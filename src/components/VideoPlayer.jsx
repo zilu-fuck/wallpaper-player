@@ -7,6 +7,7 @@ export default function VideoPlayer({ video, onClose, mpvAvailable }) {
   const [mode, setMode] = useState(mpvAvailable ? 'mpv' : 'html5')
   const [mpvStatus, setMpvStatus] = useState(mpvAvailable ? 'launching' : 'idle')
   const [mpvError, setMpvError] = useState(null)
+  const [html5Error, setHtml5Error] = useState(false)
 
   // ─── mpv 模式 ──────────────────────────────────────
   useEffect(() => {
@@ -207,7 +208,23 @@ export default function VideoPlayer({ video, onClose, mpvAvailable }) {
 
         <div className="player-title">{video.name}</div>
 
-        {videoUrl ? (
+        {html5Error ? (
+          <div className="player-loading">
+            <div className="thumb-placeholder">
+              <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                <circle cx="12" cy="12" r="10" />
+                <line x1="12" y1="8" x2="12" y2="12" />
+                <line x1="12" y1="16" x2="12.01" y2="16" />
+              </svg>
+            </div>
+            <p>内置播放器不支持此格式 ({video.extension})</p>
+            {mpvAvailable && (
+              <button className="btn btn-primary btn-sm" onClick={() => setMode('mpv')}>
+                使用 mpv 播放
+              </button>
+            )}
+          </div>
+        ) : videoUrl ? (
           <video
             ref={videoRef}
             className="player-video"
@@ -216,6 +233,7 @@ export default function VideoPlayer({ video, onClose, mpvAvailable }) {
             autoPlay
             onPlay={() => setIsPlaying(true)}
             onPause={() => setIsPlaying(false)}
+            onError={() => setHtml5Error(true)}
           >
             您的浏览器不支持此视频格式 ({video.extension})
           </video>

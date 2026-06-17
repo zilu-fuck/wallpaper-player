@@ -8,7 +8,9 @@ contextBridge.exposeInMainWorld('electronAPI', {
   generateThumbnail: (videoPath) => ipcRenderer.invoke('generate-thumbnail', videoPath),
   generateThumbnails: (videoPaths) => ipcRenderer.invoke('generate-thumbnails', videoPaths),
   onThumbnailProgress: (callback) => {
-    ipcRenderer.on('thumbnail-progress', (_event, data) => callback(data))
+    const handler = (_event, data) => callback(data)
+    ipcRenderer.on('thumbnail-progress', handler)
+    return () => ipcRenderer.removeListener('thumbnail-progress', handler)
   },
 
   // 设置

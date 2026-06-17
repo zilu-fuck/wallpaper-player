@@ -67,6 +67,7 @@ export default function App() {
         console.error('扫描失败:', result.error)
         setScanning(false)
         setLoading(false)
+        setThumbProgress(null)
         return
       }
 
@@ -219,12 +220,12 @@ export default function App() {
 
       {/* 缩略图生成进度条 */}
       {scanning && (
-        <div className="progress-bar">
-          <div className="progress-fill" style={{
-            width: thumbProgress
-              ? `${(thumbProgress.completed / thumbProgress.total) * 100}%`
-              : '100%'
-          }} />
+        <div className={`progress-bar${!thumbProgress ? ' scanning' : ''}`}>
+          {thumbProgress && (
+            <div className="progress-fill" style={{
+              width: `${(thumbProgress.completed / thumbProgress.total) * 100}%`
+            }} />
+          )}
           <span className="progress-text">
             {thumbProgress
               ? `生成缩略图: ${thumbProgress.completed} / ${thumbProgress.total}`

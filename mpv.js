@@ -343,11 +343,22 @@ class MpvManager {
 
   // ─── 停止播放 ──────────────────────────────────────
   stop() {
-    this._disconnectSocket()
-    if (this.process) {
-      try { this.process.kill() } catch {}
+    const proc = this.process
+    if (proc) {
+      // 优先通过 IPC 发送 quit 命令，允许 mpv 保存状态后优雅退出
+      if (this.socket && this._ready) {
+        try {
+          const msg = JSON.stringify({ command: ['quit'] })
+          this.socket.write(msg + '\n')
+        } catch {}
+      }
+      // 超时后强制终止
+      setTimeout(() => {
+        try { if (proc && !proc.killed) proc.kill() } catch {}
+      }, 1000)
       this.process = null
     }
+    this._disconnectSocket()
     this._ready = false
   }
 

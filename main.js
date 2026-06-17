@@ -47,15 +47,6 @@ function getThumbnailDir() {
   return dir
 }
 
-function formatDuration(seconds) {
-  if (!seconds || isNaN(seconds)) return '0:00'
-  const h = Math.floor(seconds / 3600)
-  const m = Math.floor((seconds % 3600) / 60)
-  const s = Math.floor(seconds % 60)
-  if (h > 0) return `${h}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`
-  return `${m}:${String(s).padStart(2, '0')}`
-}
-
 // ─── 扫描目录 ──────────────────────────────────────────
 function scanDirectory(dirPath, baseDir, depth = 0) {
   const results = []
@@ -125,19 +116,6 @@ function findFfmpeg() {
   }
 
   return null
-}
-
-function getVideoDuration(ffprobePath, videoPath) {
-  return new Promise((resolve) => {
-    const probe = ffprobePath || ffmpegPath?.replace('ffmpeg', 'ffprobe') || 'ffprobe'
-    execFile(probe, [
-      '-v', 'error', '-show_entries', 'format=duration',
-      '-of', 'default=noprint_wrappers=1:nokey=1', videoPath
-    ], { timeout: 10000 }, (err, stdout) => {
-      if (err) return resolve(0)
-      resolve(parseFloat(stdout.trim()) || 0)
-    })
-  })
 }
 
 function generateThumbnail(videoPath) {
