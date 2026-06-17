@@ -1,0 +1,20 @@
+{
+  "name": "wallpaper-player",
+  "version": "1.0.0",
+  "description": "本地视频画廊播放器 - 浏览、搜索、播放本地视频文件",
+  "main": "main.js",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "start": "electron .",
+    "rebuild": "vite build && electron ."
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "electron": "^35.0.0",
+    "vite": "^6.0.0",
+    "@vitejs/plugin-react": "^4.3.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  }
+}
