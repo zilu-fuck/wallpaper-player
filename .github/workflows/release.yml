@@ -26,8 +26,50 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Build and publish
+      - name: Build
+        env:
+          ELECTRON_PUBLISH: never
+        run: npm run dist:win
+
+      - name: Publish release assets
+        shell: pwsh
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          ELECTRON_PUBLISH: always
-        run: npm run dist:win
+        run: |
+          function Invoke-Gh {
+            & gh @args
+            if ($LASTEXITCODE -ne 0) {
+              throw "gh $($args -join ' ') failed"
+            }
+          }
+
+          if ("${{ github.ref_type }}" -ne "tag") {
+            throw "Release workflow must run from a tag. Current ref: ${{ github.ref }}"
+          }
+
+          $repository = "${{ github.repository }}"
+          $tag = "${{ github.ref_name }}"
+          $version = (node -p "require('./package.json').version").Trim()
+          $title = "Wallpaper Player $version"
+          $assetNames = @(
+            "Wallpaper-Player-Setup-$version.exe",
+            "Wallpaper-Player-Setup-$version.exe.blockmap",
+            "Wallpaper-Player-$version.exe",
+            "latest.yml"
+          )
+
+          $assetPaths = foreach ($assetName in $assetNames) {
+            $assetPath = Join-Path "release" $assetName
+            if (!(Test-Path -LiteralPath $assetPath -PathType Leaf)) {
+              throw "Missing release asset: $assetPath"
+            }
+            (Resolve-Path -LiteralPath $assetPath).Path
+          }
+
+          gh release view $tag --repo $repository *> $null
+          if ($LASTEXITCODE -eq 0) {
+            Invoke-Gh release upload $tag @assetPaths --repo $repository --clobber
+            Invoke-Gh release edit $tag --repo $repository --title $title --draft=false --prerelease=false --latest
+          } else {
+            Invoke-Gh release create $tag @assetPaths --repo $repository --title $title --notes "Automated Windows release for $tag." --latest
+          }
