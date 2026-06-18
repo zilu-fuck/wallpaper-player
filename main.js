@@ -17,6 +17,13 @@ const DEFAULT_DIR = 'F:\\SteamLibrary\\steamapps\\workshop\\content\\431960'
 const sessionAllowedDirectories = new Set()
 const sessionAllowedMpvPaths = new Set()
 
+function getResourcePath(...segments) {
+  if (app.isPackaged) {
+    return path.join(process.resourcesPath, ...segments)
+  }
+  return path.join(__dirname, ...segments)
+}
+
 // ─── 设置管理 ──────────────────────────────────────────
 function getSettingsPath() {
   return path.join(app.getPath('userData'), 'settings.json')
@@ -252,6 +259,8 @@ function findFfmpeg() {
   if (ffmpegPath) return ffmpegPath
 
   const candidates = [
+    getResourcePath('vendor', 'ffmpeg', 'bin', 'ffmpeg.exe'),
+    getResourcePath('vendor', 'ffmpeg', 'ffmpeg.exe'),
     'ffmpeg',
     'ffmpeg.exe',
     path.join(app.getAppPath(), 'ffmpeg.exe'),

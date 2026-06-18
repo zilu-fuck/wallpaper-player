@@ -6,15 +6,51 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
+    "prepare-vendor": "node scripts/prepare-vendor.js",
     "start": "npm run build && electron .",
-    "rebuild": "vite build && electron ."
+    "rebuild": "vite build && electron .",
+    "pack:win": "npm run build && npm run prepare-vendor && electron-builder --win --dir",
+    "dist:win": "npm run build && npm run prepare-vendor && node scripts/package-win.js"
   },
-  "dependencies": {},
+  "build": {
+    "appId": "com.wallpaper.player",
+    "productName": "Wallpaper Player",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "dist/**/*",
+      "main.js",
+      "mpv.js",
+      "preload.js",
+      "package.json"
+    ],
+    "extraResources": [
+      {
+        "from": "vendor",
+        "to": "vendor",
+        "filter": [
+          "**/*"
+        ]
+      }
+    ],
+    "win": {
+      "target": [
+        "nsis",
+        "portable"
+      ]
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true
+    }
+  },
   "devDependencies": {
-    "electron": "^35.0.0",
-    "vite": "^6.0.0",
     "@vitejs/plugin-react": "^4.3.0",
+    "electron": "^35.0.0",
+    "electron-builder": "^26.15.3",
     "react": "^19.0.0",
-    "react-dom": "^19.0.0"
+    "react-dom": "^19.0.0",
+    "vite": "^6.0.0"
   }
 }

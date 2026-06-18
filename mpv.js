@@ -11,6 +11,13 @@ const MPV_DOWNLOAD_URL =
 const MPV_FALLBACK_URL =
   'https://github.com/mpv-player/mpv/releases/download/v0.40.0/mpv-v0.40.0-x86_64-pc-windows-msvc.zip'
 
+function getResourcePath(...segments) {
+  if (app.isPackaged) {
+    return path.join(process.resourcesPath, ...segments)
+  }
+  return path.join(__dirname, ...segments)
+}
+
 class MpvManager {
   constructor() {
     this.mpvPath = null
@@ -27,6 +34,13 @@ class MpvManager {
   async findMpv(customPath) {
     if (customPath && fs.existsSync(customPath)) {
       this.mpvPath = customPath
+      return this.mpvPath
+    }
+
+    // 1) bundled vendor/mpv/mpv.exe
+    const bundledMpv = getResourcePath('vendor', 'mpv', 'mpv.exe')
+    if (fs.existsSync(bundledMpv)) {
+      this.mpvPath = bundledMpv
       return this.mpvPath
     }
 
