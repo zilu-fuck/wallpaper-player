@@ -4,6 +4,8 @@ const fs = require('fs')
 const fsp = require('fs/promises')
 const { pathToFileURL } = require('url')
 const { execFile, execFileSync } = require('child_process')
+const { autoUpdater } = require('electron-updater')
+const log = require('electron-log')
 const MpvManager = require('./mpv')
 
 // ─── 常量 ──────────────────────────────────────────────
@@ -16,12 +18,17 @@ const VIDEO_EXTENSIONS = new Set([
 const DEFAULT_DIR = 'F:\\SteamLibrary\\steamapps\\workshop\\content\\431960'
 const sessionAllowedDirectories = new Set()
 const sessionAllowedMpvPaths = new Set()
+let updateCheckTimer = null
 
 function getResourcePath(...segments) {
   if (app.isPackaged) {
     return path.join(process.resourcesPath, ...segments)
   }
   return path.join(__dirname, ...segments)
+}
+
+function isPortableApp() {
+  return Boolean(process.env.PORTABLE_EXECUTABLE_FILE || process.env.PORTABLE_EXECUTABLE_DIR)
 }
 
 // ─── 设置管理 ──────────────────────────────────────────
@@ -33,7 +40,9 @@ function loadSettings() {
   const defaults = {
     theme: 'dark',
     directories: [DEFAULT_DIR],
-    defaultDirectory: DEFAULT_DIR
+    defaultDirectory: DEFAULT_DIR,
+    favorites: [],
+    customTags: {}
   }
 
   try {
@@ -45,11 +54,31 @@ function loadSettings() {
       directories: Array.isArray(parsed.directories) && parsed.directories.length > 0
         ? parsed.directories
         : defaults.directories,
-      defaultDirectory: parsed.defaultDirectory || defaults.defaultDirectory
+      defaultDirectory: parsed.defaultDirectory || defaults.defaultDirectory,
+      favorites: Array.isArray(parsed.favorites) ? parsed.favorites : defaults.favorites,
+      customTags: normalizeCustomTags(parsed.customTags)
     }
   } catch {
     return defaults
   }
+}
+
+function normalizeCustomTags(customTags) {
+  if (!customTags || typeof customTags !== 'object' || Array.isArray(customTags)) {
+    return {}
+  }
+
+  return Object.fromEntries(
+    Object.entries(customTags)
+      .filter(([key]) => typeof key === 'string' && key.trim())
+      .map(([key, tags]) => [
+        key,
+        Array.isArray(tags)
+          ? [...new Set(tags.filter(tag => typeof tag === 'string' && tag.trim()).map(tag => tag.trim()))]
+          : []
+      ])
+      .filter(([, tags]) => tags.length > 0)
+  )
 }
 
 function saveSettings(settings) {
@@ -65,12 +94,49 @@ function saveSettings(settings) {
   if (!merged.defaultDirectory) {
     merged.defaultDirectory = merged.directories[0]
   }
+  if (!Array.isArray(merged.favorites)) {
+    merged.favorites = []
+  }
+  merged.customTags = normalizeCustomTags(merged.customTags)
   fs.writeFileSync(getSettingsPath(), JSON.stringify(merged, null, 2))
 }
 
 // ─── 工具函数 ──────────────────────────────────────────
 function isVideoFile(filePath) {
   return VIDEO_EXTENSIONS.has(path.extname(filePath).toLowerCase())
+}
+
+async function readWallpaperMetadata(dirPath) {
+  try {
+    const projectPath = path.join(dirPath, 'project.json')
+    const raw = await fsp.readFile(projectPath, 'utf-8')
+    const project = JSON.parse(raw)
+    const tags = Array.isArray(project.tags)
+      ? project.tags.filter(tag => typeof tag === 'string' && tag.trim()).map(tag => tag.trim())
+      : []
+    const workshopId = project.workshopid ? String(project.workshopid) : path.basename(dirPath)
+    const wallpaperDir = path.resolve(dirPath)
+    const previewPath = typeof project.preview === 'string' && project.preview.trim()
+      ? path.resolve(dirPath, project.preview)
+      : null
+    const safePreviewPath = previewPath && isPathInside(wallpaperDir, previewPath) && fs.existsSync(previewPath)
+      ? previewPath
+      : null
+
+    return {
+      projectDir: dirPath,
+      title: typeof project.title === 'string' ? project.title.trim() : '',
+      description: typeof project.description === 'string' ? project.description : '',
+      tags,
+      type: typeof project.type === 'string' ? project.type.trim() : '',
+      file: typeof project.file === 'string' ? project.file : '',
+      previewPath: safePreviewPath,
+      workshopId,
+      workshopUrl: typeof project.workshopurl === 'string' ? project.workshopurl : ''
+    }
+  } catch {
+    return null
+  }
 }
 
 function getThumbnailDir() {
@@ -104,6 +170,11 @@ function isExistingFile(inputPath) {
   } catch {
     return false
   }
+}
+
+function isMpvExecutablePath(inputPath) {
+  if (inputPath === 'mpv' || inputPath === 'mpv.exe') return true
+  return path.basename(inputPath).toLowerCase() === 'mpv.exe'
 }
 
 function sanitizeSettingsForSave(settings) {
@@ -141,9 +212,21 @@ function sanitizeSettingsForSave(settings) {
       sessionAllowedMpvPaths.has(pathKey(mpvPath))
     )
 
-    sanitized.mpvPath = canSaveMpvPath && isExistingFile(mpvPath)
+    sanitized.mpvPath = canSaveMpvPath && isMpvExecutablePath(mpvPath) && isExistingFile(mpvPath)
       ? mpvPath
       : current.mpvPath
+  }
+
+  if (Object.hasOwn(sanitized, 'favorites')) {
+    sanitized.favorites = Array.isArray(sanitized.favorites)
+      ? [...new Set(sanitized.favorites.filter(item => typeof item === 'string' && item.trim()))]
+      : current.favorites
+  }
+
+  if (Object.hasOwn(sanitized, 'customTags')) {
+    sanitized.customTags = sanitized.customTags && typeof sanitized.customTags === 'object' && !Array.isArray(sanitized.customTags)
+      ? normalizeCustomTags(sanitized.customTags)
+      : current.customTags || {}
   }
 
   return sanitized
@@ -189,9 +272,11 @@ async function assertAllowedVideoPath(filePath) {
 }
 
 // ─── 扫描目录 ──────────────────────────────────────────
-async function scanDirectory(dirPath, baseDir, depth = 0) {
+async function scanDirectory(dirPath, baseDir, depth = 0, inheritedMetadata = null) {
   const results = []
   if (depth > 8) return results
+
+  const metadata = inheritedMetadata || await readWallpaperMetadata(dirPath)
 
   let entries
   try {
@@ -205,22 +290,35 @@ async function scanDirectory(dirPath, baseDir, depth = 0) {
 
     if (entry.isDirectory()) {
       if (!entry.name.startsWith('.') && entry.name !== 'node_modules') {
-        results.push(...await scanDirectory(fullPath, baseDir, depth + 1))
+        results.push(...await scanDirectory(fullPath, baseDir, depth + 1, metadata))
       }
     } else if (entry.isFile() && isVideoFile(entry.name)) {
       try {
         const stats = await fsp.stat(fullPath)
         const relDir = path.relative(baseDir, dirPath)
         const group = relDir ? relDir.split(path.sep)[0] : path.basename(baseDir)
+        const title = metadata?.title || path.basename(entry.name, path.extname(entry.name))
+        const workshopId = metadata?.workshopId || (group || path.basename(baseDir))
+        const favoriteKey = metadata
+          ? `workshop:${workshopId}`
+          : `file:${Buffer.from(fullPath).toString('base64url')}`
 
         results.push({
           id: Buffer.from(path.relative(baseDir, fullPath)).toString('base64url'),
-          name: path.basename(entry.name, path.extname(entry.name)),
+          name: title,
+          fileName: path.basename(entry.name, path.extname(entry.name)),
           fullPath,
           extension: path.extname(entry.name).toLowerCase(),
           size: stats.size,
           modified: stats.mtimeMs,
-          group
+          group: metadata?.tags?.[0] || group,
+          tags: metadata?.tags || [],
+          wallpaperType: metadata?.type || '',
+          previewPath: metadata?.previewPath || null,
+          workshopId,
+          workshopUrl: metadata?.workshopUrl || '',
+          favoriteKey,
+          description: metadata?.description || ''
         })
       } catch {
         // skip files with stat errors
@@ -234,16 +332,17 @@ async function scanDirectory(dirPath, baseDir, depth = 0) {
 async function resolveMpvPath() {
   const settings = loadSettings()
   if (settings.mpvPath) {
-    if (fs.existsSync(settings.mpvPath)) {
-      mpvManager.setMpvPath(settings.mpvPath)
-      return settings.mpvPath
+    const customPath = path.resolve(settings.mpvPath)
+    if (isMpvExecutablePath(customPath) && fs.existsSync(customPath)) {
+      mpvManager.setMpvPath(customPath)
+      return customPath
     }
     mpvManager.setMpvPath(null)
   }
 
   const current = mpvManager.getMpvPath()
   if (current) {
-    if (current === 'mpv' || current === 'mpv.exe' || fs.existsSync(current)) {
+    if (isMpvExecutablePath(current) && (current === 'mpv' || current === 'mpv.exe' || fs.existsSync(current))) {
       return current
     }
     mpvManager.setMpvPath(null)
@@ -326,13 +425,27 @@ function generateThumbnail(videoPath) {
   })
 }
 
+async function getExistingPreviewPath(videoPath) {
+  let dirPath = path.dirname(videoPath)
+  const allowedDirs = getAllowedVideoDirectories()
+
+  while (allowedDirs.some(dir => isPathInside(dir, dirPath))) {
+    const metadata = await readWallpaperMetadata(dirPath)
+    if (metadata?.previewPath) return metadata.previewPath
+
+    const parentPath = path.dirname(dirPath)
+    if (parentPath === dirPath) break
+    dirPath = parentPath
+  }
+
+  return null
+}
+
 // ─── mpv 播放器 ────────────────────────────────────────
 const mpvManager = new MpvManager()
 
 async function initMpv() {
-  const settings = loadSettings()
-  const customPath = settings.mpvPath || null
-  const found = await mpvManager.findMpv(customPath)
+  const found = await resolveMpvPath()
 
   if (found) {
     console.log('[mpv] 已找到:', found)
@@ -410,6 +523,75 @@ function createWindow() {
   mainWindow.on('closed', () => { mainWindow = null })
 }
 
+// ─── 自动更新 ──────────────────────────────────────────
+function setupAutoUpdater() {
+  if (!app.isPackaged || isPortableApp()) {
+    console.log('[updater] 跳过自动更新检查')
+    return
+  }
+
+  autoUpdater.logger = log
+  log.transports.file.level = 'info'
+  autoUpdater.autoDownload = true
+  autoUpdater.autoInstallOnAppQuit = true
+
+  autoUpdater.on('checking-for-update', () => {
+    log.info('[updater] 正在检查更新')
+  })
+
+  autoUpdater.on('update-available', (info) => {
+    log.info('[updater] 发现新版本:', info.version)
+  })
+
+  autoUpdater.on('update-not-available', (info) => {
+    log.info('[updater] 当前已是最新版本:', info.version)
+  })
+
+  autoUpdater.on('download-progress', (progress) => {
+    log.info(
+      `[updater] 下载进度 ${progress.percent.toFixed(1)}%，` +
+      `${Math.round(progress.bytesPerSecond / 1024)} KB/s`
+    )
+  })
+
+  autoUpdater.on('update-downloaded', async (info) => {
+    log.info('[updater] 更新下载完成:', info.version)
+
+    if (!mainWindow || mainWindow.isDestroyed()) return
+
+    const result = await dialog.showMessageBox(mainWindow, {
+      type: 'info',
+      title: '发现新版本',
+      message: `Wallpaper Player ${info.version} 已下载完成`,
+      detail: '重启应用后将自动安装新版本。',
+      buttons: ['立即重启安装', '稍后安装'],
+      defaultId: 0,
+      cancelId: 1,
+      noLink: true
+    })
+
+    if (result.response === 0) {
+      autoUpdater.quitAndInstall(false, true)
+    }
+  })
+
+  autoUpdater.on('error', (error) => {
+    log.error('[updater] 自动更新失败:', error)
+  })
+
+  setTimeout(() => {
+    autoUpdater.checkForUpdates().catch((error) => {
+      log.error('[updater] 检查更新失败:', error)
+    })
+  }, 5000)
+
+  updateCheckTimer = setInterval(() => {
+    autoUpdater.checkForUpdates().catch((error) => {
+      log.error('[updater] 定时检查更新失败:', error)
+    })
+  }, 6 * 60 * 60 * 1000)
+}
+
 // ─── IPC 处理器 ────────────────────────────────────────
 function setupIPC() {
   // 扫描指定目录的视频文件
@@ -433,7 +615,7 @@ function setupIPC() {
   ipcMain.handle('generate-thumbnail', async (_event, videoPath) => {
     try {
       const resolvedPath = await assertAllowedVideoPath(videoPath)
-      const thumbPath = await generateThumbnail(resolvedPath)
+      const thumbPath = await getExistingPreviewPath(resolvedPath) || await generateThumbnail(resolvedPath)
       return { thumbPath }
     } catch (err) {
       return { error: err.message }
@@ -472,7 +654,7 @@ function setupIPC() {
         const vp = videoPaths[i]
         try {
           const resolvedPath = await assertAllowedVideoPath(vp)
-          results[vp] = await generateThumbnail(resolvedPath)
+          results[vp] = await getExistingPreviewPath(resolvedPath) || await generateThumbnail(resolvedPath)
         } catch {
           results[vp] = null
         }
@@ -537,7 +719,7 @@ function setupIPC() {
 
       execFile(ffmpeg, ['-version'], { timeout: 5000 }, (err, stdout) => {
         if (err) return resolve({ available: false })
-        const versionLine = stdout.split('\n')[0]
+        const versionLine = stdout.split(/\r?\n/).find(line => line.trim()) || 'unknown'
         resolve({ available: true, version: versionLine })
       })
     })
@@ -551,7 +733,7 @@ function setupIPC() {
     if (mpvPath) {
       try {
         const stdout = execFileSync(mpvPath, ['--version'], { timeout: 5000, encoding: 'utf-8', stdio: 'pipe' })
-        const versionLine = stdout.split('\n')[0]
+        const versionLine = stdout.split(/\r?\n/).find(line => line.trim()) || 'unknown'
         return { available: true, path: mpvPath, version: versionLine }
       } catch {
         return { available: false, path: mpvPath, version: 'unknown' }
@@ -609,6 +791,7 @@ function setupIPC() {
     })
     if (result.canceled || result.filePaths.length === 0) return null
     const selectedPath = path.resolve(result.filePaths[0])
+    if (!isMpvExecutablePath(selectedPath)) return null
     sessionAllowedMpvPaths.add(pathKey(selectedPath))
     return selectedPath
   })
@@ -619,6 +802,7 @@ app.whenReady().then(async () => {
   setupCSP()
   setupIPC()
   createWindow()
+  setupAutoUpdater()
   await initMpv()
 
   app.on('activate', () => {
@@ -632,5 +816,9 @@ app.on('window-all-closed', () => {
 })
 
 app.on('before-quit', () => {
+  if (updateCheckTimer) {
+    clearInterval(updateCheckTimer)
+    updateCheckTimer = null
+  }
   mpvManager.destroy()
 })

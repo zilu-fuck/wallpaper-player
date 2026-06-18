@@ -107,7 +107,7 @@ export default function Settings({ settings, ffmpegStatus, mpvStatus, onMpvStatu
               <div className="ffmpeg-status warn">
                 <span className="status-dot yellow" />
                 <div className="status-content">
-                  <p>未检测到 mpv — 将使用内置播放器（格式支持有限）</p>
+                  <p>未检测到标准 mpv — 将使用内置 HTML5 播放器（格式支持有限）</p>
                   <p className="hint">
                     mpv 支持几乎所有视频格式，推荐安装以获得最佳体验。
                   </p>

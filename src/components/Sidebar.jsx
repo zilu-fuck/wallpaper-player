@@ -11,7 +11,12 @@ export default function Sidebar({
   currentDir,
   onDirectoryChange,
   onDirectoriesChange,
-  onOpenSettings
+  onOpenSettings,
+  categoryGroups = { custom: [], system: [] },
+  activeCategory = 'all',
+  onCategoryChange,
+  favoriteCount = 0,
+  totalCount = 0
 }) {
   const [localDirs, setLocalDirs] = useState(directories || [])
 
@@ -56,6 +61,31 @@ export default function Sidebar({
     }
   }, [localDirs, currentDir, saveDirs, onDirectoryChange])
 
+  const handleCategorySelect = useCallback((categoryKey) => {
+    onCategoryChange?.(categoryKey)
+  }, [onCategoryChange])
+
+  const renderCategoryGroup = (title, categories, emptyText) => (
+    <div className="sidebar-category-group">
+      <div className="sidebar-category-group-title">{title}</div>
+      {categories.length > 0 ? (
+        categories.map(category => (
+          <button
+            key={category.key}
+            className={`sidebar-category-item${activeCategory === category.key ? ' active' : ''}`}
+            onClick={() => handleCategorySelect(category.key)}
+            title={category.name}
+          >
+            <span className="sidebar-category-name">{category.name}</span>
+            <span className="sidebar-category-count">{category.count}</span>
+          </button>
+        ))
+      ) : (
+        <div className="sidebar-category-empty">{emptyText}</div>
+      )}
+    </div>
+  )
+
   return (
     <aside className={`sidebar${collapsed ? ' collapsed' : ''}`} aria-label="导航">
       {collapsed ? (
@@ -75,6 +105,29 @@ export default function Sidebar({
             >
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" />
+              </svg>
+            </button>
+            <button
+              className={`sidebar-icon-btn${activeCategory === 'all' ? ' active' : ''}`}
+              onClick={() => handleCategorySelect('all')}
+              title="全部"
+              aria-label="全部"
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <rect x="3" y="3" width="7" height="7" rx="1" />
+                <rect x="14" y="3" width="7" height="7" rx="1" />
+                <rect x="3" y="14" width="7" height="7" rx="1" />
+                <rect x="14" y="14" width="7" height="7" rx="1" />
+              </svg>
+            </button>
+            <button
+              className={`sidebar-icon-btn${activeCategory === 'favorites' ? ' active' : ''}`}
+              onClick={() => handleCategorySelect('favorites')}
+              title="我喜欢"
+              aria-label="我喜欢"
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill={activeCategory === 'favorites' ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="2">
+                <path d="M20.8 4.6a5.5 5.5 0 00-7.8 0L12 5.6l-1-1a5.5 5.5 0 00-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 000-7.8z" />
               </svg>
             </button>
             <button className="sidebar-icon-btn" onClick={handleAdd} title="添加目录" aria-label="添加目录">
@@ -157,6 +210,35 @@ export default function Sidebar({
                 ))}
               </div>
             )}
+          </div>
+
+          <div className="sidebar-section sidebar-category-section">
+            <div className="sidebar-section-header">
+              <span className="sidebar-label">分类</span>
+            </div>
+            <div className="sidebar-category-list">
+              <button
+                className={`sidebar-category-item${activeCategory === 'all' ? ' active' : ''}`}
+                onClick={() => handleCategorySelect('all')}
+              >
+                <span className="sidebar-category-name">全部</span>
+                <span className="sidebar-category-count">{totalCount}</span>
+              </button>
+              <button
+                className={`sidebar-category-item${activeCategory === 'favorites' ? ' active' : ''}`}
+                onClick={() => handleCategorySelect('favorites')}
+              >
+                <span className="sidebar-category-name">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill={activeCategory === 'favorites' ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="2.2">
+                    <path d="M20.8 4.6a5.5 5.5 0 00-7.8 0L12 5.6l-1-1a5.5 5.5 0 00-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 000-7.8z" />
+                  </svg>
+                  我喜欢
+                </span>
+                <span className="sidebar-category-count">{favoriteCount}</span>
+              </button>
+              {renderCategoryGroup('自定义分类', categoryGroups.custom, '暂无自定义分类')}
+              {renderCategoryGroup('系统分类', categoryGroups.system, '暂无系统分类')}
+            </div>
           </div>
 
           <div className="sidebar-footer">

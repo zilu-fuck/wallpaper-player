@@ -50,7 +50,9 @@ async function main() {
   await copyProject()
 
   const electronBuilderCli = path.join(tempRoot, 'node_modules', 'electron-builder', 'cli.js')
-  execFileSync(process.execPath, [electronBuilderCli, '--win', '--publish', 'never'], {
+  const publishMode = process.env.ELECTRON_PUBLISH || 'never'
+
+  execFileSync(process.execPath, [electronBuilderCli, '--win', '--publish', publishMode], {
     cwd: tempRoot,
     stdio: 'inherit',
     env: {

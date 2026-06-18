@@ -824,6 +824,104 @@ a:hover {
   transform: scale(1.1);
 }
 
+.sidebar-category-section {
+  flex: 0 1 48%;
+  border-top: 1px solid var(--border);
+}
+
+.sidebar-category-list {
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 4px 8px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.sidebar-category-group {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding-top: 6px;
+}
+
+.sidebar-category-group + .sidebar-category-group {
+  margin-top: 4px;
+  border-top: 1px solid var(--border);
+}
+
+.sidebar-category-group-title {
+  padding: 4px 8px 2px;
+  color: var(--text-muted);
+  font-size: 10px;
+  font-weight: 650;
+  text-transform: uppercase;
+}
+
+.sidebar-category-empty {
+  padding: 5px 8px 8px;
+  color: var(--text-muted);
+  font-size: 11px;
+}
+
+.sidebar-category-item {
+  width: 100%;
+  min-height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 6px 8px;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: background var(--transition), color var(--transition), transform var(--transition-fast);
+}
+
+.sidebar-category-item:hover {
+  color: var(--text-primary);
+  background: var(--bg-card-hover);
+}
+
+.sidebar-category-item.active {
+  color: var(--text-primary);
+  background: var(--accent-soft);
+}
+
+.sidebar-category-name {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 12px;
+}
+
+.sidebar-category-count {
+  min-width: 22px;
+  height: 18px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  font-size: 10px;
+  flex-shrink: 0;
+}
+
+.sidebar-category-item.active .sidebar-category-count {
+  color: var(--accent);
+  border-color: rgba(91, 140, 255, 0.35);
+  background: var(--bg-card);
+}
+
 .sidebar-footer {
   padding: 8px;
   border-top: 1px solid var(--border);
@@ -1225,11 +1323,52 @@ a:hover {
   background: rgba(0, 0, 0, 0.7);
 }
 
+.favorite-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: background var(--transition), color var(--transition), transform var(--transition-fast), opacity var(--transition);
+}
+
+.favorite-btn:hover {
+  color: #ff6f91;
+  background: rgba(255, 111, 145, 0.12);
+  transform: scale(1.08);
+}
+
+.favorite-btn.active {
+  color: #ff6f91;
+}
+
+.card-favorite-btn {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  width: 28px;
+  height: 28px;
+  background: rgba(0, 0, 0, 0.46);
+  color: #d2deed;
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  z-index: 2;
+}
+
+.card-favorite-btn.active {
+  background: rgba(255, 111, 145, 0.18);
+  color: #ff7c9b;
+}
+
 .card-info {
   display: flex;
   flex-direction: column;
   gap: 4px;
-  padding: 10px 12px 12px;
+  padding: 10px 44px 12px 12px;
+  position: relative;
 }
 
 .card-title,
@@ -1260,6 +1399,101 @@ a:hover {
   gap: 8px;
 }
 
+.card-tags {
+  display: flex;
+  gap: 5px;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.card-tag {
+  max-width: 84px;
+  display: inline-flex;
+  align-items: center;
+  height: 19px;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: var(--accent-soft);
+  color: var(--text-secondary);
+  font-size: 10px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.card-actions {
+  position: relative;
+  flex-shrink: 0;
+  z-index: 5;
+}
+
+.card-info .card-actions {
+  position: absolute;
+  right: 10px;
+  bottom: 10px;
+}
+
+.card-menu-btn {
+  width: 28px;
+  height: 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  background: var(--bg-surface);
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: background var(--transition), color var(--transition), border-color var(--transition), transform var(--transition-fast);
+}
+
+.card-menu-btn:hover,
+.card-menu-btn.active {
+  color: var(--text-primary);
+  border-color: var(--border-strong);
+  background: var(--bg-card-hover);
+}
+
+.card-menu-btn:active {
+  transform: scale(0.96);
+}
+
+.card-menu {
+  position: absolute;
+  right: 0;
+  bottom: 34px;
+  min-width: 230px;
+  padding: 5px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg-card);
+  box-shadow: var(--shadow-md);
+}
+
+.card-menu button {
+  width: 100%;
+  min-height: 30px;
+  padding: 0 9px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: 12px;
+  text-align: left;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background var(--transition-fast), color var(--transition-fast);
+}
+
+.card-menu button:hover {
+  color: var(--text-primary);
+  background: var(--bg-card-hover);
+}
+
 /* ─── Video List Card ─── */
 .video-card-list {
   display: flex;
@@ -1270,8 +1504,7 @@ a:hover {
   border: 1px solid transparent;
   border-radius: 8px;
   cursor: pointer;
-  contain: layout paint style;
-  content-visibility: auto;
+  contain: layout style;
   contain-intrinsic-size: 100px 68px;
   transition: background var(--transition), border-color var(--transition), transform var(--transition), box-shadow var(--transition);
 }
@@ -1318,6 +1551,18 @@ a:hover {
   transition: color var(--transition), transform var(--transition);
 }
 
+.list-favorite-btn {
+  width: 30px;
+  height: 30px;
+  flex-shrink: 0;
+}
+
+.video-card-list .card-menu {
+  right: 0;
+  bottom: auto;
+  top: 34px;
+}
+
 .video-card-list:hover .list-play-btn {
   color: var(--accent);
   transform: translateX(2px);
@@ -1325,7 +1570,8 @@ a:hover {
 
 /* ─── Overlays ─── */
 .player-overlay,
-.settings-overlay {
+.settings-overlay,
+.tag-editor-overlay {
   position: fixed;
   inset: 0;
   display: flex;
@@ -1343,6 +1589,10 @@ a:hover {
 
 .settings-overlay {
   z-index: 1100;
+}
+
+.tag-editor-overlay {
+  z-index: 1200;
 }
 
 @keyframes fadeIn {
@@ -1733,6 +1983,83 @@ kbd:hover {
   border-top: 1px solid var(--border);
 }
 
+.tag-editor-panel {
+  width: min(92vw, 480px);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: linear-gradient(180deg, var(--bg-secondary) 0%, var(--bg-surface) 100%);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  box-shadow: var(--shadow-lg);
+  animation: slideUp 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.tag-editor-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 16px 18px 12px;
+  border-bottom: 1px solid var(--border);
+}
+
+.tag-editor-header h2 {
+  font-size: 16px;
+  font-weight: 650;
+}
+
+.tag-editor-body {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 16px 18px;
+}
+
+.tag-editor-title {
+  font-size: 13px;
+  color: var(--text-secondary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tag-editor-label {
+  font-size: 12px;
+  font-weight: 650;
+  color: var(--text-muted);
+}
+
+.tag-editor-input {
+  width: 100%;
+  height: 38px;
+  padding: 0 11px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg-card);
+  color: var(--text-primary);
+  outline: none;
+  transition: border-color var(--transition), box-shadow var(--transition);
+}
+
+.tag-editor-input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+
+.tag-editor-hint {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.tag-editor-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 12px 18px 16px;
+  border-top: 1px solid var(--border);
+}
+
 .player-container.mpv-mode .player-actions {
   align-items: center;
 }
@@ -1831,7 +2158,8 @@ kbd:hover {
 }
 
 .app.theme-light .player-overlay,
-.app.theme-light .settings-overlay {
+.app.theme-light .settings-overlay,
+.app.theme-light .tag-editor-overlay {
   backdrop-filter: blur(4px);
   -webkit-backdrop-filter: blur(4px);
 }
@@ -1880,6 +2208,7 @@ kbd:hover {
   .sidebar-section-header,
   .sidebar-footer-btn span,
   .sidebar-dir-info,
+  .sidebar-category-section,
   .sidebar-label,
   .sidebar-empty {
     display: none;

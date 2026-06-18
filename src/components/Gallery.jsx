@@ -1,7 +1,18 @@
 import { memo, useState, useMemo } from 'react'
 import VideoCard from './VideoCard'
 
-function Gallery({ videos, totalCount, searchQuery, thumbnails, onPlay }) {
+function Gallery({
+  videos,
+  totalCount,
+  searchQuery,
+  activeCategoryLabel,
+  thumbnails,
+  onPlay,
+  favoriteKeys,
+  onToggleFavorite,
+  onOpenInFolder,
+  onEditCustomTags
+}) {
   const [viewMode, setViewMode] = useState('grid') // grid | list
 
   // 按分组归类视频
@@ -23,7 +34,11 @@ function Gallery({ videos, totalCount, searchQuery, thumbnails, onPlay }) {
   return (
     <div className="gallery">
       <div className="gallery-summary">
-        <span>{searchQuery ? `筛选结果 ${videos.length} / ${totalCount}` : `${videos.length} 个视频`}</span>
+        <span>
+          {searchQuery || activeCategoryLabel !== '全部'
+            ? `${activeCategoryLabel} · ${videos.length} / ${totalCount}`
+            : `${videos.length} 个视频`}
+        </span>
         <span>{viewMode === 'grid' ? '网格视图' : '列表视图'}</span>
       </div>
 
@@ -72,6 +87,10 @@ function Gallery({ videos, totalCount, searchQuery, thumbnails, onPlay }) {
                     thumbnail={thumbnails[video.fullPath]}
                     viewMode={viewMode}
                     onPlay={onPlay}
+                    isFavorite={favoriteKeys.has(video.favoriteKey || video.fullPath)}
+                    onToggleFavorite={onToggleFavorite}
+                    onOpenInFolder={onOpenInFolder}
+                    onEditCustomTags={onEditCustomTags}
                     index={idx}
                   />
                 ))}
@@ -88,6 +107,10 @@ function Gallery({ videos, totalCount, searchQuery, thumbnails, onPlay }) {
               thumbnail={thumbnails[video.fullPath]}
               viewMode={viewMode}
               onPlay={onPlay}
+              isFavorite={favoriteKeys.has(video.favoriteKey || video.fullPath)}
+              onToggleFavorite={onToggleFavorite}
+              onOpenInFolder={onOpenInFolder}
+              onEditCustomTags={onEditCustomTags}
               index={idx}
             />
           ))}
