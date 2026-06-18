@@ -10,6 +10,7 @@ const mirror = 'https://npmmirror.com/mirrors/electron-builder-binaries/'
 
 const copyItems = [
   '.npmrc',
+  'build',
   'dist',
   'index.html',
   'main.js',

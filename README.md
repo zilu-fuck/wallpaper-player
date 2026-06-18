@@ -20,6 +20,12 @@ Windows 发布包已内置 mpv 和 FFmpeg，普通用户无需额外安装。
 - 将安装版自动更新从静默下载改为用户确认下载与安装流程。
 - Cached recent directory scan results and invalidated them with file watching plus TTL fallback to reduce repeated scans when switching folders.
 - 为近期目录扫描增加缓存，并通过文件监听与 TTL 兜底失效，减少切换目录时的重复扫描。
+- Moved the manual update check entry into Settings.
+- 将手动检查更新入口移动到设置面板。
+- Added a finish-page option in the Windows installer to create a desktop shortcut.
+- Windows 安装器完成页新增创建桌面快捷方式选项。
+- Improved mpv startup error reporting when the mpv process exits early.
+- 改进 mpv 启动失败时的错误提示。
 - Release notes for tagged builds are now published from versioned bilingual files.
 - tag 发布时会读取版本对应的中英双语更新报告并写入 GitHub Release。
 

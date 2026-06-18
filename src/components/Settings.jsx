@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect } from 'react'
 
-export default function Settings({ settings, ffmpegStatus, mpvStatus, onMpvStatusChange, onSave, onThemeChange, onClose }) {
+export default function Settings({ settings, ffmpegStatus, mpvStatus, onMpvStatusChange, onSave, onThemeChange, onCheckUpdate, onClose }) {
   const [theme, setTheme] = useState(settings?.theme || 'dark')
   const [saving, setSaving] = useState(false)
   const [downloading, setDownloading] = useState(false)
@@ -88,6 +88,24 @@ export default function Settings({ settings, ffmpegStatus, mpvStatus, onMpvStatu
                 <span className="theme-swatch light" />
                 亮色
               </button>
+            </div>
+          </section>
+
+          {/* 应用更新 */}
+          <section className="settings-section">
+            <h3 className="section-title">应用更新</h3>
+            <p className="section-desc">检查 GitHub Releases 上是否有新版本。</p>
+            <div className="ffmpeg-status">
+              <span className="status-dot green" />
+              <div className="status-content">
+                <p>安装版会在后台定期检查更新，也可以手动检查。</p>
+                <p className="hint">便携版不支持自动更新，需要手动下载新版。</p>
+                <div className="mpv-actions">
+                  <button className="btn btn-sm btn-primary" onClick={onCheckUpdate} type="button">
+                    检查更新
+                  </button>
+                </div>
+              </div>
             </div>
           </section>
 

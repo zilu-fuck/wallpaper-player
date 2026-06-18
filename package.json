@@ -46,7 +46,9 @@
     "nsis": {
       "artifactName": "Wallpaper-Player-Setup-${version}.${ext}",
       "oneClick": false,
-      "allowToChangeInstallationDirectory": true
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": false,
+      "include": "build/installer.nsh"
     },
     "portable": {
       "artifactName": "Wallpaper-Player-${version}.${ext}"

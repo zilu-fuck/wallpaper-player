@@ -149,6 +149,11 @@ export default function App() {
     await scanAndLoad(dirPath)
   }
 
+  function handleCheckUpdate() {
+    window.dispatchEvent(new Event('wallpaper-player-check-update'))
+    setShowSettings(false)
+  }
+
   const handlePlay = useCallback((video) => {
     setPlayingVideo(video)
   }, [])
@@ -533,6 +538,7 @@ export default function App() {
           onMpvStatusChange={setMpvStatus}
           onSave={handleSaveSettings}
           onThemeChange={handleThemeChange}
+          onCheckUpdate={handleCheckUpdate}
           onClose={() => setShowSettings(false)}
         />
       )}

@@ -236,12 +236,22 @@ class MpvManager {
     }
 
     return new Promise((resolve, reject) => {
+      let settled = false
+      let output = ''
+      const finish = (fn, value) => {
+        if (settled) return
+        settled = true
+        fn(value)
+      }
+      const getExitError = (code) => {
+        const detail = output.trim().split(/\r?\n/).filter(Boolean).slice(-4).join('\n')
+        return new Error(detail || `mpv 启动失败，退出码 ${code ?? 'unknown'}`)
+      }
       const args = [
         filePath,
         `--input-ipc-server=${pipePath}`,
         '--no-terminal',
         '--force-window=immediate',
-        '--window-autofit=yes',
         '--autofit-larger=90%x90%',
         '--no-resume-playback',
         '--title=${filename}',
@@ -249,17 +259,25 @@ class MpvManager {
         '--hwdec=auto',
       ]
 
-      this.process = spawn(this.mpvPath, args, { stdio: 'ignore', detached: false })
+      this.process = spawn(this.mpvPath, args, { stdio: ['ignore', 'pipe', 'pipe'], detached: false })
       const proc = this.process
+      proc.stdout.on('data', (data) => { output += data.toString() })
+      proc.stderr.on('data', (data) => { output += data.toString() })
 
       proc.on('error', (err) => {
         this._emit('error', { message: err.message })
-        reject(err)
+        finish(reject, err)
       })
 
       proc.on('exit', (code) => {
+        const isCurrentProcess = this.process === proc
+        const exitError = isCurrentProcess && code !== 0 ? getExitError(code) : null
+        if (exitError) {
+          this._emit('error', { message: exitError.message })
+          finish(reject, exitError)
+        }
         this._emit('ended', { code })
-        if (this.process === proc) {
+        if (isCurrentProcess) {
           this.process = null
           this._disconnectSocket()
         }
@@ -271,15 +289,15 @@ class MpvManager {
           if (this.process !== proc || this.sessionId !== sessionId) return
           this._ready = true
           this._listenEvents()
-          resolve()
+          finish(resolve)
         })
         .catch((err) => {
           // mpv 可能已启动但 IPC 不可用，仍然算成功启动
           if (this.process === proc && !proc.killed) {
             this._ready = false
-            resolve()
+            finish(resolve)
           } else {
-            reject(err)
+            finish(reject, err)
           }
         })
     })

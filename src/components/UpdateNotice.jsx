@@ -61,6 +61,23 @@ export default function UpdateNotice() {
   const [manualMessage, setManualMessage] = useState('')
   const updaterApi = window.electronAPI
 
+  const handleCheck = useCallback(async () => {
+    if (!updaterApi?.updaterCheck) return
+    setDismissedVersion('')
+    setManualMessage('正在手动检查更新...')
+    try {
+      const state = await updaterApi.updaterCheck()
+      setUpdateState(state)
+      if (state.status === 'not-available') {
+        setManualMessage('当前已是最新版本。')
+      } else if (state.status === 'disabled') {
+        setManualMessage(state.message || '当前环境不支持自动更新。')
+      }
+    } catch (err) {
+      setUpdateState(prev => ({ ...prev, status: 'error', error: err.message }))
+    }
+  }, [updaterApi])
+
   useEffect(() => {
     if (!updaterApi?.updaterGetStatus || !updaterApi?.onUpdaterStatus) return
 
@@ -80,11 +97,14 @@ export default function UpdateNotice() {
       setUpdateState(status)
     })
 
+    window.addEventListener('wallpaper-player-check-update', handleCheck)
+
     return () => {
       mounted = false
       cleanup?.()
+      window.removeEventListener('wallpaper-player-check-update', handleCheck)
     }
-  }, [updaterApi])
+  }, [handleCheck, updaterApi])
 
   const status = updateState?.status || 'idle'
   const updateInfo = updateState?.updateInfo
@@ -101,23 +121,6 @@ export default function UpdateNotice() {
   const showNotes = notes.length > 0 && (status === 'available' || status === 'downloaded')
   const progress = updateState?.progress
   const percent = Math.max(0, Math.min(100, Math.round(progress?.percent || 0)))
-
-  const handleCheck = useCallback(async () => {
-    if (!updaterApi?.updaterCheck) return
-    setDismissedVersion('')
-    setManualMessage('正在手动检查更新...')
-    try {
-      const state = await updaterApi.updaterCheck()
-      setUpdateState(state)
-      if (state.status === 'not-available') {
-        setManualMessage('当前已是最新版本。')
-      } else if (state.status === 'disabled') {
-        setManualMessage(state.message || '当前环境不支持自动更新。')
-      }
-    } catch (err) {
-      setUpdateState(prev => ({ ...prev, status: 'error', error: err.message }))
-    }
-  }, [updaterApi])
 
   const handleDownload = useCallback(async () => {
     if (!updaterApi?.updaterDownload) return
@@ -152,13 +155,7 @@ export default function UpdateNotice() {
     return null
   }
 
-  if (!visible) {
-    return (
-      <button className="update-check-button" onClick={handleCheck} type="button" title="检查更新">
-        检查更新
-      </button>
-    )
-  }
+  if (!visible) return null
 
   return (
     <div className="update-notice" role="status">
