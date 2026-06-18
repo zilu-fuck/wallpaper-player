@@ -5,6 +5,7 @@ export default function Settings({ settings, ffmpegStatus, mpvStatus, onMpvStatu
   const [saving, setSaving] = useState(false)
   const [downloading, setDownloading] = useState(false)
   const [downloadProgress, setDownloadProgress] = useState(null)
+  const [mpvDownloadError, setMpvDownloadError] = useState('')
 
   useEffect(() => {
     setTheme(settings?.theme || 'dark')
@@ -25,6 +26,7 @@ export default function Settings({ settings, ffmpegStatus, mpvStatus, onMpvStatu
   const handleDownloadMpv = useCallback(async () => {
     setDownloading(true)
     setDownloadProgress(null)
+    setMpvDownloadError('')
 
     const removeListener = window.electronAPI.onMpvDownloadProgress((progress) => {
       setDownloadProgress(progress)
@@ -38,7 +40,7 @@ export default function Settings({ settings, ffmpegStatus, mpvStatus, onMpvStatu
       const status = await window.electronAPI.checkMpv()
       onMpvStatusChange(status)
     } else {
-      alert('mpv 下载失败: ' + (result.error || '未知错误'))
+      setMpvDownloadError(result.error || '未知错误')
     }
   }, [onMpvStatusChange])
 
@@ -129,6 +131,9 @@ export default function Settings({ settings, ffmpegStatus, mpvStatus, onMpvStatu
                       手动选择 mpv.exe
                     </button>
                   </div>
+                  {mpvDownloadError && (
+                    <p className="hint error">mpv 下载失败: {mpvDownloadError}</p>
+                  )}
                 </div>
               </div>
             )}

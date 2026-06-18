@@ -117,6 +117,13 @@ export default function App() {
   async function handleSelectDirectory() {
     const dir = await window.electronAPI.selectDirectory()
     if (dir) {
+      const currentDirectories = settings?.directories || []
+      if (!currentDirectories.includes(dir)) {
+        await handleDirectoriesChange({
+          directories: [...currentDirectories, dir],
+          defaultDirectory: dir
+        })
+      }
       setVideos([])
       setThumbnails({})
       setActiveCategory('all')

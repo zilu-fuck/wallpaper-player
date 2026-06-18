@@ -33,6 +33,7 @@ function VideoCard({
   const [imgError, setImgError] = useState(false)
   const [visible, setVisible] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
+  const [thumbUrl, setThumbUrl] = useState(null)
   const cardRef = useRef(null)
   const displayMeta = useMemo(() => getDisplayMeta(video), [video])
   const animationDelay = useMemo(() => `${(index % 20) * 30}ms`, [index])
@@ -60,11 +61,10 @@ function VideoCard({
     onPlay(video)
   }, [video, onPlay])
 
-  const handleContextMenu = useCallback(async (e) => {
+  const handleContextMenu = useCallback((e) => {
     e.preventDefault()
-    // 在文件管理器中显示
-    await window.electronAPI?.showInFolder(video.fullPath)
-  }, [video.fullPath])
+    setMenuOpen(true)
+  }, [])
 
   const handleFavoriteClick = useCallback((e) => {
     e.stopPropagation()
@@ -119,15 +119,24 @@ function VideoCard({
     </div>
   )
 
-  // 获取缩略图 URL
-  const thumbUrl = visible && thumbnail && !imgError
-    ? `file:///${thumbnail.replace(/\\/g, '/')}`
-    : null
-
   useEffect(() => {
+    let canceled = false
     setImgLoaded(false)
     setImgError(false)
-  }, [thumbnail])
+    setThumbUrl(null)
+
+    if (!visible || !thumbnail) return () => { canceled = true }
+
+    window.electronAPI?.getThumbnailUrl(thumbnail)
+      .then((url) => {
+        if (!canceled) setThumbUrl(url)
+      })
+      .catch(() => {
+        if (!canceled) setImgError(true)
+      })
+
+    return () => { canceled = true }
+  }, [thumbnail, visible])
 
   if (viewMode === 'list') {
     return (

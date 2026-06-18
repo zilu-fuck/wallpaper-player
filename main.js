@@ -14,8 +14,8 @@ const VIDEO_EXTENSIONS = new Set([
   '.m4v', '.mpg', '.mpeg', '.3gp', '.ogv', '.ts', '.vob',
   '.rmvb', '.rm', '.asf', '.divx', '.f4v'
 ])
+const IMAGE_EXTENSIONS = new Set(['.jpg', '.jpeg', '.png', '.webp', '.gif', '.bmp'])
 
-const DEFAULT_DIR = 'F:\\SteamLibrary\\steamapps\\workshop\\content\\431960'
 const sessionAllowedDirectories = new Set()
 const sessionAllowedMpvPaths = new Set()
 let updateCheckTimer = null
@@ -39,8 +39,8 @@ function getSettingsPath() {
 function loadSettings() {
   const defaults = {
     theme: 'dark',
-    directories: [DEFAULT_DIR],
-    defaultDirectory: DEFAULT_DIR,
+    directories: [],
+    defaultDirectory: '',
     favorites: [],
     customTags: {}
   }
@@ -48,13 +48,16 @@ function loadSettings() {
   try {
     const raw = fs.readFileSync(getSettingsPath(), 'utf-8')
     const parsed = JSON.parse(raw)
+    const directories = normalizeDirectoryList(parsed.directories)
+    const defaultDirectory = typeof parsed.defaultDirectory === 'string' && directories.includes(parsed.defaultDirectory)
+      ? parsed.defaultDirectory
+      : directories[0] || ''
+
     return {
       ...defaults,
       ...parsed,
-      directories: Array.isArray(parsed.directories) && parsed.directories.length > 0
-        ? parsed.directories
-        : defaults.directories,
-      defaultDirectory: parsed.defaultDirectory || defaults.defaultDirectory,
+      directories,
+      defaultDirectory,
       favorites: Array.isArray(parsed.favorites) ? parsed.favorites : defaults.favorites,
       customTags: normalizeCustomTags(parsed.customTags)
     }
@@ -88,11 +91,9 @@ function saveSettings(settings) {
     ...loadSettings(),
     ...settings
   }
-  if (!Array.isArray(merged.directories) || merged.directories.length === 0) {
-    merged.directories = [DEFAULT_DIR]
-  }
-  if (!merged.defaultDirectory) {
-    merged.defaultDirectory = merged.directories[0]
+  merged.directories = normalizeDirectoryList(merged.directories)
+  if (!merged.defaultDirectory || !merged.directories.includes(merged.defaultDirectory)) {
+    merged.defaultDirectory = merged.directories[0] || ''
   }
   if (!Array.isArray(merged.favorites)) {
     merged.favorites = []
@@ -353,50 +354,75 @@ async function resolveMpvPath() {
 
 // ─── FFmpeg 缩略图 ─────────────────────────────────────
 let ffmpegPath = null
+let ffmpegSearchPromise = null
+let ffmpegSearchCompleted = false
 
-function findFfmpeg() {
-  if (ffmpegPath) return ffmpegPath
-
-  const candidates = [
-    getResourcePath('vendor', 'ffmpeg', 'bin', 'ffmpeg.exe'),
-    getResourcePath('vendor', 'ffmpeg', 'ffmpeg.exe'),
-    'ffmpeg',
-    'ffmpeg.exe',
-    path.join(app.getAppPath(), 'ffmpeg.exe'),
-    path.join(app.getAppPath(), 'ffmpeg'),
-    'C:\\ffmpeg\\bin\\ffmpeg.exe',
-    'C:\\Program Files\\ffmpeg\\bin\\ffmpeg.exe'
-  ]
-
-  for (const candidate of candidates) {
-    try {
-      execFileSync(candidate, ['-version'], { timeout: 5000, stdio: 'ignore' })
-      ffmpegPath = candidate
-      return candidate
-    } catch {
-      continue
-    }
-  }
-
-  return null
+function execFileAsync(file, args, options = {}) {
+  return new Promise((resolve, reject) => {
+    execFile(file, args, options, (err, stdout, stderr) => {
+      if (err) {
+        reject(err)
+      } else {
+        resolve({ stdout, stderr })
+      }
+    })
+  })
 }
 
-function generateThumbnail(videoPath) {
+async function findFfmpeg() {
+  if (ffmpegPath) return ffmpegPath
+  if (ffmpegSearchCompleted) return null
+  if (ffmpegSearchPromise) return ffmpegSearchPromise
+
+  ffmpegSearchPromise = (async () => {
+    const candidates = [
+      getResourcePath('vendor', 'ffmpeg', 'bin', 'ffmpeg.exe'),
+      getResourcePath('vendor', 'ffmpeg', 'ffmpeg.exe'),
+      'ffmpeg',
+      'ffmpeg.exe',
+      path.join(app.getAppPath(), 'ffmpeg.exe'),
+      path.join(app.getAppPath(), 'ffmpeg'),
+      'C:\\ffmpeg\\bin\\ffmpeg.exe',
+      'C:\\Program Files\\ffmpeg\\bin\\ffmpeg.exe'
+    ]
+
+    for (const candidate of candidates) {
+      try {
+        await execFileAsync(candidate, ['-version'], { timeout: 5000 })
+        ffmpegPath = candidate
+        return candidate
+      } catch {
+        continue
+      }
+    }
+
+    return null
+  })()
+
+  try {
+    return await ffmpegSearchPromise
+  } finally {
+    ffmpegSearchCompleted = true
+    ffmpegSearchPromise = null
+  }
+}
+
+async function generateThumbnail(videoPath) {
   const thumbDir = getThumbnailDir()
   const thumbName = Buffer.from(videoPath).toString('base64url') + '.jpg'
   const thumbPath = path.join(thumbDir, thumbName)
 
   if (fs.existsSync(thumbPath)) {
-    return Promise.resolve(thumbPath)
+    return thumbPath
+  }
+
+  const ffmpeg = await findFfmpeg()
+  if (!ffmpeg) {
+    return null
   }
 
   return new Promise((resolve) => {
-    const ffmpeg = findFfmpeg()
-    if (!ffmpeg) {
-      return resolve(null)
-    }
-
-    // 取视频 10% 处的帧作为缩略图（跳过可能的黑色片头）
+    // 取视频第 1 秒的帧作为缩略图（跳过可能的黑色片头）
     execFile(ffmpeg, [
       '-i', videoPath,
       '-ss', '00:00:01',
@@ -509,6 +535,31 @@ function createWindow() {
       contextIsolation: true,
       nodeIntegration: false,
       webSecurity: true
+    }
+  })
+
+  function isAppNavigationUrl(url) {
+    return (
+      url.startsWith('file://') ||
+      url.startsWith('http://localhost:5173') ||
+      url.startsWith('http://127.0.0.1:5173')
+    )
+  }
+
+  mainWindow.webContents.setWindowOpenHandler(({ url }) => {
+    if (url.startsWith('http://') || url.startsWith('https://')) {
+      shell.openExternal(url)
+    }
+    return { action: 'deny' }
+  })
+
+  mainWindow.webContents.on('will-navigate', (event, url) => {
+    const currentUrl = mainWindow.webContents.getURL()
+    if (url === currentUrl || (!currentUrl && isAppNavigationUrl(url))) return
+
+    event.preventDefault()
+    if (url.startsWith('http://') || url.startsWith('https://')) {
+      shell.openExternal(url)
     }
   })
 
@@ -711,18 +762,35 @@ function setupIPC() {
     return pathToFileURL(resolvedPath).href
   })
 
+  ipcMain.handle('get-thumbnail-url', async (_event, filePath) => {
+    const resolvedPath = await resolveExistingPath(filePath)
+    const stats = await fsp.stat(resolvedPath)
+    const thumbDir = getThumbnailDir()
+    const allowedDirs = getAllowedVideoDirectories()
+    const canExpose = (
+      isPathInside(thumbDir, resolvedPath) ||
+      allowedDirs.some(dir => isPathInside(dir, resolvedPath))
+    )
+
+    if (!stats.isFile() || !canExpose || !IMAGE_EXTENSIONS.has(path.extname(resolvedPath).toLowerCase())) {
+      throw new Error('缩略图路径无效')
+    }
+
+    return pathToFileURL(resolvedPath).href
+  })
+
   // 检查 ffmpeg 是否可用
   ipcMain.handle('check-ffmpeg', async () => {
-    return new Promise((resolve) => {
-      const ffmpeg = findFfmpeg()
-      if (!ffmpeg) return resolve({ available: false })
+    const ffmpeg = await findFfmpeg()
+    if (!ffmpeg) return { available: false }
 
-      execFile(ffmpeg, ['-version'], { timeout: 5000 }, (err, stdout) => {
-        if (err) return resolve({ available: false })
-        const versionLine = stdout.split(/\r?\n/).find(line => line.trim()) || 'unknown'
-        resolve({ available: true, version: versionLine })
-      })
-    })
+    try {
+      const { stdout } = await execFileAsync(ffmpeg, ['-version'], { timeout: 5000 })
+      const versionLine = stdout.split(/\r?\n/).find(line => line.trim()) || 'unknown'
+      return { available: true, path: ffmpeg, version: versionLine }
+    } catch {
+      return { available: false }
+    }
   })
 
   // ─── mpv 相关 IPC ──────────────────────────────────
@@ -808,6 +876,9 @@ app.whenReady().then(async () => {
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) createWindow()
   })
+}).catch((error) => {
+  log.error('[app] 启动失败:', error)
+  app.quit()
 })
 
 app.on('window-all-closed', () => {
