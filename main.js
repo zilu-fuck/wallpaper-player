@@ -20,6 +20,49 @@ const sessionAllowedDirectories = new Set()
 const sessionAllowedMpvPaths = new Set()
 let updateCheckTimer = null
 
+// ─── 目录扫描缓存 + 文件监听 ──────────────────────────
+// 缓存：key=pathKey(dirPath) → { videos, scannedAt, dirMtime }
+// 失效策略：fs.watch recursive 主动失效 + 60s TTL 兜底漏事件
+const SCAN_CACHE_TTL = 60_000
+const directoryScanCache = new Map()
+const directoryWatchers = new Map() // key=pathKey(dirPath) → fs.FSWatcher
+
+function invalidateScanCache(cacheKey) {
+  directoryScanCache.delete(cacheKey)
+}
+
+function watchDirectory(dirPath) {
+  const resolved = path.resolve(dirPath)
+  const key = pathKey(resolved)
+  if (directoryWatchers.has(key)) return
+  try {
+    const watcher = fs.watch(resolved, { recursive: true }, () => invalidateScanCache(key))
+    watcher.on('error', () => {
+      directoryWatchers.delete(key)
+      invalidateScanCache(key)
+    })
+    directoryWatchers.set(key, watcher)
+  } catch {
+    // recursive watch 不支持或目录不存在，静默失败，靠 TTL 兜底
+  }
+}
+
+function unwatchDirectory(dirPath) {
+  const key = pathKey(path.resolve(dirPath))
+  const watcher = directoryWatchers.get(key)
+  if (w) {
+    try { watcher.close() } catch {}
+    directoryWatchers.delete(key)
+  }
+}
+
+function unwatchAllDirectories() {
+  for (const watcher of directoryWatchers.values()) {
+    try { watcher.close() } catch {}
+  }
+  directoryWatchers.clear()
+}
+
 function getResourcePath(...segments) {
   if (app.isPackaged) {
     return path.join(process.resourcesPath, ...segments)
@@ -100,6 +143,21 @@ function saveSettings(settings) {
   }
   merged.customTags = normalizeCustomTags(merged.customTags)
   fs.writeFileSync(getSettingsPath(), JSON.stringify(merged, null, 2))
+
+  // 目录列表变化时：清理被移除目录的扫描缓存 + 关闭对应 watcher
+  if (Object.hasOwn(settings, 'directories')) {
+    const remainingKeys = new Set(merged.directories.map(pathKey))
+    for (const key of [...directoryScanCache.keys()]) {
+      if (!remainingKeys.has(key)) directoryScanCache.delete(key)
+    }
+    for (const key of [...directoryWatchers.keys()]) {
+      if (!remainingKeys.has(key)) {
+        const w = directoryWatchers.get(key)
+        try { w.close() } catch {}
+        directoryWatchers.delete(key)
+      }
+    }
+  }
 }
 
 // ─── 工具函数 ──────────────────────────────────────────
@@ -645,8 +703,8 @@ function setupAutoUpdater() {
 
 // ─── IPC 处理器 ────────────────────────────────────────
 function setupIPC() {
-  // 扫描指定目录的视频文件
-  ipcMain.handle('scan-directory', async (_event, dirPath) => {
+  // 扫描指定目录的视频文件（带缓存：watcher 主动失效 + TTL 兜底）
+  ipcMain.handle('scan-directory', async (_event, dirPath, force) => {
     try {
       const resolvedDir = await assertAllowedDirectory(dirPath)
       const allowedDirs = getAllowedVideoDirectories()
@@ -655,7 +713,28 @@ function setupIPC() {
         return { error: `目录未添加到库中: ${dirPath}` }
       }
 
+      const cacheKey = pathKey(resolvedDir)
+
+      // 缓存命中：非强制 + 未过 TTL + 根目录 mtime 未变
+      if (!force) {
+        const cached = directoryScanCache.get(cacheKey)
+        if (cached && Date.now() - cached.scannedAt < SCAN_CACHE_TTL) {
+          try {
+            if ((await fsp.stat(resolvedDir)).mtimeMs === cached.dirMtime) {
+              return { videos: cached.videos, count: cached.videos.length, cached: true }
+            }
+          } catch {
+            // stat 失败放弃缓存，继续全量扫描
+          }
+        }
+        directoryScanCache.delete(cacheKey)
+      }
+
       const videos = await scanDirectory(resolvedDir, resolvedDir)
+      let dirMtime = null
+      try { dirMtime = (await fsp.stat(resolvedDir)).mtimeMs } catch {}
+      directoryScanCache.set(cacheKey, { videos, scannedAt: Date.now(), dirMtime })
+      watchDirectory(resolvedDir) // 确保该目录被监听，变化时主动失效缓存
       return { videos, count: videos.length }
     } catch (err) {
       return { error: err.message }
@@ -891,5 +970,6 @@ app.on('before-quit', () => {
     clearInterval(updateCheckTimer)
     updateCheckTimer = null
   }
+  unwatchAllDirectories()
   mpvManager.destroy()
 })

@@ -77,13 +77,13 @@ export default function App() {
     }
   }
 
-  async function scanAndLoad(dirPath) {
+  async function scanAndLoad(dirPath, force = false) {
     const requestId = scanRequestRef.current + 1
     scanRequestRef.current = requestId
     setScanning(true)
     setThumbProgress(null)
     try {
-      const result = await window.electronAPI.scanDirectory(dirPath)
+      const result = await window.electronAPI.scanDirectory(dirPath, force)
       if (requestId !== scanRequestRef.current) return
       if (result.error) {
         console.error('扫描失败:', result.error)
@@ -127,7 +127,7 @@ export default function App() {
       setVideos([])
       setThumbnails({})
       setActiveCategory('all')
-      await scanAndLoad(dir)
+      await scanAndLoad(dir, true)
     }
   }
 
@@ -414,7 +414,7 @@ export default function App() {
           <button
             className="btn btn-icon"
             title="刷新"
-            onClick={() => currentDir && scanAndLoad(currentDir)}
+            onClick={() => currentDir && scanAndLoad(currentDir, true)}
             disabled={scanning}
           >
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">

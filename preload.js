@@ -2,7 +2,7 @@ const { contextBridge, ipcRenderer } = require('electron')
 
 contextBridge.exposeInMainWorld('electronAPI', {
   // 目录扫描
-  scanDirectory: (dirPath) => ipcRenderer.invoke('scan-directory', dirPath),
+  scanDirectory: (dirPath, force) => ipcRenderer.invoke('scan-directory', dirPath, force),
 
   // 缩略图
   generateThumbnail: (videoPath) => ipcRenderer.invoke('generate-thumbnail', videoPath),
