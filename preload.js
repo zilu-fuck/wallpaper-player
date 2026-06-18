@@ -26,6 +26,17 @@ contextBridge.exposeInMainWorld('electronAPI', {
   getFileUrl: (filePath) => ipcRenderer.invoke('get-file-url', filePath),
   checkFfmpeg: () => ipcRenderer.invoke('check-ffmpeg'),
 
+  // 自动更新
+  updaterGetStatus: () => ipcRenderer.invoke('updater-get-status'),
+  updaterCheck: () => ipcRenderer.invoke('updater-check'),
+  updaterDownload: () => ipcRenderer.invoke('updater-download'),
+  updaterInstall: () => ipcRenderer.invoke('updater-install'),
+  onUpdaterStatus: (callback) => {
+    const handler = (_event, data) => callback(data)
+    ipcRenderer.on('updater-status', handler)
+    return () => ipcRenderer.removeListener('updater-status', handler)
+  },
+
   // mpv 播放器
   checkMpv: () => ipcRenderer.invoke('check-mpv'),
   downloadMpv: () => ipcRenderer.invoke('download-mpv'),

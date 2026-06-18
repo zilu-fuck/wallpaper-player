@@ -51,6 +51,12 @@ jobs:
           $tag = "${{ github.ref_name }}"
           $version = (node -p "require('./package.json').version").Trim()
           $title = "Wallpaper Player $version"
+          $notesPath = Join-Path "release-notes" "$tag.md"
+          $notesArgs = if (Test-Path -LiteralPath $notesPath -PathType Leaf) {
+            @("--notes-file", $notesPath)
+          } else {
+            @("--notes", "Automated Windows release for $tag.")
+          }
           $assetNames = @(
             "Wallpaper-Player-Setup-$version.exe",
             "Wallpaper-Player-Setup-$version.exe.blockmap",
@@ -69,7 +75,7 @@ jobs:
           gh release view $tag --repo $repository *> $null
           if ($LASTEXITCODE -eq 0) {
             Invoke-Gh release upload $tag @assetPaths --repo $repository --clobber
-            Invoke-Gh release edit $tag --repo $repository --title $title --draft=false --prerelease=false --latest
+            Invoke-Gh release edit $tag --repo $repository --title $title @notesArgs --draft=false --prerelease=false --latest
           } else {
-            Invoke-Gh release create $tag @assetPaths --repo $repository --title $title --notes "Automated Windows release for $tag." --latest
+            Invoke-Gh release create $tag @assetPaths --repo $repository --title $title @notesArgs --latest
           }

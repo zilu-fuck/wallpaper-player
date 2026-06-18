@@ -10,22 +10,18 @@ Windows 发布包已内置 mpv 和 FFmpeg，普通用户无需额外安装。
 
 ## Current Version / 当前版本
 
-`v1.1.1`
+`v1.1.2`
 
-## What's New in v1.1.1 / v1.1.1 更新内容
+## What's New in v1.1.2 / v1.1.2 更新内容
 
-- Removed the developer-machine default directory. First launch now starts with an empty library and lets users choose their own folders.
-- 修复开发者本机路径被当作默认目录的问题。首次启动现在为空库，由用户自行选择目录。
-- Fixed clearing the last directory so the empty state persists after restart.
-- 修复删除最后一个目录后重启又恢复默认目录的问题。
-- Made FFmpeg detection asynchronous to avoid blocking the Electron main process during startup/status checks.
-- 将 FFmpeg 检测改为异步，避免启动或状态检查时阻塞 Electron 主进程。
-- Added navigation/window-opening guards and external-link handling.
-- 增加导航和新窗口拦截，并将外部链接交给系统浏览器打开。
-- Fixed thumbnail file URL generation for paths containing spaces, `#`, `%`, or non-ASCII characters.
-- 修复缩略图路径中包含空格、`#`、`%` 或非 ASCII 字符时可能无法加载的问题。
-- Updated README and release metadata to `v1.1.1`.
-- 更新 README 和发布元数据到 `v1.1.1`。
+- Added an in-app update notice with target version, release notes, download progress, and restart-to-install action.
+- 新增应用内更新提示，显示目标版本、更新说明、下载进度，并支持下载完成后重启安装。
+- Changed installer auto updates from silent downloading to a user-confirmed flow.
+- 将安装版自动更新从静默下载改为用户确认下载与安装流程。
+- Cached recent directory scan results and invalidated them with file watching plus TTL fallback to reduce repeated scans when switching folders.
+- 为近期目录扫描增加缓存，并通过文件监听与 TTL 兜底失效，减少切换目录时的重复扫描。
+- Release notes for tagged builds are now published from versioned bilingual files.
+- tag 发布时会读取版本对应的中英双语更新报告并写入 GitHub Release。
 
 ## Features / 功能
 
@@ -68,12 +64,12 @@ Windows 构建产物发布在 GitHub Releases 页面：
 
 https://github.com/zilu-fuck/wallpaper-player/releases
 
-Release artifacts for `v1.1.1`:
+Release artifacts for `v1.1.2`:
 
-`v1.1.1` 发布文件：
+`v1.1.2` 发布文件：
 
-- `Wallpaper-Player-Setup-1.1.1.exe`: installer / 安装包。
-- `Wallpaper-Player-1.1.1.exe`: portable executable / 便携版。
+- `Wallpaper-Player-Setup-1.1.2.exe`: installer / 安装包。
+- `Wallpaper-Player-1.1.2.exe`: portable executable / 便携版。
 
 Both builds include:
 

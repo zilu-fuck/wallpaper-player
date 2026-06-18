@@ -3,6 +3,7 @@ import Gallery from './components/Gallery'
 import VideoPlayer from './components/VideoPlayer'
 import Settings from './components/Settings'
 import Sidebar from './components/Sidebar'
+import UpdateNotice from './components/UpdateNotice'
 
 export default function App() {
   const [videos, setVideos] = useState([])
@@ -571,6 +572,8 @@ export default function App() {
           </div>
         </div>
       )}
+
+      <UpdateNotice />
     </div>
   )
 }
