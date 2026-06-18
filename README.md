@@ -1,6 +1,6 @@
-# Javis
+# Wallpaper Player
 
-Javis is a local video wallpaper gallery/player built with Electron, Vite, and React. It scans local directories, groups video files, generates thumbnails with FFmpeg, and plays videos with either the built-in HTML5 player or bundled mpv.
+Wallpaper Player is a local video wallpaper gallery/player built with Electron, Vite, and React. It scans local directories, groups video files, generates thumbnails with FFmpeg, and plays videos with either the built-in HTML5 player or bundled mpv.
 
 The Windows release includes mpv and FFmpeg, so users do not need to install them separately.
 
@@ -19,7 +19,7 @@ The Windows release includes mpv and FFmpeg, so users do not need to install the
 
 ## Supported Video Formats
 
-Javis scans common video formats including:
+Wallpaper Player scans common video formats including:
 
 `.mp4`, `.webm`, `.mkv`, `.avi`, `.mov`, `.wmv`, `.flv`, `.m4v`, `.mpg`, `.mpeg`, `.3gp`, `.ogv`, `.ts`, `.vob`, `.rmvb`, `.rm`, `.asf`, `.divx`, `.f4v`.
 
@@ -27,7 +27,7 @@ Javis scans common video formats including:
 
 Windows builds are published on the GitHub Releases page:
 
-https://github.com/zilu-fuck/Javis/releases
+https://github.com/zilu-fuck/wallpaper-player/releases
 
 Release artifacts:
 
