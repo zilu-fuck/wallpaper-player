@@ -18,6 +18,7 @@ class MpvManager {
     this.socket = null
     this.requestId = 0
     this.pipePath = null
+    this.sessionId = 0
     this.eventHandlers = {}
     this._ready = false
   }
@@ -50,6 +51,10 @@ class MpvManager {
 
   getMpvPath() {
     return this.mpvPath
+  }
+
+  setMpvPath(mpvPath) {
+    this.mpvPath = mpvPath
   }
 
   isReady() {
@@ -165,7 +170,8 @@ class MpvManager {
               progressCallback({ downloaded, total, percent: Math.round((downloaded / total) * 100) })
             }
           })
-          res.on('end', () => file.close(() => resolve()))
+          res.pipe(file)
+          file.on('finish', () => file.close(() => resolve()))
           res.on('error', (err) => { file.destroy(); try { fs.unlinkSync(dest) } catch {}; reject(err) })
           file.on('error', (err) => { file.destroy(); try { fs.unlinkSync(dest) } catch {}; reject(err) })
         }).on('error', reject)
@@ -204,19 +210,21 @@ class MpvManager {
     this.stop()
 
     const pid = process.pid
-    this.pipePath = process.platform === 'win32'
-      ? `\\\\.\\pipe\\mpvgallery-${pid}`
-      : `/tmp/mpvgallery-${pid}.sock`
+    const sessionId = ++this.sessionId
+    const pipePath = process.platform === 'win32'
+      ? `\\\\.\\pipe\\mpvgallery-${pid}-${sessionId}`
+      : `/tmp/mpvgallery-${pid}-${sessionId}.sock`
+    this.pipePath = pipePath
 
     // 清理旧 socket 文件 (Unix)
     if (process.platform !== 'win32') {
-      try { fs.unlinkSync(this.pipePath) } catch {}
+      try { fs.unlinkSync(pipePath) } catch {}
     }
 
     return new Promise((resolve, reject) => {
       const args = [
         filePath,
-        `--input-ipc-server=${this.pipePath}`,
+        `--input-ipc-server=${pipePath}`,
         '--no-terminal',
         '--force-window=immediate',
         '--window-autofit=yes',
@@ -228,28 +236,32 @@ class MpvManager {
       ]
 
       this.process = spawn(this.mpvPath, args, { stdio: 'ignore', detached: false })
+      const proc = this.process
 
-      this.process.on('error', (err) => {
+      proc.on('error', (err) => {
         this._emit('error', { message: err.message })
         reject(err)
       })
 
-      this.process.on('exit', (code) => {
+      proc.on('exit', (code) => {
         this._emit('ended', { code })
-        this.process = null
-        this._disconnectSocket()
+        if (this.process === proc) {
+          this.process = null
+          this._disconnectSocket()
+        }
       })
 
       // 等待 IPC pipe 就绪后连接
-      this._connectWithRetry(15, 400)
+      this._connectWithRetry(pipePath, sessionId, 15, 400)
         .then(() => {
+          if (this.process !== proc || this.sessionId !== sessionId) return
           this._ready = true
           this._listenEvents()
           resolve()
         })
         .catch((err) => {
           // mpv 可能已启动但 IPC 不可用，仍然算成功启动
-          if (this.process && !this.process.killed) {
+          if (this.process === proc && !proc.killed) {
             this._ready = false
             resolve()
           } else {
@@ -259,19 +271,28 @@ class MpvManager {
     })
   }
 
-  _connectWithRetry(retries, delay) {
+  _connectWithRetry(pipePath, sessionId, retries, delay) {
     return new Promise((resolve, reject) => {
       const tryConnect = (n) => {
+        if (this.sessionId !== sessionId) {
+          return reject(new Error('mpv session replaced'))
+        }
         // 销毁上一次失败的 socket，防止泄漏
         if (this.socket) {
           try { this.socket.destroy() } catch {}
           this.socket = null
         }
-        this.socket = net.createConnection(this.pipePath, () => {
-          this.socket.setEncoding('utf-8')
+        const socket = net.createConnection(pipePath, () => {
+          if (this.sessionId !== sessionId || this.socket !== socket) {
+            try { socket.destroy() } catch {}
+            return reject(new Error('mpv session replaced'))
+          }
+          socket.setEncoding('utf-8')
           resolve()
         })
-        this.socket.on('error', (err) => {
+        this.socket = socket
+        socket.on('error', (err) => {
+          if (this.socket !== socket) return
           if (n > 0) {
             setTimeout(() => tryConnect(n - 1), delay)
           } else {
@@ -283,7 +304,8 @@ class MpvManager {
     })
   }
 
-  _disconnectSocket() {
+  _disconnectSocket(socket = this.socket) {
+    if (socket && this.socket !== socket) return
     if (this.socket) {
       try { this.socket.destroy() } catch {}
       this.socket = null
@@ -305,9 +327,10 @@ class MpvManager {
   }
 
   _listenEvents() {
-    if (!this.socket) return
+    const socket = this.socket
+    if (!socket) return
     let buffer = ''
-    this.socket.on('data', (data) => {
+    socket.on('data', (data) => {
       buffer += data
       const lines = buffer.split('\n')
       buffer = lines.pop()
@@ -321,8 +344,8 @@ class MpvManager {
         } catch { /* ignore */ }
       }
     })
-    this.socket.on('close', () => { this._disconnectSocket() })
-    this.socket.on('error', () => { /* ignore */ })
+    socket.on('close', () => { this._disconnectSocket(socket) })
+    socket.on('error', () => { /* ignore */ })
   }
 
   // ─── 事件系统 ──────────────────────────────────────
@@ -343,6 +366,7 @@ class MpvManager {
 
   // ─── 停止播放 ──────────────────────────────────────
   stop() {
+    this.sessionId++
     const proc = this.process
     if (proc) {
       // 优先通过 IPC 发送 quit 命令，允许 mpv 保存状态后优雅退出

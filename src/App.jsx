@@ -1,7 +1,8 @@
-import { useState, useEffect, useCallback, useRef } from 'react'
+import { useState, useEffect, useMemo, useRef, useCallback, useDeferredValue } from 'react'
 import Gallery from './components/Gallery'
 import VideoPlayer from './components/VideoPlayer'
 import Settings from './components/Settings'
+import Sidebar from './components/Sidebar'
 
 export default function App() {
   const [videos, setVideos] = useState([])
@@ -17,7 +18,10 @@ export default function App() {
   const [sortBy, setSortBy] = useState('name')
   const [ffmpegStatus, setFmpegStatus] = useState(null)
   const [mpvStatus, setMpvStatus] = useState(null)
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
   const initRef = useRef(false)
+  const scanRequestRef = useRef(0)
+  const theme = settings?.theme || 'dark'
 
   // 初始化：加载设置、扫描默认目录（用 ref 防止 StrictMode 重复调用）
   useEffect(() => {
@@ -29,6 +33,7 @@ export default function App() {
   // 监听缩略图生成进度（注册一次，带清理）
   useEffect(() => {
     const cleanup = window.electronAPI?.onThumbnailProgress((data) => {
+      if (data?.requestId !== scanRequestRef.current) return
       setThumbProgress(data)
     })
     return cleanup
@@ -38,7 +43,10 @@ export default function App() {
     setLoading(true)
     try {
       const s = await window.electronAPI.getSettings()
-      setSettings(s)
+      setSettings({
+        theme: 'dark',
+        ...s
+      })
 
       const dir = s.defaultDirectory || s.directories?.[0]
       if (dir) {
@@ -60,9 +68,13 @@ export default function App() {
   }
 
   async function scanAndLoad(dirPath) {
+    const requestId = scanRequestRef.current + 1
+    scanRequestRef.current = requestId
     setScanning(true)
+    setThumbProgress(null)
     try {
       const result = await window.electronAPI.scanDirectory(dirPath)
+      if (requestId !== scanRequestRef.current) return
       if (result.error) {
         console.error('扫描失败:', result.error)
         setScanning(false)
@@ -78,49 +90,89 @@ export default function App() {
       // 缩略图在后台异步生成，不阻塞UI
       if (result.videos.length > 0) {
         const paths = result.videos.map(v => v.fullPath)
-        const thumbResults = await window.electronAPI.generateThumbnails(paths)
+        const thumbResults = await window.electronAPI.generateThumbnails({ paths, requestId })
+        if (requestId !== scanRequestRef.current) return
         setThumbnails(thumbResults)
       }
     } catch (err) {
+      if (requestId !== scanRequestRef.current) return
       console.error('扫描失败:', err)
       setLoading(false)
     }
+    if (requestId !== scanRequestRef.current) return
     setScanning(false)
     setThumbProgress(null)
   }
 
-  function handleSelectDirectory() {
-    setShowSettings(true)
+  async function handleSelectDirectory() {
+    const dir = await window.electronAPI.selectDirectory()
+    if (dir) {
+      setVideos([])
+      setThumbnails({})
+      await scanAndLoad(dir)
+    }
   }
 
   async function handleDirectoryChange(dirPath) {
     setShowSettings(false)
+    if (!dirPath) {
+      scanRequestRef.current += 1
+      setVideos([])
+      setThumbnails({})
+      setCurrentDir(null)
+      setScanning(false)
+      setThumbProgress(null)
+      return
+    }
     setVideos([])
     setThumbnails({})
     await scanAndLoad(dirPath)
   }
 
-  function handlePlay(video) {
+  const handlePlay = useCallback((video) => {
     setPlayingVideo(video)
-  }
+  }, [])
 
-  function handleClosePlayer() {
+  const handleClosePlayer = useCallback(() => {
     setPlayingVideo(null)
-  }
+  }, [])
 
   async function handleSaveSettings(newSettings) {
-    await window.electronAPI.saveSettings(newSettings)
-    setSettings(newSettings)
+    const merged = {
+      ...settings,
+      ...newSettings
+    }
+    await window.electronAPI.saveSettings(merged)
+    setSettings(merged)
   }
 
-  // 过滤和排序
-  const filteredVideos = videos
-    .filter(v => {
-      if (!searchQuery) return true
-      const q = searchQuery.toLowerCase()
-      return v.name.toLowerCase().includes(q) || v.group.toLowerCase().includes(q)
-    })
-    .sort((a, b) => {
+  async function handleDirectoriesChange({ directories, defaultDirectory }) {
+    const merged = {
+      ...settings,
+      directories,
+      defaultDirectory
+    }
+    await window.electronAPI.saveSettings(merged)
+    setSettings(merged)
+  }
+
+  async function handleThemeChange(nextTheme) {
+    const merged = {
+      ...settings,
+      theme: nextTheme
+    }
+    await window.electronAPI.saveSettings(merged)
+    setSettings(merged)
+  }
+
+  const deferredSearchQuery = useDeferredValue(searchQuery)
+  const normalizedSearchQuery = useMemo(() => (
+    deferredSearchQuery.trim().toLowerCase()
+  ), [deferredSearchQuery])
+  const trimmedSearchQuery = searchQuery.trim()
+
+  const sortedVideos = useMemo(() => {
+    return [...videos].sort((a, b) => {
       switch (sortBy) {
         case 'name': return a.name.localeCompare(b.name, 'zh')
         case 'size': return b.size - a.size
@@ -129,6 +181,20 @@ export default function App() {
         default: return 0
       }
     })
+  }, [videos, sortBy])
+
+  // 过滤和排序
+  const filteredVideos = useMemo(() => {
+    if (!normalizedSearchQuery) return sortedVideos
+
+    return sortedVideos.filter(v => (
+      v.name.toLowerCase().includes(normalizedSearchQuery) ||
+      v.group.toLowerCase().includes(normalizedSearchQuery)
+    ))
+  }, [sortedVideos, normalizedSearchQuery])
+
+  const hasSearch = trimmedSearchQuery.length > 0
+  const activeDirName = currentDir ? currentDir.split(/[/\\]/).pop() : '未选择目录'
 
   if (loading) {
     return (
@@ -140,19 +206,13 @@ export default function App() {
   }
 
   return (
-    <div className="app">
+    <div className={`app theme-${theme}`}>
       {/* 顶部导航栏 */}
       <header className="header">
         <div className="header-left">
-          <h1 className="header-title">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <polygon points="5 3 19 12 5 21 5 3" />
-            </svg>
-            视频画廊
-          </h1>
           {currentDir && (
             <span className="header-dir" title={currentDir}>
-              {currentDir.split(/[/\\]/).pop()}
+              {activeDirName}
             </span>
           )}
         </div>
@@ -166,12 +226,12 @@ export default function App() {
             <input
               type="text"
               className="search-input"
-              placeholder="搜索视频..."
+              placeholder="搜索名称或分组..."
               value={searchQuery}
               onChange={e => setSearchQuery(e.target.value)}
             />
             {searchQuery && (
-              <button className="search-clear" onClick={() => setSearchQuery('')}>
+              <button className="search-clear" onClick={() => setSearchQuery('')} title="清空搜索">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <path d="M18 6L6 18M6 6l12 12" />
                 </svg>
@@ -191,8 +251,8 @@ export default function App() {
             <option value="size">按大小</option>
             <option value="type">按类型</option>
           </select>
-          <span className="video-count">
-            {filteredVideos.length} 个视频
+          <span className="video-count" title={`当前目录: ${currentDir || '未选择'}`}>
+            {hasSearch ? `${filteredVideos.length} / ${videos.length}` : videos.length} 个视频
           </span>
           <button
             className="btn btn-icon"
@@ -205,37 +265,39 @@ export default function App() {
               <path d="M20.49 15a9 9 0 11-2.12-9.36L23 10" />
             </svg>
           </button>
-          <button
-            className="btn btn-icon"
-            title="设置"
-            onClick={() => setShowSettings(true)}
-          >
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <circle cx="12" cy="12" r="3" />
-              <path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06A1.65 1.65 0 0019.32 9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z" />
-            </svg>
-          </button>
         </div>
       </header>
 
-      {/* 缩略图生成进度条 */}
-      {scanning && (
-        <div className={`progress-bar${!thumbProgress ? ' scanning' : ''}`}>
-          {thumbProgress && (
-            <div className="progress-fill" style={{
-              width: `${(thumbProgress.completed / thumbProgress.total) * 100}%`
-            }} />
-          )}
-          <span className="progress-text">
-            {thumbProgress
-              ? `生成缩略图: ${thumbProgress.completed} / ${thumbProgress.total}`
-              : '扫描文件中...'}
-          </span>
-        </div>
-      )}
+      <div className="content-row">
+        <Sidebar
+          collapsed={sidebarCollapsed}
+          onToggle={() => setSidebarCollapsed(!sidebarCollapsed)}
+          directories={settings?.directories || []}
+          currentDir={currentDir}
+          onDirectoryChange={handleDirectoryChange}
+          onDirectoriesChange={handleDirectoriesChange}
+          onOpenSettings={() => setShowSettings(true)}
+        />
 
-      {/* 主内容区 */}
-      <main className="main-content">
+        <div className="content-body">
+          {/* 缩略图生成进度条 */}
+          {scanning && (
+            <div className={`progress-bar${!thumbProgress ? ' scanning' : ''}`}>
+              {thumbProgress && (
+                <div className="progress-fill" style={{
+                  width: `${(thumbProgress.completed / thumbProgress.total) * 100}%`
+                }} />
+              )}
+              <span className="progress-text">
+                {thumbProgress
+                  ? `生成缩略图: ${thumbProgress.completed} / ${thumbProgress.total}`
+                  : '扫描文件中...'}
+              </span>
+            </div>
+          )}
+
+          {/* 主内容区 */}
+          <main className="main-content">
         {videos.length === 0 && !scanning ? (
           <div className="empty-state">
             <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
@@ -254,14 +316,31 @@ export default function App() {
               选择目录
             </button>
           </div>
+        ) : filteredVideos.length === 0 && hasSearch ? (
+          <div className="empty-state compact">
+            <svg width="58" height="58" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+              <circle cx="11" cy="11" r="8" />
+              <path d="M21 21l-4.35-4.35" />
+              <path d="M8.5 8.5l5 5M13.5 8.5l-5 5" />
+            </svg>
+            <h2>没有匹配的视频</h2>
+            <p>没有在“{activeDirName}”中找到包含“{trimmedSearchQuery}”的视频或分组。</p>
+            <button className="btn btn-primary" onClick={() => setSearchQuery('')}>
+              清空搜索
+            </button>
+          </div>
         ) : (
           <Gallery
             videos={filteredVideos}
+            totalCount={videos.length}
+            searchQuery={trimmedSearchQuery}
             thumbnails={thumbnails}
             onPlay={handlePlay}
           />
         )}
-      </main>
+          </main>
+        </div>
+      </div>
 
       {/* 视频播放器 */}
       {playingVideo && (
@@ -280,7 +359,7 @@ export default function App() {
           mpvStatus={mpvStatus}
           onMpvStatusChange={setMpvStatus}
           onSave={handleSaveSettings}
-          onDirectoryChange={handleDirectoryChange}
+          onThemeChange={handleThemeChange}
           onClose={() => setShowSettings(false)}
         />
       )}

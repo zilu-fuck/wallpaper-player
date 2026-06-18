@@ -1,7 +1,7 @@
-import { useState, useMemo } from 'react'
+import { memo, useState, useMemo } from 'react'
 import VideoCard from './VideoCard'
 
-export default function Gallery({ videos, thumbnails, onPlay }) {
+function Gallery({ videos, totalCount, searchQuery, thumbnails, onPlay }) {
   const [viewMode, setViewMode] = useState('grid') // grid | list
 
   // 按分组归类视频
@@ -16,12 +16,17 @@ export default function Gallery({ videos, thumbnails, onPlay }) {
   }, [videos])
 
   const showGroups = groups.size > 1
+  const groupEntries = useMemo(() => Array.from(groups.entries()), [groups])
 
   if (videos.length === 0) return null
 
   return (
     <div className="gallery">
-      {/* 视图切换 */}
+      <div className="gallery-summary">
+        <span>{searchQuery ? `筛选结果 ${videos.length} / ${totalCount}` : `${videos.length} 个视频`}</span>
+        <span>{viewMode === 'grid' ? '网格视图' : '列表视图'}</span>
+      </div>
+
       <div className="gallery-toolbar">
         <div className="view-toggle">
           <button
@@ -53,20 +58,21 @@ export default function Gallery({ videos, thumbnails, onPlay }) {
       {/* 视频网格 */}
       {showGroups ? (
         <div className="gallery-grouped">
-          {Array.from(groups.entries()).map(([groupName, groupVideos]) => (
+          {groupEntries.map(([groupName, groupVideos]) => (
             <section key={groupName} className="video-group">
               <h2 className="group-title">
                 {groupName}
                 <span className="group-count">{groupVideos.length}</span>
               </h2>
               <div className={`video-${viewMode}`}>
-                {groupVideos.map(video => (
+                {groupVideos.map((video, idx) => (
                   <VideoCard
                     key={video.id}
                     video={video}
                     thumbnail={thumbnails[video.fullPath]}
                     viewMode={viewMode}
                     onPlay={onPlay}
+                    index={idx}
                   />
                 ))}
               </div>
@@ -75,13 +81,14 @@ export default function Gallery({ videos, thumbnails, onPlay }) {
         </div>
       ) : (
         <div className={`video-${viewMode}`}>
-          {videos.map(video => (
+          {videos.map((video, idx) => (
             <VideoCard
               key={video.id}
               video={video}
               thumbnail={thumbnails[video.fullPath]}
               viewMode={viewMode}
               onPlay={onPlay}
+              index={idx}
             />
           ))}
         </div>
@@ -89,3 +96,5 @@ export default function Gallery({ videos, thumbnails, onPlay }) {
     </div>
   )
 }
+
+export default memo(Gallery)

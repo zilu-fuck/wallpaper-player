@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useCallback } from 'react'
+import { memo, useState, useRef, useEffect, useCallback, useMemo } from 'react'
 
 function formatFileSize(bytes) {
   if (bytes === 0) return '0 B'
@@ -8,11 +8,19 @@ function formatFileSize(bytes) {
   return (bytes / Math.pow(k, i)).toFixed(1) + ' ' + sizes[i]
 }
 
-export default function VideoCard({ video, thumbnail, viewMode, onPlay }) {
+function getDisplayMeta(video) {
+  const parts = [video.extension.toUpperCase().slice(1), formatFileSize(video.size)]
+  if (video.group) parts.push(video.group)
+  return parts.join(' · ')
+}
+
+function VideoCard({ video, thumbnail, viewMode, onPlay, index = 0 }) {
   const [imgLoaded, setImgLoaded] = useState(false)
   const [imgError, setImgError] = useState(false)
   const [visible, setVisible] = useState(false)
   const cardRef = useRef(null)
+  const displayMeta = useMemo(() => getDisplayMeta(video), [video])
+  const animationDelay = useMemo(() => `${(index % 20) * 30}ms`, [index])
 
   // 懒加载：只有卡片进入视口时才加载缩略图
   useEffect(() => {
@@ -48,6 +56,11 @@ export default function VideoCard({ video, thumbnail, viewMode, onPlay }) {
     ? `file:///${thumbnail.replace(/\\/g, '/')}`
     : null
 
+  useEffect(() => {
+    setImgLoaded(false)
+    setImgError(false)
+  }, [thumbnail])
+
   if (viewMode === 'list') {
     return (
       <div
@@ -55,6 +68,8 @@ export default function VideoCard({ video, thumbnail, viewMode, onPlay }) {
         className="video-card-list"
         onClick={handleClick}
         onContextMenu={handleContextMenu}
+        title={video.name}
+        style={{ animationDelay }}
       >
         <div className="list-thumb">
           {thumbUrl ? (
@@ -76,9 +91,7 @@ export default function VideoCard({ video, thumbnail, viewMode, onPlay }) {
         </div>
         <div className="list-info">
           <span className="list-name">{video.name}</span>
-          <span className="list-meta">
-            {video.extension.toUpperCase().slice(1)} &middot; {formatFileSize(video.size)} &middot; {video.group}
-          </span>
+          <span className="list-meta">{displayMeta}</span>
         </div>
         <div className="list-play-btn">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
@@ -96,6 +109,8 @@ export default function VideoCard({ video, thumbnail, viewMode, onPlay }) {
       className="video-card"
       onClick={handleClick}
       onContextMenu={handleContextMenu}
+      title={video.name}
+      style={{ animationDelay }}
     >
       <div className="card-thumb">
         {thumbUrl ? (
@@ -132,9 +147,11 @@ export default function VideoCard({ video, thumbnail, viewMode, onPlay }) {
       <div className="card-info">
         <h3 className="card-title" title={video.name}>{video.name}</h3>
         <div className="card-meta">
-          <span>{formatFileSize(video.size)}</span>
+          <span>{displayMeta}</span>
         </div>
       </div>
     </div>
   )
 }
+
+export default memo(VideoCard)

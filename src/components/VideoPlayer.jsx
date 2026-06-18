@@ -3,7 +3,6 @@ import { useRef, useEffect, useState, useCallback } from 'react'
 export default function VideoPlayer({ video, onClose, mpvAvailable }) {
   const videoRef = useRef(null)
   const containerRef = useRef(null)
-  const [isPlaying, setIsPlaying] = useState(false)
   const [mode, setMode] = useState(mpvAvailable ? 'mpv' : 'html5')
   const [mpvStatus, setMpvStatus] = useState(mpvAvailable ? 'launching' : 'idle')
   const [mpvError, setMpvError] = useState(null)
@@ -21,7 +20,6 @@ export default function VideoPlayer({ video, onClose, mpvAvailable }) {
         const result = await window.electronAPI.mpvPlay(video.fullPath)
         if (result.success) {
           setMpvStatus('playing')
-          setIsPlaying(true)
         } else {
           setMpvError(result.error)
           setMpvStatus('error')
@@ -34,16 +32,12 @@ export default function VideoPlayer({ video, onClose, mpvAvailable }) {
 
     removeEnded = window.electronAPI?.onMpvEnded(() => {
       setMpvStatus('ended')
-      setIsPlaying(false)
     })
 
     removeEvent = window.electronAPI?.onMpvEvent((evt) => {
       if (evt.event === 'end-file' && evt.reason === 'eof') {
         setMpvStatus('ended')
-        setIsPlaying(false)
       }
-      if (evt.event === 'pause') setIsPlaying(false)
-      if (evt.event === 'unpause') setIsPlaying(true)
     })
 
     removeError = window.electronAPI?.onMpvError((data) => {
@@ -231,8 +225,6 @@ export default function VideoPlayer({ video, onClose, mpvAvailable }) {
             src={videoUrl}
             controls
             autoPlay
-            onPlay={() => setIsPlaying(true)}
-            onPause={() => setIsPlaying(false)}
             onError={() => setHtml5Error(true)}
           >
             您的浏览器不支持此视频格式 ({video.extension})
