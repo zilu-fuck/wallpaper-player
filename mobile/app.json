@@ -1,0 +1,39 @@
+{
+  "expo": {
+    "name": "Wallpaper Player",
+    "slug": "wallpaper-player-mobile",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "dark",
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "android": {
+      "package": "com.wallpaperplayer.mobile",
+      "blockedPermissions": [
+        "android.permission.RECORD_AUDIO"
+      ],
+      "permissions": [
+        "CAMERA",
+        "INTERNET"
+      ]
+    },
+    "plugins": [
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "允许 Wallpaper Player 扫描电脑端绑定二维码。"
+        }
+      ],
+      [
+        "expo-video",
+        {
+          "supportsPictureInPicture": true
+        }
+      ],
+      "expo-secure-store",
+      "./plugins/with-cleartext-traffic"
+    ],
+    "scheme": "wallpaper-player"
+  }
+}

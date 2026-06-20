@@ -131,6 +131,10 @@ function setupIPC() {
     return loadSettings()
   })
 
+  ipcMain.handle('get-app-version', async () => {
+    return app.getVersion()
+  })
+
   ipcMain.handle('save-settings', async (_event, settings) => {
     saveSettings(sanitizeSettingsForSave(settings))
     return { success: true }

@@ -1,6 +1,11 @@
 node_modules/
+mobile/node_modules/
+mobile/.expo/
+mobile/android/
+mobile/ios/
 dist/
 release/
 vendor/
 thumbnails/
 *.log
+.tmp-wallpaper-player/

@@ -1,0 +1,29 @@
+{
+  "name": "wallpaper-player-mobile",
+  "version": "0.1.0",
+  "private": true,
+  "main": "expo/AppEntry.js",
+  "scripts": {
+    "start": "expo start",
+    "android": "expo run:android",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@react-native-async-storage/async-storage": "2.2.0",
+    "expo": "^56.0.12",
+    "expo-camera": "^56.0.8",
+    "expo-clipboard": "~56.0.4",
+    "expo-screen-orientation": "~56.0.5",
+    "expo-secure-store": "^56.0.4",
+    "expo-status-bar": "~56.0.4",
+    "expo-video": "^56.1.4",
+    "lucide-react-native": "^1.21.0",
+    "react": "19.2.3",
+    "react-native": "0.85.3",
+    "react-native-svg": "15.15.4"
+  },
+  "devDependencies": {
+    "@types/react": "^19.2.17",
+    "typescript": "^6.0.3"
+  }
+}

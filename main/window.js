@@ -3,6 +3,7 @@ const path = require('path')
 const fs = require('fs')
 
 let mainWindow = null
+let windowCloseHandler = null
 
 function getMainWindow() {
   return mainWindow
@@ -10,6 +11,10 @@ function getMainWindow() {
 
 function setMainWindow(win) {
   mainWindow = win
+}
+
+function setWindowCloseHandler(handler) {
+  windowCloseHandler = typeof handler === 'function' ? handler : null
 }
 
 function setupCSP() {
@@ -37,7 +42,7 @@ function createWindow() {
     height: 900,
     minWidth: 900,
     minHeight: 600,
-    title: '瑙嗛鐢诲粖',
+    title: '视频画廊',
     backgroundColor: '#0a0a0f',
     autoHideMenuBar: true,
     webPreferences: {
@@ -85,14 +90,21 @@ function createWindow() {
     mainWindow.loadURL('http://localhost:5173')
   }
 
+  mainWindow.on('close', (event) => {
+    windowCloseHandler?.(event, mainWindow)
+  })
+
   mainWindow.on('closed', () => {
     mainWindow = null
   })
+
+  return mainWindow
 }
 
 module.exports = {
   getMainWindow,
   setMainWindow,
+  setWindowCloseHandler,
   setupCSP,
   createWindow
 }

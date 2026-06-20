@@ -14,6 +14,7 @@ export function useAppController() {
     setSettings,
     setCurrentDir,
     setLoading,
+    setShowSettings,
     saveSettings,
     handleDirectoriesChange
   } = appState
@@ -29,6 +30,7 @@ export function useAppController() {
     queueVideos: filter.filteredVideos,
     playbackMode: appState.playbackMode
   })
+  const { handlePlayPath } = player
   const totalCount = scan.videos.length
 
   // 初始化：加载设置、扫描默认目录（用 ref 防止 StrictMode 重复调用）
@@ -110,6 +112,17 @@ export function useAppController() {
       console.error('打开文件位置失败:', err)
     }
   }, [])
+
+  useEffect(() => {
+    const removeRemotePlay = window.electronAPI?.onRemotePlayOnDesktop?.((payload) => {
+      const filePath = payload?.filePath
+      if (!filePath) return
+      setShowSettings(false)
+      handlePlayPath(filePath, { resume: true, queueVideos: null })
+    })
+
+    return () => removeRemotePlay?.()
+  }, [handlePlayPath, setShowSettings])
 
   return {
     ...appState,

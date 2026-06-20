@@ -1,10 +1,39 @@
-const { app, BrowserWindow, globalShortcut } = require('electron')
+const { app, dialog, globalShortcut } = require('electron')
 const log = require('electron-log')
-const { setupCSP, createWindow, getMainWindow } = require('./window')
+const { setupCSP, createWindow, getMainWindow, setWindowCloseHandler } = require('./window')
 const { setupIPC } = require('./ipc')
 const { setupAutoUpdater, disposeUpdater } = require('./updater')
 const { initMpv, destroyMpv } = require('./mpv-integration')
 const { unwatchAllDirectories } = require('./scanner')
+const { loadSettings, saveSettings, sanitizeSettingsForSave } = require('./settings')
+const {
+  setupRemoteIPC,
+  initRemoteAccess,
+  disposeRemoteAccess,
+  shouldKeepRunningInTray,
+  markQuitting
+} = require('./remote')
+
+function setupConsoleEncoding() {
+  for (const stream of [process.stdout, process.stderr]) {
+    if (typeof stream?.setDefaultEncoding === 'function') {
+      stream.setDefaultEncoding('utf8')
+    }
+  }
+}
+
+setupConsoleEncoding()
+
+let isAppQuitting = false
+let closePromptOpen = false
+
+function getTodayKey() {
+  const now = new Date()
+  const year = now.getFullYear()
+  const month = String(now.getMonth() + 1).padStart(2, '0')
+  const day = String(now.getDate()).padStart(2, '0')
+  return `${year}-${month}-${day}`
+}
 
 function sendPlayerShortcut(action, value) {
   const win = getMainWindow()
@@ -35,18 +64,120 @@ function registerPlayerShortcuts() {
   }
 }
 
+function minimizeWindow(win) {
+  if (!win || win.isDestroyed()) return
+  if (shouldKeepRunningInTray()) {
+    win.hide()
+  } else {
+    win.minimize()
+  }
+}
+
+function exitApp() {
+  isAppQuitting = true
+  markQuitting()
+  app.quit()
+}
+
+function runCloseAction(action, win) {
+  if (action === 'exit') {
+    exitApp()
+  } else {
+    minimizeWindow(win)
+  }
+}
+
+async function handleWindowClose(event, win) {
+  if (!win || win.isDestroyed()) return
+  if (isAppQuitting) return
+
+  event.preventDefault()
+  if (closePromptOpen) return
+  closePromptOpen = true
+
+  try {
+    const today = getTodayKey()
+    const settings = loadSettings()
+    const closeMode = settings.windowClose?.mode || 'ask'
+
+    if (closeMode === 'minimize' || closeMode === 'exit') {
+      runCloseAction(closeMode, win)
+      return
+    }
+
+    const rememberedAction = settings.windowClose?.rememberedDate === today
+      ? settings.windowClose?.rememberedAction
+      : ''
+
+    if (rememberedAction === 'minimize') {
+      runCloseAction('minimize', win)
+      return
+    }
+
+    if (rememberedAction === 'exit') {
+      runCloseAction('exit', win)
+      return
+    }
+
+    const result = await dialog.showMessageBox(win, {
+      type: 'question',
+      title: '关闭应用',
+      message: '要最小化/隐藏到后台，还是退出应用？',
+      detail: shouldKeepRunningInTray()
+        ? '选择最小化会隐藏到后台，手机访问服务会继续运行。'
+        : '选择最小化会保留应用运行，选择退出会关闭应用。',
+      buttons: ['最小化/隐藏到后台', '退出应用'],
+      defaultId: 0,
+      cancelId: 0,
+      checkboxLabel: '今日内不再提醒',
+      checkboxChecked: false,
+      noLink: true
+    })
+
+    const action = result.response === 1 ? 'exit' : 'minimize'
+    if (result.checkboxChecked) {
+      saveSettings(sanitizeSettingsForSave({
+        windowClose: {
+          rememberedAction: action,
+          rememberedDate: today
+        }
+      }))
+    }
+
+    runCloseAction(action, win)
+  } finally {
+    closePromptOpen = false
+  }
+}
+
 function start() {
   setupCSP()
+  setWindowCloseHandler((event, win) => {
+    handleWindowClose(event, win).catch((error) => {
+      log.error('[window] close prompt failed:', error)
+      minimizeWindow(win)
+    })
+  })
   setupIPC()
+  setupRemoteIPC()
   createWindow()
   registerPlayerShortcuts()
   setupAutoUpdater()
+  initRemoteAccess().catch((error) => {
+    log.error('[remote] 初始化失败:', error)
+  })
   initMpv().catch((error) => {
     log.error('[mpv] 初始化失败:', error)
   })
 
   app.on('activate', () => {
-    if (BrowserWindow.getAllWindows().length === 0) createWindow()
+    const win = getMainWindow()
+    if (win && !win.isDestroyed()) {
+      win.show()
+      win.focus()
+    } else {
+      createWindow()
+    }
   })
 }
 
@@ -56,15 +187,17 @@ app.whenReady().then(start).catch((error) => {
 })
 
 app.on('window-all-closed', () => {
-  globalShortcut.unregisterAll()
-  destroyMpv()
+  if (shouldKeepRunningInTray()) return
   if (process.platform !== 'darwin') app.quit()
 })
 
-app.on('before-quit', () => {
+app.on('before-quit', async () => {
+  isAppQuitting = true
+  markQuitting()
   globalShortcut.unregisterAll()
   disposeUpdater()
   unwatchAllDirectories()
+  await disposeRemoteAccess()
   destroyMpv()
 })
 

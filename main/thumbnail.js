@@ -10,6 +10,7 @@ const { assertAllowedVideoPath, readWallpaperMetadata } = require('./scanner')
 let ffmpegPath = null
 let ffmpegSearchPromise = null
 let ffmpegSearchCompleted = false
+const fallbackUserDataDir = path.join(process.cwd(), '.tmp-wallpaper-player')
 
 function execFileAsync(file, args, options = {}) {
   return new Promise((resolve, reject) => {
@@ -24,7 +25,10 @@ function execFileAsync(file, args, options = {}) {
 }
 
 function getThumbnailDir() {
-  const dir = path.join(app.getPath('userData'), 'thumbnails')
+  const baseDir = app?.getPath
+    ? app.getPath('userData')
+    : fallbackUserDataDir
+  const dir = path.join(baseDir, 'thumbnails')
   if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true })
   return dir
 }
@@ -40,8 +44,8 @@ async function findFfmpeg() {
       getResourcePath('vendor', 'ffmpeg', 'ffmpeg.exe'),
       'ffmpeg',
       'ffmpeg.exe',
-      path.join(app.getAppPath(), 'ffmpeg.exe'),
-      path.join(app.getAppPath(), 'ffmpeg'),
+      app?.getAppPath ? path.join(app.getAppPath(), 'ffmpeg.exe') : '',
+      app?.getAppPath ? path.join(app.getAppPath(), 'ffmpeg') : '',
       'C:\\ffmpeg\\bin\\ffmpeg.exe',
       'C:\\Program Files\\ffmpeg\\bin\\ffmpeg.exe'
     ]

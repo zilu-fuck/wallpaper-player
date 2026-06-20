@@ -92,9 +92,9 @@ async function initMpv() {
   const found = await resolveMpvPath()
 
   if (found) {
-    console.log('[mpv] 宸叉壘鍒?', found)
+    console.log('[mpv] 已找到:', found)
   } else {
-    console.log('[mpv] 鏈壘鍒帮紝棣栨浣跨敤鏃跺皢鑷姩涓嬭浇')
+    console.log('[mpv] 未找到，首次使用时将自动下载')
   }
 
   mpvManager.on('state', (data) => {

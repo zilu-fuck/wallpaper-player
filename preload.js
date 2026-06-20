@@ -14,7 +14,21 @@ contextBridge.exposeInMainWorld('electronAPI', {
   onThumbnailProgress: (callback) => on('thumbnail-progress', callback),
 
   getSettings: () => ipcRenderer.invoke('get-settings'),
+  getAppVersion: () => ipcRenderer.invoke('get-app-version'),
   saveSettings: (settings) => ipcRenderer.invoke('save-settings', settings),
+
+  remoteGetState: () => ipcRenderer.invoke('remote-get-state'),
+  remoteSaveSettings: (settings) => ipcRenderer.invoke('remote-save-settings', settings),
+  remoteCopyEndpoint: () => ipcRenderer.invoke('remote-copy-endpoint'),
+  remoteCopyToken: () => ipcRenderer.invoke('remote-copy-token'),
+  remoteRotateToken: () => ipcRenderer.invoke('remote-rotate-token'),
+  remoteCreatePairingCode: () => ipcRenderer.invoke('remote-create-pairing-code'),
+  remoteCopyPairingCode: (pairingCode) => ipcRenderer.invoke('remote-copy-pairing-code', pairingCode),
+  remoteRemovePairedDevice: (deviceId) => ipcRenderer.invoke('remote-remove-paired-device', deviceId),
+  remoteApprovePairingRequest: (requestId) => ipcRenderer.invoke('remote-approve-pairing-request', requestId),
+  remoteRejectPairingRequest: (requestId) => ipcRenderer.invoke('remote-reject-pairing-request', requestId),
+  onRemoteAccessState: (callback) => on('remote-access-state', callback),
+  onRemotePlayOnDesktop: (callback) => on('remote-play-on-desktop', callback),
 
   selectDirectory: () => ipcRenderer.invoke('select-directory'),
   openVideoFile: () => ipcRenderer.invoke('open-video-file'),

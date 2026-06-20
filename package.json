@@ -10,6 +10,16 @@
     "prepare-vendor": "node scripts/prepare-vendor.js",
     "start": "npm run build && electron .",
     "rebuild": "vite build && electron .",
+    "verify:remote-mobile": "node scripts/verify-remote-mobile.js",
+    "verify:remote-settings": "node scripts/verify-remote-settings.js",
+    "verify:remote-api": "node scripts/verify-remote-api-smoke.js",
+    "verify:remote-library": "node scripts/verify-remote-library-flow.js",
+    "verify:remote-pressure": "node scripts/verify-remote-pressure.js",
+    "verify:mobile-multi-device": "node scripts/verify-mobile-multi-device.js",
+    "verify:mobile-player": "node scripts/verify-mobile-player-structure.js",
+    "verify:mobile-transcode": "node scripts/verify-transcode-command.js",
+    "verify:mobile-transcode-concurrency": "node scripts/verify-transcode-concurrency.js",
+    "verify:mobile-lan": "npm run verify:remote-mobile && npm run verify:remote-settings && npm run verify:remote-api && npm run verify:remote-library && npm run verify:mobile-multi-device && npm run verify:mobile-player && npm run verify:mobile-transcode && npm run verify:mobile-transcode-concurrency",
     "pack:win": "npm run build && npm run prepare-vendor && electron-builder --win --dir",
     "dist:win": "npm run build && npm run prepare-vendor && node scripts/package-win.js"
   },
@@ -54,8 +64,8 @@
       "oneClick": false,
       "allowToChangeInstallationDirectory": true,
       "createDesktopShortcut": false,
-      "include": "build/installer.nsh",
-      "license": "LICENSE"
+      "license": "LICENSE",
+      "include": "build/installer.nsh"
     },
     "portable": {
       "artifactName": "Wallpaper-Player-${version}.${ext}"
@@ -79,6 +89,7 @@
   },
   "dependencies": {
     "electron-log": "^5.4.4",
-    "electron-updater": "^6.8.9"
+    "electron-updater": "^6.8.9",
+    "qrcode": "^1.5.4"
   }
 }

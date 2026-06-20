@@ -6,6 +6,7 @@ const { pathKey, isExistingFile, isMpvExecutablePath } = require('./paths')
 const sessionAllowedDirectories = new Set()
 const sessionAllowedMpvPaths = new Set()
 const sessionAllowedFiles = new Set()
+const fallbackUserDataDir = path.join(process.cwd(), '.tmp-wallpaper-player')
 
 let directoryChangeHandler = null
 
@@ -14,7 +15,10 @@ function setDirectoryChangeHandler(handler) {
 }
 
 function getSettingsPath() {
-  return path.join(app.getPath('userData'), 'settings.json')
+  const baseDir = app?.getPath
+    ? app.getPath('userData')
+    : fallbackUserDataDir
+  return path.join(baseDir, 'settings.json')
 }
 
 function normalizeDirectoryList(directories) {
@@ -85,6 +89,30 @@ function normalizePlaybackStates(playbackStates) {
   )
 }
 
+function normalizeRemoteAccess(remoteAccess) {
+  const remote = remoteAccess && typeof remoteAccess === 'object' && !Array.isArray(remoteAccess)
+    ? remoteAccess
+    : {}
+  const port = Number(remote.port)
+  return {
+    enabled: Boolean(remote.enabled),
+    port: Number.isInteger(port) && port > 0 && port <= 65535 ? port : 38127,
+    keepRunningInTray: remote.keepRunningInTray == null ? true : Boolean(remote.keepRunningInTray),
+    allowLegacyToken: Boolean(remote.allowLegacyToken)
+  }
+}
+
+function normalizeWindowClose(windowClose) {
+  const close = windowClose && typeof windowClose === 'object' && !Array.isArray(windowClose)
+    ? windowClose
+    : {}
+  return {
+    mode: ['ask', 'minimize', 'exit'].includes(close.mode) ? close.mode : 'ask',
+    rememberedAction: ['minimize', 'exit'].includes(close.rememberedAction) ? close.rememberedAction : '',
+    rememberedDate: typeof close.rememberedDate === 'string' ? close.rememberedDate : ''
+  }
+}
+
 function getPlaybackStateKey(filePath) {
   return pathKey(path.resolve(filePath))
 }
@@ -120,7 +148,9 @@ function loadSettings() {
     favorites: [],
     customTags: {},
     playbackStates: {},
-    playbackMode: 'order'
+    playbackMode: 'order',
+    remoteAccess: normalizeRemoteAccess(),
+    windowClose: normalizeWindowClose()
   }
 
   try {
@@ -139,7 +169,9 @@ function loadSettings() {
       favorites: Array.isArray(parsed.favorites) ? parsed.favorites : defaults.favorites,
       customTags: normalizeCustomTags(parsed.customTags),
       playbackStates: normalizePlaybackStates(parsed.playbackStates),
-      playbackMode: ['order', 'shuffle', 'single'].includes(parsed.playbackMode) ? parsed.playbackMode : defaults.playbackMode
+      playbackMode: ['order', 'shuffle', 'single'].includes(parsed.playbackMode) ? parsed.playbackMode : defaults.playbackMode,
+      remoteAccess: normalizeRemoteAccess(parsed.remoteAccess),
+      windowClose: normalizeWindowClose(parsed.windowClose)
     }
   } catch {
     return defaults
@@ -163,6 +195,8 @@ function saveSettings(settings) {
   merged.customTags = normalizeCustomTags(merged.customTags)
   merged.playbackStates = normalizePlaybackStates(merged.playbackStates)
   merged.playbackMode = ['order', 'shuffle', 'single'].includes(merged.playbackMode) ? merged.playbackMode : 'order'
+  merged.remoteAccess = normalizeRemoteAccess(merged.remoteAccess)
+  merged.windowClose = normalizeWindowClose(merged.windowClose)
 
   fs.writeFileSync(getSettingsPath(), JSON.stringify(merged, null, 2))
 
@@ -173,10 +207,18 @@ function saveSettings(settings) {
 
 function getAllowedVideoDirectories() {
   const settings = loadSettings()
+  const seen = new Set()
   return [
     ...normalizeDirectoryList(settings.directories),
     ...sessionAllowedDirectories
-  ].map(dir => path.resolve(dir))
+  ]
+    .map(dir => path.resolve(dir))
+    .filter(dir => {
+      const key = pathKey(dir)
+      if (seen.has(key)) return false
+      seen.add(key)
+      return true
+    })
 }
 
 function sanitizeSettingsForSave(settings) {
@@ -240,6 +282,14 @@ function sanitizeSettingsForSave(settings) {
       : current.playbackMode || 'order'
   }
 
+  if (Object.hasOwn(sanitized, 'remoteAccess')) {
+    sanitized.remoteAccess = normalizeRemoteAccess(sanitized.remoteAccess)
+  }
+
+  if (Object.hasOwn(sanitized, 'windowClose')) {
+    sanitized.windowClose = normalizeWindowClose(sanitized.windowClose)
+  }
+
   return sanitized
 }
 
@@ -255,6 +305,8 @@ module.exports = {
   normalizeCustomTags,
   normalizePlaybackState,
   normalizePlaybackStates,
+  normalizeRemoteAccess,
+  normalizeWindowClose,
   getPlaybackStateKey,
   getPlaybackState,
   upsertPlaybackState,

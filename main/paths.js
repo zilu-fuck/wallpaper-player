@@ -4,7 +4,7 @@ const { app } = require('electron')
 const { VIDEO_EXTENSIONS } = require('./constants')
 
 function getResourcePath(...segments) {
-  if (app.isPackaged) {
+  if (app?.isPackaged) {
     return path.join(process.resourcesPath, ...segments)
   }
   return path.join(__dirname, '..', ...segments)
