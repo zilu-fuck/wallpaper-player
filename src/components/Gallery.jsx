@@ -1,18 +1,14 @@
 import { memo, useState, useMemo } from 'react'
 import VideoCard from './VideoCard'
+import { useApp } from '../context/AppContext'
 
-function Gallery({
-  videos,
-  totalCount,
-  searchQuery,
-  activeCategoryLabel,
-  thumbnails,
-  onPlay,
-  favoriteKeys,
-  onToggleFavorite,
-  onOpenInFolder,
-  onEditCustomTags
-}) {
+function Gallery({ videos }) {
+  const {
+    totalCount,
+    searchQuery,
+    trimmedSearchQuery,
+    activeCategoryLabel
+  } = useApp()
   const [viewMode, setViewMode] = useState('grid') // grid | list
 
   // 按分组归类视频
@@ -35,7 +31,7 @@ function Gallery({
     <div className="gallery">
       <div className="gallery-summary">
         <span>
-          {searchQuery || activeCategoryLabel !== '全部'
+          {trimmedSearchQuery || activeCategoryLabel !== '全部'
             ? `${activeCategoryLabel} · ${videos.length} / ${totalCount}`
             : `${videos.length} 个视频`}
         </span>
@@ -84,14 +80,9 @@ function Gallery({
                   <VideoCard
                     key={video.id}
                     video={video}
-                    thumbnail={thumbnails[video.fullPath]}
                     viewMode={viewMode}
-                    onPlay={onPlay}
-                    isFavorite={favoriteKeys.has(video.favoriteKey || video.fullPath)}
-                    onToggleFavorite={onToggleFavorite}
-                    onOpenInFolder={onOpenInFolder}
-                    onEditCustomTags={onEditCustomTags}
                     index={idx}
+                    queueVideos={groupVideos}
                   />
                 ))}
               </div>
@@ -104,14 +95,9 @@ function Gallery({
             <VideoCard
               key={video.id}
               video={video}
-              thumbnail={thumbnails[video.fullPath]}
               viewMode={viewMode}
-              onPlay={onPlay}
-              isFavorite={favoriteKeys.has(video.favoriteKey || video.fullPath)}
-              onToggleFavorite={onToggleFavorite}
-              onOpenInFolder={onOpenInFolder}
-              onEditCustomTags={onEditCustomTags}
               index={idx}
+              queueVideos={videos}
             />
           ))}
         </div>

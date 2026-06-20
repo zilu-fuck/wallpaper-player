@@ -1,4 +1,5 @@
 import { memo, useState, useRef, useEffect, useCallback, useMemo } from 'react'
+import { useApp } from '../context/AppContext'
 
 function formatFileSize(bytes) {
   if (bytes === 0) return '0 B'
@@ -20,15 +21,19 @@ function getDisplayMeta(video) {
 
 function VideoCard({
   video,
-  thumbnail,
   viewMode,
-  onPlay,
-  isFavorite,
-  onToggleFavorite,
-  onOpenInFolder,
-  onEditCustomTags,
-  index = 0
+  index = 0,
+  queueVideos
 }) {
+  const {
+    thumbnails,
+    favoriteKeys,
+    handlePlay,
+    handleToggleFavorite,
+    handleOpenInFolder,
+    handleOpenTagEditor
+  } = useApp()
+
   const [imgLoaded, setImgLoaded] = useState(false)
   const [imgError, setImgError] = useState(false)
   const [visible, setVisible] = useState(false)
@@ -37,6 +42,8 @@ function VideoCard({
   const cardRef = useRef(null)
   const displayMeta = useMemo(() => getDisplayMeta(video), [video])
   const animationDelay = useMemo(() => `${(index % 20) * 30}ms`, [index])
+  const thumbnail = thumbnails[video.fullPath]
+  const isFavorite = favoriteKeys.has(video.favoriteKey || video.fullPath)
 
   // 懒加载：只有卡片进入视口时才加载缩略图
   useEffect(() => {
@@ -58,8 +65,8 @@ function VideoCard({
   }, [])
 
   const handleClick = useCallback(() => {
-    onPlay(video)
-  }, [video, onPlay])
+    handlePlay(video, { queueVideos })
+  }, [video, handlePlay, queueVideos])
 
   const handleContextMenu = useCallback((e) => {
     e.preventDefault()
@@ -68,25 +75,25 @@ function VideoCard({
 
   const handleFavoriteClick = useCallback((e) => {
     e.stopPropagation()
-    onToggleFavorite?.(video)
-  }, [video, onToggleFavorite])
+    handleToggleFavorite?.(video)
+  }, [video, handleToggleFavorite])
 
   const handleMenuClick = useCallback((e) => {
     e.stopPropagation()
     setMenuOpen(open => !open)
   }, [])
 
-  const handleOpenInFolder = useCallback(async (e) => {
+  const handleOpenInFolderClick = useCallback(async (e) => {
     e.stopPropagation()
     setMenuOpen(false)
-    await onOpenInFolder?.(video)
-  }, [video, onOpenInFolder])
+    await handleOpenInFolder?.(video)
+  }, [video, handleOpenInFolder])
 
   const handleEditTags = useCallback((e) => {
     e.stopPropagation()
     setMenuOpen(false)
-    onEditCustomTags?.(video)
-  }, [video, onEditCustomTags])
+    handleOpenTagEditor?.(video)
+  }, [video, handleOpenTagEditor])
 
   useEffect(() => {
     if (!menuOpen) return
@@ -112,7 +119,7 @@ function VideoCard({
       </button>
       {menuOpen && (
         <div className="card-menu" role="menu">
-          <button type="button" onClick={handleOpenInFolder} role="menuitem">在资源管理器中打开视频所在位置</button>
+          <button type="button" onClick={handleOpenInFolderClick} role="menuitem">在资源管理器中打开视频所在位置</button>
           <button type="button" onClick={handleEditTags} role="menuitem">自定义标签</button>
         </div>
       )}

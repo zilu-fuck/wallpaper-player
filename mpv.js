@@ -5,6 +5,16 @@ const https = require('https')
 const http = require('http')
 const net = require('net')
 const { app } = require('electron')
+const {
+  destroyMpvHostWindow,
+  getMpvHostHandle,
+  hideMpvHostWindow,
+  setMpvHostBounds,
+  setMpvHostMainWindow,
+  showMpvHostWindow,
+  syncMpvHostWindowBounds
+} = require('./main/mpv-host')
+const { getMainWindow } = require('./main/window')
 
 const MPV_DOWNLOAD_URL =
   'https://github.com/mpv-player/mpv/releases/download/v0.41.0/mpv-v0.41.0-x86_64-pc-windows-msvc.zip'
@@ -12,10 +22,107 @@ const MPV_FALLBACK_URL =
   'https://github.com/mpv-player/mpv/releases/download/v0.40.0/mpv-v0.40.0-x86_64-pc-windows-msvc.zip'
 
 function getResourcePath(...segments) {
-  if (app.isPackaged) {
-    return path.join(process.resourcesPath, ...segments)
+  return app.isPackaged
+    ? path.join(process.resourcesPath, ...segments)
+    : path.join(__dirname, ...segments)
+}
+
+function createDefaultState() {
+  return {
+    filePath: null,
+    timePos: 0,
+    duration: 0,
+    paused: false,
+    volume: 100,
+    muted: false,
+    speed: 1,
+    audioId: null,
+    subtitleId: null,
+    subtitleVisible: true,
+    subtitleScale: 1,
+    loopFile: 'no',
+    abLoopA: null,
+    abLoopB: null,
+    playlistPos: 0,
+    playlistCount: 0,
+    eofReached: false,
+    trackList: []
   }
-  return path.join(__dirname, ...segments)
+}
+
+function toNumber(value, fallback = 0) {
+  const n = Number(value)
+  return Number.isFinite(n) ? n : fallback
+}
+
+function toNullableNumber(value) {
+  if (value == null || value === '' || value === 'no') return null
+  const n = Number(value)
+  return Number.isFinite(n) ? n : null
+}
+
+function normalizeTrackSelection(value) {
+  if (value == null || value === '' || value === 'auto') return 'auto'
+  if (value === 'off' || value === 'no') return 'no'
+  const n = Number(value)
+  return Number.isFinite(n) ? n : value
+}
+
+function normalizeHostBounds(bounds) {
+  if (!bounds || typeof bounds !== 'object') return null
+
+  const x = Number(bounds.x)
+  const y = Number(bounds.y)
+  const width = Number(bounds.width)
+  const height = Number(bounds.height)
+
+  if (!Number.isFinite(x) || !Number.isFinite(y) || !Number.isFinite(width) || !Number.isFinite(height)) {
+    return null
+  }
+
+  return {
+    x: Math.round(x),
+    y: Math.round(y),
+    width: Math.max(1, Math.round(width)),
+    height: Math.max(1, Math.round(height))
+  }
+}
+
+function pathIdentity(filePath) {
+  const resolved = path.resolve(String(filePath || ''))
+  return process.platform === 'win32' ? resolved.toLowerCase() : resolved
+}
+
+function normalizePlaylistOptions(filePath, options = {}) {
+  const current = path.resolve(filePath)
+  const currentKey = pathIdentity(current)
+  const rawPlaylist = Array.isArray(options.playlist) ? options.playlist : []
+  const paths = []
+  const seen = new Set()
+
+  for (const item of rawPlaylist) {
+    if (typeof item !== 'string' || !item.trim()) continue
+    const resolved = path.resolve(item)
+    const key = pathIdentity(resolved)
+    if (seen.has(key)) continue
+    seen.add(key)
+    paths.push(resolved)
+  }
+
+  let startIndex = Number(options.playlistIndex)
+  if (!Number.isInteger(startIndex) || startIndex < 0 || startIndex >= paths.length || pathIdentity(paths[startIndex]) !== currentKey) {
+    startIndex = paths.findIndex(item => pathIdentity(item) === currentKey)
+  }
+
+  if (startIndex < 0) {
+    paths.unshift(current)
+    startIndex = 0
+  }
+
+  return {
+    paths: paths.length > 0 ? paths : [current],
+    startIndex
+  }
 }
 
 class MpvManager {
@@ -23,44 +130,49 @@ class MpvManager {
     this.mpvPath = null
     this.process = null
     this.socket = null
-    this.requestId = 0
-    this.pipePath = null
     this.sessionId = 0
-    this.eventHandlers = {}
+    this.pipePath = null
     this._ready = false
+    this._buffer = ''
+    this._nextRequestId = 1
+    this._pendingRequests = new Map()
+    this._observedProperties = new Map()
+    this._currentState = createDefaultState()
+    this._activeFilePath = null
+    this._playlistPaths = []
+    this._playlistIndex = -1
+    this._pendingInitialState = null
+    this._initialSeekApplied = false
+    this._endedEmitted = false
+    this._stopping = false
+    this.eventHandlers = {}
   }
 
-  // ─── 查找 mpv ──────────────────────────────────────
   async findMpv(customPath) {
     if (customPath && fs.existsSync(customPath)) {
       this.mpvPath = customPath
       return this.mpvPath
     }
 
-    // 1) bundled vendor/mpv/mpv.exe
     const bundledMpv = getResourcePath('vendor', 'mpv', 'mpv.exe')
     if (fs.existsSync(bundledMpv)) {
       this.mpvPath = bundledMpv
       return this.mpvPath
     }
 
-    // 1) userData/mpv/mpv.exe
     const appMpv = path.join(app.getPath('userData'), 'mpv', 'mpv.exe')
     if (fs.existsSync(appMpv)) {
       this.mpvPath = appMpv
       return this.mpvPath
     }
 
-    // 2) 系统 PATH
     try {
       execFileSync('mpv', ['--version'], { timeout: 5000, stdio: 'ignore' })
       this.mpvPath = 'mpv'
       return this.mpvPath
     } catch {
-      // not found
+      return null
     }
-
-    return null
   }
 
   getMpvPath() {
@@ -72,10 +184,18 @@ class MpvManager {
   }
 
   isReady() {
-    return this._ready && this.mpvPath
+    return this._ready && !!this.mpvPath
   }
 
-  // ─── 下载 mpv ──────────────────────────────────────
+  getState() {
+    return {
+      ...this._currentState,
+      filePath: this._activeFilePath,
+      trackList: Array.isArray(this._currentState.trackList) ? [...this._currentState.trackList] : [],
+      ready: this.isReady()
+    }
+  }
+
   async download(progressCallback) {
     const mpvDir = path.join(app.getPath('userData'), 'mpv')
     if (!fs.existsSync(mpvDir)) fs.mkdirSync(mpvDir, { recursive: true })
@@ -83,24 +203,20 @@ class MpvManager {
     const archivePath = path.join(mpvDir, 'mpv.zip')
     const mpvExePath = path.join(mpvDir, 'mpv.exe')
 
-    // 下载 ZIP 包（官方源，失败则用备用版本）
     await this._downloadFile(MPV_DOWNLOAD_URL, archivePath, progressCallback)
       .catch(() => this._downloadFile(MPV_FALLBACK_URL, archivePath, progressCallback))
 
-    // 解压到临时目录，再整理到 mpvDir
     const extractDir = path.join(mpvDir, '_extract_tmp')
     if (fs.existsSync(extractDir)) fs.rmSync(extractDir, { recursive: true, force: true })
     fs.mkdirSync(extractDir, { recursive: true })
 
     await this._extractZip(archivePath, extractDir)
 
-    // 官方 ZIP 可能将文件放在子目录中，找到 mpv.exe 所在位置
     const foundExe = this._findMpvExe(extractDir)
     if (!foundExe) {
       throw new Error('解压后未找到 mpv.exe，请手动下载 mpv 并在设置中指定路径')
     }
 
-    // 将 mpv.exe 及其同目录文件移至 mpvDir
     const exeDir = path.dirname(foundExe)
     if (exeDir !== mpvDir) {
       for (const file of fs.readdirSync(exeDir)) {
@@ -109,14 +225,12 @@ class MpvManager {
         try {
           fs.renameSync(src, dst)
         } catch {
-          // 跨盘符 rename 失败时用 copy + unlink
           fs.copyFileSync(src, dst)
           fs.unlinkSync(src)
         }
       }
     }
 
-    // 清理临时文件
     try { fs.rmSync(extractDir, { recursive: true, force: true }) } catch {}
     try { fs.unlinkSync(archivePath) } catch {}
 
@@ -129,99 +243,121 @@ class MpvManager {
   }
 
   _findMpvExe(dir) {
-    // 先在当前目录查找
     const direct = path.join(dir, 'mpv.exe')
     if (fs.existsSync(direct)) return direct
 
-    // 递归查找（最多深入 2 层）
     try {
       const entries = fs.readdirSync(dir, { withFileTypes: true })
       for (const entry of entries) {
-        if (entry.isDirectory()) {
-          const sub = path.join(dir, entry.name, 'mpv.exe')
-          if (fs.existsSync(sub)) return sub
-          // 再深一层
-          try {
-            const subEntries = fs.readdirSync(path.join(dir, entry.name), { withFileTypes: true })
-            for (const se of subEntries) {
-              if (se.isDirectory()) {
-                const deep = path.join(dir, entry.name, se.name, 'mpv.exe')
-                if (fs.existsSync(deep)) return deep
-              }
-            }
-          } catch {}
-        }
+        if (!entry.isDirectory()) continue
+        const subDir = path.join(dir, entry.name)
+        const sub = path.join(subDir, 'mpv.exe')
+        if (fs.existsSync(sub)) return sub
+
+        try {
+          const subEntries = fs.readdirSync(subDir, { withFileTypes: true })
+          for (const subEntry of subEntries) {
+            if (!subEntry.isDirectory()) continue
+            const deep = path.join(subDir, subEntry.name, 'mpv.exe')
+            if (fs.existsSync(deep)) return deep
+          }
+        } catch {}
       }
     } catch {}
+
     return null
   }
 
   _downloadFile(url, dest, progressCallback) {
     return new Promise((resolve, reject) => {
-      const follow = (url, redirects) => {
+      const follow = (nextUrl, redirects) => {
         if (redirects > 5) return reject(new Error('Too many redirects'))
-        const client = url.startsWith('https:') ? https : http
-        client.get(url, { headers: { 'User-Agent': 'VideoGallery/1.0' } }, (res) => {
+        const client = nextUrl.startsWith('https:') ? https : http
+
+        client.get(nextUrl, { headers: { 'User-Agent': 'VideoGallery/1.0' } }, (res) => {
           if (res.statusCode >= 300 && res.statusCode < 400 && res.headers.location) {
             let loc = res.headers.location
             if (loc.startsWith('/')) {
-              const u = new URL(url)
+              const u = new URL(nextUrl)
               loc = u.protocol + '//' + u.host + loc
             }
             return follow(loc, redirects + 1)
           }
+
           if (res.statusCode !== 200) {
-            // 出错时关闭已打开的写入流，防止文件锁泄漏
             try { fs.unlinkSync(dest) } catch {}
             return reject(new Error(`HTTP ${res.statusCode}`))
           }
+
           const total = parseInt(res.headers['content-length'] || '0', 10)
           let downloaded = 0
           const file = fs.createWriteStream(dest)
+
           res.on('data', (chunk) => {
             downloaded += chunk.length
             if (progressCallback && total > 0) {
               progressCallback({ downloaded, total, percent: Math.round((downloaded / total) * 100) })
             }
           })
+
           res.pipe(file)
           file.on('finish', () => file.close(() => resolve()))
-          res.on('error', (err) => { file.destroy(); try { fs.unlinkSync(dest) } catch {}; reject(err) })
-          file.on('error', (err) => { file.destroy(); try { fs.unlinkSync(dest) } catch {}; reject(err) })
+          const cleanup = (err) => {
+            file.destroy()
+            try { fs.unlinkSync(dest) } catch {}
+            reject(err)
+          }
+          res.on('error', cleanup)
+          file.on('error', cleanup)
         }).on('error', reject)
       }
+
       follow(url, 0)
     })
   }
 
   async _extractZip(archivePath, targetDir) {
-    // PowerShell Expand-Archive（Windows 10+ 内置，无需额外依赖）
     try {
       execFileSync('powershell.exe', [
-        '-NoProfile', '-NonInteractive', '-Command',
+        '-NoProfile',
+        '-NonInteractive',
+        '-Command',
         `Expand-Archive -Path '${archivePath.replace(/'/g, "''")}' -DestinationPath '${targetDir.replace(/'/g, "''")}' -Force`
       ], { timeout: 120000, stdio: 'ignore' })
       return
-    } catch { /* try fallback */ }
+    } catch {}
 
-    // 备用: Windows 10+ tar.exe 也支持 ZIP
     try {
       execFileSync('tar', ['-xf', archivePath, '-C', targetDir], { timeout: 120000, stdio: 'ignore' })
       return
-    } catch { /* continue */ }
+    } catch {}
 
     throw new Error(
-      '无法解压 ZIP 文件。请手动下载 mpv (https://github.com/mpv-player/mpv/releases) ' +
-      '并在设置中指定 mpv.exe 路径'
+      '无法解压 ZIP 文件。请手动下载 mpv (https://github.com/mpv-player/mpv/releases) 并在设置中指定 mpv.exe 路径'
     )
   }
 
-  // ─── 启动 mpv 播放 ─────────────────────────────────
-  async play(filePath) {
+  async play(filePath, options = {}) {
     if (!this.mpvPath) throw new Error('mpv 未就绪')
 
-    // 先停止已有实例
     this.stop()
+    setMpvHostMainWindow(getMainWindow())
+    if (options.hostBounds != null) {
+      this.setHostBounds(options.hostBounds)
+    }
+
+    const playlist = normalizePlaylistOptions(filePath, options)
+    this._activeFilePath = playlist.paths[playlist.startIndex]
+    this._playlistPaths = playlist.paths
+    this._playlistIndex = playlist.startIndex
+    this._currentState = createDefaultState()
+    this._currentState.filePath = this._activeFilePath
+    this._currentState.playlistPos = playlist.startIndex + 1
+    this._currentState.playlistCount = playlist.paths.length
+    this._pendingInitialState = this._normalizeInitialState(options)
+    this._initialSeekApplied = false
+    this._endedEmitted = false
+    this._stopping = false
 
     const pid = process.pid
     const sessionId = ++this.sessionId
@@ -230,7 +366,6 @@ class MpvManager {
       : `/tmp/mpvgallery-${pid}-${sessionId}.sock`
     this.pipePath = pipePath
 
-    // 清理旧 socket 文件 (Unix)
     if (process.platform !== 'win32') {
       try { fs.unlinkSync(pipePath) } catch {}
     }
@@ -238,63 +373,92 @@ class MpvManager {
     return new Promise((resolve, reject) => {
       let settled = false
       let output = ''
+
       const finish = (fn, value) => {
         if (settled) return
         settled = true
         fn(value)
       }
+
       const getExitError = (code) => {
         const detail = output.trim().split(/\r?\n/).filter(Boolean).slice(-4).join('\n')
         return new Error(detail || `mpv 启动失败，退出码 ${code ?? 'unknown'}`)
       }
+
       const args = [
-        filePath,
+        ...playlist.paths,
         `--input-ipc-server=${pipePath}`,
         '--no-terminal',
         '--force-window=immediate',
-        '--autofit-larger=90%x90%',
         '--no-resume-playback',
-        '--title=${filename}',
+        `--playlist-start=${playlist.startIndex}`,
+        `--title=${path.basename(this._activeFilePath)}`,
         '--hr-seek=yes',
-        '--hwdec=auto',
+        '--vo=gpu',
+        '--gpu-context=d3d11',
+        '--hwdec=no',
+        '--osc=no',
+        '--input-default-bindings=yes',
+        '--input-cursor=no'
       ]
+
+      syncMpvHostWindowBounds()
+      const wid = getMpvHostHandle()
+      if (wid) {
+        args.splice(playlist.paths.length, 0, `--wid=${wid}`)
+      }
 
       this.process = spawn(this.mpvPath, args, { stdio: ['ignore', 'pipe', 'pipe'], detached: false })
       const proc = this.process
+
       proc.stdout.on('data', (data) => { output += data.toString() })
       proc.stderr.on('data', (data) => { output += data.toString() })
 
       proc.on('error', (err) => {
         this._emit('error', { message: err.message })
+        this._rejectAllPending(err)
+        hideMpvHostWindow(true)
         finish(reject, err)
       })
 
       proc.on('exit', (code) => {
         const isCurrentProcess = this.process === proc
-        const exitError = isCurrentProcess && code !== 0 ? getExitError(code) : null
-        if (exitError) {
+        if (!isCurrentProcess) return
+
+        if (code !== 0) {
+          const exitError = getExitError(code)
           this._emit('error', { message: exitError.message })
+          this._rejectAllPending(exitError)
+          hideMpvHostWindow(true)
           finish(reject, exitError)
+        } else if (!this._stopping && !this._endedEmitted) {
+          this._endedEmitted = true
+          this._emit('ended', { reason: 'eof', code })
         }
-        this._emit('ended', { code })
-        if (isCurrentProcess) {
-          this.process = null
-          this._disconnectSocket()
-        }
+
+        this._cleanupConnection(proc, new Error('mpv exited'))
       })
 
-      // 等待 IPC pipe 就绪后连接
       this._connectWithRetry(pipePath, sessionId, 15, 400)
-        .then(() => {
-          if (this.process !== proc || this.sessionId !== sessionId) return
+        .then(async () => {
+          if (this.process !== proc || this.sessionId !== sessionId) {
+            finish(reject, new Error('mpv session replaced'))
+            return
+          }
           this._ready = true
+          this._buffer = ''
           this._listenEvents()
+          await this._registerObservers()
+          await this._applyImmediateInitialState()
+          await this._applySeekIfNeeded()
+          this._emitState()
+          showMpvHostWindow()
           finish(resolve)
         })
         .catch((err) => {
-          // mpv 可能已启动但 IPC 不可用，仍然算成功启动
           if (this.process === proc && !proc.killed) {
             this._ready = false
+            showMpvHostWindow()
             finish(resolve)
           } else {
             finish(reject, err)
@@ -303,17 +467,65 @@ class MpvManager {
     })
   }
 
+  _normalizeInitialState(options) {
+    const resume = options?.resume === false ? {} : (options?.resume || options || {})
+    return {
+      position: toNumber(resume.position, 0),
+      volume: resume.volume == null ? null : Math.max(0, Math.min(100, toNumber(resume.volume, 100))),
+      speed: resume.speed == null ? null : Math.max(0.1, toNumber(resume.speed, 1)),
+      muted: resume.muted == null ? null : Boolean(resume.muted),
+      audioId: resume.audioId == null ? null : toNullableNumber(resume.audioId),
+      subtitleId: resume.subtitleId == null ? null : toNullableNumber(resume.subtitleId),
+      subtitleVisible: resume.subtitleVisible == null ? null : Boolean(resume.subtitleVisible),
+      subtitleScale: resume.subtitleScale == null ? null : Math.max(0.1, toNumber(resume.subtitleScale, 1)),
+      loopMode: typeof resume.loopMode === 'string' ? resume.loopMode : null,
+      abLoopA: resume.abLoopA == null ? null : toNumber(resume.abLoopA, 0),
+      abLoopB: resume.abLoopB == null ? null : toNumber(resume.abLoopB, 0)
+    }
+  }
+
+  async _applyImmediateInitialState() {
+    if (!this._pendingInitialState) return
+    const state = this._pendingInitialState
+
+    const tasks = []
+    if (state.volume != null) tasks.push(this.setVolume(state.volume))
+    if (state.speed != null) tasks.push(this.setSpeed(state.speed))
+    if (state.muted != null) tasks.push(this.setMuted(state.muted))
+    if (state.audioId != null) tasks.push(this.setAudioTrack(state.audioId))
+    if (state.subtitleId != null) tasks.push(this.setSubtitleTrack(state.subtitleId))
+    if (state.subtitleVisible != null) tasks.push(this.setSubtitleVisible(state.subtitleVisible))
+    if (state.subtitleScale != null) tasks.push(this.setSubtitleScale(state.subtitleScale))
+    if (state.loopMode != null) tasks.push(this.setLoopMode(state.loopMode))
+    if (state.abLoopA != null || state.abLoopB != null) tasks.push(this.setABLoop(state.abLoopA, state.abLoopB))
+
+    await Promise.allSettled(tasks)
+  }
+
+  async _applySeekIfNeeded() {
+    if (this._initialSeekApplied || !this._pendingInitialState) return
+    const position = this._pendingInitialState.position
+    if (position <= 0) {
+      this._initialSeekApplied = true
+      return
+    }
+
+    try {
+      await this.seekTo(position)
+      this._initialSeekApplied = true
+    } catch {}
+  }
+
   _connectWithRetry(pipePath, sessionId, retries, delay) {
     return new Promise((resolve, reject) => {
-      const tryConnect = (n) => {
-        if (this.sessionId !== sessionId) {
-          return reject(new Error('mpv session replaced'))
-        }
-        // 销毁上一次失败的 socket，防止泄漏
+      const tryConnect = (remaining) => {
+        if (this.sessionId !== sessionId) return reject(new Error('mpv session replaced'))
+
         if (this.socket) {
           try { this.socket.destroy() } catch {}
           this.socket = null
         }
+
         const socket = net.createConnection(pipePath, () => {
           if (this.sessionId !== sessionId || this.socket !== socket) {
             try { socket.destroy() } catch {}
@@ -322,65 +534,402 @@ class MpvManager {
           socket.setEncoding('utf-8')
           resolve()
         })
+
         this.socket = socket
         socket.on('error', (err) => {
           if (this.socket !== socket) return
-          if (n > 0) {
-            setTimeout(() => tryConnect(n - 1), delay)
+          if (remaining > 0) {
+            setTimeout(() => tryConnect(remaining - 1), delay)
           } else {
             reject(err)
           }
         })
       }
+
       tryConnect(retries)
     })
   }
 
-  _disconnectSocket(socket = this.socket) {
+  _registerObservers() {
+    const props = [
+      'time-pos',
+      'path',
+      'duration',
+      'pause',
+      'volume',
+      'mute',
+      'speed',
+      'aid',
+      'sid',
+      'sub-visibility',
+      'sub-scale',
+      'loop-file',
+      'ab-loop-a',
+      'ab-loop-b',
+      'playlist-pos-1',
+      'playlist-count',
+      'track-list'
+    ]
+
+    return Promise.allSettled(props.map((name, index) => this.observeProperty(name, index + 1)))
+  }
+
+  _cleanupConnection(proc = this.process, reason = new Error('mpv connection closed'), socket = this.socket) {
+    const matchesProcess = proc && this.process === proc
+    const matchesSocket = socket && this.socket === socket
+    if ((proc || socket) && !matchesProcess && !matchesSocket) return
+
+    if (this.socket && (!socket || this.socket === socket)) {
+      try { this.socket.destroy() } catch {}
+      this.socket = null
+    }
+    this.process = null
+    this._ready = false
+    this._buffer = ''
+    this._pendingInitialState = null
+    this._initialSeekApplied = false
+    this._rejectAllPending(reason)
+    this._observedProperties.clear()
+    hideMpvHostWindow(true)
+  }
+
+  _markSocketClosed(socket, reason = new Error('mpv socket closed')) {
     if (socket && this.socket !== socket) return
+
     if (this.socket) {
       try { this.socket.destroy() } catch {}
       this.socket = null
     }
+
     this._ready = false
+    this._buffer = ''
+    this._rejectAllPending(reason)
+    this._observedProperties.clear()
   }
 
-  // ─── IPC 通信 ──────────────────────────────────────
-  send(command, args = []) {
-    if (!this.socket || !this._ready) return
-    const msg = JSON.stringify({ command: [command, ...args] })
-    try { this.socket.write(msg + '\n') } catch {}
+  _rejectAllPending(err) {
+    for (const { reject } of this._pendingRequests.values()) {
+      try { reject(err) } catch {}
+    }
+    this._pendingRequests.clear()
   }
 
-  sendProperty(name, value) {
-    if (!this.socket || !this._ready) return
-    const msg = JSON.stringify({ command: ['set_property', name, value] })
-    try { this.socket.write(msg + '\n') } catch {}
+  _clearPendingRequests() {
+    this._pendingRequests.clear()
+    this._observedProperties.clear()
+  }
+
+  _send(payload) {
+    if (!this.socket || !this._ready) {
+      return Promise.reject(new Error('mpv not ready'))
+    }
+
+    const requestId = this._nextRequestId++
+    const message = JSON.stringify({ request_id: requestId, ...payload })
+
+    return new Promise((resolve, reject) => {
+      this._pendingRequests.set(requestId, { resolve, reject })
+      try {
+        this.socket.write(message + '\n')
+      } catch (err) {
+        this._pendingRequests.delete(requestId)
+        reject(err)
+      }
+    })
+  }
+
+  request(command, args = []) {
+    return this._send({ command: [command, ...args] })
+  }
+
+  command(command, args = []) {
+    return this.request(command, args)
+  }
+
+  getProperty(name) {
+    return this.request('get_property', [name])
+  }
+
+  setProperty(name, value) {
+    return this.request('set_property', [name, value])
+  }
+
+  observeProperty(name, id) {
+    this._observedProperties.set(name, id)
+    return this.request('observe_property', [id, name])
+  }
+
+  unobserveProperty(name) {
+    const id = this._observedProperties.get(name)
+    if (id == null) return Promise.resolve()
+    this._observedProperties.delete(name)
+    return this.request('unobserve_property', [id])
+  }
+
+  async seekTo(position) {
+    if (position == null || Number.isNaN(Number(position))) return
+    return this.setProperty('time-pos', Number(position))
+  }
+
+  seekRelative(delta) {
+    return this.command('seek', [Number(delta), 'relative'])
+  }
+
+  cyclePause() {
+    return this.command('cycle', ['pause'])
+  }
+
+  setPaused(paused) {
+    return this.setProperty('pause', Boolean(paused))
+  }
+
+  setVolume(volume) {
+    return this.setProperty('volume', Math.max(0, Math.min(100, Number(volume))))
+  }
+
+  setMuted(muted) {
+    return this.setProperty('mute', Boolean(muted))
+  }
+
+  toggleMute() {
+    return this.command('cycle', ['mute'])
+  }
+
+  setSpeed(speed) {
+    return this.setProperty('speed', Math.max(0.1, Number(speed)))
+  }
+
+  cycleSpeed() {
+    return this.command('cycle-values', ['speed', '0.5', '0.75', '1.0', '1.25', '1.5', '2.0'])
+  }
+
+  setAudioTrack(trackId) {
+    const normalized = normalizeTrackSelection(trackId)
+    if (normalized === 'auto') {
+      return this.setProperty('aid', 'auto')
+    }
+    if (normalized === 'no') {
+      return this.setProperty('aid', 'no')
+    }
+    return this.setProperty('aid', normalized)
+  }
+
+  cycleAudioTrack() {
+    return this.command('cycle', ['aid'])
+  }
+
+  setSubtitleTrack(trackId) {
+    const normalized = normalizeTrackSelection(trackId)
+    if (normalized === 'no') {
+      return this.setProperty('sid', 'no')
+    }
+    if (normalized === 'auto') {
+      return this.setProperty('sid', 'auto')
+    }
+    return this.setProperty('sid', normalized)
+  }
+
+  cycleSubtitleTrack() {
+    return this.command('cycle', ['sid'])
+  }
+
+  setSubtitleVisible(visible) {
+    return this.setProperty('sub-visibility', Boolean(visible))
+  }
+
+  toggleSubtitleVisible() {
+    return this.command('cycle', ['sub-visibility'])
+  }
+
+  setSubtitleScale(scale) {
+    return this.setProperty('sub-scale', Math.max(0.1, Number(scale)))
+  }
+
+  setLoopMode(mode) {
+    const normalized = mode === 'inf' || mode === true ? 'inf' : 'no'
+    return this.setProperty('loop-file', normalized)
+  }
+
+  setHostBounds(bounds) {
+    if (bounds == null) {
+      hideMpvHostWindow(true)
+      return false
+    }
+
+    const nextBounds = normalizeHostBounds(bounds)
+    if (!nextBounds) return false
+
+    const result = setMpvHostBounds(nextBounds)
+    if (result && this._ready) {
+      showMpvHostWindow()
+    }
+    return result
+  }
+
+  setABLoop(a, b) {
+    const tasks = [
+      this.setProperty('ab-loop-a', a == null ? 'no' : Number(a)),
+      this.setProperty('ab-loop-b', b == null ? 'no' : Number(b))
+    ]
+    return Promise.allSettled(tasks)
+  }
+
+  clearABLoop() {
+    return this.setABLoop(null, null)
+  }
+
+  async screenshot() {
+    const dir = path.join(app.getPath('userData'), 'screenshots')
+    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true })
+    const stamp = new Date().toISOString().replace(/[:.]/g, '-')
+    const filePath = path.join(dir, `shot-${stamp}.png`)
+    await this.command('screenshot-to-file', [filePath, 'video'])
+    return filePath
   }
 
   _listenEvents() {
     const socket = this.socket
     if (!socket) return
-    let buffer = ''
+
     socket.on('data', (data) => {
-      buffer += data
-      const lines = buffer.split('\n')
-      buffer = lines.pop()
+      this._buffer += data
+      const lines = this._buffer.split('\n')
+      this._buffer = lines.pop() || ''
+
       for (const line of lines) {
         if (!line.trim()) continue
+
+        let json
         try {
-          const json = JSON.parse(line)
-          if (json.event) {
-            this._emit('mpv-event', json)
+          json = JSON.parse(line)
+        } catch {
+          continue
+        }
+
+        if (json.request_id != null) {
+          const pending = this._pendingRequests.get(json.request_id)
+          if (pending) {
+            this._pendingRequests.delete(json.request_id)
+            if (json.error && json.error !== 'success') {
+              pending.reject(new Error(json.error))
+            } else {
+              pending.resolve(json.data)
+            }
           }
-        } catch { /* ignore */ }
+        }
+
+        if (json.event) {
+          this._handleEvent(json)
+          this._emit('mpv-event', json)
+        }
       }
     })
-    socket.on('close', () => { this._disconnectSocket(socket) })
-    socket.on('error', () => { /* ignore */ })
+
+    socket.on('close', () => {
+      this._markSocketClosed(socket)
+    })
+
+    socket.on('error', () => {})
   }
 
-  // ─── 事件系统 ──────────────────────────────────────
+  _handleEvent(json) {
+    switch (json.event) {
+      case 'property-change':
+        this._applyPropertyChange(json.name, json.data)
+        this._emitState()
+        break
+      case 'file-loaded':
+        this._currentState.eofReached = false
+        this._applySeekIfNeeded().catch(() => {})
+        this._emitState()
+        break
+      case 'end-file':
+        this._currentState.eofReached = json.reason === 'eof'
+        if (json.reason === 'eof' && this._playlistIndex >= this._playlistPaths.length - 1) {
+          this._endedEmitted = true
+          this._emit('ended', json)
+        }
+        this._emitState()
+        break
+      case 'shutdown':
+      case 'idle':
+        this._emitState()
+        break
+      default:
+        break
+    }
+  }
+
+  _applyPropertyChange(name, data) {
+    switch (name) {
+      case 'time-pos':
+        this._currentState.timePos = toNumber(data, 0)
+        break
+      case 'path':
+        if (typeof data === 'string' && data.trim()) {
+          this._activeFilePath = path.resolve(data)
+          this._currentState.filePath = this._activeFilePath
+          this._playlistIndex = this._playlistPaths.findIndex(item => pathIdentity(item) === pathIdentity(this._activeFilePath))
+        }
+        break
+      case 'duration':
+        this._currentState.duration = toNumber(data, 0)
+        break
+      case 'pause':
+        this._currentState.paused = Boolean(data)
+        break
+      case 'volume':
+        this._currentState.volume = Math.max(0, Math.min(100, toNumber(data, 100)))
+        break
+      case 'mute':
+        this._currentState.muted = Boolean(data)
+        break
+      case 'speed':
+        this._currentState.speed = Math.max(0.1, toNumber(data, 1))
+        break
+      case 'aid':
+        this._currentState.audioId = toNullableNumber(data)
+        break
+      case 'sid':
+        this._currentState.subtitleId = toNullableNumber(data)
+        break
+      case 'sub-visibility':
+        this._currentState.subtitleVisible = Boolean(data)
+        break
+      case 'sub-scale':
+        this._currentState.subtitleScale = Math.max(0.1, toNumber(data, 1))
+        break
+      case 'loop-file':
+        this._currentState.loopFile = data == null ? 'no' : String(data)
+        break
+      case 'ab-loop-a':
+        this._currentState.abLoopA = toNullableNumber(data)
+        break
+      case 'ab-loop-b':
+        this._currentState.abLoopB = toNullableNumber(data)
+        break
+      case 'playlist-pos-1':
+        this._currentState.playlistPos = toNumber(data, 0)
+        this._playlistIndex = Math.max(0, this._currentState.playlistPos - 1)
+        break
+      case 'playlist-count':
+        this._currentState.playlistCount = toNumber(data, 0)
+        break
+      case 'track-list':
+        this._currentState.trackList = Array.isArray(data) ? data : []
+        break
+      case 'eof-reached':
+        this._currentState.eofReached = Boolean(data)
+        break
+      default:
+        break
+    }
+  }
+
+  _emitState() {
+    this._emit('state', this.getState())
+  }
+
   on(event, handler) {
     if (!this.eventHandlers[event]) this.eventHandlers[event] = []
     this.eventHandlers[event].push(handler)
@@ -396,35 +945,46 @@ class MpvManager {
     if (handlers) handlers.forEach(h => h(data))
   }
 
-  // ─── 停止播放 ──────────────────────────────────────
   stop() {
     this.sessionId++
+    this._stopping = true
     const proc = this.process
+
+    this._emit('state', this.getState())
+
     if (proc) {
-      // 优先通过 IPC 发送 quit 命令，允许 mpv 保存状态后优雅退出
       if (this.socket && this._ready) {
         try {
-          const msg = JSON.stringify({ command: ['quit'] })
-          this.socket.write(msg + '\n')
+          this.socket.write(JSON.stringify({ command: ['quit'] }) + '\n')
         } catch {}
       }
-      // 超时后强制终止
+
       setTimeout(() => {
-        try { if (proc && !proc.killed) proc.kill() } catch {}
+        try {
+          if (proc && !proc.killed) proc.kill()
+        } catch {}
       }, 1000)
-      this.process = null
     }
-    this._disconnectSocket()
-    this._ready = false
+
+    this._cleanupConnection(proc)
+    this._pendingInitialState = null
+    this._initialSeekApplied = false
+    this._activeFilePath = null
+    this._playlistPaths = []
+    this._playlistIndex = -1
+    this._endedEmitted = false
+    this._stopping = false
+    this._currentState = createDefaultState()
+    hideMpvHostWindow(true)
   }
 
   isPlaying() {
     return this.process !== null && !this.process.killed
   }
 
-  // ─── 清理 ──────────────────────────────────────────
   destroy() {
     this.stop()
+    destroyMpvHostWindow()
     this.eventHandlers = {}
   }
 }

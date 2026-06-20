@@ -1,11 +1,26 @@
 import { useState, useCallback, useEffect } from 'react'
+import { useApp } from '../context/AppContext'
 
-export default function Settings({ settings, ffmpegStatus, mpvStatus, onMpvStatusChange, onSave, onThemeChange, onCheckUpdate, onClose }) {
+export default function Settings() {
+  const {
+    settings,
+    ffmpegStatus,
+    mpvStatus,
+    setMpvStatus,
+    saveSettings,
+    handleThemeChange,
+    playbackMode,
+    handlePlaybackModeChange,
+    handleCheckUpdate,
+    setShowSettings
+  } = useApp()
+
   const [theme, setTheme] = useState(settings?.theme || 'dark')
   const [saving, setSaving] = useState(false)
   const [downloading, setDownloading] = useState(false)
   const [downloadProgress, setDownloadProgress] = useState(null)
   const [mpvDownloadError, setMpvDownloadError] = useState('')
+  const onClose = useCallback(() => setShowSettings(false), [setShowSettings])
 
   useEffect(() => {
     setTheme(settings?.theme || 'dark')
@@ -13,15 +28,15 @@ export default function Settings({ settings, ffmpegStatus, mpvStatus, onMpvStatu
 
   const handleChangeTheme = useCallback(async (nextTheme) => {
     setTheme(nextTheme)
-    await onThemeChange(nextTheme)
-  }, [onThemeChange])
+    await handleThemeChange(nextTheme)
+  }, [handleThemeChange])
 
   const handleSave = useCallback(async () => {
     setSaving(true)
-    await onSave({ theme })
+    await saveSettings({ theme })
     setSaving(false)
     onClose()
-  }, [theme, onSave, onClose])
+  }, [theme, saveSettings, onClose])
 
   const handleDownloadMpv = useCallback(async () => {
     setDownloading(true)
@@ -38,21 +53,20 @@ export default function Settings({ settings, ffmpegStatus, mpvStatus, onMpvStatu
 
     if (result.success) {
       const status = await window.electronAPI.checkMpv()
-      onMpvStatusChange(status)
+      setMpvStatus(status)
     } else {
       setMpvDownloadError(result.error || '未知错误')
     }
-  }, [onMpvStatusChange])
+  }, [setMpvStatus])
 
   const handleSelectMpvPath = useCallback(async () => {
     const mpvPath = await window.electronAPI.selectMpvPath()
     if (mpvPath) {
-      const newSettings = { ...settings, mpvPath }
-      await onSave(newSettings)
+      await saveSettings({ mpvPath })
       const status = await window.electronAPI.checkMpv()
-      onMpvStatusChange(status)
+      setMpvStatus(status)
     }
-  }, [settings, onSave, onMpvStatusChange])
+  }, [saveSettings, setMpvStatus])
 
   return (
     <div className="settings-overlay" onClick={(e) => e.target === e.currentTarget && onClose()}>
@@ -91,6 +105,34 @@ export default function Settings({ settings, ffmpegStatus, mpvStatus, onMpvStatu
             </div>
           </section>
 
+          <section className="settings-section">
+            <h3 className="section-title">播放模式</h3>
+            <p className="section-desc">控制上一首、下一首和结束后的连播方式。</p>
+            <div className="playback-mode-toggle" role="group" aria-label="播放模式切换">
+              <button
+                className={`playback-mode-option ${playbackMode === 'order' ? 'active' : ''}`}
+                onClick={() => handlePlaybackModeChange('order')}
+                type="button"
+              >
+                顺序
+              </button>
+              <button
+                className={`playback-mode-option ${playbackMode === 'shuffle' ? 'active' : ''}`}
+                onClick={() => handlePlaybackModeChange('shuffle')}
+                type="button"
+              >
+                随机
+              </button>
+              <button
+                className={`playback-mode-option ${playbackMode === 'single' ? 'active' : ''}`}
+                onClick={() => handlePlaybackModeChange('single')}
+                type="button"
+              >
+                单曲
+              </button>
+            </div>
+          </section>
+
           {/* 应用更新 */}
           <section className="settings-section">
             <h3 className="section-title">应用更新</h3>
@@ -101,7 +143,7 @@ export default function Settings({ settings, ffmpegStatus, mpvStatus, onMpvStatu
                 <p>安装版会在后台定期检查更新，也可以手动检查。</p>
                 <p className="hint">便携版不支持自动更新，需要手动下载新版。</p>
                 <div className="mpv-actions">
-                  <button className="btn btn-sm btn-primary" onClick={onCheckUpdate} type="button">
+                  <button className="btn btn-sm btn-primary" onClick={handleCheckUpdate} type="button">
                     检查更新
                   </button>
                 </div>

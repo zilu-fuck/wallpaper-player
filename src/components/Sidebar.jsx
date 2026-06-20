@@ -1,35 +1,39 @@
 import { useCallback, useEffect, useState } from 'react'
+import { useApp } from '../context/AppContext'
 
 function dirName(dir) {
   return dir.split(/[/\\]/).pop()
 }
 
-export default function Sidebar({
-  collapsed,
-  onToggle,
-  directories,
-  currentDir,
-  onDirectoryChange,
-  onDirectoriesChange,
-  onOpenSettings,
-  categoryGroups = { custom: [], system: [] },
-  activeCategory = 'all',
-  onCategoryChange,
-  favoriteCount = 0,
-  totalCount = 0
-}) {
-  const [localDirs, setLocalDirs] = useState(directories || [])
+export default function Sidebar() {
+  const {
+    sidebarCollapsed,
+    setSidebarCollapsed,
+    settings,
+    currentDir,
+    handleDirectoryChange,
+    handleDirectoriesChange,
+    setShowSettings,
+    categoryGroups = { custom: [], system: [] },
+    activeCategory = 'all',
+    setActiveCategory,
+    favoriteCount = 0,
+    totalCount = 0
+  } = useApp()
+
+  const directories = settings?.directories || []
+  const [localDirs, setLocalDirs] = useState(directories)
 
   useEffect(() => {
-    setLocalDirs(directories || [])
+    setLocalDirs(directories)
   }, [directories])
 
   const saveDirs = useCallback((newDirs) => {
     const newDefault = newDirs.length > 0
       ? (newDirs.includes(currentDir) ? currentDir : newDirs[0])
       : ''
-    onDirectoriesChange({ directories: newDirs, defaultDirectory: newDefault })
-  }, [currentDir, onDirectoriesChange])
+    handleDirectoriesChange({ directories: newDirs, defaultDirectory: newDefault })
+  }, [currentDir, handleDirectoriesChange])
 
   const handleAdd = useCallback(async () => {
     try {
@@ -54,16 +58,19 @@ export default function Sidebar({
     // 如果删除的是当前目录，切换到第一个剩余目录（或清空）
     if (dir === currentDir) {
       if (newDirs.length > 0) {
-        onDirectoryChange(newDirs[0])
+        handleDirectoryChange(newDirs[0])
       } else {
-        onDirectoryChange(null)
+        handleDirectoryChange(null)
       }
     }
-  }, [localDirs, currentDir, saveDirs, onDirectoryChange])
+  }, [localDirs, currentDir, saveDirs, handleDirectoryChange])
 
   const handleCategorySelect = useCallback((categoryKey) => {
-    onCategoryChange?.(categoryKey)
-  }, [onCategoryChange])
+    setActiveCategory?.(categoryKey)
+  }, [setActiveCategory])
+
+  const onToggle = useCallback(() => setSidebarCollapsed(!sidebarCollapsed), [sidebarCollapsed, setSidebarCollapsed])
+  const onOpenSettings = useCallback(() => setShowSettings(true), [setShowSettings])
 
   const renderCategoryGroup = (title, categories, emptyText) => (
     <div className="sidebar-category-group">
@@ -87,8 +94,8 @@ export default function Sidebar({
   )
 
   return (
-    <aside className={`sidebar${collapsed ? ' collapsed' : ''}`} aria-label="导航">
-      {collapsed ? (
+    <aside className={`sidebar${sidebarCollapsed ? ' collapsed' : ''}`} aria-label="导航">
+      {sidebarCollapsed ? (
         <div className="sidebar-collapsed-content">
           <button className="sidebar-toggle-btn" onClick={onToggle} title="展开侧边栏" aria-label="展开侧边栏">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -99,7 +106,7 @@ export default function Sidebar({
           <div className="sidebar-collapsed-icons">
             <button
               className={`sidebar-icon-btn${currentDir ? ' active' : ''}`}
-              onClick={() => { if (localDirs.length > 0) onDirectoryChange(currentDir || localDirs[0]) }}
+              onClick={() => { if (localDirs.length > 0) handleDirectoryChange(currentDir || localDirs[0]) }}
               title="目录"
               aria-label="目录"
             >
@@ -183,11 +190,11 @@ export default function Sidebar({
                   <div
                     key={dir}
                     className={`sidebar-dir-item${dir === currentDir ? ' active' : ''}`}
-                    onClick={() => onDirectoryChange(dir)}
+                    onClick={() => handleDirectoryChange(dir)}
                     title={dir}
                     role="button"
                     tabIndex={0}
-                    onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onDirectoryChange(dir) } }}
+                    onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleDirectoryChange(dir) } }}
                   >
                     <svg className="sidebar-dir-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                       <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" />

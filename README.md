@@ -10,24 +10,24 @@ Windows 发布包已内置 mpv 和 FFmpeg，普通用户无需额外安装。
 
 ## Current Version / 当前版本
 
-`v1.1.2`
+`v1.2.0`
 
-## What's New in v1.1.2 / v1.1.2 更新内容
+## What's New in v1.2.0 / v1.2.0 更新内容
 
-- Added an in-app update notice with target version, release notes, download progress, and restart-to-install action.
-- 新增应用内更新提示，显示目标版本、更新说明、下载进度，并支持下载完成后重启安装。
-- Changed installer auto updates from silent downloading to a user-confirmed flow.
-- 将安装版自动更新从静默下载改为用户确认下载与安装流程。
-- Cached recent directory scan results and invalidated them with file watching plus TTL fallback to reduce repeated scans when switching folders.
-- 为近期目录扫描增加缓存，并通过文件监听与 TTL 兜底失效，减少切换目录时的重复扫描。
-- Moved the manual update check entry into Settings.
-- 将手动检查更新入口移动到设置面板。
-- Added a finish-page option in the Windows installer to create a desktop shortcut.
-- Windows 安装器完成页新增创建桌面快捷方式选项。
-- Improved mpv startup error reporting when the mpv process exits early.
-- 改进 mpv 启动失败时的错误提示。
-- Release notes for tagged builds are now published from versioned bilingual files.
-- tag 发布时会读取版本对应的中英双语更新报告并写入 GitHub Release。
+- Rebuilt the player as a modern embedded web-video interface with a 16:9 black stage and compact overlay controls.
+- 将播放器重构为现代网页嵌入式视频界面，使用 16:9 黑色播放区域和紧凑的覆盖式控制栏。
+- Reworked mpv embedding so the app-managed controls sit over the playback area while mpv's native OSC stays hidden.
+- 重做 mpv 嵌入方式，应用自己的控制层直接覆盖在播放区域上，并隐藏 mpv 原生 OSC。
+- Added floating menus for speed, subtitles, audio tracks, settings, and quality instead of large controls below the video.
+- 倍速、字幕、音轨、设置和清晰度改为小型悬浮菜单，不再占用视频下方的大块表单区域。
+- Fixed initial mpv host sizing, web fullscreen layout, and playlist navigation so next/previous stays in the active category.
+- 修复 mpv 初始嵌入尺寸、网页全屏布局和播放队列跳转问题，上一首/下一首会保持在当前分类队列内。
+- Improved keyboard playback behavior: short arrow press seeks, long arrow press temporarily speeds playback.
+- 优化方向键快捷键：短按快进/快退，长按临时倍速播放。
+- Added playback-state persistence for position, volume, speed, subtitle, audio track, loop, and A-B loop settings.
+- 增加播放状态保存，覆盖进度、音量、倍速、字幕、音轨、循环和 A-B 循环设置。
+- Split the Electron main process into smaller modules and tightened IPC command/path validation.
+- 将 Electron 主进程拆分为更小的模块，并收紧 IPC 命令和路径校验。
 
 ## Features / 功能
 
@@ -70,12 +70,12 @@ Windows 构建产物发布在 GitHub Releases 页面：
 
 https://github.com/zilu-fuck/wallpaper-player/releases
 
-Release artifacts for `v1.1.2`:
+Release artifacts for `v1.2.0`:
 
-`v1.1.2` 发布文件：
+`v1.2.0` 发布文件：
 
-- `Wallpaper-Player-Setup-1.1.2.exe`: installer / 安装包。
-- `Wallpaper-Player-1.1.2.exe`: portable executable / 便携版。
+- `Wallpaper-Player-Setup-1.2.0.exe`: installer / 安装包。
+- `Wallpaper-Player-1.2.0.exe`: portable executable / 便携版。
 
 Both builds include:
 
@@ -169,8 +169,9 @@ The app uses Electron context isolation and keeps Node integration disabled in t
 
 ```text
 .
-|-- main.js                  # Electron main process and IPC / Electron 主进程与 IPC
-|-- mpv.js                   # mpv process manager / mpv 进程管理
+|-- main.js                  # Electron entry / Electron 入口
+|-- main/                    # Main-process modules and IPC / 主进程模块与 IPC
+|-- mpv.js                   # mpv process manager and embedding / mpv 进程与嵌入管理
 |-- preload.js               # Safe renderer bridge / 安全渲染进程桥接
 |-- src/                     # React UI / React 界面
 |-- scripts/

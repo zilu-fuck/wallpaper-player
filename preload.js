@@ -1,67 +1,71 @@
 const { contextBridge, ipcRenderer } = require('electron')
 
-contextBridge.exposeInMainWorld('electronAPI', {
-  // 目录扫描
-  scanDirectory: (dirPath, force) => ipcRenderer.invoke('scan-directory', dirPath, force),
+function on(channel, callback) {
+  const handler = (_event, data) => callback(data)
+  ipcRenderer.on(channel, handler)
+  return () => ipcRenderer.removeListener(channel, handler)
+}
 
-  // 缩略图
+contextBridge.exposeInMainWorld('electronAPI', {
+  scanDirectory: (dirPath, force) => ipcRenderer.invoke('scan-directory', dirPath, force),
   generateThumbnail: (videoPath) => ipcRenderer.invoke('generate-thumbnail', videoPath),
   generateThumbnails: (videoPaths) => ipcRenderer.invoke('generate-thumbnails', videoPaths),
   getThumbnailUrl: (thumbnailPath) => ipcRenderer.invoke('get-thumbnail-url', thumbnailPath),
-  onThumbnailProgress: (callback) => {
-    const handler = (_event, data) => callback(data)
-    ipcRenderer.on('thumbnail-progress', handler)
-    return () => ipcRenderer.removeListener('thumbnail-progress', handler)
-  },
+  onThumbnailProgress: (callback) => on('thumbnail-progress', callback),
 
-  // 设置
   getSettings: () => ipcRenderer.invoke('get-settings'),
   saveSettings: (settings) => ipcRenderer.invoke('save-settings', settings),
 
-  // 目录选择
   selectDirectory: () => ipcRenderer.invoke('select-directory'),
+  openVideoFile: () => ipcRenderer.invoke('open-video-file'),
+  allowVideoFile: (filePath) => ipcRenderer.invoke('allow-video-file', filePath),
 
-  // 工具
   showInFolder: (filePath) => ipcRenderer.invoke('show-in-folder', filePath),
   getFileUrl: (filePath) => ipcRenderer.invoke('get-file-url', filePath),
+  getPlaybackState: (filePath) => ipcRenderer.invoke('get-playback-state', filePath),
+  savePlaybackState: (filePath, statePatch) => ipcRenderer.invoke('save-playback-state', filePath, statePatch),
   checkFfmpeg: () => ipcRenderer.invoke('check-ffmpeg'),
 
-  // 自动更新
   updaterGetStatus: () => ipcRenderer.invoke('updater-get-status'),
   updaterCheck: () => ipcRenderer.invoke('updater-check'),
   updaterDownload: () => ipcRenderer.invoke('updater-download'),
   updaterInstall: () => ipcRenderer.invoke('updater-install'),
-  onUpdaterStatus: (callback) => {
-    const handler = (_event, data) => callback(data)
-    ipcRenderer.on('updater-status', handler)
-    return () => ipcRenderer.removeListener('updater-status', handler)
-  },
+  onUpdaterStatus: (callback) => on('updater-status', callback),
 
-  // mpv 播放器
   checkMpv: () => ipcRenderer.invoke('check-mpv'),
   downloadMpv: () => ipcRenderer.invoke('download-mpv'),
-  mpvPlay: (filePath) => ipcRenderer.invoke('mpv-play', filePath),
+  mpvPlay: (filePath, options = {}) => ipcRenderer.invoke('mpv-play', filePath, options),
+  mpvSetHostBounds: (bounds) => ipcRenderer.invoke('mpv-set-host-bounds', bounds),
   mpvStop: () => ipcRenderer.invoke('mpv-stop'),
   mpvIsPlaying: () => ipcRenderer.invoke('mpv-is-playing'),
+  mpvGetState: () => ipcRenderer.invoke('mpv-get-state'),
+  mpvCommand: (method, ...args) => ipcRenderer.invoke('mpv-command', method, ...args),
+  mpvSeekTo: (position) => ipcRenderer.invoke('mpv-command', 'seekTo', position),
+  mpvSeekRelative: (delta) => ipcRenderer.invoke('mpv-command', 'seekRelative', delta),
+  mpvCyclePause: () => ipcRenderer.invoke('mpv-command', 'cyclePause'),
+  mpvSetPaused: (paused) => ipcRenderer.invoke('mpv-command', 'setPaused', paused),
+  mpvSetVolume: (volume) => ipcRenderer.invoke('mpv-command', 'setVolume', volume),
+  mpvSetMuted: (muted) => ipcRenderer.invoke('mpv-command', 'setMuted', muted),
+  mpvToggleMute: () => ipcRenderer.invoke('mpv-command', 'toggleMute'),
+  mpvSetSpeed: (speed) => ipcRenderer.invoke('mpv-command', 'setSpeed', speed),
+  mpvCycleSpeed: () => ipcRenderer.invoke('mpv-command', 'cycleSpeed'),
+  mpvSetAudioTrack: (trackId) => ipcRenderer.invoke('mpv-command', 'setAudioTrack', trackId),
+  mpvCycleAudioTrack: () => ipcRenderer.invoke('mpv-command', 'cycleAudioTrack'),
+  mpvSetSubtitleTrack: (trackId) => ipcRenderer.invoke('mpv-command', 'setSubtitleTrack', trackId),
+  mpvCycleSubtitleTrack: () => ipcRenderer.invoke('mpv-command', 'cycleSubtitleTrack'),
+  mpvSetSubtitleVisible: (visible) => ipcRenderer.invoke('mpv-command', 'setSubtitleVisible', visible),
+  mpvToggleSubtitleVisible: () => ipcRenderer.invoke('mpv-command', 'toggleSubtitleVisible'),
+  mpvSetSubtitleScale: (scale) => ipcRenderer.invoke('mpv-command', 'setSubtitleScale', scale),
+  mpvSetLoopMode: (mode) => ipcRenderer.invoke('mpv-command', 'setLoopMode', mode),
+  mpvSetABLoop: (a, b) => ipcRenderer.invoke('mpv-command', 'setABLoop', a, b),
+  mpvClearABLoop: () => ipcRenderer.invoke('mpv-command', 'clearABLoop'),
+  mpvScreenshot: () => ipcRenderer.invoke('mpv-command', 'screenshot'),
   selectMpvPath: () => ipcRenderer.invoke('select-mpv-path'),
-  onMpvEnded: (callback) => {
-    const handler = (_event, data) => callback(data)
-    ipcRenderer.on('mpv-ended', handler)
-    return () => ipcRenderer.removeListener('mpv-ended', handler)
-  },
-  onMpvEvent: (callback) => {
-    const handler = (_event, data) => callback(data)
-    ipcRenderer.on('mpv-event', handler)
-    return () => ipcRenderer.removeListener('mpv-event', handler)
-  },
-  onMpvError: (callback) => {
-    const handler = (_event, data) => callback(data)
-    ipcRenderer.on('mpv-error', handler)
-    return () => ipcRenderer.removeListener('mpv-error', handler)
-  },
-  onMpvDownloadProgress: (callback) => {
-    const handler = (_event, data) => callback(data)
-    ipcRenderer.on('mpv-download-progress', handler)
-    return () => ipcRenderer.removeListener('mpv-download-progress', handler)
-  }
+  onMpvState: (callback) => on('mpv-state', callback),
+  onMpvEnded: (callback) => on('mpv-ended', callback),
+  onMpvEvent: (callback) => on('mpv-event', callback),
+  onMpvError: (callback) => on('mpv-error', callback),
+  onMpvDownloadProgress: (callback) => on('mpv-download-progress', callback),
+
+  onPlayerShortcut: (callback) => on('player-shortcut', callback)
 })

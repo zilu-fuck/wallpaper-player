@@ -13,6 +13,7 @@ const copyItems = [
   'build',
   'dist',
   'index.html',
+  'main',
   'main.js',
   'mpv.js',
   'node_modules',
