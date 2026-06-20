@@ -223,6 +223,14 @@ export default function Settings() {
 
           {/* 快捷键说明 */}
           <section className="settings-section">
+            <h3 className="section-title">About</h3>
+            <div className="about-info">
+              <span>Wallpaper Player</span>
+              <span>License: Apache-2.0</span>
+            </div>
+          </section>
+
+          <section className="settings-section">
             <h3 className="section-title">快捷键</h3>
             <div className="shortcut-list">
               <div className="shortcut-item">

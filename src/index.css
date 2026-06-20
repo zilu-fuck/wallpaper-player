@@ -2760,6 +2760,14 @@ kbd:hover {
   border-top: 1px solid var(--border);
 }
 
+.about-info {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+  color: var(--text-secondary);
+  font-size: 13px;
+}
+
 .tag-editor-panel {
   width: min(92vw, 480px);
   display: flex;

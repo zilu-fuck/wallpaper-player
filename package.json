@@ -25,6 +25,7 @@
       "main/**/*",
       "mpv.js",
       "preload.js",
+      "LICENSE",
       "package.json"
     ],
     "extraResources": [
@@ -50,7 +51,8 @@
       "oneClick": false,
       "allowToChangeInstallationDirectory": true,
       "createDesktopShortcut": false,
-      "include": "build/installer.nsh"
+      "include": "build/installer.nsh",
+      "license": "LICENSE"
     },
     "portable": {
       "artifactName": "Wallpaper-Player-${version}.${ext}"

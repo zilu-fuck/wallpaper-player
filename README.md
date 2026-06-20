@@ -184,6 +184,6 @@ The app uses Electron context isolation and keeps Node integration disabled in t
 
 ## License / 许可证
 
-Apache License 2.0. See [LICENSE](./LICENSE).
+Apache-2.0. See [LICENSE](./LICENSE).
 
-Apache License 2.0。详见 [LICENSE](./LICENSE)。
+Apache-2.0。详见 [LICENSE](./LICENSE)。
