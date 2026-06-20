@@ -2,6 +2,7 @@ const fs = require('fs')
 const fsp = require('fs/promises')
 const https = require('https')
 const path = require('path')
+const crypto = require('crypto')
 const { execFileSync } = require('child_process')
 
 const vendorDir = path.join(__dirname, '..', 'vendor')
@@ -11,15 +12,17 @@ const packages = [
   {
     name: 'mpv',
     url: 'https://github.com/mpv-player/mpv/releases/download/v0.41.0/mpv-v0.41.0-x86_64-pc-windows-msvc.zip',
-    archive: 'mpv.zip',
+    sha256: '4e197f729f5071c6772f35fffd96e0f36e3e8a044bd9479b136bb09b7c6a80ff',
+    archive: 'mpv-v0.41.0-x86_64-pc-windows-msvc.zip',
     marker: path.join(vendorDir, 'mpv', 'mpv.exe'),
     targetDir: path.join(vendorDir, 'mpv'),
     exeName: 'mpv.exe'
   },
   {
     name: 'ffmpeg',
-    url: 'https://www.gyan.dev/ffmpeg/builds/ffmpeg-release-essentials.zip',
-    archive: 'ffmpeg.zip',
+    url: 'https://github.com/GyanD/codexffmpeg/releases/download/8.1.1/ffmpeg-8.1.1-essentials_build.zip',
+    sha256: '6f58ce889f59c311410f7d2b18895b33c03456463486f3b1ebc93d97a0f54541',
+    archive: 'ffmpeg-8.1.1-essentials_build.zip',
     marker: path.join(vendorDir, 'ffmpeg', 'bin', 'ffmpeg.exe'),
     targetDir: path.join(vendorDir, 'ffmpeg'),
     exeName: 'ffmpeg.exe',
@@ -75,6 +78,19 @@ async function downloadWithPowerShell(url, dest) {
   ], { stdio: 'inherit' })
 }
 
+function verifySha256(filePath, expectedHash) {
+  if (!expectedHash) return
+
+  const actualHash = crypto
+    .createHash('sha256')
+    .update(fs.readFileSync(filePath))
+    .digest('hex')
+
+  if (actualHash.toLowerCase() !== expectedHash.toLowerCase()) {
+    throw new Error(`SHA-256 mismatch for ${path.basename(filePath)}: expected ${expectedHash}, got ${actualHash}`)
+  }
+}
+
 async function extractZip(archivePath, targetDir) {
   await ensureDir(targetDir)
   execFileSync('powershell.exe', [
@@ -127,6 +143,7 @@ async function preparePackage(pkg) {
       await downloadFile(pkg.url, archivePath)
     }
   }
+  verifySha256(archivePath, pkg.sha256)
 
   console.log(`[vendor] extracting ${pkg.name}`)
   await fsp.rm(extractDir, { recursive: true, force: true })

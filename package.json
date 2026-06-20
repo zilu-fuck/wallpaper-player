@@ -26,6 +26,9 @@
       "mpv.js",
       "preload.js",
       "LICENSE",
+      "THIRD_PARTY_NOTICES.md",
+      "licenses/**/*",
+      "sources/**/*",
       "package.json"
     ],
     "extraResources": [

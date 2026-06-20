@@ -1,0 +1,28 @@
+Dependency notices
+==================
+
+This file records third-party runtime binaries bundled with Windows releases of
+Wallpaper Player. JavaScript package licenses remain recorded in package-lock
+metadata and are not duplicated here.
+
+Bundled binary programs:
+
+1. mpv
+   - Bundled archive: mpv-v0.41.0-x86_64-pc-windows-msvc.zip
+   - Bundled executable version: v0.41.0-dev-g41f6a6450
+   - License: GPL-2.0-or-later by default, as described by mpv's Copyright
+     file unless built with GPL-only files excluded.
+   - Full license text: licenses/mpv-GPL-2.0-or-later.txt
+   - Source information: sources/mpv-source-information.txt
+   - Modification status: redistributed unmodified.
+
+2. FFmpeg
+   - Bundled archive: ffmpeg-8.1.1-essentials_build.zip
+   - Bundled executable version: 8.1.1-essentials_build-www.gyan.dev
+   - License: GPL-3.0 for the Gyan static essentials build used here.
+   - Full license text: licenses/ffmpeg-GPL-3.0.txt
+   - Source information: sources/ffmpeg-source-information.txt
+   - Modification status: redistributed unmodified.
+
+These notices are provided for distribution compliance tracking and are not
+legal advice.

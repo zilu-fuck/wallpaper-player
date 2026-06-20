@@ -1,0 +1,51 @@
+FFmpeg source information
+=========================
+
+Bundled binary
+--------------
+
+Component: FFmpeg
+Bundled path: vendor/ffmpeg/
+Release asset: ffmpeg-8.1.1-essentials_build.zip
+Download URL: https://github.com/GyanD/codexffmpeg/releases/download/8.1.1/ffmpeg-8.1.1-essentials_build.zip
+SHA-256: 6f58ce889f59c311410f7d2b18895b33c03456463486f3b1ebc93d97a0f54541
+Observed executable version: 8.1.1-essentials_build-www.gyan.dev
+License: GPL-3.0
+License text: licenses/ffmpeg-GPL-3.0.txt
+
+The bundled Gyan build reports this relevant configuration:
+
+    --enable-gpl --enable-version3 --enable-static --enable-libx264 --enable-libx265
+
+Corresponding source
+--------------------
+
+FFmpeg upstream repository: https://github.com/FFmpeg/FFmpeg
+Gyan build release page: https://github.com/GyanD/codexffmpeg/releases/tag/8.1.1
+Gyan release source note: https://github.com/FFmpeg/FFmpeg/commit/239f2c733d
+Source commit: 239f2c733de417201d7ad3b3b8b0d9b63285b2b1
+Commit URL: https://github.com/FFmpeg/FFmpeg/commit/239f2c733de417201d7ad3b3b8b0d9b63285b2b1
+
+How to obtain source
+--------------------
+
+Clone the upstream FFmpeg repository and check out the recorded commit:
+
+    git clone https://github.com/FFmpeg/FFmpeg.git
+    cd FFmpeg
+    git checkout 239f2c733de417201d7ad3b3b8b0d9b63285b2b1
+
+Alternatively, download the source archive from:
+
+    https://github.com/FFmpeg/FFmpeg/archive/239f2c733de417201d7ad3b3b8b0d9b63285b2b1.zip
+
+The Gyan build scripts and release metadata are available from:
+
+    https://github.com/GyanD/codexffmpeg
+    https://github.com/GyanD/codexffmpeg/releases/tag/8.1.1
+
+Modification status
+-------------------
+
+Wallpaper Player redistributes the upstream Gyan FFmpeg binary archive without
+modifying the FFmpeg source code or binary files.

@@ -187,3 +187,10 @@ The app uses Electron context isolation and keeps Node integration disabled in t
 Apache-2.0. See [LICENSE](./LICENSE).
 
 Apache-2.0。详见 [LICENSE](./LICENSE)。
+
+Windows releases bundle mpv and FFmpeg under their own GPL licenses. See
+[THIRD_PARTY_NOTICES.md](./THIRD_PARTY_NOTICES.md) for binary notices,
+license texts, hashes, and source information.
+
+Windows 发布包会捆绑 mpv 和 FFmpeg，它们适用各自的 GPL 许可证。二进制声明、
+许可证正文、哈希和源码信息详见 [THIRD_PARTY_NOTICES.md](./THIRD_PARTY_NOTICES.md)。

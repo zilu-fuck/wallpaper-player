@@ -1,0 +1,44 @@
+mpv source information
+======================
+
+Bundled binary
+--------------
+
+Component: mpv
+Bundled path: vendor/mpv/
+Release asset: mpv-v0.41.0-x86_64-pc-windows-msvc.zip
+Download URL: https://github.com/mpv-player/mpv/releases/download/v0.41.0/mpv-v0.41.0-x86_64-pc-windows-msvc.zip
+SHA-256: 4e197f729f5071c6772f35fffd96e0f36e3e8a044bd9479b136bb09b7c6a80ff
+Observed executable version: mpv v0.41.0-dev-g41f6a6450
+Build date reported by executable: Dec 21 2025 19:30:47
+License: GPL-2.0-or-later by default
+License text: licenses/mpv-GPL-2.0-or-later.txt
+
+Corresponding source
+--------------------
+
+Upstream repository: https://github.com/mpv-player/mpv
+Release tag: v0.41.0
+Source commit: 41f6a645068483470267271e1d09966ca3b9f413
+Commit URL: https://github.com/mpv-player/mpv/commit/41f6a645068483470267271e1d09966ca3b9f413
+Release page: https://github.com/mpv-player/mpv/releases/tag/v0.41.0
+CI build identified by upstream release notes: https://github.com/mpv-player/mpv/actions/runs/20414542745
+
+How to obtain source
+--------------------
+
+Clone the upstream repository and check out the recorded commit:
+
+    git clone https://github.com/mpv-player/mpv.git
+    cd mpv
+    git checkout 41f6a645068483470267271e1d09966ca3b9f413
+
+Alternatively, download the release source archive from:
+
+    https://github.com/mpv-player/mpv/archive/41f6a645068483470267271e1d09966ca3b9f413.zip
+
+Modification status
+-------------------
+
+Wallpaper Player redistributes the upstream mpv Windows binary archive without
+modifying the mpv source code or binary files.
