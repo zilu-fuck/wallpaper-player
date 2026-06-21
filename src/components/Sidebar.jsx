@@ -95,8 +95,7 @@ export default function Sidebar() {
 
   return (
     <aside className={`sidebar${sidebarCollapsed ? ' collapsed' : ''}`} aria-label="导航">
-      {sidebarCollapsed ? (
-        <div className="sidebar-collapsed-content">
+      <div className={`sidebar-collapsed-content sidebar-pane${sidebarCollapsed ? ' active' : ''}`} aria-hidden={!sidebarCollapsed}>
           <button className="sidebar-toggle-btn" onClick={onToggle} title="展开侧边栏" aria-label="展开侧边栏">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <rect x="3" y="3" width="18" height="18" rx="2" />
@@ -151,8 +150,7 @@ export default function Sidebar() {
             </button>
           </div>
         </div>
-      ) : (
-        <>
+      <div className={`sidebar-full-content sidebar-pane${sidebarCollapsed ? '' : ' active'}`} aria-hidden={sidebarCollapsed}>
           <div className="sidebar-header">
             <h1 className="sidebar-title">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -257,8 +255,7 @@ export default function Sidebar() {
               <span>设置</span>
             </button>
           </div>
-        </>
-      )}
+        </div>
     </aside>
   )
 }

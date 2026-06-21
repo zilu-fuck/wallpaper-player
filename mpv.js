@@ -145,6 +145,7 @@ class MpvManager {
     this._initialSeekApplied = false
     this._endedEmitted = false
     this._stopping = false
+    this._stateEmitTimer = null
     this.eventHandlers = {}
   }
 
@@ -396,7 +397,9 @@ class MpvManager {
         '--hr-seek=yes',
         '--vo=gpu',
         '--gpu-context=d3d11',
-        '--hwdec=no',
+        '--hwdec=auto-safe',
+        '--framedrop=vo',
+        '--video-sync=display-resample',
         '--osc=no',
         '--input-default-bindings=yes',
         '--input-cursor=no'
@@ -588,6 +591,7 @@ class MpvManager {
     this._buffer = ''
     this._pendingInitialState = null
     this._initialSeekApplied = false
+    this._clearStateEmitTimer()
     this._rejectAllPending(reason)
     this._observedProperties.clear()
     hideMpvHostWindow(true)
@@ -836,7 +840,11 @@ class MpvManager {
     switch (json.event) {
       case 'property-change':
         this._applyPropertyChange(json.name, json.data)
-        this._emitState()
+        if (json.name === 'time-pos') {
+          this._emitStateSoon()
+        } else {
+          this._emitState()
+        }
         break
       case 'file-loaded':
         this._currentState.eofReached = false
@@ -930,6 +938,20 @@ class MpvManager {
     this._emit('state', this.getState())
   }
 
+  _emitStateSoon() {
+    if (this._stateEmitTimer) return
+    this._stateEmitTimer = setTimeout(() => {
+      this._stateEmitTimer = null
+      this._emitState()
+    }, 250)
+  }
+
+  _clearStateEmitTimer() {
+    if (!this._stateEmitTimer) return
+    clearTimeout(this._stateEmitTimer)
+    this._stateEmitTimer = null
+  }
+
   on(event, handler) {
     if (!this.eventHandlers[event]) this.eventHandlers[event] = []
     this.eventHandlers[event].push(handler)
@@ -984,6 +1006,7 @@ class MpvManager {
 
   destroy() {
     this.stop()
+    this._clearStateEmitTimer()
     destroyMpvHostWindow()
     this.eventHandlers = {}
   }

@@ -7,7 +7,10 @@ function Gallery({ videos }) {
     totalCount,
     searchQuery,
     trimmedSearchQuery,
-    activeCategoryLabel
+    activeCategoryLabel,
+    selectedVideoKeys,
+    handleClearVideoSelection,
+    handleOpenBulkTagEditor
   } = useApp()
   const [viewMode, setViewMode] = useState('grid') // grid | list
 
@@ -39,6 +42,21 @@ function Gallery({ videos }) {
       </div>
 
       <div className="gallery-toolbar">
+        {(selectedVideoKeys?.length || 0) > 0 ? (
+          <div className="bulk-selection-bar">
+            <span>已选择 {selectedVideoKeys.length} 个视频</span>
+            <button
+              className="btn btn-sm btn-primary"
+              type="button"
+              onClick={() => handleOpenBulkTagEditor?.()}
+            >
+              批量添加标签
+            </button>
+            <button className="btn btn-sm" type="button" onClick={handleClearVideoSelection}>
+              清空选择
+            </button>
+          </div>
+        ) : null}
         <div className="view-toggle">
           <button
             className={`view-btn ${viewMode === 'grid' ? 'active' : ''}`}

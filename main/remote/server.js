@@ -586,6 +586,44 @@ async function handlePutTags(req, res, videoId) {
   sendJson(req, res, 200, { success: true, customTags: tags })
 }
 
+async function handlePutBulkTags(req, res) {
+  const body = await readBody(req)
+  const videoIds = Array.isArray(body.videoIds)
+    ? [...new Set(body.videoIds.filter(id => typeof id === 'string' && id.trim()).map(id => id.trim()))]
+    : []
+  const tags = normalizeRequestTags(body.tags)
+
+  if (!videoIds.length) {
+    sendError(req, res, 400, 'missing_video_ids', '请选择要添加标签的视频')
+    return
+  }
+  if (!tags.length) {
+    sendError(req, res, 400, 'missing_tags', '请输入要添加的标签')
+    return
+  }
+
+  const settings = loadSettings()
+  const customTags = { ...(settings.customTags || {}) }
+  let updatedCount = 0
+
+  for (const videoId of videoIds) {
+    const videoPath = await resolveVideoPath(videoId)
+    const favoriteKey = getFavoriteKeyForVideoId(videoId)
+    if (!favoriteKey) continue
+    await assertAllowedVideoPath(videoPath)
+    const currentTags = [
+      ...(Array.isArray(customTags[favoriteKey]) ? customTags[favoriteKey] : []),
+      ...(Array.isArray(customTags[videoPath]) ? customTags[videoPath] : [])
+    ]
+    customTags[favoriteKey] = [...new Set([...currentTags, ...tags])]
+    delete customTags[videoPath]
+    updatedCount += 1
+  }
+
+  saveSettings({ customTags })
+  sendJson(req, res, 200, { success: true, updatedCount, tags })
+}
+
 async function handlePlayOnDesktop(req, res, videoId) {
   const videoPath = await resolveVideoPath(videoId)
   const body = await readBody(req)
@@ -714,6 +752,11 @@ function createRemoteServer({ port, onPairingRequest } = {}) {
       const favoriteMatch = pathname.match(/^\/v1\/videos\/([^/]+)\/favorite$/)
       if (favoriteMatch && req.method === 'PUT') {
         await handleToggleFavorite(req, res, decodeVideoId(favoriteMatch[1]))
+        return
+      }
+
+      if (req.method === 'PUT' && pathname === '/v1/videos/tags/bulk') {
+        await handlePutBulkTags(req, res)
         return
       }
 

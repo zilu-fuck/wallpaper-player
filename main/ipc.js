@@ -87,7 +87,7 @@ function setupIPC() {
     }
 
     const results = {}
-    const concurrency = 4
+    const concurrency = 1
     let index = 0
     let completed = 0
     let lastProgressAt = 0

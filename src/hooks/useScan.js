@@ -45,6 +45,7 @@ export function useScan({ setCurrentDir, setLoading }) {
 
       setVideos(result.videos)
       setCurrentDir(dirPath)
+      setScanning(false)
       setLoading(false) // 扫描完成后立即显示画廊
 
       // 缩略图在后台异步生成，不阻塞UI

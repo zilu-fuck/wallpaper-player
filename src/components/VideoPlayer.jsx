@@ -74,6 +74,9 @@ export default function VideoPlayer({ video }) {
   const arrowHoldRef = useRef({})
   const arrowSpeedRestoreRef = useRef(null)
   const speedRef = useRef(1)
+  const pausedRef = useRef(true)
+  const canUseMpvRef = useRef(false)
+  const autoPausedRef = useRef(false)
   const hostSyncFramesRef = useRef([])
   const hostSyncTimersRef = useRef([])
   const [mode, setMode] = useState(() => (mpvStatus?.available === false ? 'html5' : 'mpv'))
@@ -133,6 +136,14 @@ export default function VideoPlayer({ video }) {
   useEffect(() => {
     speedRef.current = Number.isFinite(speed) ? speed : 1
   }, [speed])
+
+  useEffect(() => {
+    pausedRef.current = paused
+  }, [paused])
+
+  useEffect(() => {
+    canUseMpvRef.current = canUseMpv
+  }, [canUseMpv])
 
   const handleClose = useCallback(() => {
     videoRef.current?.pause?.()
@@ -857,6 +868,48 @@ export default function VideoPlayer({ video }) {
     if (mode !== 'html5' || !html5Url) return
     videoRef.current?.play?.().catch(() => {})
   }, [html5Url, mode, video])
+
+  useEffect(() => {
+    if (!video) return undefined
+
+    const pauseForBackground = () => {
+      if (pausedRef.current) return
+      autoPausedRef.current = true
+      if (canUseMpvRef.current) {
+        window.electronAPI?.mpvSetPaused?.(true)?.catch(() => {})
+        return
+      }
+      videoRef.current?.pause?.()
+    }
+
+    const restoreFromBackground = () => {
+      if (!autoPausedRef.current) return
+      autoPausedRef.current = false
+      if (canUseMpvRef.current) {
+        window.electronAPI?.mpvSetPaused?.(false)?.catch(() => {})
+        return
+      }
+      videoRef.current?.play?.().catch(() => {})
+    }
+
+    const handleVisibilityChange = () => {
+      if (document.hidden) {
+        pauseForBackground()
+      } else {
+        restoreFromBackground()
+      }
+    }
+
+    window.addEventListener('pagehide', pauseForBackground)
+    document.addEventListener('visibilitychange', handleVisibilityChange)
+    handleVisibilityChange()
+
+    return () => {
+      window.removeEventListener('pagehide', pauseForBackground)
+      document.removeEventListener('visibilitychange', handleVisibilityChange)
+      autoPausedRef.current = false
+    }
+  }, [video])
 
   useEffect(() => {
     showControls()

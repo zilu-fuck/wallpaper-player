@@ -16,6 +16,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
   getSettings: () => ipcRenderer.invoke('get-settings'),
   getAppVersion: () => ipcRenderer.invoke('get-app-version'),
   saveSettings: (settings) => ipcRenderer.invoke('save-settings', settings),
+  onSettingsChanged: (callback) => on('settings-changed', callback),
 
   remoteGetState: () => ipcRenderer.invoke('remote-get-state'),
   remoteSaveSettings: (settings) => ipcRenderer.invoke('remote-save-settings', settings),

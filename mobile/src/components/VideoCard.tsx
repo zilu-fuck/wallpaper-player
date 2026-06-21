@@ -1,4 +1,5 @@
-import { Film, Heart } from 'lucide-react-native'
+import { memo, useCallback } from 'react'
+import { Check, Film, Heart } from 'lucide-react-native'
 import { useEffect, useMemo, useState } from 'react'
 import { Image, Pressable, StyleSheet, Text, View } from 'react-native'
 import type { StoredDevice, VideoItem } from '../types'
@@ -9,8 +10,11 @@ import { resolveRemoteUrl } from '../services/api'
 type Props = {
   device: StoredDevice
   video: VideoItem
-  onPress: () => void
-  onToggleFavorite?: () => void
+  onPress: (video: VideoItem) => void
+  onLongPress?: (video: VideoItem) => void
+  onToggleFavorite?: (video: VideoItem) => void
+  selected?: boolean
+  selectionMode?: boolean
   width?: number
 }
 
@@ -19,7 +23,16 @@ function withQueryToken(url: string, key: string, token: string) {
   return `${url}${separator}${key}=${encodeURIComponent(token)}`
 }
 
-export function VideoCard({ device, video, onPress, onToggleFavorite, width }: Props) {
+function VideoCardComponent({
+  device,
+  video,
+  onPress,
+  onLongPress,
+  onToggleFavorite,
+  selected = false,
+  selectionMode = false,
+  width
+}: Props) {
   const { colors } = useTheme()
   const styles = createStyles(colors)
   const thumbnailUrl = useMemo(
@@ -36,8 +49,30 @@ export function VideoCard({ device, video, onPress, onToggleFavorite, width }: P
     setImageFailed(false)
   }, [thumbnailUrl])
 
+  const handlePress = useCallback(() => {
+    onPress(video)
+  }, [onPress, video])
+
+  const handleLongPress = useCallback(() => {
+    onLongPress?.(video)
+  }, [onLongPress, video])
+
+  const handleToggleFavorite = useCallback(() => {
+    onToggleFavorite?.(video)
+  }, [onToggleFavorite, video])
+
   return (
-    <Pressable style={({ pressed }) => [styles.card, { width: width ?? '100%' }, pressed && styles.pressed]} onPress={onPress}>
+    <Pressable
+      style={({ pressed }) => [
+        styles.card,
+        { width: width ?? '100%' },
+        selected && styles.cardSelected,
+        pressed && styles.pressed
+      ]}
+      onPress={handlePress}
+      onLongPress={onLongPress ? handleLongPress : undefined}
+      delayLongPress={170}
+    >
       <View style={styles.thumb}>
         {!imageFailed ? (
           <Image
@@ -51,13 +86,18 @@ export function VideoCard({ device, video, onPress, onToggleFavorite, width }: P
           <Film color={colors.muted} size={24} />
         </View>
         {onToggleFavorite ? (
-          <Pressable style={styles.favoriteButton} onPress={onToggleFavorite}>
+          <Pressable style={styles.favoriteButton} onPress={handleToggleFavorite}>
             <Heart
               color={video.favorite ? colors.text : colors.muted}
               fill={video.favorite ? colors.danger : 'none'}
               size={17}
             />
           </Pressable>
+        ) : null}
+        {selectionMode ? (
+          <View style={[styles.selectionBadge, selected && styles.selectionBadgeActive]}>
+            {selected ? <Check color="#ffffff" size={16} strokeWidth={3} /> : null}
+          </View>
         ) : null}
       </View>
       <View style={styles.body}>
@@ -73,6 +113,8 @@ export function VideoCard({ device, video, onPress, onToggleFavorite, width }: P
   )
 }
 
+export const VideoCard = memo(VideoCardComponent)
+
 const createStyles = (colors: ReturnType<typeof useTheme>['colors']) => StyleSheet.create({
   card: {
     borderRadius: 8,
@@ -80,6 +122,9 @@ const createStyles = (colors: ReturnType<typeof useTheme>['colors']) => StyleShe
     borderWidth: 1,
     borderColor: colors.border,
     overflow: 'hidden'
+  },
+  cardSelected: {
+    borderColor: colors.accentStrong
   },
   pressed: {
     backgroundColor: colors.surfaceElevated
@@ -109,6 +154,24 @@ const createStyles = (colors: ReturnType<typeof useTheme>['colors']) => StyleShe
     backgroundColor: 'rgba(11,15,20,0.72)',
     alignItems: 'center',
     justifyContent: 'center'
+  },
+  selectionBadge: {
+    position: 'absolute',
+    left: 7,
+    bottom: 7,
+    zIndex: 4,
+    width: 30,
+    height: 30,
+    borderRadius: 15,
+    borderWidth: 2,
+    borderColor: 'rgba(255,255,255,0.78)',
+    backgroundColor: 'rgba(11,15,20,0.52)',
+    alignItems: 'center',
+    justifyContent: 'center'
+  },
+  selectionBadgeActive: {
+    borderColor: colors.accentStrong,
+    backgroundColor: colors.accentStrong
   },
   body: {
     minHeight: 72,

@@ -292,9 +292,9 @@ function setupRemoteIPC() {
       endpoints: state.endpoints
     })
     const qrDataUrl = await QRCode.toDataURL(pairing.pairingCode, {
-      errorCorrectionLevel: 'M',
-      margin: 1,
-      width: 240
+      errorCorrectionLevel: 'Q',
+      margin: 4,
+      width: 360
     })
     return {
       ...pairing,
@@ -327,7 +327,12 @@ function setupRemoteIPC() {
 
 async function disposeRemoteAccess() {
   isQuitting = true
-  await stopRemoteAccess()
+  const currentServer = server
+  server = null
+  serverState = { ...serverState, running: false, error: '' }
+  if (currentServer) {
+    await new Promise((resolve) => currentServer.close(resolve))
+  }
   if (tray) {
     tray.destroy()
     tray = null

@@ -5,7 +5,7 @@ const { setupIPC } = require('./ipc')
 const { setupAutoUpdater, disposeUpdater } = require('./updater')
 const { initMpv, destroyMpv } = require('./mpv-integration')
 const { unwatchAllDirectories } = require('./scanner')
-const { loadSettings, saveSettings, sanitizeSettingsForSave } = require('./settings')
+const { loadSettings, saveSettings, sanitizeSettingsForSave, onSettingsChanged } = require('./settings')
 const {
   setupRemoteIPC,
   initRemoteAccess,
@@ -26,6 +26,7 @@ setupConsoleEncoding()
 
 let isAppQuitting = false
 let closePromptOpen = false
+let removeSettingsChangedListener = null
 
 function getTodayKey() {
   const now = new Date()
@@ -40,6 +41,15 @@ function sendPlayerShortcut(action, value) {
   if (!win || win.isDestroyed()) return false
   win.webContents.send('player-shortcut', { action, value })
   return true
+}
+
+function setupSettingsSync() {
+  removeSettingsChangedListener?.()
+  removeSettingsChangedListener = onSettingsChanged((settings) => {
+    const win = getMainWindow()
+    if (!win || win.isDestroyed()) return
+    win.webContents.send('settings-changed', settings)
+  })
 }
 
 function registerPlayerShortcuts() {
@@ -160,6 +170,7 @@ function start() {
   })
   setupIPC()
   setupRemoteIPC()
+  setupSettingsSync()
   createWindow()
   registerPlayerShortcuts()
   setupAutoUpdater()
@@ -191,13 +202,17 @@ app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') app.quit()
 })
 
-app.on('before-quit', async () => {
+app.on('before-quit', () => {
   isAppQuitting = true
   markQuitting()
+  removeSettingsChangedListener?.()
+  removeSettingsChangedListener = null
   globalShortcut.unregisterAll()
   disposeUpdater()
   unwatchAllDirectories()
-  await disposeRemoteAccess()
+  disposeRemoteAccess().catch((error) => {
+    log.error('[remote] dispose failed:', error)
+  })
   destroyMpv()
 })
 

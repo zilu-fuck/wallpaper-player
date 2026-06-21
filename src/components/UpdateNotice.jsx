@@ -58,12 +58,14 @@ function summarizeReleaseNotes(notes) {
 export default function UpdateNotice() {
   const [updateState, setUpdateState] = useState(null)
   const [dismissedVersion, setDismissedVersion] = useState('')
+  const [dismissedStatusKey, setDismissedStatusKey] = useState('')
   const [manualMessage, setManualMessage] = useState('')
   const updaterApi = window.electronAPI
 
   const handleCheck = useCallback(async () => {
     if (!updaterApi?.updaterCheck) return
     setDismissedVersion('')
+    setDismissedStatusKey('')
     setManualMessage('正在手动检查更新...')
     try {
       const state = await updaterApi.updaterCheck()
@@ -108,13 +110,15 @@ export default function UpdateNotice() {
 
   const status = updateState?.status || 'idle'
   const updateInfo = updateState?.updateInfo
+  const statusKey = `${status}:${updateInfo?.version || updateInfo?.currentVersion || updateState?.message || updateState?.error || manualMessage || ''}`
   const visible = useMemo(() => {
     if (!updateState || status === 'idle') return false
+    if (dismissedStatusKey === statusKey) return false
     if (status === 'disabled' && !manualMessage) return false
     if (status === 'not-available' && !manualMessage) return false
     if (status === 'available' && dismissedVersion === updateInfo?.version) return false
     return true
-  }, [dismissedVersion, manualMessage, status, updateInfo?.version, updateState])
+  }, [dismissedStatusKey, dismissedVersion, manualMessage, status, statusKey, updateInfo?.version, updateState])
 
   const copy = getStatusCopy(status, updateInfo, updateState?.message)
   const notes = summarizeReleaseNotes(updateInfo?.releaseNotes)
@@ -148,8 +152,19 @@ export default function UpdateNotice() {
     if (updateInfo?.version) {
       setDismissedVersion(updateInfo.version)
     }
+    setDismissedStatusKey(statusKey)
     setManualMessage('')
-  }, [updateInfo?.version])
+  }, [statusKey, updateInfo?.version])
+
+  useEffect(() => {
+    if (!visible) return undefined
+    if (!['not-available', 'error', 'disabled'].includes(status)) return undefined
+
+    const timer = window.setTimeout(() => {
+      handleDismiss()
+    }, 5000)
+    return () => window.clearTimeout(timer)
+  }, [handleDismiss, status, visible])
 
   if (!updaterApi?.updaterCheck) {
     return null
@@ -164,13 +179,11 @@ export default function UpdateNotice() {
           <h2>{copy.title}</h2>
           <p>{manualMessage || copy.detail}</p>
         </div>
-        {status === 'available' && (
-          <button className="update-close" onClick={handleDismiss} type="button" aria-label="稍后提醒">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M18 6L6 18M6 6l12 12" />
-            </svg>
-          </button>
-        )}
+        <button className="update-close" onClick={handleDismiss} type="button" aria-label="关闭更新提示" title="关闭">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <path d="M18 6L6 18M6 6l12 12" />
+          </svg>
+        </button>
       </div>
 
       {showNotes && (

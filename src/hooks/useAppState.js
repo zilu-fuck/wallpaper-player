@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 
 // 应用级基础状态：settings / 当前目录 / loading / UI 开关 / 系统状态
 export function useAppState() {
@@ -12,6 +12,14 @@ export function useAppState() {
 
   const theme = settings?.theme || 'dark'
   const playbackMode = settings?.playbackMode || 'order'
+
+  useEffect(() => {
+    return window.electronAPI?.onSettingsChanged?.((nextSettings) => {
+      if (nextSettings && typeof nextSettings === 'object') {
+        setSettings(nextSettings)
+      }
+    })
+  }, [])
 
   // 合并写入并持久化设置（乐观更新）
   const saveSettings = useCallback(async (partial) => {

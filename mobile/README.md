@@ -17,6 +17,7 @@ POST /v1/pairing/claim
 DELETE /v1/devices/current
 PUT  /v1/videos/:videoId/favorite
 PUT  /v1/videos/:videoId/tags
+PUT  /v1/videos/tags/bulk
 POST /v1/videos/:videoId/play-on-desktop
 POST /v1/videos/:videoId/reveal-on-desktop
 POST /v1/videos/:videoId/transcode

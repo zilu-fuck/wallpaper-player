@@ -184,6 +184,15 @@ export async function updateVideoTags(device: StoredDevice, videoId: string, tag
   })
 }
 
+export async function addTagsToVideos(device: StoredDevice, videoIds: string[], tags: string[]) {
+  return requestJson<{ success: boolean, updatedCount: number, tags: string[] }>(device.endpoint, '/v1/videos/tags/bulk', {
+    method: 'PUT',
+    token: device.token,
+    body: { videoIds, tags },
+    timeoutMs: 10000
+  })
+}
+
 export async function startTranscode(device: StoredDevice, videoId: string, quality = 'compatible') {
   return requestJson<{ status: string, progress: number, error?: string, streamUrl?: string }>(
     device.endpoint,

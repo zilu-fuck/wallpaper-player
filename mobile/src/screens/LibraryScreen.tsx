@@ -22,7 +22,9 @@ import {
   ActivityIndicator,
   FlatList,
   InteractionManager,
+  KeyboardAvoidingView,
   Linking,
+  Platform,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -36,7 +38,7 @@ import mobilePackage from '../../package.json'
 import { ConnectionStatus } from '../components/ConnectionStatus'
 import { PrimaryButton } from '../components/PrimaryButton'
 import { VideoCard } from '../components/VideoCard'
-import { ApiError, getLibrary, toggleFavorite } from '../services/api'
+import { addTagsToVideos, ApiError, getLibrary, toggleFavorite } from '../services/api'
 import { testConnection } from '../services/connection-manager'
 import { checkMobileUpdate, type MobileUpdateInfo } from '../services/updates'
 import { loadCachedLibrary, saveLibraryResponse } from '../stores/library'
@@ -145,6 +147,29 @@ function favoriteCount(items: VideoItem[]) {
   return items.filter(item => item.favorite).length
 }
 
+function getTagKey(value: string) {
+  return value.trim().toLocaleLowerCase()
+}
+
+function uniqueTags(tags: string[]) {
+  const seen = new Set<string>()
+  const result: string[] = []
+
+  for (const value of tags) {
+    const tag = String(value || '').trim()
+    const key = getTagKey(tag)
+    if (!tag || seen.has(key)) continue
+    seen.add(key)
+    result.push(tag)
+  }
+
+  return result
+}
+
+function normalizeTagText(value: string) {
+  return uniqueTags(value.split(/[,，\s]+/))
+}
+
 export function LibraryScreen({ navigation, device }: Props) {
   const { colors, themeMode, setThemeMode } = useTheme()
   const styles = createStyles(colors)
@@ -182,6 +207,12 @@ export function LibraryScreen({ navigation, device }: Props) {
   const [checkingUpdate, setCheckingUpdate] = useState(false)
   const [updateInfo, setUpdateInfo] = useState<MobileUpdateInfo | null>(null)
   const [updateError, setUpdateError] = useState('')
+  const [selectedVideoIds, setSelectedVideoIds] = useState<string[]>([])
+  const [bulkTagOpen, setBulkTagOpen] = useState(false)
+  const [bulkTagText, setBulkTagText] = useState('')
+  const [bulkTagQuery, setBulkTagQuery] = useState('')
+  const [bulkSelectedTags, setBulkSelectedTags] = useState<string[]>([])
+  const [bulkSaving, setBulkSaving] = useState(false)
   const { width } = useWindowDimensions()
 
   useEffect(() => {
@@ -349,6 +380,34 @@ export function LibraryScreen({ navigation, device }: Props) {
   const gridPadding = 10
   const cardWidth = Math.max(144, Math.floor((width - gridPadding * 2 - GRID_GAP) / GRID_COLUMNS))
   const title = selection.mode === 'all' ? activeDevice.name : selection.label
+  const selectedVideoIdSet = useMemo(() => new Set(selectedVideoIds), [selectedVideoIds])
+  const selectionModeActive = selectedVideoIds.length > 0
+  const availableBulkTags = useMemo(() => {
+    const tags: string[] = []
+
+    for (const category of categoryGroups.custom) tags.push(category.name)
+    for (const category of categoryGroups.system) tags.push(category.name)
+    for (const video of videos) {
+      tags.push(...(video.customTags || []))
+      tags.push(...(video.systemTags || []))
+      tags.push(...(video.tags || []))
+    }
+
+    return uniqueTags(tags).sort(zhCollator.compare)
+  }, [categoryGroups, videos])
+  const pendingBulkTags = useMemo(() => uniqueTags([
+    ...normalizeTagText(bulkTagText),
+    ...bulkSelectedTags
+  ]), [bulkSelectedTags, bulkTagText])
+  const pendingBulkTagKeySet = useMemo(() => new Set(pendingBulkTags.map(getTagKey)), [pendingBulkTags])
+  const filteredBulkTagOptions = useMemo(() => {
+    const keyword = bulkTagQuery.trim().toLocaleLowerCase()
+    const matched = keyword
+      ? availableBulkTags.filter(tag => getTagKey(tag).includes(keyword))
+      : availableBulkTags
+
+    return matched.slice(0, 36)
+  }, [availableBulkTags, bulkTagQuery])
 
   const closeDrawer = useCallback(() => setDrawerOpen(false), [])
 
@@ -390,6 +449,87 @@ export function LibraryScreen({ navigation, device }: Props) {
       pendingSortTaskRef.current = null
     })
   }, [])
+
+  const clearVideoSelection = useCallback(() => {
+    setSelectedVideoIds([])
+    setBulkTagOpen(false)
+    setBulkTagText('')
+    setBulkTagQuery('')
+    setBulkSelectedTags([])
+  }, [])
+
+  const toggleVideoSelection = useCallback((video: VideoItem) => {
+    setSelectedVideoIds(current => current.includes(video.id)
+      ? current.filter(id => id !== video.id)
+      : [...current, video.id])
+  }, [])
+
+  const startVideoSelection = useCallback((video: VideoItem) => {
+    setSelectedVideoIds(current => current.includes(video.id) ? current : [...current, video.id])
+  }, [])
+
+  const openBulkTagSheet = useCallback(() => {
+    if (!selectedVideoIds.length) return
+    setBulkTagText('')
+    setBulkTagQuery('')
+    setBulkSelectedTags([])
+    setBulkTagOpen(true)
+  }, [selectedVideoIds.length])
+
+  const closeBulkTagSheet = useCallback(() => {
+    setBulkTagOpen(false)
+    setBulkTagText('')
+    setBulkTagQuery('')
+    setBulkSelectedTags([])
+  }, [])
+
+  const removePendingBulkTag = useCallback((tag: string) => {
+    const key = getTagKey(tag)
+    setBulkSelectedTags(current => current.filter(item => getTagKey(item) !== key))
+    setBulkTagText(current => normalizeTagText(current)
+      .filter(item => getTagKey(item) !== key)
+      .join(', '))
+  }, [])
+
+  const toggleBulkTagOption = useCallback((tag: string) => {
+    const key = getTagKey(tag)
+    if (pendingBulkTagKeySet.has(key)) {
+      removePendingBulkTag(tag)
+      return
+    }
+
+    setBulkSelectedTags(current => {
+      const exists = current.some(item => getTagKey(item) === key)
+      return exists ? current.filter(item => getTagKey(item) !== key) : [...current, tag]
+    })
+  }, [pendingBulkTagKeySet, removePendingBulkTag])
+
+  const saveBulkTags = useCallback(async () => {
+    const tags = pendingBulkTags
+    if (!selectedVideoIds.length || !tags.length) return
+    setBulkSaving(true)
+    try {
+      await addTagsToVideos(activeDevice, selectedVideoIds, tags)
+      setLibrary(current => {
+        const items = current.items.map(item => {
+          if (!selectedVideoIds.includes(item.id)) return item
+          const customTags = [...new Set([...(item.customTags || []), ...tags])]
+          const allTags = [...new Set([...(item.tags || []), ...tags])]
+          return { ...item, customTags, tags: allTags }
+        })
+        return {
+          ...current,
+          items,
+          categoryGroups: inferCategoryGroups(items)
+        }
+      })
+      clearVideoSelection()
+    } catch (err) {
+      setError(err instanceof Error ? err.message : '批量添加标签失败')
+    } finally {
+      setBulkSaving(false)
+    }
+  }, [activeDevice, pendingBulkTags, selectedVideoIds, clearVideoSelection])
 
   useEffect(() => () => {
     pendingSortTaskRef.current?.cancel?.()
@@ -451,6 +591,22 @@ export function LibraryScreen({ navigation, device }: Props) {
       setError(err instanceof Error ? err.message : '收藏同步失败')
     }
   }, [activeDevice])
+
+  const handleVideoPress = useCallback((video: VideoItem) => {
+    if (selectionModeActive) {
+      toggleVideoSelection(video)
+      return
+    }
+    navigation.navigate({ name: 'player', device: activeDevice, video, videos: filteredVideos })
+  }, [activeDevice, filteredVideos, navigation, selectionModeActive, toggleVideoSelection])
+
+  const handleVideoLongPress = useCallback((video: VideoItem) => {
+    startVideoSelection(video)
+  }, [startVideoSelection])
+
+  const handleVideoFavorite = useCallback((video: VideoItem) => {
+    updateFavorite(video)
+  }, [updateFavorite])
 
   const sortOptions: Array<{ key: SortKey, label: string, icon: ReactNode }> = [
     { key: 'name', label: '名称', icon: <Tags color={visibleSortBy === 'name' ? colors.text : colors.muted} size={16} /> },
@@ -645,8 +801,11 @@ export function LibraryScreen({ navigation, device }: Props) {
                 width={cardWidth}
                 device={activeDevice}
                 video={item}
-                onToggleFavorite={() => updateFavorite(item)}
-                onPress={() => navigation.navigate({ name: 'player', device: activeDevice, video: item, videos: filteredVideos })}
+                selected={selectedVideoIdSet.has(item.id)}
+                selectionMode={selectionModeActive}
+                onToggleFavorite={selectionModeActive ? undefined : handleVideoFavorite}
+                onLongPress={handleVideoLongPress}
+                onPress={handleVideoPress}
               />
             )}
             ListEmptyComponent={(
@@ -662,6 +821,117 @@ export function LibraryScreen({ navigation, device }: Props) {
           />
         </>
       )}
+
+      {selectionModeActive ? (
+        <View style={styles.bulkBar}>
+          <Text style={styles.bulkText}>已选择 {selectedVideoIds.length} 个视频</Text>
+          <Pressable style={styles.bulkButton} onPress={openBulkTagSheet}>
+            <Tag color={colors.onAccent} size={17} />
+            <Text style={styles.bulkButtonText}>添加标签</Text>
+          </Pressable>
+          <Pressable style={[styles.bulkButton, styles.bulkButtonSecondary]} onPress={clearVideoSelection}>
+            <Text style={[styles.bulkButtonText, styles.bulkButtonSecondaryText]}>取消</Text>
+          </Pressable>
+        </View>
+      ) : null}
+
+      {bulkTagOpen ? (
+        <KeyboardAvoidingView
+          style={styles.bulkSheetAvoider}
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          pointerEvents="box-none"
+        >
+          <Pressable style={styles.bulkSheetScrim} onPress={closeBulkTagSheet} />
+          <View style={styles.bulkSheet}>
+            <View style={styles.bulkSheetHeader}>
+              <Text style={styles.bulkSheetTitle}>批量添加标签</Text>
+              <Pressable style={styles.drawerClose} onPress={closeBulkTagSheet}>
+                <X color={colors.text} size={20} />
+              </Pressable>
+            </View>
+            <ScrollView
+              style={styles.bulkSheetScroll}
+              contentContainerStyle={styles.bulkSheetScrollContent}
+              keyboardShouldPersistTaps="handled"
+              showsVerticalScrollIndicator={false}
+            >
+              <Text style={styles.bulkSheetHint}>会追加到已选择的 {selectedVideoIds.length} 个视频，不会清除原有标签。</Text>
+              <Text style={styles.bulkSectionLabel}>新增标签</Text>
+              <TextInput
+                value={bulkTagText}
+                onChangeText={setBulkTagText}
+                placeholder="输入标签，用逗号或空格分隔"
+                placeholderTextColor={colors.subtle}
+                style={styles.bulkInput}
+                returnKeyType="done"
+                onSubmitEditing={saveBulkTags}
+              />
+              {pendingBulkTags.length ? (
+                <View style={styles.bulkPendingTags}>
+                  {pendingBulkTags.map(tag => (
+                    <Pressable key={tag} style={styles.bulkPendingTag} onPress={() => removePendingBulkTag(tag)}>
+                      <Text style={styles.bulkPendingTagText} numberOfLines={1}>{tag}</Text>
+                      <X color={colors.onAccent} size={13} />
+                    </Pressable>
+                  ))}
+                </View>
+              ) : null}
+
+              <View style={styles.bulkTagSearchHeader}>
+                <Text style={styles.bulkSectionLabel}>已有标签</Text>
+                <Text style={styles.bulkTagCount}>{availableBulkTags.length} 个</Text>
+              </View>
+              <View style={styles.bulkSearchBox}>
+                <Search color={colors.muted} size={16} />
+                <TextInput
+                  value={bulkTagQuery}
+                  onChangeText={setBulkTagQuery}
+                  placeholder="搜索已有标签"
+                  placeholderTextColor={colors.subtle}
+                  style={styles.bulkSearchInput}
+                  returnKeyType="search"
+                />
+                {bulkTagQuery ? (
+                  <Pressable style={styles.bulkSearchClear} onPress={() => setBulkTagQuery('')}>
+                    <X color={colors.muted} size={15} />
+                  </Pressable>
+                ) : null}
+              </View>
+              <View style={styles.bulkTagOptions}>
+                {filteredBulkTagOptions.length ? filteredBulkTagOptions.map(tag => {
+                  const selected = pendingBulkTagKeySet.has(getTagKey(tag))
+                  return (
+                    <Pressable
+                      key={tag}
+                      style={[styles.bulkTagOption, selected && styles.bulkTagOptionSelected]}
+                      onPress={() => toggleBulkTagOption(tag)}
+                    >
+                      <Text
+                        style={[styles.bulkTagOptionText, selected && styles.bulkTagOptionTextSelected]}
+                        numberOfLines={1}
+                      >
+                        {tag}
+                      </Text>
+                    </Pressable>
+                  )
+                }) : (
+                  <Text style={styles.bulkTagEmpty}>
+                    {availableBulkTags.length ? '没有匹配的标签' : '还没有已有标签，可以先输入新标签'}
+                  </Text>
+                )}
+              </View>
+            </ScrollView>
+            <Pressable
+              style={[styles.bulkSaveButton, (!pendingBulkTags.length || bulkSaving) && styles.updateButtonDisabled]}
+              onPress={saveBulkTags}
+              disabled={!pendingBulkTags.length || bulkSaving}
+            >
+              {bulkSaving ? <ActivityIndicator color={colors.onAccent} size="small" /> : null}
+              <Text style={styles.bulkSaveButtonText}>{bulkSaving ? '保存中...' : '添加到已选视频'}</Text>
+            </Pressable>
+          </View>
+        </KeyboardAvoidingView>
+      ) : null}
 
       {drawerOpen ? (
         <View style={StyleSheet.absoluteFill} pointerEvents="box-none">
@@ -1180,5 +1450,226 @@ const createStyles = (colors: ReturnType<typeof useTheme>['colors']) => StyleShe
     color: colors.muted,
     fontSize: 14,
     lineHeight: 20
+  },
+  bulkBar: {
+    position: 'absolute',
+    left: 10,
+    right: 10,
+    bottom: 12,
+    minHeight: 54,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: colors.border,
+    backgroundColor: colors.surfaceElevated,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    paddingHorizontal: 10
+  },
+  bulkText: {
+    flex: 1,
+    color: colors.text,
+    fontSize: 14,
+    fontWeight: '800'
+  },
+  bulkButton: {
+    minHeight: 38,
+    borderRadius: 8,
+    paddingHorizontal: 11,
+    backgroundColor: colors.accentStrong,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 5
+  },
+  bulkButtonSecondary: {
+    backgroundColor: colors.surface,
+    borderWidth: 1,
+    borderColor: colors.border
+  },
+  bulkButtonText: {
+    color: colors.onAccent,
+    fontSize: 13,
+    fontWeight: '800'
+  },
+  bulkButtonSecondaryText: {
+    color: colors.text
+  },
+  bulkSheetScrim: {
+    position: 'absolute',
+    top: 0,
+    right: 0,
+    bottom: 0,
+    left: 0,
+    backgroundColor: 'rgba(0,0,0,0.42)'
+  },
+  bulkSheetAvoider: {
+    position: 'absolute',
+    top: 0,
+    right: 0,
+    bottom: 0,
+    left: 0,
+    justifyContent: 'flex-end'
+  },
+  bulkSheet: {
+    marginHorizontal: 10,
+    marginBottom: 10,
+    maxHeight: '74%',
+    borderTopLeftRadius: 16,
+    borderTopRightRadius: 16,
+    borderBottomLeftRadius: 16,
+    borderBottomRightRadius: 16,
+    borderWidth: 1,
+    borderColor: colors.border,
+    backgroundColor: colors.background,
+    padding: 16,
+    gap: 12
+  },
+  bulkSheetScroll: {
+    flexShrink: 1
+  },
+  bulkSheetScrollContent: {
+    gap: 10,
+    paddingBottom: 2
+  },
+  bulkSheetHeader: {
+    minHeight: 42,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10
+  },
+  bulkSheetTitle: {
+    flex: 1,
+    color: colors.text,
+    fontSize: 20,
+    fontWeight: '900'
+  },
+  bulkSheetHint: {
+    color: colors.muted,
+    fontSize: 13,
+    lineHeight: 19
+  },
+  bulkSectionLabel: {
+    color: colors.text,
+    fontSize: 12,
+    fontWeight: '900'
+  },
+  bulkInput: {
+    minHeight: 46,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: colors.border,
+    backgroundColor: colors.surface,
+    color: colors.text,
+    paddingHorizontal: 12,
+    fontSize: 15
+  },
+  bulkPendingTags: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8
+  },
+  bulkPendingTag: {
+    maxWidth: '100%',
+    minHeight: 32,
+    borderRadius: 999,
+    paddingLeft: 11,
+    paddingRight: 9,
+    backgroundColor: colors.accentStrong,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5
+  },
+  bulkPendingTagText: {
+    color: colors.onAccent,
+    fontSize: 12,
+    fontWeight: '800',
+    maxWidth: 180
+  },
+  bulkTagSearchHeader: {
+    marginTop: 2,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between'
+  },
+  bulkTagCount: {
+    color: colors.subtle,
+    fontSize: 12,
+    fontWeight: '700'
+  },
+  bulkSearchBox: {
+    minHeight: 42,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: colors.border,
+    backgroundColor: colors.surface,
+    paddingLeft: 11,
+    paddingRight: 6,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 7
+  },
+  bulkSearchInput: {
+    flex: 1,
+    minHeight: 40,
+    color: colors.text,
+    fontSize: 14,
+    paddingVertical: 0
+  },
+  bulkSearchClear: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    alignItems: 'center',
+    justifyContent: 'center'
+  },
+  bulkTagOptions: {
+    minHeight: 38,
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8
+  },
+  bulkTagOption: {
+    maxWidth: '100%',
+    minHeight: 32,
+    borderRadius: 999,
+    borderWidth: 1,
+    borderColor: colors.border,
+    backgroundColor: colors.surface,
+    paddingHorizontal: 11,
+    alignItems: 'center',
+    justifyContent: 'center'
+  },
+  bulkTagOptionSelected: {
+    borderColor: colors.accentStrong,
+    backgroundColor: colors.accentStrong
+  },
+  bulkTagOptionText: {
+    color: colors.text,
+    fontSize: 12,
+    fontWeight: '800',
+    maxWidth: 180
+  },
+  bulkTagOptionTextSelected: {
+    color: colors.onAccent
+  },
+  bulkTagEmpty: {
+    color: colors.subtle,
+    fontSize: 13,
+    lineHeight: 20
+  },
+  bulkSaveButton: {
+    minHeight: 46,
+    borderRadius: 8,
+    backgroundColor: colors.accentStrong,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8
+  },
+  bulkSaveButtonText: {
+    color: colors.onAccent,
+    fontSize: 15,
+    fontWeight: '900'
   }
 })

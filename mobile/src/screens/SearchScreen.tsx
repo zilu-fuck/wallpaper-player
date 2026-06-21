@@ -1,5 +1,5 @@
 import { ArrowLeft, Search } from 'lucide-react-native'
-import { useMemo, useState } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 import { FlatList, Pressable, StyleSheet, Text, TextInput, View } from 'react-native'
 import type { NavigationContext } from '../../App'
 import { VideoCard } from '../components/VideoCard'
@@ -23,6 +23,10 @@ export function SearchScreen({ navigation, device, videos }: Props) {
     if (!keyword) return videos
     return videos.filter(video => safeSearchText(video.name, video.fileName, video.group, video.tags).includes(keyword))
   }, [query, videos])
+
+  const openVideo = useCallback((video: VideoItem) => {
+    navigation.navigate({ name: 'player', device, video, videos })
+  }, [device, navigation, videos])
 
   return (
     <View style={styles.shell}>
@@ -51,7 +55,7 @@ export function SearchScreen({ navigation, device, videos }: Props) {
           <VideoCard
             device={device}
             video={item}
-            onPress={() => navigation.navigate({ name: 'player', device, video: item, videos })}
+            onPress={openVideo}
           />
         )}
         ListEmptyComponent={(

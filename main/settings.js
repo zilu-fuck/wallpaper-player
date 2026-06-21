@@ -9,9 +9,24 @@ const sessionAllowedFiles = new Set()
 const fallbackUserDataDir = path.join(process.cwd(), '.tmp-wallpaper-player')
 
 let directoryChangeHandler = null
+const settingsChangeHandlers = new Set()
 
 function setDirectoryChangeHandler(handler) {
   directoryChangeHandler = handler
+}
+
+function onSettingsChanged(handler) {
+  if (typeof handler !== 'function') return () => {}
+  settingsChangeHandlers.add(handler)
+  return () => settingsChangeHandlers.delete(handler)
+}
+
+function notifySettingsChanged(settings) {
+  for (const handler of settingsChangeHandlers) {
+    try {
+      handler(settings)
+    } catch {}
+  }
 }
 
 function getSettingsPath() {
@@ -203,6 +218,9 @@ function saveSettings(settings) {
   if (Object.hasOwn(settings, 'directories')) {
     directoryChangeHandler?.(merged.directories)
   }
+
+  notifySettingsChanged(merged)
+  return merged
 }
 
 function getAllowedVideoDirectories() {
@@ -298,6 +316,7 @@ module.exports = {
   sessionAllowedMpvPaths,
   sessionAllowedFiles,
   setDirectoryChangeHandler,
+  onSettingsChanged,
   loadSettings,
   saveSettings,
   sanitizeSettingsForSave,

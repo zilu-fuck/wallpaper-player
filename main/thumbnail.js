@@ -11,6 +11,32 @@ let ffmpegPath = null
 let ffmpegSearchPromise = null
 let ffmpegSearchCompleted = false
 const fallbackUserDataDir = path.join(process.cwd(), '.tmp-wallpaper-player')
+const THUMBNAIL_FFMPEG_CONCURRENCY = 1
+const THUMBNAIL_SCALE = '320:-1'
+const THUMBNAIL_QUALITY = '5'
+const thumbnailJobQueue = []
+let activeThumbnailJobs = 0
+
+function drainThumbnailJobs() {
+  while (activeThumbnailJobs < THUMBNAIL_FFMPEG_CONCURRENCY && thumbnailJobQueue.length > 0) {
+    const { task, resolve } = thumbnailJobQueue.shift()
+    activeThumbnailJobs += 1
+    Promise.resolve()
+      .then(task)
+      .then(resolve, () => resolve(null))
+      .finally(() => {
+        activeThumbnailJobs -= 1
+        drainThumbnailJobs()
+      })
+  }
+}
+
+function enqueueThumbnailJob(task) {
+  return new Promise((resolve) => {
+    thumbnailJobQueue.push({ task, resolve })
+    drainThumbnailJobs()
+  })
+}
 
 function execFileAsync(file, args, options = {}) {
   return new Promise((resolve, reject) => {
@@ -85,14 +111,20 @@ async function generateThumbnail(videoPath) {
     return null
   }
 
-  return new Promise((resolve) => {
+  return enqueueThumbnailJob(() => new Promise((resolve) => {
+    if (fs.existsSync(thumbPath)) {
+      resolve(thumbPath)
+      return
+    }
+
     // 取视频第 1 秒的帧作为缩略图（跳过可能的黑色片头）
     execFile(ffmpeg, [
-      '-i', videoPath,
       '-ss', '00:00:01',
+      '-i', videoPath,
+      '-threads', '1',
       '-vframes', '1',
-      '-vf', 'scale=480:-1',
-      '-q:v', '3',
+      '-vf', `scale=${THUMBNAIL_SCALE}`,
+      '-q:v', THUMBNAIL_QUALITY,
       '-y',
       thumbPath
     ], { timeout: 30000 }, (err) => {
@@ -100,9 +132,10 @@ async function generateThumbnail(videoPath) {
         // 如果 -ss 1 秒失败，尝试第 0 秒
         execFile(ffmpeg, [
           '-i', videoPath,
+          '-threads', '1',
           '-vframes', '1',
-          '-vf', 'scale=480:-1',
-          '-q:v', '3',
+          '-vf', `scale=${THUMBNAIL_SCALE}`,
+          '-q:v', THUMBNAIL_QUALITY,
           '-y',
           thumbPath
         ], { timeout: 30000 }, (err2) => {
@@ -112,7 +145,7 @@ async function generateThumbnail(videoPath) {
         resolve(thumbPath)
       }
     })
-  })
+  }))
 }
 
 async function getExistingPreviewPath(videoPath) {

@@ -1,7 +1,7 @@
 import * as Clipboard from 'expo-clipboard'
 import { CameraView, useCameraPermissions } from 'expo-camera'
 import { Camera, QrCode } from 'lucide-react-native'
-import { useCallback, useState } from 'react'
+import { useCallback, useRef, useState } from 'react'
 import { Keyboard, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native'
 import type { NavigationContext } from '../../App'
 import { PrimaryButton } from '../components/PrimaryButton'
@@ -26,6 +26,7 @@ export function PairDeviceScreen({ navigation }: Props) {
   const [scannerOpen, setScannerOpen] = useState(false)
   const [legacyOpen, setLegacyOpen] = useState(false)
   const [permission, requestPermission] = useCameraPermissions()
+  const barcodeHandledRef = useRef(false)
 
   const saveAndContinue = useCallback(async (
     create: () => Promise<ReturnType<typeof createManualDevice> extends Promise<infer T> ? T : never>,
@@ -79,14 +80,19 @@ export function PairDeviceScreen({ navigation }: Props) {
         return
       }
     }
+    barcodeHandledRef.current = false
     setScannerOpen(true)
   }, [permission?.granted, requestPermission])
 
-  const handleBarcode = useCallback(({ data }: { data: string }) => {
+  const handleBarcode = useCallback((result: { data?: string; raw?: string; nativeEvent?: { data?: string; raw?: string } }) => {
+    if (barcodeHandledRef.current) return
+    barcodeHandledRef.current = true
     setScannerOpen(false)
+    const data = result.data || result.raw || result.nativeEvent?.data || result.nativeEvent?.raw || ''
     const payload = parsePairingCode(data)
     if (!payload) {
       setError('二维码不是 Wallpaper Player 绑定码')
+      barcodeHandledRef.current = false
       return
     }
     saveAndContinue(() => createDeviceFromPairingPayload(payload, token), {

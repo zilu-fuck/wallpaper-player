@@ -31,7 +31,11 @@ function VideoCard({
     handlePlay,
     handleToggleFavorite,
     handleOpenInFolder,
-    handleOpenTagEditor
+    handleOpenTagEditor,
+    selectedVideoKeys,
+    selectedVideoKeySet,
+    handleToggleVideoSelection,
+    handleSelectOnlyVideo
   } = useApp()
 
   const [imgLoaded, setImgLoaded] = useState(false)
@@ -44,6 +48,9 @@ function VideoCard({
   const animationDelay = useMemo(() => `${(index % 20) * 30}ms`, [index])
   const thumbnail = thumbnails[video.fullPath]
   const isFavorite = favoriteKeys.has(video.favoriteKey || video.fullPath)
+  const videoKey = video.favoriteKey || video.fullPath
+  const isSelected = selectedVideoKeySet?.has(videoKey)
+  const selectionActive = (selectedVideoKeys?.length || 0) > 0
 
   // 懒加载：只有卡片进入视口时才加载缩略图
   useEffect(() => {
@@ -65,8 +72,12 @@ function VideoCard({
   }, [])
 
   const handleClick = useCallback(() => {
+    if (selectionActive) {
+      handleToggleVideoSelection?.(video)
+      return
+    }
     handlePlay(video, { queueVideos })
-  }, [video, handlePlay, queueVideos])
+  }, [selectionActive, video, handleToggleVideoSelection, handlePlay, queueVideos])
 
   const handleContextMenu = useCallback((e) => {
     e.preventDefault()
@@ -95,6 +106,18 @@ function VideoCard({
     handleOpenTagEditor?.(video)
   }, [video, handleOpenTagEditor])
 
+  const handleToggleSelectionClick = useCallback((e) => {
+    e.stopPropagation()
+    setMenuOpen(false)
+    handleToggleVideoSelection?.(video)
+  }, [video, handleToggleVideoSelection])
+
+  const handleSelectOnlyClick = useCallback((e) => {
+    e.stopPropagation()
+    setMenuOpen(false)
+    handleSelectOnlyVideo?.(video)
+  }, [video, handleSelectOnlyVideo])
+
   useEffect(() => {
     if (!menuOpen) return
 
@@ -121,6 +144,10 @@ function VideoCard({
         <div className="card-menu" role="menu">
           <button type="button" onClick={handleOpenInFolderClick} role="menuitem">在资源管理器中打开视频所在位置</button>
           <button type="button" onClick={handleEditTags} role="menuitem">自定义标签</button>
+          <button type="button" onClick={handleToggleSelectionClick} role="menuitem">
+            {isSelected ? '取消选择' : '加入多选'}
+          </button>
+          <button type="button" onClick={handleSelectOnlyClick} role="menuitem">从这个视频开始多选</button>
         </div>
       )}
     </div>
@@ -149,7 +176,7 @@ function VideoCard({
     return (
       <div
         ref={cardRef}
-        className="video-card-list"
+        className={`video-card-list${isSelected ? ' selected' : ''}`}
         onClick={handleClick}
         onContextMenu={handleContextMenu}
         title={video.name}
@@ -188,6 +215,13 @@ function VideoCard({
           </svg>
         </button>
         {actionsMenu}
+        {isSelected ? (
+          <div className="selection-check" aria-hidden="true">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
+              <path d="M20 6L9 17l-5-5" />
+            </svg>
+          </div>
+        ) : null}
         <div className="list-play-btn">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
             <polygon points="5 3 19 12 5 21 5 3" />
@@ -201,7 +235,7 @@ function VideoCard({
   return (
     <div
       ref={cardRef}
-      className="video-card"
+      className={`video-card${isSelected ? ' selected' : ''}`}
       onClick={handleClick}
       onContextMenu={handleContextMenu}
       title={video.name}
@@ -247,6 +281,13 @@ function VideoCard({
             <path d="M20.8 4.6a5.5 5.5 0 00-7.8 0L12 5.6l-1-1a5.5 5.5 0 00-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 000-7.8z" />
           </svg>
         </button>
+        {isSelected ? (
+          <div className="selection-check" aria-hidden="true">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
+              <path d="M20 6L9 17l-5-5" />
+            </svg>
+          </div>
+        ) : null}
       </div>
 
       <div className="card-info">

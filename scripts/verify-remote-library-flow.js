@@ -243,9 +243,10 @@ async function main() {
   await createFixtureLibrary()
   process.chdir(tempRoot)
 
-  const { saveSettings, sessionAllowedDirectories } = require(path.join(projectRoot, 'main', 'settings'))
+  const { loadSettings, onSettingsChanged, saveSettings, sessionAllowedDirectories } = require(path.join(projectRoot, 'main', 'settings'))
   const { createScopedToken, listPairedDevices } = require(path.join(projectRoot, 'main', 'remote', 'identity'))
   const { createRemoteServer } = require(path.join(projectRoot, 'main', 'remote', 'server'))
+  const { getFavoriteKeyForVideoId } = require(path.join(projectRoot, 'main', 'remote', 'video-index'))
 
   sessionAllowedDirectories.add(libraryDir)
   saveSettings({
@@ -427,6 +428,44 @@ async function main() {
     assert.ok(libraryAfterMetadata.data.items[0].customTags.includes('custom-tag'))
     assert.ok(libraryAfterMetadata.data.categoryGroups.custom.some(category => category.name === 'custom-tag'))
     assertNoDesktopPaths(libraryAfterMetadata.data, 'metadata-updated library response')
+
+    const legacyCustomTags = { ...(loadSettings().customTags || {}) }
+    const incompatibleFavoriteKey = getFavoriteKeyForVideoId(incompatibleVideo.id)
+    assert.ok(incompatibleFavoriteKey, 'incompatible fixture should have a favorite key')
+    legacyCustomTags[incompatibleVideoPath] = ['legacy-path-tag']
+    delete legacyCustomTags[incompatibleFavoriteKey]
+    saveSettings({ customTags: legacyCustomTags })
+
+    let settingsChangedPayload = null
+    const removeSettingsChanged = onSettingsChanged((settings) => {
+      settingsChangedPayload = settings
+    })
+    const bulkTags = await requestJson(`${baseUrl}/v1/videos/tags/bulk`, {
+      method: 'PUT',
+      headers: { Authorization: `Bearer ${phoneAToken}` },
+      body: JSON.stringify({ videoIds: [video.id, incompatibleVideo.id], tags: ['bulk-tag'] })
+    })
+    removeSettingsChanged()
+    assert.strictEqual(bulkTags.status, 200)
+    assert.strictEqual(bulkTags.data.updatedCount, 2)
+    assert.deepStrictEqual(bulkTags.data.tags, ['bulk-tag'])
+    assert.ok(settingsChangedPayload?.customTags, 'bulk tag save should notify settings listeners')
+    assert.ok(settingsChangedPayload.customTags[incompatibleFavoriteKey]?.includes('legacy-path-tag'), 'bulk tags should preserve legacy path-key tags')
+    assert.ok(!Object.hasOwn(settingsChangedPayload.customTags, incompatibleVideoPath), 'bulk tags should migrate legacy path-key tags')
+
+    const libraryAfterBulkTags = await getLibrary(baseUrl, phoneAToken)
+    assert.strictEqual(libraryAfterBulkTags.status, 200)
+    const bulkTaggedIds = new Set(
+      libraryAfterBulkTags.data.items
+        .filter(item => item.customTags?.includes('bulk-tag'))
+        .map(item => item.id)
+    )
+    assert.ok(bulkTaggedIds.has(video.id), 'bulk tags should update first selected video')
+    assert.ok(bulkTaggedIds.has(incompatibleVideo.id), 'bulk tags should update second selected video')
+    const bulkTaggedIncompatible = libraryAfterBulkTags.data.items.find(item => item.id === incompatibleVideo.id)
+    assert.ok(bulkTaggedIncompatible.customTags?.includes('legacy-path-tag'), 'bulk tags should keep existing legacy custom tags')
+    assert.ok(libraryAfterBulkTags.data.categoryGroups.custom.some(category => category.name === 'bulk-tag'))
+    assertNoDesktopPaths(libraryAfterBulkTags.data, 'bulk-tagged library response')
 
     const unpairA = await requestJson(`${baseUrl}/v1/devices/current`, {
       method: 'DELETE',
