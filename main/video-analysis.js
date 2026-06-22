@@ -6,12 +6,24 @@ const path = require('path')
 const { spawn } = require('child_process')
 const { BrowserWindow } = require('electron')
 const { getResourcePath, isPathInside, pathKey } = require('./paths')
-const { getDefaultAnalysisModelDirectory, getDefaultAnalysisResultDirectory, loadSettings, saveSettings } = require('./settings')
+const {
+  getDefaultAnalysisModelDirectory,
+  getDefaultAnalysisResultDirectory,
+  getDefaultAnalysisRuntimeDirectory,
+  loadSettings,
+  saveSettings
+} = require('./settings')
 
 let activeJob = null
 let activeJobSeq = 0
 const recentAnalysisEvents = new Map()
 const RECENT_ANALYSIS_EVENT_LIMIT = 100
+const REQUIRED_VIDEO_COMPREHENSION_FILES = [
+  'pyproject.toml',
+  path.join('video_comprehension', 'cli.py'),
+  path.join('video_comprehension', 'config.py'),
+  path.join('video_comprehension', 'pipeline.py')
+]
 
 const ANALYSIS_ENV_KEYS = [
   'MAX_DURATION_SECONDS',
@@ -84,11 +96,80 @@ function getVideoComprehensionRoot() {
   return getResourcePath('video comprehension', 'video comprehension')
 }
 
+function getBundledVideoComprehensionRoot() {
+  return path.join(__dirname, 'video-comprehension-runtime')
+}
+
+function getRuntimeVideoComprehensionRoot() {
+  return path.join(getDefaultAnalysisRuntimeDirectory(), 'project')
+}
+
+function isAsarPath(inputPath) {
+  return path.resolve(inputPath).split(path.sep).includes('app.asar')
+}
+
+async function hasCompleteVideoComprehensionProject(root) {
+  try {
+    await Promise.all(REQUIRED_VIDEO_COMPREHENSION_FILES.map(item => fsp.access(path.join(root, item))))
+    const cliText = await fsp.readFile(path.join(root, 'video_comprehension', 'cli.py'), 'utf-8')
+    const configText = await fsp.readFile(path.join(root, 'video_comprehension', 'config.py'), 'utf-8')
+    if (!cliText.includes('VIDEO_COMPREHENSION_ENV')) return false
+    if (!configText.includes('VIDEO_COMPREHENSION_OUTPUT_DIR')) return false
+    return true
+  } catch {
+    return false
+  }
+}
+
+async function copyDirectoryFromPossiblyAsar(sourceDir, targetDir) {
+  await fsp.mkdir(targetDir, { recursive: true })
+  const entries = await fsp.readdir(sourceDir, { withFileTypes: true })
+  for (const entry of entries) {
+    const sourcePath = path.join(sourceDir, entry.name)
+    const targetPath = path.join(targetDir, entry.name)
+    if (entry.isDirectory()) {
+      await copyDirectoryFromPossiblyAsar(sourcePath, targetPath)
+    } else if (entry.isFile()) {
+      await fsp.mkdir(path.dirname(targetPath), { recursive: true })
+      await fsp.writeFile(targetPath, await fsp.readFile(sourcePath))
+    }
+  }
+}
+
+async function resolveVideoComprehensionRoot() {
+  const resourceRoot = getVideoComprehensionRoot()
+  if (await hasCompleteVideoComprehensionProject(resourceRoot)) {
+    return { root: resourceRoot, source: 'resources' }
+  }
+
+  const bundledRoot = getBundledVideoComprehensionRoot()
+  if (await hasCompleteVideoComprehensionProject(bundledRoot)) {
+    const runtimeRoot = getRuntimeVideoComprehensionRoot()
+    if (!(await hasCompleteVideoComprehensionProject(runtimeRoot))) {
+      await fsp.rm(runtimeRoot, { recursive: true, force: true })
+      await copyDirectoryFromPossiblyAsar(bundledRoot, runtimeRoot)
+    }
+    if (await hasCompleteVideoComprehensionProject(runtimeRoot)) {
+      return { root: runtimeRoot, source: isAsarPath(bundledRoot) ? 'asar_fallback' : 'bundled_fallback' }
+    }
+  }
+
+  return {
+    root: resourceRoot,
+    source: 'missing',
+    checkedPaths: [resourceRoot, bundledRoot, getRuntimeVideoComprehensionRoot()]
+  }
+}
+
 function getOutputsDir() {
-  return path.join(getVideoComprehensionRoot(), 'outputs')
+  return path.join(getDefaultAnalysisRuntimeDirectory(), 'outputs')
 }
 
 function getEnvPath() {
+  return path.join(getDefaultAnalysisRuntimeDirectory(), '.env')
+}
+
+function getLegacyEnvPath() {
   return path.join(getVideoComprehensionRoot(), '.env')
 }
 
@@ -219,8 +300,27 @@ function renderEnv(values) {
   return `${ANALYSIS_ENV_KEYS.map(key => `${key}=${values[key]}`).join('\n')}\n`
 }
 
-async function getVideoAnalysisRuntimeConfig() {
+async function ensureRuntimeEnvPath() {
   const envPath = getEnvPath()
+  await fsp.mkdir(path.dirname(envPath), { recursive: true })
+  try {
+    await fsp.access(envPath)
+    return envPath
+  } catch (err) {
+    if (err?.code !== 'ENOENT') throw err
+  }
+
+  const legacyEnvPath = getLegacyEnvPath()
+  try {
+    await fsp.copyFile(legacyEnvPath, envPath)
+  } catch (err) {
+    if (err?.code !== 'ENOENT') throw err
+  }
+  return envPath
+}
+
+async function getVideoAnalysisRuntimeConfig() {
+  const envPath = await ensureRuntimeEnvPath()
   try {
     const parsed = parseEnvText(await fsp.readFile(envPath, 'utf-8'))
     const config = envToRuntimeConfig(parsed.values, {
@@ -240,8 +340,9 @@ async function getVideoAnalysisRuntimeConfig() {
 
 async function saveVideoAnalysisRuntimeConfig(config) {
   let currentConfig = envToRuntimeConfig(LOCAL_DEFAULT_ANALYSIS_ENV)
+  const envPath = await ensureRuntimeEnvPath()
   try {
-    const parsed = parseEnvText(await fsp.readFile(getEnvPath(), 'utf-8'))
+    const parsed = parseEnvText(await fsp.readFile(envPath, 'utf-8'))
     currentConfig = envToRuntimeConfig(parsed.values)
   } catch (err) {
     if (err?.code !== 'ENOENT') throw err
@@ -251,7 +352,6 @@ async function saveVideoAnalysisRuntimeConfig(config) {
     ...config,
     modelStorageDir: config?.modelStorageDir || getAnalysisModelDirectory()
   })
-  const envPath = getEnvPath()
   await fsp.mkdir(path.dirname(envPath), { recursive: true })
   await fsp.writeFile(envPath, renderEnv(values), 'utf-8')
   const runtimeConfig = envToRuntimeConfig(values, {
@@ -563,16 +663,15 @@ async function startVideoAnalysis(videoPath, sender) {
     }
   }
 
-  const root = getVideoComprehensionRoot()
-  try {
-    await fsp.access(path.join(root, 'pyproject.toml'))
-  } catch {
+  const project = await resolveVideoComprehensionRoot()
+  if (project.source === 'missing') {
     return {
       accepted: false,
       reason: 'missing_project',
-      error: `未找到视频理解项目：${root}`
+      error: `未找到完整的视频理解项目。已检查：${project.checkedPaths.join('；')}。请重新安装包含视频理解运行文件的版本，或检查安装目录 resources\\video comprehension\\video comprehension 下是否存在 pyproject.toml 和 video_comprehension。`
     }
   }
+  const root = project.root
 
   const serviceCheck = await checkLocalModelServices()
   if (!serviceCheck.ok) {
@@ -593,6 +692,10 @@ async function startVideoAnalysis(videoPath, sender) {
   }
 
   const modelDir = getAnalysisModelDirectory()
+  const envPath = getEnvPath()
+  const outputsDir = getOutputsDir()
+  await fsp.mkdir(path.dirname(envPath), { recursive: true })
+  await fsp.mkdir(outputsDir, { recursive: true })
   const child = spawn('uv', ['run', 'video-comprehension', job.videoPath], {
     cwd: root,
     windowsHide: true,
@@ -601,6 +704,8 @@ async function startVideoAnalysis(videoPath, sender) {
       ...process.env,
       PYTHONUTF8: '1',
       PYTHONIOENCODING: 'utf-8',
+      VIDEO_COMPREHENSION_ENV: envPath,
+      VIDEO_COMPREHENSION_OUTPUT_DIR: outputsDir,
       HF_HOME: path.join(modelDir, 'huggingface'),
       HUGGINGFACE_HUB_CACHE: path.join(modelDir, 'huggingface', 'hub')
     }

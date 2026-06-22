@@ -2,7 +2,7 @@ const path = require('path')
 const fs = require('fs')
 const crypto = require('crypto')
 const { app } = require('electron')
-const { getResourcePath, pathKey, isExistingFile, isMpvExecutablePath } = require('./paths')
+const { pathKey, isExistingFile, isMpvExecutablePath } = require('./paths')
 
 const PRIVACY_PASSWORD_ITERATIONS = 120000
 const PRIVACY_PASSWORD_KEY_LENGTH = 32
@@ -52,7 +52,17 @@ function getDefaultAnalysisResultDirectory() {
 }
 
 function getDefaultAnalysisModelDirectory() {
-  return getResourcePath('video comprehension', 'video comprehension', 'models')
+  const baseDir = app?.getPath
+    ? app.getPath('userData')
+    : fallbackUserDataDir
+  return path.join(baseDir, 'analysis-models')
+}
+
+function getDefaultAnalysisRuntimeDirectory() {
+  const baseDir = app?.getPath
+    ? app.getPath('userData')
+    : fallbackUserDataDir
+  return path.join(baseDir, 'video-analysis-runtime')
 }
 
 function normalizeDirectoryList(directories) {
@@ -581,6 +591,7 @@ module.exports = {
   normalizeAnalysisLlmProfiles,
   getDefaultAnalysisResultDirectory,
   getDefaultAnalysisModelDirectory,
+  getDefaultAnalysisRuntimeDirectory,
   getPlaybackStateKey,
   getPlaybackState,
   upsertPlaybackState,
