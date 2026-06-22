@@ -2175,6 +2175,75 @@ a:hover {
   background: rgba(91, 140, 255, 0.28);
 }
 
+.player-analysis-status,
+.player-analysis-error {
+  position: absolute;
+  left: 14px;
+  top: 14px;
+  z-index: 9;
+  max-width: min(440px, calc(100% - 28px));
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 8px;
+  background: rgba(13, 18, 26, 0.92);
+  color: rgba(255, 255, 255, 0.84);
+  box-shadow: 0 14px 42px rgba(0, 0, 0, 0.36);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+
+.player-analysis-status div {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.player-analysis-status strong {
+  color: white;
+  font-size: 12px;
+  line-height: 1.25;
+}
+
+.player-analysis-status span,
+.player-analysis-error span {
+  overflow: hidden;
+  color: rgba(255, 255, 255, 0.66);
+  font-size: 11px;
+  line-height: 1.35;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.player-analysis-status button,
+.player-analysis-error button {
+  flex-shrink: 0;
+  min-height: 26px;
+  padding: 0 9px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.07);
+  color: white;
+  font-size: 11px;
+  cursor: pointer;
+}
+
+.player-analysis-status button:hover,
+.player-analysis-error button:hover {
+  background: rgba(255, 255, 255, 0.14);
+}
+
+.player-analysis-error {
+  border-color: rgba(239, 106, 100, 0.32);
+}
+
+.player-analysis-error span {
+  color: rgba(255, 190, 186, 0.92);
+}
+
 .player-analysis-spinner {
   width: 14px;
   height: 14px;

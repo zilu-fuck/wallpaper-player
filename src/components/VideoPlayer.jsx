@@ -100,6 +100,7 @@ export default function VideoPlayer({ video }) {
   const [html5Error, setHtml5Error] = useState('')
   const [analysisState, setAnalysisState] = useState({ status: 'idle', data: null, error: '' })
   const [analysisOpen, setAnalysisOpen] = useState(false)
+  const [analysisJob, setAnalysisJob] = useState(null)
   const playbackResumeEnabled = video?.playOptions?.resume !== false
   const videoAnalysisEnabled = Boolean(settings?.videoAnalysis?.enabled)
 
@@ -138,11 +139,14 @@ export default function VideoPlayer({ video }) {
     return 'HTML5 兜底播放'
   })()
   const analysisAvailable = analysisState.status === 'ready' && analysisState.data?.available
+  const analysisRunning = analysisState.status === 'analyzing'
+  const canStartAnalysis = videoAnalysisEnabled && !analysisAvailable && !analysisRunning && Boolean(video?.fullPath)
   const analysisButtonTitle = (() => {
     if (!videoAnalysisEnabled) return '请先在设置中启用视频理解'
-    if (analysisState.status === 'loading') return '正在读取视频理解结果'
+    if (analysisState.status === 'checking') return '正在读取视频理解结果'
+    if (analysisRunning) return '正在分析当前视频'
     if (analysisAvailable) return analysisOpen ? '隐藏视频理解' : '显示视频理解'
-    return '没有找到当前视频的理解结果'
+    return '分析当前视频'
   })()
 
   useEffect(() => {
@@ -168,11 +172,12 @@ export default function VideoPlayer({ video }) {
       }
     }
 
-    setAnalysisState({ status: 'loading', data: null, error: '' })
+    setAnalysisJob(null)
+    setAnalysisState({ status: 'checking', data: null, error: '' })
     window.electronAPI.getVideoAnalysis(video.fullPath)
       .then((result) => {
         if (!canceled) {
-          setAnalysisState({ status: 'ready', data: result, error: '' })
+          setAnalysisState({ status: result?.available ? 'ready' : 'missing', data: result, error: '' })
         }
       })
       .catch((err) => {
@@ -184,6 +189,53 @@ export default function VideoPlayer({ video }) {
     return () => {
       canceled = true
     }
+  }, [video?.fullPath, videoAnalysisEnabled])
+
+  useEffect(() => {
+    if (!videoAnalysisEnabled || !video?.fullPath || !window.electronAPI?.onVideoAnalysisEvent) return undefined
+
+    const remove = window.electronAPI.onVideoAnalysisEvent((payload) => {
+      if (!payload || payload.videoPath !== video.fullPath) return
+
+      if (payload.status === 'started') {
+        setAnalysisOpen(false)
+        setAnalysisJob({ jobId: payload.jobId, message: payload.message || '开始分析当前视频' })
+        setAnalysisState({ status: 'analyzing', data: null, error: '' })
+        return
+      }
+
+      if (payload.status === 'running') {
+        setAnalysisJob(prev => ({
+          ...(prev || {}),
+          jobId: payload.jobId,
+          message: payload.event?.message || payload.event?.stage || '正在分析',
+          stage: payload.event?.stage,
+          stageStatus: payload.event?.status
+        }))
+        setAnalysisState(prev => prev.status === 'analyzing' ? prev : { status: 'analyzing', data: null, error: '' })
+        return
+      }
+
+      if (payload.status === 'success') {
+        setAnalysisJob(null)
+        setAnalysisState({ status: payload.analysis?.available ? 'ready' : 'missing', data: payload.analysis, error: '' })
+        setAnalysisOpen(Boolean(payload.analysis?.available))
+        return
+      }
+
+      if (payload.status === 'cancelled') {
+        setAnalysisJob(null)
+        setAnalysisState({ status: 'missing', data: null, error: '' })
+        return
+      }
+
+      if (payload.status === 'error') {
+        setAnalysisJob(null)
+        setAnalysisState({ status: 'error', data: null, error: payload.error || '视频理解分析失败' })
+      }
+    })
+
+    return () => remove?.()
   }, [video?.fullPath, videoAnalysisEnabled])
 
   const handleClose = useCallback(() => {
@@ -313,6 +365,30 @@ export default function VideoPlayer({ video }) {
     setAnalysisOpen(value => !value)
     setActiveMenu(null)
   }, [analysisAvailable])
+
+  const handleStartAnalysis = useCallback(async () => {
+    if (!canStartAnalysis || !video?.fullPath) return
+    setActiveMenu(null)
+    setAnalysisOpen(false)
+    setAnalysisJob({ message: '正在启动分析任务' })
+    setAnalysisState({ status: 'analyzing', data: null, error: '' })
+    const result = await window.electronAPI?.startVideoAnalysis?.(video.fullPath)
+    if (!result?.accepted) {
+      setAnalysisJob(null)
+      setAnalysisState({
+        status: 'error',
+        data: null,
+        error: result?.error || (result?.reason === 'already_running' ? '已有视频正在分析' : '无法启动视频理解分析')
+      })
+      return
+    }
+    setAnalysisJob(result.job || { message: '分析任务已启动' })
+  }, [canStartAnalysis, video?.fullPath])
+
+  const handleCancelAnalysis = useCallback(async () => {
+    const jobId = analysisJob?.jobId
+    await window.electronAPI?.cancelVideoAnalysis?.(jobId)
+  }, [analysisJob?.jobId])
 
   const handleScreenshot = useCallback(async () => {
     if (canUseMpv) {
@@ -1125,6 +1201,24 @@ export default function VideoPlayer({ video }) {
               />
             ) : null}
 
+            {analysisRunning ? (
+              <div className="player-analysis-status" onClick={event => event.stopPropagation()}>
+                <span className="player-analysis-spinner" aria-hidden="true" />
+                <div>
+                  <strong>{analysisJob?.stage || '视频理解'}</strong>
+                  <span>{analysisJob?.message || '正在分析当前视频'}</span>
+                </div>
+                <button type="button" onClick={handleCancelAnalysis}>取消</button>
+              </div>
+            ) : null}
+
+            {analysisState.status === 'error' && analysisState.error ? (
+              <div className="player-analysis-error" onClick={event => event.stopPropagation()}>
+                <span>{analysisState.error}</span>
+                {canStartAnalysis ? <button type="button" onClick={handleStartAnalysis}>重试</button> : null}
+              </div>
+            ) : null}
+
             <div className="player-toolbar" onClick={event => event.stopPropagation()}>
             <div className="player-controls-row">
               <div className="player-left-controls">
@@ -1193,13 +1287,13 @@ export default function VideoPlayer({ video }) {
                 {videoAnalysisEnabled ? (
                   <button
                     className={`btn btn-icon player-control-btn player-analysis-toggle${analysisOpen ? ' active' : ''}`}
-                    onClick={handleToggleAnalysis}
+                    onClick={analysisAvailable ? handleToggleAnalysis : handleStartAnalysis}
                     type="button"
-                    disabled={!analysisAvailable}
+                    disabled={analysisRunning || analysisState.status === 'checking'}
                     title={analysisButtonTitle}
                     aria-label="视频理解"
                   >
-                    {analysisState.status === 'loading' ? (
+                    {analysisState.status === 'checking' || analysisRunning ? (
                       <span className="player-analysis-spinner" aria-hidden="true" />
                     ) : (
                       <Icon path={<><path d="M4 5h16v10H4z" /><path d="M8 19h8" /><path d="M10 15v4M14 15v4" /><path d="M8 9h8M8 12h5" /></>} />

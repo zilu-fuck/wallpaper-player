@@ -2,7 +2,11 @@ const crypto = require('crypto')
 const fs = require('fs')
 const fsp = require('fs/promises')
 const path = require('path')
+const { spawn } = require('child_process')
 const { getResourcePath, pathKey } = require('./paths')
+
+let activeJob = null
+let activeJobSeq = 0
 
 function getVideoComprehensionRoot() {
   return getResourcePath('video comprehension', 'video comprehension')
@@ -10,6 +14,190 @@ function getVideoComprehensionRoot() {
 
 function getOutputsDir() {
   return path.join(getVideoComprehensionRoot(), 'outputs')
+}
+
+function getActiveAnalysisJob() {
+  if (!activeJob) return { running: false }
+  return {
+    running: true,
+    jobId: activeJob.jobId,
+    videoPath: activeJob.videoPath,
+    startedAt: activeJob.startedAt,
+    lastEvent: activeJob.lastEvent
+  }
+}
+
+function emitAnalysisEvent(sender, payload) {
+  if (!sender || sender.isDestroyed()) return
+  sender.send('video-analysis-event', payload)
+}
+
+function parsePipelineLine(line) {
+  const trimmed = line.trim()
+  if (!trimmed) return null
+  const match = trimmed.match(/^\[(.*?)\]\s+(\S+)\s+(\S+):\s*(.*)$/)
+  if (!match) {
+    return {
+      type: 'output',
+      message: trimmed
+    }
+  }
+
+  let message = match[4]
+  let extra = null
+  const jsonStart = message.indexOf(' {')
+  if (jsonStart >= 0) {
+    const maybeJson = message.slice(jsonStart + 1)
+    try {
+      extra = JSON.parse(maybeJson)
+      message = message.slice(0, jsonStart)
+    } catch {}
+  }
+
+  return {
+    type: 'stage',
+    createdAt: match[1],
+    stage: match[2],
+    status: match[3],
+    message: message.trim(),
+    extra
+  }
+}
+
+function handleProcessOutput(job, sender, text) {
+  job.outputBuffer += text
+  const lines = job.outputBuffer.split(/\r?\n/)
+  job.outputBuffer = lines.pop() || ''
+
+  for (const line of lines) {
+    const event = parsePipelineLine(line)
+    if (!event) continue
+    job.lastEvent = event
+    emitAnalysisEvent(sender, {
+      jobId: job.jobId,
+      videoPath: job.videoPath,
+      status: 'running',
+      event
+    })
+  }
+}
+
+async function startVideoAnalysis(videoPath, sender) {
+  if (activeJob) {
+    return {
+      accepted: false,
+      reason: 'already_running',
+      job: getActiveAnalysisJob()
+    }
+  }
+
+  const root = getVideoComprehensionRoot()
+  try {
+    await fsp.access(path.join(root, 'pyproject.toml'))
+  } catch {
+    return {
+      accepted: false,
+      reason: 'missing_project',
+      error: `未找到视频理解项目：${root}`
+    }
+  }
+
+  const job = {
+    jobId: `analysis_${Date.now()}_${++activeJobSeq}`,
+    videoPath: path.resolve(videoPath),
+    startedAt: Date.now(),
+    lastEvent: null,
+    outputBuffer: '',
+    process: null
+  }
+
+  const child = spawn('uv', ['run', 'video-comprehension', job.videoPath], {
+    cwd: root,
+    windowsHide: true,
+    shell: false,
+    env: {
+      ...process.env,
+      PYTHONUTF8: '1',
+      PYTHONIOENCODING: 'utf-8'
+    }
+  })
+  job.process = child
+  activeJob = job
+
+  emitAnalysisEvent(sender, {
+    jobId: job.jobId,
+    videoPath: job.videoPath,
+    status: 'started',
+    message: '开始分析当前视频'
+  })
+
+  child.stdout?.setEncoding('utf8')
+  child.stderr?.setEncoding('utf8')
+  child.stdout?.on('data', chunk => handleProcessOutput(job, sender, chunk))
+  child.stderr?.on('data', chunk => handleProcessOutput(job, sender, chunk))
+
+  child.on('error', (err) => {
+    if (activeJob?.jobId === job.jobId) activeJob = null
+    emitAnalysisEvent(sender, {
+      jobId: job.jobId,
+      videoPath: job.videoPath,
+      status: 'error',
+      error: err.message
+    })
+  })
+
+  child.on('close', async (code, signal) => {
+    if (job.outputBuffer.trim()) {
+      const event = parsePipelineLine(job.outputBuffer)
+      if (event) {
+        job.lastEvent = event
+        emitAnalysisEvent(sender, {
+          jobId: job.jobId,
+          videoPath: job.videoPath,
+          status: 'running',
+          event
+        })
+      }
+      job.outputBuffer = ''
+    }
+
+    if (activeJob?.jobId === job.jobId) activeJob = null
+    if (code === 0) {
+      const analysis = await findVideoAnalysis(job.videoPath)
+      emitAnalysisEvent(sender, {
+        jobId: job.jobId,
+        videoPath: job.videoPath,
+        status: 'success',
+        analysis
+      })
+      return
+    }
+
+    emitAnalysisEvent(sender, {
+      jobId: job.jobId,
+      videoPath: job.videoPath,
+      status: signal ? 'cancelled' : 'error',
+      code,
+      signal,
+      error: signal ? '分析已取消' : `视频理解管线退出：${code}`
+    })
+  })
+
+  return {
+    accepted: true,
+    job: getActiveAnalysisJob()
+  }
+}
+
+function cancelVideoAnalysis(jobId) {
+  if (!activeJob) return { cancelled: false, reason: 'not_running' }
+  if (jobId && activeJob.jobId !== jobId) return { cancelled: false, reason: 'job_mismatch' }
+
+  const job = activeJob
+  try {
+    job.process?.kill()
+  } catch {}
+  return { cancelled: true, jobId: job.jobId }
 }
 
 async function readJson(filePath) {
@@ -188,6 +376,9 @@ async function findVideoAnalysis(videoPath) {
 
 module.exports = {
   findVideoAnalysis,
+  startVideoAnalysis,
+  cancelVideoAnalysis,
+  getActiveAnalysisJob,
   getOutputsDir,
   getVideoComprehensionRoot
 }

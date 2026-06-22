@@ -40,6 +40,10 @@ contextBridge.exposeInMainWorld('electronAPI', {
   getPlaybackState: (filePath) => ipcRenderer.invoke('get-playback-state', filePath),
   savePlaybackState: (filePath, statePatch) => ipcRenderer.invoke('save-playback-state', filePath, statePatch),
   getVideoAnalysis: (filePath) => ipcRenderer.invoke('video-analysis-get', filePath),
+  startVideoAnalysis: (filePath) => ipcRenderer.invoke('video-analysis-start', filePath),
+  cancelVideoAnalysis: (jobId) => ipcRenderer.invoke('video-analysis-cancel', jobId),
+  getVideoAnalysisJob: () => ipcRenderer.invoke('video-analysis-job'),
+  onVideoAnalysisEvent: (callback) => on('video-analysis-event', callback),
   checkFfmpeg: () => ipcRenderer.invoke('check-ffmpeg'),
 
   updaterGetStatus: () => ipcRenderer.invoke('updater-get-status'),

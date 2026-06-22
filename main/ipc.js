@@ -37,7 +37,12 @@ const {
 } = require('./updater')
 const { mpvManager, resolveMpvPath } = require('./mpv-integration')
 const { getMainWindow } = require('./window')
-const { findVideoAnalysis } = require('./video-analysis')
+const {
+  findVideoAnalysis,
+  startVideoAnalysis,
+  cancelVideoAnalysis,
+  getActiveAnalysisJob
+} = require('./video-analysis')
 
 const MPV_COMMANDS = new Set([
   'seekTo',
@@ -252,6 +257,23 @@ function setupIPC() {
     } catch (err) {
       return { available: false, reason: 'error', error: err.message }
     }
+  })
+
+  ipcMain.handle('video-analysis-start', async (event, filePath) => {
+    try {
+      const resolvedPath = await assertAllowedVideoPath(filePath)
+      return await startVideoAnalysis(resolvedPath, event.sender)
+    } catch (err) {
+      return { accepted: false, reason: 'error', error: err.message }
+    }
+  })
+
+  ipcMain.handle('video-analysis-cancel', async (_event, jobId) => {
+    return cancelVideoAnalysis(jobId)
+  })
+
+  ipcMain.handle('video-analysis-job', async () => {
+    return getActiveAnalysisJob()
   })
 
   ipcMain.handle('check-ffmpeg', async () => {
