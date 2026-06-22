@@ -1,4 +1,4 @@
-import { Download, Expand, Heart, Minimize, MonitorPlay, MoreHorizontal, Pause, Play, Tag } from 'lucide-react-native'
+import { Brain, Download, Expand, Heart, Minimize, MonitorPlay, MoreHorizontal, Pause, Play, Tag } from 'lucide-react-native'
 import { Pressable, StyleSheet, View } from 'react-native'
 import { colors } from '../../theme'
 import { HIT_SLOP, TOP_SAFE_OFFSET } from '../../screens/player/playerLayout'
@@ -16,6 +16,7 @@ type Props = {
   onSeek: (time: number) => void
   onFavorite: () => void
   onTags: () => void
+  onAnalysis: () => void
   onCache: () => void
   onDesktopPlay: () => void
   onMore: () => void
@@ -35,6 +36,7 @@ export function PlayerControls({
   onSeek,
   onFavorite,
   onTags,
+  onAnalysis,
   onCache,
   onDesktopPlay,
   onMore,
@@ -57,6 +59,9 @@ export function PlayerControls({
             </Pressable>
             <Pressable style={styles.iconButton} onPress={() => { onInteract(); onTags() }} hitSlop={HIT_SLOP}>
               <Tag color={colors.text} size={20} />
+            </Pressable>
+            <Pressable style={styles.iconButton} onPress={() => { onInteract(); onAnalysis() }} hitSlop={HIT_SLOP}>
+              <Brain color={colors.text} size={20} />
             </Pressable>
             <Pressable style={styles.iconButton} onPress={() => { onInteract(); onCache() }} hitSlop={HIT_SLOP}>
               <Download color={colors.text} size={20} />

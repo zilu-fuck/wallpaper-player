@@ -1,4 +1,4 @@
-import type { LibraryResponse, PairingPayload, PlaybackState, RemoteInfo, StoredDevice } from '../types'
+import type { LibraryResponse, PairingPayload, PlaybackState, RemoteInfo, StoredDevice, VideoAnalysisResponse } from '../types'
 import { joinUrl, normalizeEndpoint } from '../utils/url'
 import { Platform } from 'react-native'
 
@@ -226,6 +226,21 @@ export async function cancelTranscode(device: StoredDevice, videoId: string, qua
       timeoutMs: 5000
     }
   )
+}
+
+export async function getVideoAnalysis(device: StoredDevice, videoId: string) {
+  return requestJson<VideoAnalysisResponse>(device.endpoint, `/v1/videos/${encodeURIComponent(videoId)}/analysis`, {
+    token: device.token,
+    timeoutMs: 12000
+  })
+}
+
+export async function startVideoAnalysis(device: StoredDevice, videoId: string) {
+  return requestJson<VideoAnalysisResponse>(device.endpoint, `/v1/videos/${encodeURIComponent(videoId)}/analysis`, {
+    method: 'POST',
+    token: device.token,
+    timeoutMs: 12000
+  })
 }
 
 export async function playOnDesktop(device: StoredDevice, videoId: string, position = 0) {

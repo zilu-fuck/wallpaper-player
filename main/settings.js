@@ -1,11 +1,19 @@
 const path = require('path')
 const fs = require('fs')
+const crypto = require('crypto')
 const { app } = require('electron')
-const { pathKey, isExistingFile, isMpvExecutablePath } = require('./paths')
+const { getResourcePath, pathKey, isExistingFile, isMpvExecutablePath } = require('./paths')
+
+const PRIVACY_PASSWORD_ITERATIONS = 120000
+const PRIVACY_PASSWORD_KEY_LENGTH = 32
+const PRIVACY_PASSWORD_DIGEST = 'sha256'
 
 const sessionAllowedDirectories = new Set()
+const sessionPrivateDirectories = new Set()
 const sessionAllowedMpvPaths = new Set()
 const sessionAllowedFiles = new Set()
+const sessionAllowedAnalysisResultDirectories = new Set()
+const sessionAllowedAnalysisModelDirectories = new Set()
 const fallbackUserDataDir = path.join(process.cwd(), '.tmp-wallpaper-player')
 
 let directoryChangeHandler = null
@@ -36,10 +44,92 @@ function getSettingsPath() {
   return path.join(baseDir, 'settings.json')
 }
 
+function getDefaultAnalysisResultDirectory() {
+  const baseDir = app?.getPath
+    ? app.getPath('userData')
+    : fallbackUserDataDir
+  return path.join(baseDir, 'analysis-results')
+}
+
+function getDefaultAnalysisModelDirectory() {
+  return getResourcePath('video comprehension', 'video comprehension', 'models')
+}
+
 function normalizeDirectoryList(directories) {
   return Array.isArray(directories)
     ? directories.filter(dir => typeof dir === 'string' && dir.trim())
     : []
+}
+
+function normalizePrivateDirectories(privateDirectories, directories = []) {
+  const directoryKeys = new Set(normalizeDirectoryList(directories).map(dir => pathKey(path.resolve(dir))))
+  return normalizeDirectoryList(privateDirectories)
+    .map(dir => path.resolve(dir))
+    .filter(dir => directoryKeys.has(pathKey(dir)))
+}
+
+function getPublicDirectories(directories, privateDirectories = []) {
+  const privateKeys = new Set(normalizePrivateDirectories(privateDirectories, directories).map(pathKey))
+  return normalizeDirectoryList(directories)
+    .filter(dir => !privateKeys.has(pathKey(path.resolve(dir))))
+}
+
+function normalizePrivacy(privacy) {
+  const value = privacy && typeof privacy === 'object' && !Array.isArray(privacy)
+    ? privacy
+    : {}
+  const salt = typeof value.salt === 'string' && /^[0-9a-f]{32}$/i.test(value.salt)
+    ? value.salt.toLowerCase()
+    : ''
+  const passwordHash = typeof value.passwordHash === 'string' && /^[0-9a-f]{64}$/i.test(value.passwordHash)
+    ? value.passwordHash.toLowerCase()
+    : ''
+  return {
+    salt,
+    passwordHash,
+    passwordSet: Boolean(salt && passwordHash)
+  }
+}
+
+function hashPrivacyPassword(password, salt) {
+  return crypto.pbkdf2Sync(
+    String(password),
+    salt,
+    PRIVACY_PASSWORD_ITERATIONS,
+    PRIVACY_PASSWORD_KEY_LENGTH,
+    PRIVACY_PASSWORD_DIGEST
+  ).toString('hex')
+}
+
+function createPrivacyPassword(password) {
+  const normalized = typeof password === 'string' ? password : ''
+  if (normalized.length < 4) {
+    throw new Error('隐私密码至少需要 4 位')
+  }
+  const salt = crypto.randomBytes(16).toString('hex')
+  return normalizePrivacy({
+    salt,
+    passwordHash: hashPrivacyPassword(normalized, salt)
+  })
+}
+
+function verifyPrivacyPassword(password, privacy = loadSettings().privacy) {
+  const current = normalizePrivacy(privacy)
+  if (!current.passwordSet) return false
+  const nextHash = hashPrivacyPassword(typeof password === 'string' ? password : '', current.salt)
+  const expected = Buffer.from(current.passwordHash, 'hex')
+  const actual = Buffer.from(nextHash, 'hex')
+  return expected.length === actual.length && crypto.timingSafeEqual(expected, actual)
+}
+
+function sanitizeSettingsForRenderer(settings) {
+  const privacy = normalizePrivacy(settings?.privacy)
+  return {
+    ...settings,
+    privacy: {
+      passwordSet: privacy.passwordSet
+    }
+  }
 }
 
 function normalizeCustomTags(customTags) {
@@ -128,12 +218,84 @@ function normalizeWindowClose(windowClose) {
   }
 }
 
+function normalizeAnalysisLlmProfile(profile) {
+  const value = profile && typeof profile === 'object' && !Array.isArray(profile)
+    ? profile
+    : {}
+  return {
+    llmBaseUrl: typeof value.llmBaseUrl === 'string' ? value.llmBaseUrl : '',
+    llmName: typeof value.llmName === 'string' ? value.llmName : '',
+    llmApiKey: typeof value.llmApiKey === 'string' ? value.llmApiKey : ''
+  }
+}
+
+function normalizeAnalysisLlmProfiles(profiles) {
+  const value = profiles && typeof profiles === 'object' && !Array.isArray(profiles)
+    ? profiles
+    : {}
+  return {
+    local: normalizeAnalysisLlmProfile(value.local),
+    api: normalizeAnalysisLlmProfile(value.api)
+  }
+}
+
+function mergeAnalysisLlmProfile(currentProfile, nextProfile) {
+  const current = normalizeAnalysisLlmProfile(currentProfile)
+  const next = nextProfile && typeof nextProfile === 'object' && !Array.isArray(nextProfile)
+    ? nextProfile
+    : {}
+  return normalizeAnalysisLlmProfile({
+    ...current,
+    ...next
+  })
+}
+
+function mergeAnalysisLlmProfiles(currentProfiles, nextProfiles) {
+  const current = normalizeAnalysisLlmProfiles(currentProfiles)
+  const next = nextProfiles && typeof nextProfiles === 'object' && !Array.isArray(nextProfiles)
+    ? nextProfiles
+    : {}
+  return {
+    local: Object.hasOwn(next, 'local')
+      ? mergeAnalysisLlmProfile(current.local, next.local)
+      : current.local,
+    api: Object.hasOwn(next, 'api')
+      ? mergeAnalysisLlmProfile(current.api, next.api)
+      : current.api
+  }
+}
+
+function mergeVideoAnalysis(currentVideoAnalysis, nextVideoAnalysis) {
+  const current = normalizeVideoAnalysis(currentVideoAnalysis)
+  const next = nextVideoAnalysis && typeof nextVideoAnalysis === 'object' && !Array.isArray(nextVideoAnalysis)
+    ? nextVideoAnalysis
+    : {}
+  return normalizeVideoAnalysis({
+    ...current,
+    ...(Object.hasOwn(next, 'enabled') ? { enabled: next.enabled } : {}),
+    ...(Object.hasOwn(next, 'outputDir') ? { outputDir: next.outputDir } : {}),
+    ...(Object.hasOwn(next, 'modelDir') ? { modelDir: next.modelDir } : {}),
+    llmProfiles: Object.hasOwn(next, 'llmProfiles')
+      ? mergeAnalysisLlmProfiles(current.llmProfiles, next.llmProfiles)
+      : current.llmProfiles
+  })
+}
+
 function normalizeVideoAnalysis(videoAnalysis) {
   const analysis = videoAnalysis && typeof videoAnalysis === 'object' && !Array.isArray(videoAnalysis)
     ? videoAnalysis
     : {}
+  const outputDir = typeof analysis.outputDir === 'string' && analysis.outputDir.trim()
+    ? path.resolve(analysis.outputDir)
+    : getDefaultAnalysisResultDirectory()
+  const modelDir = typeof analysis.modelDir === 'string' && analysis.modelDir.trim()
+    ? path.resolve(analysis.modelDir)
+    : getDefaultAnalysisModelDirectory()
   return {
-    enabled: Boolean(analysis.enabled)
+    enabled: Boolean(analysis.enabled),
+    outputDir,
+    modelDir,
+    llmProfiles: normalizeAnalysisLlmProfiles(analysis.llmProfiles)
   }
 }
 
@@ -168,11 +330,13 @@ function loadSettings() {
   const defaults = {
     theme: 'dark',
     directories: [],
+    privateDirectories: [],
     defaultDirectory: '',
     favorites: [],
     customTags: {},
     playbackStates: {},
     playbackMode: 'order',
+    privacy: normalizePrivacy(),
     remoteAccess: normalizeRemoteAccess(),
     windowClose: normalizeWindowClose(),
     videoAnalysis: normalizeVideoAnalysis()
@@ -182,19 +346,23 @@ function loadSettings() {
     const raw = fs.readFileSync(getSettingsPath(), 'utf-8')
     const parsed = JSON.parse(raw)
     const directories = normalizeDirectoryList(parsed.directories)
-    const defaultDirectory = typeof parsed.defaultDirectory === 'string' && directories.includes(parsed.defaultDirectory)
+    const privateDirectories = normalizePrivateDirectories(parsed.privateDirectories, directories)
+    const publicDirectories = getPublicDirectories(directories, privateDirectories)
+    const defaultDirectory = typeof parsed.defaultDirectory === 'string' && publicDirectories.includes(parsed.defaultDirectory)
       ? parsed.defaultDirectory
-      : directories[0] || ''
+      : publicDirectories[0] || ''
 
     return {
       ...defaults,
       ...parsed,
       directories,
+      privateDirectories,
       defaultDirectory,
       favorites: Array.isArray(parsed.favorites) ? parsed.favorites : defaults.favorites,
       customTags: normalizeCustomTags(parsed.customTags),
       playbackStates: normalizePlaybackStates(parsed.playbackStates),
       playbackMode: ['order', 'shuffle', 'single'].includes(parsed.playbackMode) ? parsed.playbackMode : defaults.playbackMode,
+      privacy: normalizePrivacy(parsed.privacy),
       remoteAccess: normalizeRemoteAccess(parsed.remoteAccess),
       windowClose: normalizeWindowClose(parsed.windowClose),
       videoAnalysis: normalizeVideoAnalysis(parsed.videoAnalysis)
@@ -208,26 +376,37 @@ function saveSettings(settings) {
   const dir = path.dirname(getSettingsPath())
   if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true })
 
+  const currentSettings = loadSettings()
   const merged = {
-    ...loadSettings(),
+    ...currentSettings,
     ...settings
+  }
+  if (settings && Object.hasOwn(settings, 'videoAnalysis')) {
+    merged.videoAnalysis = mergeVideoAnalysis(currentSettings.videoAnalysis, settings.videoAnalysis)
   }
 
   merged.directories = normalizeDirectoryList(merged.directories)
-  if (!merged.defaultDirectory || !merged.directories.includes(merged.defaultDirectory)) {
-    merged.defaultDirectory = merged.directories[0] || ''
+  merged.privateDirectories = normalizePrivateDirectories(merged.privateDirectories, merged.directories)
+  const privateDirectoryKeys = new Set(merged.privateDirectories.map(pathKey))
+  for (const key of [...sessionPrivateDirectories]) {
+    if (!privateDirectoryKeys.has(key)) sessionPrivateDirectories.delete(key)
+  }
+  const publicDirectories = getPublicDirectories(merged.directories, merged.privateDirectories)
+  if (!merged.defaultDirectory || !publicDirectories.includes(merged.defaultDirectory)) {
+    merged.defaultDirectory = publicDirectories[0] || ''
   }
   if (!Array.isArray(merged.favorites)) merged.favorites = []
   merged.customTags = normalizeCustomTags(merged.customTags)
   merged.playbackStates = normalizePlaybackStates(merged.playbackStates)
   merged.playbackMode = ['order', 'shuffle', 'single'].includes(merged.playbackMode) ? merged.playbackMode : 'order'
+  merged.privacy = normalizePrivacy(merged.privacy)
   merged.remoteAccess = normalizeRemoteAccess(merged.remoteAccess)
   merged.windowClose = normalizeWindowClose(merged.windowClose)
   merged.videoAnalysis = normalizeVideoAnalysis(merged.videoAnalysis)
 
   fs.writeFileSync(getSettingsPath(), JSON.stringify(merged, null, 2))
 
-  if (Object.hasOwn(settings, 'directories')) {
+  if (Object.hasOwn(settings, 'directories') || Object.hasOwn(settings, 'privateDirectories')) {
     directoryChangeHandler?.(merged.directories)
   }
 
@@ -251,6 +430,16 @@ function getAllowedVideoDirectories() {
     })
 }
 
+function getPublicVideoDirectories() {
+  const settings = loadSettings()
+  const privateKeys = new Set([
+    ...normalizePrivateDirectories(settings.privateDirectories, settings.directories).map(pathKey),
+    ...sessionPrivateDirectories
+  ])
+  return getAllowedVideoDirectories()
+    .filter(dir => !privateKeys.has(pathKey(dir)))
+}
+
 function sanitizeSettingsForSave(settings) {
   const current = loadSettings()
   const sanitized = { ...settings }
@@ -266,15 +455,22 @@ function sanitizeSettingsForSave(settings) {
       .filter(dir => allowedDirectoryKeys.has(pathKey(dir)))
   }
 
+  if (Object.hasOwn(sanitized, 'privateDirectories')) {
+    const directories = normalizeDirectoryList(sanitized.directories ?? current.directories).map(dir => path.resolve(dir))
+    sanitized.privateDirectories = normalizePrivateDirectories(sanitized.privateDirectories, directories)
+  }
+
   if (Object.hasOwn(sanitized, 'defaultDirectory')) {
     const directories = normalizeDirectoryList(sanitized.directories ?? current.directories).map(dir => path.resolve(dir))
+    const privateDirectories = normalizePrivateDirectories(sanitized.privateDirectories ?? current.privateDirectories, directories)
+    const publicDirectories = getPublicDirectories(directories, privateDirectories)
     const defaultDirectory = typeof sanitized.defaultDirectory === 'string'
       ? path.resolve(sanitized.defaultDirectory)
       : ''
 
-    sanitized.defaultDirectory = directories.some(dir => pathKey(dir) === pathKey(defaultDirectory))
+    sanitized.defaultDirectory = publicDirectories.some(dir => pathKey(dir) === pathKey(defaultDirectory))
       ? defaultDirectory
-      : directories[0] || ''
+      : publicDirectories[0] || ''
   }
 
   if (Object.hasOwn(sanitized, 'mpvPath') && sanitized.mpvPath) {
@@ -312,6 +508,10 @@ function sanitizeSettingsForSave(settings) {
       : current.playbackMode || 'order'
   }
 
+  if (Object.hasOwn(sanitized, 'privacy')) {
+    sanitized.privacy = current.privacy || normalizePrivacy()
+  }
+
   if (Object.hasOwn(sanitized, 'remoteAccess')) {
     sanitized.remoteAccess = normalizeRemoteAccess(sanitized.remoteAccess)
   }
@@ -321,7 +521,32 @@ function sanitizeSettingsForSave(settings) {
   }
 
   if (Object.hasOwn(sanitized, 'videoAnalysis')) {
-    sanitized.videoAnalysis = normalizeVideoAnalysis(sanitized.videoAnalysis)
+    const nextAnalysis = mergeVideoAnalysis(current.videoAnalysis, sanitized.videoAnalysis)
+    const currentDir = current.videoAnalysis?.outputDir
+      ? path.resolve(current.videoAnalysis.outputDir)
+      : getDefaultAnalysisResultDirectory()
+    const currentModelDir = current.videoAnalysis?.modelDir
+      ? path.resolve(current.videoAnalysis.modelDir)
+      : getDefaultAnalysisModelDirectory()
+    const nextDir = nextAnalysis.outputDir ? path.resolve(nextAnalysis.outputDir) : currentDir
+    const nextModelDir = nextAnalysis.modelDir ? path.resolve(nextAnalysis.modelDir) : currentModelDir
+    const canSaveOutputDir = (
+      pathKey(nextDir) === pathKey(currentDir) ||
+      pathKey(nextDir) === pathKey(getDefaultAnalysisResultDirectory()) ||
+      sessionAllowedAnalysisResultDirectories.has(pathKey(nextDir))
+    )
+    const canSaveModelDir = (
+      pathKey(nextModelDir) === pathKey(currentModelDir) ||
+      pathKey(nextModelDir) === pathKey(getDefaultAnalysisModelDirectory()) ||
+      sessionAllowedAnalysisModelDirectories.has(pathKey(nextModelDir))
+    )
+
+    sanitized.videoAnalysis = {
+      ...nextAnalysis,
+      llmProfiles: nextAnalysis.llmProfiles,
+      outputDir: canSaveOutputDir ? nextDir : currentDir,
+      modelDir: canSaveModelDir ? nextModelDir : currentModelDir
+    }
   }
 
   return sanitized
@@ -329,24 +554,38 @@ function sanitizeSettingsForSave(settings) {
 
 module.exports = {
   sessionAllowedDirectories,
+  sessionPrivateDirectories,
   sessionAllowedMpvPaths,
   sessionAllowedFiles,
+  sessionAllowedAnalysisResultDirectories,
+  sessionAllowedAnalysisModelDirectories,
   setDirectoryChangeHandler,
   onSettingsChanged,
   loadSettings,
   saveSettings,
   sanitizeSettingsForSave,
+  sanitizeSettingsForRenderer,
   normalizeDirectoryList,
+  normalizePrivateDirectories,
+  normalizePrivacy,
+  createPrivacyPassword,
+  verifyPrivacyPassword,
+  getPublicDirectories,
   normalizeCustomTags,
   normalizePlaybackState,
   normalizePlaybackStates,
   normalizeRemoteAccess,
   normalizeWindowClose,
   normalizeVideoAnalysis,
+  mergeVideoAnalysis,
+  normalizeAnalysisLlmProfiles,
+  getDefaultAnalysisResultDirectory,
+  getDefaultAnalysisModelDirectory,
   getPlaybackStateKey,
   getPlaybackState,
   upsertPlaybackState,
   addSessionAllowedFile,
   isSessionAllowedFile,
-  getAllowedVideoDirectories
+  getAllowedVideoDirectories,
+  getPublicVideoDirectories
 }

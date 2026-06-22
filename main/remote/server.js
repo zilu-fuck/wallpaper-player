@@ -5,7 +5,7 @@ const path = require('path')
 const zlib = require('zlib')
 const { shell } = require('electron')
 const { URL } = require('url')
-const { getAllowedVideoDirectories, getPlaybackState, loadSettings, saveSettings, upsertPlaybackState } = require('../settings')
+const { getPlaybackState, getPublicVideoDirectories, loadSettings, saveSettings, upsertPlaybackState } = require('../settings')
 const { assertAllowedVideoPath, scanWithCache } = require('../scanner')
 const { resolveThumbnail } = require('../thumbnail')
 const {
@@ -15,6 +15,7 @@ const {
   verifyAccessTokenWithType,
   verifyBoundScopedToken
 } = require('./identity')
+const { isPathInside, pathKey } = require('../paths')
 const { getDirectoryId, getDirectoryName, getFavoriteKeyForVideoId, getPathForVideoId, toRemoteVideo } = require('./video-index')
 const { getLanAddresses, getPrimaryEndpoint } = require('./network')
 const { getMainWindow } = require('../window')
@@ -24,6 +25,12 @@ const {
   getTranscodedPath,
   startMobileTranscode
 } = require('./transcode')
+const {
+  findVideoAnalysis,
+  getActiveAnalysisJob,
+  getRecentAnalysisEvent,
+  startVideoAnalysis
+} = require('../video-analysis')
 
 const VIDEO_CONTENT_TYPES = {
   '.mp4': 'video/mp4',
@@ -218,7 +225,12 @@ async function resolveVideoPath(videoId) {
   if (!fullPath) {
     throw Object.assign(new Error('视频不存在或索引尚未加载'), { status: 404, code: 'video_not_found' })
   }
-  return assertAllowedVideoPath(fullPath)
+  const resolvedPath = await assertAllowedVideoPath(fullPath)
+  const publicDirectories = getPublicVideoDirectories()
+  if (!publicDirectories.some(directory => isPathInside(directory, resolvedPath))) {
+    throw Object.assign(new Error('视频不存在或索引尚未加载'), { status: 404, code: 'video_not_found' })
+  }
+  return resolvedPath
 }
 
 async function handleInfo(req, res, port) {
@@ -338,7 +350,7 @@ function applyDesktopMetadata(video, settings) {
 }
 
 async function handleLibrary(req, res, url) {
-  const directories = getAllowedVideoDirectories()
+  const directories = getPublicVideoDirectories()
   const items = []
   const directorySummaries = []
   const settings = loadSettings()
@@ -493,6 +505,7 @@ async function handleStartTranscode(req, res, videoId) {
 }
 
 async function handleGetTranscode(req, res, videoId) {
+  await resolveVideoPath(videoId)
   const url = new URL(req.url, `http://${req.headers.host || '127.0.0.1'}`)
   const quality = url.searchParams.get('quality') || 'compatible'
   const status = getMobileTranscodeStatus(videoId, quality)
@@ -504,12 +517,14 @@ async function handleGetTranscode(req, res, videoId) {
 }
 
 async function handleCancelTranscode(req, res, videoId) {
+  await resolveVideoPath(videoId)
   const url = new URL(req.url, `http://${req.headers.host || '127.0.0.1'}`)
   const quality = url.searchParams.get('quality') || 'compatible'
   sendJson(req, res, 200, { success: cancelMobileTranscode(videoId, quality) })
 }
 
 async function handleTranscodedStream(req, res, videoId) {
+  await resolveVideoPath(videoId)
   const url = new URL(req.url, `http://${req.headers.host || '127.0.0.1'}`)
   const quality = url.searchParams.get('quality') || 'compatible'
   const outputPath = getTranscodedPath(videoId, quality)
@@ -518,6 +533,141 @@ async function handleTranscodedStream(req, res, videoId) {
     return
   }
   await streamFileWithRange(req, res, outputPath, 'video/mp4', '兼容格式不存在')
+}
+
+function sanitizeRemoteAnalysis(analysis) {
+  if (!analysis || typeof analysis !== 'object') return null
+  const timeline = Array.isArray(analysis.timeline)
+    ? analysis.timeline.map(item => ({
+        start_time: Number(item?.start_time) || 0,
+        end_time: Number(item?.end_time) || 0,
+        title: typeof item?.title === 'string' ? item.title : '',
+        description: typeof item?.description === 'string' ? item.description : '',
+        confidence: Number(item?.confidence) || 0,
+        vlm_status: typeof item?.vlm_status === 'string' ? item.vlm_status : ''
+      }))
+    : []
+  const characters = Array.isArray(analysis.characters)
+    ? analysis.characters.map(item => ({
+        name: typeof item?.name === 'string' ? item.name : '',
+        identity_status: typeof item?.identity_status === 'string' ? item.identity_status : '',
+        description: typeof item?.description === 'string' ? item.description : '',
+        confidence: Number(item?.confidence) || 0
+      })).filter(item => item.name || item.description)
+    : []
+  const sourceVideo = analysis.sourceVideo && typeof analysis.sourceVideo === 'object'
+    ? {
+        original_filename: typeof analysis.sourceVideo.original_filename === 'string'
+          ? analysis.sourceVideo.original_filename
+          : '',
+        duration: Number(analysis.sourceVideo.duration) || 0,
+        file_size_bytes: Number(analysis.sourceVideo.file_size_bytes) || 0
+      }
+    : {}
+
+  return {
+    available: analysis.available !== false,
+    reason: typeof analysis.reason === 'string' ? analysis.reason : '',
+    error: typeof analysis.error === 'string' ? analysis.error : '',
+    savedAt: typeof analysis.savedAt === 'string' ? analysis.savedAt : '',
+    matchType: typeof analysis.matchType === 'string' ? analysis.matchType : '',
+    sourceVideo,
+    summary: typeof analysis.summary === 'string' ? analysis.summary : '',
+    tags: Array.isArray(analysis.tags) ? analysis.tags.filter(item => typeof item === 'string') : [],
+    keywords: Array.isArray(analysis.keywords) ? analysis.keywords.filter(item => typeof item === 'string') : [],
+    timeline,
+    characters,
+    quality: analysis.quality && typeof analysis.quality === 'object' ? analysis.quality : {},
+    naming: analysis.naming && typeof analysis.naming === 'object' ? analysis.naming : {}
+  }
+}
+
+function sanitizeRemoteAnalysisEvent(event) {
+  if (!event || typeof event !== 'object') return null
+  return {
+    type: typeof event.type === 'string' ? event.type : '',
+    stage: typeof event.stage === 'string' ? event.stage : '',
+    status: typeof event.status === 'string' ? event.status : '',
+    message: typeof event.message === 'string' ? event.message : '',
+    createdAt: typeof event.createdAt === 'string' ? event.createdAt : ''
+  }
+}
+
+function sanitizeRemoteAnalysisJob(job, videoPath) {
+  if (!job?.running) return null
+  const sameVideo = job.videoPath && pathKey(job.videoPath) === pathKey(videoPath)
+  if (!sameVideo) {
+    return {
+      running: true,
+      currentVideo: false,
+      startedAt: job.startedAt || 0
+    }
+  }
+
+  return {
+    running: true,
+    currentVideo: true,
+    jobId: job.jobId || '',
+    startedAt: job.startedAt || 0,
+    lastEvent: sanitizeRemoteAnalysisEvent(job.lastEvent)
+  }
+}
+
+function sanitizeRemoteRecentAnalysisEvent(recent, videoPath) {
+  if (!recent || (recent.videoPath && pathKey(recent.videoPath) !== pathKey(videoPath))) return null
+  return {
+    jobId: recent.jobId || '',
+    status: typeof recent.status === 'string' ? recent.status : '',
+    message: typeof recent.message === 'string' ? recent.message : '',
+    error: typeof recent.error === 'string' ? recent.error : '',
+    updatedAt: recent.updatedAt || 0,
+    event: sanitizeRemoteAnalysisEvent(recent.event),
+    analysis: sanitizeRemoteAnalysis(recent.analysis)
+  }
+}
+
+async function getRemoteVideoAnalysisPayload(videoId) {
+  const videoPath = await resolveVideoPath(videoId)
+  const settings = loadSettings()
+  const enabled = Boolean(settings.videoAnalysis?.enabled)
+  const job = getActiveAnalysisJob()
+  const sanitizedJob = sanitizeRemoteAnalysisJob(job, videoPath)
+  const analysis = enabled && !sanitizedJob?.currentVideo
+    ? await findVideoAnalysis(videoPath)
+    : { available: false, reason: enabled ? 'running' : 'disabled' }
+  const recent = sanitizeRemoteRecentAnalysisEvent(getRecentAnalysisEvent(videoPath), videoPath)
+  return {
+    enabled,
+    analysis: sanitizeRemoteAnalysis(analysis),
+    job: sanitizedJob,
+    recent,
+    checkedAt: Date.now()
+  }
+}
+
+async function handleGetVideoAnalysis(req, res, videoId) {
+  sendJson(req, res, 200, await getRemoteVideoAnalysisPayload(videoId))
+}
+
+async function handleStartVideoAnalysis(req, res, videoId) {
+  const videoPath = await resolveVideoPath(videoId)
+  const settings = loadSettings()
+  if (!settings.videoAnalysis?.enabled) {
+    sendJson(req, res, 200, {
+      accepted: false,
+      reason: 'disabled',
+      error: '请先在电脑端设置里开启视频理解',
+      ...(await getRemoteVideoAnalysisPayload(videoId))
+    })
+    return
+  }
+
+  const result = await startVideoAnalysis(videoPath)
+  sendJson(req, res, result.accepted ? 202 : 200, {
+    ...result,
+    job: sanitizeRemoteAnalysisJob(result.job, videoPath),
+    ...(await getRemoteVideoAnalysisPayload(videoId))
+  })
 }
 
 async function handleGetPlayback(req, res, videoId) {
@@ -726,6 +876,19 @@ function createRemoteServer({ port, onPairingRequest } = {}) {
         }
         if (req.method === 'DELETE') {
           await handleCancelTranscode(req, res, videoId)
+          return
+        }
+      }
+
+      const analysisMatch = pathname.match(/^\/v1\/videos\/([^/]+)\/analysis$/)
+      if (analysisMatch) {
+        const videoId = decodeVideoId(analysisMatch[1])
+        if (req.method === 'GET') {
+          await handleGetVideoAnalysis(req, res, videoId)
+          return
+        }
+        if (req.method === 'POST') {
+          await handleStartVideoAnalysis(req, res, videoId)
           return
         }
       }

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useApp } from '../context/AppContext'
 
 function dirName(dir) {
@@ -12,6 +12,7 @@ export default function Sidebar() {
     settings,
     currentDir,
     handleDirectoryChange,
+    handleAddDirectory,
     handleDirectoriesChange,
     setShowSettings,
     categoryGroups = { custom: [], system: [] },
@@ -22,48 +23,229 @@ export default function Sidebar() {
   } = useApp()
 
   const directories = settings?.directories || []
-  const [localDirs, setLocalDirs] = useState(directories)
+  const privateDirectories = settings?.privateDirectories || []
+  const privateDirSet = useMemo(() => new Set(privateDirectories), [privateDirectories])
+  const hiddenPrivateCount = useMemo(
+    () => privateDirectories.filter(dir => directories.includes(dir)).length,
+    [directories, privateDirectories]
+  )
+  const [showPrivateDirs, setShowPrivateDirs] = useState(false)
+  const [privacyDialogOpen, setPrivacyDialogOpen] = useState(false)
+  const [privacyPassword, setPrivacyPassword] = useState('')
+  const [privacyConfirmPassword, setPrivacyConfirmPassword] = useState('')
+  const [privacyMessage, setPrivacyMessage] = useState('')
+  const [privacySubmitting, setPrivacySubmitting] = useState(false)
+  const [pendingPrivateDirectory, setPendingPrivateDirectory] = useState(null)
+  const [directoryMenu, setDirectoryMenu] = useState(null)
+  const [localDirs, setLocalDirs] = useState(() => directories.filter(dir => showPrivateDirs || !privateDirSet.has(dir)))
+  const privacyPasswordSet = Boolean(settings?.privacy?.passwordSet)
 
   useEffect(() => {
-    setLocalDirs(directories)
-  }, [directories])
+    setLocalDirs(directories.filter(dir => showPrivateDirs || !privateDirSet.has(dir)))
+  }, [directories, privateDirSet, showPrivateDirs])
 
-  const saveDirs = useCallback((newDirs) => {
-    const newDefault = newDirs.length > 0
-      ? (newDirs.includes(currentDir) ? currentDir : newDirs[0])
+  useEffect(() => {
+    if (!directoryMenu) return undefined
+    const closeMenu = () => setDirectoryMenu(null)
+    window.addEventListener('click', closeMenu)
+    window.addEventListener('contextmenu', closeMenu)
+    window.addEventListener('resize', closeMenu)
+    window.addEventListener('scroll', closeMenu, true)
+    return () => {
+      window.removeEventListener('click', closeMenu)
+      window.removeEventListener('contextmenu', closeMenu)
+      window.removeEventListener('resize', closeMenu)
+      window.removeEventListener('scroll', closeMenu, true)
+    }
+  }, [directoryMenu])
+
+  const getPublicDirs = useCallback((dirs, privateDirs) => {
+    const privateSet = new Set(privateDirs)
+    return dirs.filter(dir => !privateSet.has(dir))
+  }, [])
+
+  useEffect(() => {
+    if (showPrivateDirs || !currentDir || !privateDirSet.has(currentDir)) return
+    const publicDirs = getPublicDirs(directories, privateDirectories)
+    handleDirectoryChange(publicDirs[0] || null)
+  }, [currentDir, directories, getPublicDirs, handleDirectoryChange, privateDirSet, privateDirectories, showPrivateDirs])
+
+  useEffect(() => {
+    const openPendingPrivateDirectory = (event) => {
+      const dir = event.detail?.dir
+      if (!dir) return
+      setPendingPrivateDirectory(dir)
+      setPrivacyPassword('')
+      setPrivacyConfirmPassword('')
+      setPrivacyMessage('')
+      setPrivacyDialogOpen(true)
+    }
+    window.addEventListener('wallpaper-player-private-directory-password-required', openPendingPrivateDirectory)
+    return () => window.removeEventListener('wallpaper-player-private-directory-password-required', openPendingPrivateDirectory)
+  }, [])
+
+  const lockPrivateDirs = useCallback(() => {
+    setShowPrivateDirs(false)
+    setPrivacyDialogOpen(false)
+    setPrivacyPassword('')
+    setPrivacyConfirmPassword('')
+    setPrivacyMessage('')
+    setPendingPrivateDirectory(null)
+  }, [])
+
+  const requestShowPrivateDirs = useCallback(() => {
+    if (showPrivateDirs) {
+      lockPrivateDirs()
+      return
+    }
+    setPrivacyPassword('')
+    setPrivacyConfirmPassword('')
+    setPrivacyMessage('')
+    setPrivacyDialogOpen(true)
+  }, [lockPrivateDirs, showPrivateDirs])
+
+  const closePrivacyDialog = useCallback(() => {
+    setPrivacyDialogOpen(false)
+    setPrivacyPassword('')
+    setPrivacyConfirmPassword('')
+    setPrivacyMessage('')
+    setPendingPrivateDirectory(null)
+  }, [])
+
+  const savePrivateDirectory = useCallback(async (dir) => {
+    const nextDirectories = directories.includes(dir) ? directories : [...directories, dir]
+    const nextPrivateDirectories = [...new Set([...privateDirectories, dir])]
+    const publicDirs = getPublicDirs(nextDirectories, nextPrivateDirectories)
+    await handleDirectoriesChange({
+      directories: nextDirectories,
+      privateDirectories: nextPrivateDirectories,
+      defaultDirectory: publicDirs.includes(currentDir) ? currentDir : publicDirs[0] || ''
+    })
+  }, [currentDir, directories, getPublicDirs, handleDirectoriesChange, privateDirectories])
+
+  const removePrivateDirectory = useCallback(async (dir) => {
+    const nextPrivateDirectories = privateDirectories.filter(item => item !== dir)
+    const publicDirs = getPublicDirs(directories, nextPrivateDirectories)
+    await handleDirectoriesChange({
+      directories,
+      privateDirectories: nextPrivateDirectories,
+      defaultDirectory: publicDirs.includes(currentDir) ? currentDir : publicDirs[0] || ''
+    })
+  }, [currentDir, directories, getPublicDirs, handleDirectoriesChange, privateDirectories])
+
+  const submitPrivacyPassword = useCallback(async (event) => {
+    event.preventDefault()
+    const password = privacyPassword
+    if (password.length < 4) {
+      setPrivacyMessage('隐私密码至少需要 4 位')
+      return
+    }
+    if (!privacyPasswordSet && password !== privacyConfirmPassword) {
+      setPrivacyMessage('两次输入的密码不一致')
+      return
+    }
+    setPrivacySubmitting(true)
+    setPrivacyMessage('')
+    try {
+      const result = privacyPasswordSet
+        ? await window.electronAPI?.unlockPrivacy?.(password)
+        : await window.electronAPI?.setPrivacyPassword?.(password)
+      if (!result?.success) {
+        setPrivacyMessage(result?.error || '隐私验证失败')
+        return
+      }
+      if (pendingPrivateDirectory) {
+        await savePrivateDirectory(pendingPrivateDirectory)
+      }
+      setShowPrivateDirs(true)
+      closePrivacyDialog()
+    } catch (err) {
+      setPrivacyMessage(err?.message || '隐私验证失败')
+    } finally {
+      setPrivacySubmitting(false)
+    }
+  }, [
+    closePrivacyDialog,
+    currentDir,
+    directories,
+    getPublicDirs,
+    handleDirectoriesChange,
+    pendingPrivateDirectory,
+    privacyConfirmPassword,
+    privacyPassword,
+    privacyPasswordSet,
+    privateDirectories,
+    savePrivateDirectory
+  ])
+
+  const saveDirs = useCallback((newDirs, nextPrivateDirs = privateDirectories) => {
+    const cleanPrivateDirs = nextPrivateDirs.filter(dir => newDirs.includes(dir))
+    const publicDirs = getPublicDirs(newDirs, cleanPrivateDirs)
+    const newDefault = publicDirs.length > 0
+      ? (publicDirs.includes(currentDir) ? currentDir : publicDirs[0])
       : ''
-    handleDirectoriesChange({ directories: newDirs, defaultDirectory: newDefault })
-  }, [currentDir, handleDirectoriesChange])
+    handleDirectoriesChange({ directories: newDirs, privateDirectories: cleanPrivateDirs, defaultDirectory: newDefault })
+  }, [currentDir, getPublicDirs, handleDirectoriesChange, privateDirectories])
 
   const handleAdd = useCallback(async () => {
     try {
-      const dir = await window.electronAPI?.selectDirectory()
-      if (!dir) return
-      setLocalDirs(prev => {
-        if (prev.includes(dir)) return prev
-        const newDirs = [...prev, dir]
-        saveDirs(newDirs)
-        return newDirs
-      })
+      const result = await handleAddDirectory?.({ returnPasswordRequired: true })
+      if (result?.needsPrivacyPassword && result.dir) {
+        setPendingPrivateDirectory(result.dir)
+        setPrivacyPassword('')
+        setPrivacyConfirmPassword('')
+        setPrivacyMessage('')
+        setPrivacyDialogOpen(true)
+      }
     } catch (err) {
       console.error('添加目录失败:', err)
     }
-  }, [saveDirs])
+  }, [handleAddDirectory])
 
   const handleRemove = useCallback((dir, e) => {
     e.stopPropagation()
-    const newDirs = localDirs.filter(d => d !== dir)
-    setLocalDirs(newDirs)
-    saveDirs(newDirs)
-    // 如果删除的是当前目录，切换到第一个剩余目录（或清空）
+    const newDirs = directories.filter(d => d !== dir)
+    const newPrivateDirs = privateDirectories.filter(d => d !== dir)
+    const publicDirs = getPublicDirs(newDirs, newPrivateDirs)
+    setLocalDirs(newDirs.filter(d => showPrivateDirs || !newPrivateDirs.includes(d)))
+    saveDirs(newDirs, newPrivateDirs)
     if (dir === currentDir) {
-      if (newDirs.length > 0) {
-        handleDirectoryChange(newDirs[0])
+      if (publicDirs.length > 0) {
+        handleDirectoryChange(publicDirs[0])
       } else {
         handleDirectoryChange(null)
       }
     }
-  }, [localDirs, currentDir, saveDirs, handleDirectoryChange])
+  }, [currentDir, directories, getPublicDirs, handleDirectoryChange, privateDirectories, saveDirs, showPrivateDirs])
+
+  const handleDirectoryContextMenu = useCallback((dir, event) => {
+    event.preventDefault()
+    event.stopPropagation()
+    setDirectoryMenu({
+      dir,
+      x: Math.min(event.clientX, window.innerWidth - 190),
+      y: Math.min(event.clientY, window.innerHeight - 112)
+    })
+  }, [])
+
+  const handleSetDirectoryPrivate = useCallback(async (dir) => {
+    setDirectoryMenu(null)
+    if (!privacyPasswordSet) {
+      setPendingPrivateDirectory(dir)
+      setPrivacyPassword('')
+      setPrivacyConfirmPassword('')
+      setPrivacyMessage('')
+      setPrivacyDialogOpen(true)
+      return
+    }
+    await savePrivateDirectory(dir)
+    setShowPrivateDirs(false)
+  }, [privacyPasswordSet, savePrivateDirectory])
+
+  const handleUnsetDirectoryPrivate = useCallback(async (dir) => {
+    setDirectoryMenu(null)
+    await removePrivateDirectory(dir)
+  }, [removePrivateDirectory])
 
   const handleCategorySelect = useCallback((categoryKey) => {
     setActiveCategory?.(categoryKey)
@@ -169,12 +351,36 @@ export default function Sidebar() {
           <div className="sidebar-section">
             <div className="sidebar-section-header">
               <span className="sidebar-label">目录</span>
-              <button className="sidebar-add-mini" onClick={handleAdd} title="添加目录" aria-label="添加目录">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                  <line x1="12" y1="5" x2="12" y2="19" />
-                  <line x1="5" y1="12" x2="19" y2="12" />
-                </svg>
-              </button>
+              <div className="sidebar-section-actions">
+                {hiddenPrivateCount > 0 && (
+                  <button
+                    className={`sidebar-add-mini${showPrivateDirs ? ' active' : ''}`}
+                    onClick={requestShowPrivateDirs}
+                    title={showPrivateDirs ? '锁定隐私目录' : `解锁 ${hiddenPrivateCount} 个隐私目录`}
+                    aria-label={showPrivateDirs ? '锁定隐私目录' : '解锁隐私目录'}
+                  >
+                    {showPrivateDirs ? (
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.3">
+                        <path d="M17.94 17.94A10.9 10.9 0 0 1 12 20C7 20 2.73 16.89 1 12c.75-2.12 2.05-3.95 3.72-5.31" />
+                        <path d="M9.9 4.24A10.7 10.7 0 0 1 12 4c5 0 9.27 3.11 11 8a11.8 11.8 0 0 1-2.16 3.19" />
+                        <path d="M14.12 14.12A3 3 0 0 1 9.88 9.88" />
+                        <path d="M1 1l22 22" />
+                      </svg>
+                    ) : (
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.3">
+                        <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                        <circle cx="12" cy="12" r="3" />
+                      </svg>
+                    )}
+                  </button>
+                )}
+                <button className="sidebar-add-mini" onClick={handleAdd} title="添加目录" aria-label="添加目录">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                    <line x1="12" y1="5" x2="12" y2="19" />
+                    <line x1="5" y1="12" x2="19" y2="12" />
+                  </svg>
+                </button>
+              </div>
             </div>
 
             {localDirs.length === 0 ? (
@@ -184,11 +390,14 @@ export default function Sidebar() {
               </div>
             ) : (
               <div className="sidebar-dir-list">
-                {localDirs.map(dir => (
+                {localDirs.map(dir => {
+                  const isPrivate = privateDirSet.has(dir)
+                  return (
                   <div
                     key={dir}
-                    className={`sidebar-dir-item${dir === currentDir ? ' active' : ''}`}
+                    className={`sidebar-dir-item${dir === currentDir ? ' active' : ''}${isPrivate ? ' private' : ''}`}
                     onClick={() => handleDirectoryChange(dir)}
+                    onContextMenu={(event) => handleDirectoryContextMenu(dir, event)}
                     title={dir}
                     role="button"
                     tabIndex={0}
@@ -198,7 +407,10 @@ export default function Sidebar() {
                       <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" />
                     </svg>
                     <div className="sidebar-dir-info">
-                      <span className="sidebar-dir-name">{dirName(dir)}</span>
+                      <span className="sidebar-dir-name">
+                        {dirName(dir)}
+                        {isPrivate && <span className="sidebar-private-badge">隐私</span>}
+                      </span>
                       <span className="sidebar-dir-path">{dir}</span>
                     </div>
                     <button
@@ -212,7 +424,8 @@ export default function Sidebar() {
                       </svg>
                     </button>
                   </div>
-                ))}
+                  )
+                })}
               </div>
             )}
           </div>
@@ -256,6 +469,74 @@ export default function Sidebar() {
             </button>
           </div>
         </div>
+      {directoryMenu && (
+        <div
+          className="sidebar-dir-menu"
+          style={{ left: directoryMenu.x, top: directoryMenu.y }}
+          onClick={(event) => event.stopPropagation()}
+          onContextMenu={(event) => event.preventDefault()}
+        >
+          {privateDirSet.has(directoryMenu.dir) ? (
+            <button type="button" onClick={() => handleUnsetDirectoryPrivate(directoryMenu.dir)}>
+              取消隐私目录
+            </button>
+          ) : (
+            <button type="button" onClick={() => handleSetDirectoryPrivate(directoryMenu.dir)}>
+              设为隐私目录
+            </button>
+          )}
+          <button type="button" className="danger" onClick={(event) => handleRemove(directoryMenu.dir, event)}>
+            移除目录
+          </button>
+        </div>
+      )}
+      {privacyDialogOpen && (
+        <div className="privacy-dialog-overlay" onClick={closePrivacyDialog}>
+          <form className="privacy-dialog" onSubmit={submitPrivacyPassword} onClick={(event) => event.stopPropagation()}>
+            <div className="privacy-dialog-header">
+              <h2>{privacyPasswordSet ? '解锁隐私目录' : '设置隐私密码'}</h2>
+              <button type="button" className="btn btn-icon" onClick={closePrivacyDialog} aria-label="关闭">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M18 6L6 18M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            <div className="privacy-dialog-body">
+              <label className="privacy-field">
+                <span>{privacyPasswordSet ? '隐私密码' : '新隐私密码'}</span>
+                <input
+                  type="password"
+                  value={privacyPassword}
+                  onChange={(event) => setPrivacyPassword(event.target.value)}
+                  autoFocus
+                  minLength={4}
+                />
+              </label>
+              {!privacyPasswordSet && (
+                <label className="privacy-field">
+                  <span>确认密码</span>
+                  <input
+                    type="password"
+                    value={privacyConfirmPassword}
+                    onChange={(event) => setPrivacyConfirmPassword(event.target.value)}
+                    minLength={4}
+                  />
+                </label>
+              )}
+              <p className="privacy-hint">
+                {privacyPasswordSet ? '解锁后仅本次打开期间显示隐私目录。' : '以后显示隐私目录时都需要输入这个密码。'}
+              </p>
+              {privacyMessage && <p className="privacy-error">{privacyMessage}</p>}
+            </div>
+            <div className="privacy-dialog-footer">
+              <button type="button" className="btn btn-sm" onClick={closePrivacyDialog}>取消</button>
+              <button type="submit" className="btn btn-sm btn-primary" disabled={privacySubmitting}>
+                {privacySubmitting ? '处理中...' : (privacyPasswordSet ? '解锁' : '设置并显示')}
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
     </aside>
   )
 }

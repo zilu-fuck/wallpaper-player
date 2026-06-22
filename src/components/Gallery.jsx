@@ -10,9 +10,18 @@ function Gallery({ videos }) {
     activeCategoryLabel,
     selectedVideoKeys,
     handleClearVideoSelection,
-    handleOpenBulkTagEditor
+    handleOpenBulkTagEditor,
+    analysisSidebarOpen,
+    setAnalysisSidebarOpen,
+    analysisTaskCounts
   } = useApp()
   const [viewMode, setViewMode] = useState('grid') // grid | list
+  const analysisTaskTotal = (
+    Number(analysisTaskCounts?.running || 0) +
+    Number(analysisTaskCounts?.queued || 0) +
+    Number(analysisTaskCounts?.success || 0) +
+    Number(analysisTaskCounts?.failed || 0)
+  )
 
   // 按分组归类视频
   const groups = useMemo(() => {
@@ -57,6 +66,20 @@ function Gallery({ videos }) {
             </button>
           </div>
         ) : null}
+        <button
+          className={`analysis-sidebar-open-btn${analysisSidebarOpen ? ' active' : ''}`}
+          type="button"
+          onClick={() => setAnalysisSidebarOpen?.(true)}
+          title="打开视频分析队列"
+          aria-label="打开视频分析队列"
+        >
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <rect x="4" y="4" width="16" height="16" rx="2" />
+            <path d="M15 4v16" />
+            <path d="M8 8h4M8 12h4M8 16h4" />
+          </svg>
+          {analysisTaskTotal > 0 ? <span>{analysisTaskTotal > 99 ? '99+' : analysisTaskTotal}</span> : null}
+        </button>
         <div className="view-toggle">
           <button
             className={`view-btn ${viewMode === 'grid' ? 'active' : ''}`}

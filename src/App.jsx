@@ -6,6 +6,7 @@ import Settings from './components/Settings'
 import Sidebar from './components/Sidebar'
 import TagEditor from './components/TagEditor'
 import UpdateNotice from './components/UpdateNotice'
+import VideoAnalysisSidebar, { VideoAnalysisResultModal } from './components/VideoAnalysisSidebar'
 import { useApp } from './context/AppContext'
 
 function AppInner() {
@@ -31,7 +32,23 @@ function AppInner() {
     handleDropFiles,
     scanAndLoad,
     playingVideo,
-    showSettings
+    showSettings,
+    analysisTasks,
+    analysisSidebarOpen,
+    setAnalysisSidebarOpen,
+    analysisTaskCounts,
+    getAnalysisTaskStatusLabel,
+    cancelRunningAnalysisTask,
+    retryAnalysisTask,
+    hideFinishedAnalysisTasks,
+    deleteSavedAnalysisTask,
+    deleteSavedAnalysisTasks,
+    refreshSavedAnalysisResults,
+    savedAnalysisResultsLoading,
+    savedAnalysisResultsMessage,
+    selectedAnalysisResultTask,
+    openAnalysisResultTask,
+    closeAnalysisResultTask
   } = useApp()
 
   const activeDirName = currentDir ? currentDir.split(/[/\\]/).pop() : '未选择目录'
@@ -134,7 +151,7 @@ function AppInner() {
       <div className="content-row">
         <Sidebar />
 
-        <div className="content-body">
+        <div className={`content-body${analysisSidebarOpen ? ' analysis-sidebar-open' : ''}`}>
           {/* 缩略图生成进度条 */}
           {scanning && (
             <div className={`progress-bar${!thumbProgress ? ' scanning' : ''}`}>
@@ -152,47 +169,65 @@ function AppInner() {
           )}
 
           {/* 主内容区 */}
-          <main className="main-content">
-            {videos.length === 0 && !scanning ? (
-              <div className="empty-state">
-                <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-                  <rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18" />
-                  <line x1="7" y1="2" x2="7" y2="22" />
-                  <line x1="17" y1="2" x2="17" y2="22" />
-                  <line x1="2" y1="12" x2="22" y2="12" />
-                  <line x1="2" y1="7" x2="7" y2="7" />
-                  <line x1="2" y1="17" x2="7" y2="17" />
-                  <line x1="17" y1="7" x2="22" y2="7" />
-                  <line x1="17" y1="17" x2="22" y2="17" />
-                </svg>
-                <h2>未找到视频文件</h2>
-                <p>当前目录中没有发现视频文件，请选择一个包含视频的目录。</p>
-                <button className="btn btn-primary" onClick={handleSelectDirectory}>
-                  选择目录
-                </button>
-              </div>
-            ) : filteredVideos.length === 0 && hasFilter ? (
-              <div className="empty-state compact">
-                <svg width="58" height="58" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-                  <circle cx="11" cy="11" r="8" />
-                  <path d="M21 21l-4.35-4.35" />
-                  <path d="M8.5 8.5l5 5M13.5 8.5l-5 5" />
-                </svg>
-                <h2>没有匹配的视频</h2>
-                <p>
-                  没有在“{activeDirName}”中找到
-                  {activeCategory !== 'all' ? `“${activeCategoryLabel}”分类下` : ''}
-                  {trimmedSearchQuery ? `包含“${trimmedSearchQuery}”的` : ''}
-                  视频。
-                </p>
-                <button className="btn btn-primary" onClick={onClearFilters}>
-                  {trimmedSearchQuery ? '清空搜索' : '显示全部'}
-                </button>
-              </div>
-            ) : (
-              <Gallery videos={filteredVideos} />
-            )}
-          </main>
+          <div className="main-workspace">
+            <main className="main-content">
+              {videos.length === 0 && !scanning ? (
+                <div className="empty-state">
+                  <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                    <rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18" />
+                    <line x1="7" y1="2" x2="7" y2="22" />
+                    <line x1="17" y1="2" x2="17" y2="22" />
+                    <line x1="2" y1="12" x2="22" y2="12" />
+                    <line x1="2" y1="7" x2="7" y2="7" />
+                    <line x1="2" y1="17" x2="7" y2="17" />
+                    <line x1="17" y1="7" x2="22" y2="7" />
+                    <line x1="17" y1="17" x2="22" y2="17" />
+                  </svg>
+                  <h2>未找到视频文件</h2>
+                  <p>当前目录中没有发现视频文件，请选择一个包含视频的目录。</p>
+                  <button className="btn btn-primary" onClick={handleSelectDirectory}>
+                    选择目录
+                  </button>
+                </div>
+              ) : filteredVideos.length === 0 && hasFilter ? (
+                <div className="empty-state compact">
+                  <svg width="58" height="58" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                    <circle cx="11" cy="11" r="8" />
+                    <path d="M21 21l-4.35-4.35" />
+                    <path d="M8.5 8.5l5 5M13.5 8.5l-5 5" />
+                  </svg>
+                  <h2>没有匹配的视频</h2>
+                  <p>
+                    没有在“{activeDirName}”中找到
+                    {activeCategory !== 'all' ? `“${activeCategoryLabel}”分类下` : ''}
+                    {trimmedSearchQuery ? `包含“${trimmedSearchQuery}”的` : ''}
+                    视频。
+                  </p>
+                  <button className="btn btn-primary" onClick={onClearFilters}>
+                    {trimmedSearchQuery ? '清空搜索' : '显示全部'}
+                  </button>
+                </div>
+              ) : (
+                <Gallery videos={filteredVideos} />
+              )}
+            </main>
+            <VideoAnalysisSidebar
+              open={analysisSidebarOpen}
+              tasks={analysisTasks}
+              counts={analysisTaskCounts}
+              getStatusLabel={getAnalysisTaskStatusLabel}
+              onClose={() => setAnalysisSidebarOpen(false)}
+              onCancelRunning={cancelRunningAnalysisTask}
+              onRetry={retryAnalysisTask}
+              onHideFinished={hideFinishedAnalysisTasks}
+              onRefreshSaved={refreshSavedAnalysisResults}
+              onDeleteSaved={deleteSavedAnalysisTask}
+              onDeleteSavedBatch={deleteSavedAnalysisTasks}
+              savedResultsLoading={savedAnalysisResultsLoading}
+              savedResultsMessage={savedAnalysisResultsMessage}
+              onOpenResult={openAnalysisResultTask}
+            />
+          </div>
         </div>
       </div>
 
@@ -206,6 +241,11 @@ function AppInner() {
 
       {/* 标签编辑器 */}
       <TagEditor />
+
+      <VideoAnalysisResultModal
+        task={selectedAnalysisResultTask}
+        onClose={closeAnalysisResultTask}
+      />
 
       <UpdateNotice />
     </div>

@@ -45,7 +45,7 @@ matches(playerScreen, /rewindTimerRef[\s\S]*seekCurrentPlayer\(next\)/, 'rewind 
 matches(playerScreen, /restorePortraitOrientation[\s\S]*OrientationLock\.PORTRAIT_UP/, 'fullscreen exit should restore portrait orientation')
 matches(playerScreen, /OrientationLock\.LANDSCAPE/, 'fullscreen should lock to landscape without handing gestures to native fullscreen')
 matches(playerScreen, /restoreCurrentPagePosition\(false\)/, 'fullscreen minimize should restore the current vertical feed page')
-matches(playerScreen, /scrollEnabled=\{!fullscreenMode && !moreSheetVisible && !tagSheetVisible\}/, 'vertical paging should be disabled in fullscreen and sheets')
+matches(playerScreen, /scrollEnabled=\{!fullscreenMode && !moreSheetVisible && !tagSheetVisible && !analysisSheetVisible\}/, 'vertical paging should be disabled in fullscreen and sheets')
 matches(playerScreen, /startTranscode\(device, item\.id, quality\)/, 'player should request desktop transcoding for compatible cache playback')
 matches(playerScreen, /applyTranscodeReady\(item\.id, result\.streamUrl, qualityLabel\)/, 'player should switch to the transcoded stream when it is ready')
 matches(playerScreen, /onCache=\{handleTranscode\}/, 'cache action should prepare the compatible transcoded stream instead of being a placeholder')

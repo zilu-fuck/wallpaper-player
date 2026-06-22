@@ -26,12 +26,14 @@ function VideoCard({
   queueVideos
 }) {
   const {
+    settings,
     thumbnails,
     favoriteKeys,
     handlePlay,
     handleToggleFavorite,
     handleOpenInFolder,
     handleOpenTagEditor,
+    queueVideoAnalysis,
     selectedVideoKeys,
     selectedVideoKeySet,
     handleToggleVideoSelection,
@@ -51,6 +53,7 @@ function VideoCard({
   const videoKey = video.favoriteKey || video.fullPath
   const isSelected = selectedVideoKeySet?.has(videoKey)
   const selectionActive = (selectedVideoKeys?.length || 0) > 0
+  const videoAnalysisEnabled = Boolean(settings?.videoAnalysis?.enabled)
 
   // 懒加载：只有卡片进入视口时才加载缩略图
   useEffect(() => {
@@ -106,6 +109,12 @@ function VideoCard({
     handleOpenTagEditor?.(video)
   }, [video, handleOpenTagEditor])
 
+  const handleAnalyzeVideo = useCallback((e) => {
+    e.stopPropagation()
+    setMenuOpen(false)
+    queueVideoAnalysis?.(video)
+  }, [video, queueVideoAnalysis])
+
   const handleToggleSelectionClick = useCallback((e) => {
     e.stopPropagation()
     setMenuOpen(false)
@@ -142,6 +151,15 @@ function VideoCard({
       </button>
       {menuOpen && (
         <div className="card-menu" role="menu">
+          <button
+            type="button"
+            onClick={handleAnalyzeVideo}
+            role="menuitem"
+            disabled={!videoAnalysisEnabled}
+            title={videoAnalysisEnabled ? '分析当前视频' : '请先在设置中启用视频理解'}
+          >
+            分析当前视频
+          </button>
           <button type="button" onClick={handleOpenInFolderClick} role="menuitem">在资源管理器中打开视频所在位置</button>
           <button type="button" onClick={handleEditTags} role="menuitem">自定义标签</button>
           <button type="button" onClick={handleToggleSelectionClick} role="menuitem">
@@ -235,7 +253,7 @@ function VideoCard({
   return (
     <div
       ref={cardRef}
-      className={`video-card${isSelected ? ' selected' : ''}`}
+      className={`video-card${isSelected ? ' selected' : ''}${menuOpen ? ' menu-open' : ''}`}
       onClick={handleClick}
       onContextMenu={handleContextMenu}
       title={video.name}

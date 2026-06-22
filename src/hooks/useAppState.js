@@ -36,8 +36,12 @@ export function useAppState() {
     return saveSettings({ theme: nextTheme })
   }, [saveSettings])
 
-  const handleDirectoriesChange = useCallback(async ({ directories, defaultDirectory }) => {
-    return saveSettings({ directories, defaultDirectory })
+  const handleDirectoriesChange = useCallback(async ({ directories, privateDirectories, defaultDirectory }) => {
+    const patch = { directories, defaultDirectory }
+    if (Array.isArray(privateDirectories)) {
+      patch.privateDirectories = privateDirectories
+    }
+    return saveSettings(patch)
   }, [saveSettings])
 
   const handlePlaybackModeChange = useCallback(async (nextMode) => {

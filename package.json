@@ -1,6 +1,6 @@
 {
   "name": "wallpaper-player",
-  "version": "1.2.2",
+  "version": "1.2.3",
   "description": "本地视频画廊播放器 - 浏览、搜索、播放本地视频文件",
   "license": "Apache-2.0",
   "main": "main.js",
@@ -50,6 +50,28 @@
           "!_downloads/**",
           "!**/*.pdb",
           "!ffmpeg/doc/**"
+        ]
+      },
+      {
+        "from": "video comprehension",
+        "to": "video comprehension",
+        "filter": [
+          "video comprehension/.env.example",
+          "video comprehension/docs/**",
+          "video comprehension/pyproject.toml",
+          "video comprehension/README.md",
+          "video comprehension/uv.lock",
+          "video comprehension/video_comprehension/**",
+          "!**/__pycache__/**",
+          "!**/*.pyc",
+          "!**/models/**",
+          "!**/outputs/**",
+          "!**/.venv/**",
+          "!**/.git/**",
+          "!**/.pytest_cache/**",
+          "!**/deprecated/**",
+          "!**/tests/**",
+          "!**/.env"
         ]
       }
     ],

@@ -1,0 +1,48 @@
+llama.cpp source information
+============================
+
+Bundled binary
+--------------
+
+Component: llama.cpp
+Bundled paths: vendor/llama.cpp-cuda/ and vendor/llama.cpp/
+Primary release asset: llama-b9756-bin-win-cuda-13.3-x64.zip
+Primary download URL: https://github.com/ggml-org/llama.cpp/releases/download/b9756/llama-b9756-bin-win-cuda-13.3-x64.zip
+Primary SHA-256: 390d2ddb61df915ebd02c0a08a01a80a2190a2969aaa1142946d1080e14b9067
+CUDA runtime asset: cudart-llama-bin-win-cuda-13.3-x64.zip
+CUDA runtime download URL: https://github.com/ggml-org/llama.cpp/releases/download/b9756/cudart-llama-bin-win-cuda-13.3-x64.zip
+CUDA runtime SHA-256: 1462a050eb4c684921ba51dcc4cc488a036674c3e73e9945ee705b854808d03e
+Fallback release asset: llama-b9756-bin-win-cpu-x64.zip
+Fallback download URL: https://github.com/ggml-org/llama.cpp/releases/download/b9756/llama-b9756-bin-win-cpu-x64.zip
+Fallback SHA-256: 47e5c4f2e59969ee1d812f71281614dad236f312912a1759fba8fc622bb5ad5f
+Observed executable: llama-server.exe
+License: MIT
+License text: licenses/llama.cpp-MIT.txt
+
+Corresponding source
+--------------------
+
+Upstream repository: https://github.com/ggml-org/llama.cpp
+Release tag: b9756
+Source commit: d0f9d2e5a
+Release page: https://github.com/ggml-org/llama.cpp/releases/tag/b9756
+
+How to obtain source
+--------------------
+
+Clone the upstream repository and check out the recorded release tag:
+
+    git clone https://github.com/ggml-org/llama.cpp.git
+    cd llama.cpp
+    git checkout b9756
+
+Alternatively, download the release source archive from:
+
+    https://github.com/ggml-org/llama.cpp/archive/refs/tags/b9756.zip
+
+Modification status
+-------------------
+
+Wallpaper Player redistributes the upstream llama.cpp Windows CUDA 13.3 x64,
+CUDA runtime, and CPU x64 fallback binary archives without modifying the
+llama.cpp source code or binary files.

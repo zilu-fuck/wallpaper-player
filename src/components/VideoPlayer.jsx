@@ -70,9 +70,16 @@ export default function VideoPlayer({ video }) {
   const html5SaveTimerRef = useRef(null)
   const stageRef = useRef(null)
   const shellRef = useRef(null)
+  const toolbarRef = useRef(null)
   const hostBoundsRef = useRef(null)
   const controlsTimerRef = useRef(null)
   const clickTimerRef = useRef(null)
+  const progressPreviewTimerRef = useRef(null)
+  const progressPreviewRequestRef = useRef(0)
+  const progressPreviewCacheRef = useRef(new Map())
+  const progressPreviewInFlightRef = useRef(false)
+  const progressPreviewPendingTimeRef = useRef(null)
+  const progressPreviewVisibleRef = useRef(false)
   const arrowHoldRef = useRef({})
   const arrowSpeedRestoreRef = useRef(null)
   const speedRef = useRef(1)
@@ -101,6 +108,13 @@ export default function VideoPlayer({ video }) {
   const [analysisState, setAnalysisState] = useState({ status: 'idle', data: null, error: '' })
   const [analysisOpen, setAnalysisOpen] = useState(false)
   const [analysisJob, setAnalysisJob] = useState(null)
+  const [progressPreview, setProgressPreview] = useState({
+    visible: false,
+    time: 0,
+    x: 0,
+    imageUrl: '',
+    loading: false
+  })
   const playbackResumeEnabled = video?.playOptions?.resume !== false
   const videoAnalysisEnabled = Boolean(settings?.videoAnalysis?.enabled)
 
@@ -140,13 +154,12 @@ export default function VideoPlayer({ video }) {
   })()
   const analysisAvailable = analysisState.status === 'ready' && analysisState.data?.available
   const analysisRunning = analysisState.status === 'analyzing'
-  const canStartAnalysis = videoAnalysisEnabled && !analysisAvailable && !analysisRunning && Boolean(video?.fullPath)
   const analysisButtonTitle = (() => {
     if (!videoAnalysisEnabled) return '请先在设置中启用视频理解'
     if (analysisState.status === 'checking') return '正在读取视频理解结果'
     if (analysisRunning) return '正在分析当前视频'
-    if (analysisAvailable) return analysisOpen ? '隐藏视频理解' : '显示视频理解'
-    return '分析当前视频'
+    if (analysisAvailable) return analysisOpen ? '隐藏最新分析结果' : '显示最新分析结果'
+    return '暂无分析结果，请从视频卡片菜单发起分析'
   })()
 
   useEffect(() => {
@@ -258,6 +271,106 @@ export default function VideoPlayer({ video }) {
     setHtml5State(prev => ({ ...prev, currentTime: el.currentTime }))
   }, [canUseMpv])
 
+  const requestProgressPreviewFrame = useCallback((previewTime) => {
+    if (!video?.fullPath || !window.electronAPI?.generatePreviewFrame || !window.electronAPI?.getThumbnailUrl) return
+
+    const seconds = Math.max(0, Math.round(Number(previewTime) || 0))
+    const cachedUrl = progressPreviewCacheRef.current.get(seconds)
+    if (cachedUrl) {
+      setProgressPreview(prev => ({ ...prev, imageUrl: cachedUrl, loading: false }))
+      return
+    }
+
+    if (progressPreviewInFlightRef.current) {
+      progressPreviewPendingTimeRef.current = previewTime
+      setProgressPreview(prev => ({ ...prev, loading: true }))
+      return
+    }
+
+    const requestId = progressPreviewRequestRef.current + 1
+    progressPreviewRequestRef.current = requestId
+    progressPreviewInFlightRef.current = true
+    progressPreviewPendingTimeRef.current = null
+    setProgressPreview(prev => ({ ...prev, loading: true }))
+
+    window.electronAPI.generatePreviewFrame(video.fullPath, seconds)
+      .then(async (result) => {
+        if (progressPreviewRequestRef.current !== requestId) return
+        if (!result?.framePath) {
+          setProgressPreview(prev => ({ ...prev, loading: false }))
+          return
+        }
+
+        const imageUrl = await window.electronAPI.getThumbnailUrl(result.framePath)
+        if (progressPreviewRequestRef.current !== requestId) return
+        progressPreviewCacheRef.current.set(seconds, imageUrl)
+        setProgressPreview(prev => ({
+          ...prev,
+          imageUrl: Math.max(0, Math.round(Number(prev.time) || 0)) === seconds ? imageUrl : prev.imageUrl,
+          loading: false
+        }))
+      })
+      .catch(() => {
+        if (progressPreviewRequestRef.current === requestId) {
+          setProgressPreview(prev => ({ ...prev, loading: false }))
+        }
+      })
+      .finally(() => {
+        progressPreviewInFlightRef.current = false
+        const pendingTime = progressPreviewPendingTimeRef.current
+        progressPreviewPendingTimeRef.current = null
+        if (pendingTime != null && progressPreviewVisibleRef.current) {
+          requestProgressPreviewFrame(pendingTime)
+        }
+      })
+  }, [video?.fullPath])
+
+  const updateProgressPreview = useCallback((event) => {
+    if (!duration || duration <= 0) return
+
+    const bounds = event.currentTarget.getBoundingClientRect()
+    const toolbarBounds = toolbarRef.current?.getBoundingClientRect()
+    const ratio = clamp((event.clientX - bounds.left) / bounds.width, 0, 1)
+    const previewTime = ratio * duration
+    const previewSeconds = Math.max(0, Math.round(previewTime))
+    const previewEdge = 84
+    const previewMax = toolbarBounds ? Math.max(previewEdge, toolbarBounds.width - previewEdge) : Math.max(previewEdge, bounds.width - previewEdge)
+    const previewLeft = toolbarBounds
+      ? clamp(event.clientX - toolbarBounds.left, previewEdge, previewMax)
+      : clamp(event.clientX - bounds.left, Math.min(previewEdge, bounds.width / 2), previewMax)
+    const cachedUrl = progressPreviewCacheRef.current.get(previewSeconds)
+
+    setActiveMenu(null)
+    progressPreviewVisibleRef.current = true
+    setProgressPreview(prev => ({
+      ...prev,
+      visible: true,
+      time: previewTime,
+      x: `${previewLeft}px`,
+      imageUrl: cachedUrl || '',
+      loading: !cachedUrl
+    }))
+
+    if (progressPreviewTimerRef.current) {
+      clearTimeout(progressPreviewTimerRef.current)
+    }
+    progressPreviewTimerRef.current = setTimeout(() => {
+      progressPreviewTimerRef.current = null
+      requestProgressPreviewFrame(previewTime)
+    }, 120)
+  }, [duration, requestProgressPreviewFrame])
+
+  const hideProgressPreview = useCallback(() => {
+    if (progressPreviewTimerRef.current) {
+      clearTimeout(progressPreviewTimerRef.current)
+      progressPreviewTimerRef.current = null
+    }
+    progressPreviewRequestRef.current += 1
+    progressPreviewPendingTimeRef.current = null
+    progressPreviewVisibleRef.current = false
+    setProgressPreview(prev => ({ ...prev, visible: false, loading: false }))
+  }, [])
+
   const handleSeek = useCallback((delta) => {
     if (canUseMpv) {
       window.electronAPI?.mpvSeekRelative?.(delta)
@@ -357,33 +470,15 @@ export default function VideoPlayer({ video }) {
   }, [canUseMpv])
 
   const handleToggleMenu = useCallback((menuName) => {
+    hideProgressPreview()
     setActiveMenu(current => (current === menuName ? null : menuName))
-  }, [])
+  }, [hideProgressPreview])
 
   const handleToggleAnalysis = useCallback(() => {
     if (!analysisAvailable) return
     setAnalysisOpen(value => !value)
     setActiveMenu(null)
   }, [analysisAvailable])
-
-  const handleStartAnalysis = useCallback(async () => {
-    if (!canStartAnalysis || !video?.fullPath) return
-    setActiveMenu(null)
-    setAnalysisOpen(false)
-    setAnalysisJob({ message: '正在启动分析任务' })
-    setAnalysisState({ status: 'analyzing', data: null, error: '' })
-    const result = await window.electronAPI?.startVideoAnalysis?.(video.fullPath)
-    if (!result?.accepted) {
-      setAnalysisJob(null)
-      setAnalysisState({
-        status: 'error',
-        data: null,
-        error: result?.error || (result?.reason === 'already_running' ? '已有视频正在分析' : '无法启动视频理解分析')
-      })
-      return
-    }
-    setAnalysisJob(result.job || { message: '分析任务已启动' })
-  }, [canStartAnalysis, video?.fullPath])
 
   const handleCancelAnalysis = useCallback(async () => {
     const jobId = analysisJob?.jobId
@@ -748,6 +843,19 @@ export default function VideoPlayer({ video }) {
     }
   }, [canUseMpv, clearHostSyncJobs, scheduleMpvHostBoundsSync, video])
 
+  useLayoutEffect(() => {
+    if (video && canUseMpv) scheduleMpvHostBoundsSync(true)
+  }, [
+    activeMenu,
+    analysisAvailable,
+    analysisRunning,
+    analysisOpen,
+    analysisState.status,
+    canUseMpv,
+    scheduleMpvHostBoundsSync,
+    video
+  ])
+
   useEffect(() => {
     return registerPlayerCommandTarget?.(handlePlayerCommand)
   }, [handlePlayerCommand, registerPlayerCommandTarget])
@@ -1055,11 +1163,32 @@ export default function VideoPlayer({ video }) {
   }, [])
 
   useEffect(() => {
+    progressPreviewCacheRef.current.clear()
+    progressPreviewRequestRef.current += 1
+    progressPreviewPendingTimeRef.current = null
+    progressPreviewVisibleRef.current = false
+    setProgressPreview({
+      visible: false,
+      time: 0,
+      x: 0,
+      imageUrl: '',
+      loading: false
+    })
+  }, [video?.fullPath])
+
+  useEffect(() => {
     return () => {
       if (clickTimerRef.current) {
         clearTimeout(clickTimerRef.current)
         clickTimerRef.current = null
       }
+      if (progressPreviewTimerRef.current) {
+        clearTimeout(progressPreviewTimerRef.current)
+        progressPreviewTimerRef.current = null
+      }
+      progressPreviewRequestRef.current += 1
+      progressPreviewPendingTimeRef.current = null
+      progressPreviewVisibleRef.current = false
     }
   }, [])
 
@@ -1071,7 +1200,99 @@ export default function VideoPlayer({ video }) {
   const qualityLabel = '原画'
   const hasNext = queueLength > 1 && queueIndex >= 0 && queueIndex < queueLength - 1
   const hasPrev = queueLength > 1 && queueIndex > 0
+  const activeToolbarMenu = (() => {
+    if (activeMenu === 'quality') {
+      return (
+        <div className="player-menu player-menu-right" role="menu">
+          <button className="active" type="button" role="menuitem" onClick={() => setActiveMenu(null)}>原画</button>
+          <span className="player-menu-note">本地文件暂无多清晰度源</span>
+        </div>
+      )
+    }
 
+    if (activeMenu === 'speed') {
+      return (
+        <div className="player-menu player-menu-right" role="menu">
+          {SPEED_OPTIONS.map(option => (
+            <button
+              key={option}
+              className={Math.abs(speed - option) < 0.01 ? 'active' : ''}
+              type="button"
+              role="menuitem"
+              onClick={() => handleSpeedChange(option)}
+            >
+              {formatSpeed(option)}
+            </button>
+          ))}
+        </div>
+      )
+    }
+
+    if (activeMenu === 'subtitle') {
+      return (
+        <div className="player-menu player-menu-right" role="menu">
+          <button className={subtitleId == null ? 'active' : ''} type="button" role="menuitem" onClick={() => handleSelectSubtitle('no')}>关闭字幕</button>
+          {canUseMpv && subtitleTracks.length ? subtitleTracks.map(track => (
+            <button
+              key={track.id}
+              className={subtitleId === Number(track.id) ? 'active' : ''}
+              type="button"
+              role="menuitem"
+              onClick={() => handleSelectSubtitle(track.id)}
+            >
+              {getTrackLabel(track, `字幕 ${track.id}`)}
+            </button>
+          )) : (
+            <span className="player-menu-note">没有检测到字幕轨</span>
+          )}
+        </div>
+      )
+    }
+
+    if (activeMenu === 'settings') {
+      return (
+        <div className="player-menu player-menu-right player-settings-menu" role="menu">
+          <div className="player-menu-group">
+            <span className="player-menu-title">字幕大小</span>
+            <div className="player-menu-options">
+              {SUBTITLE_SCALE_OPTIONS.map(option => (
+                <button
+                  key={option}
+                  className={Math.abs(subtitleScale - option) < 0.01 ? 'active' : ''}
+                  type="button"
+                  role="menuitem"
+                  onClick={() => handleSubtitleScaleChange(option)}
+                >
+                  {Math.round(option * 100)}%
+                </button>
+              ))}
+            </div>
+          </div>
+          <button type="button" role="menuitem" onClick={handleToggleSubtitleVisible}>
+            {subtitleVisible ? '隐藏字幕' : '显示字幕'}
+          </button>
+          <div className="player-menu-group">
+            <span className="player-menu-title">音轨</span>
+            {canUseMpv && audioTracks.length ? audioTracks.map(track => (
+              <button
+                key={track.id}
+                className={audioId === Number(track.id) ? 'active' : ''}
+                type="button"
+                role="menuitem"
+                onClick={() => handleSelectAudio(track.id)}
+              >
+                {getTrackLabel(track, `音轨 ${track.id}`)}
+              </button>
+            )) : (
+              <span className="player-menu-note">没有可切换音轨</span>
+            )}
+          </div>
+        </div>
+      )
+    }
+
+    return null
+  })()
   return (
     <div
       className={`player-overlay${webFullscreen ? ' player-overlay-web-fullscreen' : ''}`}
@@ -1095,7 +1316,8 @@ export default function VideoPlayer({ video }) {
           webFullscreen ? 'web-fullscreen' : '',
           activeMenu ? 'menu-open' : '',
           activeMenu ? `menu-${activeMenu}` : '',
-          controlsVisible || paused || activeMenu ? 'controls-visible' : 'controls-hidden'
+          analysisOpen && analysisAvailable ? 'analysis-open' : '',
+          'controls-visible'
         ].filter(Boolean).join(' ')}
         onMouseEnter={showControls}
         onMouseMove={showControls}
@@ -1191,35 +1413,38 @@ export default function VideoPlayer({ video }) {
                 <span>{html5Error || playerError}</span>
               </div>
             )}
+          </div>
 
-            {analysisOpen && analysisAvailable ? (
+          {analysisOpen && analysisAvailable ? (
+            <div className="player-analysis-sidecar">
               <VideoAnalysisPanel
                 analysis={analysisState.data}
                 currentTime={progressValue}
                 onSeek={handleSeekTo}
                 onClose={() => setAnalysisOpen(false)}
               />
-            ) : null}
+            </div>
+          ) : null}
+        </div>
 
-            {analysisRunning ? (
-              <div className="player-analysis-status" onClick={event => event.stopPropagation()}>
-                <span className="player-analysis-spinner" aria-hidden="true" />
-                <div>
-                  <strong>{analysisJob?.stage || '视频理解'}</strong>
-                  <span>{analysisJob?.message || '正在分析当前视频'}</span>
-                </div>
-                <button type="button" onClick={handleCancelAnalysis}>取消</button>
+        <div className="player-toolbar" ref={toolbarRef} onClick={event => event.stopPropagation()}>
+          {analysisRunning ? (
+            <div className="player-analysis-status">
+              <span className="player-analysis-spinner" aria-hidden="true" />
+              <div>
+                <strong>{analysisJob?.stage || '视频理解'}</strong>
+                <span>{analysisJob?.message || '正在分析当前视频'}</span>
               </div>
-            ) : null}
+              <button type="button" onClick={handleCancelAnalysis}>取消</button>
+            </div>
+          ) : null}
 
-            {analysisState.status === 'error' && analysisState.error ? (
-              <div className="player-analysis-error" onClick={event => event.stopPropagation()}>
-                <span>{analysisState.error}</span>
-                {canStartAnalysis ? <button type="button" onClick={handleStartAnalysis}>重试</button> : null}
-              </div>
-            ) : null}
+          {analysisState.status === 'error' && analysisState.error ? (
+            <div className="player-analysis-error">
+              <span>{analysisState.error}</span>
+            </div>
+          ) : null}
 
-            <div className="player-toolbar" onClick={event => event.stopPropagation()}>
             <div className="player-controls-row">
               <div className="player-left-controls">
                 <button
@@ -1269,7 +1494,12 @@ export default function VideoPlayer({ video }) {
                 <span className="player-time-total">{formatTime(duration)}</span>
               </div>
 
-              <div className="player-progress-wrap">
+              <div
+                className="player-progress-wrap"
+                onMouseMove={updateProgressPreview}
+                onMouseEnter={updateProgressPreview}
+                onMouseLeave={hideProgressPreview}
+              >
                 <input
                   className="player-range player-progress-range"
                   type="range"
@@ -1287,9 +1517,9 @@ export default function VideoPlayer({ video }) {
                 {videoAnalysisEnabled ? (
                   <button
                     className={`btn btn-icon player-control-btn player-analysis-toggle${analysisOpen ? ' active' : ''}`}
-                    onClick={analysisAvailable ? handleToggleAnalysis : handleStartAnalysis}
+                    onClick={handleToggleAnalysis}
                     type="button"
-                    disabled={analysisRunning || analysisState.status === 'checking'}
+                    disabled={!analysisAvailable || analysisRunning || analysisState.status === 'checking'}
                     title={analysisButtonTitle}
                     aria-label="视频理解"
                   >
@@ -1305,57 +1535,18 @@ export default function VideoPlayer({ video }) {
                   <button className="player-text-button" type="button" title="清晰度" onClick={() => handleToggleMenu('quality')}>
                     {qualityLabel}
                   </button>
-                  {activeMenu === 'quality' && (
-                    <div className="player-menu player-menu-right" role="menu">
-                      <button className="active" type="button" role="menuitem" onClick={() => setActiveMenu(null)}>原画</button>
-                      <span className="player-menu-note">本地文件暂无多清晰度源</span>
-                    </div>
-                  )}
                 </div>
 
                 <div className="player-popover-anchor">
                   <button className="player-text-button" type="button" title="倍速" onClick={() => handleToggleMenu('speed')}>
                     {formatSpeed(speed)}
                   </button>
-                  {activeMenu === 'speed' && (
-                    <div className="player-menu player-menu-right" role="menu">
-                      {SPEED_OPTIONS.map(option => (
-                        <button
-                          key={option}
-                          className={Math.abs(speed - option) < 0.01 ? 'active' : ''}
-                          type="button"
-                          role="menuitem"
-                          onClick={() => handleSpeedChange(option)}
-                        >
-                          {formatSpeed(option)}
-                        </button>
-                      ))}
-                    </div>
-                  )}
                 </div>
 
                 <div className="player-popover-anchor">
                   <button className="player-text-button" type="button" title="字幕" onClick={() => handleToggleMenu('subtitle')}>
                     字幕
                   </button>
-                  {activeMenu === 'subtitle' && (
-                    <div className="player-menu player-menu-right" role="menu">
-                      <button className={subtitleId == null ? 'active' : ''} type="button" role="menuitem" onClick={() => handleSelectSubtitle('no')}>关闭字幕</button>
-                      {canUseMpv && subtitleTracks.length ? subtitleTracks.map(track => (
-                        <button
-                          key={track.id}
-                          className={subtitleId === Number(track.id) ? 'active' : ''}
-                          type="button"
-                          role="menuitem"
-                          onClick={() => handleSelectSubtitle(track.id)}
-                        >
-                          {getTrackLabel(track, `字幕 ${track.id}`)}
-                        </button>
-                      )) : (
-                        <span className="player-menu-note">没有检测到字幕轨</span>
-                      )}
-                    </div>
-                  )}
                 </div>
 
                 <div className="player-volume-control">
@@ -1394,45 +1585,6 @@ export default function VideoPlayer({ video }) {
                   <button className="btn btn-icon player-control-btn" type="button" title="设置" aria-label="设置" onClick={() => handleToggleMenu('settings')}>
                     <Icon path={<><circle cx="12" cy="12" r="3" /><path d="M19.4 15a1.7 1.7 0 00.3 1.9l.1.1-2 2-.1-.1a1.7 1.7 0 00-1.9-.3 1.7 1.7 0 00-1 1.6V20h-3v-.2a1.7 1.7 0 00-1-1.6 1.7 1.7 0 00-1.9.3l-.1.1-2-2 .1-.1a1.7 1.7 0 00.3-1.9 1.7 1.7 0 00-1.6-1H4v-3h.2a1.7 1.7 0 001.6-1 1.7 1.7 0 00-.3-1.9l-.1-.1 2-2 .1.1a1.7 1.7 0 001.9.3 1.7 1.7 0 001-1.6V4h3v.2a1.7 1.7 0 001 1.6 1.7 1.7 0 001.9-.3l.1-.1 2 2-.1.1a1.7 1.7 0 00-.3 1.9 1.7 1.7 0 001.6 1h.2v3h-.2a1.7 1.7 0 00-1.6 1z" /></>} />
                   </button>
-                  {activeMenu === 'settings' && (
-                    <div className="player-menu player-menu-right player-settings-menu" role="menu">
-                      <div className="player-menu-group">
-                        <span className="player-menu-title">字幕大小</span>
-                        <div className="player-menu-options">
-                          {SUBTITLE_SCALE_OPTIONS.map(option => (
-                            <button
-                              key={option}
-                              className={Math.abs(subtitleScale - option) < 0.01 ? 'active' : ''}
-                              type="button"
-                              role="menuitem"
-                              onClick={() => handleSubtitleScaleChange(option)}
-                            >
-                              {Math.round(option * 100)}%
-                            </button>
-                          ))}
-                        </div>
-                      </div>
-                      <button type="button" role="menuitem" onClick={handleToggleSubtitleVisible}>
-                        {subtitleVisible ? '隐藏字幕' : '显示字幕'}
-                      </button>
-                      <div className="player-menu-group">
-                        <span className="player-menu-title">音轨</span>
-                        {canUseMpv && audioTracks.length ? audioTracks.map(track => (
-                          <button
-                            key={track.id}
-                            className={audioId === Number(track.id) ? 'active' : ''}
-                            type="button"
-                            role="menuitem"
-                            onClick={() => handleSelectAudio(track.id)}
-                          >
-                            {getTrackLabel(track, `音轨 ${track.id}`)}
-                          </button>
-                        )) : (
-                          <span className="player-menu-note">没有可切换音轨</span>
-                        )}
-                      </div>
-                    </div>
-                  )}
                 </div>
 
                 <button
@@ -1463,10 +1615,30 @@ export default function VideoPlayer({ video }) {
                 >
                   <Icon path={isFullscreen ? <path d="M9 3v6H3M15 3v6h6M9 21v-6H3M15 21v-6h6" /> : <path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5" />} />
                 </button>
-              </div>
+                </div>
             </div>
-          </div>
-        </div>
+            {progressPreview.visible && duration > 0 ? (
+              <div className="player-progress-preview-layer" aria-hidden="true">
+                <div
+                  className="player-progress-preview"
+                  style={{ left: progressPreview.x }}
+                >
+                  <div className="player-progress-preview-image">
+                    {progressPreview.imageUrl ? (
+                      <img src={progressPreview.imageUrl} alt="" draggable="false" />
+                    ) : (
+                      <span>{progressPreview.loading ? '加载中' : '无预览'}</span>
+                    )}
+                  </div>
+                  <span className="player-progress-preview-time">{formatTime(progressPreview.time)}</span>
+                </div>
+              </div>
+            ) : null}
+            {activeToolbarMenu ? (
+              <div className="player-toolbar-panel">
+                {activeToolbarMenu}
+              </div>
+            ) : null}
         </div>
       </div>
     </div>

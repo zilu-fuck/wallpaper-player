@@ -29,6 +29,15 @@ const copyItems = [
   'vite.config.js'
 ]
 
+const videoComprehensionItems = [
+  '.env.example',
+  'docs',
+  'pyproject.toml',
+  'README.md',
+  'uv.lock',
+  'video_comprehension'
+]
+
 async function copyProject() {
   await fsp.rm(tempRoot, { recursive: true, force: true })
   await fsp.mkdir(tempRoot, { recursive: true })
@@ -37,6 +46,17 @@ async function copyProject() {
     const src = path.join(rootDir, item)
     if (!fs.existsSync(src)) continue
     await fsp.cp(src, path.join(tempRoot, item), { recursive: true })
+  }
+
+  const sourceProject = path.join(rootDir, 'video comprehension', 'video comprehension')
+  if (fs.existsSync(sourceProject)) {
+    const targetProject = path.join(tempRoot, 'video comprehension', 'video comprehension')
+    await fsp.mkdir(targetProject, { recursive: true })
+    for (const item of videoComprehensionItems) {
+      const src = path.join(sourceProject, item)
+      if (!fs.existsSync(src)) continue
+      await fsp.cp(src, path.join(targetProject, item), { recursive: true })
+    }
   }
 }
 

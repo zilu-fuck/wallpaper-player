@@ -27,6 +27,34 @@ const packages = [
     targetDir: path.join(vendorDir, 'ffmpeg'),
     exeName: 'ffmpeg.exe',
     keepBinLayout: true
+  },
+  {
+    name: 'llama.cpp CPU',
+    url: 'https://github.com/ggml-org/llama.cpp/releases/download/b9756/llama-b9756-bin-win-cpu-x64.zip',
+    sha256: '47e5c4f2e59969ee1d812f71281614dad236f312912a1759fba8fc622bb5ad5f',
+    archive: 'llama-b9756-bin-win-cpu-x64.zip',
+    marker: path.join(vendorDir, 'llama.cpp', 'llama-server.exe'),
+    targetDir: path.join(vendorDir, 'llama.cpp'),
+    exeName: 'llama-server.exe'
+  },
+  {
+    name: 'llama.cpp CUDA',
+    url: 'https://github.com/ggml-org/llama.cpp/releases/download/b9756/llama-b9756-bin-win-cuda-13.3-x64.zip',
+    sha256: '390d2ddb61df915ebd02c0a08a01a80a2190a2969aaa1142946d1080e14b9067',
+    archive: 'llama-b9756-bin-win-cuda-13.3-x64.zip',
+    marker: path.join(vendorDir, 'llama.cpp-cuda', 'llama-server.exe'),
+    targetDir: path.join(vendorDir, 'llama.cpp-cuda'),
+    exeName: 'llama-server.exe'
+  },
+  {
+    name: 'llama.cpp CUDA runtime',
+    url: 'https://github.com/ggml-org/llama.cpp/releases/download/b9756/cudart-llama-bin-win-cuda-13.3-x64.zip',
+    sha256: '1462a050eb4c684921ba51dcc4cc488a036674c3e73e9945ee705b854808d03e',
+    archive: 'cudart-llama-bin-win-cuda-13.3-x64.zip',
+    marker: path.join(vendorDir, 'llama.cpp-cuda', 'cudart64_13.dll'),
+    targetDir: path.join(vendorDir, 'llama.cpp-cuda'),
+    exeName: 'cudart64_13.dll',
+    mergeIntoTarget: true
   }
 ]
 
@@ -119,8 +147,10 @@ async function findFile(dir, fileName, depth = 0) {
   return null
 }
 
-async function copyDirectory(src, dest) {
-  await fsp.rm(dest, { recursive: true, force: true })
+async function copyDirectory(src, dest, merge = false) {
+  if (!merge) {
+    await fsp.rm(dest, { recursive: true, force: true })
+  }
   await fsp.mkdir(dest, { recursive: true })
   await fsp.cp(src, dest, { recursive: true })
 }
@@ -158,7 +188,7 @@ async function preparePackage(pkg) {
     ? path.dirname(path.dirname(exePath))
     : path.dirname(exePath)
 
-  await copyDirectory(sourceRoot, pkg.targetDir)
+  await copyDirectory(sourceRoot, pkg.targetDir, pkg.mergeIntoTarget)
   await fsp.rm(extractDir, { recursive: true, force: true })
   console.log(`[vendor] ready: ${pkg.name}`)
 }

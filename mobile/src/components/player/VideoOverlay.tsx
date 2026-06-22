@@ -14,6 +14,8 @@ import { VideoInfo } from './VideoInfo'
 type Props = {
   video: VideoItem
   favorite: boolean
+  analysisLabel?: string
+  analysisActive?: boolean
   status: 'loading' | 'ready' | 'buffering' | 'error'
   error: string
   isPlaying: boolean
@@ -35,6 +37,7 @@ type Props = {
   onSeek: (time: number) => void
   onFavorite: () => void
   onTags: () => void
+  onAnalysis: () => void
   onCache: () => void
   onDesktopPlay: () => void
   onMore: () => void
@@ -48,6 +51,8 @@ type Props = {
 export function VideoOverlay({
   video,
   favorite,
+  analysisLabel,
+  analysisActive,
   status,
   error,
   isPlaying,
@@ -69,6 +74,7 @@ export function VideoOverlay({
   onSeek,
   onFavorite,
   onTags,
+  onAnalysis,
   onCache,
   onDesktopPlay,
   onMore,
@@ -78,8 +84,8 @@ export function VideoOverlay({
   onCancelTranscode,
   onErrorDetails
 }: Props) {
-  const infoBottom = BOTTOM_SAFE_OFFSET + (controlsVisible ? 88 : 54)
-  const actionsBottom = BOTTOM_SAFE_OFFSET + (controlsVisible ? 112 : 74)
+  const infoBottom = BOTTOM_SAFE_OFFSET + (controlsVisible ? 88 : 50)
+  const actionsBottom = BOTTOM_SAFE_OFFSET + (controlsVisible ? 104 : 64)
   const progressBottom = BOTTOM_SAFE_OFFSET + 7
 
   return (
@@ -143,9 +149,12 @@ export function VideoOverlay({
       {!landscapeMode ? (
         <VideoActionBar
           favorite={favorite}
+          analysisLabel={analysisLabel}
+          analysisActive={analysisActive}
           bottomOffset={actionsBottom}
           onFavorite={onFavorite}
           onTags={onTags}
+          onAnalysis={onAnalysis}
           onCache={onCache}
           onDesktopPlay={onDesktopPlay}
           onMore={onMore}
@@ -186,6 +195,7 @@ export function VideoOverlay({
         onSeek={onSeek}
         onFavorite={onFavorite}
         onTags={onTags}
+        onAnalysis={onAnalysis}
         onCache={onCache}
         onDesktopPlay={onDesktopPlay}
         onMore={onMore}

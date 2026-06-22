@@ -23,24 +23,27 @@ import type {
 import type { NativeVideoPlayerHandle } from '../components/player/NativeVideoPlayer'
 import { PlayerMoreSheet, type AspectMode } from '../components/player/PlayerMoreSheet'
 import { TagEditorSheet } from '../components/player/TagEditorSheet'
+import { VideoAnalysisSheet } from '../components/player/VideoAnalysisSheet'
 import { VideoFeedItem } from '../components/player/VideoFeedItem'
 import { VideoOverlay } from '../components/player/VideoOverlay'
 import type { NavigationContext } from '../../App'
 import {
   getPlaybackState,
   cancelTranscode,
+  getVideoAnalysis,
   getTranscodeStatus,
   playOnDesktop,
   resolveRemoteUrl,
   revealOnDesktop,
   savePlaybackState,
+  startVideoAnalysis,
   startTranscode,
   toggleFavorite,
   updateVideoTags
 } from '../services/api'
 import { loadLocalPlayback, saveLocalPlayback } from '../stores/playback'
 import { colors } from '../theme'
-import type { StoredDevice, VideoItem } from '../types'
+import type { StoredDevice, VideoAnalysisResponse, VideoItem } from '../types'
 import {
   appendRetryParam,
   clamp,
@@ -104,6 +107,10 @@ export function PlayerScreen({ navigation, device, video, videos }: Props) {
   const [networkSlow, setNetworkSlow] = useState(false)
   const [transcoding, setTranscoding] = useState(false)
   const [transcodeProgress, setTranscodeProgress] = useState(0)
+  const [analysisSheetVisible, setAnalysisSheetVisible] = useState(false)
+  const [analysisById, setAnalysisById] = useState<Record<string, VideoAnalysisResponse | null>>({})
+  const [analysisLoading, setAnalysisLoading] = useState(false)
+  const [analysisStarting, setAnalysisStarting] = useState(false)
   const [speedBoostMode, setSpeedBoostMode] = useState<'forward' | 'rewind' | null>(null)
   const [controlsVisible, setControlsVisible] = useState(false)
   const [moreSheetVisible, setMoreSheetVisible] = useState(false)
@@ -125,6 +132,7 @@ export function PlayerScreen({ navigation, device, video, videos }: Props) {
   const heartTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const controlsTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const transcodeTimerRef = useRef<ReturnType<typeof setInterval> | null>(null)
+  const analysisTimerRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const rewindTimerRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const ignoreNextPressRef = useRef(false)
   const speedBoostActiveRef = useRef(false)
@@ -152,6 +160,10 @@ export function PlayerScreen({ navigation, device, video, videos }: Props) {
   }, [videoList])
   const groupLine = useMemo(() => getVideoGroupLine(activeVideo, device, activeTags), [activeTags, activeVideo, device])
   const detailLine = useMemo(() => getVideoDetailLine(activeVideo, duration, videoSize), [activeVideo, duration, videoSize])
+  const activeAnalysisState = analysisById[activeVideo.id] || null
+  const analysisRunning = Boolean(activeAnalysisState?.job?.running || ['started', 'running'].includes(activeAnalysisState?.recent?.status || ''))
+  const analysisAvailable = Boolean(activeAnalysisState?.analysis?.available || activeAnalysisState?.recent?.analysis?.available)
+  const analysisActionLabel = analysisRunning ? '分析中' : analysisAvailable ? '结果' : '分析'
 
   const player = useVideoPlayer({
     uri: streamUrl,
@@ -563,6 +575,7 @@ export function PlayerScreen({ navigation, device, video, videos }: Props) {
     if (heartTimerRef.current) clearTimeout(heartTimerRef.current)
     if (controlsTimerRef.current) clearTimeout(controlsTimerRef.current)
     if (transcodeTimerRef.current) clearInterval(transcodeTimerRef.current)
+    if (analysisTimerRef.current) clearInterval(analysisTimerRef.current)
     if (rewindTimerRef.current) clearInterval(rewindTimerRef.current)
     restorePortraitOrientation()
   }, [restorePortraitOrientation])
@@ -618,6 +631,60 @@ export function PlayerScreen({ navigation, device, video, videos }: Props) {
       transcodeTimerRef.current = null
     }
   }, [])
+
+  const stopAnalysisPolling = useCallback(() => {
+    if (analysisTimerRef.current) {
+      clearInterval(analysisTimerRef.current)
+      analysisTimerRef.current = null
+    }
+  }, [])
+
+  const storeAnalysisState = useCallback((videoId: string, state: VideoAnalysisResponse | null) => {
+    setAnalysisById(current => ({ ...current, [videoId]: state }))
+  }, [])
+
+  const fetchAnalysisState = useCallback(async (videoId = activeVideoRef.current.id, options: { silent?: boolean } = {}) => {
+    if (!options.silent) setAnalysisLoading(true)
+    try {
+      const result = await getVideoAnalysis(device, videoId)
+      storeAnalysisState(videoId, result)
+      const running = Boolean(result.job?.running)
+      const terminal = ['success', 'error', 'cancelled'].includes(result.recent?.status || '')
+      if (!running && terminal) stopAnalysisPolling()
+      return result
+    } catch (analysisError) {
+      if (!options.silent) {
+        showGestureHint(analysisError instanceof Error ? analysisError.message : '读取分析状态失败', 1600)
+      }
+      return null
+    } finally {
+      if (!options.silent) setAnalysisLoading(false)
+    }
+  }, [device, showGestureHint, stopAnalysisPolling, storeAnalysisState])
+
+  const pollAnalysisState = useCallback(async (videoId: string) => {
+    const result = await fetchAnalysisState(videoId, { silent: true })
+    if (!result) return
+    const running = Boolean(result.job?.running)
+    const terminal = ['success', 'error', 'cancelled'].includes(result.recent?.status || '')
+    if (running || !terminal) return
+    stopAnalysisPolling()
+    if (result.recent?.status === 'success') {
+      await fetchAnalysisState(videoId, { silent: true })
+      if (activeVideoRef.current.id === videoId) showGestureHint('视频分析完成')
+      return
+    }
+    if (activeVideoRef.current.id === videoId && result.recent?.status === 'error') {
+      showGestureHint(result.recent.error || '视频分析失败', 1800)
+    }
+  }, [fetchAnalysisState, showGestureHint, stopAnalysisPolling])
+
+  const startAnalysisPolling = useCallback((videoId: string) => {
+    stopAnalysisPolling()
+    analysisTimerRef.current = setInterval(() => {
+      pollAnalysisState(videoId)
+    }, 1600)
+  }, [pollAnalysisState, stopAnalysisPolling])
 
   const applyTranscodeReady = useCallback((videoId: string, streamUrl?: string, qualityLabel = '兼容格式') => {
     if (!streamUrl) return
@@ -695,6 +762,39 @@ export function PlayerScreen({ navigation, device, video, videos }: Props) {
       setStatus('error')
     }
   }, [applyTranscodeReady, device, pollTranscodeStatus, stopTranscodePolling])
+
+  const handleOpenAnalysis = useCallback(() => {
+    const item = activeVideoRef.current
+    setAnalysisSheetVisible(true)
+    setControlsVisible(false)
+    fetchAnalysisState(item.id).then((result) => {
+      if (result?.job?.running) startAnalysisPolling(item.id)
+    })
+  }, [fetchAnalysisState, startAnalysisPolling])
+
+  const handleStartAnalysis = useCallback(async () => {
+    const item = activeVideoRef.current
+    setAnalysisStarting(true)
+    stopAnalysisPolling()
+    try {
+      const result = await startVideoAnalysis(device, item.id)
+      storeAnalysisState(item.id, result)
+      if (result.accepted || result.job?.currentVideo) {
+        showGestureHint('已在电脑端开始分析')
+        startAnalysisPolling(item.id)
+        return
+      }
+      if (result.job?.running) {
+        showGestureHint('电脑端正在分析其他视频，请稍后再试', 1800)
+        return
+      }
+      showGestureHint(result.error || (result.reason === 'disabled' ? '请先在电脑端开启视频理解' : '无法开始分析'), 1800)
+    } catch (analysisError) {
+      showGestureHint(analysisError instanceof Error ? analysisError.message : '视频分析启动失败', 1800)
+    } finally {
+      setAnalysisStarting(false)
+    }
+  }, [device, showGestureHint, startAnalysisPolling, stopAnalysisPolling, storeAnalysisState])
 
   const handleQualitySelect = useCallback((quality: string) => {
     setMoreSheetVisible(false)
@@ -828,16 +928,20 @@ export function PlayerScreen({ navigation, device, video, videos }: Props) {
     positionSnapshotRef.current[activeVideoRef.current.id] = readCurrentPosition()
     saveCurrentPosition().catch(() => {})
     stopTranscodePolling()
+    stopAnalysisPolling()
     setTranscoding(false)
     setTranscodeProgress(0)
     setReloadKey(0)
     setControlsVisible(false)
     setMoreSheetVisible(false)
     setTagSheetVisible(false)
+    setAnalysisSheetVisible(false)
+    setAnalysisLoading(false)
+    setAnalysisStarting(false)
     setFullscreenMode(false)
     restorePortraitOrientation()
     setActiveIndex(bounded)
-  }, [readCurrentPosition, restorePortraitOrientation, saveCurrentPosition, stopTranscodePolling, videoList.length])
+  }, [readCurrentPosition, restorePortraitOrientation, saveCurrentPosition, stopAnalysisPolling, stopTranscodePolling, videoList.length])
 
   const handleScrollBeginDrag = useCallback((event: NativeSyntheticEvent<NativeScrollEvent>) => {
     dragStartIndexRef.current = clamp(
@@ -906,6 +1010,8 @@ export function PlayerScreen({ navigation, device, video, videos }: Props) {
               networkSlow={networkSlow}
               transcoding={transcoding}
               transcodeProgress={transcodeProgress}
+              analysisLabel={analysisActionLabel}
+              analysisActive={analysisRunning || analysisAvailable}
               groupLine={groupLine}
               detailLine={detailLine}
               landscapeMode={fullscreenMode}
@@ -918,6 +1024,7 @@ export function PlayerScreen({ navigation, device, video, videos }: Props) {
                 setTagSheetVisible(true)
                 setControlsVisible(false)
               }}
+              onAnalysis={handleOpenAnalysis}
               onCache={handleTranscode}
               onDesktopPlay={handleDesktopPlay}
               onMore={() => {
@@ -956,13 +1063,35 @@ export function PlayerScreen({ navigation, device, video, videos }: Props) {
               onClose={() => setTagSheetVisible(false)}
               onSave={handleSaveTags}
             />
+            <VideoAnalysisSheet
+              visible={analysisSheetVisible}
+              video={activeVideo}
+              state={activeAnalysisState}
+              loading={analysisLoading}
+              starting={analysisStarting}
+              currentTime={currentTime}
+              onClose={() => setAnalysisSheetVisible(false)}
+              onRefresh={() => fetchAnalysisState(activeVideoRef.current.id)}
+              onStart={handleStartAnalysis}
+              onSeek={(time) => {
+                handleSeek(time)
+                setAnalysisSheetVisible(false)
+              }}
+            />
           </>
         ) : null}
       </VideoFeedItem>
     )
   }, [
     activeIndex,
+    activeAnalysisState,
     activeVideo,
+    analysisActionLabel,
+    analysisAvailable,
+    analysisLoading,
+    analysisRunning,
+    analysisSheetVisible,
+    analysisStarting,
     controlsVisible,
     currentTime,
     availableCustomTags,
@@ -979,12 +1108,14 @@ export function PlayerScreen({ navigation, device, video, videos }: Props) {
     handleCopyName,
     handleDesktopPlay,
     handleHideFromPlaylist,
+    handleOpenAnalysis,
     handleQualitySelect,
     handlePlaybackRateChange,
     handleRevealOnDesktop,
     handleRetry,
     handleSeek,
     handleSaveTags,
+    handleStartAnalysis,
     handleCancelTranscode,
     handleTranscode,
     handleVideoPress,
@@ -1005,6 +1136,7 @@ export function PlayerScreen({ navigation, device, video, videos }: Props) {
     status,
     tagSheetVisible,
     tagsSaving,
+    fetchAnalysisState,
     stopSpeedBoost,
     thumbnailUrl,
     transcoding,
@@ -1034,7 +1166,7 @@ export function PlayerScreen({ navigation, device, video, videos }: Props) {
         initialNumToRender={3}
         maxToRenderPerBatch={3}
         removeClippedSubviews={Platform.OS === 'android'}
-        scrollEnabled={!fullscreenMode && !moreSheetVisible && !tagSheetVisible}
+        scrollEnabled={!fullscreenMode && !moreSheetVisible && !tagSheetVisible && !analysisSheetVisible}
         onScrollBeginDrag={handleScrollBeginDrag}
         onScrollEndDrag={(event) => {
           if (!event.nativeEvent.velocity || Math.abs(event.nativeEvent.velocity.y || 0) < 0.05) {

@@ -5,7 +5,8 @@ const { setupIPC } = require('./ipc')
 const { setupAutoUpdater, disposeUpdater } = require('./updater')
 const { initMpv, destroyMpv } = require('./mpv-integration')
 const { unwatchAllDirectories } = require('./scanner')
-const { loadSettings, saveSettings, sanitizeSettingsForSave, onSettingsChanged } = require('./settings')
+const { loadSettings, saveSettings, sanitizeSettingsForSave, sanitizeSettingsForRenderer, onSettingsChanged } = require('./settings')
+const { disposeVlmService } = require('./vlm-service')
 const {
   setupRemoteIPC,
   initRemoteAccess,
@@ -48,7 +49,7 @@ function setupSettingsSync() {
   removeSettingsChangedListener = onSettingsChanged((settings) => {
     const win = getMainWindow()
     if (!win || win.isDestroyed()) return
-    win.webContents.send('settings-changed', settings)
+    win.webContents.send('settings-changed', sanitizeSettingsForRenderer(settings))
   })
 }
 
@@ -213,6 +214,11 @@ app.on('before-quit', () => {
   disposeRemoteAccess().catch((error) => {
     log.error('[remote] dispose failed:', error)
   })
+  try {
+    disposeVlmService()
+  } catch (error) {
+    log.error('[vlm] dispose failed:', error)
+  }
   destroyMpv()
 })
 

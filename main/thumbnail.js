@@ -1,6 +1,7 @@
 const path = require('path')
 const fs = require('fs')
 const fsp = require('fs/promises')
+const crypto = require('crypto')
 const { execFile } = require('child_process')
 const { app } = require('electron')
 const { getResourcePath, isPathInside } = require('./paths')
@@ -13,9 +14,14 @@ let ffmpegSearchCompleted = false
 const fallbackUserDataDir = path.join(process.cwd(), '.tmp-wallpaper-player')
 const THUMBNAIL_FFMPEG_CONCURRENCY = 1
 const THUMBNAIL_SCALE = '320:-1'
+const PREVIEW_FRAME_SCALE = '240:-1'
 const THUMBNAIL_QUALITY = '5'
+const PREVIEW_FRAME_CACHE_LIMIT = 500
+const PREVIEW_FRAME_MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000
+const PREVIEW_FRAME_CLEANUP_INTERVAL_MS = 5 * 60 * 1000
 const thumbnailJobQueue = []
 let activeThumbnailJobs = 0
+let lastPreviewFrameCleanupAt = 0
 
 function drainThumbnailJobs() {
   while (activeThumbnailJobs < THUMBNAIL_FFMPEG_CONCURRENCY && thumbnailJobQueue.length > 0) {
@@ -57,6 +63,41 @@ function getThumbnailDir() {
   const dir = path.join(baseDir, 'thumbnails')
   if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true })
   return dir
+}
+
+function getPreviewFrameDir() {
+  const dir = path.join(getThumbnailDir(), 'preview-frames')
+  if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true })
+  return dir
+}
+
+async function cleanupPreviewFrameCache(force = false) {
+  const now = Date.now()
+  if (!force && now - lastPreviewFrameCleanupAt < PREVIEW_FRAME_CLEANUP_INTERVAL_MS) return
+  lastPreviewFrameCleanupAt = now
+
+  try {
+    const dir = getPreviewFrameDir()
+    const entries = await fsp.readdir(dir, { withFileTypes: true })
+    const files = []
+
+    for (const entry of entries) {
+      if (!entry.isFile() || path.extname(entry.name).toLowerCase() !== '.jpg') continue
+      const filePath = path.join(dir, entry.name)
+      try {
+        const stats = await fsp.stat(filePath)
+        files.push({ filePath, mtimeMs: stats.mtimeMs })
+      } catch {}
+    }
+
+    files.sort((a, b) => b.mtimeMs - a.mtimeMs)
+    const expiredBefore = now - PREVIEW_FRAME_MAX_AGE_MS
+    const removals = files
+      .filter((file, index) => index >= PREVIEW_FRAME_CACHE_LIMIT || file.mtimeMs < expiredBefore)
+      .map(file => fsp.unlink(file.filePath).catch(() => {}))
+
+    await Promise.all(removals)
+  } catch {}
 }
 
 async function findFfmpeg() {
@@ -148,6 +189,50 @@ async function generateThumbnail(videoPath) {
   }))
 }
 
+async function generatePreviewFrame(videoPath, seconds) {
+  const resolvedPath = await assertAllowedVideoPath(videoPath)
+  const time = Math.max(0, Math.round(Number(seconds) || 0))
+  const stats = await fsp.stat(resolvedPath)
+  const previewDir = getPreviewFrameDir()
+  const signature = `${Math.round(stats.mtimeMs)}-${stats.size}`
+  const cacheKey = crypto.createHash('sha256').update(`${resolvedPath}|${signature}|${time}`).digest('hex')
+  const framePath = path.join(previewDir, `${cacheKey}.jpg`)
+
+  if (fs.existsSync(framePath)) {
+    return framePath
+  }
+
+  const ffmpeg = await findFfmpeg()
+  if (!ffmpeg) {
+    return null
+  }
+
+  return enqueueThumbnailJob(() => new Promise((resolve) => {
+    if (fs.existsSync(framePath)) {
+      resolve(framePath)
+      return
+    }
+
+    execFile(ffmpeg, [
+      '-ss', String(time),
+      '-i', resolvedPath,
+      '-threads', '1',
+      '-vframes', '1',
+      '-vf', `scale=${PREVIEW_FRAME_SCALE}`,
+      '-q:v', THUMBNAIL_QUALITY,
+      '-y',
+      framePath
+    ], { timeout: 30000 }, (err) => {
+      if (err) {
+        fsp.unlink(framePath).catch(() => {})
+      } else {
+        cleanupPreviewFrameCache().catch(() => {})
+      }
+      resolve(err ? null : framePath)
+    })
+  }))
+}
+
 async function getExistingPreviewPath(videoPath) {
   let dirPath = path.dirname(videoPath)
   const allowedDirs = getAllowedVideoDirectories()
@@ -173,7 +258,9 @@ module.exports = {
   execFileAsync,
   findFfmpeg,
   getThumbnailDir,
+  getPreviewFrameDir,
   generateThumbnail,
+  generatePreviewFrame,
   getExistingPreviewPath,
   resolveThumbnail
 }
