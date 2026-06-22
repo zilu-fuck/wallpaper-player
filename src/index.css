@@ -2017,6 +2017,173 @@ a:hover {
   flex-shrink: 0;
 }
 
+.player-analysis-panel {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  z-index: 9;
+  width: min(380px, calc(100% - 28px));
+  max-height: calc(100% - 78px);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 13px;
+  overflow: auto;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 8px;
+  background: rgba(13, 18, 26, 0.92);
+  color: rgba(255, 255, 255, 0.88);
+  box-shadow: 0 18px 52px rgba(0, 0, 0, 0.42);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+
+.player-analysis-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.player-analysis-kicker {
+  margin: 0 0 3px;
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 11px;
+}
+
+.player-analysis-head h3 {
+  margin: 0;
+  color: white;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.35;
+}
+
+.player-analysis-close {
+  width: 26px;
+  height: 26px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.58);
+  cursor: pointer;
+}
+
+.player-analysis-close:hover {
+  color: white;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.player-analysis-summary {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.76);
+  font-size: 12px;
+  line-height: 1.55;
+}
+
+.player-analysis-meta,
+.player-analysis-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.player-analysis-meta span,
+.player-analysis-tags span {
+  display: inline-flex;
+  align-items: center;
+  min-height: 22px;
+  padding: 0 8px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.06);
+  color: rgba(255, 255, 255, 0.66);
+  font-size: 11px;
+}
+
+.player-analysis-tags span {
+  color: white;
+  border-color: rgba(91, 140, 255, 0.32);
+  background: rgba(91, 140, 255, 0.18);
+}
+
+.player-analysis-timeline {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.player-analysis-timeline button {
+  display: grid;
+  grid-template-columns: 48px minmax(0, 1fr);
+  gap: 8px;
+  padding: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.04);
+  color: rgba(255, 255, 255, 0.8);
+  text-align: left;
+  cursor: pointer;
+}
+
+.player-analysis-timeline button:hover,
+.player-analysis-timeline button.active {
+  border-color: rgba(91, 140, 255, 0.48);
+  background: rgba(91, 140, 255, 0.18);
+  color: white;
+}
+
+.player-analysis-time {
+  color: rgba(255, 255, 255, 0.48);
+  font-family: 'Cascadia Code', 'Fira Code', Consolas, monospace;
+  font-size: 11px;
+}
+
+.player-analysis-line {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.player-analysis-line strong {
+  overflow: hidden;
+  color: inherit;
+  font-size: 12px;
+  line-height: 1.35;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.player-analysis-line small {
+  display: -webkit-box;
+  overflow: hidden;
+  color: rgba(255, 255, 255, 0.58);
+  font-size: 11px;
+  line-height: 1.45;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.player-analysis-toggle.active {
+  color: white;
+  border-color: rgba(91, 140, 255, 0.54);
+  background: rgba(91, 140, 255, 0.28);
+}
+
+.player-analysis-spinner {
+  width: 14px;
+  height: 14px;
+  border: 2px solid rgba(255, 255, 255, 0.24);
+  border-top-color: white;
+  border-radius: 999px;
+  animation: spin 0.8s linear infinite;
+}
+
 .player-toolbar {
   position: absolute;
   left: 0;

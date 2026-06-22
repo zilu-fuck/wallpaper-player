@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { useApp } from '../context/AppContext'
+import VideoAnalysisPanel from './VideoAnalysisPanel'
 
 const SEEK_STEP = 5
 const ARROW_HOLD_DELAY = 300
@@ -44,6 +45,7 @@ function getTrackLabel(track, fallback) {
 
 export default function VideoPlayer({ video }) {
   const {
+    settings,
     mpvState,
     mpvStatus,
     playerError,
@@ -96,7 +98,10 @@ export default function VideoPlayer({ video }) {
     loop: false
   })
   const [html5Error, setHtml5Error] = useState('')
+  const [analysisState, setAnalysisState] = useState({ status: 'idle', data: null, error: '' })
+  const [analysisOpen, setAnalysisOpen] = useState(false)
   const playbackResumeEnabled = video?.playOptions?.resume !== false
+  const videoAnalysisEnabled = Boolean(settings?.videoAnalysis?.enabled)
 
   const mpvEngineAvailable = mpvStatus?.available !== false
   const canUseMpv = mpvEngineAvailable && mode === 'mpv'
@@ -132,6 +137,13 @@ export default function VideoPlayer({ video }) {
     if (!html5Url) return '正在加载 HTML5 播放器...'
     return 'HTML5 兜底播放'
   })()
+  const analysisAvailable = analysisState.status === 'ready' && analysisState.data?.available
+  const analysisButtonTitle = (() => {
+    if (!videoAnalysisEnabled) return '请先在设置中启用视频理解'
+    if (analysisState.status === 'loading') return '正在读取视频理解结果'
+    if (analysisAvailable) return analysisOpen ? '隐藏视频理解' : '显示视频理解'
+    return '没有找到当前视频的理解结果'
+  })()
 
   useEffect(() => {
     speedRef.current = Number.isFinite(speed) ? speed : 1
@@ -144,6 +156,35 @@ export default function VideoPlayer({ video }) {
   useEffect(() => {
     canUseMpvRef.current = canUseMpv
   }, [canUseMpv])
+
+  useEffect(() => {
+    let canceled = false
+    setAnalysisOpen(false)
+
+    if (!videoAnalysisEnabled || !video?.fullPath || !window.electronAPI?.getVideoAnalysis) {
+      setAnalysisState({ status: 'idle', data: null, error: '' })
+      return () => {
+        canceled = true
+      }
+    }
+
+    setAnalysisState({ status: 'loading', data: null, error: '' })
+    window.electronAPI.getVideoAnalysis(video.fullPath)
+      .then((result) => {
+        if (!canceled) {
+          setAnalysisState({ status: 'ready', data: result, error: '' })
+        }
+      })
+      .catch((err) => {
+        if (!canceled) {
+          setAnalysisState({ status: 'error', data: null, error: err?.message || '读取视频理解结果失败' })
+        }
+      })
+
+    return () => {
+      canceled = true
+    }
+  }, [video?.fullPath, videoAnalysisEnabled])
 
   const handleClose = useCallback(() => {
     videoRef.current?.pause?.()
@@ -266,6 +307,12 @@ export default function VideoPlayer({ video }) {
   const handleToggleMenu = useCallback((menuName) => {
     setActiveMenu(current => (current === menuName ? null : menuName))
   }, [])
+
+  const handleToggleAnalysis = useCallback(() => {
+    if (!analysisAvailable) return
+    setAnalysisOpen(value => !value)
+    setActiveMenu(null)
+  }, [analysisAvailable])
 
   const handleScreenshot = useCallback(async () => {
     if (canUseMpv) {
@@ -1069,6 +1116,15 @@ export default function VideoPlayer({ video }) {
               </div>
             )}
 
+            {analysisOpen && analysisAvailable ? (
+              <VideoAnalysisPanel
+                analysis={analysisState.data}
+                currentTime={progressValue}
+                onSeek={handleSeekTo}
+                onClose={() => setAnalysisOpen(false)}
+              />
+            ) : null}
+
             <div className="player-toolbar" onClick={event => event.stopPropagation()}>
             <div className="player-controls-row">
               <div className="player-left-controls">
@@ -1134,6 +1190,23 @@ export default function VideoPlayer({ video }) {
               </div>
 
               <div className="player-right-controls">
+                {videoAnalysisEnabled ? (
+                  <button
+                    className={`btn btn-icon player-control-btn player-analysis-toggle${analysisOpen ? ' active' : ''}`}
+                    onClick={handleToggleAnalysis}
+                    type="button"
+                    disabled={!analysisAvailable}
+                    title={analysisButtonTitle}
+                    aria-label="视频理解"
+                  >
+                    {analysisState.status === 'loading' ? (
+                      <span className="player-analysis-spinner" aria-hidden="true" />
+                    ) : (
+                      <Icon path={<><path d="M4 5h16v10H4z" /><path d="M8 19h8" /><path d="M10 15v4M14 15v4" /><path d="M8 9h8M8 12h5" /></>} />
+                    )}
+                  </button>
+                ) : null}
+
                 <div className="player-popover-anchor">
                   <button className="player-text-button" type="button" title="清晰度" onClick={() => handleToggleMenu('quality')}>
                     {qualityLabel}

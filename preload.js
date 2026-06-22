@@ -39,6 +39,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
   getFileUrl: (filePath) => ipcRenderer.invoke('get-file-url', filePath),
   getPlaybackState: (filePath) => ipcRenderer.invoke('get-playback-state', filePath),
   savePlaybackState: (filePath, statePatch) => ipcRenderer.invoke('save-playback-state', filePath, statePatch),
+  getVideoAnalysis: (filePath) => ipcRenderer.invoke('video-analysis-get', filePath),
   checkFfmpeg: () => ipcRenderer.invoke('check-ffmpeg'),
 
   updaterGetStatus: () => ipcRenderer.invoke('updater-get-status'),

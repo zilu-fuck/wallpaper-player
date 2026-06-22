@@ -14,6 +14,7 @@ const copyItems = [
   'dist',
   'index.html',
   'LICENSE',
+  'licenses',
   'main',
   'main.js',
   'mpv.js',
@@ -22,6 +23,7 @@ const copyItems = [
   'package.json',
   'preload.js',
   'scripts',
+  'sources',
   'THIRD_PARTY_NOTICES.md',
   'vendor',
   'vite.config.js'

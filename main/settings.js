@@ -128,6 +128,15 @@ function normalizeWindowClose(windowClose) {
   }
 }
 
+function normalizeVideoAnalysis(videoAnalysis) {
+  const analysis = videoAnalysis && typeof videoAnalysis === 'object' && !Array.isArray(videoAnalysis)
+    ? videoAnalysis
+    : {}
+  return {
+    enabled: Boolean(analysis.enabled)
+  }
+}
+
 function getPlaybackStateKey(filePath) {
   return pathKey(path.resolve(filePath))
 }
@@ -165,7 +174,8 @@ function loadSettings() {
     playbackStates: {},
     playbackMode: 'order',
     remoteAccess: normalizeRemoteAccess(),
-    windowClose: normalizeWindowClose()
+    windowClose: normalizeWindowClose(),
+    videoAnalysis: normalizeVideoAnalysis()
   }
 
   try {
@@ -186,7 +196,8 @@ function loadSettings() {
       playbackStates: normalizePlaybackStates(parsed.playbackStates),
       playbackMode: ['order', 'shuffle', 'single'].includes(parsed.playbackMode) ? parsed.playbackMode : defaults.playbackMode,
       remoteAccess: normalizeRemoteAccess(parsed.remoteAccess),
-      windowClose: normalizeWindowClose(parsed.windowClose)
+      windowClose: normalizeWindowClose(parsed.windowClose),
+      videoAnalysis: normalizeVideoAnalysis(parsed.videoAnalysis)
     }
   } catch {
     return defaults
@@ -212,6 +223,7 @@ function saveSettings(settings) {
   merged.playbackMode = ['order', 'shuffle', 'single'].includes(merged.playbackMode) ? merged.playbackMode : 'order'
   merged.remoteAccess = normalizeRemoteAccess(merged.remoteAccess)
   merged.windowClose = normalizeWindowClose(merged.windowClose)
+  merged.videoAnalysis = normalizeVideoAnalysis(merged.videoAnalysis)
 
   fs.writeFileSync(getSettingsPath(), JSON.stringify(merged, null, 2))
 
@@ -308,6 +320,10 @@ function sanitizeSettingsForSave(settings) {
     sanitized.windowClose = normalizeWindowClose(sanitized.windowClose)
   }
 
+  if (Object.hasOwn(sanitized, 'videoAnalysis')) {
+    sanitized.videoAnalysis = normalizeVideoAnalysis(sanitized.videoAnalysis)
+  }
+
   return sanitized
 }
 
@@ -326,6 +342,7 @@ module.exports = {
   normalizePlaybackStates,
   normalizeRemoteAccess,
   normalizeWindowClose,
+  normalizeVideoAnalysis,
   getPlaybackStateKey,
   getPlaybackState,
   upsertPlaybackState,

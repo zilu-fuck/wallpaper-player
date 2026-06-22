@@ -95,6 +95,15 @@ export default function Settings() {
     })
   }, [settings, saveSettings])
 
+  const handleVideoAnalysisToggle = useCallback(async (enabled) => {
+    await saveSettings({
+      videoAnalysis: {
+        ...(settings?.videoAnalysis || {}),
+        enabled
+      }
+    })
+  }, [settings, saveSettings])
+
   const handleRemoteSave = useCallback(async (patch = {}) => {
     const current = remoteState?.settings || settings?.remoteAccess || {}
     const port = Number(remotePort)
@@ -305,6 +314,22 @@ export default function Settings() {
             </div>
             <p className="hint close-behavior-hint">
               未勾选“永久不弹出关闭确认”时，关闭窗口仍会显示确认弹窗；勾选后会直接执行下方选择的操作。
+            </p>
+          </section>
+
+          <section className="settings-section">
+            <h3 className="section-title">视频理解</h3>
+            <p className="section-desc">在播放器里显示已生成的视频理解结果。开启后只读取本机分析产物，不会自动启动长任务。</p>
+            <label className="remote-toggle">
+              <input
+                type="checkbox"
+                checked={Boolean(settings?.videoAnalysis?.enabled)}
+                onChange={(event) => handleVideoAnalysisToggle(event.target.checked)}
+              />
+              <span>启用视频理解结果面板</span>
+            </label>
+            <p className="hint video-analysis-settings-hint">
+              结果来自项目内的 video comprehension/outputs 目录；没有匹配结果的视频会保持原播放界面。
             </p>
           </section>
 
