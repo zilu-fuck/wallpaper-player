@@ -1,6 +1,6 @@
 {
   "name": "wallpaper-player",
-  "version": "1.2.3",
+  "version": "1.2.4",
   "description": "本地视频画廊播放器 - 浏览、搜索、播放本地视频文件",
   "license": "Apache-2.0",
   "main": "main.js",

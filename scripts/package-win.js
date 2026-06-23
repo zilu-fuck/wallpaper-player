@@ -46,13 +46,33 @@ const requiredVideoComprehensionFiles = [
 ]
 
 async function assertVideoComprehensionProject(projectDir) {
-  const missing = requiredVideoComprehensionFiles
-    .map(item => path.join(projectDir, item))
-    .filter(itemPath => !fs.existsSync(itemPath))
+  const missing = getMissingVideoComprehensionFiles(projectDir)
 
   if (missing.length) {
     throw new Error(`video comprehension project is incomplete:\n${missing.map(item => `- ${item}`).join('\n')}`)
   }
+}
+
+function getMissingVideoComprehensionFiles(projectDir) {
+  return requiredVideoComprehensionFiles
+    .map(item => path.join(projectDir, item))
+    .filter(itemPath => !fs.existsSync(itemPath))
+}
+
+function hasCompleteVideoComprehensionProject(projectDir) {
+  return getMissingVideoComprehensionFiles(projectDir).length === 0
+}
+
+function resolveVideoComprehensionSourceProject() {
+  const candidates = [
+    path.join(rootDir, 'video comprehension', 'video comprehension'),
+    path.join(rootDir, 'main', 'video-comprehension-runtime')
+  ]
+  const sourceProject = candidates.find(hasCompleteVideoComprehensionProject)
+  if (sourceProject) return sourceProject
+
+  const missing = candidates.flatMap(candidate => getMissingVideoComprehensionFiles(candidate))
+  throw new Error(`video comprehension project is incomplete:\n${missing.map(item => `- ${item}`).join('\n')}`)
 }
 
 async function patchVideoComprehensionRuntime(projectDir) {
@@ -86,6 +106,19 @@ async function patchVideoComprehensionRuntime(projectDir) {
   }
 }
 
+async function copyVideoComprehensionProject(sourceProject, targetProject) {
+  await fsp.rm(targetProject, { recursive: true, force: true })
+  await fsp.mkdir(targetProject, { recursive: true })
+  for (const item of videoComprehensionItems) {
+    const src = path.join(sourceProject, item)
+    if (!fs.existsSync(src)) continue
+    await fsp.cp(src, path.join(targetProject, item), { recursive: true })
+  }
+  await assertVideoComprehensionProject(targetProject)
+  await patchVideoComprehensionRuntime(targetProject)
+  await assertVideoComprehensionProject(targetProject)
+}
+
 async function copyProject() {
   await fsp.rm(tempRoot, { recursive: true, force: true })
   await fsp.mkdir(tempRoot, { recursive: true })
@@ -96,32 +129,12 @@ async function copyProject() {
     await fsp.cp(src, path.join(tempRoot, item), { recursive: true })
   }
 
-  const sourceProject = path.join(rootDir, 'video comprehension', 'video comprehension')
-  await assertVideoComprehensionProject(sourceProject)
+  const sourceProject = resolveVideoComprehensionSourceProject()
   const bundledProject = path.join(tempRoot, 'main', 'video-comprehension-runtime')
-  await fsp.rm(bundledProject, { recursive: true, force: true })
-  await fsp.mkdir(bundledProject, { recursive: true })
-  for (const item of videoComprehensionItems) {
-    const src = path.join(sourceProject, item)
-    if (!fs.existsSync(src)) continue
-    await fsp.cp(src, path.join(bundledProject, item), { recursive: true })
-  }
-  await assertVideoComprehensionProject(bundledProject)
-  await patchVideoComprehensionRuntime(bundledProject)
-  await assertVideoComprehensionProject(bundledProject)
+  await copyVideoComprehensionProject(sourceProject, bundledProject)
 
-  if (fs.existsSync(sourceProject)) {
-    const targetProject = path.join(tempRoot, 'video comprehension', 'video comprehension')
-    await fsp.mkdir(targetProject, { recursive: true })
-    for (const item of videoComprehensionItems) {
-      const src = path.join(sourceProject, item)
-      if (!fs.existsSync(src)) continue
-      await fsp.cp(src, path.join(targetProject, item), { recursive: true })
-    }
-    await assertVideoComprehensionProject(targetProject)
-    await patchVideoComprehensionRuntime(targetProject)
-    await assertVideoComprehensionProject(targetProject)
-  }
+  const targetProject = path.join(tempRoot, 'video comprehension', 'video comprehension')
+  await copyVideoComprehensionProject(sourceProject, targetProject)
 }
 
 async function copyReleaseBack() {

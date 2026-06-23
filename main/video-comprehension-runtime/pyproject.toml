@@ -1,0 +1,34 @@
+[project]
+name = "video-comprehension"
+version = "0.1.0"
+description = "Local video understanding pipeline with scene detection, ASR, VLM, OCR, YOLO, and LLM evidence reasoning"
+requires-python = ">=3.13"
+dependencies = [
+  "faster-whisper>=1.2.1",
+  "opencv-python>=4.13",
+  "rapidocr-onnxruntime>=1.4.4",
+  "scenedetect>=0.7",
+  "ultralytics>=8.4.72",
+  "fastapi>=0.115.0",
+  "uvicorn>=0.34.0",
+]
+
+[project.scripts]
+video-comprehension = "video_comprehension.cli:main"
+video-comprehension-api = "video_comprehension.api:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.uv]
+package = true
+
+[dependency-groups]
+dev = [
+  "pytest>=8.4",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
