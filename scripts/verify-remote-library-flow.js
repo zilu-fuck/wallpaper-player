@@ -233,6 +233,7 @@ async function createFixtureLibrary() {
   fs.writeFileSync(path.join(libraryDir, 'project.json'), JSON.stringify({
     title: 'LAN Flow Sample',
     tags: ['Flow', 'Verify'],
+    contentrating: 'Mature',
     type: 'video',
     file: 'sample-video.mp4',
     preview: 'preview.jpg'
@@ -281,6 +282,7 @@ async function main() {
     assertNoDesktopPaths(library.data, 'library response')
     assert.ok(Array.isArray(library.data.directories) && library.data.directories.length === 1)
     assert.ok(library.data.categoryGroups?.system?.some(category => category.name === 'Flow'))
+    assert.ok(library.data.categoryGroups?.system?.some(category => category.name === 'R18'))
 
     const video = library.data.items.find(item => item.fileName === 'sample-video')
     const incompatibleVideo = library.data.items.find(item => item.fileName === 'vp9-opus-sample')
@@ -290,11 +292,29 @@ async function main() {
     assert.ok(largeVideo, 'library should include large fixture video')
     assert.ok(video.id.startsWith('video_'))
     assert.strictEqual(video.name, 'LAN Flow Sample')
+    assert.ok(video.systemTags.includes('R18'))
     assert.strictEqual(video.extension, '.mp4')
     assert.ok(video.thumbnailToken, 'library item should include bound thumbnail token')
     assert.ok(!Object.hasOwn(video, 'fullPath'), 'library item should not include fullPath')
     assert.ok(!Object.hasOwn(video, 'playbackKey'), 'library item should not include playbackKey')
     assert.ok(!Object.hasOwn(video, 'previewPath'), 'library item should not include previewPath')
+
+    const metadata = await requestJson(`${baseUrl}/v1/videos/${encodeURIComponent(video.id)}/metadata`, {
+      headers: { Authorization: `Bearer ${phoneAToken}` }
+    })
+    assert.strictEqual(metadata.status, 200)
+    assert.strictEqual(metadata.data.media.available, true)
+    assert.strictEqual(metadata.data.media.width, 320)
+    assert.strictEqual(metadata.data.media.height, 180)
+    assert.strictEqual(metadata.data.media.videoCodec, 'h264')
+    assert.strictEqual(metadata.data.media.audioCodec, 'aac')
+
+    const libraryAfterMetadataProbe = await getLibrary(baseUrl, phoneAToken)
+    assert.strictEqual(libraryAfterMetadataProbe.status, 200)
+    const probedVideo = libraryAfterMetadataProbe.data.items.find(item => item.id === video.id)
+    assert.strictEqual(probedVideo.media.videoCodec, 'h264')
+    assert.strictEqual(probedVideo.media.width, 320)
+    assertNoDesktopPaths(libraryAfterMetadataProbe.data, 'metadata-probed library response')
 
     const thumbnailUrl = `${baseUrl}${video.thumbnailUrl}?thumbnailToken=${encodeURIComponent(video.thumbnailToken)}`
     const thumbnail = await requestRaw(thumbnailUrl)
@@ -379,6 +399,22 @@ async function main() {
     assert.ok(incompatibleOutputPath && fs.existsSync(incompatibleOutputPath), 'incompatible source should produce a cached MP4')
     assert.strictEqual(probeCodec(incompatibleOutputPath, 'v:0'), 'h264')
     assert.strictEqual(probeCodec(incompatibleOutputPath, 'a:0'), 'aac')
+
+    const transcodes = await requestJson(`${baseUrl}/v1/transcodes`, {
+      headers: { Authorization: `Bearer ${phoneAToken}` }
+    })
+    assert.strictEqual(transcodes.status, 200)
+    assert.ok(transcodes.data.tasks.some(task => task.id === video.id && task.quality === '720p' && task.status === 'ready'))
+    assert.ok(transcodes.data.tasks.some(task => task.id === incompatibleVideo.id && task.quality === '720p' && task.status === 'ready'))
+
+    const cleanupDryRun = await requestJson(`${baseUrl}/v1/transcodes/cache`, {
+      method: 'DELETE',
+      headers: { Authorization: `Bearer ${phoneAToken}` },
+      body: JSON.stringify({ force: false })
+    })
+    assert.strictEqual(cleanupDryRun.status, 200)
+    assert.strictEqual(cleanupDryRun.data.success, true)
+    assert.ok(cleanupDryRun.data.totalFiles >= 2, 'transcode cache cleanup should report cached files')
 
     await assertJsonError(
       `${baseUrl}/v1/videos/${encodeURIComponent(video.id)}/play-on-desktop`,
@@ -489,6 +525,15 @@ async function main() {
     assert.strictEqual(libraryFromPhoneB.status, 200)
     assert.strictEqual(libraryFromPhoneB.data.count, 3)
     assert.strictEqual(libraryFromPhoneB.data.items[0].favorite, true)
+
+    const forceCleanup = await requestJson(`${baseUrl}/v1/transcodes/cache`, {
+      method: 'DELETE',
+      headers: { Authorization: `Bearer ${phoneBToken}` },
+      body: JSON.stringify({ force: true })
+    })
+    assert.strictEqual(forceCleanup.status, 200)
+    assert.strictEqual(forceCleanup.data.success, true)
+    assert.ok(forceCleanup.data.removed >= 1, 'forced cleanup should remove cached transcodes')
 
     const pairedAfterRevoke = listPairedDevices()
     assert.ok(!pairedAfterRevoke.some(device => device.id === 'verify_phone_a'))

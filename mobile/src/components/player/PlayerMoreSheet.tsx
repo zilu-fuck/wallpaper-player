@@ -5,6 +5,7 @@ import { colors } from '../../theme'
 import type { VideoItem } from '../../types'
 import { BOTTOM_SAFE_OFFSET } from '../../screens/player/playerLayout'
 import { getVideoTitle } from '../../screens/player/playerUtils'
+import type { MobilePlayerBackgroundMode } from '../../stores/settings'
 
 export type AspectMode = 'fit' | 'fill' | 'original'
 
@@ -13,16 +14,19 @@ type Props = {
   video: VideoItem
   playbackRate: number
   aspectMode: AspectMode
+  playerBackgroundMode: MobilePlayerBackgroundMode
   selectedQuality: string
   detailLine: string
   onClose: () => void
   onSpeedChange: (speed: number) => void
   onAspectModeChange: (mode: AspectMode) => void
+  onPlayerBackgroundModeChange: (mode: MobilePlayerBackgroundMode) => void
   onQualitySelect: (quality: string) => void
   onSubtitleSelect: () => void
   onAudioTrackSelect: () => void
   onCopyName: () => void
   onRevealOnDesktop: () => void
+  onClearTranscodeCache: () => void
   onFileInfo: () => void
   onHideFromPlaylist: () => void
 }
@@ -33,6 +37,10 @@ const aspectOptions: Array<{ value: AspectMode, label: string }> = [
   { value: 'fill', label: '填充' },
   { value: 'original', label: '原始比例' }
 ]
+const backgroundOptions: Array<{ value: MobilePlayerBackgroundMode, label: string }> = [
+  { value: 'black', label: '黑色' },
+  { value: 'cover', label: '封面' }
+]
 const qualityOptions = ['原画', '1080p', '720p', '480p']
 
 export function PlayerMoreSheet({
@@ -40,16 +48,19 @@ export function PlayerMoreSheet({
   video,
   playbackRate,
   aspectMode,
+  playerBackgroundMode,
   selectedQuality,
   detailLine,
   onClose,
   onSpeedChange,
   onAspectModeChange,
+  onPlayerBackgroundModeChange,
   onQualitySelect,
   onSubtitleSelect,
   onAudioTrackSelect,
   onCopyName,
   onRevealOnDesktop,
+  onClearTranscodeCache,
   onFileInfo,
   onHideFromPlaylist
 }: Props) {
@@ -110,6 +121,21 @@ export function PlayerMoreSheet({
             ))}
           </View>
 
+          <Text style={styles.sectionTitle}>播放背景</Text>
+          <View style={styles.optionRow}>
+            {backgroundOptions.map(option => (
+              <Pressable
+                key={option.value}
+                style={[styles.pill, playerBackgroundMode === option.value && styles.pillActive]}
+                onPress={() => onPlayerBackgroundModeChange(option.value)}
+              >
+                <Text style={[styles.pillText, playerBackgroundMode === option.value && styles.pillTextActive]}>
+                  {option.label}
+                </Text>
+              </Pressable>
+            ))}
+          </View>
+
           <Text style={styles.sectionTitle}>清晰度</Text>
           <View style={styles.optionRow}>
             {qualityOptions.map((quality) => (
@@ -127,6 +153,7 @@ export function PlayerMoreSheet({
           <MenuItem label="音轨选择" value="默认音轨" onPress={onAudioTrackSelect} />
           <MenuItem label="复制视频名称" icon={<Copy color={colors.text} size={19} />} onPress={onCopyName} />
           <MenuItem label="在电脑中定位文件" icon={<FolderOpen color={colors.text} size={19} />} onPress={onRevealOnDesktop} />
+          <MenuItem label="清理转码缓存" value="释放电脑端缓存" onPress={onClearTranscodeCache} />
           <MenuItem label="查看文件信息" value={detailLine} icon={<FileText color={colors.text} size={19} />} onPress={onFileInfo} />
           <MenuItem label="从播放列表隐藏" danger icon={<EyeOff color={colors.danger} size={19} />} onPress={onHideFromPlaylist} />
         </ScrollView>

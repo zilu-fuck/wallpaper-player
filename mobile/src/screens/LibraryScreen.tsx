@@ -23,7 +23,6 @@ import {
   FlatList,
   InteractionManager,
   KeyboardAvoidingView,
-  Linking,
   Platform,
   Pressable,
   ScrollView,
@@ -36,11 +35,11 @@ import {
 import type { NavigationContext } from '../../App'
 import mobilePackage from '../../package.json'
 import { ConnectionStatus } from '../components/ConnectionStatus'
+import { MobileUpdateCard } from '../components/MobileUpdateCard'
 import { PrimaryButton } from '../components/PrimaryButton'
 import { VideoCard } from '../components/VideoCard'
 import { addTagsToVideos, ApiError, getLibrary, toggleFavorite } from '../services/api'
 import { testConnection } from '../services/connection-manager'
-import { checkMobileUpdate, type MobileUpdateInfo } from '../services/updates'
 import { loadCachedLibrary, saveLibraryResponse } from '../stores/library'
 import { useTheme } from '../theme-context'
 import type { ThemeMode } from '../theme'
@@ -68,6 +67,12 @@ type Selection = {
   label: string
 }
 
+type TagFilter = {
+  key: string
+  type: 'custom' | 'system'
+  name: string
+}
+
 const GRID_COLUMNS = 2
 const GRID_GAP = 10
 const EMPTY_GROUPS = { custom: [], system: [] }
@@ -75,6 +80,24 @@ const APP_VERSION = mobilePackage.version
 const RECONNECT_BASE_DELAY_MS = 2000
 const RECONNECT_MAX_DELAY_MS = 30000
 const zhCollator = new Intl.Collator('zh-Hans-CN', { numeric: true, sensitivity: 'base' })
+
+function getSortTitle(video: VideoItem) {
+  return String(video.name || video.fileName || '').trim()
+}
+
+function getSortFileName(video: VideoItem) {
+  return String(video.fileName || '').trim()
+}
+
+function getSortPath(video: VideoItem) {
+  return String(video.id || video.streamUrl || video.thumbnailUrl || '').trim()
+}
+
+function compareByTitle(a: VideoItem, b: VideoItem) {
+  return zhCollator.compare(getSortTitle(a), getSortTitle(b)) ||
+    zhCollator.compare(getSortFileName(a), getSortFileName(b)) ||
+    zhCollator.compare(getSortPath(a), getSortPath(b))
+}
 
 function getVideoSearchText(video: VideoItem) {
   return safeSearchText(
@@ -93,14 +116,14 @@ function sortVideos(videos: VideoItem[], sortBy: SortKey) {
   return [...videos].sort((a, b) => {
     switch (sortBy) {
       case 'date':
-        return (b.modified || 0) - (a.modified || 0)
+        return (b.modified || 0) - (a.modified || 0) || compareByTitle(a, b)
       case 'size':
-        return (b.size || 0) - (a.size || 0)
+        return (b.size || 0) - (a.size || 0) || compareByTitle(a, b)
       case 'type':
-        return zhCollator.compare(a.extension || '', b.extension || '') || zhCollator.compare(a.name, b.name)
+        return zhCollator.compare(a.extension || '', b.extension || '') || compareByTitle(a, b)
       case 'name':
       default:
-        return zhCollator.compare(a.name, b.name)
+        return compareByTitle(a, b)
     }
   })
 }
@@ -170,6 +193,12 @@ function normalizeTagText(value: string) {
   return uniqueTags(value.split(/[,，\s]+/))
 }
 
+function videoMatchesTagFilter(video: VideoItem, filter: TagFilter) {
+  if (filter.type === 'custom') return Boolean(video.customTags?.includes(filter.name))
+  const systemTags = video.systemTags?.length ? video.systemTags : video.tags || []
+  return systemTags.includes(filter.name)
+}
+
 export function LibraryScreen({ navigation, device }: Props) {
   const { colors, themeMode, setThemeMode } = useTheme()
   const styles = createStyles(colors)
@@ -177,6 +206,8 @@ export function LibraryScreen({ navigation, device }: Props) {
   const activeDeviceRef = useRef(device)
   const readyRef = useRef(false)
   const reconnectTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const libraryRefreshTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const libraryRequestRef = useRef(0)
   const reconnectAttemptRef = useRef(0)
   const loadRef = useRef<((useCache?: boolean) => Promise<void>) | null>(null)
   const pendingSortTaskRef = useRef<{ cancel?: () => void } | null>(null)
@@ -204,9 +235,7 @@ export function LibraryScreen({ navigation, device }: Props) {
   const [visibleSortBy, setVisibleSortBy] = useState<SortKey>('name')
   const [sortBy, setSortBy] = useState<SortKey>('name')
   const [selection, setSelection] = useState<Selection>({ mode: 'all', label: device.name })
-  const [checkingUpdate, setCheckingUpdate] = useState(false)
-  const [updateInfo, setUpdateInfo] = useState<MobileUpdateInfo | null>(null)
-  const [updateError, setUpdateError] = useState('')
+  const [tagFilters, setTagFilters] = useState<TagFilter[]>([])
   const [selectedVideoIds, setSelectedVideoIds] = useState<string[]>([])
   const [bulkTagOpen, setBulkTagOpen] = useState(false)
   const [bulkTagText, setBulkTagText] = useState('')
@@ -240,6 +269,13 @@ export function LibraryScreen({ navigation, device }: Props) {
     setReconnectHint('')
   }, [])
 
+  const clearLibraryRefreshTimer = useCallback(() => {
+    if (libraryRefreshTimerRef.current) {
+      clearTimeout(libraryRefreshTimerRef.current)
+      libraryRefreshTimerRef.current = null
+    }
+  }, [])
+
   const scheduleReconnect = useCallback((message: string) => {
     if (reconnectTimerRef.current) return
     const attempt = reconnectAttemptRef.current
@@ -256,6 +292,9 @@ export function LibraryScreen({ navigation, device }: Props) {
 
   const load = useCallback(async (useCache = true) => {
     const isInitialLoad = !readyRef.current
+    const requestId = libraryRequestRef.current + 1
+    libraryRequestRef.current = requestId
+    clearLibraryRefreshTimer()
     clearReconnectTimer()
     setError('')
     if (isInitialLoad) {
@@ -288,6 +327,7 @@ export function LibraryScreen({ navigation, device }: Props) {
         })
       }
       const response = await getLibrary(connectedDevice)
+      if (requestId !== libraryRequestRef.current) return
       if (isInitialLoad) {
         setConnectionGate({
           progress: 0.92,
@@ -297,6 +337,12 @@ export function LibraryScreen({ navigation, device }: Props) {
       }
       applyLibrary(response)
       await saveLibraryResponse(connectedDevice.id, response)
+      if (response.refreshing) {
+        libraryRefreshTimerRef.current = setTimeout(() => {
+          libraryRefreshTimerRef.current = null
+          loadRef.current?.(false)
+        }, response.indexed ? 1200 : 600)
+      }
       reconnectAttemptRef.current = 0
       if (isInitialLoad) {
         setConnectionGate({
@@ -307,6 +353,7 @@ export function LibraryScreen({ navigation, device }: Props) {
         setReady(true)
       }
     } catch (err) {
+      if (requestId !== libraryRequestRef.current) return
       setOnline(false)
       const message = err instanceof Error ? err.message : '无法连接电脑'
       setError(message)
@@ -329,10 +376,12 @@ export function LibraryScreen({ navigation, device }: Props) {
         })
       }
     } finally {
-      setLoading(false)
-      setRefreshing(false)
+      if (requestId === libraryRequestRef.current) {
+        setLoading(false)
+        setRefreshing(false)
+      }
     }
-  }, [applyLibrary, clearReconnectTimer, scheduleReconnect])
+  }, [applyLibrary, clearLibraryRefreshTimer, clearReconnectTimer, scheduleReconnect])
 
   useEffect(() => {
     loadRef.current = load
@@ -342,7 +391,10 @@ export function LibraryScreen({ navigation, device }: Props) {
     load()
   }, [load])
 
-  useEffect(() => () => clearReconnectTimer(), [clearReconnectTimer])
+  useEffect(() => () => {
+    clearReconnectTimer()
+    clearLibraryRefreshTimer()
+  }, [clearLibraryRefreshTimer, clearReconnectTimer])
 
   const videos = library.items
   const directories = library.directories || []
@@ -355,12 +407,7 @@ export function LibraryScreen({ navigation, device }: Props) {
     const scoped = videos.filter(video => {
       if (selection.mode === 'favorites') return Boolean(video.favorite)
       if (selection.mode === 'directory') return video.directoryId === selection.id
-      if (selection.mode === 'custom') return video.customTags?.includes(selection.label)
-      if (selection.mode === 'system') {
-        const systemTags = video.systemTags?.length ? video.systemTags : video.tags || []
-        return systemTags.includes(selection.label)
-      }
-      return true
+      return tagFilters.every(filter => videoMatchesTagFilter(video, filter))
     })
 
     const searched = keyword
@@ -368,7 +415,7 @@ export function LibraryScreen({ navigation, device }: Props) {
       : scoped
 
     return sortVideos(searched, sortBy)
-  }, [query, selection, sortBy, videos])
+  }, [query, selection, sortBy, tagFilters, videos])
 
   const subtitle = useMemo(() => {
     if (loading) return '正在读取视频库'
@@ -379,9 +426,12 @@ export function LibraryScreen({ navigation, device }: Props) {
 
   const gridPadding = 10
   const cardWidth = Math.max(144, Math.floor((width - gridPadding * 2 - GRID_GAP) / GRID_COLUMNS))
-  const title = selection.mode === 'all' ? activeDevice.name : selection.label
+  const title = tagFilters.length
+    ? tagFilters.map(filter => filter.name).join(' + ')
+    : selection.mode === 'all' ? activeDevice.name : selection.label
   const selectedVideoIdSet = useMemo(() => new Set(selectedVideoIds), [selectedVideoIds])
   const selectionModeActive = selectedVideoIds.length > 0
+  const tagFilterKeySet = useMemo(() => new Set(tagFilters.map(filter => filter.key)), [tagFilters])
   const availableBulkTags = useMemo(() => {
     const tags: string[] = []
 
@@ -413,6 +463,9 @@ export function LibraryScreen({ navigation, device }: Props) {
 
   const select = useCallback((next: Selection) => {
     setSelection(next)
+    if (next.mode !== 'custom' && next.mode !== 'system') {
+      setTagFilters([])
+    }
     setDrawerOpen(false)
   }, [])
 
@@ -438,6 +491,24 @@ export function LibraryScreen({ navigation, device }: Props) {
   const openSettings = useCallback(() => {
     select({ mode: 'settings', label: '设置' })
   }, [select])
+
+  const toggleTagFilter = useCallback((filter: TagFilter) => {
+    setTagFilters(current => {
+      const exists = current.some(item => item.key === filter.key)
+      const next = exists ? current.filter(item => item.key !== filter.key) : [...current, filter]
+      setSelection(next.length
+        ? { mode: filter.type, id: filter.key, label: filter.name }
+        : { mode: 'all', label: activeDevice.name })
+      return next
+    })
+  }, [activeDevice.name])
+
+  const clearTagFilters = useCallback(() => {
+    setTagFilters([])
+    if (selection.mode === 'custom' || selection.mode === 'system') {
+      setSelection({ mode: 'all', label: activeDevice.name })
+    }
+  }, [activeDevice.name, selection.mode])
 
   const handleSortSelect = useCallback((key: SortKey) => {
     setVisibleSortBy(key)
@@ -538,25 +609,6 @@ export function LibraryScreen({ navigation, device }: Props) {
   const handleThemeSelect = useCallback((mode: ThemeMode) => {
     setThemeMode(mode).catch(() => {})
   }, [setThemeMode])
-
-  const handleCheckUpdate = useCallback(async () => {
-    setCheckingUpdate(true)
-    setUpdateError('')
-    try {
-      setUpdateInfo(await checkMobileUpdate(APP_VERSION))
-    } catch (err) {
-      setUpdateError(err instanceof Error ? err.message : '检查更新失败')
-    } finally {
-      setCheckingUpdate(false)
-    }
-  }, [])
-
-  const handleOpenUpdate = useCallback(() => {
-    const targetUrl = updateInfo?.downloadUrl || updateInfo?.releaseUrl
-    if (targetUrl) {
-      Linking.openURL(targetUrl).catch(() => setUpdateError('无法打开更新页面'))
-    }
-  }, [updateInfo?.downloadUrl, updateInfo?.releaseUrl])
 
   const updateFavorite = useCallback(async (video: VideoItem) => {
     const nextFavorite = !video.favorite
@@ -722,39 +774,9 @@ export function LibraryScreen({ navigation, device }: Props) {
             </View>
           </View>
           <Text style={styles.settingsText}>{activeDevice.endpoint}</Text>
-          <Text style={styles.settingsText}>手机客户端版本 v{APP_VERSION}</Text>
           <View style={styles.settingGroup}>
             <Text style={styles.settingLabel}>检查更新</Text>
-            <View style={styles.updateBox}>
-              <Text style={styles.updateTitle}>
-                {updateInfo
-                  ? updateInfo.available
-                    ? `发现新版本 v${updateInfo.latestVersion}`
-                    : `已是最新版本 v${updateInfo.currentVersion}`
-                  : '检查 GitHub Releases 上的最新版本'}
-              </Text>
-              {updateInfo?.available ? (
-                <Text style={styles.updateText}>{updateInfo.releaseName}</Text>
-              ) : null}
-              {updateError ? <Text style={styles.updateError}>{updateError}</Text> : null}
-              <View style={styles.updateActions}>
-                <Pressable
-                  style={[styles.updateButton, checkingUpdate && styles.updateButtonDisabled]}
-                  onPress={handleCheckUpdate}
-                  disabled={checkingUpdate}
-                >
-                  {checkingUpdate ? <ActivityIndicator color={colors.onAccent} size="small" /> : null}
-                  <Text style={styles.updateButtonText}>{checkingUpdate ? '检查中...' : '检查更新'}</Text>
-                </Pressable>
-                {updateInfo?.available ? (
-                  <Pressable style={[styles.updateButton, styles.updateButtonSecondary]} onPress={handleOpenUpdate}>
-                    <Text style={[styles.updateButtonText, styles.updateButtonSecondaryText]}>
-                      {updateInfo.downloadUrl ? '下载更新' : '查看更新'}
-                    </Text>
-                  </Pressable>
-                ) : null}
-              </View>
-            </View>
+            <MobileUpdateCard />
           </View>
           <Text style={styles.settingsText}>目录 {directories.length} 个 · 视频 {totalCount} 个 · 我喜欢 {currentFavoriteCount} 个</Text>
           <PrimaryButton
@@ -784,6 +806,16 @@ export function LibraryScreen({ navigation, device }: Props) {
               </Pressable>
             ))}
           </View>
+          {tagFilters.length ? (
+            <View style={styles.filterBar}>
+              <Text style={styles.filterBarText} numberOfLines={1}>
+                交集筛选：{tagFilters.map(filter => filter.name).join(' + ')}
+              </Text>
+              <Pressable style={styles.filterClearButton} onPress={clearTagFilters}>
+                <Text style={styles.filterClearText}>清空</Text>
+              </Pressable>
+            </View>
+          ) : null}
           <FlatList
             key="library-grid"
             data={filteredVideos}
@@ -981,9 +1013,9 @@ export function LibraryScreen({ navigation, device }: Props) {
                     key={category.key}
                     label={category.name}
                     count={category.count}
-                    active={selection.mode === 'custom' && selection.id === category.key}
-                    icon={<Tag color={selection.mode === 'custom' && selection.id === category.key ? colors.text : colors.muted} size={20} />}
-                    onPress={() => select({ mode: 'custom', id: category.key, label: category.name })}
+                    active={tagFilterKeySet.has(category.key)}
+                    icon={<Tag color={tagFilterKeySet.has(category.key) ? colors.text : colors.muted} size={20} />}
+                    onPress={() => toggleTagFilter({ key: category.key, type: 'custom', name: category.name })}
                   />
                 )) : (
                   <Text style={styles.drawerEmpty}>暂无自定义分类</Text>
@@ -996,9 +1028,9 @@ export function LibraryScreen({ navigation, device }: Props) {
                     key={category.key}
                     label={category.name}
                     count={category.count}
-                    active={selection.mode === 'system' && selection.id === category.key}
-                    icon={<Folder color={selection.mode === 'system' && selection.id === category.key ? colors.text : colors.muted} size={20} />}
-                    onPress={() => select({ mode: 'system', id: category.key, label: category.name })}
+                    active={tagFilterKeySet.has(category.key)}
+                    icon={<Folder color={tagFilterKeySet.has(category.key) ? colors.text : colors.muted} size={20} />}
+                    onPress={() => toggleTagFilter({ key: category.key, type: 'system', name: category.name })}
                   />
                 )) : (
                   <Text style={styles.drawerEmpty}>暂无系统分类</Text>
@@ -1174,6 +1206,36 @@ const createStyles = (colors: ReturnType<typeof useTheme>['colors']) => StyleShe
   },
   sortChipTextActive: {
     color: colors.text
+  },
+  filterBar: {
+    minHeight: 40,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.border,
+    backgroundColor: colors.surface,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8
+  },
+  filterBarText: {
+    flex: 1,
+    color: colors.text,
+    fontSize: 12,
+    fontWeight: '800'
+  },
+  filterClearButton: {
+    minHeight: 28,
+    borderRadius: 8,
+    paddingHorizontal: 10,
+    backgroundColor: colors.surfaceElevated,
+    alignItems: 'center',
+    justifyContent: 'center'
+  },
+  filterClearText: {
+    color: colors.text,
+    fontSize: 12,
+    fontWeight: '800'
   },
   list: {
     padding: 10,
@@ -1387,59 +1449,8 @@ const createStyles = (colors: ReturnType<typeof useTheme>['colors']) => StyleShe
   themeOptionTextActive: {
     color: colors.onAccent
   },
-  updateBox: {
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: colors.border,
-    backgroundColor: colors.surface,
-    padding: 12,
-    gap: 8
-  },
-  updateTitle: {
-    color: colors.text,
-    fontSize: 14,
-    fontWeight: '800'
-  },
-  updateText: {
-    color: colors.muted,
-    fontSize: 13,
-    lineHeight: 19
-  },
-  updateError: {
-    color: colors.danger,
-    fontSize: 13,
-    lineHeight: 19
-  },
-  updateActions: {
-    flexDirection: 'row',
-    gap: 8,
-    flexWrap: 'wrap'
-  },
-  updateButton: {
-    minHeight: 38,
-    borderRadius: 8,
-    paddingHorizontal: 13,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 7,
-    backgroundColor: colors.accentStrong
-  },
-  updateButtonSecondary: {
-    backgroundColor: colors.surfaceElevated,
-    borderWidth: 1,
-    borderColor: colors.border
-  },
   updateButtonDisabled: {
     opacity: 0.62
-  },
-  updateButtonText: {
-    color: colors.onAccent,
-    fontSize: 13,
-    fontWeight: '800'
-  },
-  updateButtonSecondaryText: {
-    color: colors.text
   },
   settingsTitle: {
     color: colors.text,

@@ -72,6 +72,7 @@ const {
   listHuggingFaceModelFiles,
   selectHuggingFaceModelFile
 } = require('./vlm-service')
+const { getVideoMetadata } = require('./video-metadata')
 
 const MPV_COMMANDS = new Set([
   'seekTo',
@@ -158,6 +159,15 @@ function setupIPC() {
       return { thumbPath }
     } catch (err) {
       return { error: err.message }
+    }
+  })
+
+  ipcMain.handle('get-video-metadata', async (_event, videoPath, options = {}) => {
+    try {
+      const resolvedPath = await assertAllowedVideoPath(videoPath)
+      return { success: true, media: await getVideoMetadata(resolvedPath, options) }
+    } catch (err) {
+      return { success: false, error: err.message }
     }
   })
 

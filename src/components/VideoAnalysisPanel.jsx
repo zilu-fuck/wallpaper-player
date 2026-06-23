@@ -1,3 +1,5 @@
+import { useEffect, useMemo, useState } from 'react'
+
 function formatTime(seconds) {
   const value = Number(seconds)
   if (!Number.isFinite(value) || value < 0) return '00:00'
@@ -14,7 +16,23 @@ function getTimelineTitle(item) {
   return `${formatTime(item?.start_time)} - ${formatTime(item?.end_time)}`
 }
 
-export default function VideoAnalysisPanel({ analysis, currentTime, onSeek, onClose }) {
+function uniqueTags(tags) {
+  const seen = new Set()
+  const result = []
+  for (const value of tags) {
+    const tag = String(value || '').trim()
+    const key = tag.toLocaleLowerCase()
+    if (!tag || seen.has(key)) continue
+    seen.add(key)
+    result.push(tag)
+  }
+  return result
+}
+
+export default function VideoAnalysisPanel({ analysis, currentTime, onSeek, onClose, bindVideo, onAddTags }) {
+  const [selectedTags, setSelectedTags] = useState([])
+  const [savingTags, setSavingTags] = useState(false)
+  const [tagMessage, setTagMessage] = useState('')
   const timeline = Array.isArray(analysis?.timeline) ? analysis.timeline : []
   const currentSegment = timeline.find(item => (
     currentTime >= Number(item.start_time || 0) &&
@@ -24,8 +42,40 @@ export default function VideoAnalysisPanel({ analysis, currentTime, onSeek, onCl
     ? [currentSegment, ...timeline.filter(item => item !== currentSegment)].slice(0, 5)
     : timeline.slice(0, 5)
   const tags = Array.isArray(analysis?.tags) ? analysis.tags.slice(0, 5) : []
+  const candidateTags = useMemo(() => uniqueTags([
+    ...(Array.isArray(analysis?.tags) ? analysis.tags : []),
+    ...(Array.isArray(analysis?.keywords) ? analysis.keywords : [])
+  ]).slice(0, 24), [analysis])
   const characters = Array.isArray(analysis?.characters) ? analysis.characters : []
   const analyzedCount = timeline.filter(item => item.vlm_status === 'analyzed').length
+  const canBindTags = Boolean(bindVideo && onAddTags && candidateTags.length)
+
+  useEffect(() => {
+    setSelectedTags([])
+    setTagMessage('')
+  }, [analysis?.taskId, bindVideo?.fullPath])
+
+  const toggleCandidateTag = (tag) => {
+    setTagMessage('')
+    setSelectedTags(current => current.includes(tag)
+      ? current.filter(item => item !== tag)
+      : [...current, tag])
+  }
+
+  const addSelectedTags = async () => {
+    if (!selectedTags.length || !bindVideo || !onAddTags) return
+    setSavingTags(true)
+    setTagMessage('')
+    try {
+      await onAddTags(bindVideo, selectedTags)
+      setTagMessage(`已添加 ${selectedTags.length} 个标签`)
+      setSelectedTags([])
+    } catch (err) {
+      setTagMessage(err?.message || '添加标签失败')
+    } finally {
+      setSavingTags(false)
+    }
+  }
 
   return (
     <div className="player-analysis-panel" onClick={event => event.stopPropagation()}>
@@ -54,6 +104,34 @@ export default function VideoAnalysisPanel({ analysis, currentTime, onSeek, onCl
       {tags.length ? (
         <div className="player-analysis-tags">
           {tags.map(tag => <span key={tag}>{tag}</span>)}
+        </div>
+      ) : null}
+
+      {canBindTags ? (
+        <div className="player-analysis-tag-bind">
+          <div className="player-analysis-tag-bind-head">
+            <span>候选标签</span>
+            <button
+              type="button"
+              onClick={addSelectedTags}
+              disabled={!selectedTags.length || savingTags}
+            >
+              {savingTags ? '添加中...' : `添加选中${selectedTags.length ? ` ${selectedTags.length}` : ''}`}
+            </button>
+          </div>
+          <div className="player-analysis-tag-options">
+            {candidateTags.map(tag => (
+              <button
+                key={tag}
+                type="button"
+                className={selectedTags.includes(tag) ? 'active' : ''}
+                onClick={() => toggleCandidateTag(tag)}
+              >
+                {tag}
+              </button>
+            ))}
+          </div>
+          {tagMessage ? <p className="player-analysis-tag-message">{tagMessage}</p> : null}
         </div>
       ) : null}
 

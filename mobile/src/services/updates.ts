@@ -23,6 +23,11 @@ type GitHubRelease = {
   assets?: GitHubReleaseAsset[]
 }
 
+type MobileReleaseAsset = {
+  version: string
+  downloadUrl: string
+}
+
 function cleanVersion(version: string) {
   return String(version || '').trim().replace(/^v/i, '')
 }
@@ -40,10 +45,28 @@ function compareVersions(left: string, right: string) {
   return 0
 }
 
-function findMobileDownloadUrl(release: GitHubRelease) {
+function parseMobileAssetVersion(name: string) {
+  const match = name.match(/wallpaper-player-mobile-([0-9]+(?:\.[0-9]+){1,3})[^/\\]*\.(?:apk|ipa)$/i)
+  return match ? match[1] : ''
+}
+
+function findMobileReleaseAsset(release: GitHubRelease): MobileReleaseAsset | null {
   const assets = Array.isArray(release.assets) ? release.assets : []
-  const mobileAsset = assets.find(asset => /\.(apk|ipa)$/i.test(asset.name || ''))
-  return mobileAsset?.browser_download_url || ''
+  let selected: MobileReleaseAsset | null = null
+  for (const asset of assets) {
+    const name = asset.name || ''
+    const version = parseMobileAssetVersion(name)
+    if (version) {
+      const next = {
+        version,
+        downloadUrl: asset.browser_download_url || ''
+      }
+      if (!selected || compareVersions(next.version, selected.version) > 0) {
+        selected = next
+      }
+    }
+  }
+  return selected
 }
 
 export async function checkMobileUpdate(currentVersion: string): Promise<MobileUpdateInfo> {
@@ -58,18 +81,26 @@ export async function checkMobileUpdate(currentVersion: string): Promise<MobileU
   }
 
   const release = await response.json() as GitHubRelease
-  const latestVersion = cleanVersion(release.tag_name || '')
-  if (!latestVersion) {
-    throw new Error('没有找到最新版本号')
+  const mobileAsset = findMobileReleaseAsset(release)
+  if (!mobileAsset) {
+    throw new Error('没有找到手机端安装包')
   }
+  const latestVersion = mobileAsset.version
 
   return {
     available: compareVersions(latestVersion, currentVersion) > 0,
     currentVersion,
     latestVersion,
     releaseName: release.name || `Wallpaper Player ${latestVersion}`,
-    releaseUrl: release.html_url || `https://github.com/zilu-fuck/wallpaper-player/releases/tag/v${latestVersion}`,
-    downloadUrl: findMobileDownloadUrl(release),
+    releaseUrl: release.html_url || `https://github.com/zilu-fuck/wallpaper-player/releases/tag/${release.tag_name || `v${latestVersion}`}`,
+    downloadUrl: mobileAsset.downloadUrl,
     publishedAt: release.published_at || ''
   }
+}
+
+export const __mobileUpdateTestUtils = {
+  cleanVersion,
+  compareVersions,
+  parseMobileAssetVersion,
+  findMobileReleaseAsset
 }

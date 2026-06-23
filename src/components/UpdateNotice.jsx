@@ -37,9 +37,25 @@ function getStatusCopy(status, updateInfo, message) {
   }
 }
 
-function summarizeReleaseNotes(notes) {
-  if (!notes) return []
-  const lines = notes.split(/\r?\n/)
+function decodeHtmlEntities(value) {
+  if (!value) return ''
+  if (typeof document !== 'undefined') {
+    const textarea = document.createElement('textarea')
+    textarea.innerHTML = value
+    return textarea.value
+  }
+
+  return value
+    .replace(/&nbsp;/g, ' ')
+    .replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+}
+
+function markdownToReleaseNoteLines(value) {
+  const lines = value.split(/\r?\n/)
   const zhStart = lines.findIndex(line => /^##\s*更新内容/.test(line.trim()))
   const candidateLines = zhStart >= 0
     ? lines.slice(zhStart + 1)
@@ -50,8 +66,46 @@ function summarizeReleaseNotes(notes) {
     : candidateLines
 
   return scopedLines
-    .map(line => line.replace(/^[-*]\s*/, '').trim())
-    .filter(line => line && !line.startsWith('#') && !line.startsWith('>'))
+}
+
+function htmlToReleaseNoteLines(value) {
+  const markdownLikeText = value
+    .replace(/<h[1-6]\b[^>]*>/gi, '\n## ')
+    .replace(/<\/h[1-6]>/gi, '\n')
+    .replace(/<(br|\/p|\/li|\/ul|\/ol)\b[^>]*>/gi, '\n')
+    .replace(/<li\b[^>]*>/gi, '\n- ')
+    .replace(/<[^>]*>/g, '')
+
+  return markdownToReleaseNoteLines(decodeHtmlEntities(markdownLikeText))
+}
+
+function summarizeReleaseNotes(notes) {
+  if (!notes) return []
+  const value = String(notes)
+  const lines = /<[a-z][\s\S]*>/i.test(value)
+    ? htmlToReleaseNoteLines(value)
+    : markdownToReleaseNoteLines(value)
+  const seen = new Set()
+
+  return lines
+    .map(line => {
+      const trimmed = line.trim()
+      return {
+        isHeading: /^#{1,6}\s+/.test(trimmed),
+        text: trimmed
+          .replace(/^[-*]\s*/, '')
+          .replace(/`([^`]+)`/g, '$1')
+          .replace(/\*\*([^*]+)\*\*/g, '$1')
+          .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
+          .trim()
+      }
+    })
+    .filter(({ isHeading, text }) => {
+      if (isHeading || !text || text.startsWith('>') || seen.has(text)) return false
+      seen.add(text)
+      return true
+    })
+    .map(({ text }) => text)
     .slice(0, 5)
 }
 

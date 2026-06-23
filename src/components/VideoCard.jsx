@@ -9,8 +9,30 @@ function formatFileSize(bytes) {
   return (bytes / Math.pow(k, i)).toFixed(1) + ' ' + sizes[i]
 }
 
+function formatDuration(seconds) {
+  const total = Math.round(Number(seconds) || 0)
+  if (total <= 0) return ''
+  const hours = Math.floor(total / 3600)
+  const minutes = Math.floor((total % 3600) / 60)
+  const secs = total % 60
+  if (hours > 0) {
+    return `${hours}:${String(minutes).padStart(2, '0')}:${String(secs).padStart(2, '0')}`
+  }
+  return `${minutes}:${String(secs).padStart(2, '0')}`
+}
+
 function getDisplayMeta(video) {
-  const parts = [video.extension.toUpperCase().slice(1), formatFileSize(video.size)]
+  const media = video.media || {}
+  const resolution = media.width && media.height ? `${media.width}×${media.height}` : ''
+  const duration = formatDuration(media.durationSeconds)
+  const codec = media.videoCodec ? media.videoCodec.toUpperCase() : ''
+  const parts = [
+    video.extension.toUpperCase().slice(1),
+    duration,
+    resolution,
+    codec,
+    formatFileSize(video.size)
+  ].filter(Boolean)
   if (video.tags?.length) {
     parts.push(video.tags.slice(0, 2).join(', '))
   } else if (video.group) {

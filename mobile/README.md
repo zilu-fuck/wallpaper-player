@@ -2,6 +2,8 @@
 
 Android-first React Native client for the Wallpaper Player remote API.
 
+Current test build: `0.1.3`.
+
 ## Scope
 
 This app matches `docs/mobile-client-remote-access-plan.md` stage 3 and assumes the desktop app exposes:
@@ -11,6 +13,7 @@ GET  /v1/info
 GET  /v1/library
 GET  /v1/videos/:videoId/thumbnail
 GET  /v1/videos/:videoId/stream
+GET  /v1/videos/:videoId/metadata
 GET  /v1/playback/:videoId
 PUT  /v1/playback/:videoId
 POST /v1/pairing/claim
@@ -22,10 +25,15 @@ POST /v1/videos/:videoId/play-on-desktop
 POST /v1/videos/:videoId/reveal-on-desktop
 POST /v1/videos/:videoId/transcode
 GET  /v1/videos/:videoId/transcode
+DELETE /v1/videos/:videoId/transcode
+GET  /v1/transcodes
+DELETE /v1/transcodes/cache
 GET  /v1/videos/:videoId/transcoded-stream
 ```
 
 The scanner supports one-time QR pairing from the desktop settings panel. A scan creates a pending request on the desktop; the phone receives its device token only after the desktop user approves it. Manual endpoint + token pairing is kept for compatibility with older desktop builds.
+
+The app can check for APK updates before pairing with a desktop. The player defaults to a black video background and can switch to cover background in mobile settings. Library filters support multi-tag intersection, including desktop system tags such as `R18` and custom tags confirmed from VLM analysis.
 
 ## Development
 

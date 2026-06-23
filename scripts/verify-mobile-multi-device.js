@@ -43,6 +43,23 @@ function createFixture(dir, fileName) {
   fs.writeFileSync(path.join(dir, fileName), Buffer.alloc(2048, 7))
 }
 
+function sleepSync(ms) {
+  Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, ms)
+}
+
+function removeTempRoot() {
+  for (let attempt = 0; attempt < 8; attempt += 1) {
+    try {
+      fs.rmSync(tempRoot, { recursive: true, force: true })
+      return
+    } catch (error) {
+      if (error?.code !== 'EBUSY' && error?.code !== 'ENOTEMPTY' && error?.code !== 'EPERM') throw error
+      sleepSync(100)
+    }
+  }
+  fs.rmSync(tempRoot, { recursive: true, force: true })
+}
+
 async function startDesktop(name, userDataDir, libraryDir) {
   clearProjectModules()
   process.chdir(userDataDir)
@@ -179,7 +196,7 @@ async function main() {
 main()
   .finally(() => {
     process.chdir(projectRoot)
-    fs.rmSync(tempRoot, { recursive: true, force: true })
+    removeTempRoot()
   })
   .catch(error => {
     console.error(error)

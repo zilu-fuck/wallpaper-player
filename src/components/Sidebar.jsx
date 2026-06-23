@@ -17,6 +17,7 @@ export default function Sidebar() {
     setShowSettings,
     categoryGroups = { custom: [], system: [] },
     activeCategory = 'all',
+    selectedCategoryKeys = [],
     setActiveCategory,
     favoriteCount = 0,
     totalCount = 0
@@ -39,6 +40,7 @@ export default function Sidebar() {
   const [directoryMenu, setDirectoryMenu] = useState(null)
   const [localDirs, setLocalDirs] = useState(() => directories.filter(dir => showPrivateDirs || !privateDirSet.has(dir)))
   const privacyPasswordSet = Boolean(settings?.privacy?.passwordSet)
+  const selectedCategoryKeySet = useMemo(() => new Set(selectedCategoryKeys), [selectedCategoryKeys])
 
   useEffect(() => {
     setLocalDirs(directories.filter(dir => showPrivateDirs || !privateDirSet.has(dir)))
@@ -261,11 +263,16 @@ export default function Sidebar() {
         categories.map(category => (
           <button
             key={category.key}
-            className={`sidebar-category-item${activeCategory === category.key ? ' active' : ''}`}
+            className={`sidebar-category-item${selectedCategoryKeySet.has(category.key) ? ' active' : ''}`}
             onClick={() => handleCategorySelect(category.key)}
             title={category.name}
           >
-            <span className="sidebar-category-name">{category.name}</span>
+            <span className="sidebar-category-name">
+              <span className="sidebar-category-check" aria-hidden="true">
+                {selectedCategoryKeySet.has(category.key) ? '✓' : ''}
+              </span>
+              {category.name}
+            </span>
             <span className="sidebar-category-count">{category.count}</span>
           </button>
         ))
@@ -434,9 +441,15 @@ export default function Sidebar() {
             <div className="sidebar-section-header">
               <span className="sidebar-label">分类</span>
             </div>
-            <div className="sidebar-category-list">
+          <div className="sidebar-category-list">
+              {selectedCategoryKeys.length > 0 ? (
+                <div className="sidebar-category-filterbar">
+                  <span>交集筛选 {selectedCategoryKeys.length} 项</span>
+                  <button type="button" onClick={() => handleCategorySelect('all')}>清空</button>
+                </div>
+              ) : null}
               <button
-                className={`sidebar-category-item${activeCategory === 'all' ? ' active' : ''}`}
+                className={`sidebar-category-item${selectedCategoryKeys.length === 0 ? ' active' : ''}`}
                 onClick={() => handleCategorySelect('all')}
               >
                 <span className="sidebar-category-name">全部</span>

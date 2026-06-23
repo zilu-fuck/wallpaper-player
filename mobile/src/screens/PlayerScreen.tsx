@@ -30,6 +30,7 @@ import type { NavigationContext } from '../../App'
 import {
   getPlaybackState,
   cancelTranscode,
+  clearTranscodeCache,
   getVideoAnalysis,
   getTranscodeStatus,
   playOnDesktop,
@@ -42,6 +43,8 @@ import {
   updateVideoTags
 } from '../services/api'
 import { loadLocalPlayback, saveLocalPlayback } from '../stores/playback'
+import { loadMobileSettings, saveMobileSettings } from '../stores/settings'
+import type { MobilePlayerBackgroundMode } from '../stores/settings'
 import { colors } from '../theme'
 import type { StoredDevice, VideoAnalysisResponse, VideoItem } from '../types'
 import {
@@ -107,6 +110,7 @@ export function PlayerScreen({ navigation, device, video, videos }: Props) {
   const [networkSlow, setNetworkSlow] = useState(false)
   const [transcoding, setTranscoding] = useState(false)
   const [transcodeProgress, setTranscodeProgress] = useState(0)
+  const [transcodeQueuePosition, setTranscodeQueuePosition] = useState(0)
   const [analysisSheetVisible, setAnalysisSheetVisible] = useState(false)
   const [analysisById, setAnalysisById] = useState<Record<string, VideoAnalysisResponse | null>>({})
   const [analysisLoading, setAnalysisLoading] = useState(false)
@@ -121,6 +125,7 @@ export function PlayerScreen({ navigation, device, video, videos }: Props) {
   const [videoSize, setVideoSize] = useState<{ width: number, height: number } | null>(null)
   const [playbackRate, setPlaybackRateState] = useState(1)
   const [aspectMode, setAspectMode] = useState<AspectMode>('fit')
+  const [playerBackgroundMode, setPlayerBackgroundMode] = useState<MobilePlayerBackgroundMode>('black')
   const [qualityById, setQualityById] = useState<Record<string, string>>({})
   const [fullscreenMode, setFullscreenMode] = useState(false)
   const fullscreenModeRef = useRef(false)
@@ -190,6 +195,16 @@ export function PlayerScreen({ navigation, device, video, videos }: Props) {
   useEffect(() => {
     fullscreenModeRef.current = fullscreenMode
   }, [fullscreenMode])
+
+  useEffect(() => {
+    let mounted = true
+    loadMobileSettings().then((settings) => {
+      if (mounted) setPlayerBackgroundMode(settings.playerBackgroundMode)
+    })
+    return () => {
+      mounted = false
+    }
+  }, [])
 
   useEffect(() => {
     setActiveIndex(initialIndex)
@@ -697,6 +712,7 @@ export function PlayerScreen({ navigation, device, video, videos }: Props) {
     }))
     setTranscoding(false)
     setTranscodeProgress(1)
+    setTranscodeQueuePosition(0)
     if (activeVideoRef.current.id === videoId) {
       setError('')
       setStatus('loading')
@@ -709,6 +725,7 @@ export function PlayerScreen({ navigation, device, video, videos }: Props) {
     stopTranscodePolling()
     setTranscoding(false)
     setTranscodeProgress(0)
+    setTranscodeQueuePosition(0)
     await cancelTranscode(device, activeVideoRef.current.id, transcodingQualityRef.current).catch(() => {})
     showGestureHint('已取消转码')
   }, [device, showGestureHint, stopTranscodePolling])
@@ -717,18 +734,21 @@ export function PlayerScreen({ navigation, device, video, videos }: Props) {
     try {
       const statusResult = await getTranscodeStatus(device, videoId, quality)
       setTranscodeProgress(Math.max(0, Math.min(1, Number(statusResult.progress) || 0)))
+      setTranscodeQueuePosition(Number(statusResult.queuePosition) || 0)
       if (statusResult.status === 'ready') {
         stopTranscodePolling()
         applyTranscodeReady(videoId, statusResult.streamUrl, qualityLabel)
       } else if (statusResult.status === 'error') {
         stopTranscodePolling()
         setTranscoding(false)
+        setTranscodeQueuePosition(0)
         setError(statusResult.error || '转码失败')
         setStatus('error')
       }
     } catch (transcodeError) {
       stopTranscodePolling()
       setTranscoding(false)
+      setTranscodeQueuePosition(0)
       setError(transcodeError instanceof Error ? transcodeError.message : '转码状态读取失败')
       setStatus('error')
     }
@@ -739,12 +759,14 @@ export function PlayerScreen({ navigation, device, video, videos }: Props) {
     transcodingQualityRef.current = quality
     setTranscoding(true)
     setTranscodeProgress(0.02)
+    setTranscodeQueuePosition(0)
     setControlsVisible(false)
     stopTranscodePolling()
 
     try {
       const result = await startTranscode(device, item.id, quality)
       setTranscodeProgress(Math.max(0.02, Math.min(1, Number(result.progress) || 0.02)))
+      setTranscodeQueuePosition(Number(result.queuePosition) || 0)
       if (result.status === 'ready') {
         applyTranscodeReady(item.id, result.streamUrl, qualityLabel)
         return
@@ -758,6 +780,7 @@ export function PlayerScreen({ navigation, device, video, videos }: Props) {
       }, 1200)
     } catch (transcodeError) {
       setTranscoding(false)
+      setTranscodeQueuePosition(0)
       setError(transcodeError instanceof Error ? transcodeError.message : '转码启动失败')
       setStatus('error')
     }
@@ -802,6 +825,7 @@ export function PlayerScreen({ navigation, device, video, videos }: Props) {
       stopTranscodePolling()
       setTranscoding(false)
       setTranscodeProgress(0)
+      setTranscodeQueuePosition(0)
       setQualityById(current => {
         const next = { ...current }
         delete next[activeVideoRef.current.id]
@@ -831,6 +855,16 @@ export function PlayerScreen({ navigation, device, video, videos }: Props) {
     handleTranscode(transcodeQuality, quality)
   }, [handleTranscode, showGestureHint, stopTranscodePolling])
 
+  const handleClearTranscodeCache = useCallback(async () => {
+    setMoreSheetVisible(false)
+    try {
+      const result = await clearTranscodeCache(device)
+      showGestureHint(`已清理 ${result.removed} 个缓存`, 1600)
+    } catch (cacheError) {
+      showGestureHint(cacheError instanceof Error ? cacheError.message : '清理缓存失败', 1600)
+    }
+  }, [device, showGestureHint])
+
   const handleSeek = useCallback((time: number) => {
     const nextTime = clamp(time, 0, duration || time)
     seekCurrentPlayer(nextTime)
@@ -849,6 +883,12 @@ export function PlayerScreen({ navigation, device, video, videos }: Props) {
   const handleAspectModeChange = useCallback((mode: AspectMode) => {
     setAspectMode(mode)
     showGestureHint(mode === 'fit' ? '画面比例：适应' : mode === 'fill' ? '画面比例：填充' : '画面比例：原始比例')
+  }, [showGestureHint])
+
+  const handlePlayerBackgroundModeChange = useCallback((mode: MobilePlayerBackgroundMode) => {
+    setPlayerBackgroundMode(mode)
+    saveMobileSettings({ playerBackgroundMode: mode }).catch(() => {})
+    showGestureHint(mode === 'cover' ? '播放背景：封面' : '播放背景：黑色')
   }, [showGestureHint])
 
   const handleDesktopPlay = useCallback(async () => {
@@ -904,6 +944,14 @@ export function PlayerScreen({ navigation, device, video, videos }: Props) {
       setTagsSaving(false)
     }
   }, [activeVideo, device, showGestureHint])
+
+  const handleAddAnalysisTags = useCallback((tags: string[]) => {
+    const mergedTags = uniqueCustomTags([
+      ...(activeVideo.customTags || []),
+      ...tags
+    ])
+    handleSaveTags(mergedTags)
+  }, [activeVideo, handleSaveTags])
 
   const handleHideFromPlaylist = useCallback(async () => {
     const item = activeVideoRef.current
@@ -988,6 +1036,7 @@ export function PlayerScreen({ navigation, device, video, videos }: Props) {
         height={pageHeight}
         player={player}
         contentFit={effectiveFit}
+        useCoverBackground={playerBackgroundMode === 'cover'}
         videoRef={videoViewRef}
         onPress={handleVideoPress}
         onLongPress={startSpeedBoost}
@@ -1010,6 +1059,7 @@ export function PlayerScreen({ navigation, device, video, videos }: Props) {
               networkSlow={networkSlow}
               transcoding={transcoding}
               transcodeProgress={transcodeProgress}
+              transcodeQueuePosition={transcodeQueuePosition}
               analysisLabel={analysisActionLabel}
               analysisActive={analysisRunning || analysisAvailable}
               groupLine={groupLine}
@@ -1042,16 +1092,19 @@ export function PlayerScreen({ navigation, device, video, videos }: Props) {
               video={activeVideo}
               playbackRate={playbackRate}
               aspectMode={aspectMode}
+              playerBackgroundMode={playerBackgroundMode}
               selectedQuality={selectedQuality}
               detailLine={detailLine}
               onClose={() => setMoreSheetVisible(false)}
               onSpeedChange={handlePlaybackRateChange}
               onAspectModeChange={handleAspectModeChange}
+              onPlayerBackgroundModeChange={handlePlayerBackgroundModeChange}
               onQualitySelect={handleQualitySelect}
               onSubtitleSelect={() => showGestureHint('暂无可选字幕')}
               onAudioTrackSelect={() => showGestureHint('暂无可选音轨')}
               onCopyName={handleCopyName}
               onRevealOnDesktop={handleRevealOnDesktop}
+              onClearTranscodeCache={handleClearTranscodeCache}
               onFileInfo={() => showGestureHint(detailLine || '暂无文件信息', 1800)}
               onHideFromPlaylist={handleHideFromPlaylist}
             />
@@ -1073,6 +1126,7 @@ export function PlayerScreen({ navigation, device, video, videos }: Props) {
               onClose={() => setAnalysisSheetVisible(false)}
               onRefresh={() => fetchAnalysisState(activeVideoRef.current.id)}
               onStart={handleStartAnalysis}
+              onAddTags={handleAddAnalysisTags}
               onSeek={(time) => {
                 handleSeek(time)
                 setAnalysisSheetVisible(false)
@@ -1109,7 +1163,9 @@ export function PlayerScreen({ navigation, device, video, videos }: Props) {
     handleDesktopPlay,
     handleHideFromPlaylist,
     handleOpenAnalysis,
+    handlePlayerBackgroundModeChange,
     handleQualitySelect,
+    handleClearTranscodeCache,
     handlePlaybackRateChange,
     handleRevealOnDesktop,
     handleRetry,
@@ -1128,6 +1184,7 @@ export function PlayerScreen({ navigation, device, video, videos }: Props) {
     pageWidth,
     playbackRate,
     player,
+    playerBackgroundMode,
     selectedQuality,
     showControls,
     showGestureHint,

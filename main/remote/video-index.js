@@ -40,6 +40,26 @@ function normalizeTags(tags) {
     : []
 }
 
+function sanitizeMedia(media) {
+  if (!media || typeof media !== 'object') return null
+  const durationSeconds = Number(media.durationSeconds)
+  const width = Number(media.width)
+  const height = Number(media.height)
+  const fps = Number(media.fps)
+  const bitRate = Number(media.bitRate)
+  return {
+    available: Boolean(media.available),
+    durationSeconds: Number.isFinite(durationSeconds) && durationSeconds >= 0 ? durationSeconds : 0,
+    width: Number.isFinite(width) && width >= 0 ? width : 0,
+    height: Number.isFinite(height) && height >= 0 ? height : 0,
+    fps: Number.isFinite(fps) && fps >= 0 ? fps : 0,
+    videoCodec: typeof media.videoCodec === 'string' ? media.videoCodec : '',
+    audioCodec: typeof media.audioCodec === 'string' ? media.audioCodec : '',
+    bitRate: Number.isFinite(bitRate) && bitRate >= 0 ? bitRate : 0,
+    container: typeof media.container === 'string' ? media.container : ''
+  }
+}
+
 function toRemoteVideo(video, basePath, context = {}) {
   const id = getVideoId(video.fullPath)
   const favoriteKey = video.favoriteKey || getFallbackFavoriteKey(video.fullPath)
@@ -68,7 +88,8 @@ function toRemoteVideo(video, basePath, context = {}) {
     thumbnailToken: context.accessToken
       ? createBoundScopedToken('thumbnail', id, context.accessToken, THUMBNAIL_TOKEN_TTL_MS)
       : '',
-    streamUrl: `${basePath}/v1/videos/${encodeURIComponent(id)}/stream`
+    streamUrl: `${basePath}/v1/videos/${encodeURIComponent(id)}/stream`,
+    media: sanitizeMedia(video.media)
   }
 }
 

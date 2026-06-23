@@ -3,6 +3,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { Alert, FlatList, StyleSheet, Text, View } from 'react-native'
 import type { NavigationContext } from '../../App'
 import { DeviceCard } from '../components/DeviceCard'
+import { MobileUpdateCard } from '../components/MobileUpdateCard'
 import { PrimaryButton } from '../components/PrimaryButton'
 import { unpairCurrentDevice } from '../services/api'
 import { checkDeviceAvailability, type DeviceAvailability } from '../services/connection-manager'
@@ -79,11 +80,14 @@ export function DeviceListScreen({ navigation, devices }: Props) {
           />
         )}
         ListFooterComponent={(
-          <PrimaryButton
-            label="绑定新电脑"
-            icon={<Plus color={colors.onAccent} size={20} />}
-            onPress={() => navigation.navigate({ name: 'pair' })}
-          />
+          <View style={styles.footer}>
+            <MobileUpdateCard />
+            <PrimaryButton
+              label="绑定新电脑"
+              icon={<Plus color={colors.onAccent} size={20} />}
+              onPress={() => navigation.navigate({ name: 'pair' })}
+            />
+          </View>
         )}
       />
     </View>
@@ -110,6 +114,9 @@ const createStyles = (colors: ReturnType<typeof useTheme>['colors']) => StyleShe
   },
   list: {
     padding: 16,
+    gap: 12
+  },
+  footer: {
     gap: 12
   }
 })

@@ -23,6 +23,33 @@ function withQueryToken(url: string, key: string, token: string) {
   return `${url}${separator}${key}=${encodeURIComponent(token)}`
 }
 
+function formatDuration(seconds?: number) {
+  const total = Math.round(Number(seconds) || 0)
+  if (total <= 0) return ''
+  const hours = Math.floor(total / 3600)
+  const minutes = Math.floor((total % 3600) / 60)
+  const secs = total % 60
+  if (hours > 0) {
+    return `${hours}:${String(minutes).padStart(2, '0')}:${String(secs).padStart(2, '0')}`
+  }
+  return `${minutes}:${String(secs).padStart(2, '0')}`
+}
+
+function getVideoMetaLine(video: VideoItem) {
+  const media = video.media || null
+  const resolution = media?.width && media?.height ? `${media.width}x${media.height}` : ''
+  const duration = formatDuration(media?.durationSeconds)
+  const codec = media?.videoCodec ? media.videoCodec.toUpperCase() : ''
+  return [
+    video.extension?.replace('.', '').toUpperCase(),
+    duration,
+    resolution,
+    codec,
+    formatBytes(video.size),
+    video.directoryName || video.group
+  ].filter(Boolean).join(' · ')
+}
+
 function VideoCardComponent({
   device,
   video,
@@ -43,6 +70,7 @@ function VideoCardComponent({
     ),
     [device, video.thumbnailToken, video.thumbnailUrl]
   )
+  const metaLine = useMemo(() => getVideoMetaLine(video), [video])
   const [imageFailed, setImageFailed] = useState(false)
 
   useEffect(() => {
@@ -103,7 +131,7 @@ function VideoCardComponent({
       <View style={styles.body}>
         <Text style={styles.name} numberOfLines={2}>{video.name || video.fileName || video.id}</Text>
         <Text style={styles.meta} numberOfLines={1}>
-          {[video.extension?.replace('.', '').toUpperCase(), formatBytes(video.size), video.directoryName || video.group].filter(Boolean).join(' · ')}
+          {metaLine}
         </Text>
         {video.tags?.length ? (
           <Text style={styles.tags} numberOfLines={1}>{video.tags.join(' / ')}</Text>

@@ -28,6 +28,7 @@ type Props = {
   networkSlow: boolean
   transcoding: boolean
   transcodeProgress: number
+  transcodeQueuePosition?: number
   groupLine: string
   detailLine: string
   landscapeMode: boolean
@@ -65,6 +66,7 @@ export function VideoOverlay({
   networkSlow,
   transcoding,
   transcodeProgress,
+  transcodeQueuePosition,
   groupLine,
   detailLine,
   landscapeMode,
@@ -116,6 +118,7 @@ export function VideoOverlay({
       {transcoding ? (
         <TranscodingStatus
           progress={transcodeProgress}
+          queuePosition={transcodeQueuePosition}
           onCancel={onCancelTranscode}
         />
       ) : null}

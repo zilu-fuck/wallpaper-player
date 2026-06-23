@@ -23,6 +23,7 @@ function AppInner() {
     setSortBy,
     activeCategory,
     activeCategoryLabel,
+    hasCategoryFilter,
     setActiveCategory,
     filteredVideos,
     trimmedSearchQuery,
@@ -199,12 +200,12 @@ function AppInner() {
                   <h2>没有匹配的视频</h2>
                   <p>
                     没有在“{activeDirName}”中找到
-                    {activeCategory !== 'all' ? `“${activeCategoryLabel}”分类下` : ''}
+                    {hasCategoryFilter ? `“${activeCategoryLabel}”分类下` : ''}
                     {trimmedSearchQuery ? `包含“${trimmedSearchQuery}”的` : ''}
                     视频。
                   </p>
                   <button className="btn btn-primary" onClick={onClearFilters}>
-                    {trimmedSearchQuery ? '清空搜索' : '显示全部'}
+                    {trimmedSearchQuery || hasCategoryFilter ? '清空筛选' : '显示全部'}
                   </button>
                 </div>
               ) : (

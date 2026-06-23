@@ -1,5 +1,7 @@
 import { useState, useMemo, useCallback, useEffect, useDeferredValue } from 'react'
 
+const zhCollator = new Intl.Collator('zh-Hans-CN', { numeric: true, sensitivity: 'base' })
+
 export function getCategoryKey(type, name) {
   return `${type}:${name}`
 }
@@ -10,19 +12,88 @@ export function parseCategoryKey(key) {
   return { type: key, name: key }
 }
 
+function uniqueTags(tags) {
+  const seen = new Set()
+  const result = []
+  for (const value of tags) {
+    const tag = String(value || '').trim()
+    const key = tag.toLocaleLowerCase()
+    if (!tag || seen.has(key)) continue
+    seen.add(key)
+    result.push(tag)
+  }
+  return result
+}
+
+function categoryExists(categoryKey, categoryGroups) {
+  if (categoryKey === 'favorites') return true
+  const category = parseCategoryKey(categoryKey)
+  if (category.type === 'custom') return categoryGroups.custom.some(item => item.name === category.name)
+  if (category.type === 'system') return categoryGroups.system.some(item => item.name === category.name)
+  return [...categoryGroups.custom, ...categoryGroups.system].some(item => item.name === categoryKey)
+}
+
+function videoMatchesCategory(video, categoryKey) {
+  const category = parseCategoryKey(categoryKey)
+  if (category.type === 'custom') return (video.customTags || []).includes(category.name)
+  if (category.type === 'system') return (video.systemTags || []).includes(category.name)
+  return (video.tags || []).includes(categoryKey)
+}
+
+function getSortTitle(video) {
+  return String(video?.name || video?.fileName || '').trim()
+}
+
+function getSortFileName(video) {
+  return String(video?.fileName || '').trim()
+}
+
+function getSortPath(video) {
+  return String(video?.fullPath || video?.path || video?.id || '').trim()
+}
+
+function compareByTitle(a, b) {
+  return zhCollator.compare(getSortTitle(a), getSortTitle(b)) ||
+    zhCollator.compare(getSortFileName(a), getSortFileName(b)) ||
+    zhCollator.compare(getSortPath(a), getSortPath(b))
+}
+
 // 过滤 / 排序 / 分类 / 搜索
 export function useVideoFilter({ videos, customTags, favoriteKeys }) {
   const [searchQuery, setSearchQuery] = useState('')
   const [sortBy, setSortBy] = useState('name')
-  const [activeCategory, setActiveCategory] = useState('all')
+  const [selectedCategoryKeys, setSelectedCategoryKeys] = useState([])
+
+  const setActiveCategory = useCallback((categoryKey) => {
+    if (!categoryKey || categoryKey === 'all') {
+      setSelectedCategoryKeys([])
+      return
+    }
+
+    if (categoryKey === 'favorites') {
+      setSelectedCategoryKeys(['favorites'])
+      return
+    }
+
+    setSelectedCategoryKeys(current => {
+      const activeTags = current.filter(key => key !== 'favorites')
+      return activeTags.includes(categoryKey)
+        ? activeTags.filter(key => key !== categoryKey)
+        : [...activeTags, categoryKey]
+    })
+  }, [])
 
   // 合并系统标签与自定义标签后的视频列表
   const displayVideos = useMemo(() => (
     videos.map(video => {
       const tagKey = video.favoriteKey || video.fullPath
+      const legacyKey = video.fullPath && video.fullPath !== tagKey ? video.fullPath : ''
       const systemTags = video.tags || []
-      const userTags = customTags[tagKey] || []
-      const tags = [...new Set([...systemTags, ...userTags])]
+      const userTags = uniqueTags([
+        ...(Array.isArray(customTags[tagKey]) ? customTags[tagKey] : []),
+        ...(legacyKey && Array.isArray(customTags[legacyKey]) ? customTags[legacyKey] : [])
+      ])
+      const tags = uniqueTags([...systemTags, ...userTags])
       return {
         ...video,
         tags,
@@ -36,10 +107,10 @@ export function useVideoFilter({ videos, customTags, favoriteKeys }) {
   const sortedVideos = useMemo(() => {
     return [...displayVideos].sort((a, b) => {
       switch (sortBy) {
-        case 'name': return a.name.localeCompare(b.name, 'zh')
-        case 'size': return b.size - a.size
-        case 'date': return b.modified - a.modified
-        case 'type': return a.extension.localeCompare(b.extension) || a.name.localeCompare(b.name, 'zh')
+        case 'name': return compareByTitle(a, b)
+        case 'size': return (Number(b.size) || 0) - (Number(a.size) || 0) || compareByTitle(a, b)
+        case 'date': return (Number(b.modified) || 0) - (Number(a.modified) || 0) || compareByTitle(a, b)
+        case 'type': return zhCollator.compare(a.extension || '', b.extension || '') || compareByTitle(a, b)
         default: return 0
       }
     })
@@ -59,7 +130,7 @@ export function useVideoFilter({ videos, customTags, favoriteKeys }) {
 
     const toCategories = (counts, type) => Array.from(counts.entries())
       .map(([name, count]) => ({ name, count, type, key: getCategoryKey(type, name) }))
-      .sort((a, b) => b.count - a.count || a.name.localeCompare(b.name, 'zh'))
+      .sort((a, b) => b.count - a.count || zhCollator.compare(a.name, b.name))
 
     return {
       custom: toCategories(customCounts, 'custom'),
@@ -71,19 +142,10 @@ export function useVideoFilter({ videos, customTags, favoriteKeys }) {
     displayVideos.filter(video => favoriteKeys.has(video.favoriteKey || video.fullPath)).length
   ), [displayVideos, favoriteKeys])
 
-  // 当前选中的分类被删空后自动回退到“全部”
+  // 当前选中的分类被删空后自动移除
   useEffect(() => {
-    if (activeCategory === 'all' || activeCategory === 'favorites') return
-    const category = parseCategoryKey(activeCategory)
-    const exists = category.type === 'custom'
-      ? categoryGroups.custom.some(item => item.name === category.name)
-      : category.type === 'system'
-        ? categoryGroups.system.some(item => item.name === category.name)
-        : [...categoryGroups.custom, ...categoryGroups.system].some(item => item.name === activeCategory)
-    if (!exists) {
-      setActiveCategory('all')
-    }
-  }, [activeCategory, categoryGroups])
+    setSelectedCategoryKeys(current => current.filter(key => categoryExists(key, categoryGroups)))
+  }, [categoryGroups])
 
   const deferredSearchQuery = useDeferredValue(searchQuery)
   const normalizedSearchQuery = useMemo(() => (
@@ -92,36 +154,32 @@ export function useVideoFilter({ videos, customTags, favoriteKeys }) {
   const trimmedSearchQuery = searchQuery.trim()
 
   const filteredVideos = useMemo(() => {
-    const category = parseCategoryKey(activeCategory)
+    const favoriteOnly = selectedCategoryKeys.includes('favorites')
+    const tagFilters = selectedCategoryKeys.filter(key => key !== 'favorites')
     return sortedVideos.filter(v => (
-      (activeCategory === 'all' ||
-        (activeCategory === 'favorites'
-          ? favoriteKeys.has(v.favoriteKey || v.fullPath)
-          : category.type === 'custom'
-            ? (v.customTags || []).includes(category.name)
-            : category.type === 'system'
-              ? (v.systemTags || []).includes(category.name)
-              : (v.tags || []).includes(activeCategory))) &&
+      (!favoriteOnly || favoriteKeys.has(v.favoriteKey || v.fullPath)) &&
+      tagFilters.every(categoryKey => videoMatchesCategory(v, categoryKey)) &&
       (!normalizedSearchQuery ||
         v.name.toLowerCase().includes(normalizedSearchQuery) ||
         v.fileName?.toLowerCase().includes(normalizedSearchQuery) ||
         v.group.toLowerCase().includes(normalizedSearchQuery) ||
         (v.tags || []).some(tag => tag.toLowerCase().includes(normalizedSearchQuery)))
     ))
-  }, [sortedVideos, normalizedSearchQuery, activeCategory, favoriteKeys])
+  }, [sortedVideos, normalizedSearchQuery, selectedCategoryKeys, favoriteKeys])
 
   const hasSearch = trimmedSearchQuery.length > 0
-  const hasFilter = hasSearch || activeCategory !== 'all'
-  const activeCategoryInfo = parseCategoryKey(activeCategory)
+  const activeCategory = selectedCategoryKeys[0] || 'all'
+  const hasCategoryFilter = selectedCategoryKeys.length > 0
+  const hasFilter = hasSearch || hasCategoryFilter
   const activeCategoryLabel = activeCategory === 'favorites'
     ? '我喜欢'
-    : activeCategory === 'all'
+    : !hasCategoryFilter
       ? '全部'
-      : activeCategoryInfo.name
+      : selectedCategoryKeys.map(key => parseCategoryKey(key).name).join(' + ')
 
   const handleClearFilters = useCallback(() => {
     setSearchQuery('')
-    setActiveCategory('all')
+    setSelectedCategoryKeys([])
   }, [])
 
   return {
@@ -131,6 +189,8 @@ export function useVideoFilter({ videos, customTags, favoriteKeys }) {
     setSortBy,
     activeCategory,
     setActiveCategory,
+    selectedCategoryKeys,
+    hasCategoryFilter,
     displayVideos,
     sortedVideos,
     categoryGroups,

@@ -4,6 +4,7 @@ import { Camera, QrCode } from 'lucide-react-native'
 import { useCallback, useRef, useState } from 'react'
 import { Keyboard, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native'
 import type { NavigationContext } from '../../App'
+import { MobileUpdateCard } from '../components/MobileUpdateCard'
 import { PrimaryButton } from '../components/PrimaryButton'
 import { createDeviceFromPairingPayload, createManualDevice, parsePairingCode } from '../services/pairing'
 import { saveDevice } from '../stores/devices'
@@ -219,6 +220,8 @@ export function PairDeviceScreen({ navigation }: Props) {
         {error ? <Text style={styles.error}>{error}</Text> : null}
 
         {loadingText ? <Text style={styles.loadingText}>{loadingText}</Text> : null}
+
+        <MobileUpdateCard />
 
         <Pressable onPress={navigation.refreshDevices} style={styles.footerLink}>
           <Text style={styles.footerLinkText}>查看已保存电脑</Text>

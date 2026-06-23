@@ -12,6 +12,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
   generateThumbnails: (videoPaths) => ipcRenderer.invoke('generate-thumbnails', videoPaths),
   getThumbnailUrl: (thumbnailPath) => ipcRenderer.invoke('get-thumbnail-url', thumbnailPath),
   generatePreviewFrame: (videoPath, seconds) => ipcRenderer.invoke('generate-preview-frame', videoPath, seconds),
+  getVideoMetadata: (videoPath, options) => ipcRenderer.invoke('get-video-metadata', videoPath, options),
   onThumbnailProgress: (callback) => on('thumbnail-progress', callback),
 
   getSettings: () => ipcRenderer.invoke('get-settings'),

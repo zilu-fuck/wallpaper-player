@@ -15,6 +15,7 @@ type Props = {
   height: number
   player: VideoPlayer
   contentFit: VideoContentFit
+  useCoverBackground: boolean
   videoRef: React.RefObject<NativeVideoPlayerHandle | null>
   children?: React.ReactNode
   onPress: () => void
@@ -29,6 +30,7 @@ function VideoFeedItemBase({
   height,
   player,
   contentFit,
+  useCoverBackground,
   videoRef,
   children,
   onPress,
@@ -37,8 +39,12 @@ function VideoFeedItemBase({
 }: Props) {
   return (
     <View style={[styles.page, { width, height }]}>
-      <Image source={{ uri: thumbnailUrl, cache: 'force-cache' }} style={styles.backgroundImage} blurRadius={contentFit === 'contain' ? 28 : 18} />
-      <View style={styles.backgroundOverlay} />
+      {useCoverBackground ? (
+        <>
+          <Image source={{ uri: thumbnailUrl, cache: 'force-cache' }} style={styles.backgroundImage} blurRadius={contentFit === 'contain' ? 28 : 18} />
+          <View style={styles.backgroundOverlay} />
+        </>
+      ) : null}
       {isActive ? (
         <>
           <NativeVideoPlayer

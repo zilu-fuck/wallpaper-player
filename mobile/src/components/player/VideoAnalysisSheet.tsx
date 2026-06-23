@@ -1,6 +1,6 @@
 import { ActivityIndicator, PanResponder, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native'
 import { Brain, ChevronDown, PlayCircle, RefreshCw } from 'lucide-react-native'
-import { useMemo } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { colors } from '../../theme'
 import type { VideoAnalysisResponse, VideoAnalysisResult, VideoAnalysisTimelineItem, VideoItem } from '../../types'
 import { BOTTOM_SAFE_OFFSET } from '../../screens/player/playerLayout'
@@ -17,6 +17,7 @@ type Props = {
   onRefresh: () => void
   onStart: () => void
   onSeek: (time: number) => void
+  onAddTags?: (tags: string[]) => void
 }
 
 function formatTime(seconds?: number) {
@@ -49,6 +50,19 @@ function getAnalysisTitle(video: VideoItem, analysis: VideoAnalysisResult | null
   return analysis?.naming?.episode_title || analysis?.sourceVideo?.original_filename || getVideoTitle(video)
 }
 
+function uniqueTags(tags: string[]) {
+  const seen = new Set<string>()
+  const result: string[] = []
+  for (const value of tags) {
+    const tag = String(value || '').trim()
+    const key = tag.toLocaleLowerCase()
+    if (!tag || seen.has(key)) continue
+    seen.add(key)
+    result.push(tag)
+  }
+  return result
+}
+
 export function VideoAnalysisSheet({
   visible,
   video,
@@ -59,8 +73,10 @@ export function VideoAnalysisSheet({
   onClose,
   onRefresh,
   onStart,
-  onSeek
+  onSeek,
+  onAddTags
 }: Props) {
+  const [selectedAnalysisTags, setSelectedAnalysisTags] = useState<string[]>([])
   const panResponder = useMemo(() => PanResponder.create({
     onMoveShouldSetPanResponder: (_event, gesture) => gesture.dy > 16 && Math.abs(gesture.dy) > Math.abs(gesture.dx),
     onPanResponderRelease: (_event, gesture) => {
@@ -68,9 +84,13 @@ export function VideoAnalysisSheet({
     }
   }), [onClose])
 
+  const analysis = state?.analysis?.available ? state.analysis : state?.recent?.analysis?.available ? state.recent.analysis : null
+  useEffect(() => {
+    if (!visible) setSelectedAnalysisTags([])
+  }, [analysis?.savedAt, analysis?.sourceVideo?.original_filename, video.id, visible])
+
   if (!visible) return null
 
-  const analysis = state?.analysis?.available ? state.analysis : state?.recent?.analysis?.available ? state.recent.analysis : null
   const timeline = Array.isArray(analysis?.timeline) ? analysis.timeline : []
   const currentSegment = timeline.find(item => (
     currentTime >= Number(item.start_time || 0) &&
@@ -80,6 +100,11 @@ export function VideoAnalysisSheet({
     ? [currentSegment, ...timeline.filter(item => item !== currentSegment)].slice(0, 8)
     : timeline.slice(0, 8)
   const tags = Array.isArray(analysis?.tags) ? analysis.tags.slice(0, 8) : []
+  const candidateTags = uniqueTags([
+    ...(Array.isArray(analysis?.tags) ? analysis.tags : []),
+    ...(Array.isArray(analysis?.keywords) ? analysis.keywords : [])
+  ]).slice(0, 24)
+  const canAddTags = Boolean(onAddTags && candidateTags.length)
   const characters = Array.isArray(analysis?.characters) ? analysis.characters : []
   const analyzedCount = timeline.filter(item => item.vlm_status === 'analyzed').length
   const running = Boolean(state?.job?.running)
@@ -182,6 +207,44 @@ export function VideoAnalysisSheet({
                     <Text style={styles.tagText}>{tag}</Text>
                   </View>
                 ))}
+              </View>
+            </View>
+          ) : null}
+
+          {canAddTags ? (
+            <View style={styles.section}>
+              <View style={styles.sectionHeaderRow}>
+                <Text style={styles.sectionTitle}>候选标签</Text>
+                <Pressable
+                  style={[styles.addTagsButton, !selectedAnalysisTags.length && styles.addTagsButtonDisabled]}
+                  disabled={!selectedAnalysisTags.length}
+                  onPress={() => {
+                    onAddTags?.(selectedAnalysisTags)
+                    setSelectedAnalysisTags([])
+                  }}
+                >
+                  <Text style={styles.addTagsButtonText}>
+                    {selectedAnalysisTags.length ? `添加 ${selectedAnalysisTags.length}` : '选择后添加'}
+                  </Text>
+                </Pressable>
+              </View>
+              <View style={styles.tagWrap}>
+                {candidateTags.map(tag => {
+                  const selected = selectedAnalysisTags.includes(tag)
+                  return (
+                    <Pressable
+                      key={tag}
+                      style={[styles.tag, selected && styles.tagSelected]}
+                      onPress={() => setSelectedAnalysisTags(current => (
+                        current.includes(tag)
+                          ? current.filter(item => item !== tag)
+                          : [...current, tag]
+                      ))}
+                    >
+                      <Text style={[styles.tagText, selected && styles.tagTextSelected]}>{tag}</Text>
+                    </Pressable>
+                  )
+                })}
               </View>
             </View>
           ) : null}
@@ -368,6 +431,28 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: '800'
   },
+  sectionHeaderRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 8
+  },
+  addTagsButton: {
+    minHeight: 30,
+    borderRadius: 8,
+    paddingHorizontal: 10,
+    backgroundColor: colors.accentStrong,
+    alignItems: 'center',
+    justifyContent: 'center'
+  },
+  addTagsButtonDisabled: {
+    opacity: 0.5
+  },
+  addTagsButtonText: {
+    color: colors.text,
+    fontSize: 12,
+    fontWeight: '900'
+  },
   summary: {
     color: colors.text,
     fontSize: 14,
@@ -408,13 +493,22 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     borderRadius: 14,
     backgroundColor: 'rgba(79,182,255,0.16)',
+    borderWidth: 1,
+    borderColor: 'rgba(79,182,255,0.16)',
     alignItems: 'center',
     justifyContent: 'center'
+  },
+  tagSelected: {
+    backgroundColor: colors.accentStrong,
+    borderColor: colors.accentStrong
   },
   tagText: {
     color: colors.text,
     fontSize: 12,
     fontWeight: '800'
+  },
+  tagTextSelected: {
+    color: colors.text
   },
   timelineItem: {
     minHeight: 64,

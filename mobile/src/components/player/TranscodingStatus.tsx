@@ -3,19 +3,21 @@ import { colors } from '../../theme'
 
 type Props = {
   progress: number
+  queuePosition?: number
   onCancel: () => void
 }
 
-export function TranscodingStatus({ progress, onCancel }: Props) {
+export function TranscodingStatus({ progress, queuePosition = 0, onCancel }: Props) {
   const percent = Math.max(1, Math.min(100, Math.round(progress * 100)))
+  const queued = queuePosition > 0
 
   return (
     <View style={styles.panel}>
-      <Text style={styles.title}>正在准备兼容格式</Text>
+      <Text style={styles.title}>{queued ? `排队中 · 第 ${queuePosition} 位` : '正在准备兼容格式'}</Text>
       <View style={styles.track}>
         <View style={[styles.fill, { width: `${percent}%` }]} />
       </View>
-      <Text style={styles.percent}>{percent}%</Text>
+      <Text style={styles.percent}>{queued ? '等待电脑端转码队列' : `${percent}%`}</Text>
       <Pressable style={styles.cancelButton} onPress={onCancel}>
         <Text style={styles.cancelText}>取消</Text>
       </Pressable>

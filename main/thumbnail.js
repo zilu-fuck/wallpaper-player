@@ -101,6 +101,7 @@ async function cleanupPreviewFrameCache(force = false) {
 }
 
 async function findFfmpeg() {
+  if (process.env.WALLPAPER_PLAYER_FFMPEG_PATH) return process.env.WALLPAPER_PLAYER_FFMPEG_PATH
   if (ffmpegPath) return ffmpegPath
   if (ffmpegSearchCompleted) return null
   if (ffmpegSearchPromise) return ffmpegSearchPromise

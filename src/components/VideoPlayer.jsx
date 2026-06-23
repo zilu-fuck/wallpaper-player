@@ -1,26 +1,17 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { useApp } from '../context/AppContext'
 import VideoAnalysisPanel from './VideoAnalysisPanel'
+import PlayerAnalysisStatus from './player/PlayerAnalysisStatus'
+import PlayerProgressPreview from './player/PlayerProgressPreview'
+import PlayerToolbarMenu, { formatSpeed } from './player/PlayerToolbarMenu'
+import { formatTime } from './player/playerFormat'
 
 const SEEK_STEP = 5
 const ARROW_HOLD_DELAY = 300
 const ARROW_HOLD_SPEED = 2
-const SPEED_OPTIONS = [0.5, 0.75, 1, 1.25, 1.5, 2]
-const SUBTITLE_SCALE_OPTIONS = [0.75, 1, 1.25, 1.5, 2]
 
 function clamp(value, min, max) {
   return Math.min(max, Math.max(min, value))
-}
-
-function formatTime(seconds) {
-  const value = Number(seconds)
-  if (!Number.isFinite(value) || value < 0) return '00:00'
-  const total = Math.floor(value)
-  const h = Math.floor(total / 3600)
-  const m = Math.floor((total % 3600) / 60)
-  const s = total % 60
-  const pad = (n) => String(n).padStart(2, '0')
-  return h > 0 ? `${h}:${pad(m)}:${pad(s)}` : `${pad(m)}:${pad(s)}`
 }
 
 function Icon({ path, viewBox = '0 0 24 24' }) {
@@ -29,18 +20,6 @@ function Icon({ path, viewBox = '0 0 24 24' }) {
       {path}
     </svg>
   )
-}
-
-function formatSpeed(value) {
-  const speed = Number(value)
-  if (!Number.isFinite(speed)) return '1x'
-  return `${speed.toFixed(speed % 1 ? 2 : 0)}x`
-}
-
-function getTrackLabel(track, fallback) {
-  if (!track) return fallback
-  const parts = [track.title, track.lang, track.external ? '外部' : ''].filter(Boolean)
-  return parts.length ? parts.join(' / ') : fallback
 }
 
 export default function VideoPlayer({ video }) {
@@ -60,6 +39,7 @@ export default function VideoPlayer({ video }) {
     handlePrev,
     handleReplayCurrent,
     handleAdvanceFromEnd,
+    handleAppendCustomTags,
     registerPlayerCommandTarget
   } = useApp()
 
@@ -1200,99 +1180,26 @@ export default function VideoPlayer({ video }) {
   const qualityLabel = '原画'
   const hasNext = queueLength > 1 && queueIndex >= 0 && queueIndex < queueLength - 1
   const hasPrev = queueLength > 1 && queueIndex > 0
-  const activeToolbarMenu = (() => {
-    if (activeMenu === 'quality') {
-      return (
-        <div className="player-menu player-menu-right" role="menu">
-          <button className="active" type="button" role="menuitem" onClick={() => setActiveMenu(null)}>原画</button>
-          <span className="player-menu-note">本地文件暂无多清晰度源</span>
-        </div>
-      )
-    }
-
-    if (activeMenu === 'speed') {
-      return (
-        <div className="player-menu player-menu-right" role="menu">
-          {SPEED_OPTIONS.map(option => (
-            <button
-              key={option}
-              className={Math.abs(speed - option) < 0.01 ? 'active' : ''}
-              type="button"
-              role="menuitem"
-              onClick={() => handleSpeedChange(option)}
-            >
-              {formatSpeed(option)}
-            </button>
-          ))}
-        </div>
-      )
-    }
-
-    if (activeMenu === 'subtitle') {
-      return (
-        <div className="player-menu player-menu-right" role="menu">
-          <button className={subtitleId == null ? 'active' : ''} type="button" role="menuitem" onClick={() => handleSelectSubtitle('no')}>关闭字幕</button>
-          {canUseMpv && subtitleTracks.length ? subtitleTracks.map(track => (
-            <button
-              key={track.id}
-              className={subtitleId === Number(track.id) ? 'active' : ''}
-              type="button"
-              role="menuitem"
-              onClick={() => handleSelectSubtitle(track.id)}
-            >
-              {getTrackLabel(track, `字幕 ${track.id}`)}
-            </button>
-          )) : (
-            <span className="player-menu-note">没有检测到字幕轨</span>
-          )}
-        </div>
-      )
-    }
-
-    if (activeMenu === 'settings') {
-      return (
-        <div className="player-menu player-menu-right player-settings-menu" role="menu">
-          <div className="player-menu-group">
-            <span className="player-menu-title">字幕大小</span>
-            <div className="player-menu-options">
-              {SUBTITLE_SCALE_OPTIONS.map(option => (
-                <button
-                  key={option}
-                  className={Math.abs(subtitleScale - option) < 0.01 ? 'active' : ''}
-                  type="button"
-                  role="menuitem"
-                  onClick={() => handleSubtitleScaleChange(option)}
-                >
-                  {Math.round(option * 100)}%
-                </button>
-              ))}
-            </div>
-          </div>
-          <button type="button" role="menuitem" onClick={handleToggleSubtitleVisible}>
-            {subtitleVisible ? '隐藏字幕' : '显示字幕'}
-          </button>
-          <div className="player-menu-group">
-            <span className="player-menu-title">音轨</span>
-            {canUseMpv && audioTracks.length ? audioTracks.map(track => (
-              <button
-                key={track.id}
-                className={audioId === Number(track.id) ? 'active' : ''}
-                type="button"
-                role="menuitem"
-                onClick={() => handleSelectAudio(track.id)}
-              >
-                {getTrackLabel(track, `音轨 ${track.id}`)}
-              </button>
-            )) : (
-              <span className="player-menu-note">没有可切换音轨</span>
-            )}
-          </div>
-        </div>
-      )
-    }
-
-    return null
-  })()
+  const activeToolbarMenu = activeMenu ? (
+    <PlayerToolbarMenu
+      activeMenu={activeMenu}
+      speed={speed}
+      subtitleId={subtitleId}
+      subtitleScale={subtitleScale}
+      subtitleVisible={subtitleVisible}
+      audioId={audioId}
+      canUseMpv={canUseMpv}
+      subtitleTracks={subtitleTracks}
+      audioTracks={audioTracks}
+      onClose={() => setActiveMenu(null)}
+      onSpeedChange={handleSpeedChange}
+      onSelectSubtitle={handleSelectSubtitle}
+      onSubtitleScaleChange={handleSubtitleScaleChange}
+      onToggleSubtitleVisible={handleToggleSubtitleVisible}
+      onSelectAudio={handleSelectAudio}
+    />
+  ) : null
+  const renderToolbarMenu = (menuName) => activeMenu === menuName ? activeToolbarMenu : null
   return (
     <div
       className={`player-overlay${webFullscreen ? ' player-overlay-web-fullscreen' : ''}`}
@@ -1422,28 +1329,20 @@ export default function VideoPlayer({ video }) {
                 currentTime={progressValue}
                 onSeek={handleSeekTo}
                 onClose={() => setAnalysisOpen(false)}
+                bindVideo={video}
+                onAddTags={(targetVideo, tags) => handleAppendCustomTags?.([targetVideo], tags)}
               />
             </div>
           ) : null}
         </div>
 
         <div className="player-toolbar" ref={toolbarRef} onClick={event => event.stopPropagation()}>
-          {analysisRunning ? (
-            <div className="player-analysis-status">
-              <span className="player-analysis-spinner" aria-hidden="true" />
-              <div>
-                <strong>{analysisJob?.stage || '视频理解'}</strong>
-                <span>{analysisJob?.message || '正在分析当前视频'}</span>
-              </div>
-              <button type="button" onClick={handleCancelAnalysis}>取消</button>
-            </div>
-          ) : null}
-
-          {analysisState.status === 'error' && analysisState.error ? (
-            <div className="player-analysis-error">
-              <span>{analysisState.error}</span>
-            </div>
-          ) : null}
+          <PlayerAnalysisStatus
+            analysisRunning={analysisRunning}
+            analysisJob={analysisJob}
+            analysisState={analysisState}
+            onCancelAnalysis={handleCancelAnalysis}
+          />
 
             <div className="player-controls-row">
               <div className="player-left-controls">
@@ -1535,18 +1434,21 @@ export default function VideoPlayer({ video }) {
                   <button className="player-text-button" type="button" title="清晰度" onClick={() => handleToggleMenu('quality')}>
                     {qualityLabel}
                   </button>
+                  {renderToolbarMenu('quality')}
                 </div>
 
                 <div className="player-popover-anchor">
                   <button className="player-text-button" type="button" title="倍速" onClick={() => handleToggleMenu('speed')}>
                     {formatSpeed(speed)}
                   </button>
+                  {renderToolbarMenu('speed')}
                 </div>
 
                 <div className="player-popover-anchor">
                   <button className="player-text-button" type="button" title="字幕" onClick={() => handleToggleMenu('subtitle')}>
                     字幕
                   </button>
+                  {renderToolbarMenu('subtitle')}
                 </div>
 
                 <div className="player-volume-control">
@@ -1585,6 +1487,7 @@ export default function VideoPlayer({ video }) {
                   <button className="btn btn-icon player-control-btn" type="button" title="设置" aria-label="设置" onClick={() => handleToggleMenu('settings')}>
                     <Icon path={<><circle cx="12" cy="12" r="3" /><path d="M19.4 15a1.7 1.7 0 00.3 1.9l.1.1-2 2-.1-.1a1.7 1.7 0 00-1.9-.3 1.7 1.7 0 00-1 1.6V20h-3v-.2a1.7 1.7 0 00-1-1.6 1.7 1.7 0 00-1.9.3l-.1.1-2-2 .1-.1a1.7 1.7 0 00.3-1.9 1.7 1.7 0 00-1.6-1H4v-3h.2a1.7 1.7 0 001.6-1 1.7 1.7 0 00-.3-1.9l-.1-.1 2-2 .1.1a1.7 1.7 0 001.9.3 1.7 1.7 0 001-1.6V4h3v.2a1.7 1.7 0 001 1.6 1.7 1.7 0 001.9-.3l.1-.1 2 2-.1.1a1.7 1.7 0 00-.3 1.9 1.7 1.7 0 001.6 1h.2v3h-.2a1.7 1.7 0 00-1.6 1z" /></>} />
                   </button>
+                  {renderToolbarMenu('settings')}
                 </div>
 
                 <button
@@ -1617,28 +1520,7 @@ export default function VideoPlayer({ video }) {
                 </button>
                 </div>
             </div>
-            {progressPreview.visible && duration > 0 ? (
-              <div className="player-progress-preview-layer" aria-hidden="true">
-                <div
-                  className="player-progress-preview"
-                  style={{ left: progressPreview.x }}
-                >
-                  <div className="player-progress-preview-image">
-                    {progressPreview.imageUrl ? (
-                      <img src={progressPreview.imageUrl} alt="" draggable="false" />
-                    ) : (
-                      <span>{progressPreview.loading ? '加载中' : '无预览'}</span>
-                    )}
-                  </div>
-                  <span className="player-progress-preview-time">{formatTime(progressPreview.time)}</span>
-                </div>
-              </div>
-            ) : null}
-            {activeToolbarMenu ? (
-              <div className="player-toolbar-panel">
-                {activeToolbarMenu}
-              </div>
-            ) : null}
+            <PlayerProgressPreview duration={duration} progressPreview={progressPreview} />
         </div>
       </div>
     </div>

@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import VideoAnalysisPanel from './VideoAnalysisPanel'
+import { useApp } from '../context/AppContext'
 
 function formatTime(value) {
   if (!value) return ''
@@ -295,6 +296,7 @@ export default function VideoAnalysisSidebar({
 }
 
 export function VideoAnalysisResultModal({ task, onClose }) {
+  const { handleAppendCustomTags } = useApp()
   if (!task) return null
   const analysis = task.analysis
 
@@ -306,6 +308,8 @@ export function VideoAnalysisResultModal({ task, onClose }) {
             analysis={analysis}
             currentTime={0}
             onClose={onClose}
+            bindVideo={task.video}
+            onAddTags={(targetVideo, tags) => handleAppendCustomTags?.([targetVideo], tags)}
           />
         ) : (
           <div className="analysis-result-fallback">

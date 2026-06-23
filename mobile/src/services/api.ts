@@ -194,7 +194,7 @@ export async function addTagsToVideos(device: StoredDevice, videoIds: string[], 
 }
 
 export async function startTranscode(device: StoredDevice, videoId: string, quality = 'compatible') {
-  return requestJson<{ status: string, progress: number, error?: string, streamUrl?: string }>(
+  return requestJson<{ status: string, progress: number, error?: string, streamUrl?: string, queuePosition?: number }>(
     device.endpoint,
     `/v1/videos/${encodeURIComponent(videoId)}/transcode?quality=${encodeURIComponent(quality)}`,
     {
@@ -206,7 +206,7 @@ export async function startTranscode(device: StoredDevice, videoId: string, qual
 }
 
 export async function getTranscodeStatus(device: StoredDevice, videoId: string, quality = 'compatible') {
-  return requestJson<{ status: string, progress: number, error?: string, streamUrl?: string }>(
+  return requestJson<{ status: string, progress: number, error?: string, streamUrl?: string, queuePosition?: number }>(
     device.endpoint,
     `/v1/videos/${encodeURIComponent(videoId)}/transcode?quality=${encodeURIComponent(quality)}`,
     {
@@ -214,6 +214,39 @@ export async function getTranscodeStatus(device: StoredDevice, videoId: string, 
       timeoutMs: 5000
     }
   )
+}
+
+export async function listTranscodes(device: StoredDevice) {
+  return requestJson<{
+    tasks: Array<{
+      id: string
+      quality: string
+      status: string
+      progress: number
+      error?: string
+      queuePosition?: number
+      streamUrl?: string
+    }>
+    checkedAt: number
+  }>(device.endpoint, '/v1/transcodes', {
+    token: device.token,
+    timeoutMs: 5000
+  })
+}
+
+export async function clearTranscodeCache(device: StoredDevice, force = false) {
+  return requestJson<{
+    success: boolean
+    removed: number
+    bytesRemoved: number
+    totalFiles: number
+    totalBytes: number
+  }>(device.endpoint, '/v1/transcodes/cache', {
+    method: 'DELETE',
+    token: device.token,
+    body: { force },
+    timeoutMs: 10000
+  })
 }
 
 export async function cancelTranscode(device: StoredDevice, videoId: string, quality = 'compatible') {

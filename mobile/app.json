@@ -2,7 +2,7 @@
   "expo": {
     "name": "Wallpaper Player",
     "slug": "wallpaper-player-mobile",
-    "version": "0.1.2",
+    "version": "0.1.3",
     "orientation": "portrait",
     "userInterfaceStyle": "dark",
     "assetBundlePatterns": [
@@ -10,7 +10,7 @@
     ],
     "android": {
       "package": "com.wallpaperplayer.mobile",
-      "versionCode": 3,
+      "versionCode": 4,
       "blockedPermissions": [
         "android.permission.RECORD_AUDIO"
       ],

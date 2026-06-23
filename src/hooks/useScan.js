@@ -48,6 +48,14 @@ export function useScan({ setCurrentDir, setLoading }) {
       setScanning(false)
       setLoading(false) // 扫描完成后立即显示画廊
 
+      if (result.refreshing) {
+        setTimeout(() => {
+          if (requestId === scanRequestRef.current) {
+            scanAndLoad(dirPath, false)
+          }
+        }, result.indexed ? 1200 : 600)
+      }
+
       // 缩略图在后台异步生成，不阻塞UI
       if (result.videos.length > 0) {
         const paths = result.videos.map(v => v.fullPath)

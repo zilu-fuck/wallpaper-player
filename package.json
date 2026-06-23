@@ -1,6 +1,6 @@
 {
   "name": "wallpaper-player",
-  "version": "1.2.4",
+  "version": "1.2.5",
   "description": "本地视频画廊播放器 - 浏览、搜索、播放本地视频文件",
   "license": "Apache-2.0",
   "main": "main.js",
@@ -17,6 +17,7 @@
     "verify:remote-pressure": "node scripts/verify-remote-pressure.js",
     "verify:mobile-multi-device": "node scripts/verify-mobile-multi-device.js",
     "verify:mobile-player": "node scripts/verify-mobile-player-structure.js",
+    "verify:video-metadata": "node scripts/verify-video-metadata-cache.js",
     "verify:mobile-transcode": "node scripts/verify-transcode-command.js",
     "verify:mobile-transcode-concurrency": "node scripts/verify-transcode-concurrency.js",
     "verify:mobile-lan": "npm run verify:remote-mobile && npm run verify:remote-settings && npm run verify:remote-api && npm run verify:remote-library && npm run verify:mobile-multi-device && npm run verify:mobile-player && npm run verify:mobile-transcode && npm run verify:mobile-transcode-concurrency",

@@ -47,6 +47,17 @@ export type VideoItem = {
   thumbnailUrl: string
   thumbnailToken?: string
   streamUrl: string
+  media?: {
+    available?: boolean
+    durationSeconds?: number
+    width?: number
+    height?: number
+    fps?: number
+    videoCodec?: string
+    audioCodec?: string
+    bitRate?: number
+    container?: string
+  } | null
 }
 
 export type DirectorySummary = {
@@ -72,6 +83,8 @@ export type LibraryResponse = {
   }
   favoriteCount?: number
   scannedAt?: number
+  indexed?: boolean
+  refreshing?: boolean
 }
 
 export type PlaybackState = {

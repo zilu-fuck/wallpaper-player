@@ -8,7 +8,11 @@ const { findFfmpeg } = require('../thumbnail')
 const { getResourcePath } = require('../paths')
 
 const tasks = new Map()
+const taskStartPromises = new Map()
 const MAX_RUNNING_TRANSCODES = 1
+const TRANSCODE_CACHE_MAX_FILES = 60
+const TRANSCODE_CACHE_MAX_AGE_MS = 14 * 24 * 60 * 60 * 1000
+let runningTranscodeSlots = 0
 const fallbackUserDataDir = path.join(process.cwd(), '.tmp-wallpaper-player')
 const QUALITY_PRESETS = {
   compatible: { label: 'compatible', landscapeWidth: 1920, landscapeHeight: 1080, portraitWidth: 1080, portraitHeight: 1920, crf: '23' },
@@ -65,6 +69,7 @@ function execFileAsync(file, args, options = {}) {
 }
 
 async function findFfprobe() {
+  if (process.env.WALLPAPER_PLAYER_FFPROBE_PATH) return process.env.WALLPAPER_PLAYER_FFPROBE_PATH
   const candidates = [
     getResourcePath('vendor', 'ffmpeg', 'bin', 'ffprobe.exe'),
     getResourcePath('vendor', 'ffmpeg', 'ffprobe.exe'),
@@ -114,58 +119,75 @@ function parseTimeSeconds(line) {
   return Number(match[1]) * 3600 + Number(match[2]) * 60 + Number(match[3])
 }
 
+function shouldSpawnWithShell(filePath) {
+  return process.platform === 'win32' && /\.(?:cmd|bat)$/i.test(String(filePath || ''))
+}
+
 async function getExistingTask(videoId, videoPath, quality) {
   const normalizedQuality = normalizeQuality(quality)
   const taskKey = getTaskKey(videoId, normalizedQuality)
+  const outputPath = getOutputPath(videoPath, normalizedQuality)
   const existing = tasks.get(taskKey)
   if (existing) {
-    if (existing.status !== 'error') return existing
-    tasks.delete(taskKey)
+    if (existing.status === 'error') {
+      tasks.delete(taskKey)
+    } else if (existing.status !== 'ready') {
+      return existing
+    } else if (await isFreshTranscodeOutput(videoPath, existing.outputPath || outputPath)) {
+      return existing
+    } else {
+      tasks.delete(taskKey)
+      await fsp.rm(existing.outputPath || outputPath, { force: true }).catch(() => {})
+    }
   }
 
-  const outputPath = getOutputPath(videoPath, normalizedQuality)
+  if (await isFreshTranscodeOutput(videoPath, outputPath)) {
+    const readyTask = {
+      id: videoId,
+      quality: normalizedQuality,
+      status: 'ready',
+      progress: 1,
+      outputPath,
+      error: '',
+      updatedAt: Date.now()
+    }
+    tasks.set(taskKey, readyTask)
+    return readyTask
+  }
+
+  await fsp.rm(outputPath, { force: true }).catch(() => {})
+  return null
+}
+
+async function isFreshTranscodeOutput(videoPath, outputPath) {
   try {
     const [sourceStat, outputStat] = await Promise.all([
       fsp.stat(videoPath),
       fsp.stat(outputPath)
     ])
-    if (outputStat.isFile() && outputStat.size > 0 && outputStat.mtimeMs >= sourceStat.mtimeMs) {
-      const readyTask = {
-        id: videoId,
-        quality: normalizedQuality,
-        status: 'ready',
-        progress: 1,
-        outputPath,
-        error: '',
-        updatedAt: Date.now()
-      }
-      tasks.set(taskKey, readyTask)
-      return readyTask
-    }
-    await fsp.rm(outputPath, { force: true }).catch(() => {})
+    return outputStat.isFile() && outputStat.size > 0 && outputStat.mtimeMs >= sourceStat.mtimeMs
   } catch {
-    // No cached output yet.
+    return false
   }
-  return null
 }
 
 async function startMobileTranscode(videoId, videoPath, quality = 'compatible') {
   const normalizedQuality = normalizeQuality(quality)
   const taskKey = getTaskKey(videoId, normalizedQuality)
+  const pendingStart = taskStartPromises.get(taskKey)
+  if (pendingStart) return pendingStart
+
+  const startPromise = startMobileTranscodeTask(videoId, videoPath, normalizedQuality, taskKey)
+    .finally(() => {
+      taskStartPromises.delete(taskKey)
+    })
+  taskStartPromises.set(taskKey, startPromise)
+  return startPromise
+}
+
+async function startMobileTranscodeTask(videoId, videoPath, normalizedQuality, taskKey) {
   const existing = await getExistingTask(videoId, videoPath, normalizedQuality)
   if (existing) return existing
-  const runningCount = [...tasks.values()].filter(task => task?.status === 'running' && task.process).length
-  if (runningCount >= MAX_RUNNING_TRANSCODES) {
-    return {
-      id: videoId,
-      quality: normalizedQuality,
-      status: 'error',
-      progress: 0,
-      outputPath: '',
-      error: '电脑正在准备另一个视频，请稍后再试',
-      updatedAt: Date.now()
-    }
-  }
 
   const ffmpeg = await findFfmpeg()
   if (!ffmpeg) {
@@ -188,23 +210,186 @@ async function startMobileTranscode(videoId, videoPath, quality = 'compatible') 
   await fsp.rm(tempPath, { force: true }).catch(() => {})
   const duration = await probeDuration(videoPath)
 
+  const shouldQueue = countRunningTasks() >= MAX_RUNNING_TRANSCODES
+  if (!shouldQueue) runningTranscodeSlots += 1
   const task = {
     id: videoId,
+    taskKey,
+    videoPath,
     quality: normalizedQuality,
-    status: 'running',
-    progress: 0.02,
+    status: shouldQueue ? 'queued' : 'running',
+    progress: shouldQueue ? 0 : 0.02,
     outputPath,
+    tempPath,
+    ffmpeg,
+    duration,
     error: '',
+    createdAt: Date.now(),
     updatedAt: Date.now(),
     process: null
   }
   tasks.set(taskKey, task)
-  const preset = QUALITY_PRESETS[normalizedQuality]
+  if (task.status === 'queued') {
+    return task
+  }
+
+  try {
+    await runQueuedTranscodeTask(task)
+  } catch (err) {
+    task.status = 'error'
+    task.error = err?.message || '转码启动失败'
+    task.updatedAt = Date.now()
+    releaseRunningSlot(task)
+    scheduleTranscodeDrain()
+  }
+  return task
+}
+
+function countRunningTasks() {
+  return runningTranscodeSlots
+}
+
+function getQueuedTasks() {
+  return [...tasks.values()]
+    .filter(task => task?.status === 'queued')
+    .sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0))
+}
+
+function getQueuePosition(task) {
+  if (!task || task.status !== 'queued') return 0
+  const queued = getQueuedTasks()
+  const index = queued.findIndex(item => item === task)
+  return index >= 0 ? index + 1 : queued.length
+}
+
+function serializeTask(task) {
+  if (!task) return null
+  const quality = task.quality || 'compatible'
+  return {
+    id: task.id,
+    quality,
+    status: task.status,
+    progress: task.progress,
+    error: task.error || '',
+    queuePosition: getQueuePosition(task),
+    createdAt: task.createdAt || 0,
+    updatedAt: task.updatedAt || 0,
+    streamUrl: task.status === 'ready'
+      ? `/v1/videos/${encodeURIComponent(task.id)}/transcoded-stream?quality=${encodeURIComponent(quality)}`
+      : ''
+  }
+}
+
+function scheduleTranscodeDrain() {
+  setTimeout(() => {
+    drainTranscodeQueue().catch(() => {})
+  }, 0)
+}
+
+function releaseRunningSlot(task) {
+  if (task) {
+    if (task.slotReleased) return
+    task.slotReleased = true
+  }
+  runningTranscodeSlots = Math.max(0, runningTranscodeSlots - 1)
+}
+
+async function drainTranscodeQueue() {
+  while (countRunningTasks() < MAX_RUNNING_TRANSCODES) {
+    const task = getQueuedTasks()[0]
+    if (!task) return
+    runningTranscodeSlots += 1
+    try {
+      await runQueuedTranscodeTask(task)
+    } catch (err) {
+      task.status = 'error'
+      task.error = err?.message || '转码启动失败'
+      task.updatedAt = Date.now()
+      releaseRunningSlot(task)
+    }
+  }
+}
+
+async function cleanupTranscodeCache(options = {}) {
+  const force = Boolean(options.force)
+  const maxFiles = Math.max(1, Number(options.maxFiles) || TRANSCODE_CACHE_MAX_FILES)
+  const maxAgeMs = Math.max(60 * 1000, Number(options.maxAgeMs) || TRANSCODE_CACHE_MAX_AGE_MS)
+  const now = Date.now()
+  const dir = getTranscodeDir()
+  let entries = []
+  try {
+    entries = await fsp.readdir(dir, { withFileTypes: true })
+  } catch {
+    return { success: true, removed: 0, bytesRemoved: 0, totalFiles: 0, totalBytes: 0 }
+  }
+
+  const files = []
+  for (const entry of entries) {
+    if (!entry.isFile() || !entry.name.endsWith('.mobile.mp4')) continue
+    const filePath = path.join(dir, entry.name)
+    try {
+      const stat = await fsp.stat(filePath)
+      files.push({ filePath, size: stat.size, mtimeMs: stat.mtimeMs })
+    } catch {}
+  }
+
+  files.sort((a, b) => b.mtimeMs - a.mtimeMs)
+  const expiredBefore = now - maxAgeMs
+  const removable = files.filter((file, index) => force || index >= maxFiles || file.mtimeMs < expiredBefore)
+  const protectedOutputPaths = new Set(
+    [...tasks.values()]
+      .filter(task => task?.status === 'running' || task?.status === 'queued')
+      .map(task => task?.outputPath ? path.resolve(task.outputPath).toLowerCase() : '')
+      .filter(Boolean)
+  )
+  const removedPaths = new Set()
+  let removed = 0
+  let bytesRemoved = 0
+  for (const file of removable) {
+    const normalizedFilePath = path.resolve(file.filePath).toLowerCase()
+    if (!force && protectedOutputPaths.has(normalizedFilePath)) continue
+    try {
+      await fsp.rm(file.filePath, { force: true })
+      removedPaths.add(normalizedFilePath)
+      removed += 1
+      bytesRemoved += file.size
+    } catch {}
+  }
+
+  if (force || removedPaths.size > 0) {
+    for (const [taskKey, task] of tasks.entries()) {
+      const normalizedOutputPath = task?.outputPath ? path.resolve(task.outputPath).toLowerCase() : ''
+      if (task?.status === 'ready' && (force || removedPaths.has(normalizedOutputPath))) {
+        tasks.delete(taskKey)
+      }
+    }
+  }
+
+  return {
+    success: true,
+    removed,
+    bytesRemoved,
+    totalFiles: files.length,
+    totalBytes: files.reduce((sum, file) => sum + file.size, 0)
+  }
+}
+
+async function runQueuedTranscodeTask(task) {
+  if (!task || task.status === 'ready' || task.process) return task
+  task.status = 'running'
+  task.progress = Math.max(task.progress || 0, 0.02)
+  task.error = ''
+  task.updatedAt = Date.now()
+
+  const outputPath = task.outputPath
+  const tempPath = task.tempPath || `${outputPath}.tmp`
+  await fsp.rm(tempPath, { force: true }).catch(() => {})
+  const preset = QUALITY_PRESETS[normalizeQuality(task.quality)]
 
   const args = [
     '-hide_banner',
     '-y',
-    '-i', videoPath,
+    '-i', task.videoPath,
     '-map', '0:v:0',
     '-map', '0:a:0?',
     '-c:v', 'libx264',
@@ -214,12 +399,13 @@ async function startMobileTranscode(videoId, videoPath, quality = 'compatible') 
     '-movflags', '+faststart',
     '-c:a', 'aac',
     '-b:a', '160k',
-    '-vf', buildScaleFilter(normalizedQuality),
+    '-vf', buildScaleFilter(task.quality),
     '-f', 'mp4',
     tempPath
   ]
 
-  const child = spawn(ffmpeg, args, {
+  const child = spawn(task.ffmpeg, args, {
+    shell: shouldSpawnWithShell(task.ffmpeg),
     windowsHide: true,
     stdio: ['ignore', 'ignore', 'pipe']
   })
@@ -228,8 +414,8 @@ async function startMobileTranscode(videoId, videoPath, quality = 'compatible') 
   child.stderr.setEncoding('utf8')
   child.stderr.on('data', (chunk) => {
     const time = parseTimeSeconds(chunk)
-    if (!time || !duration) return
-    task.progress = Math.max(task.progress, Math.min(0.96, time / duration))
+    if (!time || !task.duration) return
+    task.progress = Math.max(task.progress, Math.min(0.96, time / task.duration))
     task.updatedAt = Date.now()
   })
 
@@ -237,10 +423,13 @@ async function startMobileTranscode(videoId, videoPath, quality = 'compatible') 
     task.status = 'error'
     task.error = err.message || '转码启动失败'
     task.updatedAt = Date.now()
+    releaseRunningSlot(task)
+    scheduleTranscodeDrain()
   })
 
   child.on('close', async (code) => {
     task.process = null
+    releaseRunningSlot(task)
     if (code === 0) {
       try {
         await fsp.rename(tempPath, outputPath)
@@ -257,6 +446,8 @@ async function startMobileTranscode(videoId, videoPath, quality = 'compatible') 
     }
     task.updatedAt = Date.now()
     await fsp.rm(tempPath, { force: true }).catch(() => {})
+    cleanupTranscodeCache().catch(() => {})
+    scheduleTranscodeDrain()
   })
 
   return task
@@ -265,17 +456,7 @@ async function startMobileTranscode(videoId, videoPath, quality = 'compatible') 
 function getMobileTranscodeStatus(videoId, quality = 'compatible') {
   const normalizedQuality = normalizeQuality(quality)
   const task = tasks.get(getTaskKey(videoId, normalizedQuality))
-  if (!task) return null
-  return {
-    id: task.id,
-    quality: task.quality || normalizedQuality,
-    status: task.status,
-    progress: task.progress,
-    error: task.error || '',
-    streamUrl: task.status === 'ready'
-      ? `/v1/videos/${encodeURIComponent(videoId)}/transcoded-stream?quality=${encodeURIComponent(task.quality || normalizedQuality)}`
-      : ''
-  }
+  return serializeTask(task)
 }
 
 function getTranscodedPath(videoId, quality = 'compatible') {
@@ -289,13 +470,23 @@ function cancelMobileTranscode(videoId, quality = 'compatible') {
   if (!task) return false
   if (task.process) {
     task.process.kill()
+  } else if (task.status === 'running') {
+    releaseRunningSlot(task)
   }
   const tempPath = task.outputPath ? `${task.outputPath}.tmp` : ''
   if (tempPath) {
     fsp.rm(tempPath, { force: true }).catch(() => {})
   }
   tasks.delete(taskKey)
+  scheduleTranscodeDrain()
   return true
+}
+
+function listMobileTranscodeTasks() {
+  return [...tasks.values()]
+    .map(serializeTask)
+    .filter(Boolean)
+    .sort((a, b) => (b.updatedAt || b.createdAt || 0) - (a.updatedAt || a.createdAt || 0))
 }
 
 module.exports = {
@@ -303,6 +494,8 @@ module.exports = {
   getMobileTranscodeStatus,
   getTranscodedPath,
   cancelMobileTranscode,
+  listMobileTranscodeTasks,
+  cleanupTranscodeCache,
   normalizeQuality,
   buildScaleFilter
 }
