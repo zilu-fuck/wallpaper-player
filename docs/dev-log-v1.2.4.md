@@ -2,11 +2,14 @@
 
 记录日期：2026-06-23
 桌面端版本：`1.2.4`
+手机端版本：`0.1.2`（本次不补发）
 发布标签：`v1.2.4`
 
 ## 版本定位
 
 `v1.2.4` 是一次 Windows 发布补发版本，目标不是新增用户功能，而是修复 `v1.2.3` 在 GitHub Actions 上重新发布失败的问题。
+
+手机端本次继续沿用 `0.1.2` APK，不重新构建或补发 Android 包。
 
 `v1.2.3` 的视频理解功能依赖本地 `video comprehension/video comprehension` 子项目。这个目录在开发机上存在，但根目录 `.gitignore` 排除了 `video comprehension/`，所以 GitHub Actions checkout 后拿不到运行时源码。`scripts/package-win.js` 会校验 `pyproject.toml`、`video_comprehension/cli.py`、`video_comprehension/config.py` 和 `video_comprehension/pipeline.py`，CI 缺少这些文件时会在 Build 步骤失败。
 
@@ -94,4 +97,4 @@ git push origin v1.2.4
 
 - `main/video-comprehension-runtime` 是运行时副本，后续如果继续修改 `video comprehension` 子项目，需要同步更新这个 fallback 目录。
 - 发布包仍然不包含大模型文件，用户需要在设置页下载、检测或配置本地 VLM 模型。
-- 本次只修复 Windows 发布链路，不涉及 Android APK 补发。
+- 本次只修复 Windows 发布链路，不涉及 Android APK 补发；手机端继续使用 `0.1.2`。
