@@ -8,10 +8,10 @@ Windows 发布包内置 mpv 和 FFmpeg，普通用户不需要额外安装播放
 
 | 端 | 版本 | 产物 |
 | --- | --- | --- |
-| Windows 电脑端 | `1.2.2` | `release/Wallpaper-Player-Setup-1.2.2.exe`、`release/Wallpaper-Player-1.2.2.exe` |
-| Android 手机端 | `0.1.1` | `mobile/dist/wallpaper-player-mobile-0.1.1-arm64-release.apk` |
+| Windows 电脑端 | `1.2.4` | `release/Wallpaper-Player-Setup-1.2.4.exe`、`release/Wallpaper-Player-1.2.4.exe` |
+| Android 手机端 | `0.1.2` | `mobile/dist/wallpaper-player-mobile-0.1.2-arm64-release.apk` |
 
-本批测试版说明见 [docs/test-release-1.2.2.md](docs/test-release-1.2.2.md)。
+本批 Windows 补发版说明见 [release-notes/v1.2.4.md](release-notes/v1.2.4.md)，开发记录见 [docs/dev-log-v1.2.4.md](docs/dev-log-v1.2.4.md)。手机端本次继续使用 `0.1.2` APK，不重新补发 Android 包。
 
 ## 主要功能
 
@@ -26,6 +26,8 @@ Windows 发布包内置 mpv 和 FFmpeg，普通用户不需要额外安装播放
 - 手机端支持收藏、标签、缓存占位、电脑端播放、更多菜单。
 - 支持电脑端和手机端多选视频后批量添加标签，并可复用已有标签。
 - 支持电脑端移除绑定设备和多设备管理基础流程。
+- 支持隐私目录，默认从电脑端侧栏和手机端远程库中隐藏。
+- 支持电脑端视频理解分析，并可在手机端查看电脑端生成的分析进度和结果。
 
 ## 支持的视频格式
 
@@ -40,10 +42,10 @@ Windows 发布包内置 mpv 和 FFmpeg，普通用户不需要额外安装播放
 
 ## 安装和绑定
 
-1. 在电脑上安装或运行 `release/Wallpaper-Player-Setup-1.2.2.exe` / `release/Wallpaper-Player-1.2.2.exe`。
+1. 在电脑上安装或运行 `release/Wallpaper-Player-Setup-1.2.4.exe` / `release/Wallpaper-Player-1.2.4.exe`。
 2. 打开电脑端，添加视频目录。
 3. 在电脑端设置中打开手机访问功能。
-4. 在 Android 手机上安装 `mobile/dist/wallpaper-player-mobile-0.1.1-arm64-release.apk`。
+4. 在 Android 手机上安装 `mobile/dist/wallpaper-player-mobile-0.1.2-arm64-release.apk`。
 5. 确保手机和电脑在同一局域网内。
 6. 手机端进入绑定页，扫描电脑端二维码或粘贴绑定码。
 7. 绑定完成后进入手机端视频库，选择视频开始播放。
@@ -109,7 +111,7 @@ npm run dist:win
 Android APK 构建建议在纯 ASCII 路径下执行 Expo prebuild 和 Gradle，避免中文路径触发 autolinking JSON 路径转义问题。当前生成 APK 输出到：
 
 ```text
-mobile/dist/wallpaper-player-mobile-0.1.1-arm64-release.apk
+mobile/dist/wallpaper-player-mobile-0.1.2-arm64-release.apk
 ```
 
 ## 验证命令
@@ -146,7 +148,8 @@ npm run typecheck
 ## 文档
 
 - [移动端和远程访问方案](docs/mobile-client-remote-access-plan.md)
-- [1.2.2 测试版发布说明](docs/test-release-1.2.2.md)
+- [1.2.4 Windows 补发版说明](release-notes/v1.2.4.md)
+- [1.2.4 更新记录](docs/dev-log-v1.2.4.md)
 - [移动端真机 QA 清单](docs/mobile-real-device-qa.md)
 
 ## 许可证
