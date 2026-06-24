@@ -38,6 +38,8 @@ const videoComprehensionItems = [
   'video_comprehension'
 ]
 
+const officialPluginDirs = new Set(['video-analysis', 'ai-search', 'agent-bridge'])
+
 const requiredVideoComprehensionFiles = [
   'pyproject.toml',
   path.join('video_comprehension', 'cli.py'),
@@ -129,12 +131,15 @@ async function copyProject() {
     await fsp.cp(src, path.join(tempRoot, item), { recursive: true })
   }
 
-  const sourceProject = resolveVideoComprehensionSourceProject()
-  const bundledProject = path.join(tempRoot, 'main', 'video-comprehension-runtime')
-  await copyVideoComprehensionProject(sourceProject, bundledProject)
+  await removeOfficialPluginPayloads(path.join(tempRoot, 'main', 'plugins'))
+  await fsp.rm(path.join(tempRoot, 'main', 'video-comprehension-runtime'), { recursive: true, force: true })
+  await fsp.rm(path.join(tempRoot, 'video comprehension'), { recursive: true, force: true })
+}
 
-  const targetProject = path.join(tempRoot, 'video comprehension', 'video comprehension')
-  await copyVideoComprehensionProject(sourceProject, targetProject)
+async function removeOfficialPluginPayloads(pluginsDir) {
+  for (const pluginId of officialPluginDirs) {
+    await fsp.rm(path.join(pluginsDir, pluginId), { recursive: true, force: true })
+  }
 }
 
 async function copyReleaseBack() {
@@ -147,6 +152,13 @@ async function copyReleaseBack() {
 
   await fsp.rm(targetRelease, { recursive: true, force: true })
   await fsp.cp(sourceRelease, targetRelease, { recursive: true })
+}
+
+function packagePlugins() {
+  execFileSync(process.execPath, [path.join(rootDir, 'scripts', 'package-plugins.js')], {
+    cwd: rootDir,
+    stdio: 'inherit'
+  })
 }
 
 async function main() {
@@ -164,9 +176,8 @@ async function main() {
     }
   })
 
-  await assertVideoComprehensionProject(path.join(tempRoot, 'release', 'win-unpacked', 'resources', 'video comprehension', 'video comprehension'))
-
   await copyReleaseBack()
+  packagePlugins()
 }
 
 main().catch((err) => {

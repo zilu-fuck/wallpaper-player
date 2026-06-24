@@ -10,9 +10,19 @@ const fallbackUserDataDir = path.join(process.cwd(), '.tmp-wallpaper-player')
 const CACHE_VERSION = 1
 const PROBE_TIMEOUT_MS = 12000
 const probePromises = new Map()
+const warmPendingKeys = new Set()
 let warmPromise = null
+let warmPaused = false
 
 let metadataCache = null
+
+function delay(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms))
+}
+
+function setVideoMetadataWarmPaused(paused) {
+  warmPaused = Boolean(paused)
+}
 
 function getUserDataDir() {
   return app?.getPath ? app.getPath('userData') : fallbackUserDataDir
@@ -241,9 +251,11 @@ async function getCachedVideoMetadataForPath(filePath) {
 }
 
 async function warmVideoMetadataCache(videoPaths, options = {}) {
-  const paths = Array.isArray(videoPaths)
+  const limit = Number(options.limit)
+  const rawPaths = Array.isArray(videoPaths)
     ? [...new Set(videoPaths.filter(item => typeof item === 'string' && item.trim()).map(item => path.resolve(item)))]
     : []
+  const paths = Number.isInteger(limit) && limit > 0 ? rawPaths.slice(0, limit) : rawPaths
   if (!paths.length) return
 
   const concurrency = Math.max(1, Math.min(2, Number(options.concurrency) || 1))
@@ -251,12 +263,21 @@ async function warmVideoMetadataCache(videoPaths, options = {}) {
 
   async function worker() {
     while (index < paths.length) {
+      while (warmPaused) {
+        await delay(500)
+      }
       const current = paths[index++]
+      const key = getCacheKey(current)
+      if (warmPendingKeys.has(key)) continue
+      warmPendingKeys.add(key)
       try {
         const signature = await getFileSignature(current)
         if (getCachedVideoMetadata(current, signature)) continue
         await getVideoMetadata(current)
       } catch {}
+      finally {
+        warmPendingKeys.delete(key)
+      }
     }
   }
 
@@ -277,5 +298,6 @@ module.exports = {
   getVideoMetadata,
   warmVideoMetadataCache,
   probeVideoMetadata,
-  findFfprobe
+  findFfprobe,
+  setVideoMetadataWarmPaused
 }

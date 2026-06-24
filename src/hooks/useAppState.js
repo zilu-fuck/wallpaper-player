@@ -9,6 +9,8 @@ export function useAppState() {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
   const [ffmpegStatus, setFfmpegStatus] = useState(null)
   const [mpvStatus, setMpvStatus] = useState(null)
+  const [plugins, setPlugins] = useState([])
+  const [pluginsLoaded, setPluginsLoaded] = useState(false)
 
   const theme = settings?.theme || 'dark'
   const playbackMode = settings?.playbackMode || 'order'
@@ -28,7 +30,11 @@ export function useAppState() {
       merged = { ...prev, ...partial }
       return merged
     })
-    await window.electronAPI.saveSettings(merged)
+    const result = await window.electronAPI.saveSettings(partial)
+    if (result?.settings) {
+      setSettings(result.settings)
+      return result.settings
+    }
     return merged
   }, [])
 
@@ -48,9 +54,24 @@ export function useAppState() {
     return saveSettings({ playbackMode: nextMode })
   }, [saveSettings])
 
+  const refreshPlugins = useCallback(async () => {
+    const nextPlugins = await window.electronAPI?.listPlugins?.()
+    if (Array.isArray(nextPlugins)) {
+      setPlugins(nextPlugins)
+      setPluginsLoaded(true)
+      return nextPlugins
+    }
+    return []
+  }, [])
+
   return {
     settings,
     setSettings,
+    plugins,
+    setPlugins,
+    pluginsLoaded,
+    setPluginsLoaded,
+    refreshPlugins,
     currentDir,
     setCurrentDir,
     loading,

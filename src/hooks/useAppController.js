@@ -21,6 +21,7 @@ export function useAppController() {
     setCurrentDir,
     setLoading,
     setShowSettings,
+    refreshPlugins,
     saveSettings,
     handleDirectoriesChange
   } = appState
@@ -34,9 +35,15 @@ export function useAppController() {
   const tagEditor = useTagEditor({ settings, saveSettings })
   const player = usePlayer({
     queueVideos: filter.filteredVideos,
+    videoSource: filter.displayVideos,
     playbackMode: appState.playbackMode
   })
-  const videoAnalysisTasks = useVideoAnalysisTasks({ settings, videos: scan.videos })
+  const videoAnalysisTasks = useVideoAnalysisTasks({
+    settings,
+    videos: scan.videos,
+    plugins: appState.plugins,
+    pluginsLoaded: appState.pluginsLoaded
+  })
   const { handlePlayPath } = player
   const totalCount = scan.videos.length
 
@@ -56,6 +63,7 @@ export function useAppController() {
         theme: 'dark',
         ...s
       })
+      refreshPlugins()
 
       const publicDirectories = getPublicDirectories(s.directories || [], s.privateDirectories || [])
       const dir = s.defaultDirectory || publicDirectories[0]

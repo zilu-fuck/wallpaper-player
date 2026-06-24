@@ -25,6 +25,27 @@ function uniqueTags(tags) {
   return result
 }
 
+function getVideoCustomTags(video, customTags) {
+  const tagKey = video.favoriteKey || video.fullPath
+  const legacyKey = video.fullPath && video.fullPath !== tagKey ? video.fullPath : ''
+  return uniqueTags([
+    ...(Array.isArray(customTags[tagKey]) ? customTags[tagKey] : []),
+    ...(legacyKey && Array.isArray(customTags[legacyKey]) ? customTags[legacyKey] : [])
+  ])
+}
+
+function getSystemTags(video) {
+  return Array.isArray(video.systemTags)
+    ? video.systemTags
+    : Array.isArray(video.tags)
+      ? video.tags
+      : []
+}
+
+function getCustomTags(video) {
+  return Array.isArray(video.customTags) ? video.customTags : []
+}
+
 function categoryExists(categoryKey, categoryGroups) {
   if (categoryKey === 'favorites') return true
   const category = parseCategoryKey(categoryKey)
@@ -35,8 +56,8 @@ function categoryExists(categoryKey, categoryGroups) {
 
 function videoMatchesCategory(video, categoryKey) {
   const category = parseCategoryKey(categoryKey)
-  if (category.type === 'custom') return (video.customTags || []).includes(category.name)
-  if (category.type === 'system') return (video.systemTags || []).includes(category.name)
+  if (category.type === 'custom') return getCustomTags(video).includes(category.name)
+  if (category.type === 'system') return getSystemTags(video).includes(category.name)
   return (video.tags || []).includes(categoryKey)
 }
 
@@ -83,26 +104,33 @@ export function useVideoFilter({ videos, customTags, favoriteKeys }) {
     })
   }, [])
 
-  // 合并系统标签与自定义标签后的视频列表
-  const displayVideos = useMemo(() => (
-    videos.map(video => {
-      const tagKey = video.favoriteKey || video.fullPath
-      const legacyKey = video.fullPath && video.fullPath !== tagKey ? video.fullPath : ''
-      const systemTags = video.tags || []
-      const userTags = uniqueTags([
-        ...(Array.isArray(customTags[tagKey]) ? customTags[tagKey] : []),
-        ...(legacyKey && Array.isArray(customTags[legacyKey]) ? customTags[legacyKey] : [])
-      ])
+  // 合并系统标签与自定义标签后的视频列表。大多数视频没有自定义标签时复用原对象，避免全库浅拷贝。
+  const displayVideos = useMemo(() => {
+    if (!customTags || Object.keys(customTags).length === 0) return videos
+
+    let nextVideos = null
+    for (let index = 0; index < videos.length; index += 1) {
+      const video = videos[index]
+      const systemTags = getSystemTags(video)
+      const userTags = getVideoCustomTags(video, customTags)
+      if (userTags.length === 0) {
+        if (nextVideos) nextVideos.push(video)
+        continue
+      }
+
       const tags = uniqueTags([...systemTags, ...userTags])
-      return {
+      if (!nextVideos) nextVideos = videos.slice(0, index)
+      nextVideos.push({
         ...video,
         tags,
         systemTags,
         customTags: userTags,
         group: tags[0] || video.group
-      }
-    })
-  ), [videos, customTags])
+      })
+    }
+
+    return nextVideos || videos
+  }, [videos, customTags])
 
   const sortedVideos = useMemo(() => {
     return [...displayVideos].sort((a, b) => {
@@ -120,10 +148,10 @@ export function useVideoFilter({ videos, customTags, favoriteKeys }) {
     const customCounts = new Map()
     const systemCounts = new Map()
     for (const video of displayVideos) {
-      for (const tag of video.customTags || []) {
+      for (const tag of getCustomTags(video)) {
         customCounts.set(tag, (customCounts.get(tag) || 0) + 1)
       }
-      for (const tag of video.systemTags || []) {
+      for (const tag of getSystemTags(video)) {
         systemCounts.set(tag, (systemCounts.get(tag) || 0) + 1)
       }
     }
@@ -138,9 +166,13 @@ export function useVideoFilter({ videos, customTags, favoriteKeys }) {
     }
   }, [displayVideos])
 
-  const favoriteCount = useMemo(() => (
-    displayVideos.filter(video => favoriteKeys.has(video.favoriteKey || video.fullPath)).length
-  ), [displayVideos, favoriteKeys])
+  const favoriteCount = useMemo(() => {
+    let count = 0
+    for (const video of displayVideos) {
+      if (favoriteKeys.has(video.favoriteKey || video.fullPath)) count += 1
+    }
+    return count
+  }, [displayVideos, favoriteKeys])
 
   // 当前选中的分类被删空后自动移除
   useEffect(() => {
@@ -156,6 +188,9 @@ export function useVideoFilter({ videos, customTags, favoriteKeys }) {
   const filteredVideos = useMemo(() => {
     const favoriteOnly = selectedCategoryKeys.includes('favorites')
     const tagFilters = selectedCategoryKeys.filter(key => key !== 'favorites')
+    if (!favoriteOnly && tagFilters.length === 0 && !normalizedSearchQuery) {
+      return sortedVideos
+    }
     return sortedVideos.filter(v => (
       (!favoriteOnly || favoriteKeys.has(v.favoriteKey || v.fullPath)) &&
       tagFilters.every(categoryKey => videoMatchesCategory(v, categoryKey)) &&

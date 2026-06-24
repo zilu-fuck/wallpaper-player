@@ -14,24 +14,35 @@ function getVideoKey(video) {
   return video?.playbackKey || video?.fullPath || video?.filePath || ''
 }
 
+function getUniqueVideoKeys(list) {
+  const keys = []
+  const seen = new Set()
+  for (const video of Array.isArray(list) ? list : []) {
+    const key = getVideoKey(video)
+    if (!key || seen.has(key)) continue
+    seen.add(key)
+    keys.push(key)
+  }
+  return keys
+}
+
 function pathKey(filePath) {
   return String(filePath || '').replace(/\\/g, '/').toLowerCase()
 }
 
-function findVideoIndex(list, video) {
-  if (!Array.isArray(list) || !video) return -1
-  const key = getVideoKey(video)
-  const file = pathKey(video.fullPath || video.filePath)
-  return list.findIndex(item => (
-    getVideoKey(item) === key ||
-    pathKey(item?.fullPath || item?.filePath) === file
-  ))
+function createVideoIndex(list) {
+  const index = new Map()
+  for (const video of Array.isArray(list) ? list : []) {
+    const key = getVideoKey(video)
+    const file = pathKey(video.fullPath || video.filePath)
+    if (key && !index.has(key)) index.set(key, video)
+    if (file && !index.has(file)) index.set(file, video)
+  }
+  return index
 }
 
-function stableShuffle(list) {
-  return [...list].sort((a, b) => {
-    const ak = getVideoKey(a)
-    const bk = getVideoKey(b)
+function stableShuffleKeys(keys) {
+  return [...keys].sort((ak, bk) => {
     let ah = 2166136261
     let bh = 2166136261
     for (let i = 0; i < ak.length; i++) ah = Math.imul(ah ^ ak.charCodeAt(i), 16777619)
@@ -41,9 +52,17 @@ function stableShuffle(list) {
   })
 }
 
-function orderQueueForMode(list, playbackMode) {
-  const source = Array.isArray(list) ? list : []
-  return playbackMode === 'shuffle' ? stableShuffle(source) : source
+function orderQueueKeysForMode(list, playbackMode) {
+  const keys = getUniqueVideoKeys(list)
+  return playbackMode === 'shuffle' ? stableShuffleKeys(keys) : keys
+}
+
+function keyMatchesPath(key, filePath) {
+  const normalizedPath = pathKey(filePath)
+  return Boolean(normalizedPath) && (
+    key === normalizedPath ||
+    pathKey(key) === normalizedPath
+  )
 }
 
 function createStandaloneVideo(filePath) {
@@ -71,50 +90,62 @@ function isSupportedVideoPath(filePath) {
   return SUPPORTED_EXTENSIONS.has(ext)
 }
 
-export function usePlayer({ queueVideos = [], playbackMode = 'order' } = {}) {
+export function usePlayer({ queueVideos = [], videoSource = queueVideos, playbackMode = 'order' } = {}) {
   const [playingVideo, setPlayingVideo] = useState(null)
   const [playerError, setPlayerError] = useState('')
-  const [mpvState, setMpvState] = useState(null)
-  const [sessionQueueVideos, setSessionQueueVideos] = useState(null)
-  const mpvStateRef = useRef(null)
+  const [currentPlaybackPath, setCurrentPlaybackPath] = useState('')
+  const [sessionQueueKeys, setSessionQueueKeys] = useState(null)
   const playerCommandTargetRef = useRef(null)
+  const videoIndex = useMemo(() => createVideoIndex(videoSource), [videoSource])
+  const sourceQueueKeys = useMemo(() => (
+    orderQueueKeysForMode(queueVideos, playbackMode)
+  ), [queueVideos, playbackMode])
+  const activeQueueKeys = useMemo(() => (
+    Array.isArray(sessionQueueKeys) ? sessionQueueKeys : sourceQueueKeys
+  ), [sessionQueueKeys, sourceQueueKeys])
 
-  const queue = useMemo(() => {
-    if (Array.isArray(sessionQueueVideos)) return sessionQueueVideos
-    return orderQueueForMode(queueVideos, playbackMode)
-  }, [queueVideos, playbackMode, sessionQueueVideos])
+  const resolveQueueVideoAt = useCallback((index) => {
+    const key = activeQueueKeys[index]
+    if (!key) return null
+    const indexedVideo = videoIndex.get(key) || videoIndex.get(pathKey(key))
+    if (indexedVideo) return indexedVideo
+    if (playingVideo && (getVideoKey(playingVideo) === key || keyMatchesPath(key, playingVideo.fullPath || playingVideo.filePath))) {
+      return playingVideo
+    }
+    return null
+  }, [activeQueueKeys, playingVideo, videoIndex])
 
   const queueIndex = useMemo(() => {
     if (!playingVideo) return -1
-    if (mpvState?.filePath) {
-      const currentPath = pathKey(mpvState.filePath)
-      const byPath = queue.findIndex(item => pathKey(item?.fullPath || item?.filePath) === currentPath)
+    if (currentPlaybackPath) {
+      const currentPath = pathKey(currentPlaybackPath)
+      const byPath = activeQueueKeys.findIndex(key => {
+        if (key === currentPath || pathKey(key) === currentPath) return true
+        const video = videoIndex.get(key) || videoIndex.get(pathKey(key))
+        return pathKey(video?.fullPath || video?.filePath) === currentPath
+      })
       if (byPath >= 0) return byPath
     }
     const currentKey = getVideoKey(playingVideo)
-    return queue.findIndex(item => getVideoKey(item) === currentKey)
-  }, [mpvState?.filePath, queue, playingVideo])
+    return activeQueueKeys.findIndex(key => key === currentKey || pathKey(key) === pathKey(currentKey))
+  }, [activeQueueKeys, currentPlaybackPath, playingVideo, videoIndex])
 
-  const activeQueue = useMemo(() => {
-    if (!playingVideo) return queue
-    if (queueIndex >= 0) return queue
-    return [playingVideo]
-  }, [queue, playingVideo, queueIndex])
+  const queueLength = playingVideo && queueIndex < 0 ? 1 : activeQueueKeys.length
 
   const handlePlay = useCallback((video, options = {}) => {
     if (!video) return null
     const nextPlaybackMode = options.playbackMode ||
       (options.preserveQueueOrder ? playingVideo?.playOptions?.playbackMode : null) ||
       playbackMode
-    let queueVideosForPlayback = null
-    if (Array.isArray(options.queueVideos)) {
-      queueVideosForPlayback = options.preserveQueueOrder
-        ? options.queueVideos
-        : orderQueueForMode(options.queueVideos, nextPlaybackMode)
-      setSessionQueueVideos(queueVideosForPlayback)
+    if (Array.isArray(options.queueKeys)) {
+      setSessionQueueKeys([...new Set(options.queueKeys.filter(Boolean))])
+    } else if (Array.isArray(options.queueVideos)) {
+      const nextQueueKeys = options.preserveQueueOrder
+        ? getUniqueVideoKeys(options.queueVideos)
+        : orderQueueKeysForMode(options.queueVideos, nextPlaybackMode)
+      setSessionQueueKeys(nextQueueKeys)
     } else if (options.queueVideos === null) {
-      queueVideosForPlayback = [video]
-      setSessionQueueVideos(queueVideosForPlayback)
+      setSessionQueueKeys([getVideoKey(video)].filter(Boolean))
     }
 
     const nextVideo = {
@@ -122,13 +153,11 @@ export function usePlayer({ queueVideos = [], playbackMode = 'order' } = {}) {
       playbackToken: makeToken(),
       playOptions: {
         resume: options.resume !== false,
-        queueVideos: queueVideosForPlayback,
-        playbackMode: nextPlaybackMode,
-        playlistIndex: queueVideosForPlayback ? findVideoIndex(queueVideosForPlayback, video) : 0
+        playbackMode: nextPlaybackMode
       }
     }
     setPlayerError('')
-    setMpvState(null)
+    setCurrentPlaybackPath(video.fullPath || video.filePath || '')
     setPlayingVideo(nextVideo)
     return nextVideo
   }, [playbackMode, playingVideo?.playOptions?.playbackMode])
@@ -173,8 +202,8 @@ export function usePlayer({ queueVideos = [], playbackMode = 'order' } = {}) {
   const handleClosePlayer = useCallback(() => {
     setPlayingVideo(null)
     setPlayerError('')
-    setMpvState(null)
-    setSessionQueueVideos(null)
+    setCurrentPlaybackPath('')
+    setSessionQueueKeys(null)
   }, [])
 
   const handleStopPlayback = useCallback(() => {
@@ -197,10 +226,12 @@ export function usePlayer({ queueVideos = [], playbackMode = 'order' } = {}) {
         window.electronAPI?.mpvSeekRelative?.(value ?? 5)
         break
       case 'volume-up':
-        window.electronAPI?.mpvSetVolume?.(Math.min(100, (mpvStateRef.current?.volume ?? 100) + (value ?? 5)))
+        window.electronAPI?.mpvGetState?.()
+          ?.then(state => window.electronAPI?.mpvSetVolume?.(Math.min(100, (state?.volume ?? 100) + (value ?? 5))))
         break
       case 'volume-down':
-        window.electronAPI?.mpvSetVolume?.(Math.max(0, (mpvStateRef.current?.volume ?? 100) - (value ?? 5)))
+        window.electronAPI?.mpvGetState?.()
+          ?.then(state => window.electronAPI?.mpvSetVolume?.(Math.max(0, (state?.volume ?? 100) - (value ?? 5))))
         break
       case 'mute':
         window.electronAPI?.mpvToggleMute?.()
@@ -214,24 +245,28 @@ export function usePlayer({ queueVideos = [], playbackMode = 'order' } = {}) {
   }, [])
 
   const handleNext = useCallback(() => {
-    if (!activeQueue.length || queueIndex < 0) return null
-    const nextVideo = activeQueue[queueIndex + 1]
+    if (!queueLength || queueIndex < 0) return null
+    const nextVideo = resolveQueueVideoAt(queueIndex + 1)
     if (!nextVideo) return null
-    return handlePlay(nextVideo, { queueVideos: activeQueue, preserveQueueOrder: true })
-  }, [activeQueue, queueIndex, handlePlay])
+    return handlePlay(nextVideo, { queueKeys: activeQueueKeys, preserveQueueOrder: true })
+  }, [activeQueueKeys, handlePlay, queueIndex, queueLength, resolveQueueVideoAt])
 
   const handlePrev = useCallback(() => {
-    if (!activeQueue.length || queueIndex < 0) return null
-    const prevVideo = activeQueue[queueIndex - 1]
+    if (!queueLength || queueIndex < 0) return null
+    const prevVideo = resolveQueueVideoAt(queueIndex - 1)
     if (!prevVideo) return null
-    return handlePlay(prevVideo, { queueVideos: activeQueue, preserveQueueOrder: true })
-  }, [activeQueue, queueIndex, handlePlay])
+    return handlePlay(prevVideo, { queueKeys: activeQueueKeys, preserveQueueOrder: true })
+  }, [activeQueueKeys, handlePlay, queueIndex, queueLength, resolveQueueVideoAt])
 
   const handleReplayCurrent = useCallback(() => {
-    const currentVideo = queueIndex >= 0 ? activeQueue[queueIndex] : playingVideo
+    const currentVideo = queueIndex >= 0 ? resolveQueueVideoAt(queueIndex) : playingVideo
     if (!currentVideo) return null
-    return handlePlay(currentVideo, { resume: false, queueVideos: activeQueue, preserveQueueOrder: true })
-  }, [activeQueue, handlePlay, playingVideo, queueIndex])
+    return handlePlay(currentVideo, {
+      resume: false,
+      queueKeys: queueIndex >= 0 ? activeQueueKeys : [getVideoKey(currentVideo)].filter(Boolean),
+      preserveQueueOrder: true
+    })
+  }, [activeQueueKeys, handlePlay, playingVideo, queueIndex, resolveQueueVideoAt])
 
   const handleAdvanceFromEnd = useCallback(() => {
     if (!playingVideo) return null
@@ -243,21 +278,18 @@ export function usePlayer({ queueVideos = [], playbackMode = 'order' } = {}) {
       handleClosePlayer()
       return null
     }
-    const next = activeQueue[queueIndex + 1]
+    const next = resolveQueueVideoAt(queueIndex + 1)
     if (!next) {
       handleClosePlayer()
       return null
     }
-    return handlePlay(next, { queueVideos: activeQueue, preserveQueueOrder: true })
-  }, [activeQueue, handleClosePlayer, handlePlay, handleReplayCurrent, playbackMode, playingVideo, queueIndex])
-
-  useEffect(() => {
-    mpvStateRef.current = mpvState
-  }, [mpvState])
+    return handlePlay(next, { queueKeys: activeQueueKeys, preserveQueueOrder: true })
+  }, [activeQueueKeys, handleClosePlayer, handlePlay, handleReplayCurrent, playbackMode, playingVideo, queueIndex, resolveQueueVideoAt])
 
   useEffect(() => {
     const removeState = window.electronAPI?.onMpvState?.((state) => {
-      setMpvState(state)
+      const nextPath = state?.filePath || ''
+      setCurrentPlaybackPath(current => current === nextPath ? current : nextPath)
     })
 
     const removeEnded = window.electronAPI?.onMpvEnded?.((data) => {
@@ -331,12 +363,11 @@ export function usePlayer({ queueVideos = [], playbackMode = 'order' } = {}) {
 
   return {
     playingVideo,
-    mpvState,
     playerError,
     setPlayerError,
-    queue: activeQueue,
+    queue: activeQueueKeys,
     queueIndex,
-    queueLength: activeQueue.length,
+    queueLength,
     handlePlay,
     handlePlayPath,
     handleOpenFile,

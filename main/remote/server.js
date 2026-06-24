@@ -9,13 +9,13 @@ const {
 const { isPathInside } = require('../paths')
 const { getPathForVideoId } = require('./video-index')
 const { sendError } = require('./http-utils')
-const { createAnalysisHandlers } = require('./handlers/analysis')
 const { createDesktopHandlers } = require('./handlers/desktop')
 const { createInfoHandlers } = require('./handlers/info')
 const { createLibraryHandlers } = require('./handlers/library')
 const { createMediaHandlers } = require('./handlers/media')
 const { createTagsHandlers } = require('./handlers/tags')
 const { createTranscodeHandlers } = require('./handlers/transcode')
+const { pluginRegistry } = require('../plugins')
 
 const AUTH_FAILURE_WINDOW_MS = 60 * 1000
 const AUTH_FAILURE_LIMIT = 12
@@ -132,10 +132,6 @@ function createRemoteServer({ port, onPairingRequest } = {}) {
     handleTranscodedStream
   } = createTranscodeHandlers({ resolveVideoPath })
   const {
-    handleGetVideoAnalysis,
-    handleStartVideoAnalysis
-  } = createAnalysisHandlers({ resolveVideoPath })
-  const {
     handleGetPlayback,
     handlePutPlayback,
     handleToggleFavorite,
@@ -235,19 +231,6 @@ function createRemoteServer({ port, onPairingRequest } = {}) {
         return
       }
 
-      const analysisMatch = pathname.match(/^\/v1\/videos\/([^/]+)\/analysis$/)
-      if (analysisMatch) {
-        const videoId = decodeVideoId(analysisMatch[1])
-        if (req.method === 'GET') {
-          await handleGetVideoAnalysis(req, res, videoId)
-          return
-        }
-        if (req.method === 'POST') {
-          await handleStartVideoAnalysis(req, res, videoId)
-          return
-        }
-      }
-
       const transcodedStreamMatch = pathname.match(/^\/v1\/videos\/([^/]+)\/transcoded-stream$/)
       if (transcodedStreamMatch && (req.method === 'GET' || req.method === 'HEAD')) {
         await handleTranscodedStream(req, res, decodeVideoId(transcodedStreamMatch[1]))
@@ -293,6 +276,18 @@ function createRemoteServer({ port, onPairingRequest } = {}) {
       const desktopRevealMatch = pathname.match(/^\/v1\/videos\/([^/]+)\/reveal-on-desktop$/)
       if (desktopRevealMatch && req.method === 'POST') {
         await handleRevealOnDesktop(req, res, decodeVideoId(desktopRevealMatch[1]))
+        return
+      }
+
+      const pluginRoute = pluginRegistry.matchRemoteRoute(req.method, pathname)
+      if (pluginRoute) {
+        await pluginRoute.route.handler(req, res, {
+          params: pluginRoute.params,
+          url,
+          port,
+          getRequestToken,
+          resolveVideoPath
+        })
         return
       }
 

@@ -8,7 +8,7 @@ const { getAllowedVideoDirectories, setDirectoryChangeHandler, isSessionAllowedF
 const { getCachedVideoMetadata, warmVideoMetadataCache } = require('./video-metadata')
 
 const fallbackUserDataDir = path.join(process.cwd(), '.tmp-wallpaper-player')
-const SCAN_INDEX_VERSION = 1
+const SCAN_INDEX_VERSION = 2
 
 // ─── 目录扫描缓存 + 文件监听 ──────────────────────────
 // 缓存：key=pathKey(dirPath) → { videos, scannedAt, dirMtime }
@@ -16,7 +16,9 @@ const SCAN_INDEX_VERSION = 1
 const directoryScanCache = new Map()
 const directoryWatchers = new Map() // key=pathKey(dirPath) → fs.FSWatcher
 const backgroundScanRefreshes = new Map()
+const workshopManifestCache = new Map()
 const R18_TAG = 'R18'
+const SCAN_METADATA_WARM_LIMIT = 24
 
 function getUserDataDir() {
   try {
@@ -59,7 +61,7 @@ async function saveScanIndex(dirPath, videos) {
     if (!video?.fullPath) continue
     entries[pathKey(video.fullPath)] = {
       size: Number(video.size) || 0,
-      modified: Math.round(Number(video.modified) || 0),
+      modified: Math.round(Number(video.fileModified || video.modified) || 0),
       video
     }
   }
@@ -109,6 +111,44 @@ function unwatchAllDirectories() {
     try { watcher.close() } catch {}
   }
   directoryWatchers.clear()
+}
+
+function getWorkshopManifestPath(dirPath) {
+  const resolved = path.resolve(dirPath)
+  const parts = resolved.split(path.sep)
+  const contentIndex = parts.findIndex((part, index) => (
+    part.toLowerCase() === 'content' &&
+    parts[index - 1]?.toLowerCase() === 'workshop' &&
+    /^\d+$/.test(parts[index + 1] || '')
+  ))
+  if (contentIndex < 1) return ''
+
+  const appId = parts[contentIndex + 1]
+  return path.join(parts.slice(0, contentIndex).join(path.sep), `appworkshop_${appId}.acf`)
+}
+
+async function loadWorkshopManifest(manifestPath) {
+  if (!manifestPath) return null
+  const cached = workshopManifestCache.get(manifestPath)
+  try {
+    const stats = await fsp.stat(manifestPath)
+    if (cached && cached.mtimeMs === stats.mtimeMs) return cached.items
+
+    const raw = await fsp.readFile(manifestPath, 'utf-8')
+    const items = new Map()
+    const itemPattern = /"(\d+)"\s*\{([\s\S]*?)\n\s*\}/g
+    let match
+    while ((match = itemPattern.exec(raw))) {
+      const timeMatch = match[2].match(/"timeupdated"\s*"(\d+)"/)
+      if (timeMatch) items.set(match[1], Number(timeMatch[1]) * 1000)
+    }
+
+    workshopManifestCache.set(manifestPath, { mtimeMs: stats.mtimeMs, items })
+    return items
+  } catch {
+    workshopManifestCache.delete(manifestPath)
+    return null
+  }
 }
 
 // 目录列表变化时清理被移除目录的缓存 + watcher
@@ -162,7 +202,7 @@ async function assertAllowedVideoPath(filePath) {
 }
 
 // ─── Wallpaper Engine 元数据 ───────────────────────────
-async function readWallpaperMetadata(dirPath) {
+async function readWallpaperMetadata(dirPath, workshopManifest = null) {
   try {
     const projectPath = path.join(dirPath, 'project.json')
     const raw = await fsp.readFile(projectPath, 'utf-8')
@@ -172,6 +212,7 @@ async function readWallpaperMetadata(dirPath) {
       tags.push(R18_TAG)
     }
     const workshopId = project.workshopid ? String(project.workshopid) : path.basename(dirPath)
+    const workshopUpdatedAt = Number(workshopManifest?.get(workshopId)) || 0
     const wallpaperDir = path.resolve(dirPath)
     const previewPath = typeof project.preview === 'string' && project.preview.trim()
       ? path.resolve(dirPath, project.preview)
@@ -189,6 +230,7 @@ async function readWallpaperMetadata(dirPath) {
       file: typeof project.file === 'string' ? project.file : '',
       previewPath: safePreviewPath,
       workshopId,
+      workshopUpdatedAt,
       workshopUrl: typeof project.workshopurl === 'string' ? project.workshopurl : ''
     }
   } catch {
@@ -270,15 +312,17 @@ function createVideoRecord({ fullPath, entryName, dirPath, baseDir, stats, metad
     fullPath,
     extension: path.extname(entryName).toLowerCase(),
     size: stats.size,
-    modified: stats.mtimeMs,
+    modified: metadata?.workshopUpdatedAt || stats.mtimeMs,
+    fileModified: stats.mtimeMs,
     group: metadata?.tags?.[0] || group,
     tags: metadata?.tags || [],
     wallpaperType: metadata?.type || '',
     previewPath: metadata?.previewPath || null,
     workshopId,
+    workshopUpdatedAt: metadata?.workshopUpdatedAt || 0,
     workshopUrl: metadata?.workshopUrl || '',
     favoriteKey,
-    description: metadata?.description || '',
+    description: typeof metadata?.description === 'string' ? metadata.description.slice(0, 300) : '',
     media: getCachedVideoMetadata(fullPath, {
       size: stats.size,
       mtimeMs: Math.round(stats.mtimeMs)
@@ -305,7 +349,7 @@ function attachCachedMedia(videos) {
         ...video,
         media: getCachedVideoMetadata(video.fullPath, {
           size: video.size,
-          mtimeMs: Math.round(video.modified)
+          mtimeMs: Math.round(Number(video.fileModified || video.modified) || 0)
         }) || video.media || null
       }))
     : []
@@ -332,7 +376,7 @@ async function getValidatedIndexedVideos(index, resolvedDir) {
         ...video,
         fullPath,
         size: stats.size,
-        modified: stats.mtimeMs
+        fileModified: stats.mtimeMs
       })
     } catch {}
   }
@@ -355,14 +399,21 @@ async function writeScanResult(resolvedDir, cacheKey, videos, options = {}) {
     await saveScanIndex(resolvedDir, videosWithMedia).catch(() => {})
   }
   watchDirectory(resolvedDir)
-  warmVideoMetadataCache(videosWithMedia.map(video => video.fullPath)).catch(() => {})
+  const warmPaths = videosWithMedia
+    .filter(video => !video.media?.available)
+    .slice(0, SCAN_METADATA_WARM_LIMIT)
+    .map(video => video.fullPath)
+  if (warmPaths.length) {
+    warmVideoMetadataCache(warmPaths, { limit: SCAN_METADATA_WARM_LIMIT }).catch(() => {})
+  }
   return videosWithMedia
 }
 
 function refreshScanIndexInBackground(resolvedDir, cacheKey, index) {
   if (backgroundScanRefreshes.has(cacheKey)) return backgroundScanRefreshes.get(cacheKey)
   const refresh = (async () => {
-    const videos = await scanDirectory(resolvedDir, resolvedDir, 0, null, index)
+    const workshopManifest = await loadWorkshopManifest(getWorkshopManifestPath(resolvedDir))
+    const videos = await scanDirectory(resolvedDir, resolvedDir, 0, null, index, workshopManifest)
     await writeScanResult(resolvedDir, cacheKey, videos)
   })()
     .catch(() => {})
@@ -377,11 +428,11 @@ async function waitForBackgroundScanRefreshes() {
   await Promise.all([...backgroundScanRefreshes.values()])
 }
 
-async function scanDirectory(dirPath, baseDir, depth = 0, inheritedMetadata = null, index = null) {
+async function scanDirectory(dirPath, baseDir, depth = 0, inheritedMetadata = null, index = null, workshopManifest = null) {
   const results = []
   if (depth > 8) return results
 
-  const metadata = inheritedMetadata || await readWallpaperMetadata(dirPath)
+  const metadata = inheritedMetadata || await readWallpaperMetadata(dirPath, workshopManifest)
 
   let entries
   try {
@@ -395,7 +446,7 @@ async function scanDirectory(dirPath, baseDir, depth = 0, inheritedMetadata = nu
 
     if (entry.isDirectory()) {
       if (!entry.name.startsWith('.') && entry.name !== 'node_modules') {
-        results.push(...await scanDirectory(fullPath, baseDir, depth + 1, metadata, index))
+        results.push(...await scanDirectory(fullPath, baseDir, depth + 1, metadata, index, workshopManifest))
       }
     } else if (entry.isFile() && isVideoFile(entry.name)) {
       try {
@@ -466,7 +517,8 @@ async function scanWithCache(dirPath, force = false) {
     return { videos, count: videos.length, cached: true, indexed: true, refreshing: true }
   }
 
-  const videos = await scanDirectory(resolvedDir, resolvedDir, 0, null, index)
+  const workshopManifest = await loadWorkshopManifest(getWorkshopManifestPath(resolvedDir))
+  const videos = await scanDirectory(resolvedDir, resolvedDir, 0, null, index, workshopManifest)
   const videosWithMedia = await writeScanResult(resolvedDir, cacheKey, videos)
   return { videos: videosWithMedia, count: videosWithMedia.length }
 }

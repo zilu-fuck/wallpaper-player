@@ -8,10 +8,11 @@ Windows 发布包内置 mpv 和 FFmpeg，普通用户不需要额外安装播放
 
 | 端 | 版本 | 产物 |
 | --- | --- | --- |
-| Windows 电脑端 | `1.2.5` | `release/Wallpaper-Player-Setup-1.2.5.exe`、`release/Wallpaper-Player-1.2.5.exe` |
+| Windows 电脑端 | `1.3.0` | `release/Wallpaper-Player-Setup-1.3.0.exe`、`release/Wallpaper-Player-1.3.0.exe` |
 | Android 手机端 | `0.1.3` | `mobile/dist/wallpaper-player-mobile-0.1.3-arm64-release.apk` |
+| 插件包 | `video-analysis 1.0.0`、`ai-search 0.1.0`、`agent-bridge 0.1.0` | `release/plugins/*.zip` |
 
-本批更新说明见 [release-notes/v1.2.5.md](release-notes/v1.2.5.md)，开发记录见 [docs/dev-log-v1.2.5.md](docs/dev-log-v1.2.5.md)。
+本批更新说明见 [release-notes/v1.3.0.md](release-notes/v1.3.0.md)，开发记录见 [docs/dev-log-v1.3.0.md](docs/dev-log-v1.3.0.md)。
 
 ## 主要功能
 
@@ -28,7 +29,8 @@ Windows 发布包内置 mpv 和 FFmpeg，普通用户不需要额外安装播放
 - 支持电脑端和手机端多选视频后批量添加标签，并可复用已有标签。
 - 支持电脑端移除绑定设备和多设备管理基础流程。
 - 支持隐私目录，默认从电脑端侧栏和手机端远程库中隐藏。
-- 支持电脑端视频理解分析，并可在手机端查看电脑端生成的分析进度、结果和标签。
+- 支持插件管理，插件可贡献 IPC、远程路由、设置 schema 和生命周期。
+- 视频理解、AI 搜索、Agent Bridge 以插件形式分发；视频理解插件可在电脑端分析视频，并可在手机端查看分析进度、结果和标签。
 - 手机端未连接电脑前也可检查 APK 更新，并可在播放器设置中选择黑色或封面背景。
 
 ## 支持的视频格式
@@ -44,13 +46,14 @@ Windows 发布包内置 mpv 和 FFmpeg，普通用户不需要额外安装播放
 
 ## 安装和绑定
 
-1. 在电脑上安装或运行 `release/Wallpaper-Player-Setup-1.2.5.exe` / `release/Wallpaper-Player-1.2.5.exe`。
+1. 在电脑上安装或运行 `release/Wallpaper-Player-Setup-1.3.0.exe` / `release/Wallpaper-Player-1.3.0.exe`。
 2. 打开电脑端，添加视频目录。
-3. 在电脑端设置中打开手机访问功能。
-4. 在 Android 手机上安装 `mobile/dist/wallpaper-player-mobile-0.1.3-arm64-release.apk`。
-5. 确保手机和电脑在同一局域网内。
-6. 手机端进入绑定页，扫描电脑端二维码或粘贴绑定码。
-7. 绑定完成后进入手机端视频库，选择视频开始播放。
+3. 如需视频理解、AI 搜索或 Agent Bridge，在电脑端设置的“插件管理”中安装对应 `release/plugins/*.zip` 插件包，再启用插件。
+4. 在电脑端设置中打开手机访问功能。
+5. 在 Android 手机上安装 `mobile/dist/wallpaper-player-mobile-0.1.3-arm64-release.apk`。
+6. 确保手机和电脑在同一局域网内。
+7. 手机端进入绑定页，扫描电脑端二维码或粘贴绑定码。
+8. 绑定完成后进入手机端视频库，选择视频开始播放。
 
 如果电脑开了 VPN 或代理，局域网访问可能受到影响。遇到手机连不上时，先确认电脑端显示的局域网 IP、Windows 防火墙、VPN 代理模式和手机 Wi-Fi 是否一致。
 
@@ -108,7 +111,13 @@ npm run prepare-vendor
 npm run dist:win
 ```
 
-最终文件会输出到 `release/`。`dist:win` 会把项目复制到纯 ASCII 临时目录再打包，用来规避中文路径导致的 Electron Builder / NSIS 路径解析问题。
+最终文件会输出到 `release/`，插件包会输出到 `release/plugins/`。`dist:win` 会把项目复制到纯 ASCII 临时目录再打包，用来规避中文路径导致的 Electron Builder / NSIS 路径解析问题。
+
+只生成插件包：
+
+```powershell
+npm run pack:plugins
+```
 
 Android APK 构建建议在纯 ASCII 路径下执行 Expo prebuild 和 Gradle，避免中文路径触发 autolinking JSON 路径转义问题。当前生成 APK 输出到：
 
@@ -123,6 +132,11 @@ npm run verify:mobile-lan
 npm run verify:remote-library
 npm run verify:video-metadata
 npm run verify:remote-pressure
+npm run verify:plugins
+npm run verify:plugin-official
+npm run verify:plugin-video
+npm run verify:plugin-external
+npm run verify:plugin-package
 cd mobile
 npm run typecheck
 ```
@@ -135,6 +149,7 @@ npm run typecheck
 .
 |-- main.js                  # Electron 入口
 |-- main/                    # 主进程、IPC、远程访问服务
+|-- main/plugins/            # 插件注册表、加载器和官方插件源码
 |-- main/remote/             # 手机端局域网访问、绑定、转码、视频索引
 |-- mpv.js                   # mpv 进程和嵌入管理
 |-- preload.js               # 安全的渲染进程桥
@@ -151,6 +166,8 @@ npm run typecheck
 ## 文档
 
 - [移动端和远程访问方案](docs/mobile-client-remote-access-plan.md)
+- [1.3.0 更新说明](release-notes/v1.3.0.md)
+- [1.3.0 更新记录](docs/dev-log-v1.3.0.md)
 - [1.2.5 更新说明](release-notes/v1.2.5.md)
 - [1.2.5 更新记录](docs/dev-log-v1.2.5.md)
 - [移动端真机 QA 清单](docs/mobile-real-device-qa.md)

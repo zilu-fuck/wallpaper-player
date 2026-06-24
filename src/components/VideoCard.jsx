@@ -1,5 +1,43 @@
-import { memo, useState, useRef, useEffect, useCallback, useMemo } from 'react'
+import { memo, useState, useRef, useEffect, useCallback, useMemo, useLayoutEffect } from 'react'
+import { createPortal } from 'react-dom'
 import { useApp } from '../context/AppContext'
+
+const THUMBNAIL_LOAD_DELAY_MS = 160
+const METADATA_LOAD_DELAY_MS = 240
+const CARD_MENU_MARGIN = 8
+const CARD_MENU_OFFSET = 8
+const CARD_MENU_FALLBACK_WIDTH = 230
+const CARD_MENU_FALLBACK_HEIGHT = 190
+const metadataRequestStates = new Map()
+const pendingMetadataUpdates = new Map()
+let metadataUpdateTimer = null
+const METADATA_REQUEST_STATE_LIMIT = 2000
+
+function rememberMetadataState(filePath, state) {
+  metadataRequestStates.set(filePath, state)
+  if (metadataRequestStates.size <= METADATA_REQUEST_STATE_LIMIT) return
+  for (const key of metadataRequestStates.keys()) {
+    if (metadataRequestStates.get(key) === 'pending') continue
+    metadataRequestStates.delete(key)
+    if (metadataRequestStates.size <= METADATA_REQUEST_STATE_LIMIT) break
+  }
+}
+
+function scheduleMetadataUpdate(setVideos, filePath, media) {
+  pendingMetadataUpdates.set(filePath, media)
+  if (metadataUpdateTimer) return
+
+  metadataUpdateTimer = window.setTimeout(() => {
+    const updates = new Map(pendingMetadataUpdates)
+    pendingMetadataUpdates.clear()
+    metadataUpdateTimer = null
+
+    setVideos(current => current.map(item => {
+      const nextMedia = updates.get(item.fullPath)
+      return nextMedia ? { ...item, media: nextMedia } : item
+    }))
+  }, 120)
+}
 
 function formatFileSize(bytes) {
   if (bytes === 0) return '0 B'
@@ -49,6 +87,8 @@ function VideoCard({
 }) {
   const {
     settings,
+    plugins,
+    pluginsLoaded,
     thumbnails,
     favoriteKeys,
     handlePlay,
@@ -56,6 +96,7 @@ function VideoCard({
     handleOpenInFolder,
     handleOpenTagEditor,
     queueVideoAnalysis,
+    setVideos,
     selectedVideoKeys,
     selectedVideoKeySet,
     handleToggleVideoSelection,
@@ -66,8 +107,11 @@ function VideoCard({
   const [imgError, setImgError] = useState(false)
   const [visible, setVisible] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
+  const [menuPosition, setMenuPosition] = useState(null)
   const [thumbUrl, setThumbUrl] = useState(null)
   const cardRef = useRef(null)
+  const actionsRef = useRef(null)
+  const menuRef = useRef(null)
   const displayMeta = useMemo(() => getDisplayMeta(video), [video])
   const animationDelay = useMemo(() => `${(index % 20) * 30}ms`, [index])
   const thumbnail = thumbnails[video.fullPath]
@@ -75,7 +119,9 @@ function VideoCard({
   const videoKey = video.favoriteKey || video.fullPath
   const isSelected = selectedVideoKeySet?.has(videoKey)
   const selectionActive = (selectedVideoKeys?.length || 0) > 0
-  const videoAnalysisEnabled = Boolean(settings?.videoAnalysis?.enabled)
+  const videoAnalysisPlugin = plugins?.find?.(plugin => plugin.id === 'video-analysis')
+  const videoAnalysisEnabled = Boolean(pluginsLoaded && videoAnalysisPlugin?.enabled && settings?.videoAnalysis?.enabled)
+  const mediaMissing = !video.media?.available
 
   // 懒加载：只有卡片进入视口时才加载缩略图
   useEffect(() => {
@@ -89,7 +135,7 @@ function VideoCard({
           observer.unobserve(el)
         }
       },
-      { rootMargin: '200px' }
+      { rootMargin: '32px' }
     )
 
     observer.observe(el)
@@ -149,16 +195,87 @@ function VideoCard({
     handleSelectOnlyVideo?.(video)
   }, [video, handleSelectOnlyVideo])
 
+  const updateMenuPosition = useCallback(() => {
+    const anchor = actionsRef.current
+    if (!anchor) return
+
+    const rect = anchor.getBoundingClientRect()
+    const menu = menuRef.current
+    const width = menu?.offsetWidth || CARD_MENU_FALLBACK_WIDTH
+    const height = menu?.offsetHeight || CARD_MENU_FALLBACK_HEIGHT
+    const viewportWidth = window.innerWidth || document.documentElement.clientWidth
+    const viewportHeight = window.innerHeight || document.documentElement.clientHeight
+    const maxLeft = Math.max(CARD_MENU_MARGIN, viewportWidth - width - CARD_MENU_MARGIN)
+    const left = Math.round(Math.min(Math.max(CARD_MENU_MARGIN, rect.right - width), maxLeft))
+    const belowTop = rect.bottom + CARD_MENU_OFFSET
+    const aboveTop = rect.top - height - CARD_MENU_OFFSET
+    const top = Math.round(
+      belowTop + height <= viewportHeight - CARD_MENU_MARGIN
+        ? belowTop
+        : Math.max(CARD_MENU_MARGIN, aboveTop)
+    )
+
+    setMenuPosition(current => (
+      current?.left === left && current?.top === top ? current : { left, top }
+    ))
+  }, [])
+
+  useLayoutEffect(() => {
+    if (!menuOpen) {
+      setMenuPosition(null)
+      return
+    }
+    updateMenuPosition()
+  }, [menuOpen, updateMenuPosition])
+
   useEffect(() => {
     if (!menuOpen) return
 
     const closeMenu = () => setMenuOpen(false)
+    const handleKeyDown = (event) => {
+      if (event.key === 'Escape') closeMenu()
+    }
     window.addEventListener('click', closeMenu)
-    return () => window.removeEventListener('click', closeMenu)
+    window.addEventListener('resize', closeMenu)
+    window.addEventListener('scroll', closeMenu, true)
+    window.addEventListener('keydown', handleKeyDown)
+    return () => {
+      window.removeEventListener('click', closeMenu)
+      window.removeEventListener('resize', closeMenu)
+      window.removeEventListener('scroll', closeMenu, true)
+      window.removeEventListener('keydown', handleKeyDown)
+    }
   }, [menuOpen])
 
+  const cardMenu = menuOpen ? createPortal(
+    <div
+      ref={menuRef}
+      className="card-menu"
+      role="menu"
+      style={menuPosition ? { left: menuPosition.left, top: menuPosition.top } : undefined}
+      onClick={e => e.stopPropagation()}
+    >
+      <button
+        type="button"
+        onClick={handleAnalyzeVideo}
+        role="menuitem"
+        disabled={!videoAnalysisEnabled}
+        title={videoAnalysisEnabled ? '分析当前视频' : '请先在设置中启用视频理解'}
+      >
+        分析当前视频
+      </button>
+      <button type="button" onClick={handleOpenInFolderClick} role="menuitem">在资源管理器中打开视频所在位置</button>
+      <button type="button" onClick={handleEditTags} role="menuitem">自定义标签</button>
+      <button type="button" onClick={handleToggleSelectionClick} role="menuitem">
+        {isSelected ? '取消选择' : '加入多选'}
+      </button>
+      <button type="button" onClick={handleSelectOnlyClick} role="menuitem">从这个视频开始多选</button>
+    </div>,
+    document.querySelector('.app') || document.body
+  ) : null
+
   const actionsMenu = (
-    <div className="card-actions" onClick={e => e.stopPropagation()}>
+    <div ref={actionsRef} className="card-actions" onClick={e => e.stopPropagation()}>
       <button
         className={`card-menu-btn${menuOpen ? ' active' : ''}`}
         onClick={handleMenuClick}
@@ -171,25 +288,7 @@ function VideoCard({
           <circle cx="19" cy="12" r="1.8" />
         </svg>
       </button>
-      {menuOpen && (
-        <div className="card-menu" role="menu">
-          <button
-            type="button"
-            onClick={handleAnalyzeVideo}
-            role="menuitem"
-            disabled={!videoAnalysisEnabled}
-            title={videoAnalysisEnabled ? '分析当前视频' : '请先在设置中启用视频理解'}
-          >
-            分析当前视频
-          </button>
-          <button type="button" onClick={handleOpenInFolderClick} role="menuitem">在资源管理器中打开视频所在位置</button>
-          <button type="button" onClick={handleEditTags} role="menuitem">自定义标签</button>
-          <button type="button" onClick={handleToggleSelectionClick} role="menuitem">
-            {isSelected ? '取消选择' : '加入多选'}
-          </button>
-          <button type="button" onClick={handleSelectOnlyClick} role="menuitem">从这个视频开始多选</button>
-        </div>
-      )}
+      {cardMenu}
     </div>
   )
 
@@ -199,18 +298,59 @@ function VideoCard({
     setImgError(false)
     setThumbUrl(null)
 
-    if (!visible || !thumbnail) return () => { canceled = true }
+    if (!visible || !video.fullPath) return () => { canceled = true }
 
-    window.electronAPI?.getThumbnailUrl(thumbnail)
-      .then((url) => {
+    async function loadThumbnail() {
+      try {
+        const thumbnailPath = thumbnail || (await window.electronAPI?.generateThumbnail?.(video.fullPath))?.thumbPath
+        if (!thumbnailPath) throw new Error('thumbnail unavailable')
+        const url = await window.electronAPI?.getThumbnailUrl(thumbnailPath)
         if (!canceled) setThumbUrl(url)
-      })
-      .catch(() => {
+      } catch {
         if (!canceled) setImgError(true)
-      })
+      }
+    }
 
-    return () => { canceled = true }
-  }, [thumbnail, visible])
+    const loadTimer = window.setTimeout(loadThumbnail, THUMBNAIL_LOAD_DELAY_MS)
+
+    return () => {
+      canceled = true
+      window.clearTimeout(loadTimer)
+    }
+  }, [thumbnail, video.fullPath, visible])
+
+  useEffect(() => {
+    if (!visible || !mediaMissing || !video.fullPath || !window.electronAPI?.getVideoMetadata || !setVideos) return undefined
+    if (metadataRequestStates.has(video.fullPath)) return undefined
+
+    let requestStarted = false
+    rememberMetadataState(video.fullPath, 'pending')
+    async function loadMetadata() {
+      requestStarted = true
+      try {
+        const result = await window.electronAPI.getVideoMetadata(video.fullPath)
+        if (result?.success && result.media?.available) {
+          rememberMetadataState(video.fullPath, 'resolved')
+          scheduleMetadataUpdate(setVideos, video.fullPath, result.media)
+          return
+        }
+        metadataRequestStates.delete(video.fullPath)
+      } catch {}
+      finally {
+        if (metadataRequestStates.get(video.fullPath) === 'pending') {
+          metadataRequestStates.delete(video.fullPath)
+        }
+      }
+    }
+
+    const loadTimer = window.setTimeout(loadMetadata, METADATA_LOAD_DELAY_MS + (index % 12) * 40)
+    return () => {
+      window.clearTimeout(loadTimer)
+      if (!requestStarted && metadataRequestStates.get(video.fullPath) === 'pending') {
+        metadataRequestStates.delete(video.fullPath)
+      }
+    }
+  }, [index, mediaMissing, setVideos, video.fullPath, visible])
 
   if (viewMode === 'list') {
     return (

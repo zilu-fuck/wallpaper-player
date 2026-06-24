@@ -90,7 +90,7 @@ function getStatusLabel(status) {
   }
 }
 
-export function useVideoAnalysisTasks({ settings, videos = [] } = {}) {
+export function useVideoAnalysisTasks({ settings, videos = [], plugins = [], pluginsLoaded = false } = {}) {
   const [tasks, setTasks] = useState([])
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [selectedResultTaskId, setSelectedResultTaskId] = useState('')
@@ -98,7 +98,8 @@ export function useVideoAnalysisTasks({ settings, videos = [] } = {}) {
   const [savedResultsMessage, setSavedResultsMessage] = useState('')
   const runningTaskIdRef = useRef('')
   const startingRef = useRef(false)
-  const enabled = Boolean(settings?.videoAnalysis?.enabled)
+  const videoAnalysisPlugin = plugins.find?.(plugin => plugin.id === 'video-analysis')
+  const enabled = Boolean(pluginsLoaded && videoAnalysisPlugin?.enabled && settings?.videoAnalysis?.enabled)
 
   const updateTask = useCallback((taskId, patch) => {
     setTasks(prev => prev.map(task => (

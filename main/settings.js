@@ -12,8 +12,7 @@ const sessionAllowedDirectories = new Set()
 const sessionPrivateDirectories = new Set()
 const sessionAllowedMpvPaths = new Set()
 const sessionAllowedFiles = new Set()
-const sessionAllowedAnalysisResultDirectories = new Set()
-const sessionAllowedAnalysisModelDirectories = new Set()
+const settingsSections = new Map()
 const fallbackUserDataDir = path.join(process.cwd(), '.tmp-wallpaper-player')
 
 let directoryChangeHandler = null
@@ -42,27 +41,6 @@ function getSettingsPath() {
     ? app.getPath('userData')
     : fallbackUserDataDir
   return path.join(baseDir, 'settings.json')
-}
-
-function getDefaultAnalysisResultDirectory() {
-  const baseDir = app?.getPath
-    ? app.getPath('userData')
-    : fallbackUserDataDir
-  return path.join(baseDir, 'analysis-results')
-}
-
-function getDefaultAnalysisModelDirectory() {
-  const baseDir = app?.getPath
-    ? app.getPath('userData')
-    : fallbackUserDataDir
-  return path.join(baseDir, 'analysis-models')
-}
-
-function getDefaultAnalysisRuntimeDirectory() {
-  const baseDir = app?.getPath
-    ? app.getPath('userData')
-    : fallbackUserDataDir
-  return path.join(baseDir, 'video-analysis-runtime')
 }
 
 function normalizeDirectoryList(directories) {
@@ -228,84 +206,120 @@ function normalizeWindowClose(windowClose) {
   }
 }
 
-function normalizeAnalysisLlmProfile(profile) {
-  const value = profile && typeof profile === 'object' && !Array.isArray(profile)
-    ? profile
-    : {}
-  return {
-    llmBaseUrl: typeof value.llmBaseUrl === 'string' ? value.llmBaseUrl : '',
-    llmName: typeof value.llmName === 'string' ? value.llmName : '',
-    llmApiKey: typeof value.llmApiKey === 'string' ? value.llmApiKey : ''
+function normalizePlugins(plugins) {
+  if (!plugins || typeof plugins !== 'object' || Array.isArray(plugins)) {
+    return {}
   }
+
+  return Object.fromEntries(
+    Object.entries(plugins)
+      .filter(([pluginId, state]) => (
+        typeof pluginId === 'string' &&
+        pluginId.trim() &&
+        state &&
+        typeof state === 'object' &&
+        !Array.isArray(state)
+      ))
+      .map(([pluginId, state]) => [
+        pluginId.trim(),
+        {
+          ...(Object.hasOwn(state, 'enabled') ? { enabled: Boolean(state.enabled) } : {}),
+          ...(state.config && typeof state.config === 'object' && !Array.isArray(state.config) ? { config: state.config } : {}),
+          ...(typeof state.installedAt === 'string' ? { installedAt: state.installedAt } : {}),
+          ...(typeof state.updatedAt === 'string' ? { updatedAt: state.updatedAt } : {})
+        }
+      ])
+  )
 }
 
-function normalizeAnalysisLlmProfiles(profiles) {
-  const value = profiles && typeof profiles === 'object' && !Array.isArray(profiles)
-    ? profiles
-    : {}
-  return {
-    local: normalizeAnalysisLlmProfile(value.local),
-    api: normalizeAnalysisLlmProfile(value.api)
-  }
-}
-
-function mergeAnalysisLlmProfile(currentProfile, nextProfile) {
-  const current = normalizeAnalysisLlmProfile(currentProfile)
-  const next = nextProfile && typeof nextProfile === 'object' && !Array.isArray(nextProfile)
-    ? nextProfile
-    : {}
-  return normalizeAnalysisLlmProfile({
+function mergePlugins(currentPlugins, nextPlugins) {
+  const current = normalizePlugins(currentPlugins)
+  const patch = nextPlugins && typeof nextPlugins === 'object' && !Array.isArray(nextPlugins) ? nextPlugins : {}
+  const merged = {
     ...current,
-    ...next
+    ...Object.fromEntries(
+      Object.entries(normalizePlugins(patch)).map(([pluginId, state]) => [
+        pluginId,
+        {
+          ...(current[pluginId] || {}),
+          ...state
+        }
+      ])
+    )
+  }
+  for (const [pluginId, state] of Object.entries(patch)) {
+    if (state && typeof state === 'object' && !Array.isArray(state) && state.removed === true) {
+      delete merged[pluginId]
+    }
+  }
+  return merged
+}
+
+function removePluginSettings(pluginId) {
+  const id = typeof pluginId === 'string' ? pluginId.trim() : ''
+  if (!id) return loadSettings()
+  return saveSettings({
+    plugins: {
+      [id]: {
+        removed: true
+      }
+    }
   })
 }
 
-function mergeAnalysisLlmProfiles(currentProfiles, nextProfiles) {
-  const current = normalizeAnalysisLlmProfiles(currentProfiles)
-  const next = nextProfiles && typeof nextProfiles === 'object' && !Array.isArray(nextProfiles)
-    ? nextProfiles
+function clonePlainObject(value) {
+  return value && typeof value === 'object' && !Array.isArray(value)
+    ? { ...value }
     : {}
+}
+
+function normalizeSettingsSectionValue(section, value) {
+  if (typeof section.normalize === 'function') return section.normalize(value)
+  return clonePlainObject(value)
+}
+
+function mergeSettingsSectionValue(section, currentValue, nextValue) {
+  if (typeof section.merge === 'function') return section.merge(currentValue, nextValue)
   return {
-    local: Object.hasOwn(next, 'local')
-      ? mergeAnalysisLlmProfile(current.local, next.local)
-      : current.local,
-    api: Object.hasOwn(next, 'api')
-      ? mergeAnalysisLlmProfile(current.api, next.api)
-      : current.api
+    ...normalizeSettingsSectionValue(section, currentValue),
+    ...clonePlainObject(nextValue)
   }
 }
 
-function mergeVideoAnalysis(currentVideoAnalysis, nextVideoAnalysis) {
-  const current = normalizeVideoAnalysis(currentVideoAnalysis)
-  const next = nextVideoAnalysis && typeof nextVideoAnalysis === 'object' && !Array.isArray(nextVideoAnalysis)
-    ? nextVideoAnalysis
-    : {}
-  return normalizeVideoAnalysis({
-    ...current,
-    ...(Object.hasOwn(next, 'enabled') ? { enabled: next.enabled } : {}),
-    ...(Object.hasOwn(next, 'outputDir') ? { outputDir: next.outputDir } : {}),
-    ...(Object.hasOwn(next, 'modelDir') ? { modelDir: next.modelDir } : {}),
-    llmProfiles: Object.hasOwn(next, 'llmProfiles')
-      ? mergeAnalysisLlmProfiles(current.llmProfiles, next.llmProfiles)
-      : current.llmProfiles
-  })
+function getSettingsSectionDefaults() {
+  return Object.fromEntries(
+    [...settingsSections.entries()].map(([key, section]) => [
+      key,
+      normalizeSettingsSectionValue(section, section.defaults)
+    ])
+  )
 }
 
-function normalizeVideoAnalysis(videoAnalysis) {
-  const analysis = videoAnalysis && typeof videoAnalysis === 'object' && !Array.isArray(videoAnalysis)
-    ? videoAnalysis
-    : {}
-  const outputDir = typeof analysis.outputDir === 'string' && analysis.outputDir.trim()
-    ? path.resolve(analysis.outputDir)
-    : getDefaultAnalysisResultDirectory()
-  const modelDir = typeof analysis.modelDir === 'string' && analysis.modelDir.trim()
-    ? path.resolve(analysis.modelDir)
-    : getDefaultAnalysisModelDirectory()
-  return {
-    enabled: Boolean(analysis.enabled),
-    outputDir,
-    modelDir,
-    llmProfiles: normalizeAnalysisLlmProfiles(analysis.llmProfiles)
+function normalizeRegisteredSettingsSections(settings) {
+  const normalized = {}
+  for (const [key, section] of settingsSections.entries()) {
+    normalized[key] = normalizeSettingsSectionValue(section, settings?.[key])
+  }
+  return normalized
+}
+
+function registerSettingsSection(key, definition = {}) {
+  const sectionKey = typeof key === 'string' ? key.trim() : ''
+  if (!sectionKey) throw new Error('Settings section key is required')
+  if (settingsSections.has(sectionKey)) {
+    throw new Error(`Settings section already registered: ${sectionKey}`)
+  }
+  const section = {
+    defaults: definition.defaults,
+    normalize: definition.normalize,
+    merge: definition.merge,
+    sanitizeForSave: definition.sanitizeForSave
+  }
+  settingsSections.set(sectionKey, section)
+  return () => {
+    if (settingsSections.get(sectionKey) === section) {
+      settingsSections.delete(sectionKey)
+    }
   }
 }
 
@@ -349,11 +363,12 @@ function loadSettings() {
     privacy: normalizePrivacy(),
     remoteAccess: normalizeRemoteAccess(),
     windowClose: normalizeWindowClose(),
-    videoAnalysis: normalizeVideoAnalysis()
+    plugins: normalizePlugins(),
+    ...getSettingsSectionDefaults()
   }
 
   try {
-    const raw = fs.readFileSync(getSettingsPath(), 'utf-8')
+    const raw = fs.readFileSync(getSettingsPath(), 'utf-8').replace(/^\uFEFF/, '')
     const parsed = JSON.parse(raw)
     const directories = normalizeDirectoryList(parsed.directories)
     const privateDirectories = normalizePrivateDirectories(parsed.privateDirectories, directories)
@@ -375,7 +390,8 @@ function loadSettings() {
       privacy: normalizePrivacy(parsed.privacy),
       remoteAccess: normalizeRemoteAccess(parsed.remoteAccess),
       windowClose: normalizeWindowClose(parsed.windowClose),
-      videoAnalysis: normalizeVideoAnalysis(parsed.videoAnalysis)
+      plugins: normalizePlugins(parsed.plugins),
+      ...normalizeRegisteredSettingsSections(parsed)
     }
   } catch {
     return defaults
@@ -391,8 +407,13 @@ function saveSettings(settings) {
     ...currentSettings,
     ...settings
   }
-  if (settings && Object.hasOwn(settings, 'videoAnalysis')) {
-    merged.videoAnalysis = mergeVideoAnalysis(currentSettings.videoAnalysis, settings.videoAnalysis)
+  if (settings && Object.hasOwn(settings, 'plugins')) {
+    merged.plugins = mergePlugins(currentSettings.plugins, settings.plugins)
+  }
+  for (const [key, section] of settingsSections.entries()) {
+    if (settings && Object.hasOwn(settings, key)) {
+      merged[key] = mergeSettingsSectionValue(section, currentSettings[key], settings[key])
+    }
   }
 
   merged.directories = normalizeDirectoryList(merged.directories)
@@ -412,7 +433,8 @@ function saveSettings(settings) {
   merged.privacy = normalizePrivacy(merged.privacy)
   merged.remoteAccess = normalizeRemoteAccess(merged.remoteAccess)
   merged.windowClose = normalizeWindowClose(merged.windowClose)
-  merged.videoAnalysis = normalizeVideoAnalysis(merged.videoAnalysis)
+  merged.plugins = normalizePlugins(merged.plugins)
+  Object.assign(merged, normalizeRegisteredSettingsSections(merged))
 
   fs.writeFileSync(getSettingsPath(), JSON.stringify(merged, null, 2))
 
@@ -530,33 +552,16 @@ function sanitizeSettingsForSave(settings) {
     sanitized.windowClose = normalizeWindowClose(sanitized.windowClose)
   }
 
-  if (Object.hasOwn(sanitized, 'videoAnalysis')) {
-    const nextAnalysis = mergeVideoAnalysis(current.videoAnalysis, sanitized.videoAnalysis)
-    const currentDir = current.videoAnalysis?.outputDir
-      ? path.resolve(current.videoAnalysis.outputDir)
-      : getDefaultAnalysisResultDirectory()
-    const currentModelDir = current.videoAnalysis?.modelDir
-      ? path.resolve(current.videoAnalysis.modelDir)
-      : getDefaultAnalysisModelDirectory()
-    const nextDir = nextAnalysis.outputDir ? path.resolve(nextAnalysis.outputDir) : currentDir
-    const nextModelDir = nextAnalysis.modelDir ? path.resolve(nextAnalysis.modelDir) : currentModelDir
-    const canSaveOutputDir = (
-      pathKey(nextDir) === pathKey(currentDir) ||
-      pathKey(nextDir) === pathKey(getDefaultAnalysisResultDirectory()) ||
-      sessionAllowedAnalysisResultDirectories.has(pathKey(nextDir))
-    )
-    const canSaveModelDir = (
-      pathKey(nextModelDir) === pathKey(currentModelDir) ||
-      pathKey(nextModelDir) === pathKey(getDefaultAnalysisModelDirectory()) ||
-      sessionAllowedAnalysisModelDirectories.has(pathKey(nextModelDir))
-    )
+  if (Object.hasOwn(sanitized, 'plugins')) {
+    sanitized.plugins = mergePlugins(current.plugins, sanitized.plugins)
+  }
 
-    sanitized.videoAnalysis = {
-      ...nextAnalysis,
-      llmProfiles: nextAnalysis.llmProfiles,
-      outputDir: canSaveOutputDir ? nextDir : currentDir,
-      modelDir: canSaveModelDir ? nextModelDir : currentModelDir
-    }
+  for (const [key, section] of settingsSections.entries()) {
+    if (!Object.hasOwn(sanitized, key)) continue
+    const nextValue = mergeSettingsSectionValue(section, current[key], sanitized[key])
+    sanitized[key] = typeof section.sanitizeForSave === 'function'
+      ? section.sanitizeForSave(nextValue, current[key], { path, pathKey })
+      : nextValue
   }
 
   return sanitized
@@ -567,10 +572,9 @@ module.exports = {
   sessionPrivateDirectories,
   sessionAllowedMpvPaths,
   sessionAllowedFiles,
-  sessionAllowedAnalysisResultDirectories,
-  sessionAllowedAnalysisModelDirectories,
   setDirectoryChangeHandler,
   onSettingsChanged,
+  registerSettingsSection,
   loadSettings,
   saveSettings,
   sanitizeSettingsForSave,
@@ -586,12 +590,9 @@ module.exports = {
   normalizePlaybackStates,
   normalizeRemoteAccess,
   normalizeWindowClose,
-  normalizeVideoAnalysis,
-  mergeVideoAnalysis,
-  normalizeAnalysisLlmProfiles,
-  getDefaultAnalysisResultDirectory,
-  getDefaultAnalysisModelDirectory,
-  getDefaultAnalysisRuntimeDirectory,
+  normalizePlugins,
+  mergePlugins,
+  removePluginSettings,
   getPlaybackStateKey,
   getPlaybackState,
   upsertPlaybackState,

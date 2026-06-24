@@ -9,6 +9,7 @@ import { formatTime } from './player/playerFormat'
 const SEEK_STEP = 5
 const ARROW_HOLD_DELAY = 300
 const ARROW_HOLD_SPEED = 2
+const PROGRESS_PREVIEW_CACHE_LIMIT = 24
 
 function clamp(value, min, max) {
   return Math.min(max, Math.max(min, value))
@@ -25,13 +26,13 @@ function Icon({ path, viewBox = '0 0 24 24' }) {
 export default function VideoPlayer({ video }) {
   const {
     settings,
-    mpvState,
+    plugins,
+    pluginsLoaded,
     mpvStatus,
     playerError,
     setPlayerError,
     queueIndex,
     queueLength,
-    playbackMode,
     handleOpenFile,
     handleDropFiles,
     handleStopPlayback,
@@ -75,6 +76,7 @@ export default function VideoPlayer({ video }) {
   const [webFullscreen, setWebFullscreen] = useState(false)
   const [isFullscreen, setIsFullscreen] = useState(false)
   const [html5Url, setHtml5Url] = useState('')
+  const [mpvState, setMpvState] = useState(null)
   const [html5State, setHtml5State] = useState({
     currentTime: 0,
     duration: 0,
@@ -96,7 +98,8 @@ export default function VideoPlayer({ video }) {
     loading: false
   })
   const playbackResumeEnabled = video?.playOptions?.resume !== false
-  const videoAnalysisEnabled = Boolean(settings?.videoAnalysis?.enabled)
+  const videoAnalysisPlugin = plugins?.find?.(plugin => plugin.id === 'video-analysis')
+  const videoAnalysisEnabled = Boolean(pluginsLoaded && videoAnalysisPlugin?.enabled && settings?.videoAnalysis?.enabled)
 
   const mpvEngineAvailable = mpvStatus?.available !== false
   const canUseMpv = mpvEngineAvailable && mode === 'mpv'
@@ -117,11 +120,6 @@ export default function VideoPlayer({ video }) {
   const subtitleTracks = trackList.filter(track => track?.type === 'sub')
   const audioId = state.audioId == null ? null : Number(state.audioId)
   const subtitleId = state.subtitleId == null ? null : Number(state.subtitleId)
-  const playbackQueue = Array.isArray(video?.playOptions?.queueVideos) ? video.playOptions.queueVideos : null
-  const playbackQueueIndex = Number.isInteger(Number(video?.playOptions?.playlistIndex))
-    ? Number(video.playOptions.playlistIndex)
-    : 0
-  const launchPlaybackMode = video?.playOptions?.playbackMode || playbackMode
   const statusLabel = (() => {
     if (!video) return ''
     if (canUseMpv) {
@@ -153,6 +151,22 @@ export default function VideoPlayer({ video }) {
   useEffect(() => {
     canUseMpvRef.current = canUseMpv
   }, [canUseMpv])
+
+  useEffect(() => {
+    if (!video || !window.electronAPI?.onMpvState) return undefined
+    window.electronAPI?.mpvGetState?.()
+      ?.then(state => setMpvState(state || null))
+      .catch(() => {})
+    return window.electronAPI.onMpvState((state) => {
+      if (!state?.filePath || !video?.fullPath) {
+        setMpvState(state || null)
+        return
+      }
+      if (String(state.filePath).replace(/\\/g, '/').toLowerCase() === String(video.fullPath).replace(/\\/g, '/').toLowerCase()) {
+        setMpvState(state)
+      }
+    })
+  }, [video])
 
   useEffect(() => {
     let canceled = false
@@ -233,6 +247,7 @@ export default function VideoPlayer({ video }) {
 
   const handleClose = useCallback(() => {
     videoRef.current?.pause?.()
+    setMpvState(null)
     handleStopPlayback?.()
   }, [handleStopPlayback])
 
@@ -284,6 +299,10 @@ export default function VideoPlayer({ video }) {
         const imageUrl = await window.electronAPI.getThumbnailUrl(result.framePath)
         if (progressPreviewRequestRef.current !== requestId) return
         progressPreviewCacheRef.current.set(seconds, imageUrl)
+        if (progressPreviewCacheRef.current.size > PROGRESS_PREVIEW_CACHE_LIMIT) {
+          const oldestKey = progressPreviewCacheRef.current.keys().next().value
+          progressPreviewCacheRef.current.delete(oldestKey)
+        }
         setProgressPreview(prev => ({
           ...prev,
           imageUrl: Math.max(0, Math.round(Number(prev.time) || 0)) === seconds ? imageUrl : prev.imageUrl,
@@ -897,12 +916,10 @@ export default function VideoPlayer({ video }) {
       }
 
       const playPromise = window.electronAPI?.mpvPlay?.(video.fullPath, {
-        ...(video.playOptions || {}),
+        resume: video.playOptions?.resume,
         hostBounds: currentHostBounds || hostBoundsRef.current || undefined,
-        playlist: launchPlaybackMode === 'single' || !Array.isArray(playbackQueue)
-          ? [video.fullPath]
-          : playbackQueue.map(item => item?.fullPath).filter(Boolean),
-        playlistIndex: launchPlaybackMode === 'single' ? 0 : playbackQueueIndex
+        playlist: [video.fullPath],
+        playlistIndex: 0
       })
       if (!playPromise?.then) {
         setMode('html5')
@@ -938,7 +955,7 @@ export default function VideoPlayer({ video }) {
         videoRef.current?.pause?.()
       }
     }
-  }, [launchPlaybackMode, mode, mpvStatus?.available, playbackQueue, playbackQueueIndex, playbackResumeEnabled, readMpvHostBounds, setPlayerError, video])
+  }, [mode, mpvStatus?.available, playbackResumeEnabled, readMpvHostBounds, setPlayerError, video])
 
   useEffect(() => {
     if (canUseMpv || !html5Url || !video?.fullPath) return undefined
@@ -1079,6 +1096,14 @@ export default function VideoPlayer({ video }) {
     if (mode !== 'html5' || !html5Url) return
     videoRef.current?.play?.().catch(() => {})
   }, [html5Url, mode, video])
+
+  useEffect(() => {
+    if (!video) return undefined
+    window.electronAPI?.setMediaPlaybackActive?.(true)?.catch(() => {})
+    return () => {
+      window.electronAPI?.setMediaPlaybackActive?.(false)?.catch(() => {})
+    }
+  }, [video])
 
   useEffect(() => {
     if (!video) return undefined

@@ -943,7 +943,7 @@ class MpvManager {
     this._stateEmitTimer = setTimeout(() => {
       this._stateEmitTimer = null
       this._emitState()
-    }, 250)
+    }, 500)
   }
 
   _clearStateEmitTimer() {

@@ -109,6 +109,7 @@ export function VideoAnalysisSheet({
   const analyzedCount = timeline.filter(item => item.vlm_status === 'analyzed').length
   const running = Boolean(state?.job?.running)
   const disabled = state?.enabled === false
+  const pluginUnavailable = disabled && (state?.reason === 'plugin_unavailable' || state?.analysis?.reason === 'plugin_unavailable')
   const progressMessage = getProgressMessage(state)
   const canStart = !disabled && !running && !starting
   const statusTone = disabled || state?.recent?.status === 'error'
@@ -118,8 +119,10 @@ export function VideoAnalysisSheet({
       : analysis
         ? 'ready'
         : 'empty'
-  const statusTitle = disabled
-    ? '电脑端尚未开启'
+  const statusTitle = pluginUnavailable
+    ? '插件未启用'
+    : disabled
+      ? '电脑端尚未开启'
     : running
       ? (state?.job?.currentVideo ? '正在分析当前视频' : '分析队列忙碌中')
       : state?.recent?.status === 'error'
@@ -127,8 +130,10 @@ export function VideoAnalysisSheet({
       : analysis
         ? '已生成分析结果'
         : '还没有分析结果'
-  const statusText = disabled
-    ? '请先在电脑端设置里开启视频理解，并完成模型配置。'
+  const statusText = pluginUnavailable
+    ? (state?.error || '请在电脑端插件管理中启用视频分析插件。')
+    : disabled
+      ? '请先在电脑端插件管理中启用视频分析，并完成模型配置。'
     : running
       ? (progressMessage || '电脑端正在运行模型，手机会自动刷新结果。')
       : state?.recent?.status === 'error'

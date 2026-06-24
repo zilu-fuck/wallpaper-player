@@ -9,11 +9,7 @@ const {
   sessionAllowedDirectories,
   sessionPrivateDirectories,
   sessionAllowedMpvPaths,
-  sessionAllowedAnalysisResultDirectories,
-  sessionAllowedAnalysisModelDirectories,
   addSessionAllowedFile,
-  getDefaultAnalysisModelDirectory,
-  getDefaultAnalysisResultDirectory,
   getPlaybackState,
   loadSettings,
   saveSettings,
@@ -35,6 +31,7 @@ const {
   getThumbnailDir,
   getPreviewFrameDir,
   generatePreviewFrame,
+  setMediaPlaybackActive,
   resolveThumbnail
 } = require('./thumbnail')
 const {
@@ -47,32 +44,8 @@ const {
 } = require('./updater')
 const { mpvManager, resolveMpvPath } = require('./mpv-integration')
 const { getMainWindow } = require('./window')
-const {
-  findVideoAnalysis,
-  listSavedAnalysisResultsForVideos,
-  deleteSavedAnalysisResult,
-  startVideoAnalysis,
-  cancelVideoAnalysis,
-  getActiveAnalysisJob,
-  getAnalysisModelDirectory,
-  getAnalysisResultDirectory,
-  getVideoAnalysisRuntimeConfig,
-  saveVideoAnalysisRuntimeConfig,
-  resetVideoAnalysisRuntimeConfig
-} = require('./video-analysis')
-const {
-  getVlmModelOptions,
-  getVlmServiceState,
-  saveVlmServiceConfig,
-  startVlmService,
-  stopVlmService,
-  downloadVlmModel,
-  listLocalVlmModelFiles,
-  selectLocalVlmModelFile,
-  listHuggingFaceModelFiles,
-  selectHuggingFaceModelFile
-} = require('./vlm-service')
 const { getVideoMetadata } = require('./video-metadata')
+const { pluginRegistry, installPlugin, uninstallPlugin, getExternalPluginsDir } = require('./plugins')
 
 const MPV_COMMANDS = new Set([
   'seekTo',
@@ -99,6 +72,53 @@ const MPV_COMMANDS = new Set([
 const PRIVACY_UNLOCK_FAILURE_LIMIT = 5
 const PRIVACY_UNLOCK_LOCK_MS = 30 * 1000
 const privacyUnlockFailures = new Map()
+const pendingThumbnailTasks = new Map()
+
+function queueThumbnailTask(videoPath) {
+  const key = pathKey(videoPath)
+  const pending = pendingThumbnailTasks.get(key)
+  if (pending) return pending
+
+  const task = resolveThumbnail(videoPath)
+    .finally(() => {
+      pendingThumbnailTasks.delete(key)
+    })
+  pendingThumbnailTasks.set(key, task)
+  return task
+}
+
+async function runThumbnailWorkers(videoPaths, concurrency, onProgress) {
+  const results = {}
+  const uniquePaths = []
+  const seen = new Set()
+  for (const videoPath of videoPaths) {
+    if (typeof videoPath !== 'string' || !videoPath.trim()) continue
+    const key = pathKey(videoPath)
+    if (seen.has(key)) continue
+    seen.add(key)
+    uniquePaths.push(videoPath)
+  }
+
+  let index = 0
+  let completed = 0
+  async function worker() {
+    while (index < uniquePaths.length) {
+      const videoPath = uniquePaths[index++]
+      try {
+        results[videoPath] = await queueThumbnailTask(videoPath)
+      } catch {
+        results[videoPath] = null
+      }
+      completed += 1
+      onProgress?.(completed, uniquePaths.length)
+    }
+  }
+
+  onProgress?.(0, uniquePaths.length, true)
+  await Promise.all(Array.from({ length: Math.max(1, concurrency) }, () => worker()))
+  onProgress?.(completed, uniquePaths.length, true)
+  return results
+}
 
 function getPrivacyUnlockKey(event) {
   return String(event?.sender?.id || 'main')
@@ -126,24 +146,6 @@ function recordPrivacyUnlockFailure(key) {
   return next.lockUntil ? PRIVACY_UNLOCK_LOCK_MS : 0
 }
 
-async function ensureDialogDefaultDirectory(candidatePath, fallbackDir) {
-  const fallback = path.resolve(fallbackDir)
-  const candidate = typeof candidatePath === 'string' && candidatePath.trim()
-    ? path.resolve(candidatePath)
-    : ''
-  let defaultDir = fallback
-  if (candidate) {
-    try {
-      const stat = await fsp.stat(candidate)
-      defaultDir = stat.isDirectory() ? candidate : path.dirname(candidate)
-    } catch {
-      defaultDir = path.extname(candidate) ? path.dirname(candidate) : candidate
-    }
-  }
-  await fsp.mkdir(defaultDir, { recursive: true })
-  return defaultDir
-}
-
 function setupIPC() {
   ipcMain.handle('scan-directory', async (_event, dirPath, force) => {
     try {
@@ -155,7 +157,7 @@ function setupIPC() {
 
   ipcMain.handle('generate-thumbnail', async (_event, videoPath) => {
     try {
-      const thumbPath = await resolveThumbnail(videoPath)
+      const thumbPath = await queueThumbnailTask(videoPath)
       return { thumbPath }
     } catch (err) {
       return { error: err.message }
@@ -178,13 +180,10 @@ function setupIPC() {
       return {}
     }
 
-    const results = {}
-    const concurrency = 1
-    let index = 0
-    let completed = 0
+    const concurrency = 3
     let lastProgressAt = 0
 
-    function sendThumbnailProgress(force = false) {
+    function sendThumbnailProgress(completed, total, force = false) {
       const win = getMainWindow()
       if (!win || win.isDestroyed()) return
       const now = Date.now()
@@ -192,31 +191,12 @@ function setupIPC() {
       lastProgressAt = now
       win.webContents.send('thumbnail-progress', {
         completed,
-        total: videoPaths.length,
+        total,
         requestId
       })
     }
 
-    async function worker() {
-      while (index < videoPaths.length) {
-        const i = index++
-        const vp = videoPaths[i]
-        try {
-          results[vp] = await resolveThumbnail(vp)
-        } catch {
-          results[vp] = null
-        }
-        completed++
-        sendThumbnailProgress(completed === videoPaths.length)
-      }
-    }
-
-    sendThumbnailProgress(true)
-    const workers = Array.from({ length: concurrency }, () => worker())
-    await Promise.all(workers)
-    sendThumbnailProgress(true)
-
-    return results
+    return runThumbnailWorkers(videoPaths, concurrency, sendThumbnailProgress)
   })
 
   ipcMain.handle('get-settings', async () => {
@@ -227,9 +207,85 @@ function setupIPC() {
     return app.getVersion()
   })
 
+  ipcMain.handle('plugins-list', async () => {
+    return pluginRegistry.listPlugins()
+  })
+
+  ipcMain.handle('plugins-set-enabled', async (_event, pluginId, enabled) => {
+    try {
+      return await pluginRegistry.setPluginEnabled(pluginId, enabled)
+    } catch (err) {
+      return { success: false, error: err.message }
+    }
+  })
+
+  ipcMain.handle('plugins-install', async () => {
+    try {
+      const win = getMainWindow()
+      const result = await dialog.showOpenDialog(win, {
+        title: '选择插件目录、plugin.json 或插件包',
+        properties: ['openFile', 'openDirectory'],
+        filters: [
+          { name: '插件包或清单', extensions: ['zip', 'json'] },
+          { name: '所有文件', extensions: ['*'] }
+        ]
+      })
+      if (result.canceled || !result.filePaths.length) {
+        return { success: false, canceled: true }
+      }
+      return await installPlugin(result.filePaths[0])
+    } catch (err) {
+      return { success: false, error: err.message }
+    }
+  })
+
+  ipcMain.handle('plugins-uninstall', async (_event, pluginId) => {
+    try {
+      return await uninstallPlugin(pluginId)
+    } catch (err) {
+      return { success: false, error: err.message }
+    }
+  })
+
+  ipcMain.handle('plugins-open-directory', async () => {
+    try {
+      const dir = getExternalPluginsDir()
+      await fsp.mkdir(dir, { recursive: true })
+      const error = await shell.openPath(dir)
+      return { success: !error, error, dir }
+    } catch (err) {
+      return { success: false, error: err.message }
+    }
+  })
+
+  ipcMain.handle('plugins-save-config', async (_event, pluginId, config) => {
+    try {
+      const plugin = pluginRegistry.getPlugin(pluginId)
+      if (!plugin) return { success: false, error: '插件不存在' }
+      const settings = loadSettings()
+      const nextConfig = pluginRegistry.normalizePluginConfig(plugin, config)
+      const saved = saveSettings(sanitizeSettingsForSave({
+        plugins: {
+          [plugin.id]: {
+            ...(settings.plugins?.[plugin.id] || {}),
+            config: nextConfig,
+            updatedAt: new Date().toISOString()
+          }
+        }
+      }))
+      return {
+        success: true,
+        config: saved.plugins?.[plugin.id]?.config || {},
+        plugin: pluginRegistry.listPlugins().find(item => item.id === plugin.id)
+      }
+    } catch (err) {
+      return { success: false, error: err.message }
+    }
+  })
+
   ipcMain.handle('save-settings', async (_event, settings) => {
-    saveSettings(sanitizeSettingsForSave(settings))
-    return { success: true }
+    const saved = saveSettings(sanitizeSettingsForSave(settings))
+    return { success: true, settings: sanitizeSettingsForRenderer(saved) }
   })
 
   ipcMain.handle('privacy-set-password', async (_event, password) => {
@@ -419,299 +475,9 @@ function setupIPC() {
     }
   })
 
-  ipcMain.handle('video-analysis-get', async (_event, filePath) => {
-    try {
-      const resolvedPath = await assertAllowedVideoPath(filePath)
-      return await findVideoAnalysis(resolvedPath)
-    } catch (err) {
-      return { available: false, reason: 'error', error: err.message }
-    }
-  })
-
-  ipcMain.handle('video-analysis-list-saved', async (_event, videos = []) => {
-    try {
-      const requestedVideos = Array.isArray(videos) ? videos : []
-      const allowedVideos = []
-      for (const video of requestedVideos.slice(0, 2000)) {
-        try {
-          const resolvedPath = await assertAllowedVideoPath(video?.videoPath)
-          allowedVideos.push({
-            videoPath: resolvedPath,
-            videoName: typeof video?.videoName === 'string' ? video.videoName : '',
-            fileSizeBytes: Number(video?.fileSizeBytes) || 0
-          })
-        } catch {}
-      }
-      return await listSavedAnalysisResultsForVideos(allowedVideos)
-    } catch (error) {
-      return { success: false, error: error.message }
-    }
-  })
-
-  ipcMain.handle('video-analysis-delete-saved', async (_event, resultPath) => {
-    try {
-      return await deleteSavedAnalysisResult(resultPath)
-    } catch (error) {
-      return { success: false, error: error.message }
-    }
-  })
-
-  ipcMain.handle('video-analysis-start', async (event, filePath) => {
-    try {
-      const resolvedPath = await assertAllowedVideoPath(filePath)
-      return await startVideoAnalysis(resolvedPath, event.sender)
-    } catch (err) {
-      return { accepted: false, reason: 'error', error: err.message }
-    }
-  })
-
-  ipcMain.handle('video-analysis-cancel', async (_event, jobId) => {
-    return cancelVideoAnalysis(jobId)
-  })
-
-  ipcMain.handle('video-analysis-job', async () => {
-    return getActiveAnalysisJob()
-  })
-
-  ipcMain.handle('video-analysis-get-output-dir', async () => {
-    return getAnalysisResultDirectory()
-  })
-
-  ipcMain.handle('video-analysis-select-output-dir', async () => {
-    const win = getMainWindow()
-    const currentDir = getAnalysisResultDirectory()
-    const result = await dialog.showOpenDialog(win, {
-      properties: ['openDirectory', 'createDirectory'],
-      title: '选择分析结果保存目录',
-      defaultPath: currentDir
-    })
-    if (result.canceled || result.filePaths.length === 0) return null
-    const selectedDir = path.resolve(result.filePaths[0])
-    sessionAllowedAnalysisResultDirectories.add(pathKey(selectedDir))
-    const settings = loadSettings()
-    saveSettings({
-      videoAnalysis: {
-        ...(settings.videoAnalysis || {}),
-        outputDir: selectedDir
-      }
-    })
-    return selectedDir
-  })
-
-  ipcMain.handle('video-analysis-open-output-dir', async () => {
-    const dir = getAnalysisResultDirectory() || getDefaultAnalysisResultDirectory()
-    try {
-      await fsp.mkdir(dir, { recursive: true })
-      const error = await shell.openPath(dir)
-      return { success: !error, error, dir }
-    } catch (err) {
-      return { success: false, error: err.message, dir }
-    }
-  })
-
-  ipcMain.handle('video-analysis-get-model-dir', async () => {
-    return getAnalysisModelDirectory()
-  })
-
-  ipcMain.handle('video-analysis-get-default-model-dir', async () => {
-    return getDefaultAnalysisModelDirectory()
-  })
-
-  ipcMain.handle('video-analysis-select-model-dir', async () => {
-    const win = getMainWindow()
-    const currentDir = getAnalysisModelDirectory()
-    const result = await dialog.showOpenDialog(win, {
-      properties: ['openDirectory', 'createDirectory'],
-      title: '选择视频理解模型存放目录',
-      defaultPath: currentDir
-    })
-    if (result.canceled || result.filePaths.length === 0) return null
-    const selectedDir = path.resolve(result.filePaths[0])
-    sessionAllowedAnalysisModelDirectories.add(pathKey(selectedDir))
-    const settings = loadSettings()
-    saveSettings({
-      videoAnalysis: {
-        ...(settings.videoAnalysis || {}),
-        modelDir: selectedDir
-      }
-    })
-    await saveVideoAnalysisRuntimeConfig({
-      ...(await getVideoAnalysisRuntimeConfig()),
-      modelStorageDir: selectedDir
-    })
-    return selectedDir
-  })
-
-  ipcMain.handle('video-analysis-open-model-dir', async () => {
-    const dir = getAnalysisModelDirectory() || getDefaultAnalysisModelDirectory()
-    try {
-      await fsp.mkdir(dir, { recursive: true })
-      const error = await shell.openPath(dir)
-      return { success: !error, error, dir }
-    } catch (err) {
-      return { success: false, error: err.message, dir }
-    }
-  })
-
-  ipcMain.handle('video-analysis-get-runtime-config', async () => {
-    try {
-      return { success: true, config: await getVideoAnalysisRuntimeConfig() }
-    } catch (err) {
-      return { success: false, error: err.message }
-    }
-  })
-
-  ipcMain.handle('video-analysis-save-runtime-config', async (_event, config) => {
-    try {
-      return { success: true, config: await saveVideoAnalysisRuntimeConfig(config) }
-    } catch (err) {
-      return { success: false, error: err.message }
-    }
-  })
-
-  ipcMain.handle('video-analysis-reset-runtime-config', async () => {
-    try {
-      const settings = loadSettings()
-      saveSettings({
-        videoAnalysis: {
-          ...(settings.videoAnalysis || {}),
-          modelDir: getDefaultAnalysisModelDirectory()
-        }
-      })
-      return { success: true, config: await resetVideoAnalysisRuntimeConfig() }
-    } catch (err) {
-      return { success: false, error: err.message }
-    }
-  })
-
-  ipcMain.handle('video-analysis-vlm-state', async () => {
-    try {
-      return { success: true, state: await getVlmServiceState() }
-    } catch (err) {
-      return { success: false, error: err.message }
-    }
-  })
-
-  ipcMain.handle('video-analysis-vlm-model-options', async () => {
-    try {
-      return { success: true, options: getVlmModelOptions() }
-    } catch (err) {
-      return { success: false, error: err.message }
-    }
-  })
-
-  ipcMain.handle('video-analysis-vlm-save-config', async (_event, patch) => {
-    try {
-      return await saveVlmServiceConfig(patch)
-    } catch (err) {
-      return { success: false, error: err.message }
-    }
-  })
-
-  ipcMain.handle('video-analysis-vlm-select-model-file', async () => {
-    try {
-      const config = await getVideoAnalysisRuntimeConfig()
-      const win = getMainWindow()
-      const defaultPath = await ensureDialogDefaultDirectory(
-        config.vlmModelPath,
-        path.join(config.modelStorageDir || getAnalysisModelDirectory(), 'vlm')
-      )
-      const result = await dialog.showOpenDialog(win, {
-        properties: ['openFile'],
-        title: '选择 VLM 模型文件',
-        defaultPath,
-        filters: [
-          { name: '模型文件', extensions: ['gguf', 'bin', 'safetensors', 'onnx'] },
-          { name: '所有文件', extensions: ['*'] }
-        ]
-      })
-      if (result.canceled || result.filePaths.length === 0) return null
-      const selectedPath = path.resolve(result.filePaths[0])
-      return await saveVlmServiceConfig({ vlmModelPath: selectedPath })
-    } catch (err) {
-      return { success: false, error: err.message }
-    }
-  })
-
-  ipcMain.handle('video-analysis-vlm-select-server-executable', async () => {
-    try {
-      const config = await getVideoAnalysisRuntimeConfig()
-      const win = getMainWindow()
-      const defaultPath = await ensureDialogDefaultDirectory(
-        config.vlmServerExecutable,
-        config.modelStorageDir || getAnalysisModelDirectory()
-      )
-      const result = await dialog.showOpenDialog(win, {
-        properties: ['openFile'],
-        title: '选择 VLM 服务程序',
-        defaultPath,
-        filters: [
-          { name: '可执行文件', extensions: ['exe', 'bat', 'cmd'] },
-          { name: '所有文件', extensions: ['*'] }
-        ]
-      })
-      if (result.canceled || result.filePaths.length === 0) return null
-      const selectedPath = path.resolve(result.filePaths[0])
-      return await saveVlmServiceConfig({ vlmServerExecutable: selectedPath })
-    } catch (err) {
-      return { success: false, error: err.message }
-    }
-  })
-
-  ipcMain.handle('video-analysis-vlm-hf-list-files', async (_event, patch) => {
-    try {
-      return await listHuggingFaceModelFiles(patch)
-    } catch (err) {
-      return { success: false, error: err.message }
-    }
-  })
-
-  ipcMain.handle('video-analysis-vlm-hf-select-file', async (_event, file) => {
-    try {
-      return await selectHuggingFaceModelFile(file)
-    } catch (err) {
-      return { success: false, error: err.message }
-    }
-  })
-
-  ipcMain.handle('video-analysis-vlm-local-list-files', async () => {
-    try {
-      return await listLocalVlmModelFiles()
-    } catch (err) {
-      return { success: false, error: err.message }
-    }
-  })
-
-  ipcMain.handle('video-analysis-vlm-local-select-file', async (_event, filePath) => {
-    try {
-      return await selectLocalVlmModelFile(filePath)
-    } catch (err) {
-      return { success: false, error: err.message }
-    }
-  })
-
-  ipcMain.handle('video-analysis-vlm-download', async (_event, selection) => {
-    try {
-      return await downloadVlmModel(selection)
-    } catch (err) {
-      return { success: false, error: err.message }
-    }
-  })
-
-  ipcMain.handle('video-analysis-vlm-start', async () => {
-    try {
-      return await startVlmService()
-    } catch (err) {
-      return { success: false, error: err.message }
-    }
-  })
-
-  ipcMain.handle('video-analysis-vlm-stop', async () => {
-    try {
-      return await stopVlmService()
-    } catch (err) {
-      return { success: false, error: err.message }
-    }
+  ipcMain.handle('set-media-playback-active', async (_event, active) => {
+    setMediaPlaybackActive(active)
+    return { success: true }
   })
 
   ipcMain.handle('check-ffmpeg', async () => {
@@ -804,9 +570,16 @@ function setupIPC() {
       const resume = playOptions.resume === false
         ? false
         : getPlaybackState(settings.playbackStates, resolvedPath)
-      await mpvManager.play(resolvedPath, { ...playOptions, playlist, playlistIndex, resume })
+      setMediaPlaybackActive(true)
+      await mpvManager.play(resolvedPath, {
+        hostBounds: playOptions.hostBounds,
+        playlist,
+        playlistIndex,
+        resume
+      })
       return { success: true }
     } catch (err) {
+      setMediaPlaybackActive(false)
       return { success: false, error: err.message }
     }
   })
@@ -821,6 +594,7 @@ function setupIPC() {
 
   ipcMain.handle('mpv-stop', async () => {
     mpvManager.stop()
+    setMediaPlaybackActive(false)
     return { success: true }
   })
 

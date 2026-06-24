@@ -6,14 +6,25 @@ const net = require('net')
 const path = require('path')
 const { execFileSync, spawn } = require('child_process')
 const { BrowserWindow } = require('electron')
-const { getResourcePath } = require('./paths')
-const { getAnalysisModelDirectory, getVideoAnalysisRuntimeConfig, saveVideoAnalysisRuntimeConfig } = require('./video-analysis')
+const { core } = require('./core')
+const { getResourcePath } = core('paths')
+const { getAnalysisModelDirectory, getVideoAnalysisRuntimeConfig, saveVideoAnalysisRuntimeConfig } = require('./service')
 
 let vlmProcess = null
 let vlmLastOutput = ''
 let vlmDownload = null
-const BUNDLED_LLAMA_SERVER_PATH = getResourcePath('vendor', 'llama.cpp', 'llama-server.exe')
-const BUNDLED_LLAMA_CUDA_SERVER_PATH = getResourcePath('vendor', 'llama.cpp-cuda', 'llama-server.exe')
+function getPluginResourcePath(...segments) {
+  return path.join(__dirname, 'resources', ...segments)
+}
+
+function getPreferredResourcePath(...segments) {
+  const pluginPath = getPluginResourcePath(...segments)
+  if (fs.existsSync(pluginPath)) return pluginPath
+  return getResourcePath(...segments)
+}
+
+const BUNDLED_LLAMA_SERVER_PATH = getPreferredResourcePath('vendor', 'llama.cpp', 'llama-server.exe')
+const BUNDLED_LLAMA_CUDA_SERVER_PATH = getPreferredResourcePath('vendor', 'llama.cpp-cuda', 'llama-server.exe')
 const HF_MODEL_EXTENSIONS = new Set(['.gguf', '.bin', '.safetensors', '.onnx', '.pt', '.pth'])
 const DEFAULT_VLM_MODEL_ID = 'huihui-qwen35-9b-claude-opus'
 const DEFAULT_VLM_PRECISION = 'Q4_K_M'

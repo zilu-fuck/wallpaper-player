@@ -7,25 +7,43 @@ const { app } = require('electron')
 const { getResourcePath, isPathInside } = require('./paths')
 const { getAllowedVideoDirectories } = require('./settings')
 const { assertAllowedVideoPath, readWallpaperMetadata } = require('./scanner')
+const { setVideoMetadataWarmPaused } = require('./video-metadata')
 
 let ffmpegPath = null
 let ffmpegSearchPromise = null
 let ffmpegSearchCompleted = false
 const fallbackUserDataDir = path.join(process.cwd(), '.tmp-wallpaper-player')
 const THUMBNAIL_FFMPEG_CONCURRENCY = 1
-const THUMBNAIL_SCALE = '320:-1'
-const PREVIEW_FRAME_SCALE = '240:-1'
+const THUMBNAIL_SCALE = '256:-1'
+const PREVIEW_FRAME_SCALE = '200:-1'
 const THUMBNAIL_QUALITY = '5'
-const PREVIEW_FRAME_CACHE_LIMIT = 500
+const PREVIEW_FRAME_CACHE_LIMIT = 240
 const PREVIEW_FRAME_MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000
 const PREVIEW_FRAME_CLEANUP_INTERVAL_MS = 5 * 60 * 1000
+const THUMBNAIL_QUEUE_LIMIT = 120
 const thumbnailJobQueue = []
 let activeThumbnailJobs = 0
 let lastPreviewFrameCleanupAt = 0
+let mediaPlaybackActive = false
+
+function pruneThumbnailQueueForPlayback() {
+  if (!mediaPlaybackActive || thumbnailJobQueue.length <= THUMBNAIL_QUEUE_LIMIT) return
+  for (let index = thumbnailJobQueue.length - 1; index >= 0 && thumbnailJobQueue.length > THUMBNAIL_QUEUE_LIMIT; index -= 1) {
+    const item = thumbnailJobQueue[index]
+    if (item.priority === 'preview') continue
+    thumbnailJobQueue.splice(index, 1)
+    item.resolve(null)
+  }
+}
 
 function drainThumbnailJobs() {
   while (activeThumbnailJobs < THUMBNAIL_FFMPEG_CONCURRENCY && thumbnailJobQueue.length > 0) {
-    const { task, resolve } = thumbnailJobQueue.shift()
+    const nextRunnableIndex = thumbnailJobQueue.findIndex(item => (
+      !mediaPlaybackActive || item.priority === 'preview'
+    ))
+    if (nextRunnableIndex < 0) return
+
+    const [{ task, resolve }] = thumbnailJobQueue.splice(nextRunnableIndex, 1)
     activeThumbnailJobs += 1
     Promise.resolve()
       .then(task)
@@ -37,11 +55,18 @@ function drainThumbnailJobs() {
   }
 }
 
-function enqueueThumbnailJob(task) {
+function enqueueThumbnailJob(task, options = {}) {
   return new Promise((resolve) => {
-    thumbnailJobQueue.push({ task, resolve })
+    thumbnailJobQueue.push({ task, resolve, priority: options.priority || 'thumbnail' })
+    pruneThumbnailQueueForPlayback()
     drainThumbnailJobs()
   })
+}
+
+function setMediaPlaybackActive(active) {
+  mediaPlaybackActive = Boolean(active)
+  setVideoMetadataWarmPaused(mediaPlaybackActive)
+  if (!mediaPlaybackActive) drainThumbnailJobs()
 }
 
 function execFileAsync(file, args, options = {}) {
@@ -231,7 +256,7 @@ async function generatePreviewFrame(videoPath, seconds) {
       }
       resolve(err ? null : framePath)
     })
-  }))
+  }), { priority: 'preview' })
 }
 
 async function getExistingPreviewPath(videoPath) {
@@ -260,8 +285,10 @@ module.exports = {
   findFfmpeg,
   getThumbnailDir,
   getPreviewFrameDir,
+  enqueueThumbnailJob,
   generateThumbnail,
   generatePreviewFrame,
+  setMediaPlaybackActive,
   getExistingPreviewPath,
   resolveThumbnail
 }

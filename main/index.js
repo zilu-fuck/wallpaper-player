@@ -6,7 +6,7 @@ const { setupAutoUpdater, disposeUpdater } = require('./updater')
 const { initMpv, destroyMpv } = require('./mpv-integration')
 const { unwatchAllDirectories } = require('./scanner')
 const { loadSettings, saveSettings, sanitizeSettingsForSave, sanitizeSettingsForRenderer, onSettingsChanged } = require('./settings')
-const { disposeVlmService } = require('./vlm-service')
+const { setupPlugins, disposePlugins } = require('./plugins')
 const {
   setupRemoteIPC,
   initRemoteAccess,
@@ -161,7 +161,7 @@ async function handleWindowClose(event, win) {
   }
 }
 
-function start() {
+async function start() {
   setupCSP()
   setWindowCloseHandler((event, win) => {
     handleWindowClose(event, win).catch((error) => {
@@ -169,6 +169,7 @@ function start() {
       minimizeWindow(win)
     })
   })
+  await setupPlugins()
   setupIPC()
   setupRemoteIPC()
   setupSettingsSync()
@@ -214,11 +215,9 @@ app.on('before-quit', () => {
   disposeRemoteAccess().catch((error) => {
     log.error('[remote] dispose failed:', error)
   })
-  try {
-    disposeVlmService()
-  } catch (error) {
-    log.error('[vlm] dispose failed:', error)
-  }
+  disposePlugins().catch((error) => {
+    log.error('[plugins] dispose failed:', error)
+  })
   destroyMpv()
 })
 

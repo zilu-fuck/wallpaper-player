@@ -1,12 +1,13 @@
-const { loadSettings } = require('../../settings')
-const { pathKey } = require('../../paths')
+const { core } = require('./core')
+const { loadSettings } = core('settings')
+const { pathKey } = core('paths')
 const {
   findVideoAnalysis,
   getActiveAnalysisJob,
   getRecentAnalysisEvent,
   startVideoAnalysis
-} = require('../../video-analysis')
-const { sendJson } = require('../http-utils')
+} = require('./service')
+const { sendJson } = core('remote/http-utils')
 
 function sanitizeRemoteAnalysis(analysis) {
   if (!analysis || typeof analysis !== 'object') return null

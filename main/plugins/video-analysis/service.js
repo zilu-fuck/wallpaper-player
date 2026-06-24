@@ -5,13 +5,13 @@ const net = require('net')
 const path = require('path')
 const { spawn } = require('child_process')
 const { BrowserWindow } = require('electron')
-const { getResourcePath, isPathInside, pathKey } = require('./paths')
+const { core } = require('./core')
+const { getResourcePath, isPathInside, pathKey } = core('paths')
+const { loadSettings, saveSettings } = core('settings')
 const {
   getDefaultAnalysisModelDirectory,
   getDefaultAnalysisResultDirectory,
-  getDefaultAnalysisRuntimeDirectory,
-  loadSettings,
-  saveSettings
+  getDefaultAnalysisRuntimeDirectory
 } = require('./settings')
 
 let activeJob = null
@@ -70,14 +70,22 @@ const LOCAL_DEFAULT_ANALYSIS_ENV = {
 }
 
 function getDefaultVlmServerExecutable() {
-  const cudaServer = getResourcePath('vendor', 'llama.cpp-cuda', 'llama-server.exe')
+  const cudaServer = getPluginResourcePath('vendor', 'llama.cpp-cuda', 'llama-server.exe')
   if (fs.existsSync(cudaServer)) return cudaServer
+  const cpuServer = getPluginResourcePath('vendor', 'llama.cpp', 'llama-server.exe')
+  if (fs.existsSync(cpuServer)) return cpuServer
+  const bundledCudaServer = getResourcePath('vendor', 'llama.cpp-cuda', 'llama-server.exe')
+  if (fs.existsSync(bundledCudaServer)) return bundledCudaServer
   return getResourcePath('vendor', 'llama.cpp', 'llama-server.exe')
 }
 
 function getRuntimeVlmServerExecutable(configuredPath) {
-  const cpuServer = getResourcePath('vendor', 'llama.cpp', 'llama-server.exe')
-  const cudaServer = getResourcePath('vendor', 'llama.cpp-cuda', 'llama-server.exe')
+  const cpuServer = fs.existsSync(getPluginResourcePath('vendor', 'llama.cpp', 'llama-server.exe'))
+    ? getPluginResourcePath('vendor', 'llama.cpp', 'llama-server.exe')
+    : getResourcePath('vendor', 'llama.cpp', 'llama-server.exe')
+  const cudaServer = fs.existsSync(getPluginResourcePath('vendor', 'llama.cpp-cuda', 'llama-server.exe'))
+    ? getPluginResourcePath('vendor', 'llama.cpp-cuda', 'llama-server.exe')
+    : getResourcePath('vendor', 'llama.cpp-cuda', 'llama-server.exe')
   if (
     fs.existsSync(cudaServer) &&
     (!configuredPath || pathKey(configuredPath) === pathKey(cpuServer))
@@ -92,12 +100,20 @@ const LOCAL_VLM_SETUP_HINT = [
   '可选方案：1. 使用 Ollama/LM Studio 启动 qwen2-vl 等视觉模型，并把 VLM 服务地址改到对应 /v1；2. 使用 llama.cpp/其他服务加载 GGUF 视觉模型，并监听当前 VLM 地址；3. 若使用远端视觉模型，在设置里填写远端 VLM_BASE_URL、VLM_NAME 和 API Key。'
 ].join(' ')
 
+function getPluginResourcePath(...segments) {
+  return path.join(__dirname, 'resources', ...segments)
+}
+
 function getVideoComprehensionRoot() {
+  const pluginRoot = getPluginResourcePath('video comprehension', 'video comprehension')
+  if (fs.existsSync(pluginRoot)) return pluginRoot
   return getResourcePath('video comprehension', 'video comprehension')
 }
 
 function getBundledVideoComprehensionRoot() {
-  return path.join(__dirname, 'video-comprehension-runtime')
+  const pluginRoot = getPluginResourcePath('video-comprehension-runtime')
+  if (fs.existsSync(pluginRoot)) return pluginRoot
+  return path.join(__dirname, '..', '..', 'video-comprehension-runtime')
 }
 
 function getRuntimeVideoComprehensionRoot() {

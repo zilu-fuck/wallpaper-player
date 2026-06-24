@@ -5,6 +5,7 @@ const MpvManager = require('../mpv')
 const { isMpvExecutablePath, isExistingFile } = require('./paths')
 const { loadSettings, saveSettings, upsertPlaybackState } = require('./settings')
 const { getMainWindow } = require('./window')
+const { setMediaPlaybackActive } = require('./thumbnail')
 
 const mpvManager = new MpvManager()
 const PLAYBACK_SAVE_DELAY_MS = 1000
@@ -106,6 +107,7 @@ async function initMpv() {
   })
 
   mpvManager.on('ended', (data) => {
+    setMediaPlaybackActive(false)
     persistPlaybackState(mpvManager.getState(), true)
     const win = getMainWindow()
     if (win && !win.isDestroyed()) {
@@ -121,6 +123,7 @@ async function initMpv() {
   })
 
   mpvManager.on('error', (data) => {
+    setMediaPlaybackActive(false)
     const win = getMainWindow()
     if (win && !win.isDestroyed()) {
       win.webContents.send('mpv-error', data)
@@ -134,6 +137,7 @@ function destroyMpv() {
     playbackSaveTimer = null
   }
   flushPlaybackState()
+  setMediaPlaybackActive(false)
   mpvManager.destroy()
 }
 

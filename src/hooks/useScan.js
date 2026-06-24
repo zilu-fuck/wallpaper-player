@@ -56,13 +56,7 @@ export function useScan({ setCurrentDir, setLoading }) {
         }, result.indexed ? 1200 : 600)
       }
 
-      // 缩略图在后台异步生成，不阻塞UI
-      if (result.videos.length > 0) {
-        const paths = result.videos.map(v => v.fullPath)
-        const thumbResults = await window.electronAPI.generateThumbnails({ paths, requestId })
-        if (requestId !== scanRequestRef.current) return
-        setThumbnails(thumbResults)
-      }
+      setThumbnails({})
     } catch (err) {
       if (requestId !== scanRequestRef.current) return
       console.error('扫描失败:', err)

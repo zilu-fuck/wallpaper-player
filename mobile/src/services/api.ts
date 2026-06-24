@@ -262,18 +262,54 @@ export async function cancelTranscode(device: StoredDevice, videoId: string, qua
 }
 
 export async function getVideoAnalysis(device: StoredDevice, videoId: string) {
-  return requestJson<VideoAnalysisResponse>(device.endpoint, `/v1/videos/${encodeURIComponent(videoId)}/analysis`, {
-    token: device.token,
-    timeoutMs: 12000
-  })
+  try {
+    return await requestJson<VideoAnalysisResponse>(device.endpoint, `/v1/videos/${encodeURIComponent(videoId)}/analysis`, {
+      token: device.token,
+      timeoutMs: 12000
+    })
+  } catch (error) {
+    if (isAnalysisPluginUnavailable(error)) {
+      return createUnavailableAnalysisResponse()
+    }
+    throw error
+  }
 }
 
 export async function startVideoAnalysis(device: StoredDevice, videoId: string) {
-  return requestJson<VideoAnalysisResponse>(device.endpoint, `/v1/videos/${encodeURIComponent(videoId)}/analysis`, {
-    method: 'POST',
-    token: device.token,
-    timeoutMs: 12000
-  })
+  try {
+    return await requestJson<VideoAnalysisResponse>(device.endpoint, `/v1/videos/${encodeURIComponent(videoId)}/analysis`, {
+      method: 'POST',
+      token: device.token,
+      timeoutMs: 12000
+    })
+  } catch (error) {
+    if (isAnalysisPluginUnavailable(error)) {
+      return {
+        ...createUnavailableAnalysisResponse(),
+        accepted: false
+      }
+    }
+    throw error
+  }
+}
+
+function isAnalysisPluginUnavailable(error: unknown) {
+  return error instanceof ApiError && error.status === 404 && error.code === 'not_found'
+}
+
+function createUnavailableAnalysisResponse(): VideoAnalysisResponse {
+  return {
+    enabled: false,
+    analysis: {
+      available: false,
+      reason: 'plugin_unavailable'
+    },
+    job: null,
+    recent: null,
+    checkedAt: Date.now(),
+    reason: 'plugin_unavailable',
+    error: '视频分析插件未启用或未安装，请在电脑端插件管理中启用。'
+  }
 }
 
 export async function playOnDesktop(device: StoredDevice, videoId: string, position = 0) {

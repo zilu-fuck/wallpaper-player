@@ -1,0 +1,28 @@
+{
+  "manifestVersion": 1,
+  "id": "video-analysis",
+  "name": "视频理解",
+  "version": "1.0.0",
+  "description": "官方视频理解、VLM 服务和分析结果插件。",
+  "author": "Wallpaper Player",
+  "publisher": "official",
+  "enabled": false,
+  "permissions": [
+    "video:read",
+    "settings:readwrite",
+    "remote:routes",
+    "background:jobs",
+    "model-services:manage"
+  ],
+  "settingsDefaults": {
+    "videoAnalysis": {
+      "enabled": false
+    }
+  },
+  "settingsSchema": {
+    "videoAnalysis": {
+      "type": "object",
+      "description": "视频理解开关、结果目录、模型目录和 LLM/VLM 配置。"
+    }
+  }
+}
