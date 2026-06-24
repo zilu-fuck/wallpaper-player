@@ -219,16 +219,19 @@ function setupIPC() {
     }
   })
 
-  ipcMain.handle('plugins-install', async () => {
+  ipcMain.handle('plugins-install', async (_event, sourceType = 'file') => {
     try {
       const win = getMainWindow()
+      const installDirectory = sourceType === 'directory'
       const result = await dialog.showOpenDialog(win, {
-        title: '选择插件目录、plugin.json 或插件包',
-        properties: ['openFile', 'openDirectory'],
-        filters: [
-          { name: '插件包或清单', extensions: ['zip', 'json'] },
-          { name: '所有文件', extensions: ['*'] }
-        ]
+        title: installDirectory ? '选择插件文件夹' : '选择插件包或 plugin.json',
+        properties: installDirectory ? ['openDirectory'] : ['openFile'],
+        filters: installDirectory
+          ? undefined
+          : [
+              { name: '插件包或清单', extensions: ['zip', 'json'] },
+              { name: '所有文件', extensions: ['*'] }
+            ]
       })
       if (result.canceled || !result.filePaths.length) {
         return { success: false, canceled: true }

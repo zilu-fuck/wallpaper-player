@@ -168,7 +168,8 @@ export default function PluginManagementPage({
   activePluginId,
   onSelectPlugin,
   onTogglePlugin,
-  onInstallPlugin,
+  onInstallPluginFile,
+  onInstallPluginDirectory,
   onUninstallPlugin,
   onOpenPluginsDirectory,
   onSavePluginConfig,
@@ -186,7 +187,9 @@ export default function PluginManagementPage({
     ? activePlugin.contributions.remoteRoutes
     : []
   const canToggle = Boolean(activePlugin?.canEnable)
-  const installing = busyPluginId === 'install'
+  const installingFile = busyPluginId === 'install-file'
+  const installingDirectory = busyPluginId === 'install-directory'
+  const installing = installingFile || installingDirectory
   const busy = busyPluginId === activePlugin?.id
   const actionBusy = busy || installing
   const lifecycleAction = getLifecycleAction(activePlugin)
@@ -249,10 +252,13 @@ export default function PluginManagementPage({
           <span>{plugins.length} 个插件</span>
         </div>
         <div className="plugin-list-actions">
-          <button className="btn btn-sm btn-primary" type="button" onClick={onInstallPlugin} disabled={installing}>
-            {installing ? '安装中...' : '安装插件'}
+          <button className="btn btn-sm btn-primary" type="button" onClick={onInstallPluginFile} disabled={installing}>
+            {installingFile ? '安装中...' : '安装包'}
           </button>
-          <button className="btn btn-sm" type="button" onClick={onOpenPluginsDirectory} disabled={installing}>
+          <button className="btn btn-sm" type="button" onClick={onInstallPluginDirectory} disabled={installing}>
+            {installingDirectory ? '安装中...' : '安装文件夹'}
+          </button>
+          <button className="btn btn-sm plugin-list-open-dir" type="button" onClick={onOpenPluginsDirectory} disabled={installing}>
             打开插件目录
           </button>
         </div>

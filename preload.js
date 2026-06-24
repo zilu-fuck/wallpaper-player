@@ -19,7 +19,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
   getAppVersion: () => ipcRenderer.invoke('get-app-version'),
   listPlugins: () => ipcRenderer.invoke('plugins-list'),
   setPluginEnabled: (pluginId, enabled) => ipcRenderer.invoke('plugins-set-enabled', pluginId, enabled),
-  installPlugin: () => ipcRenderer.invoke('plugins-install'),
+  installPlugin: (sourceType) => ipcRenderer.invoke('plugins-install', sourceType),
   uninstallPlugin: (pluginId) => ipcRenderer.invoke('plugins-uninstall', pluginId),
   openPluginsDirectory: () => ipcRenderer.invoke('plugins-open-directory'),
   savePluginConfig: (pluginId, config) => ipcRenderer.invoke('plugins-save-config', pluginId, config),

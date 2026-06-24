@@ -8,11 +8,11 @@ Windows 发布包内置 mpv 和 FFmpeg，普通用户不需要额外安装播放
 
 | 端 | 版本 | 产物 |
 | --- | --- | --- |
-| Windows 电脑端 | `1.3.0` | `release/Wallpaper-Player-Setup-1.3.0.exe`、`release/Wallpaper-Player-1.3.0.exe` |
+| Windows 电脑端 | `1.3.1` | `release/Wallpaper-Player-Setup-1.3.1.exe`、`release/Wallpaper-Player-1.3.1.exe` |
 | Android 手机端 | `0.1.3` | `mobile/dist/wallpaper-player-mobile-0.1.3-arm64-release.apk` |
 | 插件包 | `video-analysis 1.0.0`、`ai-search 0.1.0`、`agent-bridge 0.1.0` | `release/plugins/*.zip` |
 
-本批更新说明见 [release-notes/v1.3.0.md](release-notes/v1.3.0.md)，开发记录见 [docs/dev-log-v1.3.0.md](docs/dev-log-v1.3.0.md)。
+本批更新说明见 [release-notes/v1.3.1.md](release-notes/v1.3.1.md)，开发记录见 [docs/dev-log-v1.3.0.md](docs/dev-log-v1.3.0.md)。
 
 ## 主要功能
 
@@ -46,7 +46,7 @@ Windows 发布包内置 mpv 和 FFmpeg，普通用户不需要额外安装播放
 
 ## 安装和绑定
 
-1. 在电脑上安装或运行 `release/Wallpaper-Player-Setup-1.3.0.exe` / `release/Wallpaper-Player-1.3.0.exe`。
+1. 在电脑上安装或运行 `release/Wallpaper-Player-Setup-1.3.1.exe` / `release/Wallpaper-Player-1.3.1.exe`。
 2. 打开电脑端，添加视频目录。
 3. 如需视频理解、AI 搜索或 Agent Bridge，在电脑端设置的“插件管理”中安装对应 `release/plugins/*.zip` 插件包，再启用插件。
 4. 在电脑端设置中打开手机访问功能。
@@ -166,6 +166,7 @@ npm run typecheck
 ## 文档
 
 - [移动端和远程访问方案](docs/mobile-client-remote-access-plan.md)
+- [1.3.1 更新说明](release-notes/v1.3.1.md)
 - [1.3.0 更新说明](release-notes/v1.3.0.md)
 - [1.3.0 更新记录](docs/dev-log-v1.3.0.md)
 - [1.2.5 更新说明](release-notes/v1.2.5.md)

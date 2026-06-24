@@ -303,11 +303,11 @@ export default function Settings() {
     }
   }, [refreshPluginList])
 
-  const handleInstallPlugin = useCallback(async () => {
-    setPluginBusyId('install')
+  const handleInstallPlugin = useCallback(async (sourceType = 'file') => {
+    setPluginBusyId(sourceType === 'directory' ? 'install-directory' : 'install-file')
     setPluginMessage('')
     try {
-      const result = await window.electronAPI?.installPlugin?.()
+      const result = await window.electronAPI?.installPlugin?.(sourceType)
       const nextPlugins = await refreshPluginList()
       if (result?.success) {
         setActivePluginId(result.plugin?.id || nextPlugins[0]?.id || 'video-analysis')
@@ -1031,7 +1031,8 @@ export default function Settings() {
                 activePluginId={activePluginId}
                 onSelectPlugin={setActivePluginId}
                 onTogglePlugin={handlePluginToggle}
-                onInstallPlugin={handleInstallPlugin}
+                onInstallPluginFile={() => handleInstallPlugin('file')}
+                onInstallPluginDirectory={() => handleInstallPlugin('directory')}
                 onUninstallPlugin={handleUninstallPlugin}
                 onOpenPluginsDirectory={handleOpenPluginsDirectory}
                 onSavePluginConfig={handleSavePluginConfig}

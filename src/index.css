@@ -4438,6 +4438,10 @@ a:hover {
   margin-bottom: 10px;
 }
 
+.plugin-list-open-dir {
+  grid-column: 1 / -1;
+}
+
 .plugin-list-item {
   width: 100%;
   display: grid;
