@@ -10,5 +10,6 @@ thumbnails/
 settings.json
 *.log
 .tmp-wallpaper-player/
+.tmp/
 video comprehension/
 video comprehension.7z

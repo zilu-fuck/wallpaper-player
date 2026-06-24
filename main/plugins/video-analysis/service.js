@@ -79,6 +79,16 @@ function getDefaultVlmServerExecutable() {
   return getResourcePath('vendor', 'llama.cpp', 'llama-server.exe')
 }
 
+function isBundledLlamaServerPath(inputPath, backend) {
+  const normalized = String(inputPath || '').replace(/\\/g, '/').toLowerCase()
+  const resourceSuffix = `resources/vendor/${backend}/llama-server.exe`
+  const vendorSuffix = `vendor/${backend}/llama-server.exe`
+  return normalized === resourceSuffix ||
+    normalized.endsWith(`/${resourceSuffix}`) ||
+    normalized === vendorSuffix ||
+    normalized.endsWith(`/${vendorSuffix}`)
+}
+
 function getRuntimeVlmServerExecutable(configuredPath) {
   const cpuServer = fs.existsSync(getPluginResourcePath('vendor', 'llama.cpp', 'llama-server.exe'))
     ? getPluginResourcePath('vendor', 'llama.cpp', 'llama-server.exe')
@@ -86,13 +96,112 @@ function getRuntimeVlmServerExecutable(configuredPath) {
   const cudaServer = fs.existsSync(getPluginResourcePath('vendor', 'llama.cpp-cuda', 'llama-server.exe'))
     ? getPluginResourcePath('vendor', 'llama.cpp-cuda', 'llama-server.exe')
     : getResourcePath('vendor', 'llama.cpp-cuda', 'llama-server.exe')
+  if (fs.existsSync(cudaServer) && (!configuredPath || isBundledLlamaServerPath(configuredPath, 'llama.cpp-cuda'))) {
+    return cudaServer
+  }
   if (
     fs.existsSync(cudaServer) &&
-    (!configuredPath || pathKey(configuredPath) === pathKey(cpuServer))
+    (!configuredPath || pathKey(configuredPath) === pathKey(cpuServer) || isBundledLlamaServerPath(configuredPath, 'llama.cpp'))
   ) {
     return cudaServer
   }
+  if (fs.existsSync(cpuServer) && (!configuredPath || isBundledLlamaServerPath(configuredPath, 'llama.cpp'))) {
+    return cpuServer
+  }
+  const configuredExists = Boolean(configuredPath && fs.existsSync(configuredPath))
+  if (configuredPath && configuredExists) return configuredPath
   return configuredPath || getDefaultVlmServerExecutable()
+}
+
+function isDirectory(inputPath) {
+  try {
+    return fs.statSync(inputPath).isDirectory()
+  } catch {
+    return false
+  }
+}
+
+function isFile(inputPath) {
+  try {
+    return fs.statSync(inputPath).isFile()
+  } catch {
+    return false
+  }
+}
+
+function findFileByName(dir, fileName) {
+  if (!dir || !fileName) return ''
+  const directPath = path.join(dir, fileName)
+  if (isFile(directPath)) return directPath
+  try {
+    const matched = fs
+      .readdirSync(dir, { withFileTypes: true })
+      .find(entry => entry.isFile() && entry.name.toLowerCase() === fileName.toLowerCase())
+    return matched ? path.join(dir, matched.name) : ''
+  } catch {
+    return ''
+  }
+}
+
+function looksLikeDefaultAnalysisModelDir(inputPath) {
+  const resolved = path.resolve(inputPath || '')
+  const parentName = path.basename(path.dirname(resolved)).toLowerCase()
+  return path.basename(resolved).toLowerCase() === 'analysis-models' &&
+    ['wallpaper-player', 'wallpaper player', '.tmp-wallpaper-player'].includes(parentName)
+}
+
+function looksLikeDefaultAnalysisResultDir(inputPath) {
+  const resolved = path.resolve(inputPath || '')
+  const parentName = path.basename(path.dirname(resolved)).toLowerCase()
+  return path.basename(resolved).toLowerCase() === 'analysis-results' &&
+    ['wallpaper-player', 'wallpaper player', '.tmp-wallpaper-player'].includes(parentName)
+}
+
+function resolveRuntimeModelStorageDir(configuredDir) {
+  const configured = typeof configuredDir === 'string' && configuredDir.trim()
+    ? path.resolve(configuredDir)
+    : ''
+  if (configured && isDirectory(configured)) return configured
+  if (configured && !looksLikeDefaultAnalysisModelDir(configured)) return configured
+
+  const settingsDir = getAnalysisModelDirectory()
+  if (settingsDir && isDirectory(settingsDir)) return path.resolve(settingsDir)
+
+  return getDefaultAnalysisModelDirectory()
+}
+
+function resolveRuntimeVlmModelPath(configuredPath, modelStorageDir, vlmName) {
+  const modelName = path.basename(String(vlmName || '').trim() || LOCAL_DEFAULT_ANALYSIS_ENV.VLM_NAME)
+  const fallbackPath = path.join(modelStorageDir, 'vlm', modelName)
+  const configured = typeof configuredPath === 'string' && configuredPath.trim()
+    ? path.resolve(configuredPath)
+    : fallbackPath
+  if (isFile(configured)) return configured
+
+  const fileName = path.basename(configured || modelName)
+  const candidateDirs = [
+    path.join(modelStorageDir, 'vlm'),
+    modelStorageDir,
+    path.join(getAnalysisModelDirectory(), 'vlm'),
+    getAnalysisModelDirectory(),
+    path.join(getDefaultAnalysisModelDirectory(), 'vlm'),
+    getDefaultAnalysisModelDirectory()
+  ]
+  const seenDirs = new Set()
+  for (const dir of candidateDirs) {
+    if (!dir) continue
+    const resolvedDir = path.resolve(dir)
+    const key = pathKey(resolvedDir)
+    if (seenDirs.has(key)) continue
+    seenDirs.add(key)
+    const matched = findFileByName(resolvedDir, fileName)
+    if (matched) return matched
+  }
+
+  if (!configuredPath || looksLikeDefaultAnalysisModelDir(configured)) {
+    return fallbackPath
+  }
+  return configured
 }
 
 const LOCAL_VLM_SETUP_HINT = [
@@ -210,6 +319,7 @@ function parseEnvText(text) {
 
 function envToRuntimeConfig(values, meta = {}) {
   const merged = { ...LOCAL_DEFAULT_ANALYSIS_ENV, ...values }
+  const modelStorageDir = resolveRuntimeModelStorageDir(merged.MODEL_STORAGE_DIR)
   const llmProvider = ['local', 'api'].includes(String(merged.LLM_PROVIDER || '').toLowerCase())
     ? String(merged.LLM_PROVIDER).toLowerCase()
     : LOCAL_DEFAULT_ANALYSIS_ENV.LLM_PROVIDER
@@ -219,7 +329,7 @@ function envToRuntimeConfig(values, meta = {}) {
   return {
     mode: merged.MODE,
     maxDurationSeconds: Number(merged.MAX_DURATION_SECONDS) || Number(LOCAL_DEFAULT_ANALYSIS_ENV.MAX_DURATION_SECONDS),
-    modelStorageDir: path.resolve(merged.MODEL_STORAGE_DIR || LOCAL_DEFAULT_ANALYSIS_ENV.MODEL_STORAGE_DIR),
+    modelStorageDir,
     llmProvider,
     llmBaseUrl: merged.LLM_BASE_URL,
     llmName: merged.LLM_NAME,
@@ -228,7 +338,7 @@ function envToRuntimeConfig(values, meta = {}) {
     vlmName: merged.VLM_NAME,
     vlmApiKey: merged.VLM_API_KEY,
     vlmProvider,
-    vlmModelPath: path.resolve(merged.VLM_MODEL_PATH || LOCAL_DEFAULT_ANALYSIS_ENV.VLM_MODEL_PATH),
+    vlmModelPath: resolveRuntimeVlmModelPath(merged.VLM_MODEL_PATH, modelStorageDir, merged.VLM_NAME),
     vlmModelDownloadUrl: merged.VLM_MODEL_DOWNLOAD_URL,
     vlmHfRepo: merged.VLM_HF_REPO,
     vlmHfRevision: merged.VLM_HF_REVISION || LOCAL_DEFAULT_ANALYSIS_ENV.VLM_HF_REVISION,
@@ -248,11 +358,13 @@ function validateRuntimeConfig(config) {
   const maxDurationSeconds = Number(config?.maxDurationSeconds)
   const vlmConcurrency = Number(config?.vlmConcurrency)
   const modelStorageDir = typeof config?.modelStorageDir === 'string' && config.modelStorageDir.trim()
-    ? path.resolve(config.modelStorageDir)
-    : getAnalysisModelDirectory()
-  const vlmModelPath = typeof config?.vlmModelPath === 'string' && config.vlmModelPath.trim()
-    ? path.resolve(config.vlmModelPath)
-    : path.join(modelStorageDir, 'vlm', LOCAL_DEFAULT_ANALYSIS_ENV.VLM_NAME)
+    ? resolveRuntimeModelStorageDir(config.modelStorageDir)
+    : resolveRuntimeModelStorageDir(getAnalysisModelDirectory())
+  const vlmModelPath = resolveRuntimeVlmModelPath(
+    config?.vlmModelPath,
+    modelStorageDir,
+    config?.vlmName || LOCAL_DEFAULT_ANALYSIS_ENV.VLM_NAME
+  )
   const requiredStrings = [
     ['LLM 服务地址', config?.llmBaseUrl],
     ['LLM 模型名称', config?.llmName],
@@ -301,9 +413,11 @@ function validateRuntimeConfig(config) {
       ? config.vlmHfRevision.trim()
       : LOCAL_DEFAULT_ANALYSIS_ENV.VLM_HF_REVISION,
     VLM_HF_TOKEN: typeof config.vlmHfToken === 'string' ? config.vlmHfToken.trim() : '',
-    VLM_SERVER_EXECUTABLE: typeof config.vlmServerExecutable === 'string' && config.vlmServerExecutable.trim()
-      ? config.vlmServerExecutable.trim()
-      : LOCAL_DEFAULT_ANALYSIS_ENV.VLM_SERVER_EXECUTABLE,
+    VLM_SERVER_EXECUTABLE: getRuntimeVlmServerExecutable(
+      typeof config.vlmServerExecutable === 'string' && config.vlmServerExecutable.trim()
+        ? config.vlmServerExecutable.trim()
+        : LOCAL_DEFAULT_ANALYSIS_ENV.VLM_SERVER_EXECUTABLE
+    ),
     VLM_SERVER_ARGS: typeof config.vlmServerArgs === 'string' && config.vlmServerArgs.trim()
       ? config.vlmServerArgs.trim()
       : LOCAL_DEFAULT_ANALYSIS_ENV.VLM_SERVER_ARGS,
@@ -407,12 +521,18 @@ async function resetVideoAnalysisRuntimeConfig() {
 
 function getAnalysisResultDirectory() {
   const configuredDir = loadSettings()?.videoAnalysis?.outputDir
-  return configuredDir ? path.resolve(configuredDir) : getDefaultAnalysisResultDirectory()
+  if (!configuredDir) return getDefaultAnalysisResultDirectory()
+  const resolvedDir = path.resolve(configuredDir)
+  if (isDirectory(resolvedDir) || !looksLikeDefaultAnalysisResultDir(resolvedDir)) return resolvedDir
+  return getDefaultAnalysisResultDirectory()
 }
 
 function getAnalysisModelDirectory() {
   const configuredDir = loadSettings()?.videoAnalysis?.modelDir
-  return configuredDir ? path.resolve(configuredDir) : getDefaultAnalysisModelDirectory()
+  if (!configuredDir) return getDefaultAnalysisModelDirectory()
+  const resolvedDir = path.resolve(configuredDir)
+  if (isDirectory(resolvedDir) || !looksLikeDefaultAnalysisModelDir(resolvedDir)) return resolvedDir
+  return getDefaultAnalysisModelDirectory()
 }
 
 function sanitizeFileName(name) {

@@ -15,10 +15,12 @@ export default function VideoAnalysisPluginSettings({
   analysisOutputMessage,
   analysisModelMessage,
   analysisRuntimeConfig,
+  analysisRuntimeLoaded,
   analysisConfigSaving,
   analysisConfigMessage,
   vlmState,
   vlmSaving,
+  vlmStarting,
   vlmMessage,
   vlmModelOptions,
   selectedVlmModelId,
@@ -63,7 +65,8 @@ export default function VideoAnalysisPluginSettings({
   const vlmModelFileName = analysisRuntimeConfig.vlmModelPath
     ? analysisRuntimeConfig.vlmModelPath.split(/[\\/]/).filter(Boolean).pop()
     : analysisRuntimeConfig.vlmName
-  const vlmModelDirectory = `${analysisModelDir || defaultAnalysisModelDir || '当前模型目录'}\\vlm`
+  const currentAnalysisModelDir = analysisModelDir || defaultAnalysisModelDir || '当前模型目录'
+  const vlmModelDirectory = `${currentAnalysisModelDir}\\vlm`
   const vlmModelStateText = vlmProviderIsApi
     ? '外接 API'
     : (vlmState?.downloading ? '下载中' : (vlmState?.modelExists ? '已找到' : '未找到'))
@@ -71,7 +74,7 @@ export default function VideoAnalysisPluginSettings({
   return (
     <section className="settings-section plugin-settings-section">
       <h3 className="section-title">视频理解设置</h3>
-      <p className="section-desc">控制结果面板、分析目录、本地 VLM 服务和文本模型参数。</p>
+      <p className="section-desc">普通用户只需要确认目录、准备视觉模型、点击启动模型；高级参数保持默认即可。</p>
       <label className="remote-toggle">
         <input
           type="checkbox"
@@ -85,15 +88,18 @@ export default function VideoAnalysisPluginSettings({
         {!pluginEnabled
           ? '插件停用后已卸载视频理解 IPC 和远程路由，请先启用插件。'
           : (enabled
-              ? '结果来自下方分析结果保存目录；没有匹配结果的视频会保持原播放界面。'
-              : '开启后可从视频卡片菜单发起分析，并在播放器里查看已生成结果。')}
+              ? '已开启。播放器会读取下方“分析结果保存目录”里的结果；没有结果的视频仍按普通视频播放。'
+              : '开启后，可从视频卡片菜单发起分析，并在播放器里查看已生成的摘要、标签和时间线。')}
       </p>
       {pluginEnabled && enabled ? (
         <div className="analysis-settings-expanded">
+          <p className="hint video-analysis-settings-hint">
+            最简单用法：保持默认目录，下载或选择一个 GGUF 视觉模型，点击“启动模型”，看到“已连接”后回到视频卡片发起分析。换电脑后如果显示“模型未找到”，把同名模型放到 {vlmModelDirectory}，再点“检测目录模型”。
+          </p>
           <div className="analysis-settings-group">
             <div className="analysis-settings-group-header">
               <strong>目录</strong>
-              <span>分析结果、本地模型和下载位置</span>
+              <span>默认目录最稳；只有想放到别的磁盘时才需要改</span>
             </div>
             <div className="analysis-output-settings">
               <span title={analysisOutputDir}>{analysisOutputDir || '使用默认保存目录'}</span>
@@ -105,7 +111,7 @@ export default function VideoAnalysisPluginSettings({
               </button>
             </div>
             <p className="hint video-analysis-settings-hint">
-              新完成的分析会保存为“视频名分析结果-识别码.json”，同一个视频会覆盖自己的旧结果。{analysisOutputMessage ? ` ${analysisOutputMessage}` : ''}
+              这里保存分析结果 JSON。换电脑或重装后建议继续用默认目录；如果要保留旧结果，把旧 JSON 复制到这个目录即可。新分析会按“视频名分析结果-识别码.json”保存，同一个视频会覆盖自己的旧结果。{analysisOutputMessage ? ` ${analysisOutputMessage}` : ''}
             </p>
             <div className="analysis-output-settings">
               <span title={analysisModelDir}>{analysisModelDir || '使用默认模型目录'}</span>
@@ -117,14 +123,14 @@ export default function VideoAnalysisPluginSettings({
               </button>
             </div>
             <p className="hint video-analysis-settings-hint">
-              推荐模型目录：{defaultAnalysisModelDir || '正在读取默认目录'}。当前使用目录：{analysisModelDir || defaultAnalysisModelDir || '正在读取模型目录'}。下载的 VLM 会保存到当前目录下的 vlm 子文件夹；从别处下载的模型也建议放到这个 vlm 子文件夹里，点击“检测目录模型”即可识别。{analysisModelMessage ? ` ${analysisModelMessage}` : ''}
+              这里保存视觉模型，文件通常很大。推荐目录：{defaultAnalysisModelDir || '正在读取默认目录'}。当前使用目录：{currentAnalysisModelDir}。下载的模型会放到 {vlmModelDirectory}；从别处下载或从旧电脑复制来的模型，也放到这个 vlm 文件夹后点击“检测目录模型”。{analysisModelMessage ? ` ${analysisModelMessage}` : ''}
             </p>
           </div>
           <div className="analysis-vlm-panel">
             <div className="analysis-vlm-header">
               <div>
                 <strong>视觉模型</strong>
-                <p>选择模型后点击“启动模型”，会先保存配置再启动本地服务。</p>
+                <p>本地模式会使用插件自带的服务程序；普通用户不用手动找 exe。</p>
               </div>
               <span className={`analysis-vlm-status${vlmState?.connected ? ' connected' : ''}`}>
                 {vlmStatusText}
@@ -158,9 +164,9 @@ export default function VideoAnalysisPluginSettings({
                       className="btn btn-sm btn-primary analysis-vlm-start-button"
                       type="button"
                       onClick={onStartVlmService}
-                      disabled={vlmState?.downloading || vlmSaving}
+                      disabled={!analysisRuntimeLoaded || vlmState?.downloading || vlmSaving || vlmStarting}
                     >
-                      启动模型
+                      {!analysisRuntimeLoaded ? '读取配置...' : (vlmStarting ? '启动中...' : '启动模型')}
                     </button>
                     <button className="btn btn-sm" type="button" onClick={onStopVlmService}>
                       停止服务
@@ -190,6 +196,9 @@ export default function VideoAnalysisPluginSettings({
             </div>
             {vlmProviderIsApi ? (
               <div className="analysis-runtime-settings analysis-runtime-settings-clean">
+                <p className="hint video-analysis-settings-hint analysis-config-note">
+                  只有你已经有可用的 OpenAI 兼容视觉 API 时才选这里。没有外部 API 时，请切回“本地 VLM”。
+                </p>
                 <label className="analysis-runtime-field wide">
                   <span>VLM API 地址</span>
                   <input
@@ -217,7 +226,7 @@ export default function VideoAnalysisPluginSettings({
               <>
                 <div className="analysis-runtime-settings analysis-runtime-settings-clean">
                   <label className="analysis-runtime-field wide">
-                    <span>本地 VLM 服务地址</span>
+                    <span>本地 VLM 服务地址（默认不用改）</span>
                     <input
                       value={analysisRuntimeConfig.vlmBaseUrl}
                       onChange={(event) => onVlmRuntimeChange('vlmBaseUrl', event.target.value)}
@@ -262,7 +271,7 @@ export default function VideoAnalysisPluginSettings({
                     {vlmDownloadProgress ? <strong>{vlmDownloadInfo}</strong> : null}
                   </div>
                   <p className="analysis-vlm-download-note">
-                    下载位置：{vlmModelDirectory}。手动下载的 VLM 模型也可以放到这里再检测。
+                    下载位置：{vlmModelDirectory}。手动下载或从旧电脑复制的 VLM 模型，也放到这里再检测。
                   </p>
                   {vlmDownloadProgress ? (
                     <div className="analysis-vlm-progress" aria-label="VLM 模型下载进度">
@@ -307,8 +316,11 @@ export default function VideoAnalysisPluginSettings({
                   </div>
                 ) : null}
                 <details className="analysis-detail-config">
-                  <summary>更多配置</summary>
+                  <summary>高级配置（通常不用改）</summary>
                   <div className="analysis-detail-body">
+                    <p className="hint video-analysis-settings-hint analysis-config-note">
+                      下面这些是给手动接入 llama.cpp 或自定义端口的人用的。换电脑或更新软件后，插件会自动把自带服务程序路径迁到当前机器；普通用户保持默认即可。
+                    </p>
                     <label className="analysis-runtime-field wide">
                       <span>模型文件完整路径</span>
                       <div className="analysis-path-row">
@@ -345,7 +357,7 @@ export default function VideoAnalysisPluginSettings({
                       />
                     </label>
                     <label className="analysis-runtime-field wide">
-                      <span>服务程序路径</span>
+                      <span>服务程序路径（默认不用改）</span>
                       <div className="analysis-path-row">
                         <input
                           value={analysisRuntimeConfig.vlmServerExecutable}
@@ -358,7 +370,7 @@ export default function VideoAnalysisPluginSettings({
                       </div>
                     </label>
                     <label className="analysis-runtime-field wide">
-                      <span>启动参数</span>
+                      <span>启动参数（默认不用改）</span>
                       <input
                         value={analysisRuntimeConfig.vlmServerArgs}
                         onChange={(event) => onVlmRuntimeChange('vlmServerArgs', event.target.value)}
@@ -374,8 +386,8 @@ export default function VideoAnalysisPluginSettings({
               </button>
               <p className="hint video-analysis-settings-hint">
                 {vlmProviderIsApi
-                  ? '外接 VLM API 保存后可直接检测连接。'
-                  : '本地 VLM 使用项目自带的 llama.cpp 服务程序；启动参数可在“更多配置”中调整。'}
+                  ? '外接 VLM API 保存后可直接检测连接；如果 API 需要密钥，请填写 API Key。'
+                  : '本地 VLM 会自动使用插件自带的 llama.cpp 服务程序。换电脑后如果旧路径失效，保存或启动时会自动迁到当前安装位置。'}
                 {vlmMessage ? ` ${vlmMessage}` : ''}
               </p>
             </div>
@@ -383,7 +395,7 @@ export default function VideoAnalysisPluginSettings({
           <div className="analysis-settings-group">
             <div className="analysis-settings-group-header">
               <strong>分析参数</strong>
-              <span>文本模型和运行策略</span>
+              <span>摘要、命名和标签会用到文本模型</span>
             </div>
             <div className="analysis-provider-toggle" role="group" aria-label="文本模型来源">
               <button
@@ -403,8 +415,8 @@ export default function VideoAnalysisPluginSettings({
             </div>
             <p className="hint video-analysis-settings-hint">
               {analysisRuntimeConfig.llmProvider === 'api'
-                ? '文本理解会调用下方外部 OpenAI 兼容 API；视觉模型仍需要单独配置 VLM 服务。'
-                : '默认使用子项目本地文本模型配置；请先启动本机 OpenAI 兼容文本模型服务。'}
+                ? '文本理解会调用下方外部 OpenAI 兼容 API。视觉模型仍需要在上方单独配置；不知道怎么选时，外接 API 通常更省心。'
+                : '本地文本模型需要你先启动 Ollama、LM Studio 或其他 OpenAI 兼容服务。没有本地服务时，请切换到“外接大模型 API”。'}
             </p>
             <div className="analysis-runtime-settings">
               <label className="analysis-runtime-field compact">

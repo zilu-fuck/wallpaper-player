@@ -87,11 +87,13 @@ export default function Settings() {
   const [analysisOutputMessage, setAnalysisOutputMessage] = useState('')
   const [analysisModelMessage, setAnalysisModelMessage] = useState('')
   const [analysisRuntimeConfig, setAnalysisRuntimeConfig] = useState(DEFAULT_ANALYSIS_RUNTIME_CONFIG)
+  const [analysisRuntimeLoaded, setAnalysisRuntimeLoaded] = useState(false)
   const [analysisLlmProfiles, setAnalysisLlmProfiles] = useState({ local: LOCAL_TEXT_MODEL_DEFAULTS, api: { llmBaseUrl: '', llmName: '', llmApiKey: '' } })
   const [analysisConfigSaving, setAnalysisConfigSaving] = useState(false)
   const [analysisConfigMessage, setAnalysisConfigMessage] = useState('')
   const [vlmState, setVlmState] = useState(null)
   const [vlmSaving, setVlmSaving] = useState(false)
+  const [vlmStarting, setVlmStarting] = useState(false)
   const [vlmMessage, setVlmMessage] = useState('')
   const [vlmModelOptions, setVlmModelOptions] = useState({ models: [], precisions: [], defaultModelId: '', defaultPrecision: 'Q4_K_M' })
   const [selectedVlmModelId, setSelectedVlmModelId] = useState('')
@@ -133,10 +135,12 @@ export default function Settings() {
       if (mounted) setAppVersion(version || '')
     })
     if (!videoAnalysisPluginEnabled) {
+      setAnalysisRuntimeLoaded(false)
       return () => {
         mounted = false
       }
     }
+    setAnalysisRuntimeLoaded(false)
     window.electronAPI.getVideoAnalysisOutputDir?.().then((dir) => {
       if (mounted && dir) setAnalysisOutputDir(dir)
     })
@@ -153,6 +157,7 @@ export default function Settings() {
       }
     })
     window.electronAPI.getVideoAnalysisRuntimeConfig?.().then((result) => {
+      if (mounted) setAnalysisRuntimeLoaded(true)
       if (mounted && result?.config) {
         setAnalysisRuntimeConfig({
           ...DEFAULT_ANALYSIS_RUNTIME_CONFIG,
@@ -172,6 +177,10 @@ export default function Settings() {
       } else if (mounted && result?.error) {
         setAnalysisConfigMessage(result.error)
       }
+    }).catch((error) => {
+      if (!mounted) return
+      setAnalysisRuntimeLoaded(true)
+      setAnalysisConfigMessage(error?.message || '读取视频理解配置失败')
     })
     return () => {
       mounted = false
@@ -466,7 +475,15 @@ export default function Settings() {
     }
   }, [selectedVlmPrecision, vlmModelOptions.models])
 
-  const handleSaveVlmConfig = useCallback(async (patch = {}) => {
+  const handleSaveVlmConfig = useCallback(async (patch = {}, options = {}) => {
+    if (!analysisRuntimeLoaded && !options.allowBeforeLoaded) {
+      const error = '视频理解配置还在读取中，请稍后再试'
+      if (!options.quiet) {
+        setVlmMessage(error)
+        setTimeout(() => setVlmMessage(''), 2200)
+      }
+      return { success: false, error }
+    }
     const nextConfig = {
       vlmProvider: analysisRuntimeConfig.vlmProvider,
       vlmBaseUrl: analysisRuntimeConfig.vlmBaseUrl,
@@ -482,21 +499,31 @@ export default function Settings() {
       ...patch
     }
     setVlmSaving(true)
-    const result = await window.electronAPI?.saveVideoAnalysisVlmConfig?.(nextConfig)
-    setVlmSaving(false)
-    if (result?.success) {
-      setAnalysisRuntimeConfig(prev => ({
-        ...prev,
-        ...result.config
-      }))
-      if (result.state) setVlmState(result.state)
-      setVlmMessage('视觉模型配置已保存')
-    } else {
-      setVlmMessage(result?.error || '保存视觉模型配置失败')
+    try {
+      const result = await window.electronAPI?.saveVideoAnalysisVlmConfig?.(nextConfig)
+      if (result?.success) {
+        setAnalysisRuntimeConfig(prev => ({
+          ...prev,
+          ...result.config
+        }))
+        if (result.state) setVlmState(result.state)
+        if (!options.quiet) setVlmMessage('视觉模型配置已保存')
+      } else {
+        setVlmMessage(result?.error || '保存视觉模型配置失败')
+      }
+      if (!options.quiet || !result?.success) {
+        setTimeout(() => setVlmMessage(''), 2200)
+      }
+      return result
+    } catch (err) {
+      const error = err?.message || '保存视觉模型配置失败'
+      setVlmMessage(error)
+      setTimeout(() => setVlmMessage(''), 2600)
+      return { success: false, error }
+    } finally {
+      setVlmSaving(false)
     }
-    setTimeout(() => setVlmMessage(''), 2200)
-    return result
-  }, [analysisRuntimeConfig])
+  }, [analysisRuntimeConfig, analysisRuntimeLoaded])
 
   const handleDownloadVlmModel = useCallback(async () => {
     const saved = await handleSaveVlmConfig({
@@ -505,52 +532,79 @@ export default function Settings() {
     })
     if (!saved?.success) return
     setVlmMessage('开始下载视觉模型')
-    const result = await window.electronAPI?.downloadVideoAnalysisVlmModel?.({
-      modelId: selectedVlmModelId,
-      precision: selectedVlmPrecision
-    })
-    if (result?.state) setVlmState(result.state)
-    if (result?.config) {
-      setAnalysisRuntimeConfig(prev => ({
-        ...prev,
-        ...result.config
-      }))
-    } else {
-      const runtime = await window.electronAPI?.getVideoAnalysisRuntimeConfig?.()
-      if (runtime?.config) {
+    try {
+      const result = await window.electronAPI?.downloadVideoAnalysisVlmModel?.({
+        modelId: selectedVlmModelId,
+        precision: selectedVlmPrecision
+      })
+      if (result?.state) setVlmState(result.state)
+      if (result?.config) {
         setAnalysisRuntimeConfig(prev => ({
           ...prev,
-          ...runtime.config
+          ...result.config
         }))
+      } else {
+        const runtime = await window.electronAPI?.getVideoAnalysisRuntimeConfig?.()
+        if (runtime?.config) {
+          setAnalysisRuntimeConfig(prev => ({
+            ...prev,
+            ...runtime.config
+          }))
+        }
       }
+      setVlmMessage(result?.success ? '视觉模型下载完成' : (result?.error || '视觉模型下载失败'))
+    } catch (err) {
+      setVlmMessage(err?.message || '视觉模型下载失败')
     }
-    setVlmMessage(result?.success ? '视觉模型下载完成' : (result?.error || '视觉模型下载失败'))
     setTimeout(() => setVlmMessage(''), 2600)
   }, [analysisModelDir, analysisRuntimeConfig.modelStorageDir, handleSaveVlmConfig, selectedVlmModelId, selectedVlmPrecision])
 
   const handleStartVlmService = useCallback(async () => {
-    const saved = await handleSaveVlmConfig()
-    if (!saved?.success) return
-    const result = await window.electronAPI?.startVideoAnalysisVlmService?.()
-    if (result?.state) setVlmState(result.state)
-    setVlmMessage(result?.success ? 'VLM 服务已启动并连接' : (result?.error || 'VLM 服务启动失败'))
-    setTimeout(() => setVlmMessage(''), 2600)
-  }, [handleSaveVlmConfig])
+    if (vlmStarting) return
+    if (!analysisRuntimeLoaded) {
+      setVlmMessage('视频理解配置还在读取中，请稍后再试')
+      setTimeout(() => setVlmMessage(''), 2200)
+      return
+    }
+    setVlmStarting(true)
+    setVlmMessage('正在启动 VLM 服务，模型加载可能需要一两分钟...')
+    try {
+      const saved = await handleSaveVlmConfig({}, { quiet: true })
+      if (!saved?.success) return
+      setVlmMessage('正在等待 VLM 服务就绪...')
+      const result = await window.electronAPI?.startVideoAnalysisVlmService?.()
+      if (result?.state) setVlmState(result.state)
+      setVlmMessage(result?.success ? 'VLM 服务已启动并连接' : (result?.error || 'VLM 服务启动失败'))
+    } catch (err) {
+      setVlmMessage(err?.message || 'VLM 服务启动失败')
+    } finally {
+      setVlmStarting(false)
+      setTimeout(() => setVlmMessage(''), 5000)
+    }
+  }, [analysisRuntimeLoaded, handleSaveVlmConfig, vlmStarting])
 
   const handleStopVlmService = useCallback(async () => {
-    const result = await window.electronAPI?.stopVideoAnalysisVlmService?.()
-    if (result?.state) setVlmState(result.state)
-    setVlmMessage(result?.success ? 'VLM 服务已停止' : (result?.error || 'VLM 服务停止失败'))
+    try {
+      const result = await window.electronAPI?.stopVideoAnalysisVlmService?.()
+      if (result?.state) setVlmState(result.state)
+      setVlmMessage(result?.success ? 'VLM 服务已停止' : (result?.error || 'VLM 服务停止失败'))
+    } catch (err) {
+      setVlmMessage(err?.message || 'VLM 服务停止失败')
+    }
     setTimeout(() => setVlmMessage(''), 2200)
   }, [])
 
   const handleRefreshVlmState = useCallback(async () => {
-    const result = await window.electronAPI?.getVideoAnalysisVlmState?.()
-    if (result?.state) {
-      setVlmState(result.state)
-      setVlmMessage(result.state.connected ? 'VLM 连接可用' : 'VLM 暂未连接')
-    } else {
-      setVlmMessage(result?.error || '检测 VLM 状态失败')
+    try {
+      const result = await window.electronAPI?.getVideoAnalysisVlmState?.()
+      if (result?.state) {
+        setVlmState(result.state)
+        setVlmMessage(result.state.connected ? 'VLM 连接可用' : 'VLM 暂未连接')
+      } else {
+        setVlmMessage(result?.error || '检测 VLM 状态失败')
+      }
+    } catch (err) {
+      setVlmMessage(err?.message || '检测 VLM 状态失败')
     }
     setTimeout(() => setVlmMessage(''), 2200)
   }, [])
@@ -783,10 +837,12 @@ export default function Settings() {
       analysisOutputMessage={analysisOutputMessage}
       analysisModelMessage={analysisModelMessage}
       analysisRuntimeConfig={analysisRuntimeConfig}
+      analysisRuntimeLoaded={analysisRuntimeLoaded}
       analysisConfigSaving={analysisConfigSaving}
       analysisConfigMessage={analysisConfigMessage}
       vlmState={vlmState}
       vlmSaving={vlmSaving}
+      vlmStarting={vlmStarting}
       vlmMessage={vlmMessage}
       vlmModelOptions={vlmModelOptions}
       selectedVlmModelId={selectedVlmModelId}

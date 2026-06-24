@@ -201,6 +201,7 @@ a:hover {
   display: flex;
   flex-direction: column;
   background: var(--bg-primary);
+  color: var(--text-primary);
 }
 
 /* ─── Header ─── */
@@ -502,6 +503,17 @@ a:hover {
   color: var(--text-primary);
   border-color: var(--border-strong);
   background: var(--bg-card-hover);
+}
+
+.btn-sm.btn-primary {
+  background: linear-gradient(135deg, var(--accent) 0%, #4a7dff 100%);
+  color: white;
+  border-color: rgba(255,255,255,0.08);
+}
+
+.btn-sm.btn-primary:hover {
+  background: linear-gradient(135deg, var(--accent-hover) 0%, #6b9aff 100%);
+  color: white;
 }
 
 .btn-xs {
@@ -1918,7 +1930,8 @@ a:hover {
   flex-direction: column;
   gap: 12px;
   padding: 14px;
-  overflow: auto;
+  overflow-y: auto;
+  overflow-x: hidden;
   border-left: 1px solid var(--border);
   background: var(--bg-secondary);
 }
@@ -2086,6 +2099,9 @@ a:hover {
 
 .analysis-task-card {
   position: relative;
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
   display: flex;
   flex-direction: column;
   gap: 6px;
@@ -2179,13 +2195,19 @@ a:hover {
 }
 
 .analysis-task-card p {
+  min-width: 0;
+  max-width: 100%;
   margin: 0;
   color: var(--text-secondary);
   font-size: 12px;
   line-height: 1.45;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .analysis-task-card small {
+  min-width: 0;
+  max-width: 100%;
   overflow: hidden;
   color: var(--text-muted);
   font-size: 11px;
@@ -3597,6 +3619,7 @@ a:hover {
   border: 1px solid var(--border);
   border-radius: 14px;
   box-shadow: var(--shadow-lg);
+  color: var(--text-primary);
   animation: slideUp 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
@@ -3610,8 +3633,17 @@ a:hover {
 }
 
 .settings-header h2 {
+  color: var(--text-primary);
   font-size: 17px;
   font-weight: 650;
+}
+
+.settings-panel .hint {
+  color: var(--text-secondary);
+}
+
+.settings-panel .hint.error {
+  color: var(--danger);
 }
 
 .settings-body {
@@ -3926,6 +3958,12 @@ a:hover {
   color: var(--text-secondary);
   font-size: 12px;
   line-height: 1.55;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+.analysis-config-note {
+  grid-column: 1 / -1;
 }
 
 .settings-section > .video-analysis-settings-hint {

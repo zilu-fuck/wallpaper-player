@@ -23,6 +23,16 @@ function getPreferredResourcePath(...segments) {
   return getResourcePath(...segments)
 }
 
+function isBundledLlamaServerPath(inputPath, backend) {
+  const normalized = String(inputPath || '').replace(/\\/g, '/').toLowerCase()
+  const resourceSuffix = `resources/vendor/${backend}/llama-server.exe`
+  const vendorSuffix = `vendor/${backend}/llama-server.exe`
+  return normalized === resourceSuffix ||
+    normalized.endsWith(`/${resourceSuffix}`) ||
+    normalized === vendorSuffix ||
+    normalized.endsWith(`/${vendorSuffix}`)
+}
+
 const BUNDLED_LLAMA_SERVER_PATH = getPreferredResourcePath('vendor', 'llama.cpp', 'llama-server.exe')
 const BUNDLED_LLAMA_CUDA_SERVER_PATH = getPreferredResourcePath('vendor', 'llama.cpp-cuda', 'llama-server.exe')
 const HF_MODEL_EXTENSIONS = new Set(['.gguf', '.bin', '.safetensors', '.onnx', '.pt', '.pth'])
@@ -167,10 +177,24 @@ function normalizePathKey(inputPath) {
 function getPreferredBundledLlamaServer(configuredPath) {
   if (
     fs.existsSync(BUNDLED_LLAMA_CUDA_SERVER_PATH) &&
-    (!configuredPath || normalizePathKey(configuredPath) === normalizePathKey(BUNDLED_LLAMA_SERVER_PATH))
+    (!configuredPath || isBundledLlamaServerPath(configuredPath, 'llama.cpp-cuda'))
   ) {
     return BUNDLED_LLAMA_CUDA_SERVER_PATH
   }
+  if (
+    fs.existsSync(BUNDLED_LLAMA_CUDA_SERVER_PATH) &&
+    (!configuredPath || normalizePathKey(configuredPath) === normalizePathKey(BUNDLED_LLAMA_SERVER_PATH) || isBundledLlamaServerPath(configuredPath, 'llama.cpp'))
+  ) {
+    return BUNDLED_LLAMA_CUDA_SERVER_PATH
+  }
+  if (
+    fs.existsSync(BUNDLED_LLAMA_SERVER_PATH) &&
+    (!configuredPath || isBundledLlamaServerPath(configuredPath, 'llama.cpp'))
+  ) {
+    return BUNDLED_LLAMA_SERVER_PATH
+  }
+  const configuredExists = Boolean(configuredPath && fs.existsSync(configuredPath))
+  if (configuredPath && configuredExists) return configuredPath
   return configuredPath || BUNDLED_LLAMA_SERVER_PATH
 }
 
@@ -615,7 +639,11 @@ async function startVlmService() {
     return { success: false, error: '请先选择 VLM 服务程序，例如 llama-server.exe 或其他 OpenAI 兼容服务程序' }
   }
   if (!fs.existsSync(serverExecutable)) {
-    return { success: false, error: `VLM 服务程序不存在：${serverExecutable}。请先运行 npm run prepare-vendor，或重新安装包含 llama.cpp 的版本。` }
+    return {
+      success: false,
+      error: `VLM 服务程序不存在：${serverExecutable}。请重新安装视频理解插件包，或在插件设置里重新选择 llama-server.exe。`,
+      state: await getVlmServiceState()
+    }
   }
   if (!config.vlmModelPath || !fs.existsSync(config.vlmModelPath)) {
     return { success: false, error: `VLM 模型文件不存在：${config.vlmModelPath || '未配置'}` }
@@ -650,6 +678,7 @@ async function startVlmService() {
   })
 
   emitVlmEvent({ type: 'started', autoMmprojPath })
+  emitVlmEvent({ type: 'output', output: `启动 VLM 服务：${serverExecutable}\n${args.join(' ')}` })
   const connected = await waitForVlmReady(config.vlmBaseUrl)
   const state = await getVlmServiceState()
   if (!connected) {

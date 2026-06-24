@@ -7,7 +7,7 @@ module.exports = {
   version: '1.0.0',
   enabled: false,
   source: 'official',
-  description: '官方视频理解、VLM 服务和分析结果插件。',
+  description: '视频理解、视觉模型服务和分析结果面板。下载或选择视觉模型后，就可以给视频生成摘要、标签和时间线。',
   settingsDefaults: {
     videoAnalysis: {
       enabled: false
@@ -16,7 +16,8 @@ module.exports = {
   settingsSchema: {
     videoAnalysis: {
       type: 'object',
-      description: '视频理解开关、结果目录、模型目录和 LLM/VLM 配置。'
+      title: '视频理解基础配置',
+      description: '保存启用状态、分析结果目录、模型目录和文本/视觉模型参数。默认配置适合大多数用户。'
     }
   },
   settingsSections: {
