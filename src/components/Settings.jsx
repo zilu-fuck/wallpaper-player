@@ -910,6 +910,11 @@ export default function Settings() {
               <section className="settings-section">
                 <h3 className="section-title">手机访问</h3>
                 <p className="section-desc">在同一局域网内用手机浏览和播放这台电脑的视频库。</p>
+                {remoteState?.identityCorruptedAt ? (
+                  <div className="settings-warning" style={{ marginBottom: 12 }}>
+                    <span>设备身份文件已损坏，已自动生成新身份。所有已绑定的手机需要重新扫码绑定。</span>
+                  </div>
+                ) : null}
                 <div className={`ffmpeg-status ${remoteState?.running ? 'ok' : 'warn'}`}>
                   <span className={`status-dot ${remoteState?.running ? 'green' : 'yellow'}`} />
                   <div className="status-content">

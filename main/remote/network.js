@@ -1,5 +1,18 @@
 const os = require('os')
 
+const VIRTUAL_INTERFACE_PATTERNS = [
+  'vmware', 'vmnet', 'virtualbox', 'vbox',
+  'vethernet', 'hyper-v', 'hyperv',
+  'docker', 'wsl',
+  'loopback', 'tap-windows', 'tunnel',
+  'bluetooth'
+]
+
+function isVirtualInterface(name) {
+  const lower = String(name || '').toLowerCase()
+  return VIRTUAL_INTERFACE_PATTERNS.some(pattern => lower.includes(pattern))
+}
+
 function getAddressScore(entry, name) {
   const address = entry.address
   const interfaceName = String(name || '').toLowerCase()
@@ -21,6 +34,7 @@ function getLanAddresses(port) {
   const interfaces = os.networkInterfaces()
 
   for (const [name, entries] of Object.entries(interfaces)) {
+    if (isVirtualInterface(name)) continue
     for (const entry of entries || []) {
       if (entry.family !== 'IPv4' || entry.internal) continue
       addresses.push({

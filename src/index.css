@@ -4781,6 +4781,16 @@ a:hover {
   border-bottom: 0;
 }
 
+.settings-warning {
+  padding: 10px 14px;
+  border: 1px solid var(--danger, #e74c3c);
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--danger, #e74c3c) 10%, transparent);
+  color: var(--danger, #e74c3c);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
 .remote-address-box {
   display: flex;
   align-items: center;

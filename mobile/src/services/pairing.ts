@@ -4,7 +4,7 @@ import { getClientId } from '../stores/devices'
 import { normalizeEndpoint } from '../utils/url'
 
 const PAIRING_POLL_INTERVAL_MS = 1200
-const PAIRING_WAIT_TIMEOUT_MS = 2 * 60 * 1000
+const PAIRING_WAIT_TIMEOUT_MS = 5 * 60 * 1000
 
 function uniqueEndpoints(...groups: Array<string | string[] | undefined>) {
   const seen = new Set<string>()

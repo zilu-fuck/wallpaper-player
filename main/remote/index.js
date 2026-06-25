@@ -6,6 +6,7 @@ const { createWindow, getMainWindow } = require('../window')
 const {
   approvePairingRequest,
   createPairingCode,
+  getIdentityCorruptedAt,
   listPairedDevices,
   listPendingPairingRequests,
   loadIdentity,
@@ -69,6 +70,7 @@ function getRemoteState() {
     endpoint: getPrimaryEndpoint(settings.port),
     endpoints: getLanAddresses(settings.port),
     accessToken: identity.accessToken,
+    identityCorruptedAt: getIdentityCorruptedAt(),
     pairedDevices: listPairedDevices(),
     pendingPairingRequests: listPendingPairingRequests()
   }

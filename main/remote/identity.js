@@ -2,11 +2,13 @@ const crypto = require('crypto')
 const fs = require('fs')
 const path = require('path')
 const { app } = require('electron')
+const log = require('electron-log')
 
 const IDENTITY_FILE = 'remote-identity.json'
 const DEFAULT_PAIRING_TTL_MS = 5 * 60 * 1000
 const LAST_SEEN_WRITE_INTERVAL_MS = 60 * 1000
 const fallbackUserDataDir = path.join(process.cwd(), '.tmp-wallpaper-player')
+let identityCorruptedAt = 0
 const pairingSessions = new Map()
 
 function getIdentityPath() {
@@ -105,15 +107,36 @@ function saveIdentity(identity) {
 
 function loadIdentity() {
   try {
-    const parsed = JSON.parse(fs.readFileSync(getIdentityPath(), 'utf-8'))
+    if (!fs.existsSync(getIdentityPath())) {
+      return loadFreshIdentity()
+    }
+    const raw = fs.readFileSync(getIdentityPath(), 'utf-8')
+    if (!raw.trim()) throw new Error('identity file is empty')
+    const parsed = JSON.parse(raw)
     const identity = normalizeIdentity(parsed)
+    if (!identity.machineSecret || !identity.accessToken) {
+      throw new Error('identity missing required fields')
+    }
     saveIdentity(identity)
     return identity
-  } catch {
-    const identity = createIdentity()
-    saveIdentity(identity)
-    return identity
+  } catch (err) {
+    const now = Date.now()
+    if (identityCorruptedAt === 0) {
+      identityCorruptedAt = now
+      log.error('[identity] 身份文件损坏，已自动重建，旧配对将失效:', err.message)
+    }
+    return loadFreshIdentity()
   }
+}
+
+function loadFreshIdentity() {
+  const identity = createIdentity()
+  saveIdentity(identity)
+  return identity
+}
+
+function getIdentityCorruptedAt() {
+  return identityCorruptedAt
 }
 
 function rotateAccessToken() {
@@ -550,6 +573,7 @@ function getPublicIdentity() {
 
 module.exports = {
   getIdentityPath,
+  getIdentityCorruptedAt,
   loadIdentity,
   rotateAccessToken,
   verifyAccessToken,
