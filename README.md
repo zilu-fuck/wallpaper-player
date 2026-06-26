@@ -8,16 +8,16 @@ Windows 发布包内置 mpv 和 FFmpeg，普通用户不需要额外安装播放
 
 | 端 | 版本 | 产物 |
 | --- | --- | --- |
-| Windows 电脑端 | `1.3.2` | `release/Wallpaper-Player-Setup-1.3.2.exe`、`release/Wallpaper-Player-1.3.2.exe` |
+| Windows 电脑端 | `1.3.3` | `release/Wallpaper-Player-Setup-1.3.3.exe`、`release/Wallpaper-Player-1.3.3.exe` |
 | Android 手机端 | `0.1.3` | `mobile/dist/wallpaper-player-mobile-0.1.3-arm64-release.apk` |
 | 插件包 | `video-analysis 1.0.0`、`ai-search 0.1.0`、`agent-bridge 0.1.0` | `release/plugins/*.zip` |
 
-本批更新说明见 [release-notes/v1.3.2.md](release-notes/v1.3.2.md)，开发记录见 [docs/dev-log-v1.3.0.md](docs/dev-log-v1.3.0.md)。
+本批更新说明见 [release-notes/v1.3.3.md](release-notes/v1.3.3.md)，开发记录见 [docs/dev-log-v1.3.0.md](docs/dev-log-v1.3.0.md)。
 
 ## 主要功能
 
 - 浏览、搜索、排序本地视频目录。
-- 按目录、标签、收藏组织视频，支持多标签交集筛选。
+- 按目录、标签、收藏组织视频，支持多标签包含/排除筛选和隐藏标签。
 - 使用 FFmpeg 生成缩略图。
 - 缓存视频时长、分辨率、编码等元数据，并使用扫描索引加快再次打开视频库。
 - 使用 mpv 播放常见桌面视频格式。
@@ -29,6 +29,7 @@ Windows 发布包内置 mpv 和 FFmpeg，普通用户不需要额外安装播放
 - 支持电脑端和手机端多选视频后批量添加标签，并可复用已有标签。
 - 支持电脑端移除绑定设备和多设备管理基础流程。
 - 支持隐私目录，默认从电脑端侧栏和手机端远程库中隐藏。
+- 便携版会把设置、缩略图、扫描缓存和手机绑定身份保存到 exe 同级 `Data/` 目录。
 - 支持插件管理，插件可贡献 IPC、远程路由、设置 schema 和生命周期。
 - 视频理解、AI 搜索、Agent Bridge 以插件形式分发；视频理解插件可在电脑端分析视频，并可在手机端查看分析进度、结果和标签。
 - 手机端未连接电脑前也可检查 APK 更新，并可在播放器设置中选择黑色或封面背景。
@@ -46,7 +47,7 @@ Windows 发布包内置 mpv 和 FFmpeg，普通用户不需要额外安装播放
 
 ## 安装和绑定
 
-1. 在电脑上安装或运行 `release/Wallpaper-Player-Setup-1.3.2.exe` / `release/Wallpaper-Player-1.3.2.exe`。
+1. 在电脑上安装或运行 `release/Wallpaper-Player-Setup-1.3.3.exe` / `release/Wallpaper-Player-1.3.3.exe`。
 2. 打开电脑端，添加视频目录。
 3. 如需视频理解、AI 搜索或 Agent Bridge，在电脑端设置的“插件管理”中安装对应 `release/plugins/*.zip` 插件包，再启用插件。
 4. 在电脑端设置中打开手机访问功能。
@@ -151,6 +152,7 @@ npm run typecheck
 |-- main/                    # 主进程、IPC、远程访问服务
 |-- main/plugins/            # 插件注册表、加载器和官方插件源码
 |-- main/remote/             # 手机端局域网访问、绑定、转码、视频索引
+|-- main/video-comprehension-runtime/  # 视频理解插件依赖的 Python 运行时（uv 管理）
 |-- mpv.js                   # mpv 进程和嵌入管理
 |-- preload.js               # 安全的渲染进程桥
 |-- src/                     # 电脑端 React UI

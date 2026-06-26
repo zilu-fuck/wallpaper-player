@@ -193,6 +193,16 @@ export async function addTagsToVideos(device: StoredDevice, videoIds: string[], 
   })
 }
 
+// 还原所有隐藏标签（需隐私密码验证，电脑端清空 hiddenTags）
+export async function restoreHiddenTags(device: StoredDevice, password: string) {
+  return requestJson<{ success: boolean }>(device.endpoint, '/v1/tags/restore-hidden', {
+    method: 'POST',
+    token: device.token,
+    body: { password },
+    timeoutMs: 10000
+  })
+}
+
 export async function startTranscode(device: StoredDevice, videoId: string, quality = 'compatible') {
   return requestJson<{ status: string, progress: number, error?: string, streamUrl?: string, queuePosition?: number }>(
     device.endpoint,

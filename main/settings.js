@@ -120,6 +120,19 @@ function sanitizeSettingsForRenderer(settings) {
   }
 }
 
+function normalizeHiddenTags(hiddenTags) {
+  if (!Array.isArray(hiddenTags)) return []
+  const seen = new Set()
+  const result = []
+  for (const value of hiddenTags) {
+    const tag = String(value || '').trim()
+    if (!tag || seen.has(tag)) continue
+    seen.add(tag)
+    result.push(tag)
+  }
+  return result
+}
+
 function normalizeCustomTags(customTags) {
   if (!customTags || typeof customTags !== 'object' || Array.isArray(customTags)) {
     return {}
@@ -358,6 +371,7 @@ function loadSettings() {
     defaultDirectory: '',
     favorites: [],
     customTags: {},
+    hiddenTags: [],
     playbackStates: {},
     playbackMode: 'order',
     privacy: normalizePrivacy(),
@@ -385,6 +399,7 @@ function loadSettings() {
       defaultDirectory,
       favorites: Array.isArray(parsed.favorites) ? parsed.favorites : defaults.favorites,
       customTags: normalizeCustomTags(parsed.customTags),
+      hiddenTags: normalizeHiddenTags(parsed.hiddenTags),
       playbackStates: normalizePlaybackStates(parsed.playbackStates),
       playbackMode: ['order', 'shuffle', 'single'].includes(parsed.playbackMode) ? parsed.playbackMode : defaults.playbackMode,
       privacy: normalizePrivacy(parsed.privacy),
@@ -428,6 +443,7 @@ function saveSettings(settings) {
   }
   if (!Array.isArray(merged.favorites)) merged.favorites = []
   merged.customTags = normalizeCustomTags(merged.customTags)
+  merged.hiddenTags = normalizeHiddenTags(merged.hiddenTags)
   merged.playbackStates = normalizePlaybackStates(merged.playbackStates)
   merged.playbackMode = ['order', 'shuffle', 'single'].includes(merged.playbackMode) ? merged.playbackMode : 'order'
   merged.privacy = normalizePrivacy(merged.privacy)
@@ -530,6 +546,10 @@ function sanitizeSettingsForSave(settings) {
       : current.customTags || {}
   }
 
+  if (Object.hasOwn(sanitized, 'hiddenTags')) {
+    sanitized.hiddenTags = normalizeHiddenTags(sanitized.hiddenTags)
+  }
+
   if (Object.hasOwn(sanitized, 'playbackStates')) {
     sanitized.playbackStates = normalizePlaybackStates(sanitized.playbackStates)
   }
@@ -586,6 +606,7 @@ module.exports = {
   verifyPrivacyPassword,
   getPublicDirectories,
   normalizeCustomTags,
+  normalizeHiddenTags,
   normalizePlaybackState,
   normalizePlaybackStates,
   normalizeRemoteAccess,

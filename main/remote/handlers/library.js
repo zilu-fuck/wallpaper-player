@@ -3,6 +3,23 @@ const { scanWithCache } = require('../../scanner')
 const { getDirectoryId, getDirectoryName, toRemoteVideo } = require('../video-index')
 const { sendJson } = require('../http-utils')
 
+// 过滤掉含隐藏标签的视频（隐藏标签持久化在 settings.hiddenTags，受密码保护）
+function filterHiddenTags(items, hiddenTags) {
+  if (!Array.isArray(hiddenTags) || hiddenTags.length === 0) return items
+  const hiddenSet = new Set(hiddenTags)
+  return items.filter(item => {
+    const customTags = Array.isArray(item.customTags) ? item.customTags : []
+    const systemTags = Array.isArray(item.systemTags) ? item.systemTags : []
+    for (const tag of customTags) {
+      if (hiddenSet.has(`custom:${tag}`)) return false
+    }
+    for (const tag of systemTags) {
+      if (hiddenSet.has(`system:${tag}`)) return false
+    }
+    return true
+  })
+}
+
 function buildCategoryGroups(items) {
   const customCounts = new Map()
   const systemCounts = new Map()
@@ -81,12 +98,29 @@ function createLibraryHandlers({ getRequestToken }) {
       }
     }
 
+    // 应用隐藏标签过滤（与桌面端 useVideoFilter 一致：含隐藏标签的视频从画廊移除）
+    const hiddenTags = Array.isArray(settings.hiddenTags) ? settings.hiddenTags : []
+    const filteredItems = filterHiddenTags(items, hiddenTags)
+
+    // 基于过滤后的视频重新计算各目录计数，保持与画廊一致
+    if (hiddenTags.length > 0) {
+      const filteredCounts = new Map()
+      for (const item of filteredItems) {
+        const dirId = item.directoryId
+        if (dirId) filteredCounts.set(dirId, (filteredCounts.get(dirId) || 0) + 1)
+      }
+      for (const summary of directorySummaries) {
+        summary.count = filteredCounts.get(summary.id) || 0
+      }
+    }
+
     sendJson(req, res, 200, {
-      items,
-      count: items.length,
+      items: filteredItems,
+      count: filteredItems.length,
       directories: directorySummaries,
-      categoryGroups: buildCategoryGroups(items),
-      favoriteCount: items.filter(item => item.favorite).length,
+      categoryGroups: buildCategoryGroups(filteredItems),
+      favoriteCount: filteredItems.filter(item => item.favorite).length,
+      hiddenTagCount: hiddenTags.length,
       scannedAt: Date.now(),
       indexed,
       refreshing

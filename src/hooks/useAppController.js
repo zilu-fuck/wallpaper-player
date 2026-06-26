@@ -30,8 +30,9 @@ export function useAppController() {
 
   const { favoriteKeys, handleToggleFavorite } = useFavorites({ settings, saveSettings })
   const customTags = settings?.customTags || {}
+  const hiddenTags = settings?.hiddenTags || []
 
-  const filter = useVideoFilter({ videos: scan.videos, customTags, favoriteKeys })
+  const filter = useVideoFilter({ videos: scan.videos, customTags, favoriteKeys, hiddenTags })
   const tagEditor = useTagEditor({ settings, saveSettings })
   const player = usePlayer({
     queueVideos: filter.filteredVideos,
@@ -45,7 +46,8 @@ export function useAppController() {
     pluginsLoaded: appState.pluginsLoaded
   })
   const { handlePlayPath } = player
-  const totalCount = scan.videos.length
+  // 优先使用排除隐藏标签后的可见计数；扫描未完成时回退到扫描数量
+  const totalCount = filter.visibleCount ?? scan.videos.length
 
   // 初始化：加载设置、扫描默认目录（用 ref 防止 StrictMode 重复调用）
   const initRef = useRef(false)
@@ -185,6 +187,7 @@ export function useAppController() {
     ...videoAnalysisTasks,
     totalCount,
     customTags,
+    hiddenTags,
     favoriteKeys,
     handleToggleFavorite,
     handleOpenInFolder,

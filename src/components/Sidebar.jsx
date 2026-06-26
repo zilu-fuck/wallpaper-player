@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useApp } from '../context/AppContext'
 
 function dirName(dir) {
@@ -17,10 +17,13 @@ export default function Sidebar() {
     setShowSettings,
     categoryGroups = { custom: [], system: [] },
     activeCategory = 'all',
-    selectedCategoryKeys = [],
+    includedCategoryKeys = [],
+    excludedCategoryKeys = [],
     setActiveCategory,
     favoriteCount = 0,
-    totalCount = 0
+    totalCount = 0,
+    hiddenTags = [],
+    saveSettings
   } = useApp()
 
   const directories = settings?.directories || []
@@ -37,10 +40,16 @@ export default function Sidebar() {
   const [privacyMessage, setPrivacyMessage] = useState('')
   const [privacySubmitting, setPrivacySubmitting] = useState(false)
   const [pendingPrivateDirectory, setPendingPrivateDirectory] = useState(null)
+  // privacy 动作类型：'unlockPrivateDirs' 解锁隐私目录 | 'restoreHiddenTags' 还原隐藏标签
+  const [privacyAction, setPrivacyAction] = useState(null)
   const [directoryMenu, setDirectoryMenu] = useState(null)
   const [localDirs, setLocalDirs] = useState(() => directories.filter(dir => showPrivateDirs || !privateDirSet.has(dir)))
   const privacyPasswordSet = Boolean(settings?.privacy?.passwordSet)
-  const selectedCategoryKeySet = useMemo(() => new Set(selectedCategoryKeys), [selectedCategoryKeys])
+  const includedKeySet = useMemo(() => new Set(includedCategoryKeys), [includedCategoryKeys])
+  const excludedKeySet = useMemo(() => new Set(excludedCategoryKeys), [excludedCategoryKeys])
+  // 用 ref 跟踪最新 hiddenTags，避免快速连续隐藏时 React state 未更新导致覆盖丢失
+  const hiddenTagsRef = useRef(hiddenTags)
+  useEffect(() => { hiddenTagsRef.current = hiddenTags }, [hiddenTags])
 
   useEffect(() => {
     setLocalDirs(directories.filter(dir => showPrivateDirs || !privateDirSet.has(dir)))
@@ -80,6 +89,7 @@ export default function Sidebar() {
       setPrivacyPassword('')
       setPrivacyConfirmPassword('')
       setPrivacyMessage('')
+      setPrivacyAction('unlockPrivateDirs')
       setPrivacyDialogOpen(true)
     }
     window.addEventListener('wallpaper-player-private-directory-password-required', openPendingPrivateDirectory)
@@ -103,6 +113,7 @@ export default function Sidebar() {
     setPrivacyPassword('')
     setPrivacyConfirmPassword('')
     setPrivacyMessage('')
+    setPrivacyAction('unlockPrivateDirs')
     setPrivacyDialogOpen(true)
   }, [lockPrivateDirs, showPrivateDirs])
 
@@ -112,6 +123,7 @@ export default function Sidebar() {
     setPrivacyConfirmPassword('')
     setPrivacyMessage('')
     setPendingPrivateDirectory(null)
+    setPrivacyAction(null)
   }, [])
 
   const savePrivateDirectory = useCallback(async (dir) => {
@@ -156,10 +168,15 @@ export default function Sidebar() {
         setPrivacyMessage(result?.error || '隐私验证失败')
         return
       }
-      if (pendingPrivateDirectory) {
-        await savePrivateDirectory(pendingPrivateDirectory)
+      if (privacyAction === 'restoreHiddenTags') {
+        await saveSettings?.({ hiddenTags: [] })
+      } else {
+        // unlockPrivateDirs 默认分支
+        if (pendingPrivateDirectory) {
+          await savePrivateDirectory(pendingPrivateDirectory)
+        }
+        setShowPrivateDirs(true)
       }
-      setShowPrivateDirs(true)
       closePrivacyDialog()
     } catch (err) {
       setPrivacyMessage(err?.message || '隐私验证失败')
@@ -168,16 +185,13 @@ export default function Sidebar() {
     }
   }, [
     closePrivacyDialog,
-    currentDir,
-    directories,
-    getPublicDirs,
-    handleDirectoriesChange,
     pendingPrivateDirectory,
+    privacyAction,
     privacyConfirmPassword,
     privacyPassword,
     privacyPasswordSet,
-    privateDirectories,
-    savePrivateDirectory
+    savePrivateDirectory,
+    saveSettings
   ])
 
   const saveDirs = useCallback((newDirs, nextPrivateDirs = privateDirectories) => {
@@ -237,6 +251,7 @@ export default function Sidebar() {
       setPrivacyPassword('')
       setPrivacyConfirmPassword('')
       setPrivacyMessage('')
+      setPrivacyAction('unlockPrivateDirs')
       setPrivacyDialogOpen(true)
       return
     }
@@ -253,6 +268,26 @@ export default function Sidebar() {
     setActiveCategory?.(categoryKey)
   }, [setActiveCategory])
 
+  // 隐藏单个标签：直接加入 hiddenTags（无需密码）
+  const handleHideTag = useCallback((categoryKey) => {
+    const current = hiddenTagsRef.current || []
+    if (current.includes(categoryKey)) return
+    const next = [...current, categoryKey]
+    hiddenTagsRef.current = next
+    saveSettings?.({ hiddenTags: next })
+  }, [saveSettings])
+
+  // 还原所有隐藏标签：需要隐私密码
+  const requestRestoreHiddenTags = useCallback(() => {
+    if (!hiddenTags || hiddenTags.length === 0) return
+    setPrivacyPassword('')
+    setPrivacyConfirmPassword('')
+    setPrivacyMessage('')
+    setPendingPrivateDirectory(null)
+    setPrivacyAction('restoreHiddenTags')
+    setPrivacyDialogOpen(true)
+  }, [hiddenTags])
+
   const onToggle = useCallback(() => setSidebarCollapsed(!sidebarCollapsed), [sidebarCollapsed, setSidebarCollapsed])
   const onOpenSettings = useCallback(() => setShowSettings(true), [setShowSettings])
 
@@ -260,22 +295,51 @@ export default function Sidebar() {
     <div className="sidebar-category-group">
       <div className="sidebar-category-group-title">{title}</div>
       {categories.length > 0 ? (
-        categories.map(category => (
-          <button
-            key={category.key}
-            className={`sidebar-category-item${selectedCategoryKeySet.has(category.key) ? ' active' : ''}`}
-            onClick={() => handleCategorySelect(category.key)}
-            title={category.name}
-          >
-            <span className="sidebar-category-name">
-              <span className="sidebar-category-check" aria-hidden="true">
-                {selectedCategoryKeySet.has(category.key) ? '✓' : ''}
+        categories.map(category => {
+          const isIncluded = includedKeySet.has(category.key)
+          const isExcluded = excludedKeySet.has(category.key)
+          const stateClass = isIncluded ? ' active' : isExcluded ? ' excluded' : ''
+          return (
+            <div
+              key={category.key}
+              className={`sidebar-category-item${stateClass}`}
+              role="button"
+              tabIndex={0}
+              onClick={() => handleCategorySelect(category.key)}
+              onKeyDown={(e) => {
+                // 焦点在内部隐藏按钮上时不触发外层筛选，交由按钮自身处理
+                if (e.target !== e.currentTarget) return
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault()
+                  handleCategorySelect(category.key)
+                }
+              }}
+              title={`${category.name}（点击切换：包含 / 排除 / 取消）`}
+            >
+              <span className="sidebar-category-name">
+                <span className="sidebar-category-check" aria-hidden="true">
+                  {isIncluded ? '✓' : isExcluded ? '✕' : ''}
+                </span>
+                {category.name}
               </span>
-              {category.name}
-            </span>
-            <span className="sidebar-category-count">{category.count}</span>
-          </button>
-        ))
+              <span className="sidebar-category-actions">
+                <button
+                  type="button"
+                  className="sidebar-category-hide-btn"
+                  onClick={(e) => { e.stopPropagation(); handleHideTag(category.key) }}
+                  title={`隐藏"${category.name}"标签`}
+                  aria-label={`隐藏${category.name}`}
+                >
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24" />
+                    <line x1="1" y1="1" x2="23" y2="23" />
+                  </svg>
+                </button>
+                <span className="sidebar-category-count">{category.count}</span>
+              </span>
+            </div>
+          )
+        })
       ) : (
         <div className="sidebar-category-empty">{emptyText}</div>
       )}
@@ -440,16 +504,37 @@ export default function Sidebar() {
           <div className="sidebar-section sidebar-category-section">
             <div className="sidebar-section-header">
               <span className="sidebar-label">分类</span>
+              <div className="sidebar-section-actions">
+                {hiddenTags && hiddenTags.length > 0 ? (
+                  <button
+                    className="sidebar-add-mini"
+                    onClick={requestRestoreHiddenTags}
+                    title="还原隐藏的标签"
+                    aria-label="还原隐藏的标签"
+                  >
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.3">
+                      <path d="M17.94 17.94A10.9 10.9 0 0 1 12 20C7 20 2.73 16.89 1 12c.75-2.12 2.05-3.95 3.72-5.31" />
+                      <path d="M9.9 4.24A10.7 10.7 0 0 1 12 4c5 0 9.27 3.11 11 8a11.8 11.8 0 0 1-2.16 3.19" />
+                      <path d="M14.12 14.12A3 3 0 0 1 9.88 9.88" />
+                      <path d="M1 1l22 22" />
+                    </svg>
+                  </button>
+                ) : null}
+              </div>
             </div>
           <div className="sidebar-category-list">
-              {selectedCategoryKeys.length > 0 ? (
+              {includedCategoryKeys.length > 0 || excludedCategoryKeys.length > 0 ? (
                 <div className="sidebar-category-filterbar">
-                  <span>交集筛选 {selectedCategoryKeys.length} 项</span>
+                  <span>
+                    {includedCategoryKeys.length > 0 && `包含 ${includedCategoryKeys.length}`}
+                    {includedCategoryKeys.length > 0 && excludedCategoryKeys.length > 0 && '，'}
+                    {excludedCategoryKeys.length > 0 && `排除 ${excludedCategoryKeys.length}`}
+                  </span>
                   <button type="button" onClick={() => handleCategorySelect('all')}>清空</button>
                 </div>
               ) : null}
               <button
-                className={`sidebar-category-item${selectedCategoryKeys.length === 0 ? ' active' : ''}`}
+                className={`sidebar-category-item${includedCategoryKeys.length === 0 && excludedCategoryKeys.length === 0 ? ' active' : ''}`}
                 onClick={() => handleCategorySelect('all')}
               >
                 <span className="sidebar-category-name">全部</span>
@@ -507,7 +592,11 @@ export default function Sidebar() {
         <div className="privacy-dialog-overlay" onClick={closePrivacyDialog}>
           <form className="privacy-dialog" onSubmit={submitPrivacyPassword} onClick={(event) => event.stopPropagation()}>
             <div className="privacy-dialog-header">
-              <h2>{privacyPasswordSet ? '解锁隐私目录' : '设置隐私密码'}</h2>
+              <h2>
+                {privacyAction === 'restoreHiddenTags'
+                  ? (privacyPasswordSet ? '还原隐藏标签' : '设置隐私密码')
+                  : (privacyPasswordSet ? '解锁隐私目录' : '设置隐私密码')}
+              </h2>
               <button type="button" className="btn btn-icon" onClick={closePrivacyDialog} aria-label="关闭">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <path d="M18 6L6 18M6 6l12 12" />
@@ -537,14 +626,20 @@ export default function Sidebar() {
                 </label>
               )}
               <p className="privacy-hint">
-                {privacyPasswordSet ? '解锁后仅本次打开期间显示隐私目录。' : '以后显示隐私目录时都需要输入这个密码。'}
+                {privacyAction === 'restoreHiddenTags'
+                  ? (privacyPasswordSet ? '验证密码后还原所有被隐藏的标签。' : '设置密码后即可还原所有被隐藏的标签。')
+                  : (privacyPasswordSet ? '解锁后仅本次打开期间显示隐私目录。' : '以后显示隐私目录时都需要输入这个密码。')}
               </p>
               {privacyMessage && <p className="privacy-error">{privacyMessage}</p>}
             </div>
             <div className="privacy-dialog-footer">
               <button type="button" className="btn btn-sm" onClick={closePrivacyDialog}>取消</button>
               <button type="submit" className="btn btn-sm btn-primary" disabled={privacySubmitting}>
-                {privacySubmitting ? '处理中...' : (privacyPasswordSet ? '解锁' : '设置并显示')}
+                {privacySubmitting
+                  ? '处理中...'
+                  : (privacyAction === 'restoreHiddenTags'
+                      ? (privacyPasswordSet ? '验证并还原' : '设置并还原')
+                      : (privacyPasswordSet ? '解锁' : '设置并显示'))}
               </button>
             </div>
           </form>

@@ -136,7 +136,8 @@ function createRemoteServer({ port, onPairingRequest } = {}) {
     handlePutPlayback,
     handleToggleFavorite,
     handlePutTags,
-    handlePutBulkTags
+    handlePutBulkTags,
+    handleRestoreHiddenTags
   } = createTagsHandlers({ resolveVideoPath })
   const {
     handlePlayOnDesktop,
@@ -264,6 +265,12 @@ function createRemoteServer({ port, onPairingRequest } = {}) {
       const tagsMatch = pathname.match(/^\/v1\/videos\/([^/]+)\/tags$/)
       if (tagsMatch && req.method === 'PUT') {
         await handlePutTags(req, res, decodeVideoId(tagsMatch[1]))
+        return
+      }
+
+      // 还原所有隐藏标签（需隐私密码验证）
+      if (req.method === 'POST' && pathname === '/v1/tags/restore-hidden') {
+        await handleRestoreHiddenTags(req, res)
         return
       }
 

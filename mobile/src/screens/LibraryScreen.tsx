@@ -1,6 +1,7 @@
 import {
   ArrowLeft,
   Calendar,
+  EyeOff,
   Folder,
   FolderOpen,
   Grid2x2,
@@ -38,7 +39,7 @@ import { ConnectionStatus } from '../components/ConnectionStatus'
 import { MobileUpdateCard } from '../components/MobileUpdateCard'
 import { PrimaryButton } from '../components/PrimaryButton'
 import { VideoCard } from '../components/VideoCard'
-import { addTagsToVideos, ApiError, getLibrary, toggleFavorite } from '../services/api'
+import { addTagsToVideos, ApiError, getLibrary, restoreHiddenTags, toggleFavorite } from '../services/api'
 import { testConnection } from '../services/connection-manager'
 import { loadCachedLibrary, saveLibraryResponse } from '../stores/library'
 import { useTheme } from '../theme-context'
@@ -71,6 +72,7 @@ type TagFilter = {
   key: string
   type: 'custom' | 'system'
   name: string
+  state: 'include' | 'exclude'
 }
 
 const GRID_COLUMNS = 2
@@ -242,6 +244,10 @@ export function LibraryScreen({ navigation, device }: Props) {
   const [bulkTagQuery, setBulkTagQuery] = useState('')
   const [bulkSelectedTags, setBulkSelectedTags] = useState<string[]>([])
   const [bulkSaving, setBulkSaving] = useState(false)
+  const [restoreHiddenOpen, setRestoreHiddenOpen] = useState(false)
+  const [restorePassword, setRestorePassword] = useState('')
+  const [restoreSubmitting, setRestoreSubmitting] = useState(false)
+  const [restoreError, setRestoreError] = useState('')
   const { width } = useWindowDimensions()
 
   useEffect(() => {
@@ -404,10 +410,14 @@ export function LibraryScreen({ navigation, device }: Props) {
 
   const filteredVideos = useMemo(() => {
     const keyword = query.trim().toLowerCase()
+    const includeFilters = tagFilters.filter(f => f.state === 'include')
+    const excludeFilters = tagFilters.filter(f => f.state === 'exclude')
     const scoped = videos.filter(video => {
       if (selection.mode === 'favorites') return Boolean(video.favorite)
       if (selection.mode === 'directory') return video.directoryId === selection.id
-      return tagFilters.every(filter => videoMatchesTagFilter(video, filter))
+      // 包含：AND 交集；排除：并集排除（命中任一即隐藏）
+      return includeFilters.every(filter => videoMatchesTagFilter(video, filter)) &&
+        excludeFilters.every(filter => !videoMatchesTagFilter(video, filter))
     })
 
     const searched = keyword
@@ -426,12 +436,21 @@ export function LibraryScreen({ navigation, device }: Props) {
 
   const gridPadding = 10
   const cardWidth = Math.max(144, Math.floor((width - gridPadding * 2 - GRID_GAP) / GRID_COLUMNS))
-  const title = tagFilters.length
-    ? tagFilters.map(filter => filter.name).join(' + ')
-    : selection.mode === 'all' ? activeDevice.name : selection.label
+  const title = useMemo(() => {
+    if (tagFilters.length === 0) {
+      return selection.mode === 'all' ? activeDevice.name : selection.label
+    }
+    const includeNames = tagFilters.filter(f => f.state === 'include').map(f => f.name)
+    const excludeNames = tagFilters.filter(f => f.state === 'exclude').map(f => f.name)
+    const parts: string[] = []
+    if (includeNames.length) parts.push(includeNames.join(' + '))
+    if (excludeNames.length) parts.push('排除 ' + excludeNames.join(' / '))
+    return parts.join('，')
+  }, [activeDevice.name, selection.label, selection.mode, tagFilters])
   const selectedVideoIdSet = useMemo(() => new Set(selectedVideoIds), [selectedVideoIds])
   const selectionModeActive = selectedVideoIds.length > 0
-  const tagFilterKeySet = useMemo(() => new Set(tagFilters.map(filter => filter.key)), [tagFilters])
+  const includedTagKeySet = useMemo(() => new Set(tagFilters.filter(f => f.state === 'include').map(f => f.key)), [tagFilters])
+  const excludedTagKeySet = useMemo(() => new Set(tagFilters.filter(f => f.state === 'exclude').map(f => f.key)), [tagFilters])
   const availableBulkTags = useMemo(() => {
     const tags: string[] = []
 
@@ -492,10 +511,19 @@ export function LibraryScreen({ navigation, device }: Props) {
     select({ mode: 'settings', label: '设置' })
   }, [select])
 
-  const toggleTagFilter = useCallback((filter: TagFilter) => {
+  const toggleTagFilter = useCallback((filter: Omit<TagFilter, 'state'>) => {
     setTagFilters(current => {
-      const exists = current.some(item => item.key === filter.key)
-      const next = exists ? current.filter(item => item.key !== filter.key) : [...current, filter]
+      const existing = current.find(item => item.key === filter.key)
+      // 三态循环：未选 → 包含 → 排除 → 未选
+      let next: TagFilter[]
+      if (!existing) {
+        next = [...current, { ...filter, state: 'include' }]
+      } else if (existing.state === 'include') {
+        next = current.map(item => item.key === filter.key ? { ...item, state: 'exclude' as const } : item)
+      } else {
+        // exclude → 移除
+        next = current.filter(item => item.key !== filter.key)
+      }
       setSelection(next.length
         ? { mode: filter.type, id: filter.key, label: filter.name }
         : { mode: 'all', label: activeDevice.name })
@@ -509,6 +537,27 @@ export function LibraryScreen({ navigation, device }: Props) {
       setSelection({ mode: 'all', label: activeDevice.name })
     }
   }, [activeDevice.name, selection.mode])
+
+  const submitRestoreHiddenTags = useCallback(async () => {
+    if (!restorePassword) {
+      setRestoreError('请输入隐私密码')
+      return
+    }
+    setRestoreSubmitting(true)
+    setRestoreError('')
+    try {
+      await restoreHiddenTags(activeDevice, restorePassword)
+      setRestoreHiddenOpen(false)
+      setRestorePassword('')
+      // 重新拉取库以反映还原后的列表
+      setRefreshing(true)
+      load(false)
+    } catch (err) {
+      setRestoreError(err instanceof ApiError ? err.message : '还原失败，请重试')
+    } finally {
+      setRestoreSubmitting(false)
+    }
+  }, [activeDevice, load, restorePassword])
 
   const handleSortSelect = useCallback((key: SortKey) => {
     setVisibleSortBy(key)
@@ -809,7 +858,14 @@ export function LibraryScreen({ navigation, device }: Props) {
           {tagFilters.length ? (
             <View style={styles.filterBar}>
               <Text style={styles.filterBarText} numberOfLines={1}>
-                交集筛选：{tagFilters.map(filter => filter.name).join(' + ')}
+                {(() => {
+                  const inc = tagFilters.filter(f => f.state === 'include')
+                  const exc = tagFilters.filter(f => f.state === 'exclude')
+                  const parts: string[] = []
+                  if (inc.length) parts.push(`包含 ${inc.length}`)
+                  if (exc.length) parts.push(`排除 ${exc.length}`)
+                  return parts.join('，')
+                })()}
               </Text>
               <Pressable style={styles.filterClearButton} onPress={clearTagFilters}>
                 <Text style={styles.filterClearText}>清空</Text>
@@ -965,6 +1021,48 @@ export function LibraryScreen({ navigation, device }: Props) {
         </KeyboardAvoidingView>
       ) : null}
 
+      {restoreHiddenOpen ? (
+        <KeyboardAvoidingView
+          style={styles.bulkSheetAvoider}
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          pointerEvents="box-none"
+        >
+          <Pressable style={styles.bulkSheetScrim} onPress={() => setRestoreHiddenOpen(false)} />
+          <View style={styles.bulkSheet}>
+            <View style={styles.bulkSheetHeader}>
+              <Text style={styles.bulkSheetTitle}>还原隐藏标签</Text>
+              <Pressable style={styles.drawerClose} onPress={() => setRestoreHiddenOpen(false)}>
+                <X color={colors.text} size={20} />
+              </Pressable>
+            </View>
+            <View style={styles.bulkSheetScrollContent}>
+              <Text style={styles.bulkSheetHint}>
+                验证隐私密码后，将还原电脑端所有被隐藏的标签。
+              </Text>
+              <TextInput
+                value={restorePassword}
+                onChangeText={setRestorePassword}
+                placeholder="请输入隐私密码"
+                placeholderTextColor={colors.subtle}
+                style={styles.bulkInput}
+                secureTextEntry
+                returnKeyType="done"
+                onSubmitEditing={submitRestoreHiddenTags}
+              />
+              {restoreError ? <Text style={styles.restoreErrorText}>{restoreError}</Text> : null}
+            </View>
+            <Pressable
+              style={[styles.bulkSaveButton, (!restorePassword || restoreSubmitting) && styles.updateButtonDisabled]}
+              onPress={submitRestoreHiddenTags}
+              disabled={!restorePassword || restoreSubmitting}
+            >
+              {restoreSubmitting ? <ActivityIndicator color={colors.onAccent} size="small" /> : null}
+              <Text style={styles.bulkSaveButtonText}>{restoreSubmitting ? '还原中...' : '还原隐藏标签'}</Text>
+            </Pressable>
+          </View>
+        </KeyboardAvoidingView>
+      ) : null}
+
       {drawerOpen ? (
         <View style={StyleSheet.absoluteFill} pointerEvents="box-none">
           <Pressable style={styles.drawerScrim} onPress={closeDrawer} />
@@ -1007,32 +1105,57 @@ export function LibraryScreen({ navigation, device }: Props) {
                 )}
               </DrawerSection>
 
-              <DrawerSection title="自定义分类">
-                {categoryGroups.custom.length ? categoryGroups.custom.map(category => (
-                  <DrawerItem
-                    key={category.key}
-                    label={category.name}
-                    count={category.count}
-                    active={tagFilterKeySet.has(category.key)}
-                    icon={<Tag color={tagFilterKeySet.has(category.key) ? colors.text : colors.muted} size={20} />}
-                    onPress={() => toggleTagFilter({ key: category.key, type: 'custom', name: category.name })}
-                  />
-                )) : (
+              <DrawerSection
+                title="自定义分类"
+                headerAction={library.hiddenTagCount && library.hiddenTagCount > 0 ? (
+                  <Pressable
+                    hitSlop={8}
+                    onPress={() => {
+                      setRestoreError('')
+                      setRestorePassword('')
+                      setRestoreHiddenOpen(true)
+                    }}
+                    accessibilityLabel="还原隐藏的标签"
+                  >
+                    <EyeOff color={colors.muted} size={16} />
+                  </Pressable>
+                ) : undefined}
+              >
+                {categoryGroups.custom.length ? categoryGroups.custom.map(category => {
+                  const isIncluded = includedTagKeySet.has(category.key)
+                  const isExcluded = excludedTagKeySet.has(category.key)
+                  return (
+                    <DrawerItem
+                      key={category.key}
+                      label={category.name}
+                      count={category.count}
+                      active={isIncluded}
+                      excluded={isExcluded}
+                      icon={<Tag color={isIncluded ? colors.text : isExcluded ? colors.danger : colors.muted} size={20} />}
+                      onPress={() => toggleTagFilter({ key: category.key, type: 'custom', name: category.name })}
+                    />
+                  )
+                }) : (
                   <Text style={styles.drawerEmpty}>暂无自定义分类</Text>
                 )}
               </DrawerSection>
 
               <DrawerSection title="系统分类">
-                {categoryGroups.system.length ? categoryGroups.system.map(category => (
-                  <DrawerItem
-                    key={category.key}
-                    label={category.name}
-                    count={category.count}
-                    active={tagFilterKeySet.has(category.key)}
-                    icon={<Folder color={tagFilterKeySet.has(category.key) ? colors.text : colors.muted} size={20} />}
-                    onPress={() => toggleTagFilter({ key: category.key, type: 'system', name: category.name })}
-                  />
-                )) : (
+                {categoryGroups.system.length ? categoryGroups.system.map(category => {
+                  const isIncluded = includedTagKeySet.has(category.key)
+                  const isExcluded = excludedTagKeySet.has(category.key)
+                  return (
+                    <DrawerItem
+                      key={category.key}
+                      label={category.name}
+                      count={category.count}
+                      active={isIncluded}
+                      excluded={isExcluded}
+                      icon={<Folder color={isIncluded ? colors.text : isExcluded ? colors.danger : colors.muted} size={20} />}
+                      onPress={() => toggleTagFilter({ key: category.key, type: 'system', name: category.name })}
+                    />
+                  )
+                }) : (
                   <Text style={styles.drawerEmpty}>暂无系统分类</Text>
                 )}
               </DrawerSection>
@@ -1061,16 +1184,20 @@ export function LibraryScreen({ navigation, device }: Props) {
 
 type DrawerSectionProps = {
   title: string
+  headerAction?: ReactNode
   children: ReactNode
 }
 
-function DrawerSection({ title, children }: DrawerSectionProps) {
+function DrawerSection({ title, headerAction, children }: DrawerSectionProps) {
   const { colors } = useTheme()
   const styles = createStyles(colors)
 
   return (
     <View style={styles.drawerSection}>
-      <Text style={styles.drawerSectionTitle}>{title}</Text>
+      <View style={styles.drawerSectionHeader}>
+        <Text style={styles.drawerSectionTitle}>{title}</Text>
+        {headerAction}
+      </View>
       {children}
     </View>
   )
@@ -1080,19 +1207,20 @@ type DrawerItemProps = {
   label: string
   count?: number
   active?: boolean
+  excluded?: boolean
   icon: ReactNode
   onPress: () => void
 }
 
-function DrawerItem({ label, count, active, icon, onPress }: DrawerItemProps) {
+function DrawerItem({ label, count, active, excluded, icon, onPress }: DrawerItemProps) {
   const { colors } = useTheme()
   const styles = createStyles(colors)
 
   return (
-    <Pressable style={[styles.drawerItem, active && styles.drawerItemActive]} onPress={onPress}>
+    <Pressable style={[styles.drawerItem, active && styles.drawerItemActive, excluded && styles.drawerItemExcluded]} onPress={onPress}>
       {icon}
-      <Text style={[styles.drawerItemText, active && styles.drawerItemTextActive]} numberOfLines={1}>{label}</Text>
-      {typeof count === 'number' ? <Text style={styles.drawerItemCount}>{count}</Text> : null}
+      <Text style={[styles.drawerItemText, active && styles.drawerItemTextActive, excluded && styles.drawerItemTextExcluded]} numberOfLines={1}>{label}</Text>
+      {typeof count === 'number' ? <Text style={[styles.drawerItemCount, excluded && styles.drawerItemCountExcluded]}>{count}</Text> : null}
     </Pressable>
   )
 }
@@ -1383,6 +1511,21 @@ const createStyles = (colors: ReturnType<typeof useTheme>['colors']) => StyleShe
     color: colors.subtle,
     fontSize: 12
   },
+  drawerItemExcluded: {
+    backgroundColor: 'rgba(255, 99, 99, 0.12)'
+  },
+  restoreErrorText: {
+    color: colors.danger,
+    fontSize: 13,
+    marginTop: 8
+  },
+  drawerItemTextExcluded: {
+    color: colors.danger,
+    textDecorationLine: 'line-through'
+  },
+  drawerItemCountExcluded: {
+    color: colors.danger
+  },
   drawerSection: {
     paddingTop: 10,
     gap: 4
@@ -1392,7 +1535,13 @@ const createStyles = (colors: ReturnType<typeof useTheme>['colors']) => StyleShe
     fontSize: 12,
     fontWeight: '800',
     paddingHorizontal: 10,
-    paddingBottom: 2
+    paddingBottom: 2,
+    flex: 1
+  },
+  drawerSectionHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingRight: 6
   },
   drawerEmpty: {
     color: colors.subtle,

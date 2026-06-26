@@ -1,5 +1,5 @@
 import { StatusBar as ExpoStatusBar } from 'expo-status-bar'
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { ActivityIndicator, BackHandler, Platform, SafeAreaView, StatusBar as NativeStatusBar, StyleSheet, Text, View } from 'react-native'
 import { AppNavigator, type AppRoute } from './src/AppNavigator'
 import { loadDevices } from './src/stores/devices'
@@ -20,6 +20,11 @@ function AppShell() {
     route: { name: 'loading' },
     previousRoute: null
   })
+  // 同步镜像 navigationState，供 back() 在 setNavigationState updater 外同步读取
+  const navigationStateRef = useRef(navigationState)
+  useEffect(() => {
+    navigationStateRef.current = navigationState
+  }, [navigationState])
   const [bootError, setBootError] = useState('')
   const { route, previousRoute } = navigationState
   const isImmersivePlayer = route.name === 'player'
@@ -54,16 +59,17 @@ function AppShell() {
   }, [])
 
   const back = useCallback(() => {
-    let handled = false
-    setNavigationState(current => {
-      if (!current.previousRoute) return current
-      handled = true
-      return {
-        route: current.previousRoute,
-        previousRoute: null
-      }
+    // 在 updater 外读取当前状态决定返回值，避免 handled 在异步 updater 内赋值导致同步返回 false
+    const current = navigationStateRef.current
+    const previousRoute = current.previousRoute
+    if (!previousRoute) return false
+    // 直接返回新状态（不使用乐观锁），让 React 批处理按 updater 队列顺序应用
+    // navigate/replace 也是 updater 形式，back 会排在它们之后，最终 state 以 back 为准
+    setNavigationState({
+      route: previousRoute,
+      previousRoute: null
     })
-    return handled
+    return true
   }, [])
 
   const refreshDevices = useCallback(async () => {

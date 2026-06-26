@@ -82,6 +82,7 @@ export type LibraryResponse = {
     system: CategorySummary[]
   }
   favoriteCount?: number
+  hiddenTagCount?: number
   scannedAt?: number
   indexed?: boolean
   refreshing?: boolean

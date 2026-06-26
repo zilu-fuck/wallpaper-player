@@ -1133,6 +1133,61 @@ a:hover {
   background: var(--accent-soft);
 }
 
+.sidebar-category-item.excluded {
+  color: var(--text-secondary);
+  background: rgba(255, 99, 99, 0.12);
+}
+
+.sidebar-category-item.excluded .sidebar-category-name {
+  text-decoration: line-through;
+  text-decoration-color: rgba(255, 99, 99, 0.55);
+}
+
+.sidebar-category-item.excluded .sidebar-category-check {
+  border-color: rgba(255, 99, 99, 0.48);
+  background: var(--bg-card);
+  color: #ff6363;
+}
+
+.sidebar-category-item.excluded .sidebar-category-count {
+  color: #ff6363;
+  border-color: rgba(255, 99, 99, 0.35);
+  background: var(--bg-card);
+}
+
+/* 分类项操作区（隐藏按钮 + 计数） */
+.sidebar-category-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.sidebar-category-hide-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  border: none;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--text-tertiary);
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.15s ease, color 0.15s ease, background 0.15s ease;
+}
+
+.sidebar-category-item:hover .sidebar-category-hide-btn,
+.sidebar-category-item:focus-within .sidebar-category-hide-btn {
+  opacity: 1;
+}
+
+.sidebar-category-hide-btn:hover {
+  color: #ff6363;
+  background: rgba(255, 99, 99, 0.12);
+}
 .sidebar-category-name {
   display: inline-flex;
   align-items: center;

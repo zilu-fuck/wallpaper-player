@@ -13,3 +13,5 @@ settings.json
 .tmp/
 video comprehension/
 video comprehension.7z
+.claude/
+.codex-runlogs/
