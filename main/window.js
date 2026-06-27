@@ -1,4 +1,4 @@
-const { BrowserWindow, shell, session } = require('electron')
+const { BrowserWindow, shell, session, app } = require('electron')
 const path = require('path')
 const fs = require('fs')
 
@@ -71,6 +71,30 @@ function createWindow() {
       shell.openExternal(url)
     }
     return { action: 'deny' }
+  })
+
+  // 仅在开发模式转发渲染进程日志到主进程 stdout，避免打包后刷屏
+  if (!app.isPackaged) {
+    mainWindow.webContents.on('console-message', (event, level, message, line, sourceId) => {
+      const labels = ['debug', 'log', 'warn', 'error']
+      console.log(`[renderer:${labels[level] || level}] ${message} (${sourceId}:${line})`)
+    })
+  }
+
+  mainWindow.webContents.on('render-process-gone', (event, details) => {
+    console.error('[renderer] render-process-gone:', details)
+  })
+
+  mainWindow.webContents.on('did-finish-load', () => {
+    console.log('[window] did-finish-load:', mainWindow.webContents.getURL())
+  })
+
+  mainWindow.webContents.on('did-fail-load', (event, errorCode, errorDescription, validatedURL) => {
+    console.error('[window] did-fail-load:', errorCode, errorDescription, validatedURL)
+  })
+
+  mainWindow.webContents.on('preload-error', (event, preloadPath, error) => {
+    console.error('[window] preload-error:', preloadPath, error)
   })
 
   mainWindow.webContents.on('will-navigate', (event, url) => {

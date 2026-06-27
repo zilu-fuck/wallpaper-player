@@ -124,5 +124,10 @@ contextBridge.exposeInMainWorld('electronAPI', {
   onMpvError: (callback) => on('mpv-error', callback),
   onMpvDownloadProgress: (callback) => on('mpv-download-progress', callback),
 
+  startAiSearch: (videoInfo) => ipcRenderer.invoke('ai-search-start', videoInfo),
+  cancelAiSearch: (taskId) => ipcRenderer.invoke('ai-search-cancel', taskId),
+  submitAiSearchFeedback: (feedback) => ipcRenderer.invoke('ai-search-feedback', feedback),
+  onAiSearchEvent: (callback) => on('ai-search-event', callback),
+
   onPlayerShortcut: (callback) => on('player-shortcut', callback)
 })
