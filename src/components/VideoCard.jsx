@@ -79,6 +79,66 @@ function getDisplayMeta(video) {
   return parts.join(' · ')
 }
 
+function isWeakVideoTitle(title) {
+  const text = String(title || '')
+    .replace(/\.(mp4|mkv|avi|mov|wmv|flv|webm|m4v|ts)$/i, '')
+    .replace(/立即播放|在线播放|在线观看|免费观看|免费|播放|高清|超清|全集/g, ' ')
+    .replace(/[-_]+/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+  if (!text) return true
+  if (/^\d{1,4}$/.test(text)) return true
+  if (/^[\d\s第季话集卷]+$/.test(text)) return true
+  return text.length <= 1
+}
+
+function uniqueAISearchTags(tags) {
+  const seen = new Set()
+  const result = []
+  for (const value of tags) {
+    const tag = String(value || '').trim()
+    const key = tag.toLocaleLowerCase()
+    if (!tag || seen.has(key)) continue
+    seen.add(key)
+    result.push(tag)
+  }
+  return result
+}
+
+function getAISearchTags(video) {
+  return uniqueAISearchTags([
+    ...(Array.isArray(video.tags) ? video.tags : []),
+    ...(Array.isArray(video.customTags) ? video.customTags : []),
+    ...(Array.isArray(video.systemTags) ? video.systemTags : [])
+  ])
+}
+
+function getAISearchTitle(video) {
+  const title = video.name || ''
+  if (!isWeakVideoTitle(title)) return title
+  const candidates = [
+    video.group,
+    ...getAISearchTags(video)
+  ].filter(Boolean)
+  return candidates.find(item => !isWeakVideoTitle(item)) || title
+}
+
+function buildVideoInfo(video) {
+  const tags = getAISearchTags(video)
+  return {
+    title: getAISearchTitle(video),
+    filePath: video.fullPath,
+    fileName: video.name,
+    tags,
+    group: video.group || '',
+    description: video.description || '',
+    duration: video.duration || '',
+    resolution: video.resolution || '',
+    size: video.size || 0,
+    extension: video.extension || ''
+  }
+}
+
 function VideoCard({
   video,
   viewMode,
@@ -109,6 +169,7 @@ function VideoCard({
   const [menuOpen, setMenuOpen] = useState(false)
   const [menuPosition, setMenuPosition] = useState(null)
   const [thumbUrl, setThumbUrl] = useState(null)
+  const [isDragging, setIsDragging] = useState(false)
   const cardRef = useRef(null)
   const actionsRef = useRef(null)
   const menuRef = useRef(null)
@@ -121,6 +182,8 @@ function VideoCard({
   const selectionActive = (selectedVideoKeys?.length || 0) > 0
   const videoAnalysisPlugin = plugins?.find?.(plugin => plugin.id === 'video-analysis')
   const videoAnalysisEnabled = Boolean(pluginsLoaded && videoAnalysisPlugin?.enabled && settings?.videoAnalysis?.enabled)
+  const aiSearchPlugin = plugins?.find?.(plugin => plugin.id === 'ai-search')
+  const aiSearchEnabled = Boolean(pluginsLoaded && aiSearchPlugin?.enabled)
   const mediaMissing = !video.media?.available
 
   // 懒加载：只有卡片进入视口时才加载缩略图
@@ -183,6 +246,12 @@ function VideoCard({
     queueVideoAnalysis?.(video)
   }, [video, queueVideoAnalysis])
 
+  const handleSendToAISearch = useCallback((e) => {
+    e.stopPropagation()
+    setMenuOpen(false)
+    window.dispatchEvent(new CustomEvent('wallpaper-player-ai-search', { detail: buildVideoInfo(video) }))
+  }, [video])
+
   const handleToggleSelectionClick = useCallback((e) => {
     e.stopPropagation()
     setMenuOpen(false)
@@ -194,6 +263,29 @@ function VideoCard({
     setMenuOpen(false)
     handleSelectOnlyVideo?.(video)
   }, [video, handleSelectOnlyVideo])
+
+  // ─── 拖拽到右侧插件边栏 ───
+  const handleDragStart = useCallback((e) => {
+    e.stopPropagation()
+    const dragData = JSON.stringify(buildVideoInfo(video))
+    try {
+      // 同时写入两种 MIME 类型，提高跨浏览器/ Electron 兼容性
+      e.dataTransfer.setData('application/json', dragData)
+      e.dataTransfer.setData('text/plain', dragData)
+      e.dataTransfer.effectAllowed = 'copy'
+      if (cardRef.current) {
+        const rect = cardRef.current.getBoundingClientRect()
+        e.dataTransfer.setDragImage(cardRef.current, rect.width / 2, rect.height / 2)
+      }
+    } catch (err) {
+      console.error('拖拽设置失败:', err)
+    }
+    setIsDragging(true)
+  }, [video])
+
+  const handleDragEnd = useCallback(() => {
+    setIsDragging(false)
+  }, [])
 
   const updateMenuPosition = useCallback(() => {
     const anchor = actionsRef.current
@@ -263,6 +355,15 @@ function VideoCard({
         title={videoAnalysisEnabled ? '分析当前视频' : '请先在设置中启用视频理解'}
       >
         分析当前视频
+      </button>
+      <button
+        type="button"
+        onClick={handleSendToAISearch}
+        role="menuitem"
+        disabled={!aiSearchEnabled}
+        title={aiSearchEnabled ? '发送到 AI 搜索' : '请先在插件管理中启用 AI 搜索'}
+      >
+        发送到 AI 搜索
       </button>
       <button type="button" onClick={handleOpenInFolderClick} role="menuitem">在资源管理器中打开视频所在位置</button>
       <button type="button" onClick={handleEditTags} role="menuitem">自定义标签</button>
@@ -356,9 +457,12 @@ function VideoCard({
     return (
       <div
         ref={cardRef}
-        className={`video-card-list${isSelected ? ' selected' : ''}`}
+        draggable
+        className={`video-card-list${isSelected ? ' selected' : ''}${isDragging ? ' dragging' : ''}`}
         onClick={handleClick}
         onContextMenu={handleContextMenu}
+        onDragStart={handleDragStart}
+        onDragEnd={handleDragEnd}
         title={video.name}
         style={{ animationDelay }}
       >
@@ -415,9 +519,12 @@ function VideoCard({
   return (
     <div
       ref={cardRef}
-      className={`video-card${isSelected ? ' selected' : ''}${menuOpen ? ' menu-open' : ''}`}
+      draggable
+      className={`video-card${isSelected ? ' selected' : ''}${menuOpen ? ' menu-open' : ''}${isDragging ? ' dragging' : ''}`}
       onClick={handleClick}
       onContextMenu={handleContextMenu}
+      onDragStart={handleDragStart}
+      onDragEnd={handleDragEnd}
       title={video.name}
       style={{ animationDelay }}
     >

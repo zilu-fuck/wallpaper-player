@@ -203,6 +203,14 @@ export function useVideoFilter({ videos, customTags, favoriteKeys, hiddenTags })
     }
   }, [hiddenFilteredVideos])
 
+  const availableTags = useMemo(() => {
+    const tags = []
+    for (const video of displayVideos) {
+      tags.push(...getCustomTags(video), ...getSystemTags(video))
+    }
+    return uniqueTags(tags).sort((a, b) => zhCollator.compare(a, b))
+  }, [displayVideos])
+
   const favoriteCount = useMemo(() => {
     let count = 0
     for (const video of hiddenFilteredVideos) {
@@ -297,6 +305,7 @@ export function useVideoFilter({ videos, customTags, favoriteKeys, hiddenTags })
     displayVideos,
     sortedVideos,
     categoryGroups,
+    availableTags,
     favoriteCount,
     visibleCount,
     filteredVideos,

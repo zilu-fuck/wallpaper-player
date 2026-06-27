@@ -1,10 +1,12 @@
 const crypto = require('crypto')
 const path = require('path')
 const { ipcMain } = require('electron')
+const log = require('electron-log')
 const { EventEmitter } = require('events')
 const { loadSettings, saveSettings, sanitizeSettingsForSave, registerSettingsSection } = require('../settings')
 const { sendJson, readBody } = require('../remote/http-utils')
 const { requireCoreModule } = require('./core-api')
+const { isOfficialPluginId } = require('./official')
 
 function normalizePluginId(id) {
   return String(id || '').trim()
@@ -243,17 +245,9 @@ function createPluginRegistry() {
     for (const disposer of [...pluginState.disposers].reverse()) {
       try {
         await disposer()
-      } catch {}
-    }
-    pluginState.disposers.length = 0
-    pluginState.active = false
-  }
-
-  async function cleanupPluginActivation(pluginState) {
-    for (const disposer of [...pluginState.disposers].reverse()) {
-      try {
-        await disposer()
-      } catch {}
+      } catch (error) {
+        log.warn('[plugins] disposer failed:', error?.message || error)
+      }
     }
     pluginState.disposers.length = 0
     pluginState.active = false
@@ -304,13 +298,39 @@ function createPluginRegistry() {
         normalized[key] = Number.isFinite(number) ? number : 0
       } else if (field?.type === 'enum') {
         normalized[key] = Array.isArray(field.enum) && field.enum.includes(value) ? value : field.enum?.[0] ?? ''
+      } else if (field?.type === 'array') {
+        normalized[key] = Array.isArray(value)
+          ? value.filter(item => typeof item === 'string' && item.trim()).map(item => item.trim())
+          : []
       } else if (field?.type === 'object') {
         normalized[key] = value && typeof value === 'object' && !Array.isArray(value) ? value : {}
       } else {
         normalized[key] = typeof value === 'string' ? value : ''
       }
     }
+    for (const [key, value] of Object.entries(source)) {
+      if (!Object.hasOwn(normalized, key) && Object.hasOwn(defaults, key)) {
+        normalized[key] = value
+      }
+    }
     return normalized
+  }
+
+  function sanitizePluginConfigForRenderer(plugin, config) {
+    const secretKeys = Array.isArray(plugin.secretKeys) ? plugin.secretKeys : []
+    if (!secretKeys.length) return config
+    const sanitized = { ...config }
+    for (const key of secretKeys) {
+      if (Object.hasOwn(sanitized, key)) {
+        sanitized[key] = '***'
+      }
+      for (const [configKey, value] of Object.entries(sanitized)) {
+        if (value && typeof value === 'object' && !Array.isArray(value) && Object.hasOwn(value, key)) {
+          sanitized[configKey] = { ...value, [key]: '***' }
+        }
+      }
+    }
+    return sanitized
   }
 
   function createDeclarativeSetup(plugin) {
@@ -390,7 +410,7 @@ function createPluginRegistry() {
       plugin.enabled = false
       plugin.status = 'error'
       plugin.lastError = error?.message || String(error)
-      await cleanupPluginActivation(pluginState)
+      await disposePlugin(pluginState)
       throw error
     }
     plugin.status = getPluginStatus(plugin)
@@ -412,6 +432,9 @@ function createPluginRegistry() {
     const defaultEnabled = plugin.enabled === true
     const enabled = plugin.status === 'planned' ? false : getPersistedEnabled(id, defaultEnabled)
 
+    // trusted/official 不采信 manifest 自报：仅当插件 ID 属于官方列表且 publisher='official' 时才视为官方
+    // 与 loader.js#stampManifestSource 的判定保持一致，作为 register 直接调用时的防御
+    const isOfficial = isOfficialPluginId(id) && plugin.publisher === 'official'
     const normalizedPlugin = {
       ...plugin,
       id,
@@ -419,17 +442,17 @@ function createPluginRegistry() {
       enabled,
       status: plugin.status || (enabled ? 'active' : 'disabled'),
       source: plugin.source || 'user',
-      publisher: plugin.publisher || (plugin.official ? 'official' : 'third-party'),
-      official: Boolean(plugin.official || plugin.publisher === 'official'),
+      publisher: plugin.publisher || (isOfficial ? 'official' : 'third-party'),
+      official: isOfficial,
       external: true,
-      trusted: Boolean(plugin.trusted || plugin.official || plugin.publisher === 'official'),
+      trusted: isOfficial,
       executable: Boolean(plugin.executable),
       location: plugin.location || '',
       author: plugin.author || '',
       homepage: plugin.homepage || '',
       manifestVersion: plugin.manifestVersion || null,
       loadError: Boolean(plugin.loadError),
-      uninstallable: Boolean(plugin.installDirectoryName) || !(plugin.official || plugin.publisher === 'official'),
+      uninstallable: Boolean(plugin.installDirectoryName) || !isOfficial,
       installDirectoryName: plugin.installDirectoryName || '',
       configurable: plugin.configurable !== false,
       settingsDefaults: plugin.settingsDefaults && typeof plugin.settingsDefaults === 'object' ? plugin.settingsDefaults : {},
@@ -471,7 +494,9 @@ function createPluginRegistry() {
       for (const disposer of [...pluginState.registrationDisposers].reverse()) {
         try {
           await disposer()
-        } catch {}
+        } catch (disposerError) {
+          log.warn('[plugins] registration disposer failed:', disposerError?.message || disposerError)
+        }
       }
       pluginState.registrationDisposers.length = 0
       throw error
@@ -496,7 +521,9 @@ function createPluginRegistry() {
     for (const disposer of [...pluginState.registrationDisposers].reverse()) {
       try {
         await disposer()
-      } catch {}
+      } catch (disposerError) {
+        log.warn('[plugins] unregister disposer failed:', disposerError?.message || disposerError)
+      }
     }
     pluginState.registrationDisposers.length = 0
     plugins.delete(pluginState.plugin.id)
@@ -511,7 +538,9 @@ function createPluginRegistry() {
       } catch (error) {
         try {
           await register(createSetupErrorPlugin(plugin, error))
-        } catch {}
+        } catch (fallbackError) {
+          log.warn('[plugins] failed to register error placeholder:', fallbackError?.message || fallbackError)
+        }
       }
     }
     setupComplete = true
@@ -531,7 +560,9 @@ function createPluginRegistry() {
         description: plugin.description || '',
         source: plugin.source || 'user',
         publisher: plugin.publisher || 'third-party',
-        official: Boolean(plugin.official || plugin.publisher === 'official'),
+        // register() 已将 plugin.official 设为 isOfficialPluginId(id) && publisher==='official'
+        // 这里直接采信已规范化的字段，避免表达式与 register 不一致
+        official: Boolean(plugin.official),
         external: true,
         trusted: Boolean(plugin.trusted),
         executable: Boolean(plugin.executable),
@@ -546,7 +577,7 @@ function createPluginRegistry() {
         configurable: plugin.configurable !== false,
         canEnable: canEnable(plugin),
         lastError: plugin.lastError || '',
-        config: persisted.config || {},
+        config: sanitizePluginConfigForRenderer(plugin, persisted.config || {}),
         installedAt: persisted.installedAt || '',
         updatedAt: persisted.updatedAt || '',
         settingsDefaults: plugin.settingsDefaults || {},
@@ -660,7 +691,9 @@ function createPluginRegistry() {
       for (const disposer of [...pluginState.registrationDisposers].reverse()) {
         try {
           await disposer()
-        } catch {}
+        } catch (disposerError) {
+          log.warn('[plugins] dispose disposer failed:', disposerError?.message || disposerError)
+        }
       }
       pluginState.registrationDisposers.length = 0
     }

@@ -64,7 +64,8 @@ export default function Settings() {
     playbackMode,
     handlePlaybackModeChange,
     handleCheckUpdate,
-    setShowSettings
+    setShowSettings,
+    availableTags
   } = useApp()
 
   const [theme, setTheme] = useState(settings?.theme || 'dark')
@@ -1099,6 +1100,7 @@ export default function Settings() {
                 onSavePluginConfig={handleSavePluginConfig}
                 busyPluginId={pluginBusyId}
                 message={pluginMessage}
+                availableTags={availableTags}
                 videoAnalysisSettings={videoAnalysisSettings}
               />
             ) : null}

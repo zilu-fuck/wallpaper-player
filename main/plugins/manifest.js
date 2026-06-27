@@ -10,7 +10,9 @@ const MAX_SETTINGS_KEYS = 24
 const MAX_REMOTE_ROUTES = 16
 const MAX_ACTION_ARGS = 8
 const ALLOWED_REMOTE_METHODS = new Set(['GET', 'POST'])
+const MAX_SECRET_KEYS = 16
 const CAPABILITY_PATTERN = /^[a-z0-9][a-z0-9._-]{0,79}$/
+const SETTINGS_KEY_PATTERN = /^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$/
 const METHOD_PATTERN = /^[a-z][a-zA-Z0-9_]{0,63}$/
 
 function asPlainObject(value) {
@@ -44,10 +46,10 @@ function normalizeSettingsSchema(schema) {
   const source = asPlainObject(schema)
   const normalized = {}
   for (const [key, value] of Object.entries(source).slice(0, MAX_SETTINGS_KEYS)) {
-    if (!ID_PATTERN.test(key)) continue
+    if (!SETTINGS_KEY_PATTERN.test(key)) continue
     const item = asPlainObject(value)
     normalized[key] = {
-      type: ['object', 'string', 'number', 'boolean', 'enum'].includes(item.type) ? item.type : 'object',
+      type: ['object', 'string', 'number', 'boolean', 'enum', 'array'].includes(item.type) ? item.type : 'object',
       title: normalizeText(item.title, key),
       description: normalizeText(item.description)
     }
@@ -58,6 +60,16 @@ function normalizeSettingsSchema(schema) {
     }
   }
   return normalized
+}
+
+function normalizeSecretKeys(secretKeys) {
+  if (!Array.isArray(secretKeys)) return []
+  return [...new Set(
+    secretKeys
+      .filter(item => typeof item === 'string')
+      .map(item => item.trim())
+      .filter(item => SETTINGS_KEY_PATTERN.test(item))
+  )].slice(0, MAX_SECRET_KEYS)
 }
 
 function isPluginRoutePattern(pattern) {
@@ -152,6 +164,7 @@ function normalizeManifest(rawManifest, options = {}) {
     permissions: normalizePermissions(raw.permissions),
     settingsDefaults: asPlainObject(raw.settingsDefaults),
     settingsSchema: normalizeSettingsSchema(raw.settingsSchema),
+    secretKeys: normalizeSecretKeys(raw.secretKeys),
     contributions: null
   }
   plugin.contributions = normalizeContributions(raw.contributions, id)

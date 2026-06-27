@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import AiSearchPluginSettings from './AiSearchPluginSettings'
 
 function getStatusLabel(plugin) {
   if (!plugin) return ''
@@ -60,6 +61,7 @@ function isPlainObject(value) {
 
 function formatConfigDraft(field, value) {
   if (field?.type === 'object') {
+    if (typeof value === 'string') return value
     return JSON.stringify(isPlainObject(value) ? value : {}, null, 2)
   }
   if (value == null) return ''
@@ -72,6 +74,7 @@ function parseConfigDraft(field, value) {
     return Number.isFinite(number) ? number : 0
   }
   if (field?.type === 'object') {
+    if (isPlainObject(value)) return value
     const parsed = JSON.parse(value || '{}')
     if (!isPlainObject(parsed)) throw new Error('JSON 必须是对象')
     return parsed
@@ -90,7 +93,7 @@ function buildConfigDrafts(plugin, schemaKeys, settingsSchema) {
 
 function hasDraftChanges(plugin, schemaKeys, settingsSchema, drafts) {
   return schemaKeys.some(key => (
-    formatConfigDraft(settingsSchema[key], plugin?.config?.[key]) !== (drafts[key] ?? '')
+    formatConfigDraft(settingsSchema[key], plugin?.config?.[key]) !== formatConfigDraft(settingsSchema[key], drafts[key])
   ))
 }
 
@@ -175,6 +178,7 @@ export default function PluginManagementPage({
   onSavePluginConfig,
   busyPluginId,
   message,
+  availableTags,
   videoAnalysisSettings
 }) {
   const activePlugin = plugins.find(plugin => plugin.id === activePluginId) || plugins[0] || null
@@ -372,32 +376,46 @@ export default function PluginManagementPage({
             </div>
 
             {schemaKeys.length ? (
-              <div className="plugin-config-panel">
-                <div className="plugin-config-heading">
-                  <strong>插件配置</strong>
-                  <button
-                    className="btn btn-sm btn-primary"
-                    type="button"
-                    onClick={handleSaveDraftConfig}
-                    disabled={actionBusy || !draftChanged}
-                  >
-                    {busy ? '保存中...' : '保存配置'}
-                  </button>
+              activePlugin.id === 'ai-search' ? (
+                <AiSearchPluginSettings
+                  plugin={activePlugin}
+                  configDrafts={configDrafts}
+                  configErrors={configErrors}
+                  busy={actionBusy}
+                  onDraftChange={handleDraftChange}
+                  onSaveDraftConfig={handleSaveDraftConfig}
+                  onCommitConfig={handleCommitConfig}
+                  draftChanged={draftChanged}
+                  availableTags={availableTags}
+                />
+              ) : (
+                <div className="plugin-config-panel">
+                  <div className="plugin-config-heading">
+                    <strong>插件配置</strong>
+                    <button
+                      className="btn btn-sm btn-primary"
+                      type="button"
+                      onClick={handleSaveDraftConfig}
+                      disabled={actionBusy || !draftChanged}
+                    >
+                      {busy ? '保存中...' : '保存配置'}
+                    </button>
+                  </div>
+                  <div className="plugin-config-grid">
+                    {schemaKeys.map(key => renderConfigInput({
+                      plugin: activePlugin,
+                      key,
+                      field: settingsSchema[key],
+                      value: activePlugin.config?.[key],
+                      draftValue: configDrafts[key],
+                      error: configErrors[key],
+                      busy: actionBusy,
+                      onDraftChange: handleDraftChange,
+                      onCommit: handleCommitConfig
+                    }))}
+                  </div>
                 </div>
-                <div className="plugin-config-grid">
-                  {schemaKeys.map(key => renderConfigInput({
-                    plugin: activePlugin,
-                    key,
-                    field: settingsSchema[key],
-                    value: activePlugin.config?.[key],
-                    draftValue: configDrafts[key],
-                    error: configErrors[key],
-                    busy: actionBusy,
-                    onDraftChange: handleDraftChange,
-                    onCommit: handleCommitConfig
-                  }))}
-                </div>
-              </div>
+              )
             ) : null}
 
             {activePlugin.status === 'planned' ? (

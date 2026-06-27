@@ -28,8 +28,9 @@ async function main() {
   assert.ok(videoAnalysis.settingsDefaults.videoAnalysis)
 
   const aiSearch = pluginRegistry.getPlugin('ai-search')
-  assert.ok(aiSearch.settingsSchema.aiSearch)
-  assert.ok(aiSearch.settingsDefaults.aiSearch)
+  assert.ok(aiSearch.settingsSchema.llmProvider)
+  assert.ok(aiSearch.settingsDefaults.llmProvider)
+  assert.strictEqual(aiSearch.settingsSchema.llmProvider.type, 'enum')
 
   const agentBridge = pluginRegistry.getPlugin('agent-bridge')
   assert.ok(agentBridge.settingsSchema.agentBridge)

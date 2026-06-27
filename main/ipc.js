@@ -47,6 +47,8 @@ const { getMainWindow } = require('./window')
 const { getVideoMetadata } = require('./video-metadata')
 const { pluginRegistry, installPlugin, uninstallPlugin, getExternalPluginsDir } = require('./plugins')
 
+const SECRET_PLACEHOLDER = '***'
+
 const MPV_COMMANDS = new Set([
   'seekTo',
   'seekRelative',
@@ -73,6 +75,35 @@ const PRIVACY_UNLOCK_FAILURE_LIMIT = 5
 const PRIVACY_UNLOCK_LOCK_MS = 30 * 1000
 const privacyUnlockFailures = new Map()
 const pendingThumbnailTasks = new Map()
+
+function preserveMaskedPluginSecrets(plugin, nextConfig, currentConfig) {
+  if (!nextConfig || typeof nextConfig !== 'object' || Array.isArray(nextConfig)) return nextConfig
+  const secretKeys = Array.isArray(plugin?.secretKeys) ? plugin.secretKeys : []
+  if (!secretKeys.length) return nextConfig
+  const secretKeySet = new Set(secretKeys)
+  function mergeValue(nextValue, currentValue, key) {
+    if (secretKeySet.has(key) && nextValue === SECRET_PLACEHOLDER) {
+      return currentValue
+    }
+    if (
+      nextValue &&
+      typeof nextValue === 'object' &&
+      !Array.isArray(nextValue) &&
+      currentValue &&
+      typeof currentValue === 'object' &&
+      !Array.isArray(currentValue)
+    ) {
+      return Object.fromEntries(
+        Object.entries(nextValue).map(([childKey, childValue]) => [
+          childKey,
+          mergeValue(childValue, currentValue[childKey], childKey)
+        ])
+      )
+    }
+    return nextValue
+  }
+  return mergeValue(nextConfig, currentConfig || {}, '')
+}
 
 function queueThumbnailTask(videoPath) {
   const key = pathKey(videoPath)
@@ -266,7 +297,14 @@ function setupIPC() {
       const plugin = pluginRegistry.getPlugin(pluginId)
       if (!plugin) return { success: false, error: '插件不存在' }
       const settings = loadSettings()
-      const nextConfig = pluginRegistry.normalizePluginConfig(plugin, config)
+      const currentConfig = settings.plugins?.[plugin.id]?.config || {}
+      const nextConfig = pluginRegistry.normalizePluginConfig(
+        plugin,
+        preserveMaskedPluginSecrets(plugin, config, currentConfig)
+      )
+      if (plugin.id === 'ai-search' && config && !Object.prototype.hasOwnProperty.call(config, 'feedbackMemory') && Array.isArray(currentConfig.feedbackMemory)) {
+        nextConfig.feedbackMemory = currentConfig.feedbackMemory
+      }
       const saved = saveSettings(sanitizeSettingsForSave({
         plugins: {
           [plugin.id]: {
@@ -278,7 +316,6 @@ function setupIPC() {
       }))
       return {
         success: true,
-        config: saved.plugins?.[plugin.id]?.config || {},
         plugin: pluginRegistry.listPlugins().find(item => item.id === plugin.id)
       }
     } catch (err) {

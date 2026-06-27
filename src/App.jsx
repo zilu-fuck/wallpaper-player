@@ -1,4 +1,4 @@
-import { useCallback } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import AppProvider from './components/AppProvider'
 import Gallery from './components/Gallery'
 import VideoPlayer from './components/VideoPlayer'
@@ -7,6 +7,8 @@ import Sidebar from './components/Sidebar'
 import TagEditor from './components/TagEditor'
 import UpdateNotice from './components/UpdateNotice'
 import VideoAnalysisSidebar, { VideoAnalysisResultModal } from './components/VideoAnalysisSidebar'
+import RightDock from './components/RightDock'
+import AISearchPanel from './components/AISearchPanel'
 import { useApp } from './context/AppContext'
 
 function AppInner() {
@@ -34,6 +36,7 @@ function AppInner() {
     scanAndLoad,
     playingVideo,
     showSettings,
+    plugins,
     analysisTasks,
     analysisSidebarOpen,
     setAnalysisSidebarOpen,
@@ -49,8 +52,137 @@ function AppInner() {
     savedAnalysisResultsMessage,
     selectedAnalysisResultTask,
     openAnalysisResultTask,
-    closeAnalysisResultTask
+    closeAnalysisResultTask,
+    queueVideoAnalysis
   } = useApp()
+
+  const aiSearchRef = useRef(null)
+  const [rightDockTab, setRightDockTab] = useState('video-analysis')
+  const [unreadTabs, setUnreadTabs] = useState(() => new Set())
+  const [pendingAiSearchVideo, setPendingAiSearchVideo] = useState(null)
+  // 同步镜像 rightDockTab，供事件订阅回调在 setRightDockTab updater 外同步读取，
+  // 避免 onAiSearchEvent 订阅随 tab 切换频繁重建造成的事件空窗
+  const rightDockTabRef = useRef(rightDockTab)
+  useEffect(() => { rightDockTabRef.current = rightDockTab }, [rightDockTab])
+
+  const markTabRead = useCallback((tabId) => {
+    setUnreadTabs(prev => {
+      if (!prev.has(tabId)) return prev
+      const next = new Set(prev)
+      next.delete(tabId)
+      return next
+    })
+  }, [])
+
+  const handleTabChange = useCallback((tabId) => {
+    setRightDockTab(tabId)
+    markTabRead(tabId)
+    setAnalysisSidebarOpen(true)
+  }, [markTabRead, setAnalysisSidebarOpen])
+
+  const handleCloseDock = useCallback(() => {
+    setAnalysisSidebarOpen(false)
+  }, [setAnalysisSidebarOpen])
+
+  // 处理视频拖放到右侧
+  const handleDropVideo = useCallback((video, targetTab) => {
+    if (targetTab) {
+      handleTabChange(targetTab)
+    } else {
+      setAnalysisSidebarOpen(true)
+    }
+    // 将视频传递给对应插件
+    if (targetTab === 'ai-search') {
+      // 用 state 传递，避免 Panel 刚切换挂载时 ref 未就绪导致丢失
+      setPendingAiSearchVideo(video)
+    } else if (targetTab === 'video-analysis') {
+      queueVideoAnalysis?.(video)
+    }
+  }, [handleTabChange, queueVideoAnalysis, setAnalysisSidebarOpen])
+
+  // Build right dock tabs based on enabled plugins
+  const rightDockTabs = []
+  const aiSearchPlugin = plugins?.find(p => p.id === 'ai-search')
+  const videoAnalysisPlugin = plugins?.find(p => p.id === 'video-analysis')
+  if (videoAnalysisPlugin?.enabled) {
+    rightDockTabs.push({
+      id: 'video-analysis',
+      label: '视频理解',
+      content: (
+        <VideoAnalysisSidebar
+          open
+          tasks={analysisTasks}
+          counts={analysisTaskCounts}
+          getStatusLabel={getAnalysisTaskStatusLabel}
+          onClose={handleCloseDock}
+          onCancelRunning={cancelRunningAnalysisTask}
+          onRetry={retryAnalysisTask}
+          onHideFinished={hideFinishedAnalysisTasks}
+          onRefreshSaved={refreshSavedAnalysisResults}
+          onDeleteSaved={deleteSavedAnalysisTask}
+          onDeleteSavedBatch={deleteSavedAnalysisTasks}
+          savedResultsLoading={savedAnalysisResultsLoading}
+          savedResultsMessage={savedAnalysisResultsMessage}
+          onOpenResult={openAnalysisResultTask}
+        />
+      )
+    })
+  }
+  if (aiSearchPlugin?.enabled) {
+    rightDockTabs.push({
+      id: 'ai-search',
+      label: 'AI 搜索',
+      content: (
+        <AISearchPanel
+          ref={aiSearchRef}
+          pendingVideo={pendingAiSearchVideo}
+          onPendingVideoConsumed={() => setPendingAiSearchVideo(null)}
+        />
+      )
+    })
+  }
+
+  // Listen for custom event from VideoCard to open AI search
+  useEffect(() => {
+    const handler = (e) => {
+      handleTabChange('ai-search')
+      setPendingAiSearchVideo(e.detail)
+    }
+    window.addEventListener('wallpaper-player-ai-search', handler)
+    return () => window.removeEventListener('wallpaper-player-ai-search', handler)
+  }, [handleTabChange])
+
+  // 当有新分析任务时显示未读提示
+  useEffect(() => {
+    const runningCount = analysisTaskCounts?.running || 0
+    const queuedCount = analysisTaskCounts?.queued || 0
+    if (rightDockTab !== 'video-analysis' && (runningCount > 0 || queuedCount > 0)) {
+      setUnreadTabs(prev => {
+        if (prev.has('video-analysis')) return prev
+        const next = new Set(prev)
+        next.add('video-analysis')
+        return next
+      })
+    }
+  }, [analysisTaskCounts, rightDockTab])
+
+  // 当 AI 搜索有任务或结果时显示未读提示
+  // 订阅只注册一次，通过 ref 同步读取当前 tab，避免随 tab 切换频繁取消/重订阅造成的事件空窗
+  useEffect(() => {
+    if (!window.electronAPI?.onAiSearchEvent) return
+    const remove = window.electronAPI.onAiSearchEvent((payload) => {
+      if (!payload) return
+      if (['task-created', 'result', 'error'].includes(payload.type) && rightDockTabRef.current !== 'ai-search') {
+        setUnreadTabs(prev => {
+          if (prev.has('ai-search')) return prev
+          const next = new Set(prev)
+          next.add('ai-search')
+          return next
+        })
+      }
+    })
+    return remove
+  }, [])
 
   const activeDirName = currentDir ? currentDir.split(/[/\\]/).pop() : '未选择目录'
 
@@ -152,7 +284,7 @@ function AppInner() {
       <div className="content-row">
         <Sidebar />
 
-        <div className={`content-body${analysisSidebarOpen ? ' analysis-sidebar-open' : ''}`}>
+        <div className="content-body">
           {/* 缩略图生成进度条 */}
           {scanning && (
             <div className={`progress-bar${!thumbProgress ? ' scanning' : ''}`}>
@@ -212,21 +344,14 @@ function AppInner() {
                 <Gallery videos={filteredVideos} />
               )}
             </main>
-            <VideoAnalysisSidebar
+            <RightDock
               open={analysisSidebarOpen}
-              tasks={analysisTasks}
-              counts={analysisTaskCounts}
-              getStatusLabel={getAnalysisTaskStatusLabel}
-              onClose={() => setAnalysisSidebarOpen(false)}
-              onCancelRunning={cancelRunningAnalysisTask}
-              onRetry={retryAnalysisTask}
-              onHideFinished={hideFinishedAnalysisTasks}
-              onRefreshSaved={refreshSavedAnalysisResults}
-              onDeleteSaved={deleteSavedAnalysisTask}
-              onDeleteSavedBatch={deleteSavedAnalysisTasks}
-              savedResultsLoading={savedAnalysisResultsLoading}
-              savedResultsMessage={savedAnalysisResultsMessage}
-              onOpenResult={openAnalysisResultTask}
+              tabs={rightDockTabs}
+              activeTab={rightDockTab}
+              unreadTabs={unreadTabs}
+              onClose={handleCloseDock}
+              onTabChange={handleTabChange}
+              onDropVideo={handleDropVideo}
             />
           </div>
         </div>
