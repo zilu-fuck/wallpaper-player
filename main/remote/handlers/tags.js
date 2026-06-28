@@ -2,6 +2,7 @@ const { getPlaybackState, loadSettings, saveSettings, upsertPlaybackState, verif
 const { assertAllowedVideoPath } = require('../../scanner')
 const { getFavoriteKeyForVideoId } = require('../video-index')
 const { readBody, sendError, sendJson } = require('../http-utils')
+const { getLegacyNetworkFavoriteKey, getNetworkFavoriteKey, getRemoteNetworkItemById } = require('./network-resources')
 
 // 远程隐私密码尝试频率限制（与桌面端 IPC 一致：5 次失败后锁定 30 秒）
 const REMOTE_PRIVACY_FAILURE_LIMIT = 5
@@ -41,14 +42,37 @@ function normalizeRequestTags(tags) {
 }
 
 function createTagsHandlers({ resolveVideoPath }) {
-  async function handleGetPlayback(req, res, videoId) {
+  async function resolveFavoriteTarget(videoId) {
+    const networkItem = getRemoteNetworkItemById(videoId)
+    if (networkItem) {
+      return {
+        favoriteKey: getNetworkFavoriteKey(networkItem),
+        legacyFavoriteKey: getLegacyNetworkFavoriteKey(networkItem),
+        path: networkItem.url
+      }
+    }
+
     const videoPath = await resolveVideoPath(videoId)
+    const favoriteKey = getFavoriteKeyForVideoId(videoId)
+    if (!favoriteKey) return null
+    await assertAllowedVideoPath(videoPath)
+    return {
+      favoriteKey,
+      legacyFavoriteKey: '',
+      path: videoPath
+    }
+  }
+
+  async function handleGetPlayback(req, res, videoId) {
+    const networkItem = getRemoteNetworkItemById(videoId)
+    const videoPath = networkItem ? networkItem.url : await resolveVideoPath(videoId)
     const settings = loadSettings()
     sendJson(req, res, 200, getPlaybackState(settings.playbackStates, videoPath) || null)
   }
 
   async function handlePutPlayback(req, res, videoId) {
-    const videoPath = await resolveVideoPath(videoId)
+    const networkItem = getRemoteNetworkItemById(videoId)
+    const videoPath = networkItem ? networkItem.url : await resolveVideoPath(videoId)
     const body = await readBody(req)
     const settings = loadSettings()
     const playbackStates = upsertPlaybackState(settings.playbackStates, videoPath, {
@@ -60,42 +84,45 @@ function createTagsHandlers({ resolveVideoPath }) {
   }
 
   async function handleToggleFavorite(req, res, videoId) {
-    const videoPath = await resolveVideoPath(videoId)
-    const favoriteKey = getFavoriteKeyForVideoId(videoId)
-    if (!favoriteKey) {
+    const target = await resolveFavoriteTarget(videoId)
+    if (!target) {
       sendError(req, res, 404, 'video_not_found', '视频不存在或索引尚未加载')
       return
     }
 
-    await assertAllowedVideoPath(videoPath)
     const settings = loadSettings()
     const favorites = Array.isArray(settings.favorites) ? settings.favorites : []
-    const favorite = !favorites.includes(favoriteKey) && !favorites.includes(videoPath)
+    const favorite = !favorites.includes(target.favoriteKey) &&
+      !favorites.includes(target.legacyFavoriteKey) &&
+      !favorites.includes(target.path)
     const nextFavorites = favorite
-      ? [...favorites, favoriteKey]
-      : favorites.filter(item => item !== favoriteKey && item !== videoPath)
+      ? [...favorites, target.favoriteKey]
+      : favorites.filter(item => (
+        item !== target.favoriteKey &&
+        item !== target.legacyFavoriteKey &&
+        item !== target.path
+      ))
     saveSettings({ favorites: nextFavorites })
     sendJson(req, res, 200, { success: true, favorite })
   }
 
   async function handlePutTags(req, res, videoId) {
-    const videoPath = await resolveVideoPath(videoId)
-    const favoriteKey = getFavoriteKeyForVideoId(videoId)
-    if (!favoriteKey) {
+    const target = await resolveFavoriteTarget(videoId)
+    if (!target) {
       sendError(req, res, 404, 'video_not_found', '视频不存在或索引尚未加载')
       return
     }
 
-    await assertAllowedVideoPath(videoPath)
     const body = await readBody(req)
     const tags = normalizeRequestTags(body.tags)
     const settings = loadSettings()
     const customTags = { ...(settings.customTags || {}) }
-    delete customTags[videoPath]
+    if (target.legacyFavoriteKey) delete customTags[target.legacyFavoriteKey]
+    delete customTags[target.path]
     if (tags.length > 0) {
-      customTags[favoriteKey] = tags
+      customTags[target.favoriteKey] = tags
     } else {
-      delete customTags[favoriteKey]
+      delete customTags[target.favoriteKey]
     }
     saveSettings({ customTags })
     sendJson(req, res, 200, { success: true, customTags: tags })
@@ -122,16 +149,16 @@ function createTagsHandlers({ resolveVideoPath }) {
     let updatedCount = 0
 
     for (const videoId of videoIds) {
-      const videoPath = await resolveVideoPath(videoId)
-      const favoriteKey = getFavoriteKeyForVideoId(videoId)
-      if (!favoriteKey) continue
-      await assertAllowedVideoPath(videoPath)
+      const target = await resolveFavoriteTarget(videoId)
+      if (!target) continue
       const currentTags = [
-        ...(Array.isArray(customTags[favoriteKey]) ? customTags[favoriteKey] : []),
-        ...(Array.isArray(customTags[videoPath]) ? customTags[videoPath] : [])
+        ...(Array.isArray(customTags[target.favoriteKey]) ? customTags[target.favoriteKey] : []),
+        ...(target.legacyFavoriteKey && Array.isArray(customTags[target.legacyFavoriteKey]) ? customTags[target.legacyFavoriteKey] : []),
+        ...(Array.isArray(customTags[target.path]) ? customTags[target.path] : [])
       ]
-      customTags[favoriteKey] = [...new Set([...currentTags, ...tags])]
-      delete customTags[videoPath]
+      customTags[target.favoriteKey] = [...new Set([...currentTags, ...tags])]
+      if (target.legacyFavoriteKey) delete customTags[target.legacyFavoriteKey]
+      delete customTags[target.path]
       updatedCount += 1
     }
 

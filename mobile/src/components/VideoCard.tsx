@@ -88,6 +88,7 @@ function VideoCardComponent({
   const handleToggleFavorite = useCallback(() => {
     onToggleFavorite?.(video)
   }, [onToggleFavorite, video])
+  const isNetworkVideo = video.sourceType === 'network'
 
   return (
     <Pressable
@@ -102,7 +103,7 @@ function VideoCardComponent({
       delayLongPress={170}
     >
       <View style={styles.thumb}>
-        {!imageFailed ? (
+        {!isNetworkVideo && !imageFailed ? (
           <Image
             source={{ uri: thumbnailUrl }}
             style={styles.image}

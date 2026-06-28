@@ -1,5 +1,6 @@
 import { memo } from 'react'
 import { Image, Pressable, StyleSheet, View } from 'react-native'
+import { Film } from 'lucide-react-native'
 import type { GestureResponderEvent } from 'react-native'
 import type { VideoContentFit, VideoPlayer } from 'expo-video'
 import type { NativeVideoPlayerHandle } from './NativeVideoPlayer'
@@ -39,7 +40,7 @@ function VideoFeedItemBase({
 }: Props) {
   return (
     <View style={[styles.page, { width, height }]}>
-      {useCoverBackground ? (
+      {useCoverBackground && thumbnailUrl ? (
         <>
           <Image source={{ uri: thumbnailUrl, cache: 'force-cache' }} style={styles.backgroundImage} blurRadius={contentFit === 'contain' ? 28 : 18} />
           <View style={styles.backgroundOverlay} />
@@ -61,8 +62,12 @@ function VideoFeedItemBase({
           />
           {children}
         </>
-      ) : (
+      ) : thumbnailUrl ? (
         <Image source={{ uri: thumbnailUrl, cache: 'force-cache' }} style={styles.previewImage} resizeMode="contain" />
+      ) : (
+        <View style={styles.previewFallback}>
+          <Film color="rgba(255,255,255,0.44)" size={44} />
+        </View>
       )}
     </View>
   )
@@ -95,6 +100,13 @@ const styles = StyleSheet.create({
   previewImage: {
     width: '100%',
     height: '100%'
+  },
+  previewFallback: {
+    width: '100%',
+    height: '100%',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#05070a'
   },
   touchLayer: {
     position: 'absolute',

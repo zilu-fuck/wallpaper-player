@@ -590,5 +590,7 @@ module.exports = {
   verifyScopedToken,
   createBoundScopedToken,
   verifyBoundScopedToken,
+  hashToken,
+  signScopedToken,
   getPublicIdentity
 }

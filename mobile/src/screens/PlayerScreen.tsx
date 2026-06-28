@@ -159,6 +159,7 @@ export function PlayerScreen({ navigation, device, video, videos }: Props) {
   const contentFit: VideoContentFit = aspectMode === 'fill' ? 'cover' : 'contain'
   const effectiveFit = aspectMode === 'fit' ? autoContentFit : contentFit
   const activeTags = useMemo(() => getVideoTags(activeVideo), [activeVideo])
+  const activeIsNetworkResource = activeVideo.sourceType === 'network'
   const availableCustomTags = useMemo(() => {
     const tags = videoList.flatMap(item => item.customTags || [])
     return uniqueCustomTags(tags)
@@ -659,6 +660,7 @@ export function PlayerScreen({ navigation, device, video, videos }: Props) {
   }, [])
 
   const fetchAnalysisState = useCallback(async (videoId = activeVideoRef.current.id, options: { silent?: boolean } = {}) => {
+    if (activeVideoRef.current.sourceType === 'network') return null
     if (!options.silent) setAnalysisLoading(true)
     try {
       const result = await getVideoAnalysis(device, videoId)
@@ -756,6 +758,10 @@ export function PlayerScreen({ navigation, device, video, videos }: Props) {
 
   const handleTranscode = useCallback(async (quality = 'compatible', qualityLabel = '兼容格式') => {
     const item = activeVideoRef.current
+    if (item.sourceType === 'network') {
+      showGestureHint('网络资源暂不支持转码缓存', 1600)
+      return
+    }
     transcodingQualityRef.current = quality
     setTranscoding(true)
     setTranscodeProgress(0.02)
@@ -784,19 +790,27 @@ export function PlayerScreen({ navigation, device, video, videos }: Props) {
       setError(transcodeError instanceof Error ? transcodeError.message : '转码启动失败')
       setStatus('error')
     }
-  }, [applyTranscodeReady, device, pollTranscodeStatus, stopTranscodePolling])
+  }, [applyTranscodeReady, device, pollTranscodeStatus, showGestureHint, stopTranscodePolling])
 
   const handleOpenAnalysis = useCallback(() => {
     const item = activeVideoRef.current
+    if (item.sourceType === 'network') {
+      showGestureHint('网络资源暂不支持视频分析', 1600)
+      return
+    }
     setAnalysisSheetVisible(true)
     setControlsVisible(false)
     fetchAnalysisState(item.id).then((result) => {
       if (result?.job?.running) startAnalysisPolling(item.id)
     })
-  }, [fetchAnalysisState, startAnalysisPolling])
+  }, [fetchAnalysisState, showGestureHint, startAnalysisPolling])
 
   const handleStartAnalysis = useCallback(async () => {
     const item = activeVideoRef.current
+    if (item.sourceType === 'network') {
+      showGestureHint('网络资源暂不支持视频分析', 1600)
+      return
+    }
     setAnalysisStarting(true)
     stopAnalysisPolling()
     try {
@@ -902,6 +916,10 @@ export function PlayerScreen({ navigation, device, video, videos }: Props) {
   }, [activeVideo.id, currentTime, device, readCurrentPosition, saveCurrentPosition, showGestureHint])
 
   const handleRevealOnDesktop = useCallback(async () => {
+    if (activeVideo.sourceType === 'network') {
+      showGestureHint('网络资源没有本地文件位置', 1600)
+      return
+    }
     try {
       await revealOnDesktop(device, activeVideo.id)
       showGestureHint('已在电脑中定位')
@@ -909,7 +927,7 @@ export function PlayerScreen({ navigation, device, video, videos }: Props) {
     } catch (revealError) {
       showGestureHint(revealError instanceof Error ? revealError.message : '定位文件失败', 1600)
     }
-  }, [activeVideo.id, device, showGestureHint])
+  }, [activeVideo.id, activeVideo.sourceType, device, showGestureHint])
 
   const handleCopyName = useCallback(async () => {
     await Clipboard.setStringAsync(getVideoTitle(activeVideo))
@@ -1062,6 +1080,7 @@ export function PlayerScreen({ navigation, device, video, videos }: Props) {
               transcodeQueuePosition={transcodeQueuePosition}
               analysisLabel={analysisActionLabel}
               analysisActive={analysisRunning || analysisAvailable}
+              networkResource={activeIsNetworkResource}
               groupLine={groupLine}
               detailLine={detailLine}
               landscapeMode={fullscreenMode}
@@ -1095,6 +1114,7 @@ export function PlayerScreen({ navigation, device, video, videos }: Props) {
               playerBackgroundMode={playerBackgroundMode}
               selectedQuality={selectedQuality}
               detailLine={detailLine}
+              networkResource={activeIsNetworkResource}
               onClose={() => setMoreSheetVisible(false)}
               onSpeedChange={handlePlaybackRateChange}
               onAspectModeChange={handleAspectModeChange}
@@ -1139,6 +1159,7 @@ export function PlayerScreen({ navigation, device, video, videos }: Props) {
   }, [
     activeIndex,
     activeAnalysisState,
+    activeIsNetworkResource,
     activeVideo,
     analysisActionLabel,
     analysisAvailable,

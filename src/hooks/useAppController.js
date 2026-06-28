@@ -45,7 +45,7 @@ export function useAppController() {
     plugins: appState.plugins,
     pluginsLoaded: appState.pluginsLoaded
   })
-  const { handlePlayPath } = player
+  const { handlePlayPath, handlePlayNetworkResource } = player
   // 优先使用排除隐藏标签后的可见计数；扫描未完成时回退到扫描数量
   const totalCount = filter.visibleCount ?? scan.videos.length
 
@@ -169,6 +169,11 @@ export function useAppController() {
 
   useEffect(() => {
     const removeRemotePlay = window.electronAPI?.onRemotePlayOnDesktop?.((payload) => {
+      if (payload?.networkResource) {
+        setShowSettings(false)
+        handlePlayNetworkResource(payload.networkResource, { resume: true, queueVideos: null })
+        return
+      }
       const filePath = payload?.filePath
       if (!filePath) return
       setShowSettings(false)
@@ -176,7 +181,7 @@ export function useAppController() {
     })
 
     return () => removeRemotePlay?.()
-  }, [handlePlayPath, setShowSettings])
+  }, [handlePlayNetworkResource, handlePlayPath, setShowSettings])
 
   return {
     ...appState,

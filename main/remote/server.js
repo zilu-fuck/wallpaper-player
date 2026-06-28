@@ -13,6 +13,7 @@ const { createDesktopHandlers } = require('./handlers/desktop')
 const { createInfoHandlers } = require('./handlers/info')
 const { createLibraryHandlers } = require('./handlers/library')
 const { createMediaHandlers } = require('./handlers/media')
+const { createNetworkResourceHandlers } = require('./handlers/network-resources')
 const { createTagsHandlers } = require('./handlers/tags')
 const { createTranscodeHandlers } = require('./handlers/transcode')
 const { pluginRegistry } = require('../plugins')
@@ -124,6 +125,11 @@ function createRemoteServer({ port, onPairingRequest } = {}) {
     handleGetVideoMetadata
   } = createMediaHandlers({ resolveVideoPath })
   const {
+    handleNetworkThumbnail,
+    handleNetworkProxy,
+    handleNetworkStream
+  } = createNetworkResourceHandlers({ getRequestToken, allowLegacyToken })
+  const {
     handleStartTranscode,
     handleGetTranscode,
     handleCancelTranscode,
@@ -173,6 +179,12 @@ function createRemoteServer({ port, onPairingRequest } = {}) {
         return
       }
 
+      const networkProxyMatch = pathname.match(/^\/v1\/network-resources\/([^/]+)\/proxy$/)
+      if (networkProxyMatch && (req.method === 'GET' || req.method === 'HEAD')) {
+        await handleNetworkProxy(req, res, decodeVideoId(networkProxyMatch[1]), url)
+        return
+      }
+
       if (!requireAuth(req, res, url, { allowLegacyToken: allowLegacyToken() })) return
 
       if (req.method === 'GET' && pathname === '/v1/library') {
@@ -205,6 +217,17 @@ function createRemoteServer({ port, onPairingRequest } = {}) {
         const videoId = decodeVideoId(videoMatch[1])
         if (videoMatch[2] === 'stream') {
           await handleStream(req, res, videoId)
+        }
+        return
+      }
+
+      const networkMatch = pathname.match(/^\/v1\/network-resources\/([^/]+)\/(thumbnail|stream)$/)
+      if (networkMatch && (req.method === 'GET' || req.method === 'HEAD')) {
+        const networkId = decodeVideoId(networkMatch[1])
+        if (networkMatch[2] === 'thumbnail') {
+          await handleNetworkThumbnail(req, res, networkId)
+        } else {
+          await handleNetworkStream(req, res, networkId, url)
         }
         return
       }

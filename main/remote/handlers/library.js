@@ -2,6 +2,12 @@ const { getPublicVideoDirectories, loadSettings } = require('../../settings')
 const { scanWithCache } = require('../../scanner')
 const { getDirectoryId, getDirectoryName, toRemoteVideo } = require('../video-index')
 const { sendJson } = require('../http-utils')
+const {
+  NETWORK_DIRECTORY_ID,
+  NETWORK_DIRECTORY_NAME,
+  listRemoteNetworkItems,
+  toRemoteNetworkVideo
+} = require('./network-resources')
 
 // 过滤掉含隐藏标签的视频（隐藏标签持久化在 settings.hiddenTags，受密码保护）
 function filterHiddenTags(items, hiddenTags) {
@@ -98,20 +104,31 @@ function createLibraryHandlers({ getRequestToken }) {
       }
     }
 
+    const networkItems = listRemoteNetworkItems(settings).map(item => toRemoteNetworkVideo(item, {
+      favoriteKeys,
+      customTags: settings.customTags || {}
+    }))
+    items.push(...networkItems)
+    if (networkItems.length > 0) {
+      directorySummaries.push({
+        id: NETWORK_DIRECTORY_ID,
+        name: NETWORK_DIRECTORY_NAME,
+        count: networkItems.length
+      })
+    }
+
     // 应用隐藏标签过滤（与桌面端 useVideoFilter 一致：含隐藏标签的视频从画廊移除）
     const hiddenTags = Array.isArray(settings.hiddenTags) ? settings.hiddenTags : []
     const filteredItems = filterHiddenTags(items, hiddenTags)
 
     // 基于过滤后的视频重新计算各目录计数，保持与画廊一致
-    if (hiddenTags.length > 0) {
-      const filteredCounts = new Map()
-      for (const item of filteredItems) {
-        const dirId = item.directoryId
-        if (dirId) filteredCounts.set(dirId, (filteredCounts.get(dirId) || 0) + 1)
-      }
-      for (const summary of directorySummaries) {
-        summary.count = filteredCounts.get(summary.id) || 0
-      }
+    const filteredCounts = new Map()
+    for (const item of filteredItems) {
+      const dirId = item.directoryId
+      if (dirId) filteredCounts.set(dirId, (filteredCounts.get(dirId) || 0) + 1)
+    }
+    for (const summary of directorySummaries) {
+      summary.count = filteredCounts.get(summary.id) || 0
     }
 
     sendJson(req, res, 200, {

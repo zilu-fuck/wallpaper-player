@@ -32,6 +32,8 @@ export type RemoteInfo = {
 
 export type VideoItem = {
   id: string
+  sourceType?: 'local' | 'network'
+  resourceKind?: 'direct' | 'webpage'
   name: string
   fileName?: string
   extension: string
@@ -47,6 +49,13 @@ export type VideoItem = {
   thumbnailUrl: string
   thumbnailToken?: string
   streamUrl: string
+  network?: {
+    site?: string
+    episodeIndex?: number | null
+    episodeTitle?: string
+    parser?: string
+    kind?: string
+  } | null
   media?: {
     available?: boolean
     durationSeconds?: number

@@ -17,6 +17,7 @@ type Props = {
   playerBackgroundMode: MobilePlayerBackgroundMode
   selectedQuality: string
   detailLine: string
+  networkResource?: boolean
   onClose: () => void
   onSpeedChange: (speed: number) => void
   onAspectModeChange: (mode: AspectMode) => void
@@ -51,6 +52,7 @@ export function PlayerMoreSheet({
   playerBackgroundMode,
   selectedQuality,
   detailLine,
+  networkResource = false,
   onClose,
   onSpeedChange,
   onAspectModeChange,
@@ -136,25 +138,29 @@ export function PlayerMoreSheet({
             ))}
           </View>
 
-          <Text style={styles.sectionTitle}>清晰度</Text>
-          <View style={styles.optionRow}>
-            {qualityOptions.map((quality) => (
-              <Pressable
-                key={quality}
-                style={[styles.pill, selectedQuality === quality && styles.pillActive]}
-                onPress={() => onQualitySelect(quality)}
-              >
-                <Text style={[styles.pillText, selectedQuality === quality && styles.pillTextActive]}>{quality}</Text>
-              </Pressable>
-            ))}
-          </View>
+          {!networkResource ? (
+            <>
+              <Text style={styles.sectionTitle}>清晰度</Text>
+              <View style={styles.optionRow}>
+                {qualityOptions.map((quality) => (
+                  <Pressable
+                    key={quality}
+                    style={[styles.pill, selectedQuality === quality && styles.pillActive]}
+                    onPress={() => onQualitySelect(quality)}
+                  >
+                    <Text style={[styles.pillText, selectedQuality === quality && styles.pillTextActive]}>{quality}</Text>
+                  </Pressable>
+                ))}
+              </View>
+            </>
+          ) : null}
 
           <MenuItem label="字幕选择" value="暂无可选字幕" onPress={onSubtitleSelect} />
           <MenuItem label="音轨选择" value="默认音轨" onPress={onAudioTrackSelect} />
           <MenuItem label="复制视频名称" icon={<Copy color={colors.text} size={19} />} onPress={onCopyName} />
-          <MenuItem label="在电脑中定位文件" icon={<FolderOpen color={colors.text} size={19} />} onPress={onRevealOnDesktop} />
-          <MenuItem label="清理转码缓存" value="释放电脑端缓存" onPress={onClearTranscodeCache} />
-          <MenuItem label="查看文件信息" value={detailLine} icon={<FileText color={colors.text} size={19} />} onPress={onFileInfo} />
+          {!networkResource ? <MenuItem label="在电脑中定位文件" icon={<FolderOpen color={colors.text} size={19} />} onPress={onRevealOnDesktop} /> : null}
+          {!networkResource ? <MenuItem label="清理转码缓存" value="释放电脑端缓存" onPress={onClearTranscodeCache} /> : null}
+          <MenuItem label={networkResource ? '查看资源信息' : '查看文件信息'} value={detailLine} icon={<FileText color={colors.text} size={19} />} onPress={onFileInfo} />
           <MenuItem label="从播放列表隐藏" danger icon={<EyeOff color={colors.danger} size={19} />} onPress={onHideFromPlaylist} />
         </ScrollView>
       </View>

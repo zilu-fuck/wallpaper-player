@@ -11,6 +11,7 @@ type Props = {
   duration: number
   fullscreenMode: boolean
   favorite: boolean
+  networkResource?: boolean
   bottomOffset: number
   onTogglePlayback: () => void
   onSeek: (time: number) => void
@@ -31,6 +32,7 @@ export function PlayerControls({
   duration,
   fullscreenMode,
   favorite,
+  networkResource = false,
   bottomOffset,
   onTogglePlayback,
   onSeek,
@@ -60,12 +62,16 @@ export function PlayerControls({
             <Pressable style={styles.iconButton} onPress={() => { onInteract(); onTags() }} hitSlop={HIT_SLOP}>
               <Tag color={colors.text} size={20} />
             </Pressable>
-            <Pressable style={styles.iconButton} onPress={() => { onInteract(); onAnalysis() }} hitSlop={HIT_SLOP}>
-              <Brain color={colors.text} size={20} />
-            </Pressable>
-            <Pressable style={styles.iconButton} onPress={() => { onInteract(); onCache() }} hitSlop={HIT_SLOP}>
-              <Download color={colors.text} size={20} />
-            </Pressable>
+            {!networkResource ? (
+              <Pressable style={styles.iconButton} onPress={() => { onInteract(); onAnalysis() }} hitSlop={HIT_SLOP}>
+                <Brain color={colors.text} size={20} />
+              </Pressable>
+            ) : null}
+            {!networkResource ? (
+              <Pressable style={styles.iconButton} onPress={() => { onInteract(); onCache() }} hitSlop={HIT_SLOP}>
+                <Download color={colors.text} size={20} />
+              </Pressable>
+            ) : null}
             <Pressable style={styles.iconButton} onPress={() => { onInteract(); onDesktopPlay() }} hitSlop={HIT_SLOP}>
               <MonitorPlay color={colors.text} size={20} />
             </Pressable>

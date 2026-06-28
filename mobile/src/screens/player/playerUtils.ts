@@ -14,6 +14,7 @@ export function withQueryToken(url: string, key: string, token: string) {
 }
 
 export function resolveThumbnailUrl(device: StoredDevice, video: VideoItem) {
+  if (video.sourceType === 'network') return ''
   return withQueryToken(
     resolveRemoteUrl(device, video.thumbnailUrl),
     video.thumbnailToken ? 'thumbnailToken' : 'token',
@@ -61,6 +62,7 @@ export function getVideoTags(video: VideoItem) {
 
 export function getVideoGroupLine(video: VideoItem, device: StoredDevice, tags = getVideoTags(video)) {
   const parts = uniqueText([
+    video.network?.site,
     video.directoryName,
     video.group,
     ...tags
@@ -76,7 +78,7 @@ export function getVideoDetailLine(
   const extension = (video.extension || '').replace(/^\./, '').toUpperCase()
   const resolution = videoSize ? `${videoSize.width}×${videoSize.height}` : ''
   return uniqueText([
-    extension || 'VIDEO',
+    video.sourceType === 'network' ? (extension || 'WEB') : (extension || 'VIDEO'),
     formatBytes(video.size),
     resolution,
     duration > 0 ? formatTime(duration) : ''

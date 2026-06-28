@@ -16,6 +16,7 @@ type Props = {
   favorite: boolean
   analysisLabel?: string
   analysisActive?: boolean
+  networkResource?: boolean
   status: 'loading' | 'ready' | 'buffering' | 'error'
   error: string
   isPlaying: boolean
@@ -54,6 +55,7 @@ export function VideoOverlay({
   favorite,
   analysisLabel,
   analysisActive,
+  networkResource = false,
   status,
   error,
   isPlaying,
@@ -154,6 +156,7 @@ export function VideoOverlay({
           favorite={favorite}
           analysisLabel={analysisLabel}
           analysisActive={analysisActive}
+          networkResource={networkResource}
           bottomOffset={actionsBottom}
           onFavorite={onFavorite}
           onTags={onTags}
@@ -193,6 +196,7 @@ export function VideoOverlay({
         duration={duration}
         fullscreenMode={landscapeMode}
         favorite={favorite}
+        networkResource={networkResource}
         bottomOffset={BOTTOM_SAFE_OFFSET + 7}
         onTogglePlayback={onTogglePlayback}
         onSeek={onSeek}

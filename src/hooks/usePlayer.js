@@ -40,6 +40,14 @@ function isNetworkUrl(value) {
   }
 }
 
+function normalizeNetworkUrl(value) {
+  try {
+    return new URL(String(value || '').trim()).toString()
+  } catch {
+    return String(value || '').trim()
+  }
+}
+
 function createVideoIndex(list) {
   const index = new Map()
   for (const video of Array.isArray(list) ? list : []) {
@@ -97,6 +105,7 @@ function createStandaloneVideo(filePath) {
 
 function createNetworkVideo(resource) {
   const url = String(resource?.url || '').trim()
+  const normalizedUrl = normalizeNetworkUrl(url)
   const fallbackName = (() => {
     try {
       const parsed = new URL(url)
@@ -108,7 +117,7 @@ function createNetworkVideo(resource) {
 
   return {
     id: resource?.id || url,
-    playbackKey: url,
+    playbackKey: normalizedUrl,
     sourceType: 'network',
     resourceKind: resource?.kind || 'direct',
     openMode: resource?.page?.openMode || '',
@@ -116,8 +125,8 @@ function createNetworkVideo(resource) {
     httpHeaders: resource?.httpHeaders || null,
     parser: resource?.parser || '',
     page: resource?.page || null,
-    url,
-    fullPath: url,
+    url: normalizedUrl,
+    fullPath: normalizedUrl,
     fileName: resource?.title || fallbackName,
     name: resource?.title || fallbackName,
     extension: (() => {
@@ -129,7 +138,7 @@ function createNetworkVideo(resource) {
     })(),
     group: '网络资源',
     tags: [],
-    favoriteKey: url
+    favoriteKey: normalizedUrl
   }
 }
 
@@ -269,7 +278,7 @@ export function usePlayer({ queueVideos = [], videoSource = queueVideos, playbac
     const episodeVideos = resourceKind === 'webpage'
       ? createNetworkEpisodeVideos(resource)
       : []
-    const currentEpisodeIndex = episodeVideos.findIndex(video => pathKey(video.url) === pathKey(resource.url))
+    const currentEpisodeIndex = episodeVideos.findIndex(video => pathKey(video.url) === pathKey(normalizeNetworkUrl(resource.url)))
     const playOptions = Object.hasOwn(options, 'queueVideos')
       ? options
       : episodeVideos.length > 1

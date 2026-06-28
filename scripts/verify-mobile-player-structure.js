@@ -66,6 +66,15 @@ matches(videoFeedItem, /onLongPress: \(event: GestureResponderEvent\) => void/, 
 
 matches(read('mobile/src/components/player/NativeVideoPlayer.tsx'), /fullscreenOptions=\{\{ enable: false \}\}/, 'native fullscreen should be disabled so overlay gestures keep working')
 
+matches(read('mobile/src/types.ts'), /sourceType\?: 'local' \| 'network'/, 'mobile video item type should represent desktop network resources')
+matches(read('mobile/src/screens/player/playerUtils.ts'), /video\.sourceType === 'network'[\s\S]*return ''/, 'mobile player should avoid unauthenticated thumbnail requests for network resources')
+matches(read('mobile/src/components/player/VideoFeedItem.tsx'), /previewFallback/, 'mobile player should render a fallback preview for network resources without thumbnails')
+matches(playerScreen, /activeIsNetworkResource/, 'mobile player should branch network resource behavior')
+matches(playerScreen, /网络资源暂不支持转码缓存/, 'mobile player should not send network resources through desktop transcode APIs')
+matches(playerScreen, /网络资源暂不支持视频分析/, 'mobile player should not send network resources through local video analysis APIs')
+matches(read('mobile/src/components/player/VideoActionBar.tsx'), /!networkResource[\s\S]*label=\{analysisLabel\}/, 'mobile network resource action bar should hide local-only analysis actions')
+matches(read('mobile/src/components/player/PlayerMoreSheet.tsx'), /networkResource[\s\S]*查看资源信息/, 'mobile more sheet should use network resource wording')
+
 matches(videoOverlay, /!landscapeMode \? \([\s\S]*VideoActionBar/, 'landscape mode should hide the right action bar')
 matches(videoOverlay, /!landscapeMode \? \([\s\S]*VideoInfo/, 'landscape mode should hide left-bottom info')
 matches(videoOverlay, /TranscodingStatus/, 'overlay should expose transcoding status')
@@ -95,9 +104,10 @@ matches(mobileUpdates, /const mobileAsset = findMobileReleaseAsset\(release\)/, 
 assert.ok(!/const latestVersion = cleanVersion\(release\.tag_name \|\| ''\)/.test(mobileUpdates), 'mobile updates should not compare the desktop release tag against the mobile app version')
 matches(read('mobile/src/components/DeviceCard.tsx'), /availability\?\.text \|\| '检测中'/, 'device card should render the current connection status')
 matches(libraryScreen, /RECONNECT_BASE_DELAY_MS/, 'library should use exponential reconnect backoff after network failures')
-matches(libraryScreen, /tagFilters\.every\(filter => videoMatchesTagFilter\(video, filter\)\)/, 'mobile library tag filters should use intersection semantics')
+matches(libraryScreen, /includeFilters\.every\(filter => videoMatchesTagFilter\(video, filter\)\)/, 'mobile library tag filters should use include intersection semantics')
+matches(libraryScreen, /excludeFilters\.every\(filter => !videoMatchesTagFilter\(video, filter\)\)/, 'mobile library tag filters should keep exclude semantics')
 matches(libraryScreen, /toggleTagFilter/, 'mobile library drawer should toggle multiple tag filters')
-matches(libraryScreen, /交集筛选/, 'mobile library should show active intersection filters')
+matches(libraryScreen, /包含 \$\{inc\.length\}/, 'mobile library should show active include filter count')
 matches(libraryScreen, /RECONNECT_MAX_DELAY_MS/, 'library reconnect backoff should have an upper bound')
 matches(libraryScreen, /loadRef\.current\?\.\(false\)/, 'library reconnect timer should retry without requiring a manual refresh')
 matches(libraryScreen, /err instanceof ApiError[\s\S]*device_mismatch/, 'library reconnect should not retry revoked authorization or device mismatch forever')
@@ -130,6 +140,9 @@ matches(server, /verifyBoundScopedToken\('thumbnail'/, 'thumbnail scoped tokens 
 assert.ok(!/verifyScopedToken\('thumbnail'/.test(server), 'thumbnail scoped tokens should not bypass device revocation')
 matches(videoIndex, /createBoundScopedToken\('thumbnail'/, 'new thumbnail tokens should be bound to the requesting access token')
 assert.ok(!/createScopedToken\('thumbnail'/.test(videoIndex), 'new thumbnail tokens should not be issued without an access token binding')
+matches(read('main/remote/handlers/library.js'), /listRemoteNetworkItems\(settings\)/, 'remote library should include desktop network resources for mobile clients')
+matches(read('main/remote/handlers/network-resources.js'), /verifyBoundScopedToken\('network-proxy'/, 'remote network segment proxy should use device-bound scoped tokens')
+matches(server, /networkMatch[\s\S]*handleNetworkStream/, 'server should expose network resource stream route')
 
 matches(transcode, /'-c:v', 'libx264'/, 'transcode should output H.264 video')
 matches(transcode, /MAX_RUNNING_TRANSCODES = 1/, 'transcode should cap concurrent ffmpeg jobs')
