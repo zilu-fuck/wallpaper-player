@@ -6,6 +6,7 @@ import { AppearanceSection, PlaybackModeSection, WindowCloseSection } from './se
 import PluginManagementPage from './settings/PluginManagementPage'
 import {
   AboutSection,
+  DownloadStatusSection,
   FfmpegStatusSection,
   MpvStatusSection,
   ShortcutsSection,
@@ -73,6 +74,9 @@ export default function Settings() {
   const [downloading, setDownloading] = useState(false)
   const [downloadProgress, setDownloadProgress] = useState(null)
   const [mpvDownloadError, setMpvDownloadError] = useState('')
+  const [downloadState, setDownloadState] = useState(null)
+  const [downloadStateLoading, setDownloadStateLoading] = useState(false)
+  const [downloadStateMessage, setDownloadStateMessage] = useState('')
   const [remoteState, setRemoteState] = useState(null)
   const [remoteSaving, setRemoteSaving] = useState(false)
   const [remotePort, setRemotePort] = useState(String(settings?.remoteAccess?.port || 38127))
@@ -134,6 +138,14 @@ export default function Settings() {
     let mounted = true
     window.electronAPI.getAppVersion?.().then((version) => {
       if (mounted) setAppVersion(version || '')
+    })
+    window.electronAPI.downloadGetState?.({ start: false }).then((result) => {
+      if (!mounted) return
+      if (result?.success) {
+        setDownloadState({ engine: result.engine, tasks: result.tasks || [] })
+      } else if (result?.error) {
+        setDownloadStateMessage(result.error)
+      }
     })
     if (!videoAnalysisPluginEnabled) {
       setAnalysisRuntimeLoaded(false)
@@ -822,6 +834,32 @@ export default function Settings() {
     }
   }, [saveSettings, setMpvStatus])
 
+  const handleRefreshDownloadState = useCallback(async () => {
+    setDownloadStateLoading(true)
+    setDownloadStateMessage('')
+    try {
+      const result = await window.electronAPI.downloadGetState?.({ start: true, refresh: true })
+      if (result?.success) {
+        setDownloadState({ engine: result.engine, tasks: result.tasks || [] })
+        setDownloadStateMessage('下载引擎状态已刷新')
+      } else {
+        setDownloadStateMessage(result?.error || '读取下载中心状态失败')
+      }
+    } catch (err) {
+      setDownloadStateMessage(err?.message || '读取下载中心状态失败')
+    } finally {
+      setDownloadStateLoading(false)
+      setTimeout(() => setDownloadStateMessage(''), 2200)
+    }
+  }, [])
+
+  const handleOpenDownloadCenter = useCallback(() => {
+    window.dispatchEvent(new CustomEvent('wallpaper-player-open-download-center', {
+      detail: { type: 'open' }
+    }))
+    onClose()
+  }, [onClose])
+
   const pairingExpiresIn = pairingCode?.expiresAt
     ? Math.max(0, Math.ceil((pairingCode.expiresAt - pairingTick) / 1000))
     : 0
@@ -1108,6 +1146,13 @@ export default function Settings() {
             {activePage === 'system' ? (
               <>
                 <UpdateSection onCheckUpdate={handleCheckUpdate} />
+                <DownloadStatusSection
+                  downloadState={downloadState}
+                  downloadLoading={downloadStateLoading}
+                  downloadMessage={downloadStateMessage}
+                  onRefreshDownloadState={handleRefreshDownloadState}
+                  onOpenDownloadCenter={handleOpenDownloadCenter}
+                />
                 <MpvStatusSection
                   mpvStatus={mpvStatus}
                   downloading={downloading}

@@ -1,0 +1,42 @@
+aria2 source information
+========================
+
+Bundled binary
+--------------
+
+Component: aria2
+Bundled path: vendor/aria2/
+Release asset: aria2-1.37.0-win-64bit-build1.zip
+Download URL: https://github.com/aria2/aria2/releases/download/release-1.37.0/aria2-1.37.0-win-64bit-build1.zip
+SHA-256: 67d015301eef0b612191212d564c5bb0a14b5b9c4796b76454276a4d28d9b288
+Observed executable version: aria2 version 1.37.0
+License: GPL-2.0-or-later
+License text: licenses/aria2-GPL-2.0-or-later.txt
+
+Corresponding source
+--------------------
+
+Upstream repository: https://github.com/aria2/aria2
+Release tag: release-1.37.0
+Release page: https://github.com/aria2/aria2/releases/tag/release-1.37.0
+Source archive: https://github.com/aria2/aria2/archive/refs/tags/release-1.37.0.zip
+
+How to obtain source
+--------------------
+
+Clone the upstream repository and check out the recorded release tag:
+
+    git clone https://github.com/aria2/aria2.git
+    cd aria2
+    git checkout release-1.37.0
+
+Alternatively, download the release source archive from:
+
+    https://github.com/aria2/aria2/archive/refs/tags/release-1.37.0.zip
+
+Modification status
+-------------------
+
+Wallpaper Player redistributes the upstream aria2 Windows binary archive
+without modifying the aria2 source code or binary files. The application
+launches aria2c as a separate local background process for download tasks.

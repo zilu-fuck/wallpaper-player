@@ -11,7 +11,7 @@ function makeToken() {
 }
 
 function getVideoKey(video) {
-  return video?.playbackKey || video?.fullPath || video?.filePath || ''
+  return video?.playbackKey || video?.url || video?.fullPath || video?.filePath || ''
 }
 
 function getUniqueVideoKeys(list) {
@@ -30,11 +30,21 @@ function pathKey(filePath) {
   return String(filePath || '').replace(/\\/g, '/').toLowerCase()
 }
 
+function isNetworkUrl(value) {
+  if (typeof value !== 'string' || !value.trim()) return false
+  try {
+    const url = new URL(value.trim())
+    return url.protocol === 'http:' || url.protocol === 'https:'
+  } catch {
+    return false
+  }
+}
+
 function createVideoIndex(list) {
   const index = new Map()
   for (const video of Array.isArray(list) ? list : []) {
     const key = getVideoKey(video)
-    const file = pathKey(video.fullPath || video.filePath)
+    const file = pathKey(video.url || video.fullPath || video.filePath)
     if (key && !index.has(key)) index.set(key, video)
     if (file && !index.has(file)) index.set(file, video)
   }
@@ -85,6 +95,64 @@ function createStandaloneVideo(filePath) {
   }
 }
 
+function createNetworkVideo(resource) {
+  const url = String(resource?.url || '').trim()
+  const fallbackName = (() => {
+    try {
+      const parsed = new URL(url)
+      return decodeURIComponent(parsed.pathname.split('/').filter(Boolean).pop() || '') || parsed.hostname || '网络视频'
+    } catch {
+      return '网络视频'
+    }
+  })()
+
+  return {
+    id: resource?.id || url,
+    playbackKey: url,
+    sourceType: 'network',
+    resourceKind: resource?.kind || 'direct',
+    openMode: resource?.page?.openMode || '',
+    playbackUrl: resource?.playbackUrl || '',
+    httpHeaders: resource?.httpHeaders || null,
+    parser: resource?.parser || '',
+    page: resource?.page || null,
+    url,
+    fullPath: url,
+    fileName: resource?.title || fallbackName,
+    name: resource?.title || fallbackName,
+    extension: (() => {
+      try {
+        return new URL(url).pathname.toLowerCase().match(/\.[^.\\/]+$/)?.[0] || ''
+      } catch {
+        return ''
+      }
+    })(),
+    group: '网络资源',
+    tags: [],
+    favoriteKey: url
+  }
+}
+
+function createNetworkEpisodeVideos(resource) {
+  const episodes = Array.isArray(resource?.page?.episodes) ? resource.page.episodes : []
+  return episodes
+    .filter(episode => episode?.url && isNetworkUrl(episode.url))
+    .map(episode => createNetworkVideo({
+      ...resource,
+      id: `${resource?.id || resource?.url || 'network'}:${episode.index || episode.url}`,
+      title: episode.title || resource?.title,
+      url: episode.url,
+      playbackUrl: episode.playbackUrl || '',
+      httpHeaders: episode.httpHeaders || resource?.httpHeaders || null,
+      page: {
+        ...(resource?.page || {}),
+        openMode: episode.openMode || resource?.page?.openMode || '',
+        currentEpisodeIndex: episode.index || null,
+        currentEpisodeTitle: episode.title || ''
+      }
+    }))
+}
+
 function isSupportedVideoPath(filePath) {
   const ext = String(filePath || '').toLowerCase().match(/\.[^.\\/]+$/)?.[0] || ''
   return SUPPORTED_EXTENSIONS.has(ext)
@@ -95,8 +163,10 @@ export function usePlayer({ queueVideos = [], videoSource = queueVideos, playbac
   const [playerError, setPlayerError] = useState('')
   const [currentPlaybackPath, setCurrentPlaybackPath] = useState('')
   const [sessionQueueKeys, setSessionQueueKeys] = useState(null)
+  const [sessionQueueVideos, setSessionQueueVideos] = useState([])
   const playerCommandTargetRef = useRef(null)
   const videoIndex = useMemo(() => createVideoIndex(videoSource), [videoSource])
+  const sessionVideoIndex = useMemo(() => createVideoIndex(sessionQueueVideos), [sessionQueueVideos])
   const sourceQueueKeys = useMemo(() => (
     orderQueueKeysForMode(queueVideos, playbackMode)
   ), [queueVideos, playbackMode])
@@ -107,17 +177,27 @@ export function usePlayer({ queueVideos = [], videoSource = queueVideos, playbac
   const resolveQueueVideoAt = useCallback((index) => {
     const key = activeQueueKeys[index]
     if (!key) return null
+    const sessionVideo = sessionQueueKeys
+      ? sessionVideoIndex.get(key) || sessionVideoIndex.get(pathKey(key))
+      : null
+    if (sessionVideo) return sessionVideo
     const indexedVideo = videoIndex.get(key) || videoIndex.get(pathKey(key))
     if (indexedVideo) return indexedVideo
     if (playingVideo && (getVideoKey(playingVideo) === key || keyMatchesPath(key, playingVideo.fullPath || playingVideo.filePath))) {
       return playingVideo
     }
     return null
-  }, [activeQueueKeys, playingVideo, videoIndex])
+  }, [activeQueueKeys, playingVideo, sessionQueueKeys, sessionVideoIndex, videoIndex])
+
+  const queueItems = useMemo(() => (
+    activeQueueKeys
+      .map((_, index) => resolveQueueVideoAt(index))
+      .filter(Boolean)
+  ), [activeQueueKeys, resolveQueueVideoAt])
 
   const queueIndex = useMemo(() => {
     if (!playingVideo) return -1
-    if (currentPlaybackPath) {
+    if (currentPlaybackPath && playingVideo.sourceType !== 'network') {
       const currentPath = pathKey(currentPlaybackPath)
       const byPath = activeQueueKeys.findIndex(key => {
         if (key === currentPath || pathKey(key) === currentPath) return true
@@ -144,8 +224,10 @@ export function usePlayer({ queueVideos = [], videoSource = queueVideos, playbac
         ? getUniqueVideoKeys(options.queueVideos)
         : orderQueueKeysForMode(options.queueVideos, nextPlaybackMode)
       setSessionQueueKeys(nextQueueKeys)
+      setSessionQueueVideos(options.queueVideos)
     } else if (options.queueVideos === null) {
       setSessionQueueKeys([getVideoKey(video)].filter(Boolean))
+      setSessionQueueVideos([video])
     }
 
     const nextVideo = {
@@ -157,7 +239,7 @@ export function usePlayer({ queueVideos = [], videoSource = queueVideos, playbac
       }
     }
     setPlayerError('')
-    setCurrentPlaybackPath(video.fullPath || video.filePath || '')
+    setCurrentPlaybackPath(video.url || video.fullPath || video.filePath || '')
     setPlayingVideo(nextVideo)
     return nextVideo
   }, [playbackMode, playingVideo?.playOptions?.playbackMode])
@@ -176,6 +258,27 @@ export function usePlayer({ queueVideos = [], videoSource = queueVideos, playbac
       ? options
       : { ...options, queueVideos: null }
     return handlePlay(createStandaloneVideo(filePath), playOptions)
+  }, [handlePlay])
+
+  const handlePlayNetworkResource = useCallback((resource, options = {}) => {
+    if (!resource?.url || !isNetworkUrl(resource.url)) {
+      setPlayerError('网络资源地址无效')
+      return null
+    }
+    const resourceKind = resource?.kind === 'webpage' || resource?.parser ? 'webpage' : resource?.kind
+    const episodeVideos = resourceKind === 'webpage'
+      ? createNetworkEpisodeVideos(resource)
+      : []
+    const currentEpisodeIndex = episodeVideos.findIndex(video => pathKey(video.url) === pathKey(resource.url))
+    const playOptions = Object.hasOwn(options, 'queueVideos')
+      ? options
+      : episodeVideos.length > 1
+        ? { ...options, queueVideos: episodeVideos, preserveQueueOrder: true }
+        : { ...options, queueVideos: null }
+    return handlePlay(
+      currentEpisodeIndex >= 0 ? episodeVideos[currentEpisodeIndex] : createNetworkVideo(resource),
+      playOptions
+    )
   }, [handlePlay])
 
   const handleOpenFile = useCallback(async () => {
@@ -204,6 +307,7 @@ export function usePlayer({ queueVideos = [], videoSource = queueVideos, playbac
     setPlayerError('')
     setCurrentPlaybackPath('')
     setSessionQueueKeys(null)
+    setSessionQueueVideos([])
   }, [])
 
   const handleStopPlayback = useCallback(() => {
@@ -366,11 +470,13 @@ export function usePlayer({ queueVideos = [], videoSource = queueVideos, playbac
     playerError,
     setPlayerError,
     queue: activeQueueKeys,
+    queueItems,
     queueIndex,
     queueLength,
     handlePlay,
     handlePlayPath,
     handleOpenFile,
+    handlePlayNetworkResource,
     handleDropFiles,
     handleClosePlayer,
     handleStopPlayback,

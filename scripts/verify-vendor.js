@@ -7,11 +7,17 @@ const rootDir = path.join(__dirname, '..')
 const requiredFiles = [
   'THIRD_PARTY_NOTICES.md',
   path.join('licenses', 'mpv-GPL-2.0-or-later.txt'),
+  path.join('licenses', 'aria2-GPL-2.0-or-later.txt'),
+  path.join('licenses', 'yt-dlp-Unlicense.txt'),
   path.join('licenses', 'ffmpeg-GPL-3.0.txt'),
   path.join('licenses', 'dependency-notices.txt'),
   path.join('sources', 'mpv-source-information.txt'),
+  path.join('sources', 'aria2-source-information.txt'),
+  path.join('sources', 'yt-dlp-source-information.txt'),
   path.join('sources', 'ffmpeg-source-information.txt'),
   path.join('vendor', 'mpv', 'mpv.exe'),
+  path.join('vendor', 'aria2', 'aria2c.exe'),
+  path.join('vendor', 'yt-dlp', 'yt-dlp.exe'),
   path.join('vendor', 'ffmpeg', 'bin', 'ffmpeg.exe')
 ]
 
@@ -68,9 +74,27 @@ function validateFfmpeg() {
   ])
 }
 
+function validateAria2() {
+  const output = runVersionCommand(resolveRoot('vendor', 'aria2', 'aria2c.exe'), ['--version'])
+  assertOutputIncludes('aria2', output, [
+    'aria2 version 1.37.0',
+    'GNU General Public License',
+    'either version 2 of the License'
+  ])
+}
+
+function validateYtDlp() {
+  const output = runVersionCommand(resolveRoot('vendor', 'yt-dlp', 'yt-dlp.exe'), ['--version'])
+  assertOutputIncludes('yt-dlp', output, [
+    '2026.06.09'
+  ])
+}
+
 function verifyVendor() {
   assertFilesExist()
   validateMpv()
+  validateAria2()
+  validateYtDlp()
   validateFfmpeg()
 }
 

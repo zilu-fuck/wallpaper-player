@@ -4,7 +4,7 @@ const fsp = require('fs/promises')
 const crypto = require('crypto')
 const { SCAN_CACHE_TTL } = require('./constants')
 const { pathKey, isPathInside, isVideoFile } = require('./paths')
-const { getAllowedVideoDirectories, setDirectoryChangeHandler, isSessionAllowedFile } = require('./settings')
+const { getAllowedVideoDirectories, setDirectoryChangeHandler, isSessionAllowedFile, resolvePathForAccess } = require('./settings')
 const { getCachedVideoMetadata, warmVideoMetadataCache } = require('./video-metadata')
 
 const fallbackUserDataDir = path.join(process.cwd(), '.tmp-wallpaper-player')
@@ -171,7 +171,7 @@ async function resolveExistingPath(inputPath) {
   if (typeof inputPath !== 'string' || !inputPath.trim()) {
     throw new Error('路径无效')
   }
-  const resolved = path.resolve(inputPath)
+  const resolved = resolvePathForAccess(inputPath)
   await fsp.access(resolved)
   return resolved
 }

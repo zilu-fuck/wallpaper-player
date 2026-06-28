@@ -29,6 +29,25 @@ const packages = [
     keepBinLayout: true
   },
   {
+    name: 'aria2',
+    url: 'https://github.com/aria2/aria2/releases/download/release-1.37.0/aria2-1.37.0-win-64bit-build1.zip',
+    sha256: '67d015301eef0b612191212d564c5bb0a14b5b9c4796b76454276a4d28d9b288',
+    archive: 'aria2-1.37.0-win-64bit-build1.zip',
+    marker: path.join(vendorDir, 'aria2', 'aria2c.exe'),
+    targetDir: path.join(vendorDir, 'aria2'),
+    exeName: 'aria2c.exe'
+  },
+  {
+    name: 'yt-dlp',
+    url: 'https://github.com/yt-dlp/yt-dlp/releases/download/2026.06.09/yt-dlp.exe',
+    sha256: '3a48cb955d55c8821b60ccbdbbc6f61bc958f2f3d3b7ad5eaf3d83a543293a27',
+    archive: 'yt-dlp-2026.06.09.exe',
+    marker: path.join(vendorDir, 'yt-dlp', 'yt-dlp.exe'),
+    targetDir: path.join(vendorDir, 'yt-dlp'),
+    exeName: 'yt-dlp.exe',
+    directExecutable: true
+  },
+  {
     name: 'llama.cpp CPU',
     url: 'https://github.com/ggml-org/llama.cpp/releases/download/b9756/llama-b9756-bin-win-cpu-x64.zip',
     sha256: '47e5c4f2e59969ee1d812f71281614dad236f312912a1759fba8fc622bb5ad5f',
@@ -174,6 +193,15 @@ async function preparePackage(pkg) {
     }
   }
   verifySha256(archivePath, pkg.sha256)
+
+  if (pkg.directExecutable) {
+    console.log(`[vendor] installing ${pkg.name}`)
+    await fsp.rm(pkg.targetDir, { recursive: true, force: true })
+    await ensureDir(pkg.targetDir)
+    await fsp.copyFile(archivePath, path.join(pkg.targetDir, pkg.exeName))
+    console.log(`[vendor] ready: ${pkg.name}`)
+    return
+  }
 
   console.log(`[vendor] extracting ${pkg.name}`)
   await fsp.rm(extractDir, { recursive: true, force: true })

@@ -19,12 +19,20 @@ const AGENT_ICONS = {
       <path d="M11 8v6" />
       <path d="M8 11h6" />
     </svg>
+  ),
+  downloads: (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+      <path d="M12 3v11" />
+      <path d="M7 9l5 5 5-5" />
+      <path d="M5 20h14" />
+    </svg>
   )
 }
 
 const AGENT_LABELS = {
   'video-analysis': '视频理解',
-  'ai-search': 'AI 搜索'
+  'ai-search': 'AI 搜索',
+  downloads: '下载中心'
 }
 
 /**

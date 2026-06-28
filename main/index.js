@@ -4,6 +4,7 @@ const { setupCSP, createWindow, getMainWindow, setWindowCloseHandler } = require
 const { setupIPC } = require('./ipc')
 const { setupAutoUpdater, disposeUpdater } = require('./updater')
 const { initMpv, destroyMpv } = require('./mpv-integration')
+const { disposeDownloadManager } = require('./download-manager')
 const { unwatchAllDirectories } = require('./scanner')
 const { loadSettings, saveSettings, sanitizeSettingsForSave, sanitizeSettingsForRenderer, onSettingsChanged } = require('./settings')
 const { setupPlugins, disposePlugins } = require('./plugins')
@@ -218,6 +219,7 @@ app.on('before-quit', () => {
   disposePlugins().catch((error) => {
     log.error('[plugins] dispose failed:', error)
   })
+  disposeDownloadManager()
   destroyMpv()
 })
 

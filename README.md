@@ -2,7 +2,7 @@
 
 Wallpaper Player 是一个本地视频壁纸画廊播放器，电脑端基于 Electron、Vite 和 React，手机端基于 Expo / React Native。电脑端负责扫描本地视频目录、生成缩略图、管理收藏和标签，并通过局域网服务把视频库提供给手机端观看。
 
-Windows 发布包内置 mpv 和 FFmpeg，普通用户不需要额外安装播放器或转码工具。Android 端是独立 APK，正式测试时不依赖 Expo Go。
+Windows 发布包内置 mpv、FFmpeg、aria2 和 yt-dlp，普通用户不需要额外安装播放器、转码工具或下载引擎。Android 端是独立 APK，正式测试时不依赖 Expo Go。
 
 ## 当前测试版
 
@@ -160,7 +160,7 @@ npm run typecheck
 |-- docs/                    # 方案、发布说明和 QA 文档
 |-- scripts/                 # 构建、vendor 准备、验证脚本
 |-- dist/                    # 电脑端前端构建输出，已忽略
-|-- vendor/                  # 内置 mpv / FFmpeg，已忽略
+|-- vendor/                  # 内置 mpv / FFmpeg / aria2 / yt-dlp，已忽略
 |-- release/                 # Windows 打包产物，已忽略
 `-- mobile/dist/             # Android APK 产物，已忽略
 ```
@@ -179,4 +179,4 @@ npm run typecheck
 
 项目代码使用 Apache-2.0，详见 [LICENSE](LICENSE)。
 
-Windows 发布包会捆绑 mpv 和 FFmpeg，它们适用各自的 GPL 许可证。二进制声明、许可证正文、哈希和源码信息见 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)。
+Windows 发布包会捆绑 mpv、FFmpeg、aria2 和 yt-dlp。它们适用各自的第三方许可证；二进制声明、许可证正文、哈希和源码信息见 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)。

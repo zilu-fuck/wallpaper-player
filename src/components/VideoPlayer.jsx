@@ -23,6 +23,27 @@ function Icon({ path, viewBox = '0 0 24 24' }) {
   )
 }
 
+function getQueueItemTitle(item, index, isNetworkList) {
+  if (isNetworkList) {
+    return item?.page?.currentEpisodeTitle || item?.title || item?.name || item?.fileName || `第 ${index + 1} 集`
+  }
+  return item?.name || item?.fileName || item?.fullPath?.split(/[/\\]/).pop() || `视频 ${index + 1}`
+}
+
+function getQueueItemMeta(item, isNetworkList) {
+  if (isNetworkList) {
+    try {
+      const parsed = new URL(item?.url || item?.fullPath || '')
+      return parsed.hostname
+    } catch {
+      return '网络资源'
+    }
+  }
+  const filePath = String(item?.fullPath || item?.filePath || '')
+  const dir = filePath.split(/[/\\]/).slice(0, -1).join('\\')
+  return dir || item?.group || '本地视频'
+}
+
 export default function VideoPlayer({ video }) {
   const {
     settings,
@@ -31,8 +52,10 @@ export default function VideoPlayer({ video }) {
     mpvStatus,
     playerError,
     setPlayerError,
+    queueItems,
     queueIndex,
     queueLength,
+    handlePlay,
     handleOpenFile,
     handleDropFiles,
     handleStopPlayback,
@@ -50,6 +73,7 @@ export default function VideoPlayer({ video }) {
   const html5SaveSnapshotRef = useRef(null)
   const html5SaveTimerRef = useRef(null)
   const stageRef = useRef(null)
+  const videoSurfaceRef = useRef(null)
   const shellRef = useRef(null)
   const toolbarRef = useRef(null)
   const hostBoundsRef = useRef(null)
@@ -76,6 +100,9 @@ export default function VideoPlayer({ video }) {
   const [webFullscreen, setWebFullscreen] = useState(false)
   const [isFullscreen, setIsFullscreen] = useState(false)
   const [html5Url, setHtml5Url] = useState('')
+  const [webviewUrl, setWebviewUrl] = useState('')
+  const [activePlaybackUrl, setActivePlaybackUrl] = useState('')
+  const [activeHttpHeaders, setActiveHttpHeaders] = useState(null)
   const [mpvState, setMpvState] = useState(null)
   const [html5State, setHtml5State] = useState({
     currentTime: 0,
@@ -90,6 +117,7 @@ export default function VideoPlayer({ video }) {
   const [analysisState, setAnalysisState] = useState({ status: 'idle', data: null, error: '' })
   const [analysisOpen, setAnalysisOpen] = useState(false)
   const [analysisJob, setAnalysisJob] = useState(null)
+  const [playlistOpen, setPlaylistOpen] = useState(false)
   const [progressPreview, setProgressPreview] = useState({
     visible: false,
     time: 0,
@@ -98,11 +126,23 @@ export default function VideoPlayer({ video }) {
     loading: false
   })
   const playbackResumeEnabled = video?.playOptions?.resume !== false
+  const isNetworkResource = video?.sourceType === 'network'
+  const isWebpageShell = Boolean(isNetworkResource && video?.resourceKind === 'webpage' && video?.openMode === 'webview' && !video?.playbackUrl)
+  const isWebpageMode = Boolean(isWebpageShell || webviewUrl)
+  const playbackTarget = video?.url || video?.fullPath || ''
+  const pageUrl = webviewUrl || playbackTarget
+  const pageHost = (() => {
+    try {
+      return new URL(pageUrl).hostname.replace(/^www\./i, '')
+    } catch {
+      return '网页资源'
+    }
+  })()
   const videoAnalysisPlugin = plugins?.find?.(plugin => plugin.id === 'video-analysis')
-  const videoAnalysisEnabled = Boolean(pluginsLoaded && videoAnalysisPlugin?.enabled && settings?.videoAnalysis?.enabled)
+  const videoAnalysisEnabled = Boolean(!isNetworkResource && pluginsLoaded && videoAnalysisPlugin?.enabled && settings?.videoAnalysis?.enabled)
 
   const mpvEngineAvailable = mpvStatus?.available !== false
-  const canUseMpv = mpvEngineAvailable && mode === 'mpv'
+  const canUseMpv = !isWebpageMode && mpvEngineAvailable && mode === 'mpv'
   const isHtml5 = !canUseMpv
   const state = isHtml5 ? html5State : (mpvState || {})
   const rawPosition = Number(state.timePos ?? state.currentTime ?? 0)
@@ -122,6 +162,7 @@ export default function VideoPlayer({ video }) {
   const subtitleId = state.subtitleId == null ? null : Number(state.subtitleId)
   const statusLabel = (() => {
     if (!video) return ''
+    if (isWebpageMode) return '正在打开内置网页...'
     if (canUseMpv) {
       if (launchState === 'launching') return '正在启动 mpv...'
       return 'mpv 嵌入式播放'
@@ -132,6 +173,10 @@ export default function VideoPlayer({ video }) {
   })()
   const analysisAvailable = analysisState.status === 'ready' && analysisState.data?.available
   const analysisRunning = analysisState.status === 'analyzing'
+  const playlistItems = Array.isArray(queueItems) ? queueItems : []
+  const playlistAvailable = playlistItems.length > 1
+  const playlistIsNetwork = Boolean(isNetworkResource && video?.resourceKind === 'webpage')
+  const playlistTitle = playlistIsNetwork ? '剧集' : (isNetworkResource ? '网络视频' : '本地视频')
   const analysisButtonTitle = (() => {
     if (!videoAnalysisEnabled) return '请先在设置中启用视频理解'
     if (analysisState.status === 'checking') return '正在读取视频理解结果'
@@ -143,6 +188,12 @@ export default function VideoPlayer({ video }) {
   useEffect(() => {
     speedRef.current = Number.isFinite(speed) ? speed : 1
   }, [speed])
+
+  useEffect(() => {
+    if (!playlistAvailable) {
+      setPlaylistOpen(false)
+    }
+  }, [playlistAvailable])
 
   useEffect(() => {
     pausedRef.current = paused
@@ -158,15 +209,15 @@ export default function VideoPlayer({ video }) {
       ?.then(state => setMpvState(state || null))
       .catch(() => {})
     return window.electronAPI.onMpvState((state) => {
-      if (!state?.filePath || !video?.fullPath) {
+      if (!state?.filePath || !playbackTarget) {
         setMpvState(state || null)
         return
       }
-      if (String(state.filePath).replace(/\\/g, '/').toLowerCase() === String(video.fullPath).replace(/\\/g, '/').toLowerCase()) {
+      if (String(state.filePath).replace(/\\/g, '/').toLowerCase() === String(playbackTarget).replace(/\\/g, '/').toLowerCase()) {
         setMpvState(state)
       }
     })
-  }, [video])
+  }, [playbackTarget, video])
 
   useEffect(() => {
     let canceled = false
@@ -252,6 +303,7 @@ export default function VideoPlayer({ video }) {
   }, [handleStopPlayback])
 
   const handleSeekTo = useCallback((nextPosition) => {
+    if (isWebpageMode) return
     const value = Number(nextPosition)
     if (!Number.isFinite(value)) return
 
@@ -264,10 +316,10 @@ export default function VideoPlayer({ video }) {
     if (!el) return
     el.currentTime = clamp(value, 0, Number.isFinite(el.duration) ? el.duration : value)
     setHtml5State(prev => ({ ...prev, currentTime: el.currentTime }))
-  }, [canUseMpv])
+  }, [canUseMpv, isWebpageMode])
 
   const requestProgressPreviewFrame = useCallback((previewTime) => {
-    if (!video?.fullPath || !window.electronAPI?.generatePreviewFrame || !window.electronAPI?.getThumbnailUrl) return
+    if (isNetworkResource || !video?.fullPath || !window.electronAPI?.generatePreviewFrame || !window.electronAPI?.getThumbnailUrl) return
 
     const seconds = Math.max(0, Math.round(Number(previewTime) || 0))
     const cachedUrl = progressPreviewCacheRef.current.get(seconds)
@@ -322,7 +374,7 @@ export default function VideoPlayer({ video }) {
           requestProgressPreviewFrame(pendingTime)
         }
       })
-  }, [video?.fullPath])
+  }, [isNetworkResource, video?.fullPath])
 
   const updateProgressPreview = useCallback((event) => {
     if (!duration || duration <= 0) return
@@ -371,6 +423,7 @@ export default function VideoPlayer({ video }) {
   }, [])
 
   const handleSeek = useCallback((delta) => {
+    if (isWebpageMode) return
     if (canUseMpv) {
       window.electronAPI?.mpvSeekRelative?.(delta)
       return
@@ -380,9 +433,10 @@ export default function VideoPlayer({ video }) {
     if (!el) return
     el.currentTime = clamp(el.currentTime + delta, 0, Number.isFinite(el.duration) ? el.duration : el.currentTime + delta)
     setHtml5State(prev => ({ ...prev, currentTime: el.currentTime }))
-  }, [canUseMpv])
+  }, [canUseMpv, isWebpageMode])
 
   const handleTogglePause = useCallback(() => {
+    if (isWebpageMode) return
     if (canUseMpv) {
       window.electronAPI?.mpvCyclePause?.()
       return
@@ -395,9 +449,10 @@ export default function VideoPlayer({ video }) {
     } else {
       el.pause()
     }
-  }, [canUseMpv])
+  }, [canUseMpv, isWebpageMode])
 
   const handleSetVolume = useCallback((nextVolume) => {
+    if (isWebpageMode) return
     const value = clamp(Number(nextVolume), 0, 100)
     if (canUseMpv) {
       window.electronAPI?.mpvSetVolume?.(value)
@@ -408,9 +463,10 @@ export default function VideoPlayer({ video }) {
     if (!el) return
     el.volume = value / 100
     setHtml5State(prev => ({ ...prev, volume: value, muted: el.muted }))
-  }, [canUseMpv])
+  }, [canUseMpv, isWebpageMode])
 
   const handleToggleMute = useCallback(() => {
+    if (isWebpageMode) return
     if (canUseMpv) {
       window.electronAPI?.mpvToggleMute?.()
       return
@@ -420,9 +476,10 @@ export default function VideoPlayer({ video }) {
     if (!el) return
     el.muted = !el.muted
     setHtml5State(prev => ({ ...prev, muted: el.muted }))
-  }, [canUseMpv])
+  }, [canUseMpv, isWebpageMode])
 
   const applySpeed = useCallback((nextSpeed) => {
+    if (isWebpageMode) return
     const value = clamp(Number(nextSpeed), 0.1, 4)
     if (canUseMpv) {
       window.electronAPI?.mpvSetSpeed?.(value)
@@ -433,7 +490,7 @@ export default function VideoPlayer({ video }) {
     if (!el) return
     el.playbackRate = value
     setHtml5State(prev => ({ ...prev, playbackRate: value }))
-  }, [canUseMpv])
+  }, [canUseMpv, isWebpageMode])
 
   const handleSpeedChange = useCallback((nextSpeed) => {
     applySpeed(nextSpeed)
@@ -475,9 +532,26 @@ export default function VideoPlayer({ video }) {
 
   const handleToggleAnalysis = useCallback(() => {
     if (!analysisAvailable) return
+    setPlaylistOpen(false)
     setAnalysisOpen(value => !value)
     setActiveMenu(null)
   }, [analysisAvailable])
+
+  const handleTogglePlaylist = useCallback(() => {
+    if (!playlistAvailable) return
+    hideProgressPreview()
+    setAnalysisOpen(false)
+    setActiveMenu(null)
+    setPlaylistOpen(value => !value)
+  }, [hideProgressPreview, playlistAvailable])
+
+  const handlePlayQueueItem = useCallback((item) => {
+    if (!item) return
+    handlePlay?.(item, {
+      queueVideos: playlistItems.length ? playlistItems : [item],
+      preserveQueueOrder: true
+    })
+  }, [handlePlay, playlistItems])
 
   const handleCancelAnalysis = useCallback(async () => {
     const jobId = analysisJob?.jobId
@@ -593,12 +667,13 @@ export default function VideoPlayer({ video }) {
   }, [activeMenu, paused])
 
   const handleVideoSurfaceClick = useCallback(() => {
+    if (isWebpageMode) return
     if (clickTimerRef.current) return
     clickTimerRef.current = setTimeout(() => {
       clickTimerRef.current = null
       handleTogglePause()
     }, 180)
-  }, [handleTogglePause])
+  }, [handleTogglePause, isWebpageMode])
 
   const handleVideoSurfaceDoubleClick = useCallback((event) => {
     event.preventDefault()
@@ -669,7 +744,7 @@ export default function VideoPlayer({ video }) {
   }, [])
 
   const saveHtml5PlaybackState = useCallback((immediate = false) => {
-    if (canUseMpv || !video?.fullPath || !window.electronAPI?.savePlaybackState) return
+    if (canUseMpv || !playbackTarget || !window.electronAPI?.savePlaybackState) return
 
     const el = videoRef.current
     if (!el) return
@@ -684,7 +759,7 @@ export default function VideoPlayer({ video }) {
 
     html5SaveSnapshotRef.current = patch
 
-    const save = () => window.electronAPI.savePlaybackState(video.fullPath, patch).catch(() => {})
+    const save = () => window.electronAPI.savePlaybackState(playbackTarget, patch).catch(() => {})
     if (immediate) {
       if (html5SaveTimerRef.current) {
         clearTimeout(html5SaveTimerRef.current)
@@ -699,9 +774,9 @@ export default function VideoPlayer({ video }) {
       html5SaveTimerRef.current = null
       const nextPatch = html5SaveSnapshotRef.current
       if (!nextPatch) return
-      window.electronAPI.savePlaybackState(video.fullPath, nextPatch).catch(() => {})
+      window.electronAPI.savePlaybackState(playbackTarget, nextPatch).catch(() => {})
     }, 1000)
-  }, [canUseMpv, video?.fullPath])
+  }, [canUseMpv, playbackTarget])
 
   const handleHtml5PlaybackStateChange = useCallback(() => {
     const el = videoRef.current
@@ -737,9 +812,10 @@ export default function VideoPlayer({ video }) {
   }, [])
 
   const readMpvHostBounds = useCallback(() => {
-    if (!video || !canUseMpv || !stageRef.current) return null
+    const hostEl = stageRef.current || videoSurfaceRef.current
+    if (!video || !canUseMpv || !hostEl) return null
 
-    const rect = stageRef.current.getBoundingClientRect()
+    const rect = hostEl.getBoundingClientRect()
     const viewportWidth = window.innerWidth || document.documentElement.clientWidth || 0
     const viewportHeight = window.innerHeight || document.documentElement.clientHeight || 0
     if (
@@ -851,6 +927,8 @@ export default function VideoPlayer({ video }) {
     analysisOpen,
     analysisState.status,
     canUseMpv,
+    playlistAvailable,
+    playlistOpen,
     scheduleMpvHostBoundsSync,
     video
   ])
@@ -860,35 +938,100 @@ export default function VideoPlayer({ video }) {
   }, [handlePlayerCommand, registerPlayerCommandTarget])
 
   useEffect(() => {
-    if (mpvStatus?.available === false && mode === 'mpv') {
+    if (isWebpageShell && mode !== 'html5') {
+      setMode('html5')
+    } else if (mpvStatus?.available === false && mode === 'mpv') {
       setMode('html5')
     }
-  }, [mode, mpvStatus?.available])
+  }, [isWebpageShell, mode, mpvStatus?.available])
 
   useEffect(() => {
     if (!video) return undefined
 
     const launchId = ++launchTokenRef.current
-    const shouldUseMpv = mode === 'mpv' && mpvStatus?.available !== false
+    const shouldUseMpv = !isWebpageShell && mode === 'mpv' && mpvStatus?.available !== false
 
-    setLaunchState(shouldUseMpv ? 'launching' : 'loading')
+    setLaunchState(isWebpageShell ? 'ready' : (shouldUseMpv ? 'launching' : 'loading'))
     setHtml5Error('')
     setHtml5Url('')
+    setWebviewUrl(isWebpageShell ? playbackTarget : '')
+    setActivePlaybackUrl('')
+    setActiveHttpHeaders(null)
     setPlayerError('')
     html5ResumeRef.current = null
 
     let cancelled = false
+    let resolvedNetworkUrl = ''
+    let resolvedNetworkHeaders = null
+
+    const resolveNetworkPlayback = async () => {
+      if (!isNetworkResource) return { url: playbackTarget, httpHeaders: null }
+      if (isWebpageShell) return { url: playbackTarget, httpHeaders: null, webview: true }
+      if (resolvedNetworkUrl) return { url: resolvedNetworkUrl, httpHeaders: resolvedNetworkHeaders }
+      if (video.resourceKind !== 'webpage') {
+        resolvedNetworkUrl = video.playbackUrl || playbackTarget
+        resolvedNetworkHeaders = video.httpHeaders || null
+        setActiveHttpHeaders(resolvedNetworkHeaders)
+        return { url: resolvedNetworkUrl, httpHeaders: resolvedNetworkHeaders }
+      }
+      const result = await window.electronAPI?.resolveNetworkResource?.({
+        id: video.id,
+        url: playbackTarget,
+        title: video.name || video.fileName,
+        kind: video.resourceKind,
+        playbackUrl: video.playbackUrl,
+        httpHeaders: video.httpHeaders,
+        parser: video.parser,
+        page: video.page
+      })
+      if (!result?.success) {
+        throw new Error(result?.error || '网页资源解析失败')
+      }
+      if (!result.resource?.playbackUrl && result.resource?.page?.openMode === 'webview') {
+        resolvedNetworkUrl = result.resource?.url || playbackTarget
+        setActivePlaybackUrl(resolvedNetworkUrl)
+        setWebviewUrl(resolvedNetworkUrl)
+        setMode('html5')
+        return { url: resolvedNetworkUrl, httpHeaders: null, webview: true }
+      }
+      resolvedNetworkUrl = result.resource?.playbackUrl || playbackTarget
+      resolvedNetworkHeaders = result.resource?.httpHeaders || video.httpHeaders || null
+      setActiveHttpHeaders(resolvedNetworkHeaders)
+      return { url: resolvedNetworkUrl, httpHeaders: resolvedNetworkHeaders }
+    }
+
+    if (isWebpageShell) {
+      setActivePlaybackUrl(playbackTarget)
+      setWebviewUrl(playbackTarget)
+      setHtml5Url('')
+      setHtml5State(prev => ({
+        ...prev,
+        currentTime: 0,
+        duration: 0,
+        paused: true
+      }))
+      return () => {
+        cancelled = true
+      }
+    }
 
     const loadHtml5 = async () => {
       try {
+        const networkPlayback = isNetworkResource ? await resolveNetworkPlayback() : null
+        if (networkPlayback?.webview) {
+          if (cancelled || launchTokenRef.current !== launchId) return
+          setLaunchState('ready')
+          return
+        }
         const [url, playbackState] = await Promise.all([
-          window.electronAPI?.getFileUrl?.(video.fullPath),
-          window.electronAPI?.getPlaybackState?.(video.fullPath)
+          isNetworkResource ? Promise.resolve(networkPlayback?.url || '') : window.electronAPI?.getFileUrl?.(video.fullPath),
+          window.electronAPI?.getPlaybackState?.(playbackTarget)
         ])
 
         if (cancelled || launchTokenRef.current !== launchId) return
 
         html5ResumeRef.current = playbackResumeEnabled ? (playbackState || null) : null
+        setActivePlaybackUrl(url || '')
         setHtml5Url(url || '')
         setHtml5State(prev => ({
           ...prev,
@@ -915,12 +1058,30 @@ export default function VideoPlayer({ video }) {
         window.electronAPI?.mpvSetHostBounds?.(currentHostBounds)?.catch(() => {})
       }
 
-      const playPromise = window.electronAPI?.mpvPlay?.(video.fullPath, {
-        resume: video.playOptions?.resume,
-        hostBounds: currentHostBounds || hostBoundsRef.current || undefined,
-        playlist: [video.fullPath],
-        playlistIndex: 0
-      })
+      const playPromise = isNetworkResource
+        ? resolveNetworkPlayback().then((networkPlayback) => {
+          const networkPlaybackUrl = networkPlayback?.url || ''
+          if (networkPlayback?.webview) {
+            return { success: true, webview: true }
+          }
+          setActivePlaybackUrl(networkPlaybackUrl)
+          return window.electronAPI?.mpvPlayUrl?.(playbackTarget, {
+            title: video.name || video.fileName,
+            kind: video.resourceKind,
+            playbackUrl: networkPlaybackUrl || video.playbackUrl,
+            httpHeaders: networkPlayback?.httpHeaders || video.httpHeaders,
+            parser: video.parser,
+            page: video.page,
+            resume: video.playOptions?.resume,
+            hostBounds: currentHostBounds || hostBoundsRef.current || undefined
+          })
+        })
+        : window.electronAPI?.mpvPlay?.(video.fullPath, {
+          resume: video.playOptions?.resume,
+          hostBounds: currentHostBounds || hostBoundsRef.current || undefined,
+          playlist: [video.fullPath],
+          playlistIndex: 0
+        })
       if (!playPromise?.then) {
         setMode('html5')
         loadHtml5()
@@ -955,10 +1116,10 @@ export default function VideoPlayer({ video }) {
         videoRef.current?.pause?.()
       }
     }
-  }, [mode, mpvStatus?.available, playbackResumeEnabled, readMpvHostBounds, setPlayerError, video])
+  }, [isNetworkResource, isWebpageShell, mode, mpvStatus?.available, playbackResumeEnabled, playbackTarget, readMpvHostBounds, setPlayerError, video])
 
   useEffect(() => {
-    if (canUseMpv || !html5Url || !video?.fullPath) return undefined
+    if (canUseMpv || !html5Url || !playbackTarget) return undefined
     saveHtml5PlaybackState(false)
   }, [
     canUseMpv,
@@ -969,7 +1130,7 @@ export default function VideoPlayer({ video }) {
     html5State.loop,
     html5Url,
     saveHtml5PlaybackState,
-    video?.fullPath
+    playbackTarget
   ])
 
   useEffect(() => {
@@ -978,11 +1139,11 @@ export default function VideoPlayer({ video }) {
         clearTimeout(html5SaveTimerRef.current)
         html5SaveTimerRef.current = null
       }
-      if (!canUseMpv && video?.fullPath) {
+      if (!canUseMpv && playbackTarget) {
         saveHtml5PlaybackState(true)
       }
     }
-  }, [canUseMpv, saveHtml5PlaybackState, video?.fullPath])
+  }, [canUseMpv, playbackTarget, saveHtml5PlaybackState])
 
   useEffect(() => {
     if (!video) return undefined
@@ -1245,28 +1406,80 @@ export default function VideoPlayer({ video }) {
           'player-container',
           'player-shell',
           canUseMpv ? 'mpv-shell' : 'html5-shell',
+          isWebpageMode ? 'webview-shell' : '',
           webFullscreen ? 'web-fullscreen' : '',
           activeMenu ? 'menu-open' : '',
           activeMenu ? `menu-${activeMenu}` : '',
+          playlistAvailable ? 'playlist-available' : '',
           analysisOpen && analysisAvailable ? 'analysis-open' : '',
+          playlistOpen && playlistAvailable ? 'playlist-open' : '',
           'controls-visible'
         ].filter(Boolean).join(' ')}
         onMouseEnter={showControls}
         onMouseMove={showControls}
       >
+        {!isWebpageMode && (
         <button className="player-close" onClick={handleClose} title="关闭 (Esc)" type="button" aria-label="关闭播放器">
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             <path d="M18 6L6 18M6 6l12 12" />
           </svg>
         </button>
+        )}
+
+        {isWebpageMode && (
+          <div className="player-webview-bar" onClick={event => event.stopPropagation()}>
+            <div className="player-webview-title">
+              <span className="player-webview-dot" aria-hidden="true" />
+              <strong>{video?.name || video?.fileName || '网页资源'}</strong>
+              <span>{pageHost}</span>
+            </div>
+            <div className="player-webview-actions">
+              <button
+                className="btn btn-icon player-webview-tool"
+                type="button"
+                onClick={handleToggleWebFullscreen}
+                title={webFullscreen ? '退出网页全屏' : '网页全屏'}
+                aria-label={webFullscreen ? '退出网页全屏' : '网页全屏'}
+              >
+                <Icon path={webFullscreen ? <path d="M9 3v6H3M15 3v6h6M9 21v-6H3M15 21v-6h6" /> : <path d="M8 3H3v5M16 3h5v5M8 21H3v-5M16 21h5v-5" />} />
+              </button>
+              <button className="btn btn-icon player-webview-close" onClick={handleClose} title="关闭 (Esc)" type="button" aria-label="关闭播放器">
+                <Icon path={<path d="M18 6L6 18M6 6l12 12" />} />
+              </button>
+            </div>
+          </div>
+        )}
 
         <div className="player-stage">
           <div
+            ref={videoSurfaceRef}
             className="player-video-surface"
             onClick={handleVideoSurfaceClick}
             onDoubleClick={handleVideoSurfaceDoubleClick}
           >
-            {isHtml5 ? (
+            {isWebpageMode ? (
+              pageUrl ? (
+                <div className="player-webview-frame" onClick={event => event.stopPropagation()}>
+                  <webview
+                    className="player-webview"
+                    src={pageUrl}
+                    partition="persist:wallpaper-player-web"
+                    allowpopups="true"
+                    webpreferences="contextIsolation=yes,nodeIntegration=no"
+                  />
+                </div>
+              ) : (
+                <div className="player-stage-card">
+                  <div className="player-stage-icon">
+                    <Icon path={<path d="M10 13a5 5 0 0 0 7.07 0l2.12-2.12a5 5 0 0 0-7.07-7.07L11 4.93M14 11a5 5 0 0 0-7.07 0L4.81 13.12a5 5 0 0 0 7.07 7.07L13 19.07" />} />
+                  </div>
+                  <div>
+                    <p className="player-stage-title">网页地址无效</p>
+                    <p className="player-stage-copy">当前资源没有可打开的网页地址。</p>
+                  </div>
+                </div>
+              )
+            ) : isHtml5 ? (
               html5Url ? (
                 <video
                   ref={videoRef}
@@ -1324,7 +1537,7 @@ export default function VideoPlayer({ video }) {
               </div>
             )}
 
-            {isHtml5 && paused && (
+            {isHtml5 && !isWebpageMode && paused && (
               <button
                 className="player-center-play"
                 onClick={(event) => {
@@ -1345,7 +1558,22 @@ export default function VideoPlayer({ video }) {
                 <span>{html5Error || playerError}</span>
               </div>
             )}
+
           </div>
+
+          {playlistAvailable ? (
+            <div className="player-playlist-rail" onClick={event => event.stopPropagation()}>
+              <button
+                className={`player-playlist-handle${playlistOpen ? ' active' : ''}`}
+                type="button"
+                onClick={handleTogglePlaylist}
+                title={playlistOpen ? '收起列表' : `展开${playlistTitle}`}
+                aria-label={playlistOpen ? '收起播放列表' : '展开播放列表'}
+              >
+                <Icon path={<><path d="M8 6h12" /><path d="M8 12h12" /><path d="M8 18h12" /><path d="M4 6h.01M4 12h.01M4 18h.01" /></>} />
+              </button>
+            </div>
+          ) : null}
 
           {analysisOpen && analysisAvailable ? (
             <div className="player-analysis-sidecar">
@@ -1359,8 +1587,51 @@ export default function VideoPlayer({ video }) {
               />
             </div>
           ) : null}
+
+          {playlistOpen && playlistAvailable ? (
+            <aside className="player-playlist-sidecar" aria-label={playlistTitle} onClick={event => event.stopPropagation()}>
+              <div className="player-playlist-header">
+                <div>
+                  <p>{playlistTitle}</p>
+                  <span>{playlistItems.length} 个视频</span>
+                </div>
+                <button
+                  className="btn btn-icon player-playlist-close"
+                  type="button"
+                  onClick={() => setPlaylistOpen(false)}
+                  title="收起列表"
+                  aria-label="收起列表"
+                >
+                  <Icon path={<path d="M18 6L6 18M6 6l12 12" />} />
+                </button>
+              </div>
+              <div className="player-playlist-list">
+                {playlistItems.map((item, index) => {
+                  const active = index === queueIndex
+                  const episodeIndex = item?.page?.currentEpisodeIndex || index + 1
+                  return (
+                    <button
+                      key={item?.playbackKey || item?.url || item?.fullPath || `${index}`}
+                      className={`player-playlist-item${active ? ' active' : ''}`}
+                      type="button"
+                      onClick={() => handlePlayQueueItem(item)}
+                      title={getQueueItemTitle(item, index, playlistIsNetwork)}
+                    >
+                      <span className="player-playlist-index">{playlistIsNetwork ? episodeIndex : index + 1}</span>
+                      <span className="player-playlist-text">
+                        <span className="player-playlist-name">{getQueueItemTitle(item, index, playlistIsNetwork)}</span>
+                        <span className="player-playlist-meta">{getQueueItemMeta(item, playlistIsNetwork)}</span>
+                      </span>
+                      {active ? <span className="player-playlist-now">播放中</span> : null}
+                    </button>
+                  )
+                })}
+              </div>
+            </aside>
+          ) : null}
         </div>
 
+        {!isWebpageMode && (
         <div className="player-toolbar" ref={toolbarRef} onClick={event => event.stopPropagation()}>
           <PlayerAnalysisStatus
             analysisRunning={analysisRunning}
@@ -1547,6 +1818,7 @@ export default function VideoPlayer({ video }) {
             </div>
             <PlayerProgressPreview duration={duration} progressPreview={progressPreview} />
         </div>
+        )}
       </div>
     </div>
   )

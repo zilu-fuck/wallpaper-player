@@ -49,17 +49,39 @@ function normalizeDirectoryList(directories) {
     : []
 }
 
+function resolvePathForAccess(inputPath) {
+  const resolved = path.resolve(inputPath)
+  try {
+    return fs.realpathSync.native(resolved)
+  } catch {
+    return resolved
+  }
+}
+
 function normalizePrivateDirectories(privateDirectories, directories = []) {
-  const directoryKeys = new Set(normalizeDirectoryList(directories).map(dir => pathKey(path.resolve(dir))))
+  const directoryKeys = new Set(normalizeDirectoryList(directories).map(dir => pathKey(resolvePathForAccess(dir))))
   return normalizeDirectoryList(privateDirectories)
-    .map(dir => path.resolve(dir))
+    .map(dir => resolvePathForAccess(dir))
     .filter(dir => directoryKeys.has(pathKey(dir)))
 }
 
 function getPublicDirectories(directories, privateDirectories = []) {
   const privateKeys = new Set(normalizePrivateDirectories(privateDirectories, directories).map(pathKey))
   return normalizeDirectoryList(directories)
-    .filter(dir => !privateKeys.has(pathKey(path.resolve(dir))))
+    .map(dir => resolvePathForAccess(dir))
+    .filter(dir => !privateKeys.has(pathKey(dir)))
+}
+
+function normalizeDownloadDirectories(downloadDirectories) {
+  const seen = new Set()
+  return normalizeDirectoryList(downloadDirectories)
+    .map(dir => resolvePathForAccess(dir))
+    .filter(dir => {
+      const key = pathKey(dir)
+      if (seen.has(key)) return false
+      seen.add(key)
+      return true
+    })
 }
 
 function normalizePrivacy(privacy) {
@@ -193,6 +215,94 @@ function normalizePlaybackStates(playbackStates) {
       .sort((a, b) => (b[1].updatedAt || 0) - (a[1].updatedAt || 0))
       .slice(0, 200)
   )
+}
+
+function normalizeNetworkResources(resources) {
+  if (!Array.isArray(resources)) return []
+  const seen = new Set()
+  const seenIds = new Set()
+  const result = []
+  for (const item of resources) {
+    if (!item || typeof item !== 'object' || Array.isArray(item)) continue
+    const url = typeof item.url === 'string' ? item.url.trim() : ''
+    let parsed
+    try {
+      parsed = new URL(url)
+    } catch {
+      continue
+    }
+    if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') continue
+    const normalizedUrl = parsed.toString()
+    const key = normalizedUrl.toLowerCase()
+    if (seen.has(key)) continue
+    seen.add(key)
+    const title = typeof item.title === 'string' ? item.title.trim().slice(0, 120) : ''
+    const kind = item.kind === 'webpage' ? 'webpage' : 'direct'
+    const playbackUrl = typeof item.playbackUrl === 'string' ? item.playbackUrl.trim() : ''
+    const rawHttpHeaders = item.httpHeaders && typeof item.httpHeaders === 'object' && !Array.isArray(item.httpHeaders)
+      ? item.httpHeaders
+      : null
+    const httpHeaders = rawHttpHeaders
+      ? {
+        referer: typeof rawHttpHeaders.referer === 'string' ? rawHttpHeaders.referer.trim() : '',
+        userAgent: typeof rawHttpHeaders.userAgent === 'string' ? rawHttpHeaders.userAgent.trim() : ''
+      }
+      : null
+    const parser = typeof item.parser === 'string' ? item.parser.trim().slice(0, 40) : ''
+    const page = item.page && typeof item.page === 'object' && !Array.isArray(item.page)
+      ? normalizeNetworkResourcePage(item.page)
+      : null
+    const createdAt = typeof item.createdAt === 'string' && item.createdAt.trim()
+      ? item.createdAt.trim()
+      : new Date().toISOString()
+    const fallbackId = crypto.createHash('sha1').update(normalizedUrl).digest('hex').slice(0, 16)
+    let id = typeof item.id === 'string' && item.id.trim()
+      ? item.id.trim()
+      : fallbackId
+    if (seenIds.has(id)) {
+      id = fallbackId
+    }
+    let suffix = 2
+    while (seenIds.has(id)) {
+      id = `${fallbackId}-${suffix}`
+      suffix += 1
+    }
+    seenIds.add(id)
+    result.push({
+      id,
+      kind,
+      title,
+      url: normalizedUrl,
+      playbackUrl,
+      httpHeaders,
+      parser,
+      page,
+      createdAt
+    })
+  }
+  return result.slice(0, 200)
+}
+
+function normalizeNetworkResourcePage(page) {
+  const normalized = { ...page }
+  if (Array.isArray(normalized.episodes)) {
+    normalized.episodes = normalized.episodes.slice(0, 2000).map(episode => {
+      if (!episode || typeof episode !== 'object' || Array.isArray(episode)) return episode
+      const rawHeaders = episode.httpHeaders && typeof episode.httpHeaders === 'object' && !Array.isArray(episode.httpHeaders)
+        ? episode.httpHeaders
+        : null
+      const httpHeaders = rawHeaders
+        ? {
+          referer: typeof rawHeaders.referer === 'string' ? rawHeaders.referer.trim() : '',
+          userAgent: typeof rawHeaders.userAgent === 'string' ? rawHeaders.userAgent.trim() : ''
+        }
+        : null
+      return httpHeaders
+        ? { ...episode, httpHeaders }
+        : { ...episode, httpHeaders: undefined }
+    })
+  }
+  return normalized
 }
 
 function normalizeRemoteAccess(remoteAccess) {
@@ -337,6 +447,15 @@ function registerSettingsSection(key, definition = {}) {
 }
 
 function getPlaybackStateKey(filePath) {
+  if (typeof filePath === 'string') {
+    const value = filePath.trim()
+    try {
+      const url = new URL(value)
+      if (url.protocol === 'http:' || url.protocol === 'https:') {
+        return url.toString().toLowerCase()
+      }
+    } catch {}
+  }
   return pathKey(path.resolve(filePath))
 }
 
@@ -372,6 +491,8 @@ function loadSettings() {
     favorites: [],
     customTags: {},
     hiddenTags: [],
+    networkResources: [],
+    downloadDirectories: [],
     playbackStates: {},
     playbackMode: 'order',
     privacy: normalizePrivacy(),
@@ -400,6 +521,8 @@ function loadSettings() {
       favorites: Array.isArray(parsed.favorites) ? parsed.favorites : defaults.favorites,
       customTags: normalizeCustomTags(parsed.customTags),
       hiddenTags: normalizeHiddenTags(parsed.hiddenTags),
+      networkResources: normalizeNetworkResources(parsed.networkResources),
+      downloadDirectories: normalizeDownloadDirectories(parsed.downloadDirectories),
       playbackStates: normalizePlaybackStates(parsed.playbackStates),
       playbackMode: ['order', 'shuffle', 'single'].includes(parsed.playbackMode) ? parsed.playbackMode : defaults.playbackMode,
       privacy: normalizePrivacy(parsed.privacy),
@@ -444,6 +567,8 @@ function saveSettings(settings) {
   if (!Array.isArray(merged.favorites)) merged.favorites = []
   merged.customTags = normalizeCustomTags(merged.customTags)
   merged.hiddenTags = normalizeHiddenTags(merged.hiddenTags)
+  merged.networkResources = normalizeNetworkResources(merged.networkResources)
+  merged.downloadDirectories = normalizeDownloadDirectories(merged.downloadDirectories)
   merged.playbackStates = normalizePlaybackStates(merged.playbackStates)
   merged.playbackMode = ['order', 'shuffle', 'single'].includes(merged.playbackMode) ? merged.playbackMode : 'order'
   merged.privacy = normalizePrivacy(merged.privacy)
@@ -469,7 +594,24 @@ function getAllowedVideoDirectories() {
     ...normalizeDirectoryList(settings.directories),
     ...sessionAllowedDirectories
   ]
-    .map(dir => path.resolve(dir))
+    .map(dir => resolvePathForAccess(dir))
+    .filter(dir => {
+      const key = pathKey(dir)
+      if (seen.has(key)) return false
+      seen.add(key)
+      return true
+    })
+}
+
+function getAllowedDownloadDirectories() {
+  const settings = loadSettings()
+  const seen = new Set()
+  return [
+    ...normalizeDirectoryList(settings.directories),
+    ...normalizeDownloadDirectories(settings.downloadDirectories),
+    ...sessionAllowedDirectories
+  ]
+    .map(dir => resolvePathForAccess(dir))
     .filter(dir => {
       const key = pathKey(dir)
       if (seen.has(key)) return false
@@ -496,24 +638,24 @@ function sanitizeSettingsForSave(settings) {
     const allowedDirectoryKeys = new Set([
       ...normalizeDirectoryList(current.directories),
       ...sessionAllowedDirectories
-    ].map(pathKey))
+    ].map(dir => pathKey(resolvePathForAccess(dir))))
 
     sanitized.directories = normalizeDirectoryList(sanitized.directories)
-      .map(dir => path.resolve(dir))
+      .map(dir => resolvePathForAccess(dir))
       .filter(dir => allowedDirectoryKeys.has(pathKey(dir)))
   }
 
   if (Object.hasOwn(sanitized, 'privateDirectories')) {
-    const directories = normalizeDirectoryList(sanitized.directories ?? current.directories).map(dir => path.resolve(dir))
+    const directories = normalizeDirectoryList(sanitized.directories ?? current.directories).map(dir => resolvePathForAccess(dir))
     sanitized.privateDirectories = normalizePrivateDirectories(sanitized.privateDirectories, directories)
   }
 
   if (Object.hasOwn(sanitized, 'defaultDirectory')) {
-    const directories = normalizeDirectoryList(sanitized.directories ?? current.directories).map(dir => path.resolve(dir))
+    const directories = normalizeDirectoryList(sanitized.directories ?? current.directories).map(dir => resolvePathForAccess(dir))
     const privateDirectories = normalizePrivateDirectories(sanitized.privateDirectories ?? current.privateDirectories, directories)
     const publicDirectories = getPublicDirectories(directories, privateDirectories)
     const defaultDirectory = typeof sanitized.defaultDirectory === 'string'
-      ? path.resolve(sanitized.defaultDirectory)
+      ? resolvePathForAccess(sanitized.defaultDirectory)
       : ''
 
     sanitized.defaultDirectory = publicDirectories.some(dir => pathKey(dir) === pathKey(defaultDirectory))
@@ -548,6 +690,21 @@ function sanitizeSettingsForSave(settings) {
 
   if (Object.hasOwn(sanitized, 'hiddenTags')) {
     sanitized.hiddenTags = normalizeHiddenTags(sanitized.hiddenTags)
+  }
+
+  if (Object.hasOwn(sanitized, 'networkResources')) {
+    sanitized.networkResources = normalizeNetworkResources(sanitized.networkResources)
+  }
+
+  if (Object.hasOwn(sanitized, 'downloadDirectories')) {
+    const allowedDirectoryKeys = new Set([
+      ...normalizeDirectoryList(current.directories),
+      ...normalizeDownloadDirectories(current.downloadDirectories),
+      ...sessionAllowedDirectories
+    ].map(dir => pathKey(resolvePathForAccess(dir))))
+
+    sanitized.downloadDirectories = normalizeDownloadDirectories(sanitized.downloadDirectories)
+      .filter(dir => allowedDirectoryKeys.has(pathKey(dir)))
   }
 
   if (Object.hasOwn(sanitized, 'playbackStates')) {
@@ -607,11 +764,14 @@ module.exports = {
   getPublicDirectories,
   normalizeCustomTags,
   normalizeHiddenTags,
+  normalizeNetworkResources,
+  normalizeDownloadDirectories,
   normalizePlaybackState,
   normalizePlaybackStates,
   normalizeRemoteAccess,
   normalizeWindowClose,
   normalizePlugins,
+  resolvePathForAccess,
   mergePlugins,
   removePluginSettings,
   getPlaybackStateKey,
@@ -620,5 +780,6 @@ module.exports = {
   addSessionAllowedFile,
   isSessionAllowedFile,
   getAllowedVideoDirectories,
+  getAllowedDownloadDirectories,
   getPublicVideoDirectories
 }

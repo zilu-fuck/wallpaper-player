@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { useApp } from '../context/AppContext'
 
 function dirName(dir) {
@@ -10,6 +11,7 @@ export default function Sidebar() {
     sidebarCollapsed,
     setSidebarCollapsed,
     settings,
+    setSettings,
     currentDir,
     handleDirectoryChange,
     handleAddDirectory,
@@ -27,6 +29,7 @@ export default function Sidebar() {
   } = useApp()
 
   const directories = settings?.directories || []
+  const networkResources = settings?.networkResources || []
   const privateDirectories = settings?.privateDirectories || []
   const privateDirSet = useMemo(() => new Set(privateDirectories), [privateDirectories])
   const hiddenPrivateCount = useMemo(
@@ -43,6 +46,13 @@ export default function Sidebar() {
   // privacy 动作类型：'unlockPrivateDirs' 解锁隐私目录 | 'restoreHiddenTags' 还原隐藏标签
   const [privacyAction, setPrivacyAction] = useState(null)
   const [directoryMenu, setDirectoryMenu] = useState(null)
+  const [resourceDialogOpen, setResourceDialogOpen] = useState(false)
+  const [resourceMode, setResourceMode] = useState('choices')
+  const [resourceMessage, setResourceMessage] = useState('')
+  const [networkUrl, setNetworkUrl] = useState('')
+  const [networkTitle, setNetworkTitle] = useState('')
+  const [resourceSubmitting, setResourceSubmitting] = useState(false)
+  const [libraryView, setLibraryView] = useState('local')
   const [localDirs, setLocalDirs] = useState(() => directories.filter(dir => showPrivateDirs || !privateDirSet.has(dir)))
   const privacyPasswordSet = Boolean(settings?.privacy?.passwordSet)
   const includedKeySet = useMemo(() => new Set(includedCategoryKeys), [includedCategoryKeys])
@@ -78,8 +88,20 @@ export default function Sidebar() {
   useEffect(() => {
     if (showPrivateDirs || !currentDir || !privateDirSet.has(currentDir)) return
     const publicDirs = getPublicDirs(directories, privateDirectories)
+    window.dispatchEvent(new CustomEvent('wallpaper-player-open-local-library'))
     handleDirectoryChange(publicDirs[0] || null)
   }, [currentDir, directories, getPublicDirs, handleDirectoryChange, privateDirSet, privateDirectories, showPrivateDirs])
+
+  useEffect(() => {
+    const openNetwork = () => setLibraryView('network')
+    const openLocal = () => setLibraryView('local')
+    window.addEventListener('wallpaper-player-open-network-library', openNetwork)
+    window.addEventListener('wallpaper-player-open-local-library', openLocal)
+    return () => {
+      window.removeEventListener('wallpaper-player-open-network-library', openNetwork)
+      window.removeEventListener('wallpaper-player-open-local-library', openLocal)
+    }
+  }, [])
 
   useEffect(() => {
     const openPendingPrivateDirectory = (event) => {
@@ -203,20 +225,122 @@ export default function Sidebar() {
     handleDirectoriesChange({ directories: newDirs, privateDirectories: cleanPrivateDirs, defaultDirectory: newDefault })
   }, [currentDir, getPublicDirs, handleDirectoriesChange, privateDirectories])
 
-  const handleAdd = useCallback(async () => {
+  const openResourceDialog = useCallback((options = {}) => {
+    setDirectoryMenu(null)
+    setResourceMode(options?.mode === 'network' ? 'network' : 'choices')
+    setResourceMessage('')
+    setNetworkUrl('')
+    setNetworkTitle('')
+    setResourceDialogOpen(true)
+  }, [])
+
+  const closeResourceDialog = useCallback(() => {
+    setResourceDialogOpen(false)
+    setResourceMode('choices')
+    setResourceMessage('')
+    setNetworkUrl('')
+    setNetworkTitle('')
+    setResourceSubmitting(false)
+  }, [])
+
+  useEffect(() => {
+    if (!resourceDialogOpen) return undefined
+    const handleKeyDown = (event) => {
+      if (event.key === 'Escape') {
+        closeResourceDialog()
+      }
+    }
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [closeResourceDialog, resourceDialogOpen])
+
+  useEffect(() => {
+    const handler = (event) => openResourceDialog(event.detail || {})
+    window.addEventListener('wallpaper-player-open-resource-dialog', handler)
+    return () => window.removeEventListener('wallpaper-player-open-resource-dialog', handler)
+  }, [openResourceDialog])
+
+  const handleAddLocalResource = useCallback(async () => {
     try {
+      closeResourceDialog()
+      window.dispatchEvent(new CustomEvent('wallpaper-player-open-local-library'))
       const result = await handleAddDirectory?.({ returnPasswordRequired: true })
       if (result?.needsPrivacyPassword && result.dir) {
         setPendingPrivateDirectory(result.dir)
         setPrivacyPassword('')
         setPrivacyConfirmPassword('')
         setPrivacyMessage('')
+        setPrivacyAction('unlockPrivateDirs')
         setPrivacyDialogOpen(true)
       }
     } catch (err) {
-      console.error('添加目录失败:', err)
+      console.error('添加本地资源失败:', err)
     }
-  }, [handleAddDirectory])
+  }, [closeResourceDialog, handleAddDirectory])
+
+  const handleOpenNetworkForm = useCallback(() => {
+    setResourceMode('network')
+    setResourceMessage('')
+  }, [])
+
+  const handleOpenMagnetForm = useCallback(() => {
+    closeResourceDialog()
+    window.dispatchEvent(new CustomEvent('wallpaper-player-open-download-center', {
+      detail: {
+        type: 'magnet'
+      }
+    }))
+  }, [closeResourceDialog])
+
+  const handleSubmitNetworkResource = useCallback(async (event) => {
+    event.preventDefault()
+    if (!networkUrl.trim()) {
+      setResourceMessage('请输入视频链接或网页播放页地址')
+      return
+    }
+    setResourceSubmitting(true)
+    setResourceMessage('')
+    try {
+      const result = await window.electronAPI?.addNetworkResource?.({
+        url: networkUrl,
+        title: networkTitle
+      })
+      if (!result?.success) {
+        setResourceMessage(result?.error || '添加网络资源失败')
+        return
+      }
+      if (result.settings) {
+        setSettings?.(result.settings)
+      }
+      closeResourceDialog()
+      window.dispatchEvent(new CustomEvent('wallpaper-player-open-network-library', {
+        detail: { resourceId: result.resource?.id }
+      }))
+    } catch (err) {
+      setResourceMessage(err?.message || '添加网络资源失败')
+    } finally {
+      setResourceSubmitting(false)
+    }
+  }, [closeResourceDialog, networkTitle, networkUrl, setSettings])
+
+  const openLocalLibrary = useCallback(() => {
+    window.dispatchEvent(new CustomEvent('wallpaper-player-open-local-library'))
+  }, [])
+
+  const changeDirectory = useCallback((dir) => {
+    openLocalLibrary()
+    handleDirectoryChange(dir)
+  }, [handleDirectoryChange, openLocalLibrary])
+
+  const openNetworkLibrary = useCallback(() => {
+    setDirectoryMenu(null)
+    window.dispatchEvent(new CustomEvent('wallpaper-player-open-network-library'))
+  }, [])
+
+  const openNetworkResourceDialog = useCallback((event) => {
+    event?.stopPropagation?.()
+    openResourceDialog({ mode: 'network' })
+  }, [openResourceDialog])
 
   const handleRemove = useCallback((dir, e) => {
     e.stopPropagation()
@@ -227,12 +351,12 @@ export default function Sidebar() {
     saveDirs(newDirs, newPrivateDirs)
     if (dir === currentDir) {
       if (publicDirs.length > 0) {
-        handleDirectoryChange(publicDirs[0])
+        changeDirectory(publicDirs[0])
       } else {
-        handleDirectoryChange(null)
+        changeDirectory(null)
       }
     }
-  }, [currentDir, directories, getPublicDirs, handleDirectoryChange, privateDirectories, saveDirs, showPrivateDirs])
+  }, [changeDirectory, currentDir, directories, getPublicDirs, privateDirectories, saveDirs, showPrivateDirs])
 
   const handleDirectoryContextMenu = useCallback((dir, event) => {
     event.preventDefault()
@@ -265,6 +389,7 @@ export default function Sidebar() {
   }, [removePrivateDirectory])
 
   const handleCategorySelect = useCallback((categoryKey) => {
+    window.dispatchEvent(new CustomEvent('wallpaper-player-open-local-library'))
     setActiveCategory?.(categoryKey)
   }, [setActiveCategory])
 
@@ -289,7 +414,10 @@ export default function Sidebar() {
   }, [hiddenTags])
 
   const onToggle = useCallback(() => setSidebarCollapsed(!sidebarCollapsed), [sidebarCollapsed, setSidebarCollapsed])
-  const onOpenSettings = useCallback(() => setShowSettings(true), [setShowSettings])
+  const onOpenSettings = useCallback(() => {
+    window.dispatchEvent(new CustomEvent('wallpaper-player-close-download-dialogs'))
+    setShowSettings(true)
+  }, [setShowSettings])
 
   const renderCategoryGroup = (title, categories, emptyText) => (
     <div className="sidebar-category-group">
@@ -298,7 +426,9 @@ export default function Sidebar() {
         categories.map(category => {
           const isIncluded = includedKeySet.has(category.key)
           const isExcluded = excludedKeySet.has(category.key)
-          const stateClass = isIncluded ? ' active' : isExcluded ? ' excluded' : ''
+          const stateClass = libraryView === 'local'
+            ? (isIncluded ? ' active' : isExcluded ? ' excluded' : '')
+            : ''
           return (
             <div
               key={category.key}
@@ -346,6 +476,10 @@ export default function Sidebar() {
     </div>
   )
 
+  const resourceDialogTarget = typeof document !== 'undefined'
+    ? document.querySelector('.app') || document.body
+    : null
+
   return (
     <aside className={`sidebar${sidebarCollapsed ? ' collapsed' : ''}`} aria-label="导航">
       <div className={`sidebar-collapsed-content sidebar-pane${sidebarCollapsed ? ' active' : ''}`} aria-hidden={!sidebarCollapsed}>
@@ -357,8 +491,8 @@ export default function Sidebar() {
           </button>
           <div className="sidebar-collapsed-icons">
             <button
-              className={`sidebar-icon-btn${currentDir ? ' active' : ''}`}
-              onClick={() => { if (localDirs.length > 0) handleDirectoryChange(currentDir || localDirs[0]) }}
+              className={`sidebar-icon-btn${libraryView === 'local' && currentDir ? ' active' : ''}`}
+              onClick={() => { if (localDirs.length > 0) changeDirectory(currentDir || localDirs[0]) }}
               title="目录"
               aria-label="目录"
             >
@@ -367,7 +501,7 @@ export default function Sidebar() {
               </svg>
             </button>
             <button
-              className={`sidebar-icon-btn${activeCategory === 'all' ? ' active' : ''}`}
+              className={`sidebar-icon-btn${libraryView === 'local' && activeCategory === 'all' ? ' active' : ''}`}
               onClick={() => handleCategorySelect('all')}
               title="全部"
               aria-label="全部"
@@ -380,7 +514,7 @@ export default function Sidebar() {
               </svg>
             </button>
             <button
-              className={`sidebar-icon-btn${activeCategory === 'favorites' ? ' active' : ''}`}
+              className={`sidebar-icon-btn${libraryView === 'local' && activeCategory === 'favorites' ? ' active' : ''}`}
               onClick={() => handleCategorySelect('favorites')}
               title="我喜欢"
               aria-label="我喜欢"
@@ -389,7 +523,19 @@ export default function Sidebar() {
                 <path d="M20.8 4.6a5.5 5.5 0 00-7.8 0L12 5.6l-1-1a5.5 5.5 0 00-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 000-7.8z" />
               </svg>
             </button>
-            <button className="sidebar-icon-btn" onClick={handleAdd} title="添加目录" aria-label="添加目录">
+            <button
+              className={`sidebar-icon-btn sidebar-network-icon-btn${libraryView === 'network' ? ' active' : ''}`}
+              onClick={openNetworkLibrary}
+              title={`网络资源（${networkResources.length}）`}
+              aria-label="网络资源"
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M10 13a5 5 0 0 0 7.07 0l2.12-2.12a5 5 0 0 0-7.07-7.07L11 4.93" />
+                <path d="M14 11a5 5 0 0 0-7.07 0L4.81 13.12a5 5 0 0 0 7.07 7.07L13 19.07" />
+              </svg>
+              {networkResources.length > 0 && <span className="sidebar-icon-badge">{networkResources.length > 99 ? '99+' : networkResources.length}</span>}
+            </button>
+            <button className="sidebar-icon-btn" onClick={openResourceDialog} title="添加资源" aria-label="添加资源">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <line x1="12" y1="5" x2="12" y2="19" />
                 <line x1="5" y1="12" x2="19" y2="12" />
@@ -445,7 +591,7 @@ export default function Sidebar() {
                     )}
                   </button>
                 )}
-                <button className="sidebar-add-mini" onClick={handleAdd} title="添加目录" aria-label="添加目录">
+                <button className="sidebar-add-mini" onClick={openResourceDialog} title="添加资源" aria-label="添加资源">
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                     <line x1="12" y1="5" x2="12" y2="19" />
                     <line x1="5" y1="12" x2="19" y2="12" />
@@ -457,7 +603,7 @@ export default function Sidebar() {
             {localDirs.length === 0 ? (
               <div className="sidebar-empty">
                 <p>暂无目录</p>
-                <button className="btn btn-sm btn-outline" onClick={handleAdd}>添加视频目录</button>
+                <button className="btn btn-sm btn-outline" onClick={openResourceDialog}>添加资源</button>
               </div>
             ) : (
               <div className="sidebar-dir-list">
@@ -466,13 +612,13 @@ export default function Sidebar() {
                   return (
                   <div
                     key={dir}
-                    className={`sidebar-dir-item${dir === currentDir ? ' active' : ''}${isPrivate ? ' private' : ''}`}
-                    onClick={() => handleDirectoryChange(dir)}
+                    className={`sidebar-dir-item${libraryView === 'local' && dir === currentDir ? ' active' : ''}${isPrivate ? ' private' : ''}`}
+                    onClick={() => changeDirectory(dir)}
                     onContextMenu={(event) => handleDirectoryContextMenu(dir, event)}
                     title={dir}
                     role="button"
                     tabIndex={0}
-                    onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleDirectoryChange(dir) } }}
+                    onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); changeDirectory(dir) } }}
                   >
                     <svg className="sidebar-dir-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                       <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" />
@@ -499,6 +645,37 @@ export default function Sidebar() {
                 })}
               </div>
             )}
+          </div>
+
+          <div className="sidebar-section sidebar-network-section">
+            <div className="sidebar-section-header">
+              <span className="sidebar-label">网络</span>
+              <div className="sidebar-section-actions">
+                <button className="sidebar-add-mini" onClick={openNetworkResourceDialog} title="添加网络资源" aria-label="添加网络资源">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                    <line x1="12" y1="5" x2="12" y2="19" />
+                    <line x1="5" y1="12" x2="19" y2="12" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+            <button
+              type="button"
+              className={`sidebar-network-entry${libraryView === 'network' ? ' active' : ''}`}
+              onClick={openNetworkLibrary}
+            >
+              <span className="sidebar-network-entry-icon" aria-hidden="true">
+                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M10 13a5 5 0 0 0 7.07 0l2.12-2.12a5 5 0 0 0-7.07-7.07L11 4.93" />
+                  <path d="M14 11a5 5 0 0 0-7.07 0L4.81 13.12a5 5 0 0 0 7.07 7.07L13 19.07" />
+                </svg>
+              </span>
+              <span className="sidebar-network-entry-copy">
+                <strong>网络资源</strong>
+                <span>视频链接 / NAS 地址</span>
+              </span>
+              <span className="sidebar-network-count">{networkResources.length}</span>
+            </button>
           </div>
 
           <div className="sidebar-section sidebar-category-section">
@@ -534,14 +711,14 @@ export default function Sidebar() {
                 </div>
               ) : null}
               <button
-                className={`sidebar-category-item${includedCategoryKeys.length === 0 && excludedCategoryKeys.length === 0 ? ' active' : ''}`}
+                className={`sidebar-category-item${libraryView === 'local' && includedCategoryKeys.length === 0 && excludedCategoryKeys.length === 0 ? ' active' : ''}`}
                 onClick={() => handleCategorySelect('all')}
               >
                 <span className="sidebar-category-name">全部</span>
                 <span className="sidebar-category-count">{totalCount}</span>
               </button>
               <button
-                className={`sidebar-category-item${activeCategory === 'favorites' ? ' active' : ''}`}
+                className={`sidebar-category-item${libraryView === 'local' && activeCategory === 'favorites' ? ' active' : ''}`}
                 onClick={() => handleCategorySelect('favorites')}
               >
                 <span className="sidebar-category-name">
@@ -588,6 +765,116 @@ export default function Sidebar() {
           </button>
         </div>
       )}
+      {resourceDialogOpen && resourceDialogTarget && createPortal((
+        <div className={`resource-dialog-overlay${sidebarCollapsed ? ' sidebar-collapsed' : ''}`} onClick={closeResourceDialog}>
+          <div
+            className="resource-dialog"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="resource-dialog-title"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <div className="resource-dialog-header">
+              <div>
+                <span className="resource-dialog-eyebrow">资源来源</span>
+                <h2 id="resource-dialog-title">添加资源</h2>
+              </div>
+              <button type="button" className="btn btn-icon" onClick={closeResourceDialog} aria-label="关闭">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M18 6L6 18M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            {resourceMode === 'choices' && (
+              <div className="resource-dialog-body resource-dialog-choices">
+                <button type="button" className="resource-option resource-option-local" onClick={handleAddLocalResource} autoFocus>
+                  <span className="resource-option-icon" aria-hidden="true">
+                    <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" />
+                    </svg>
+                  </span>
+                  <span className="resource-option-copy">
+                    <strong>本地资源</strong>
+                    <span>选择目录，加入视频库。</span>
+                  </span>
+                  <span className="resource-option-arrow" aria-hidden="true">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2">
+                      <path d="M9 18l6-6-6-6" />
+                    </svg>
+                  </span>
+                </button>
+                <button type="button" className="resource-option resource-option-network" onClick={handleOpenNetworkForm}>
+                  <span className="resource-option-icon" aria-hidden="true">
+                    <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M10 13a5 5 0 0 0 7.07 0l2.12-2.12a5 5 0 0 0-7.07-7.07L11 4.93" />
+                      <path d="M14 11a5 5 0 0 0-7.07 0L4.81 13.12a5 5 0 0 0 7.07 7.07L13 19.07" />
+                    </svg>
+                  </span>
+                  <span className="resource-option-copy">
+                    <strong>网络资源</strong>
+                    <span>保存视频链接、NAS 地址或网页播放页。</span>
+                  </span>
+                  <span className="resource-option-arrow" aria-hidden="true">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2">
+                      <path d="M9 18l6-6-6-6" />
+                    </svg>
+                  </span>
+                </button>
+                <button type="button" className="resource-option resource-option-magnet" onClick={handleOpenMagnetForm}>
+                  <span className="resource-option-icon" aria-hidden="true">
+                    <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M6 4v8a6 6 0 0 0 12 0V4" />
+                      <path d="M6 8h4" />
+                      <path d="M14 8h4" />
+                      <path d="M6 4H3" />
+                      <path d="M18 4h3" />
+                    </svg>
+                  </span>
+                  <span className="resource-option-copy">
+                    <strong>磁链资源</strong>
+                    <span>选择目录后进入下载中心。</span>
+                  </span>
+                  <span className="resource-option-status">下载中心</span>
+                </button>
+              </div>
+            )}
+            {resourceMode === 'network' && (
+              <form className="resource-dialog-body resource-form" onSubmit={handleSubmitNetworkResource}>
+                <button type="button" className="resource-back-btn" onClick={() => setResourceMode('choices')}>
+                  返回资源类型
+                </button>
+                <label className="resource-field">
+                  <span>视频链接 / 网页播放页</span>
+                  <input
+                    type="url"
+                    value={networkUrl}
+                    onChange={(event) => setNetworkUrl(event.target.value)}
+                    placeholder="https://www.yh5dm.cc/p/126921-2-1.html"
+                    autoFocus
+                  />
+                </label>
+                <label className="resource-field">
+                  <span>显示名称</span>
+                  <input
+                    type="text"
+                    value={networkTitle}
+                    onChange={(event) => setNetworkTitle(event.target.value)}
+                    placeholder="留空则使用解析到的片名"
+                  />
+                </label>
+                <p className="resource-dialog-note">支持 m3u8、mp4、webm、mkv 等视频地址；网页播放页会优先使用站点解析器，未适配站点会尝试通用提取。</p>
+                {resourceMessage && <p className="resource-dialog-error">{resourceMessage}</p>}
+                <div className="resource-dialog-actions">
+                  <button type="button" className="btn btn-sm" onClick={closeResourceDialog}>取消</button>
+                  <button type="submit" className="btn btn-sm btn-primary" disabled={resourceSubmitting}>
+                    {resourceSubmitting ? '添加中...' : '添加到资源库'}
+                  </button>
+                </div>
+              </form>
+            )}
+          </div>
+        </div>
+      ), resourceDialogTarget)}
       {privacyDialogOpen && (
         <div className="privacy-dialog-overlay" onClick={closePrivacyDialog}>
           <form className="privacy-dialog" onSubmit={submitPrivacyPassword} onClick={(event) => event.stopPropagation()}>

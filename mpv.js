@@ -5,6 +5,7 @@ const https = require('https')
 const http = require('http')
 const net = require('net')
 const { app } = require('electron')
+const { getSystemProxy } = require('./main/ytdlp-service')
 const {
   destroyMpvHostWindow,
   getMpvHostHandle,
@@ -89,12 +90,62 @@ function normalizeHostBounds(bounds) {
 }
 
 function pathIdentity(filePath) {
+  if (isRemoteMediaUrl(filePath)) return String(filePath || '').trim()
   const resolved = path.resolve(String(filePath || ''))
   return process.platform === 'win32' ? resolved.toLowerCase() : resolved
 }
 
+function isRemoteMediaUrl(value) {
+  if (typeof value !== 'string' || !value.trim()) return false
+  try {
+    const url = new URL(value.trim())
+    return url.protocol === 'http:' || url.protocol === 'https:'
+  } catch {
+    return false
+  }
+}
+
+function normalizeHttpHeaders(headers) {
+  if (!headers || typeof headers !== 'object' || Array.isArray(headers)) return null
+  const referer = typeof headers.referer === 'string' ? headers.referer.trim() : ''
+  const userAgent = typeof headers.userAgent === 'string' ? headers.userAgent.trim() : ''
+  return {
+    referer,
+    userAgent
+  }
+}
+
+function normalizeMediaTarget(value) {
+  const target = String(value || '').trim()
+  return isRemoteMediaUrl(target) ? target : path.resolve(target)
+}
+
+function getProxyEnv(proxy) {
+  const normalizedProxy = String(proxy || '').trim()
+  if (!normalizedProxy) return process.env
+  return {
+    ...process.env,
+    HTTP_PROXY: process.env.HTTP_PROXY || process.env.http_proxy || normalizedProxy,
+    HTTPS_PROXY: process.env.HTTPS_PROXY || process.env.https_proxy || normalizedProxy,
+    ALL_PROXY: process.env.ALL_PROXY || process.env.all_proxy || normalizedProxy
+  }
+}
+
+function getMediaTitle(value) {
+  if (isRemoteMediaUrl(value)) {
+    try {
+      const parsed = new URL(value)
+      const name = decodeURIComponent(parsed.pathname.split('/').filter(Boolean).pop() || '')
+      return name || parsed.hostname || '网络视频'
+    } catch {
+      return '网络视频'
+    }
+  }
+  return path.basename(value)
+}
+
 function normalizePlaylistOptions(filePath, options = {}) {
-  const current = path.resolve(filePath)
+  const current = normalizeMediaTarget(filePath)
   const currentKey = pathIdentity(current)
   const rawPlaylist = Array.isArray(options.playlist) ? options.playlist : []
   const paths = []
@@ -102,7 +153,7 @@ function normalizePlaylistOptions(filePath, options = {}) {
 
   for (const item of rawPlaylist) {
     if (typeof item !== 'string' || !item.trim()) continue
-    const resolved = path.resolve(item)
+    const resolved = normalizeMediaTarget(item)
     const key = pathIdentity(resolved)
     if (seen.has(key)) continue
     seen.add(key)
@@ -393,7 +444,7 @@ class MpvManager {
         '--force-window=immediate',
         '--no-resume-playback',
         `--playlist-start=${playlist.startIndex}`,
-        `--title=${path.basename(this._activeFilePath)}`,
+        `--title=${getMediaTitle(this._activeFilePath)}`,
         '--hr-seek=yes',
         '--vo=gpu',
         '--gpu-context=d3d11',
@@ -405,13 +456,31 @@ class MpvManager {
         '--input-cursor=no'
       ]
 
+      const httpHeaders = normalizeHttpHeaders(options.httpHeaders)
+      if (httpHeaders?.referer) {
+        args.push(`--referrer=${httpHeaders.referer}`)
+      }
+      if (httpHeaders?.userAgent) {
+        args.push(`--user-agent=${httpHeaders.userAgent}`)
+      }
+      const proxyState = isRemoteMediaUrl(this._activeFilePath)
+        ? getSystemProxy(this._activeFilePath)
+        : null
+      if (proxyState?.enabled && proxyState.proxy) {
+        args.push(`--http-proxy=${proxyState.proxy}`)
+      }
+
       syncMpvHostWindowBounds()
       const wid = getMpvHostHandle()
       if (wid) {
         args.splice(playlist.paths.length, 0, `--wid=${wid}`)
       }
 
-      this.process = spawn(this.mpvPath, args, { stdio: ['ignore', 'pipe', 'pipe'], detached: false })
+      this.process = spawn(this.mpvPath, args, {
+        stdio: ['ignore', 'pipe', 'pipe'],
+        detached: false,
+        env: getProxyEnv(proxyState?.proxy)
+      })
       const proc = this.process
 
       proc.stdout.on('data', (data) => { output += data.toString() })
@@ -875,7 +944,7 @@ class MpvManager {
         break
       case 'path':
         if (typeof data === 'string' && data.trim()) {
-          this._activeFilePath = path.resolve(data)
+          this._activeFilePath = normalizeMediaTarget(data)
           this._currentState.filePath = this._activeFilePath
           this._playlistIndex = this._playlistPaths.findIndex(item => pathIdentity(item) === pathIdentity(this._activeFilePath))
         }

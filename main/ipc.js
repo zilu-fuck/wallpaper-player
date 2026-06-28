@@ -3,7 +3,7 @@ const { pathToFileURL } = require('url')
 const path = require('path')
 const fsp = require('fs/promises')
 const { execFileSync } = require('child_process')
-const { IMAGE_EXTENSIONS, VIDEO_EXTENSIONS } = require('./constants')
+const { IMAGE_EXTENSIONS, NETWORK_VIDEO_EXTENSIONS, VIDEO_EXTENSIONS } = require('./constants')
 const { pathKey, isPathInside, isMpvExecutablePath, isPortableApp, isVideoFile } = require('./paths')
 const {
   sessionAllowedDirectories,
@@ -15,10 +15,13 @@ const {
   saveSettings,
   sanitizeSettingsForSave,
   sanitizeSettingsForRenderer,
+  resolvePathForAccess,
   createPrivacyPassword,
   verifyPrivacyPassword,
   upsertPlaybackState,
-  getAllowedVideoDirectories
+  getAllowedVideoDirectories,
+  getAllowedDownloadDirectories,
+  getPublicDirectories
 } = require('./settings')
 const {
   assertAllowedVideoPath,
@@ -46,8 +49,12 @@ const { mpvManager, resolveMpvPath } = require('./mpv-integration')
 const { getMainWindow } = require('./window')
 const { getVideoMetadata } = require('./video-metadata')
 const { pluginRegistry, installPlugin, uninstallPlugin, getExternalPluginsDir } = require('./plugins')
+const downloadManager = require('./download-manager')
+const { getParserForUrl, parseNetworkResourcePage } = require('./network-resource-parser')
 
 const SECRET_PLACEHOLDER = '***'
+const NETWORK_VIDEO_SCHEMES = new Set(['http:', 'https:'])
+const STREAM_PLAYLIST_EXTENSIONS = new Set(['.m3u8', '.m3u', '.mpd'])
 
 const MPV_COMMANDS = new Set([
   'seekTo',
@@ -116,6 +123,191 @@ function queueThumbnailTask(videoPath) {
     })
   pendingThumbnailTasks.set(key, task)
   return task
+}
+
+function normalizeNetworkResourceInput(input = {}) {
+  const rawUrl = typeof input.url === 'string' ? input.url.trim() : ''
+  let parsed
+  try {
+    parsed = new URL(rawUrl)
+  } catch {
+    throw new Error('网络地址无效')
+  }
+  if (!NETWORK_VIDEO_SCHEMES.has(parsed.protocol)) {
+    throw new Error('仅支持 http/https 视频地址')
+  }
+
+  const url = parsed.toString()
+  const parser = getParserForUrl(url)
+  const extension = path.extname(parsed.pathname || '').toLowerCase()
+  if (!parser && extension && !NETWORK_VIDEO_EXTENSIONS.has(extension)) {
+    throw new Error('当前链接不是支持的视频格式或可解析网页')
+  }
+
+  const fallbackTitle = decodeURIComponent(parsed.pathname.split('/').filter(Boolean).pop() || '') || parsed.hostname || '网络视频'
+  const explicitTitle = typeof input.title === 'string' && input.title.trim() ? input.title.trim() : ''
+  return {
+    id: typeof input.id === 'string' && input.id.trim()
+      ? input.id.trim()
+      : Buffer.from(url).toString('base64url'),
+    kind: input.kind === 'webpage' || parser ? 'webpage' : 'direct',
+    title: (explicitTitle || (parser ? '' : fallbackTitle)).slice(0, 120),
+    url,
+    playbackUrl: typeof input.playbackUrl === 'string' ? input.playbackUrl.trim() : '',
+    httpHeaders: input.httpHeaders && typeof input.httpHeaders === 'object' && !Array.isArray(input.httpHeaders)
+      ? input.httpHeaders
+      : null,
+    parser: typeof input.parser === 'string' && input.parser.trim()
+      ? input.parser.trim()
+      : (parser?.id || ''),
+    page: input.page && typeof input.page === 'object' && !Array.isArray(input.page)
+      ? input.page
+      : null,
+    createdAt: typeof input.createdAt === 'string' && input.createdAt.trim()
+      ? input.createdAt.trim()
+      : new Date().toISOString()
+  }
+}
+
+async function enrichNetworkResource(resource) {
+  if (resource.kind !== 'webpage') return resource
+  const parsed = await parseNetworkResourcePage(resource.url)
+  return {
+    ...resource,
+    title: resource.title || parsed.title,
+    playbackUrl: parsed.playbackUrl,
+    httpHeaders: parsed.httpHeaders || resource.httpHeaders || null,
+    parser: parsed.parser,
+    page: parsed.page
+  }
+}
+
+function isWebpageShellResource(resource) {
+  return resource?.kind === 'webpage' &&
+    !resource?.playbackUrl &&
+    resource?.page?.openMode === 'webview'
+}
+
+function normalizeNetworkResourceUrl(value) {
+  try {
+    return new URL(String(value || '').trim()).toString()
+  } catch {
+    return ''
+  }
+}
+
+function normalizeStoredHttpHeaders(headers) {
+  if (!headers || typeof headers !== 'object' || Array.isArray(headers)) return null
+  return {
+    referer: typeof headers.referer === 'string' ? headers.referer.trim() : '',
+    userAgent: typeof headers.userAgent === 'string' ? headers.userAgent.trim() : ''
+  }
+}
+
+function getKnownNetworkResource(url, settings = loadSettings()) {
+  const target = normalizeNetworkResourceUrl(url).toLowerCase()
+  if (!target) return null
+  const resource = Array.isArray(settings.networkResources)
+    ? settings.networkResources.find(item => String(item?.url || '').trim().toLowerCase() === target)
+    : null
+
+  if (resource) {
+    return {
+      ...resource,
+      playbackUrl: '',
+      httpHeaders: normalizeStoredHttpHeaders(resource.httpHeaders)
+    }
+  }
+
+  const resources = Array.isArray(settings.networkResources) ? settings.networkResources : []
+  for (const parent of resources) {
+    const episodes = Array.isArray(parent?.page?.episodes) ? parent.page.episodes : []
+    const episode = episodes.find(item => normalizeNetworkResourceUrl(item?.url).toLowerCase() === target)
+    if (!episode) continue
+    return {
+      ...parent,
+      id: `${parent.id || parent.url}:${episode.index || episode.url}`,
+      title: episode.title || parent.title || '',
+      url: normalizeNetworkResourceUrl(episode.url),
+      playbackUrl: '',
+      httpHeaders: normalizeStoredHttpHeaders(episode.httpHeaders) || normalizeStoredHttpHeaders(parent.httpHeaders),
+      page: {
+        ...(parent.page || {}),
+        openMode: episode.openMode || parent.page?.openMode || '',
+        currentEpisodeIndex: episode.index || null,
+        currentEpisodeTitle: episode.title || parent.page?.currentEpisodeTitle || ''
+      }
+    }
+  }
+
+  return null
+}
+
+async function resolveNetworkResourcePlayback(resourceOrUrl, options = {}) {
+  const resource = typeof resourceOrUrl === 'string'
+    ? normalizeNetworkResourceInput({ url: resourceOrUrl, title: options?.title })
+    : normalizeNetworkResourceInput(resourceOrUrl)
+  const parser = getParserForUrl(resource.url)
+  if (resource.kind !== 'webpage' && !parser) {
+    return { ...resource, playbackUrl: resource.url }
+  }
+  return enrichNetworkResource({
+    ...resource,
+    kind: 'webpage',
+    playbackUrl: '',
+    parser: resource.parser || parser?.id || ''
+  })
+}
+
+async function resolveKnownNetworkResourcePlayback(resourceOrUrl, options = {}) {
+  const requested = typeof resourceOrUrl === 'string'
+    ? normalizeNetworkResourceInput({ url: resourceOrUrl, title: options?.title })
+    : normalizeNetworkResourceInput(resourceOrUrl)
+  const settings = options.settings || loadSettings()
+  const knownResource = getKnownNetworkResource(requested.url, settings)
+  if (!knownResource) {
+    throw new Error('网络资源未添加到库中')
+  }
+  return resolveNetworkResourcePlayback(knownResource, { refresh: true })
+}
+
+function assertNetworkResourceDownloadable(url) {
+  let parsed
+  try {
+    parsed = new URL(String(url || '').trim())
+  } catch {
+    throw new Error('网络地址无效')
+  }
+  const extension = path.extname(parsed.pathname || '').toLowerCase()
+  if (STREAM_PLAYLIST_EXTENSIONS.has(extension)) {
+    throw new Error('当前下载中心先支持直链视频文件；m3u8/mpd 可以播放，完整离线下载需要后续接入 HLS/DASH 下载流程。')
+  }
+}
+
+function isKnownNetworkResource(url, settings = loadSettings()) {
+  return Boolean(getKnownNetworkResource(url, settings))
+}
+
+async function assertAllowedDownloadDirectory(dirPath) {
+  if (typeof dirPath !== 'string' || !dirPath.trim()) {
+    throw new Error('请选择保存目录')
+  }
+  const resolvedPath = await resolveExistingPath(dirPath)
+  const stats = await fsp.stat(resolvedPath)
+  if (!stats.isDirectory()) {
+    throw new Error('保存路径不是目录')
+  }
+
+  const allowedDirs = getAllowedDownloadDirectories()
+  if (!allowedDirs.some(dir => isPathInside(dir, resolvedPath))) {
+    throw new Error('保存目录不在已选择或已添加的视频目录中')
+  }
+  return resolvedPath
+}
+
+function isPersistentLibraryDirectory(dirPath, settings = loadSettings()) {
+  const resolvedPath = resolvePathForAccess(dirPath)
+  return (settings.directories || []).some(dir => isPathInside(resolvePathForAccess(dir), resolvedPath))
 }
 
 async function runThumbnailWorkers(videoPaths, concurrency, onProgress) {
@@ -328,6 +520,324 @@ function setupIPC() {
     return { success: true, settings: sanitizeSettingsForRenderer(saved) }
   })
 
+  ipcMain.handle('network-resource-add', async (_event, input) => {
+    try {
+      const resource = await enrichNetworkResource(normalizeNetworkResourceInput(input))
+      const settings = loadSettings()
+      const current = Array.isArray(settings.networkResources) ? settings.networkResources : []
+      const exists = current.some(item => String(item.url).toLowerCase() === resource.url.toLowerCase())
+      const next = exists
+        ? current.map(item => String(item.url).toLowerCase() === resource.url.toLowerCase() ? { ...item, ...resource } : item)
+        : [resource, ...current]
+      const saved = saveSettings({ networkResources: next })
+      return { success: true, resource, settings: sanitizeSettingsForRenderer(saved) }
+    } catch (err) {
+      return { success: false, error: err.message }
+    }
+  })
+
+  ipcMain.handle('network-resource-update', async (_event, input = {}) => {
+    try {
+      const id = String(input.id || '').trim()
+      if (!id) {
+        return { success: false, error: '未选择要修改的网络资源' }
+      }
+      const resource = await enrichNetworkResource(normalizeNetworkResourceInput(input))
+      const settings = loadSettings()
+      const current = Array.isArray(settings.networkResources) ? settings.networkResources : []
+      const index = current.findIndex(item => String(item.id || '') === id)
+      if (index === -1) {
+        return { success: false, error: '没有找到要修改的网络资源' }
+      }
+      const duplicate = current.some((item, itemIndex) => (
+        itemIndex !== index &&
+        String(item.url || '').trim().toLowerCase() === resource.url.toLowerCase()
+      ))
+      if (duplicate) {
+        return { success: false, error: '已有相同地址的网络资源' }
+      }
+      const updated = {
+        ...current[index],
+        kind: resource.kind,
+        title: resource.title,
+        url: resource.url,
+        playbackUrl: resource.playbackUrl,
+        httpHeaders: resource.httpHeaders,
+        parser: resource.parser,
+        page: resource.page
+      }
+      const next = [...current]
+      next[index] = updated
+      const saved = saveSettings({ networkResources: next })
+      return { success: true, resource: updated, settings: sanitizeSettingsForRenderer(saved) }
+    } catch (err) {
+      return { success: false, error: err.message }
+    }
+  })
+
+  ipcMain.handle('network-resource-resolve', async (_event, input = {}) => {
+    try {
+      const resource = await resolveKnownNetworkResourcePlayback(input)
+      return { success: true, resource }
+    } catch (err) {
+      return { success: false, error: err.message }
+    }
+  })
+
+  ipcMain.handle('network-resource-remove', async (_event, resourceId) => {
+    try {
+      const id = String(resourceId || '').trim()
+      if (!id) {
+        return { success: false, error: '未选择要移除的网络资源' }
+      }
+      const settings = loadSettings()
+      const current = Array.isArray(settings.networkResources) ? settings.networkResources : []
+      const next = current.filter(item => String(item.id || '') !== id)
+      if (next.length === current.length) {
+        return { success: false, error: '没有找到要移除的网络资源' }
+      }
+      const saved = saveSettings({ networkResources: next })
+      return { success: true, removedCount: current.length - next.length, settings: sanitizeSettingsForRenderer(saved) }
+    } catch (err) {
+      return { success: false, error: err.message }
+    }
+  })
+
+  ipcMain.handle('network-resources-remove', async (_event, resourceIds) => {
+    try {
+      const ids = new Set((Array.isArray(resourceIds) ? resourceIds : [])
+        .map(item => String(item || '').trim())
+        .filter(Boolean))
+      if (ids.size === 0) {
+        return { success: false, error: '未选择要移除的网络资源' }
+      }
+      const settings = loadSettings()
+      const current = Array.isArray(settings.networkResources) ? settings.networkResources : []
+      const next = current.filter(item => !ids.has(String(item.id || '')))
+      if (next.length === current.length) {
+        return { success: false, error: '没有找到要移除的网络资源' }
+      }
+      const saved = saveSettings({ networkResources: next })
+      return {
+        success: true,
+        removedCount: current.length - next.length,
+        settings: sanitizeSettingsForRenderer(saved)
+      }
+    } catch (err) {
+      return { success: false, error: err.message }
+    }
+  })
+
+  ipcMain.handle('download-select-directory', async () => {
+    try {
+      const win = getMainWindow()
+      const result = await dialog.showOpenDialog(win, {
+        properties: ['openDirectory'],
+        title: '选择下载保存目录'
+      })
+      if (result.canceled || result.filePaths.length === 0) {
+        return { success: false, canceled: true }
+      }
+      const selectedDir = resolvePathForAccess(result.filePaths[0])
+      sessionAllowedDirectories.add(selectedDir)
+      const settings = loadSettings()
+      let savedSettings = null
+      let addedToLibrary = false
+      const alreadyInLibrary = isPersistentLibraryDirectory(selectedDir, settings)
+
+      if (!alreadyInLibrary) {
+        const response = await dialog.showMessageBox(win, {
+          type: 'question',
+          buttons: ['加入视频库', '下载完成后再说'],
+          defaultId: 0,
+          cancelId: 1,
+          title: '保存目录',
+          message: '是否将保存目录加入视频库？',
+          detail: '加入后，下载完成会自动刷新这个目录；不加入也可以下载完成后在下载中心手动加入。',
+          noLink: true
+        })
+        if (response.response === 0) {
+          const nextDirectories = settings.directories.includes(selectedDir)
+            ? settings.directories
+            : [...settings.directories, selectedDir]
+          const publicDirectories = getPublicDirectories(nextDirectories, settings.privateDirectories || [])
+          savedSettings = saveSettings({
+            directories: nextDirectories,
+            defaultDirectory: settings.defaultDirectory || publicDirectories[0] || selectedDir
+          })
+          addedToLibrary = true
+        } else {
+          const downloadDirectories = settings.downloadDirectories || []
+          savedSettings = saveSettings({
+            downloadDirectories: downloadDirectories.some(dir => pathKey(resolvePathForAccess(dir)) === pathKey(selectedDir))
+              ? downloadDirectories
+              : [...downloadDirectories, selectedDir]
+          })
+        }
+      }
+
+      return {
+        success: true,
+        path: selectedDir,
+        libraryDirectory: alreadyInLibrary || addedToLibrary,
+        settings: savedSettings ? sanitizeSettingsForRenderer(savedSettings) : null
+      }
+    } catch (err) {
+      return { success: false, error: err.message }
+    }
+  })
+
+  ipcMain.handle('download-get-state', async (_event, options = {}) => {
+    try {
+      const state = await downloadManager.getSnapshot(options)
+      return { success: true, ...state }
+    } catch (err) {
+      return { success: false, error: err.message, engine: null, tasks: [] }
+    }
+  })
+
+  ipcMain.handle('download-add-network-resource', async (_event, payload = {}) => {
+    try {
+      const resource = normalizeNetworkResourceInput(payload.resource || payload)
+      const settings = loadSettings()
+      const downloadResource = await resolveKnownNetworkResourcePlayback(resource, { settings })
+      if (isWebpageShellResource(downloadResource)) {
+        return { success: false, error: '当前网页资源没有可直接下载的视频地址，请在内置网页中观看。' }
+      }
+      const downloadUrl = downloadResource.playbackUrl || downloadResource.url
+      assertNetworkResourceDownloadable(downloadUrl)
+      const dir = await assertAllowedDownloadDirectory(payload.dir)
+      const result = await downloadManager.addUrl({
+        url: downloadUrl,
+        dir,
+        httpHeaders: downloadResource.httpHeaders
+      })
+      return {
+        success: true,
+        ...result,
+        libraryDirectory: isPersistentLibraryDirectory(dir, settings)
+      }
+    } catch (err) {
+      return { success: false, error: err.message }
+    }
+  })
+
+  ipcMain.handle('download-add-url', async (_event, payload = {}) => {
+    try {
+      const resource = normalizeNetworkResourceInput({ url: payload.url })
+      assertNetworkResourceDownloadable(resource.url)
+      const dir = await assertAllowedDownloadDirectory(payload.dir)
+      const result = await downloadManager.addUrl({
+        url: resource.url,
+        dir
+      })
+      return {
+        success: true,
+        ...result,
+        libraryDirectory: isPersistentLibraryDirectory(dir)
+      }
+    } catch (err) {
+      return { success: false, error: err.message }
+    }
+  })
+
+  ipcMain.handle('download-add-magnet', async (_event, payload = {}) => {
+    try {
+      const dir = await assertAllowedDownloadDirectory(payload.dir)
+      const result = await downloadManager.addMagnet({
+        magnet: payload.magnet,
+        dir
+      })
+      return {
+        success: true,
+        ...result,
+        libraryDirectory: isPersistentLibraryDirectory(dir)
+      }
+    } catch (err) {
+      return { success: false, error: err.message }
+    }
+  })
+
+  ipcMain.handle('download-add-xunlei', async (_event, payload = {}) => {
+    try {
+      const dir = await assertAllowedDownloadDirectory(payload.dir)
+      const input = typeof payload.magnet === 'string' && payload.magnet.trim()
+        ? payload.magnet
+        : payload.url
+      const result = await downloadManager.addXunleiTask({
+        url: input,
+        dir
+      })
+      if (!result?.success) return result
+      return {
+        success: true,
+        task: result.task,
+        xunlei: result.xunlei,
+        state: await downloadManager.getSnapshot({ start: true }),
+        libraryDirectory: isPersistentLibraryDirectory(dir)
+      }
+    } catch (err) {
+      return { success: false, error: err.message }
+    }
+  })
+
+  ipcMain.handle('download-get-xunlei-state', async (_event, options = {}) => {
+    try {
+      return {
+        success: true,
+        xunlei: await downloadManager.detectXunlei(Boolean(options.refresh))
+      }
+    } catch (err) {
+      return { success: false, error: err.message }
+    }
+  })
+
+  ipcMain.handle('download-select-files', async (_event, gid, fileIndexes) => {
+    try {
+      const state = await downloadManager.changeSelectedFiles(gid, fileIndexes)
+      return { success: true, ...state }
+    } catch (err) {
+      return { success: false, error: err.message }
+    }
+  })
+
+  ipcMain.handle('download-pause', async (_event, gid) => {
+    try {
+      const state = await downloadManager.pause(gid)
+      return { success: true, ...state }
+    } catch (err) {
+      return { success: false, error: err.message }
+    }
+  })
+
+  ipcMain.handle('download-resume', async (_event, gid) => {
+    try {
+      const state = await downloadManager.resume(gid)
+      return { success: true, ...state }
+    } catch (err) {
+      return { success: false, error: err.message }
+    }
+  })
+
+  ipcMain.handle('download-remove', async (_event, gid) => {
+    try {
+      const state = await downloadManager.remove(gid)
+      return { success: true, ...state }
+    } catch (err) {
+      return { success: false, error: err.message }
+    }
+  })
+
+  ipcMain.handle('download-open-directory', async (_event, dirPath) => {
+    try {
+      const dir = await assertAllowedDownloadDirectory(dirPath)
+      const error = await shell.openPath(dir)
+      return { success: !error, error }
+    } catch (err) {
+      return { success: false, error: err.message }
+    }
+  })
+
   ipcMain.handle('privacy-set-password', async (_event, password) => {
     try {
       const settings = loadSettings()
@@ -374,7 +884,7 @@ function setupIPC() {
       title: '选择视频目录'
     })
     if (result.canceled || result.filePaths.length === 0) return null
-    const selectedDir = path.resolve(result.filePaths[0])
+    const selectedDir = resolvePathForAccess(result.filePaths[0])
     sessionAllowedDirectories.add(selectedDir)
     return selectedDir
   })
@@ -386,7 +896,7 @@ function setupIPC() {
       title: '选择视频目录'
     })
     if (result.canceled || result.filePaths.length === 0) return null
-    const selectedDir = path.resolve(result.filePaths[0])
+    const selectedDir = resolvePathForAccess(result.filePaths[0])
     const response = await dialog.showMessageBox(win, {
       type: 'question',
       buttons: ['添加', '取消'],
@@ -424,7 +934,7 @@ function setupIPC() {
     })
 
     if (result.canceled || result.filePaths.length === 0) return null
-    const selectedPath = path.resolve(result.filePaths[0])
+    const selectedPath = resolvePathForAccess(result.filePaths[0])
     if (!isVideoFile(selectedPath)) return null
 
     addSessionAllowedFile(selectedPath)
@@ -463,6 +973,15 @@ function setupIPC() {
 
   ipcMain.handle('get-playback-state', async (_event, filePath) => {
     try {
+      if (typeof filePath === 'string' && filePath.trim()) {
+        try {
+          const resource = normalizeNetworkResourceInput({ url: filePath })
+          if (isKnownNetworkResource(resource.url)) {
+            const settings = loadSettings()
+            return getPlaybackState(settings.playbackStates, resource.url)
+          }
+        } catch {}
+      }
       const resolvedPath = await assertAllowedVideoPath(filePath)
       const settings = loadSettings()
       return getPlaybackState(settings.playbackStates, resolvedPath)
@@ -477,12 +996,52 @@ function setupIPC() {
         return { success: false, error: '文件路径无效' }
       }
 
-      const resolvedPath = await assertAllowedVideoPath(filePath)
       const settings = loadSettings()
-      const playbackStates = upsertPlaybackState(settings.playbackStates, resolvedPath, statePatch)
+      let target = ''
+      try {
+        const resource = normalizeNetworkResourceInput({ url: filePath })
+        if (isKnownNetworkResource(resource.url, settings)) {
+          target = resource.url
+        }
+      } catch {}
+      if (!target) {
+        target = await assertAllowedVideoPath(filePath)
+      }
+      const playbackStates = upsertPlaybackState(settings.playbackStates, target, statePatch)
       saveSettings({ playbackStates })
       return { success: true }
     } catch (err) {
+      return { success: false, error: err.message }
+    }
+  })
+
+  ipcMain.handle('mpv-play-url', async (_event, url, options = {}) => {
+    try {
+      const settings = loadSettings()
+      const resource = options?.temporary === true
+        ? await resolveNetworkResourcePlayback({ url, title: options?.title, kind: options?.kind }, { refresh: true })
+        : await resolveKnownNetworkResourcePlayback({ url, title: options?.title }, { settings })
+
+      const mpvPath = await resolveMpvPath()
+      if (!mpvPath) {
+        return { success: false, error: 'mpv 未安装' }
+      }
+
+      const playOptions = options && typeof options === 'object' ? options : {}
+      const resume = playOptions.resume === false
+        ? false
+        : getPlaybackState(settings.playbackStates, resource.url)
+      setMediaPlaybackActive(true)
+      await mpvManager.play(resource.playbackUrl || resource.url, {
+        hostBounds: playOptions.hostBounds,
+        playlist: [resource.playbackUrl || resource.url],
+        playlistIndex: 0,
+        resume,
+        httpHeaders: resource.httpHeaders
+      })
+      return { success: true }
+    } catch (err) {
+      setMediaPlaybackActive(false)
       return { success: false, error: err.message }
     }
   })

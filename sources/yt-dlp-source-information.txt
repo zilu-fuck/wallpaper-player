@@ -1,0 +1,42 @@
+yt-dlp source information
+=========================
+
+Bundled binary
+--------------
+
+Component: yt-dlp
+Bundled path: vendor/yt-dlp/
+Release asset: yt-dlp.exe
+Download URL: https://github.com/yt-dlp/yt-dlp/releases/download/2026.06.09/yt-dlp.exe
+SHA-256: 3a48cb955d55c8821b60ccbdbbc6f61bc958f2f3d3b7ad5eaf3d83a543293a27
+Observed executable version: 2026.06.09
+License: The Unlicense
+License text: licenses/yt-dlp-Unlicense.txt
+
+Corresponding source
+--------------------
+
+Upstream repository: https://github.com/yt-dlp/yt-dlp
+Release tag: 2026.06.09
+Release page: https://github.com/yt-dlp/yt-dlp/releases/tag/2026.06.09
+Source archive: https://github.com/yt-dlp/yt-dlp/archive/refs/tags/2026.06.09.zip
+
+How to obtain source
+--------------------
+
+Clone the upstream repository and check out the recorded release tag:
+
+    git clone https://github.com/yt-dlp/yt-dlp.git
+    cd yt-dlp
+    git checkout 2026.06.09
+
+Alternatively, download the release source archive from:
+
+    https://github.com/yt-dlp/yt-dlp/archive/refs/tags/2026.06.09.zip
+
+Modification status
+-------------------
+
+Wallpaper Player redistributes the upstream yt-dlp Windows executable without
+modifying the yt-dlp source code or binary file. The application launches
+yt-dlp as a separate local process for webpage video extraction.

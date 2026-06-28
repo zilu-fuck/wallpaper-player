@@ -73,10 +73,33 @@ function getSortPath(video) {
   return String(video?.fullPath || video?.path || video?.id || '').trim()
 }
 
+function getParentDirectory(video) {
+  const path = getSortPath(video).replace(/\\/g, '/')
+  const parts = path.split('/').filter(Boolean)
+  return parts.length > 1 ? parts[parts.length - 2] : ''
+}
+
+function getSortType(video) {
+  const customTags = getCustomTags(video)
+  const systemTags = getSystemTags(video)
+  return [
+    customTags[0] ? `1:${customTags[0]}` : '',
+    systemTags[0] ? `2:${systemTags[0]}` : '',
+    video?.group ? `3:${video.group}` : '',
+    getParentDirectory(video) ? `4:${getParentDirectory(video)}` : '',
+    video?.extension ? `5:${video.extension}` : ''
+  ].find(Boolean) || '9:未分类'
+}
+
 function compareByTitle(a, b) {
   return zhCollator.compare(getSortTitle(a), getSortTitle(b)) ||
     zhCollator.compare(getSortFileName(a), getSortFileName(b)) ||
     zhCollator.compare(getSortPath(a), getSortPath(b))
+}
+
+function compareByType(a, b) {
+  return zhCollator.compare(getSortType(a), getSortType(b)) ||
+    compareByTitle(a, b)
 }
 
 // 过滤 / 排序 / 分类 / 搜索
@@ -175,7 +198,7 @@ export function useVideoFilter({ videos, customTags, favoriteKeys, hiddenTags })
         case 'name': return compareByTitle(a, b)
         case 'size': return (Number(b.size) || 0) - (Number(a.size) || 0) || compareByTitle(a, b)
         case 'date': return (Number(b.modified) || 0) - (Number(a.modified) || 0) || compareByTitle(a, b)
-        case 'type': return zhCollator.compare(a.extension || '', b.extension || '') || compareByTitle(a, b)
+        case 'type': return compareByType(a, b)
         default: return 0
       }
     })

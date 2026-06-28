@@ -24,5 +24,21 @@ Bundled binary programs:
    - Source information: sources/ffmpeg-source-information.txt
    - Modification status: redistributed unmodified.
 
+3. aria2
+   - Bundled archive: aria2-1.37.0-win-64bit-build1.zip
+   - Bundled executable version: 1.37.0
+   - License: GPL-2.0-or-later.
+   - Full license text: licenses/aria2-GPL-2.0-or-later.txt
+   - Source information: sources/aria2-source-information.txt
+   - Modification status: redistributed unmodified.
+
+4. yt-dlp
+   - Bundled asset: yt-dlp.exe
+   - Bundled executable version: 2026.06.09
+   - License: The Unlicense.
+   - Full license text: licenses/yt-dlp-Unlicense.txt
+   - Source information: sources/yt-dlp-source-information.txt
+   - Modification status: redistributed unmodified.
+
 These notices are provided for distribution compliance tracking and are not
 legal advice.

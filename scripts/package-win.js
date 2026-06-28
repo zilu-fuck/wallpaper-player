@@ -39,6 +39,9 @@ const videoComprehensionItems = [
 ]
 
 const officialPluginDirs = new Set(['video-analysis', 'ai-search', 'agent-bridge'])
+const copyFilters = new Map([
+  ['node_modules', (src) => path.basename(src) !== 'wallpaper-player']
+])
 
 const requiredVideoComprehensionFiles = [
   'pyproject.toml',
@@ -128,7 +131,10 @@ async function copyProject() {
   for (const item of copyItems) {
     const src = path.join(rootDir, item)
     if (!fs.existsSync(src)) continue
-    await fsp.cp(src, path.join(tempRoot, item), { recursive: true })
+    await fsp.cp(src, path.join(tempRoot, item), {
+      recursive: true,
+      filter: copyFilters.get(item)
+    })
   }
 
   await removeOfficialPluginPayloads(path.join(tempRoot, 'main', 'plugins'))

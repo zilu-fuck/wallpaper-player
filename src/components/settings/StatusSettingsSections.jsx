@@ -104,6 +104,82 @@ export function FfmpegStatusSection({ ffmpegStatus }) {
   )
 }
 
+function getDownloadPortLabel(engine) {
+  const status = engine?.btPortStatus
+  if (!status) return '检测中'
+  if (status.ports?.some(port => port.listening)) return `${status.usablePort || status.range} 已监听`
+  return status.available ? `${status.usablePort} 可用` : '需检查'
+}
+
+function getProxyLabel(proxy) {
+  if (!proxy?.enabled) return '未启用'
+  if (proxy.source === 'windows') return '跟随系统代理'
+  if (proxy.source === 'environment') return '跟随环境变量'
+  return '已启用'
+}
+
+export function DownloadStatusSection({
+  downloadState,
+  downloadLoading,
+  downloadMessage,
+  onRefreshDownloadState,
+  onOpenDownloadCenter
+}) {
+  const engine = downloadState?.engine
+  const xunlei = engine?.xunlei
+  const ytdlp = engine?.ytdlp
+  const ok = Boolean(engine?.available)
+
+  return (
+    <section className="settings-section">
+      <h3 className="section-title">下载中心</h3>
+      <p className="section-desc">查看 aria2 下载引擎、BT 找源能力和迅雷接管状态。</p>
+      <div className={`ffmpeg-status ${ok ? 'ok' : 'warn'}`}>
+        <span className={`status-dot ${ok ? 'green' : 'yellow'}`} />
+        <div className="status-content">
+          <p>{ok ? (engine.running ? 'aria2 正在运行' : 'aria2 已就绪') : '未检测到 aria2c'}</p>
+          <p className="hint">
+            {ok
+              ? `路径: ${engine.path || '内置 aria2c'}`
+              : (engine?.error || '请重新执行 npm run prepare-vendor，或将 aria2c 加入 PATH。')}
+          </p>
+          <div className="download-settings-grid">
+            <div>
+              <span>BT 端口</span>
+              <strong>{getDownloadPortLabel(engine)}</strong>
+            </div>
+            <div>
+              <span>找源能力</span>
+              <strong>{engine?.trackerCount || 0} tracker · DHT/PEX/LSD</strong>
+            </div>
+            <div>
+              <span>迅雷接管</span>
+              <strong>{xunlei?.available ? '已检测到' : '未检测到'}</strong>
+            </div>
+            <div>
+              <span>网页解析</span>
+              <strong>{ytdlp?.available ? 'yt-dlp 已就绪' : 'yt-dlp 未检测到'}</strong>
+            </div>
+            <div>
+              <span>代理</span>
+              <strong>{getProxyLabel(ytdlp?.proxy)}</strong>
+            </div>
+          </div>
+          <div className="mpv-actions">
+            <button className="btn btn-sm btn-primary" type="button" onClick={onOpenDownloadCenter}>
+              打开下载中心
+            </button>
+            <button className="btn btn-sm" type="button" onClick={onRefreshDownloadState} disabled={downloadLoading}>
+              {downloadLoading ? '刷新中...' : '刷新状态'}
+            </button>
+          </div>
+          {downloadMessage ? <p className="hint">{downloadMessage}</p> : null}
+        </div>
+      </div>
+    </section>
+  )
+}
+
 export function AboutSection() {
   return (
     <section className="settings-section">

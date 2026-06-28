@@ -4,6 +4,7 @@ const fs = require('fs')
 
 let mainWindow = null
 let windowCloseHandler = null
+const WEBVIEW_PARTITION = 'persist:wallpaper-player-web'
 
 function getMainWindow() {
   return mainWindow
@@ -18,6 +19,12 @@ function setWindowCloseHandler(handler) {
 }
 
 function setupCSP() {
+  const webviewSession = session.fromPartition(WEBVIEW_PARTITION)
+  webviewSession.setPermissionRequestHandler((_webContents, _permission, callback) => {
+    callback(false)
+  })
+  webviewSession.setPermissionCheckHandler(() => false)
+
   session.defaultSession.webRequest.onHeadersReceived((details, callback) => {
     callback({
       responseHeaders: {
@@ -27,7 +34,7 @@ function setupCSP() {
           "script-src 'self'; " +
           "style-src 'self' 'unsafe-inline'; " +
           "img-src 'self' file: data: blob:; " +
-          "media-src 'self' file: data: blob:; " +
+          "media-src 'self' file: http: https: data: blob:; " +
           "font-src 'self' file: data:; " +
           "connect-src 'self' ws: wss:;"
         ]
@@ -49,7 +56,8 @@ function createWindow() {
       preload: path.join(__dirname, '..', 'preload.js'),
       contextIsolation: true,
       nodeIntegration: false,
-      webSecurity: true
+      webSecurity: true,
+      webviewTag: true
     }
   })
 
@@ -71,6 +79,45 @@ function createWindow() {
       shell.openExternal(url)
     }
     return { action: 'deny' }
+  })
+
+  mainWindow.webContents.on('will-attach-webview', (event, webPreferences, params) => {
+    let parsed
+    try {
+      parsed = new URL(params.src || '')
+    } catch {
+      event.preventDefault()
+      return
+    }
+    if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') {
+      event.preventDefault()
+      return
+    }
+    if (params.partition && params.partition !== WEBVIEW_PARTITION) {
+      event.preventDefault()
+      return
+    }
+
+    delete webPreferences.preload
+    webPreferences.partition = WEBVIEW_PARTITION
+    webPreferences.nodeIntegration = false
+    webPreferences.contextIsolation = true
+    webPreferences.sandbox = true
+    webPreferences.webSecurity = true
+    webPreferences.allowRunningInsecureContent = false
+  })
+
+  mainWindow.webContents.on('did-attach-webview', (_event, webContents) => {
+    webContents.setWindowOpenHandler(({ url }) => {
+      if (url.startsWith('http://') || url.startsWith('https://')) {
+        shell.openExternal(url)
+      }
+      return { action: 'deny' }
+    })
+    webContents.on('will-navigate', (event, url) => {
+      if (url.startsWith('http://') || url.startsWith('https://')) return
+      event.preventDefault()
+    })
   })
 
   // 仅在开发模式转发渲染进程日志到主进程 stdout，避免打包后刷屏
