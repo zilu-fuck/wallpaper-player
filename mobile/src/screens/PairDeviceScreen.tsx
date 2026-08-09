@@ -1,13 +1,13 @@
 import * as Clipboard from 'expo-clipboard'
 import { CameraView, useCameraPermissions } from 'expo-camera'
 import { Camera, QrCode } from 'lucide-react-native'
-import { useCallback, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { Keyboard, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native'
 import type { NavigationContext } from '../../App'
 import { MobileUpdateCard } from '../components/MobileUpdateCard'
 import { PrimaryButton } from '../components/PrimaryButton'
 import { createDeviceFromPairingPayload, createManualDevice, parsePairingCode } from '../services/pairing'
-import { saveDevice } from '../stores/devices'
+import { saveDevice } from '../persistence/devices'
 import { colors as fixedColors } from '../theme'
 import { useTheme } from '../theme-context'
 
@@ -28,25 +28,50 @@ export function PairDeviceScreen({ navigation }: Props) {
   const [legacyOpen, setLegacyOpen] = useState(false)
   const [permission, requestPermission] = useCameraPermissions()
   const barcodeHandledRef = useRef(false)
+  const requestRef = useRef<AbortController | null>(null)
+  const mountedRef = useRef(true)
+
+  useEffect(() => () => {
+    mountedRef.current = false
+    requestRef.current?.abort()
+  }, [])
 
   const saveAndContinue = useCallback(async (
-    create: () => Promise<ReturnType<typeof createManualDevice> extends Promise<infer T> ? T : never>,
+    create: (signal: AbortSignal) => Promise<ReturnType<typeof createManualDevice> extends Promise<infer T> ? T : never>,
     options: { loadingText?: string } = {}
   ) => {
+    requestRef.current?.abort()
+    const controller = new AbortController()
+    requestRef.current = controller
     setLoading(true)
     setLoadingText(options.loadingText || '')
     setError('')
     try {
-      const device = await create()
+      const device = await create(controller.signal)
+      if (controller.signal.aborted || !mountedRef.current) return
       await saveDevice(device)
+      if (controller.signal.aborted || !mountedRef.current) return
       navigation.navigate({ name: 'library', device })
     } catch (err) {
+      if (controller.signal.aborted || (err instanceof Error && err.name === 'AbortError')) return
       setError(err instanceof Error ? err.message : '绑定失败')
     } finally {
-      setLoading(false)
-      setLoadingText('')
+      if (requestRef.current === controller) {
+        requestRef.current = null
+        if (mountedRef.current) {
+          setLoading(false)
+          setLoadingText('')
+        }
+      }
     }
   }, [navigation])
+
+  const cancelPairing = useCallback(() => {
+    requestRef.current?.abort()
+    requestRef.current = null
+    setLoading(false)
+    setLoadingText('')
+  }, [])
 
   const handleManualPair = useCallback(() => {
     Keyboard.dismiss()
@@ -60,7 +85,7 @@ export function PairDeviceScreen({ navigation }: Props) {
       setError('绑定码不是 Wallpaper Player 绑定码')
       return
     }
-    saveAndContinue(() => createDeviceFromPairingPayload(payload, token), {
+    saveAndContinue((signal) => createDeviceFromPairingPayload(payload, token, signal), {
       loadingText: payload.pairingId ? '已提交绑定请求，等待电脑端允许绑定...' : ''
     })
   }, [saveAndContinue, token])
@@ -96,7 +121,7 @@ export function PairDeviceScreen({ navigation }: Props) {
       barcodeHandledRef.current = false
       return
     }
-    saveAndContinue(() => createDeviceFromPairingPayload(payload, token), {
+    saveAndContinue((signal) => createDeviceFromPairingPayload(payload, token, signal), {
       loadingText: payload.pairingId ? '已扫码，等待电脑端允许绑定...' : ''
     })
   }, [saveAndContinue, token])
@@ -135,6 +160,7 @@ export function PairDeviceScreen({ navigation }: Props) {
           label="扫描二维码"
           variant="secondary"
           icon={<Camera color={colors.text} size={20} />}
+          disabled={loading}
           onPress={handleOpenScanner}
         />
 
@@ -158,10 +184,10 @@ export function PairDeviceScreen({ navigation }: Props) {
             style={[styles.input, styles.codeInput]}
           />
           <View style={styles.inlineActions}>
-            <Pressable style={styles.secondaryAction} onPress={handlePastePairingCode}>
+            <Pressable style={[styles.secondaryAction, loading && styles.actionDisabled]} onPress={handlePastePairingCode} disabled={loading}>
               <Text style={styles.secondaryActionText}>粘贴并绑定</Text>
             </Pressable>
-            <Pressable style={styles.secondaryAction} onPress={() => handlePairingCode(pairingCode)}>
+            <Pressable style={[styles.secondaryAction, loading && styles.actionDisabled]} onPress={() => handlePairingCode(pairingCode)} disabled={loading}>
               <Text style={styles.secondaryActionText}>使用绑定码</Text>
             </Pressable>
           </View>
@@ -221,9 +247,21 @@ export function PairDeviceScreen({ navigation }: Props) {
 
         {loadingText ? <Text style={styles.loadingText}>{loadingText}</Text> : null}
 
+        {loading ? (
+          <Pressable accessibilityRole="button" style={styles.cancelPairingButton} onPress={cancelPairing}>
+            <Text style={styles.cancelPairingText}>取消绑定</Text>
+          </Pressable>
+        ) : null}
+
         <MobileUpdateCard />
 
-        <Pressable onPress={navigation.refreshDevices} style={styles.footerLink}>
+        <Pressable
+          onPress={() => {
+            cancelPairing()
+            navigation.refreshDevices()
+          }}
+          style={styles.footerLink}
+        >
           <Text style={styles.footerLinkText}>查看已保存电脑</Text>
         </Pressable>
       </ScrollView>
@@ -326,6 +364,9 @@ const createStyles = (colors: ReturnType<typeof useTheme>['colors']) => StyleShe
     fontSize: 14,
     fontWeight: '700'
   },
+  actionDisabled: {
+    opacity: 0.55
+  },
   sectionHint: {
     color: colors.muted,
     fontSize: 13,
@@ -349,6 +390,21 @@ const createStyles = (colors: ReturnType<typeof useTheme>['colors']) => StyleShe
     color: colors.muted,
     fontSize: 14,
     lineHeight: 20
+  },
+  cancelPairingButton: {
+    alignSelf: 'flex-start',
+    minHeight: 40,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: colors.border,
+    paddingHorizontal: 14,
+    alignItems: 'center',
+    justifyContent: 'center'
+  },
+  cancelPairingText: {
+    color: colors.text,
+    fontSize: 14,
+    fontWeight: '700'
   },
   footerLink: {
     alignSelf: 'center',

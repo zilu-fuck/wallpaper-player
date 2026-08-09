@@ -54,6 +54,9 @@ function VideoFeedItemBase({
             contentFit={contentFit}
           />
           <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="视频播放区域"
+            accessibilityHint="双击播放或暂停"
             style={styles.touchLayer}
             delayLongPress={LONG_PRESS_DELAY_MS}
             onPress={onPress}

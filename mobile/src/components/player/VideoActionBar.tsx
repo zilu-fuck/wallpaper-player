@@ -10,6 +10,7 @@ type Props = {
   analysisActive?: boolean
   networkResource?: boolean
   bottomOffset: number
+  rightOffset: number
   onFavorite: () => void
   onTags: () => void
   onAnalysis: () => void
@@ -28,7 +29,7 @@ type ActionButtonProps = {
 
 function ActionButton({ label, icon, active = false, activeColor = colors.accent, onPress }: ActionButtonProps) {
   return (
-    <Pressable style={styles.actionButton} onPress={onPress} hitSlop={HIT_SLOP}>
+    <Pressable accessibilityRole="button" accessibilityLabel={label} accessibilityState={{ selected: active }} style={styles.actionButton} onPress={onPress} hitSlop={HIT_SLOP}>
       <View style={[styles.actionIconWrap, active && { backgroundColor: `${activeColor}2e` }]}>
         {icon}
         {active ? <View style={[styles.actionDot, { backgroundColor: activeColor }]} /> : null}
@@ -44,6 +45,7 @@ export function VideoActionBar({
   analysisActive = false,
   networkResource = false,
   bottomOffset,
+  rightOffset,
   onFavorite,
   onTags,
   onAnalysis,
@@ -52,7 +54,7 @@ export function VideoActionBar({
   onMore
 }: Props) {
   return (
-    <View style={[styles.rightActions, { bottom: bottomOffset }]} pointerEvents="box-none">
+    <View style={[styles.rightActions, { bottom: bottomOffset, right: rightOffset }]} pointerEvents="box-none">
       <ActionButton
         label="收藏"
         icon={<Heart color={favorite ? colors.danger : colors.text} fill={favorite ? colors.danger : 'transparent'} size={25} />}
@@ -80,7 +82,6 @@ export function VideoActionBar({
 const styles = StyleSheet.create({
   rightActions: {
     position: 'absolute',
-    right: 12,
     alignItems: 'center',
     gap: 11
   },

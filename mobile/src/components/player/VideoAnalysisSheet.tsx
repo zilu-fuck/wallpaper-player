@@ -1,10 +1,11 @@
 import { ActivityIndicator, PanResponder, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native'
 import { Brain, ChevronDown, PlayCircle, RefreshCw } from 'lucide-react-native'
 import { useEffect, useMemo, useState } from 'react'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { colors } from '../../theme'
 import type { VideoAnalysisResponse, VideoAnalysisResult, VideoAnalysisTimelineItem, VideoItem } from '../../types'
-import { BOTTOM_SAFE_OFFSET } from '../../screens/player/playerLayout'
 import { getVideoTitle } from '../../screens/player/playerUtils'
+import { formatTime, uniqueTags } from '../../utils/url'
 
 type Props = {
   visible: boolean
@@ -18,17 +19,6 @@ type Props = {
   onStart: () => void
   onSeek: (time: number) => void
   onAddTags?: (tags: string[]) => void
-}
-
-function formatTime(seconds?: number) {
-  const value = Number(seconds)
-  if (!Number.isFinite(value) || value < 0) return '00:00'
-  const total = Math.floor(value)
-  const h = Math.floor(total / 3600)
-  const m = Math.floor((total % 3600) / 60)
-  const s = total % 60
-  const pad = (n: number) => String(n).padStart(2, '0')
-  return h > 0 ? `${h}:${pad(m)}:${pad(s)}` : `${pad(m)}:${pad(s)}`
 }
 
 function getTimelineTitle(item: VideoAnalysisTimelineItem) {
@@ -50,19 +40,6 @@ function getAnalysisTitle(video: VideoItem, analysis: VideoAnalysisResult | null
   return analysis?.naming?.episode_title || analysis?.sourceVideo?.original_filename || getVideoTitle(video)
 }
 
-function uniqueTags(tags: string[]) {
-  const seen = new Set<string>()
-  const result: string[] = []
-  for (const value of tags) {
-    const tag = String(value || '').trim()
-    const key = tag.toLocaleLowerCase()
-    if (!tag || seen.has(key)) continue
-    seen.add(key)
-    result.push(tag)
-  }
-  return result
-}
-
 export function VideoAnalysisSheet({
   visible,
   video,
@@ -76,6 +53,7 @@ export function VideoAnalysisSheet({
   onSeek,
   onAddTags
 }: Props) {
+  const safeAreaInsets = useSafeAreaInsets()
   const [selectedAnalysisTags, setSelectedAnalysisTags] = useState<string[]>([])
   const panResponder = useMemo(() => PanResponder.create({
     onMoveShouldSetPanResponder: (_event, gesture) => gesture.dy > 16 && Math.abs(gesture.dy) > Math.abs(gesture.dx),
@@ -152,7 +130,10 @@ export function VideoAnalysisSheet({
   return (
     <View style={styles.backdrop}>
       <Pressable style={styles.backdropPress} onPress={onClose} />
-      <View style={styles.sheet} {...panResponder.panHandlers}>
+      <View style={[styles.sheet, {
+        paddingLeft: safeAreaInsets.left,
+        paddingRight: safeAreaInsets.right
+      }]} {...panResponder.panHandlers}>
         <View style={styles.handleWrap}>
           <View style={styles.handle} />
         </View>
@@ -278,7 +259,7 @@ export function VideoAnalysisSheet({
 
         </ScrollView>
 
-        <View style={styles.footerActions}>
+        <View style={[styles.footerActions, { paddingBottom: safeAreaInsets.bottom + 10 }]}>
           <Pressable style={[styles.footerButton, !canStart && styles.footerButtonDisabled]} onPress={onStart} disabled={!canStart}>
             {starting ? <ActivityIndicator color={colors.text} size="small" /> : <PlayCircle color={colors.text} size={18} />}
             <Text style={styles.footerButtonText}>{analysis ? '重新分析' : '开始分析'}</Text>
@@ -550,7 +531,6 @@ const styles = StyleSheet.create({
   footerActions: {
     paddingTop: 10,
     paddingHorizontal: 16,
-    paddingBottom: BOTTOM_SAFE_OFFSET + 10,
     borderTopWidth: StyleSheet.hairlineWidth,
     borderTopColor: 'rgba(255,255,255,0.1)',
     backgroundColor: 'rgba(12,12,12,0.98)',

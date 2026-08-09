@@ -1,16 +1,20 @@
 import { StatusBar as ExpoStatusBar } from 'expo-status-bar'
+import * as ScreenOrientation from 'expo-screen-orientation'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { ActivityIndicator, BackHandler, Platform, SafeAreaView, StatusBar as NativeStatusBar, StyleSheet, Text, View } from 'react-native'
+import { ActivityIndicator, BackHandler, Pressable, StatusBar as NativeStatusBar, StyleSheet, Text, View } from 'react-native'
+import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context'
 import { AppNavigator, type AppRoute } from './src/AppNavigator'
-import { loadDevices } from './src/stores/devices'
+import { loadDevices } from './src/persistence/devices'
 import { ThemeProvider, useTheme } from './src/theme-context'
 import type { StoredDevice } from './src/types'
 
 export default function App() {
   return (
-    <ThemeProvider>
-      <AppShell />
-    </ThemeProvider>
+    <SafeAreaProvider>
+      <ThemeProvider>
+        <AppShell />
+      </ThemeProvider>
+    </SafeAreaProvider>
   )
 }
 
@@ -31,6 +35,7 @@ function AppShell() {
 
   const boot = useCallback(async () => {
     setBootError('')
+    setNavigationState({ route: { name: 'loading' }, previousRoute: null })
     try {
       const devices = await loadDevices()
       setNavigationState({
@@ -39,7 +44,6 @@ function AppShell() {
       })
     } catch (error) {
       setBootError(error instanceof Error ? error.message : '启动失败')
-      setNavigationState({ route: { name: 'pair' }, previousRoute: null })
     }
   }, [])
 
@@ -85,6 +89,11 @@ function AppShell() {
     return () => subscription.remove()
   }, [back])
 
+  useEffect(() => {
+    if (route.name === 'player') return
+    ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.PORTRAIT_UP).catch(() => {})
+  }, [route.name])
+
   const value = useMemo(() => ({
     route,
     previousRoute,
@@ -96,13 +105,12 @@ function AppShell() {
     boot
   }), [route, previousRoute, navigate, replace, back, refreshDevices, boot])
 
-  const Shell = isImmersivePlayer ? View : SafeAreaView
-
   return (
-    <Shell style={[
+    <SafeAreaView
+      edges={isImmersivePlayer ? [] : ['top', 'right', 'bottom', 'left']}
+      style={[
       styles.shell,
-      { backgroundColor: isImmersivePlayer ? '#000000' : colors.background },
-      !isImmersivePlayer && styles.safeShell
+      { backgroundColor: isImmersivePlayer ? '#000000' : colors.background }
     ]}>
       <NativeStatusBar
         backgroundColor={isImmersivePlayer ? 'transparent' : colors.background}
@@ -112,14 +120,28 @@ function AppShell() {
       <ExpoStatusBar style={isImmersivePlayer || themeMode === 'dark' ? 'light' : 'dark'} />
       {route.name === 'loading' ? (
         <View style={styles.loading}>
-          <ActivityIndicator color={colors.accent} />
-          <Text style={[styles.loadingText, { color: colors.text }]}>正在准备手机端...</Text>
-          {bootError ? <Text style={[styles.errorText, { color: colors.danger }]}>{bootError}</Text> : null}
+          {bootError ? (
+            <>
+              <Text style={[styles.errorText, { color: colors.danger }]}>{bootError}</Text>
+              <Pressable
+                accessibilityRole="button"
+                style={[styles.retryButton, { backgroundColor: colors.accentStrong }]}
+                onPress={boot}
+              >
+                <Text style={[styles.retryButtonText, { color: colors.onAccent }]}>重试</Text>
+              </Pressable>
+            </>
+          ) : (
+            <>
+              <ActivityIndicator color={colors.accent} />
+              <Text style={[styles.loadingText, { color: colors.text }]}>正在准备手机端...</Text>
+            </>
+          )}
         </View>
       ) : (
         <AppNavigator context={value} />
       )}
-    </Shell>
+    </SafeAreaView>
   )
 }
 
@@ -142,9 +164,6 @@ const styles = StyleSheet.create({
   shell: {
     flex: 1
   },
-  safeShell: {
-    paddingTop: Platform.OS === 'android' ? NativeStatusBar.currentHeight || 0 : 0
-  },
   loading: {
     flex: 1,
     alignItems: 'center',
@@ -157,5 +176,17 @@ const styles = StyleSheet.create({
   },
   errorText: {
     textAlign: 'center'
+  },
+  retryButton: {
+    minWidth: 120,
+    minHeight: 44,
+    borderRadius: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 18
+  },
+  retryButtonText: {
+    fontSize: 15,
+    fontWeight: '800'
   }
 })

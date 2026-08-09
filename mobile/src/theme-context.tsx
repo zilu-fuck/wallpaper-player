@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react'
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react'
-import { loadMobileSettings, saveMobileSettings } from './stores/settings'
+import { loadMobileSettings, saveMobileSettings } from './persistence/settings'
 import type { ThemeColors, ThemeMode } from './theme'
 import { themeColors } from './theme'
 

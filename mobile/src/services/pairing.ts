@@ -1,23 +1,10 @@
 import { claimPairing, getInfo } from './api'
 import type { PairingPayload, StoredDevice } from '../types'
-import { getClientId } from '../stores/devices'
-import { normalizeEndpoint } from '../utils/url'
+import { getClientId } from '../persistence/devices'
+import { normalizeEndpoint, uniqueEndpoints } from '../utils/url'
 
 const PAIRING_POLL_INTERVAL_MS = 1200
 const PAIRING_WAIT_TIMEOUT_MS = 5 * 60 * 1000
-
-function uniqueEndpoints(...groups: Array<string | string[] | undefined>) {
-  const seen = new Set<string>()
-  return groups
-    .flatMap(group => Array.isArray(group) ? group : [group])
-    .filter((value): value is string => Boolean(value?.trim()))
-    .map(value => normalizeEndpoint(value))
-    .filter(value => {
-      if (!value || seen.has(value)) return false
-      seen.add(value)
-      return true
-    })
-}
 
 export function parsePairingCode(raw: string): PairingPayload | null {
   const value = raw.trim()
@@ -58,7 +45,12 @@ export async function createManualDevice(endpointInput: string, token: string): 
   }
 }
 
-export async function createDeviceFromPairingPayload(payload: PairingPayload, fallbackToken = ''): Promise<StoredDevice> {
+export async function createDeviceFromPairingPayload(
+  payload: PairingPayload,
+  fallbackToken = '',
+  signal?: AbortSignal
+): Promise<StoredDevice> {
+  throwIfAborted(signal)
   if (!payload.endpoint) throw new Error('二维码缺少电脑地址')
   if (payload.expiresAt && payload.expiresAt < Date.now()) throw new Error('二维码已过期')
 
@@ -74,13 +66,14 @@ export async function createDeviceFromPairingPayload(payload: PairingPayload, fa
       clientId: await getClientId(),
       clientName: 'Wallpaper Player Mobile'
     }
-    let claimed = await claimPairing(endpoint, payload, client)
+    let claimed = await claimPairing(endpoint, payload, client, signal)
     while (claimed.status === 'pending') {
+      throwIfAborted(signal)
       if (Date.now() >= waitDeadline) {
         throw new Error('等待电脑端允许绑定超时，请在电脑端重新生成绑定码')
       }
-      await delay(PAIRING_POLL_INTERVAL_MS)
-      claimed = await claimPairing(endpoint, payload, client)
+      await delay(PAIRING_POLL_INTERVAL_MS, signal)
+      claimed = await claimPairing(endpoint, payload, client, signal)
     }
     if (!claimed.token) {
       throw new Error('电脑端尚未允许本次绑定')
@@ -112,8 +105,33 @@ export async function createDeviceFromPairingPayload(payload: PairingPayload, fa
   }
 }
 
-function delay(ms: number) {
-  return new Promise(resolve => setTimeout(resolve, ms))
+function delay(ms: number, signal?: AbortSignal) {
+  return new Promise<void>((resolve, reject) => {
+    const timeout = setTimeout(() => {
+      signal?.removeEventListener('abort', abortDelay)
+      resolve()
+    }, ms)
+    const abortDelay = () => {
+      clearTimeout(timeout)
+      signal?.removeEventListener('abort', abortDelay)
+      reject(createAbortError())
+    }
+    if (signal?.aborted) {
+      abortDelay()
+      return
+    }
+    signal?.addEventListener('abort', abortDelay, { once: true })
+  })
+}
+
+function throwIfAborted(signal?: AbortSignal) {
+  if (signal?.aborted) throw createAbortError()
+}
+
+function createAbortError() {
+  const error = new Error('绑定已取消')
+  error.name = 'AbortError'
+  return error
 }
 
 function decodeBase64Url(input: string) {

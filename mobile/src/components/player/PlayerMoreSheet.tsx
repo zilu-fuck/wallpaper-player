@@ -1,11 +1,11 @@
 import { Check, ChevronDown, Copy, EyeOff, FileText, FolderOpen } from 'lucide-react-native'
 import { useMemo } from 'react'
 import { PanResponder, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { colors } from '../../theme'
 import type { VideoItem } from '../../types'
-import { BOTTOM_SAFE_OFFSET } from '../../screens/player/playerLayout'
 import { getVideoTitle } from '../../screens/player/playerUtils'
-import type { MobilePlayerBackgroundMode } from '../../stores/settings'
+import type { MobilePlayerBackgroundMode } from '../../persistence/settings'
 
 export type AspectMode = 'fit' | 'fill' | 'original'
 
@@ -66,6 +66,7 @@ export function PlayerMoreSheet({
   onFileInfo,
   onHideFromPlaylist
 }: Props) {
+  const safeAreaInsets = useSafeAreaInsets()
   const panResponder = useMemo(() => PanResponder.create({
     onMoveShouldSetPanResponder: (_event, gesture) => gesture.dy > 16 && Math.abs(gesture.dy) > Math.abs(gesture.dx),
     onPanResponderRelease: (_event, gesture) => {
@@ -78,7 +79,11 @@ export function PlayerMoreSheet({
   return (
     <View style={styles.backdrop}>
       <Pressable style={styles.backdropPress} onPress={onClose} />
-      <View style={styles.sheet} {...panResponder.panHandlers}>
+      <View style={[styles.sheet, {
+        paddingBottom: safeAreaInsets.bottom + 12,
+        paddingLeft: safeAreaInsets.left,
+        paddingRight: safeAreaInsets.right
+      }]} {...panResponder.panHandlers}>
         <View style={styles.handleWrap}>
           <View style={styles.handle} />
         </View>
@@ -211,7 +216,6 @@ const styles = StyleSheet.create({
   },
   sheet: {
     maxHeight: '78%',
-    paddingBottom: BOTTOM_SAFE_OFFSET + 12,
     borderTopLeftRadius: 14,
     borderTopRightRadius: 14,
     backgroundColor: 'rgba(12,12,12,0.96)',

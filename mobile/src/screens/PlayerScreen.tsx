@@ -20,6 +20,7 @@ import type {
   NativeSyntheticEvent,
   GestureResponderEvent
 } from 'react-native'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import type { NativeVideoPlayerHandle } from '../components/player/NativeVideoPlayer'
 import { PlayerMoreSheet, type AspectMode } from '../components/player/PlayerMoreSheet'
 import { TagEditorSheet } from '../components/player/TagEditorSheet'
@@ -42,9 +43,10 @@ import {
   toggleFavorite,
   updateVideoTags
 } from '../services/api'
-import { loadLocalPlayback, saveLocalPlayback } from '../stores/playback'
-import { loadMobileSettings, saveMobileSettings } from '../stores/settings'
-import type { MobilePlayerBackgroundMode } from '../stores/settings'
+import { loadLocalPlayback, saveLocalPlayback } from '../persistence/playback'
+import { loadMobileSettings, saveMobileSettings } from '../persistence/settings'
+import { emitVideoLibraryUpdate } from '../services/library-events'
+import type { MobilePlayerBackgroundMode } from '../persistence/settings'
 import { colors } from '../theme'
 import type { StoredDevice, VideoAnalysisResponse, VideoItem } from '../types'
 import {
@@ -78,6 +80,7 @@ function uniqueCustomTags(tags: string[]) {
 
 export function PlayerScreen({ navigation, device, video, videos }: Props) {
   const dimensions = useWindowDimensions()
+  const safeAreaInsets = useSafeAreaInsets()
   const pageHeight = Math.max(1, dimensions.height)
   const pageWidth = Math.max(1, dimensions.width)
   const listRef = useRef<FlatList<VideoItem> | null>(null)
@@ -137,6 +140,7 @@ export function PlayerScreen({ navigation, device, video, videos }: Props) {
   const heartTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const controlsTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const transcodeTimerRef = useRef<ReturnType<typeof setInterval> | null>(null)
+  const transcodeRequestGenerationRef = useRef(0)
   const analysisTimerRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const rewindTimerRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const ignoreNextPressRef = useRef(false)
@@ -144,7 +148,9 @@ export function PlayerScreen({ navigation, device, video, videos }: Props) {
   const speedBoostModeRef = useRef<'forward' | 'rewind' | null>(null)
   const originalPlaybackRateRef = useRef(1)
   const wasPlayingBeforeBackgroundRef = useRef(false)
+  const appStateRef = useRef(AppState.currentState)
   const dragStartIndexRef = useRef(initialIndex)
+  const pageSizeRef = useRef({ width: pageWidth, height: pageHeight })
   const positionSnapshotRef = useRef<Record<string, number>>({})
   const transcodingQualityRef = useRef('compatible')
 
@@ -192,6 +198,17 @@ export function PlayerScreen({ navigation, device, video, videos }: Props) {
     activeIndexRef.current = activeIndex
     activeVideoRef.current = activeVideo
   }, [activeIndex, activeVideo])
+
+  useEffect(() => {
+    const previous = pageSizeRef.current
+    pageSizeRef.current = { width: pageWidth, height: pageHeight }
+    if (previous.width === pageWidth && previous.height === pageHeight) return
+    const frame = requestAnimationFrame(() => {
+      const index = clamp(activeIndexRef.current, 0, videoList.length - 1)
+      listRef.current?.scrollToOffset({ offset: pageHeight * index, animated: false })
+    })
+    return () => cancelAnimationFrame(frame)
+  }, [pageHeight, pageWidth, videoList.length])
 
   useEffect(() => {
     fullscreenModeRef.current = fullscreenMode
@@ -443,6 +460,11 @@ export function PlayerScreen({ navigation, device, video, videos }: Props) {
     try {
       const result = await toggleFavorite(device, item.id)
       setFavoriteById(current => ({ ...current, [item.id]: result.favorite }))
+      emitVideoLibraryUpdate({
+        deviceId: device.id,
+        videoId: item.id,
+        patch: { favorite: result.favorite }
+      })
     } catch {
       setFavoriteById(current => ({ ...current, [item.id]: previous }))
       showGestureHint('收藏失败')
@@ -552,9 +574,9 @@ export function PlayerScreen({ navigation, device, video, videos }: Props) {
   const restoreCurrentPagePosition = useCallback((animated = false) => {
     requestAnimationFrame(() => {
       const index = clamp(activeIndexRef.current, 0, videoList.length - 1)
-      listRef.current?.scrollToIndex({ index, animated })
+      listRef.current?.scrollToOffset({ offset: pageHeight * index, animated })
     })
-  }, [videoList.length])
+  }, [pageHeight, videoList.length])
 
   const leaveFullscreen = useCallback(async () => {
     setFullscreenMode(false)
@@ -591,6 +613,7 @@ export function PlayerScreen({ navigation, device, video, videos }: Props) {
     if (heartTimerRef.current) clearTimeout(heartTimerRef.current)
     if (controlsTimerRef.current) clearTimeout(controlsTimerRef.current)
     if (transcodeTimerRef.current) clearInterval(transcodeTimerRef.current)
+    transcodeRequestGenerationRef.current += 1
     if (analysisTimerRef.current) clearInterval(analysisTimerRef.current)
     if (rewindTimerRef.current) clearInterval(rewindTimerRef.current)
     restorePortraitOrientation()
@@ -619,6 +642,8 @@ export function PlayerScreen({ navigation, device, video, videos }: Props) {
 
   useEffect(() => {
     const subscription = AppState.addEventListener('change', (nextState: AppStateStatus) => {
+      const previousState = appStateRef.current
+      appStateRef.current = nextState
       if (nextState === 'active') {
         if (wasPlayingBeforeBackgroundRef.current && status !== 'error') {
           playCurrentPlayer()
@@ -627,9 +652,11 @@ export function PlayerScreen({ navigation, device, video, videos }: Props) {
         return
       }
 
-      wasPlayingBeforeBackgroundRef.current = getCurrentPlaying() || isPlaying
-      pauseCurrentPlayer()
-      saveCurrentPosition().catch(() => {})
+      if (previousState === 'active') {
+        wasPlayingBeforeBackgroundRef.current = getCurrentPlaying() || isPlaying
+        pauseCurrentPlayer()
+        saveCurrentPosition().catch(() => {})
+      }
     })
 
     return () => subscription.remove()
@@ -642,6 +669,7 @@ export function PlayerScreen({ navigation, device, video, videos }: Props) {
   }, [])
 
   const stopTranscodePolling = useCallback(() => {
+    transcodeRequestGenerationRef.current += 1
     if (transcodeTimerRef.current) {
       clearInterval(transcodeTimerRef.current)
       transcodeTimerRef.current = null
@@ -732,9 +760,15 @@ export function PlayerScreen({ navigation, device, video, videos }: Props) {
     showGestureHint('已取消转码')
   }, [device, showGestureHint, stopTranscodePolling])
 
-  const pollTranscodeStatus = useCallback(async (videoId: string, quality = 'compatible', qualityLabel = '兼容格式') => {
+  const pollTranscodeStatus = useCallback(async (
+    videoId: string,
+    quality = 'compatible',
+    qualityLabel = '兼容格式',
+    requestGeneration = transcodeRequestGenerationRef.current
+  ) => {
     try {
       const statusResult = await getTranscodeStatus(device, videoId, quality)
+      if (requestGeneration !== transcodeRequestGenerationRef.current) return
       setTranscodeProgress(Math.max(0, Math.min(1, Number(statusResult.progress) || 0)))
       setTranscodeQueuePosition(Number(statusResult.queuePosition) || 0)
       if (statusResult.status === 'ready') {
@@ -748,6 +782,7 @@ export function PlayerScreen({ navigation, device, video, videos }: Props) {
         setStatus('error')
       }
     } catch (transcodeError) {
+      if (requestGeneration !== transcodeRequestGenerationRef.current) return
       stopTranscodePolling()
       setTranscoding(false)
       setTranscodeQueuePosition(0)
@@ -768,9 +803,11 @@ export function PlayerScreen({ navigation, device, video, videos }: Props) {
     setTranscodeQueuePosition(0)
     setControlsVisible(false)
     stopTranscodePolling()
+    const requestGeneration = transcodeRequestGenerationRef.current
 
     try {
       const result = await startTranscode(device, item.id, quality)
+      if (requestGeneration !== transcodeRequestGenerationRef.current) return
       setTranscodeProgress(Math.max(0.02, Math.min(1, Number(result.progress) || 0.02)))
       setTranscodeQueuePosition(Number(result.queuePosition) || 0)
       if (result.status === 'ready') {
@@ -780,11 +817,12 @@ export function PlayerScreen({ navigation, device, video, videos }: Props) {
       if (result.status === 'error') {
         throw new Error(result.error || '转码启动失败')
       }
-      pollTranscodeStatus(item.id, quality, qualityLabel)
+      pollTranscodeStatus(item.id, quality, qualityLabel, requestGeneration)
       transcodeTimerRef.current = setInterval(() => {
-        pollTranscodeStatus(item.id, quality, qualityLabel)
+        pollTranscodeStatus(item.id, quality, qualityLabel, requestGeneration)
       }, 1200)
     } catch (transcodeError) {
+      if (requestGeneration !== transcodeRequestGenerationRef.current) return
       setTranscoding(false)
       setTranscodeQueuePosition(0)
       setError(transcodeError instanceof Error ? transcodeError.message : '转码启动失败')
@@ -954,6 +992,15 @@ export function PlayerScreen({ navigation, device, video, videos }: Props) {
           group: mergedTags[0] || activeVideo.group
         }
       }))
+      emitVideoLibraryUpdate({
+        deviceId: device.id,
+        videoId: activeVideo.id,
+        patch: {
+          customTags,
+          tags: mergedTags,
+          group: mergedTags[0] || activeVideo.group
+        }
+      })
       setTagSheetVisible(false)
       showGestureHint(customTags.length > 0 ? '标签已保存' : '自定义标签已清空')
     } catch (tagError) {
@@ -1084,6 +1131,7 @@ export function PlayerScreen({ navigation, device, video, videos }: Props) {
               groupLine={groupLine}
               detailLine={detailLine}
               landscapeMode={fullscreenMode}
+              safeAreaInsets={safeAreaInsets}
               onBack={handleBack}
               onRetry={handleRetry}
               onTogglePlayback={togglePlayback}
@@ -1094,7 +1142,7 @@ export function PlayerScreen({ navigation, device, video, videos }: Props) {
                 setControlsVisible(false)
               }}
               onAnalysis={handleOpenAnalysis}
-              onCache={handleTranscode}
+              onCache={() => handleTranscode()}
               onDesktopPlay={handleDesktopPlay}
               onMore={() => {
                 setMoreSheetVisible(true)
@@ -1102,7 +1150,7 @@ export function PlayerScreen({ navigation, device, video, videos }: Props) {
               }}
               onFullscreen={toggleFullscreen}
               onControlsInteract={showControls}
-              onTranscode={handleTranscode}
+              onTranscode={() => handleTranscode()}
               onCancelTranscode={handleCancelTranscode}
               onErrorDetails={() => showGestureHint(error || '暂无更多详情', 1600)}
             />
@@ -1207,6 +1255,7 @@ export function PlayerScreen({ navigation, device, video, videos }: Props) {
     player,
     playerBackgroundMode,
     selectedQuality,
+    safeAreaInsets,
     showControls,
     showGestureHint,
     speedBoostMode,

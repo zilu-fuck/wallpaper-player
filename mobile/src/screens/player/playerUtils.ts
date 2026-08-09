@@ -1,6 +1,6 @@
 import { resolveRemoteUrl } from '../../services/api'
 import type { StoredDevice, VideoItem } from '../../types'
-import { formatBytes } from '../../utils/url'
+import { formatBytes, formatTime } from '../../utils/url'
 
 export function appendRetryParam(url: string, retryKey: number) {
   if (!retryKey) return url
@@ -26,16 +26,7 @@ export function clamp(value: number, min: number, max: number) {
   return Math.min(max, Math.max(min, value))
 }
 
-export function formatTime(seconds: number) {
-  const safe = Math.max(0, Math.floor(Number(seconds) || 0))
-  const hours = Math.floor(safe / 3600)
-  const minutes = Math.floor((safe % 3600) / 60)
-  const rest = safe % 60
-  if (hours > 0) {
-    return `${hours}:${String(minutes).padStart(2, '0')}:${String(rest).padStart(2, '0')}`
-  }
-  return `${minutes}:${String(rest).padStart(2, '0')}`
-}
+export { formatTime }
 
 export function uniqueText(parts: Array<string | undefined>) {
   const seen = new Set<string>()

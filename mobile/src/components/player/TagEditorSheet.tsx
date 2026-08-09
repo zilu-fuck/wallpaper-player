@@ -1,9 +1,9 @@
 import { Plus, Tag, X } from 'lucide-react-native'
 import { useEffect, useMemo, useState } from 'react'
 import { PanResponder, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { colors } from '../../theme'
 import type { VideoItem } from '../../types'
-import { BOTTOM_SAFE_OFFSET } from '../../screens/player/playerLayout'
 import { getVideoTitle, uniqueText } from '../../screens/player/playerUtils'
 
 type Props = {
@@ -23,6 +23,7 @@ export function TagEditorSheet({
   onClose,
   onSave
 }: Props) {
+  const safeAreaInsets = useSafeAreaInsets()
   const systemTags = useMemo(() => {
     if (video.systemTags?.length) return uniqueText(video.systemTags)
     const customTagSet = new Set(video.customTags || [])
@@ -68,7 +69,11 @@ export function TagEditorSheet({
   return (
     <View style={styles.backdrop}>
       <Pressable style={styles.backdropPress} onPress={onClose} />
-      <View style={styles.sheet} {...panResponder.panHandlers}>
+      <View style={[styles.sheet, {
+        paddingBottom: safeAreaInsets.bottom,
+        paddingLeft: safeAreaInsets.left,
+        paddingRight: safeAreaInsets.right
+      }]} {...panResponder.panHandlers}>
         <View style={styles.handleWrap}>
           <View style={styles.handle} />
         </View>
@@ -171,7 +176,6 @@ const styles = StyleSheet.create({
   },
   sheet: {
     maxHeight: '78%',
-    paddingBottom: BOTTOM_SAFE_OFFSET,
     borderTopLeftRadius: 18,
     borderTopRightRadius: 18,
     backgroundColor: '#f8f9fb',

@@ -2,7 +2,8 @@ import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-nati
 import { ArrowLeft, Play } from 'lucide-react-native'
 import { colors } from '../../theme'
 import type { VideoItem } from '../../types'
-import { BOTTOM_SAFE_OFFSET, HIT_SLOP, TOP_SAFE_OFFSET } from '../../screens/player/playerLayout'
+import type { EdgeInsets } from 'react-native-safe-area-context'
+import { HIT_SLOP } from '../../screens/player/playerLayout'
 import { FavoriteAnimation } from './FavoriteAnimation'
 import { PlaybackProgress } from './PlaybackProgress'
 import { PlayerControls } from './PlayerControls'
@@ -33,6 +34,7 @@ type Props = {
   groupLine: string
   detailLine: string
   landscapeMode: boolean
+  safeAreaInsets: EdgeInsets
   onBack: () => void
   onRetry: () => void
   onTogglePlayback: () => void
@@ -72,6 +74,7 @@ export function VideoOverlay({
   groupLine,
   detailLine,
   landscapeMode,
+  safeAreaInsets,
   onBack,
   onRetry,
   onTogglePlayback,
@@ -88,15 +91,19 @@ export function VideoOverlay({
   onCancelTranscode,
   onErrorDetails
 }: Props) {
-  const infoBottom = BOTTOM_SAFE_OFFSET + (controlsVisible ? 88 : 50)
-  const actionsBottom = BOTTOM_SAFE_OFFSET + (controlsVisible ? 104 : 64)
-  const progressBottom = BOTTOM_SAFE_OFFSET + 7
+  const infoBottom = safeAreaInsets.bottom + (controlsVisible ? 88 : 50)
+  const actionsBottom = safeAreaInsets.bottom + (controlsVisible ? 104 : 64)
+  const progressBottom = safeAreaInsets.bottom + 7
 
   return (
     <View style={styles.overlayLayer} pointerEvents="box-none">
       {(!landscapeMode || controlsVisible) ? (
-        <View style={styles.topOverlay} pointerEvents="box-none">
-          <Pressable style={styles.backButton} onPress={onBack} hitSlop={HIT_SLOP}>
+        <View style={[styles.topOverlay, {
+          top: safeAreaInsets.top + 8,
+          left: safeAreaInsets.left + 12,
+          right: safeAreaInsets.right + 12
+        }]} pointerEvents="box-none">
+          <Pressable accessibilityRole="button" accessibilityLabel="返回" style={styles.backButton} onPress={onBack} hitSlop={HIT_SLOP}>
             <ArrowLeft color={colors.text} size={22} />
           </Pressable>
         </View>
@@ -134,7 +141,7 @@ export function VideoOverlay({
       <FavoriteAnimation visible={heartBurst} />
 
       {speedBoostMode ? (
-        <View style={styles.speedHint} pointerEvents="none">
+        <View style={[styles.speedHint, { top: safeAreaInsets.top + 16 }]} pointerEvents="none">
           <Text style={styles.speedHintText}>{speedBoostMode === 'rewind' ? '2x 快退中' : '2x 快进中'}</Text>
         </View>
       ) : null}
@@ -146,7 +153,7 @@ export function VideoOverlay({
       ) : null}
 
       {networkSlow && status !== 'error' ? (
-        <View style={styles.networkHint} pointerEvents="none">
+        <View style={[styles.networkHint, { left: safeAreaInsets.left + 18, top: safeAreaInsets.top + 66 }]} pointerEvents="none">
           <Text style={styles.networkHintText}>网络较慢，正在缓冲</Text>
         </View>
       ) : null}
@@ -158,6 +165,7 @@ export function VideoOverlay({
           analysisActive={analysisActive}
           networkResource={networkResource}
           bottomOffset={actionsBottom}
+          rightOffset={safeAreaInsets.right + 12}
           onFavorite={onFavorite}
           onTags={onTags}
           onAnalysis={onAnalysis}
@@ -174,11 +182,16 @@ export function VideoOverlay({
           groupLine={groupLine}
           detailLine={detailLine}
           bottomOffset={infoBottom}
+          leftOffset={safeAreaInsets.left + 16}
         />
       ) : null}
 
       {!controlsVisible ? (
-        <View style={[styles.progressArea, { bottom: progressBottom }]} pointerEvents="box-none">
+        <View style={[styles.progressArea, {
+          bottom: progressBottom,
+          left: safeAreaInsets.left + 12,
+          right: safeAreaInsets.right + 12
+        }]} pointerEvents="box-none">
           <PlaybackProgress
             compact
             currentTime={currentTime}
@@ -197,7 +210,8 @@ export function VideoOverlay({
         fullscreenMode={landscapeMode}
         favorite={favorite}
         networkResource={networkResource}
-        bottomOffset={BOTTOM_SAFE_OFFSET + 7}
+        bottomOffset={safeAreaInsets.bottom + 7}
+        safeAreaInsets={safeAreaInsets}
         onTogglePlayback={onTogglePlayback}
         onSeek={onSeek}
         onFavorite={onFavorite}
@@ -223,9 +237,6 @@ const styles = StyleSheet.create({
   },
   topOverlay: {
     position: 'absolute',
-    top: TOP_SAFE_OFFSET + 8,
-    left: 12,
-    right: 12,
     minHeight: 44,
     flexDirection: 'row',
     alignItems: 'center'
@@ -262,7 +273,6 @@ const styles = StyleSheet.create({
   },
   speedHint: {
     position: 'absolute',
-    top: TOP_SAFE_OFFSET + 16,
     alignSelf: 'center',
     minHeight: 34,
     paddingHorizontal: 14,
@@ -295,8 +305,6 @@ const styles = StyleSheet.create({
   },
   networkHint: {
     position: 'absolute',
-    left: 18,
-    top: TOP_SAFE_OFFSET + 66,
     minHeight: 30,
     paddingHorizontal: 12,
     borderRadius: 15,
@@ -309,8 +317,6 @@ const styles = StyleSheet.create({
     fontWeight: '700'
   },
   progressArea: {
-    position: 'absolute',
-    left: 12,
-    right: 12
+    position: 'absolute'
   }
 })

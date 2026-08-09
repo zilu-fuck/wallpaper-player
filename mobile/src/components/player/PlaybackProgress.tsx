@@ -1,6 +1,6 @@
 import { useCallback, useMemo, useState } from 'react'
 import { PanResponder, StyleSheet, Text, View } from 'react-native'
-import type { GestureResponderEvent, LayoutChangeEvent } from 'react-native'
+import type { AccessibilityActionEvent, GestureResponderEvent, LayoutChangeEvent } from 'react-native'
 import { colors } from '../../theme'
 import { clamp, formatTime } from '../../screens/player/playerUtils'
 
@@ -65,6 +65,15 @@ export function PlaybackProgress({
   const previewLeft = width > 0 && duration > 0
     ? clamp(progress * width - 28, 0, Math.max(0, width - 56))
     : 0
+  const handleAccessibilityAction = useCallback((event: AccessibilityActionEvent) => {
+    if (duration <= 0) return
+    const step = Math.max(5, Math.min(30, duration * 0.05))
+    if (event.nativeEvent.actionName === 'increment') {
+      onSeek(clamp(currentTime + step, 0, duration))
+    } else if (event.nativeEvent.actionName === 'decrement') {
+      onSeek(clamp(currentTime - step, 0, duration))
+    }
+  }, [currentTime, duration, onSeek])
 
   return (
     <View style={compact ? styles.compactShell : styles.shell} pointerEvents="box-none">
@@ -79,7 +88,26 @@ export function PlaybackProgress({
           <Text style={styles.timeText}>{duration > 0 ? formatTime(duration) : '--:--'}</Text>
         </View>
       ) : null}
-      <View style={styles.touch} onLayout={handleLayout} {...responder.panHandlers}>
+      <View
+        accessible
+        accessibilityRole="adjustable"
+        accessibilityLabel="播放进度"
+        accessibilityState={{ disabled: duration <= 0 }}
+        accessibilityValue={{
+          min: 0,
+          max: Math.max(0, Math.round(duration)),
+          now: Math.max(0, Math.round(displayTime)),
+          text: `${formatTime(displayTime)} / ${duration > 0 ? formatTime(duration) : '--:--'}`
+        }}
+        accessibilityActions={[
+          { name: 'increment', label: '快进' },
+          { name: 'decrement', label: '快退' }
+        ]}
+        onAccessibilityAction={handleAccessibilityAction}
+        style={styles.touch}
+        onLayout={handleLayout}
+        {...responder.panHandlers}
+      >
         <View style={[styles.track, compact && styles.trackCompact, scrubbing && styles.trackActive]}>
           <View style={[styles.fill, { width: `${progress * 100}%` }]} />
         </View>

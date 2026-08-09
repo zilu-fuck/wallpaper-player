@@ -1,7 +1,7 @@
 import { ApiError, getInfo, measureDownloadSpeed } from './api'
-import { saveDevice } from '../stores/devices'
+import { saveDevice } from '../persistence/devices'
 import type { StoredDevice } from '../types'
-import { normalizeEndpoint } from '../utils/url'
+import { normalizeEndpoint, uniqueEndpoints } from '../utils/url'
 
 type ConnectionProgress = {
   progress: number
@@ -15,19 +15,6 @@ export type DeviceAvailability = {
   state: 'online' | 'offline' | 'unauthorized' | 'mismatch'
   text: string
   endpoint?: string
-}
-
-function uniqueEndpoints(...groups: Array<string | string[] | undefined>) {
-  const seen = new Set<string>()
-  return groups
-    .flatMap(group => Array.isArray(group) ? group : [group])
-    .filter((value): value is string => Boolean(value?.trim()))
-    .map(value => normalizeEndpoint(value))
-    .filter(value => {
-      if (!value || seen.has(value)) return false
-      seen.add(value)
-      return true
-    })
 }
 
 function isAuthError(error: unknown) {

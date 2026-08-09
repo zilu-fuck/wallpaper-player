@@ -92,6 +92,13 @@ export type LibraryResponse = {
   }
   favoriteCount?: number
   hiddenTagCount?: number
+  pagination?: {
+    offset: number
+    limit: number
+    total: number
+    returned: number
+    hasMore: boolean
+  }
   scannedAt?: number
   indexed?: boolean
   refreshing?: boolean

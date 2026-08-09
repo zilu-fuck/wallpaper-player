@@ -41,11 +41,12 @@ import { PrimaryButton } from '../components/PrimaryButton'
 import { VideoCard } from '../components/VideoCard'
 import { addTagsToVideos, ApiError, getLibrary, restoreHiddenTags, toggleFavorite } from '../services/api'
 import { testConnection } from '../services/connection-manager'
-import { loadCachedLibrary, saveLibraryResponse } from '../stores/library'
+import { subscribeToVideoLibraryUpdates } from '../services/library-events'
+import { loadCachedLibrary, saveLibraryResponse } from '../persistence/library'
 import { useTheme } from '../theme-context'
 import type { ThemeMode } from '../theme'
 import type { CategorySummary, DirectorySummary, LibraryResponse, StoredDevice, VideoItem } from '../types'
-import { safeSearchText } from '../utils/url'
+import { safeSearchText, uniqueTags } from '../utils/url'
 
 type Props = {
   navigation: NavigationContext
@@ -73,6 +74,12 @@ type TagFilter = {
   type: 'custom' | 'system'
   name: string
   state: 'include' | 'exclude'
+}
+
+type VideoSearchIndexEntry = {
+  searchText: string
+  customTagKeys: Set<string>
+  systemTagKeys: Set<string>
 }
 
 const GRID_COLUMNS = 2
@@ -176,21 +183,6 @@ function getTagKey(value: string) {
   return value.trim().toLocaleLowerCase()
 }
 
-function uniqueTags(tags: string[]) {
-  const seen = new Set<string>()
-  const result: string[] = []
-
-  for (const value of tags) {
-    const tag = String(value || '').trim()
-    const key = getTagKey(tag)
-    if (!tag || seen.has(key)) continue
-    seen.add(key)
-    result.push(tag)
-  }
-
-  return result
-}
-
 function normalizeTagText(value: string) {
   return uniqueTags(value.split(/[,，\s]+/))
 }
@@ -201,9 +193,30 @@ function videoMatchesTagFilter(video: VideoItem, filter: TagFilter) {
   return systemTags.includes(filter.name)
 }
 
+function createVideoSearchIndex(items: VideoItem[]) {
+  const index = new Map<string, VideoSearchIndexEntry>()
+  for (const item of items) {
+    const systemTags = item.systemTags?.length ? item.systemTags : item.tags || []
+    index.set(item.id, {
+      searchText: getVideoSearchText(item),
+      customTagKeys: new Set((item.customTags || []).map(getTagKey)),
+      systemTagKeys: new Set(systemTags.map(getTagKey))
+    })
+  }
+  return index
+}
+
+function videoMatchesIndexedTagFilter(video: VideoItem, filter: TagFilter, entry?: VideoSearchIndexEntry) {
+  if (!entry) return videoMatchesTagFilter(video, filter)
+  const key = getTagKey(filter.name)
+  return filter.type === 'custom'
+    ? entry.customTagKeys.has(key)
+    : entry.systemTagKeys.has(key)
+}
+
 export function LibraryScreen({ navigation, device }: Props) {
   const { colors, themeMode, setThemeMode } = useTheme()
-  const styles = createStyles(colors)
+  const styles = useMemo(() => createStyles(colors), [colors])
   const [activeDevice, setActiveDevice] = useState(device)
   const activeDeviceRef = useRef(device)
   const readyRef = useRef(false)
@@ -298,6 +311,7 @@ export function LibraryScreen({ navigation, device }: Props) {
 
   const load = useCallback(async (useCache = true) => {
     const isInitialLoad = !readyRef.current
+    let usingCachedLibrary = false
     const requestId = libraryRequestRef.current + 1
     libraryRequestRef.current = requestId
     clearLibraryRefreshTimer()
@@ -313,19 +327,24 @@ export function LibraryScreen({ navigation, device }: Props) {
       })
     }
 
-    if (useCache && !isInitialLoad) {
-      const cached = await loadCachedLibrary(activeDeviceRef.current.id)
-      if (cached?.items.length) {
+    if (useCache) {
+      const cached = await loadCachedLibrary(activeDeviceRef.current.id).catch(() => null)
+      if (requestId !== libraryRequestRef.current) return
+      if (cached) {
         applyLibrary(cached)
+        setReady(true)
         setLoading(false)
+        usingCachedLibrary = true
       }
     }
 
+    const showConnectionGate = isInitialLoad && !usingCachedLibrary
+
     try {
-      const connectedDevice = await testConnection(activeDeviceRef.current, isInitialLoad ? setConnectionGate : undefined)
+      const connectedDevice = await testConnection(activeDeviceRef.current, showConnectionGate ? setConnectionGate : undefined)
       setActiveDevice(connectedDevice)
       setOnline(true)
-      if (isInitialLoad) {
+      if (showConnectionGate) {
         setConnectionGate({
           progress: 0.76,
           title: '正在同步视频库',
@@ -334,7 +353,7 @@ export function LibraryScreen({ navigation, device }: Props) {
       }
       const response = await getLibrary(connectedDevice)
       if (requestId !== libraryRequestRef.current) return
-      if (isInitialLoad) {
+      if (showConnectionGate) {
         setConnectionGate({
           progress: 0.92,
           title: '正在准备界面',
@@ -370,10 +389,10 @@ export function LibraryScreen({ navigation, device }: Props) {
         err.code === 'device_mismatch' ||
         err.code === 'legacy_token_disabled'
       ))
-      if (shouldReconnect && !isInitialLoad) {
+      if (shouldReconnect && (!isInitialLoad || usingCachedLibrary)) {
         scheduleReconnect(message)
       }
-      if (isInitialLoad) {
+      if (showConnectionGate) {
         setConnectionGate({
           progress: 1,
           title: '连接失败',
@@ -402,11 +421,31 @@ export function LibraryScreen({ navigation, device }: Props) {
     clearLibraryRefreshTimer()
   }, [clearLibraryRefreshTimer, clearReconnectTimer])
 
+  useEffect(() => subscribeToVideoLibraryUpdates((update) => {
+    if (update.deviceId !== activeDevice.id) return
+    setLibrary(current => {
+      let changed = false
+      const items = current.items.map(item => {
+        if (item.id !== update.videoId) return item
+        changed = true
+        return { ...item, ...update.patch }
+      })
+      if (!changed) return current
+      return {
+        ...current,
+        items,
+        favoriteCount: favoriteCount(items),
+        categoryGroups: inferCategoryGroups(items)
+      }
+    })
+  }), [activeDevice.id])
+
   const videos = library.items
   const directories = library.directories || []
   const categoryGroups = library.categoryGroups || EMPTY_GROUPS
   const totalCount = library.count || videos.length
   const currentFavoriteCount = library.favoriteCount ?? favoriteCount(videos)
+  const videoSearchIndex = useMemo(() => createVideoSearchIndex(videos), [videos])
 
   const filteredVideos = useMemo(() => {
     const keyword = query.trim().toLowerCase()
@@ -416,16 +455,16 @@ export function LibraryScreen({ navigation, device }: Props) {
       if (selection.mode === 'favorites') return Boolean(video.favorite)
       if (selection.mode === 'directory') return video.directoryId === selection.id
       // 包含：AND 交集；排除：并集排除（命中任一即隐藏）
-      return includeFilters.every(filter => videoMatchesTagFilter(video, filter)) &&
-        excludeFilters.every(filter => !videoMatchesTagFilter(video, filter))
+      return includeFilters.every(filter => videoMatchesIndexedTagFilter(video, filter, videoSearchIndex.get(video.id))) &&
+        excludeFilters.every(filter => !videoMatchesIndexedTagFilter(video, filter, videoSearchIndex.get(video.id)))
     })
 
     const searched = keyword
-      ? scoped.filter(video => getVideoSearchText(video).includes(keyword))
+      ? scoped.filter(video => (videoSearchIndex.get(video.id)?.searchText || getVideoSearchText(video)).includes(keyword))
       : scoped
 
     return sortVideos(searched, sortBy)
-  }, [query, selection, sortBy, tagFilters, videos])
+  }, [query, selection, sortBy, tagFilters, videoSearchIndex, videos])
 
   const subtitle = useMemo(() => {
     if (loading) return '正在读取视频库'
@@ -804,7 +843,7 @@ export function LibraryScreen({ navigation, device }: Props) {
       </View>
 
       {selection.mode === 'settings' ? (
-        <View style={styles.settingsPanel}>
+        <ScrollView style={styles.settingsScroll} contentContainerStyle={styles.settingsPanel}>
           <Text style={styles.settingsTitle}>手机访问设置</Text>
           <View style={styles.settingGroup}>
             <Text style={styles.settingLabel}>外观主题</Text>
@@ -833,7 +872,7 @@ export function LibraryScreen({ navigation, device }: Props) {
             icon={<Grid2x2 color={colors.onAccent} size={20} />}
             onPress={selectAll}
           />
-        </View>
+        </ScrollView>
       ) : loading && videos.length === 0 ? (
         <View style={styles.center}>
           <ActivityIndicator color={colors.accent} />
@@ -841,37 +880,14 @@ export function LibraryScreen({ navigation, device }: Props) {
         </View>
       ) : (
         <>
-          <View style={styles.sortBar}>
-            {sortOptions.map(option => (
-              <Pressable
-                key={option.key}
-                style={[styles.sortChip, visibleSortBy === option.key && styles.sortChipActive]}
-                onPress={() => handleSortSelect(option.key)}
-              >
-                {option.icon}
-                <Text style={[styles.sortChipText, visibleSortBy === option.key && styles.sortChipTextActive]}>
-                  {option.label}
-                </Text>
-              </Pressable>
-            ))}
-          </View>
-          {tagFilters.length ? (
-            <View style={styles.filterBar}>
-              <Text style={styles.filterBarText} numberOfLines={1}>
-                {(() => {
-                  const inc = tagFilters.filter(f => f.state === 'include')
-                  const exc = tagFilters.filter(f => f.state === 'exclude')
-                  const parts: string[] = []
-                  if (inc.length) parts.push(`包含 ${inc.length}`)
-                  if (exc.length) parts.push(`排除 ${exc.length}`)
-                  return parts.join('，')
-                })()}
-              </Text>
-              <Pressable style={styles.filterClearButton} onPress={clearTagFilters}>
-                <Text style={styles.filterClearText}>清空</Text>
-              </Pressable>
-            </View>
-          ) : null}
+          <SortFilterBar
+            styles={styles}
+            sortOptions={sortOptions}
+            visibleSortBy={visibleSortBy}
+            tagFilters={tagFilters}
+            onSortSelect={handleSortSelect}
+            onClearTagFilters={clearTagFilters}
+          />
           <FlatList
             key="library-grid"
             data={filteredVideos}
@@ -911,16 +927,13 @@ export function LibraryScreen({ navigation, device }: Props) {
       )}
 
       {selectionModeActive ? (
-        <View style={styles.bulkBar}>
-          <Text style={styles.bulkText}>已选择 {selectedVideoIds.length} 个视频</Text>
-          <Pressable style={styles.bulkButton} onPress={openBulkTagSheet}>
-            <Tag color={colors.onAccent} size={17} />
-            <Text style={styles.bulkButtonText}>添加标签</Text>
-          </Pressable>
-          <Pressable style={[styles.bulkButton, styles.bulkButtonSecondary]} onPress={clearVideoSelection}>
-            <Text style={[styles.bulkButtonText, styles.bulkButtonSecondaryText]}>取消</Text>
-          </Pressable>
-        </View>
+        <BulkSelectionBar
+          styles={styles}
+          colors={colors}
+          selectedCount={selectedVideoIds.length}
+          onOpenBulkTagSheet={openBulkTagSheet}
+          onClearVideoSelection={clearVideoSelection}
+        />
       ) : null}
 
       {bulkTagOpen ? (
@@ -1022,45 +1035,16 @@ export function LibraryScreen({ navigation, device }: Props) {
       ) : null}
 
       {restoreHiddenOpen ? (
-        <KeyboardAvoidingView
-          style={styles.bulkSheetAvoider}
-          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-          pointerEvents="box-none"
-        >
-          <Pressable style={styles.bulkSheetScrim} onPress={() => setRestoreHiddenOpen(false)} />
-          <View style={styles.bulkSheet}>
-            <View style={styles.bulkSheetHeader}>
-              <Text style={styles.bulkSheetTitle}>还原隐藏标签</Text>
-              <Pressable style={styles.drawerClose} onPress={() => setRestoreHiddenOpen(false)}>
-                <X color={colors.text} size={20} />
-              </Pressable>
-            </View>
-            <View style={styles.bulkSheetScrollContent}>
-              <Text style={styles.bulkSheetHint}>
-                验证隐私密码后，将还原电脑端所有被隐藏的标签。
-              </Text>
-              <TextInput
-                value={restorePassword}
-                onChangeText={setRestorePassword}
-                placeholder="请输入隐私密码"
-                placeholderTextColor={colors.subtle}
-                style={styles.bulkInput}
-                secureTextEntry
-                returnKeyType="done"
-                onSubmitEditing={submitRestoreHiddenTags}
-              />
-              {restoreError ? <Text style={styles.restoreErrorText}>{restoreError}</Text> : null}
-            </View>
-            <Pressable
-              style={[styles.bulkSaveButton, (!restorePassword || restoreSubmitting) && styles.updateButtonDisabled]}
-              onPress={submitRestoreHiddenTags}
-              disabled={!restorePassword || restoreSubmitting}
-            >
-              {restoreSubmitting ? <ActivityIndicator color={colors.onAccent} size="small" /> : null}
-              <Text style={styles.bulkSaveButtonText}>{restoreSubmitting ? '还原中...' : '还原隐藏标签'}</Text>
-            </Pressable>
-          </View>
-        </KeyboardAvoidingView>
+        <RestoreHiddenSheet
+          styles={styles}
+          colors={colors}
+          password={restorePassword}
+          submitting={restoreSubmitting}
+          error={restoreError}
+          onPasswordChange={setRestorePassword}
+          onClose={() => setRestoreHiddenOpen(false)}
+          onSubmit={submitRestoreHiddenTags}
+        />
       ) : null}
 
       {drawerOpen ? (
@@ -1186,6 +1170,155 @@ type DrawerSectionProps = {
   title: string
   headerAction?: ReactNode
   children: ReactNode
+}
+
+type SortOption = { key: SortKey, label: string, icon: ReactNode }
+
+type SortFilterBarProps = {
+  styles: ReturnType<typeof createStyles>
+  sortOptions: SortOption[]
+  visibleSortBy: SortKey
+  tagFilters: TagFilter[]
+  onSortSelect: (key: SortKey) => void
+  onClearTagFilters: () => void
+}
+
+type BulkSelectionBarProps = {
+  styles: ReturnType<typeof createStyles>
+  colors: ReturnType<typeof useTheme>['colors']
+  selectedCount: number
+  onOpenBulkTagSheet: () => void
+  onClearVideoSelection: () => void
+}
+
+type RestoreHiddenSheetProps = {
+  styles: ReturnType<typeof createStyles>
+  colors: ReturnType<typeof useTheme>['colors']
+  password: string
+  submitting: boolean
+  error: string
+  onPasswordChange: (value: string) => void
+  onClose: () => void
+  onSubmit: () => void
+}
+
+function getTagFilterSummary(tagFilters: TagFilter[]) {
+  const included = tagFilters.filter(filter => filter.state === 'include').length
+  const excluded = tagFilters.filter(filter => filter.state === 'exclude').length
+  return [
+    included ? `包含 ${included}` : '',
+    excluded ? `排除 ${excluded}` : ''
+  ].filter(Boolean).join('，')
+}
+
+function SortFilterBar({
+  styles,
+  sortOptions,
+  visibleSortBy,
+  tagFilters,
+  onSortSelect,
+  onClearTagFilters
+}: SortFilterBarProps) {
+  return (
+    <>
+      <View style={styles.sortBar}>
+        {sortOptions.map(option => (
+          <Pressable
+            key={option.key}
+            style={[styles.sortChip, visibleSortBy === option.key && styles.sortChipActive]}
+            onPress={() => onSortSelect(option.key)}
+          >
+            {option.icon}
+            <Text style={[styles.sortChipText, visibleSortBy === option.key && styles.sortChipTextActive]}>
+              {option.label}
+            </Text>
+          </Pressable>
+        ))}
+      </View>
+      {tagFilters.length ? (
+        <View style={styles.filterBar}>
+          <Text style={styles.filterBarText} numberOfLines={1}>{getTagFilterSummary(tagFilters)}</Text>
+          <Pressable style={styles.filterClearButton} onPress={onClearTagFilters}>
+            <Text style={styles.filterClearText}>清空</Text>
+          </Pressable>
+        </View>
+      ) : null}
+    </>
+  )
+}
+
+function BulkSelectionBar({
+  styles,
+  colors,
+  selectedCount,
+  onOpenBulkTagSheet,
+  onClearVideoSelection
+}: BulkSelectionBarProps) {
+  return (
+    <View style={styles.bulkBar}>
+      <Text style={styles.bulkText}>已选择 {selectedCount} 个视频</Text>
+      <Pressable style={styles.bulkButton} onPress={onOpenBulkTagSheet}>
+        <Tag color={colors.onAccent} size={17} />
+        <Text style={styles.bulkButtonText}>添加标签</Text>
+      </Pressable>
+      <Pressable style={[styles.bulkButton, styles.bulkButtonSecondary]} onPress={onClearVideoSelection}>
+        <Text style={[styles.bulkButtonText, styles.bulkButtonSecondaryText]}>取消</Text>
+      </Pressable>
+    </View>
+  )
+}
+
+function RestoreHiddenSheet({
+  styles,
+  colors,
+  password,
+  submitting,
+  error,
+  onPasswordChange,
+  onClose,
+  onSubmit
+}: RestoreHiddenSheetProps) {
+  return (
+    <KeyboardAvoidingView
+      style={styles.bulkSheetAvoider}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      pointerEvents="box-none"
+    >
+      <Pressable style={styles.bulkSheetScrim} onPress={onClose} />
+      <View style={styles.bulkSheet}>
+        <View style={styles.bulkSheetHeader}>
+          <Text style={styles.bulkSheetTitle}>还原隐藏标签</Text>
+          <Pressable style={styles.drawerClose} onPress={onClose}>
+            <X color={colors.text} size={20} />
+          </Pressable>
+        </View>
+        <View style={styles.bulkSheetScrollContent}>
+          <Text style={styles.bulkSheetHint}>
+            验证隐私密码后，将还原电脑端所有被隐藏的标签。
+          </Text>
+          <TextInput
+            value={password}
+            onChangeText={onPasswordChange}
+            placeholder="请输入隐私密码"
+            placeholderTextColor={colors.subtle}
+            style={styles.bulkInput}
+            secureTextEntry
+            returnKeyType="done"
+            onSubmitEditing={onSubmit}
+          />
+          {error ? <Text style={styles.restoreErrorText}>{error}</Text> : null}
+        </View>
+        <Pressable
+          style={[styles.bulkSaveButton, (!password || submitting) && styles.updateButtonDisabled]}
+          onPress={onSubmit}
+          disabled={!password || submitting}
+        >
+          {submitting ? <ActivityIndicator color={colors.onAccent} size="small" /> : null}
+          <Text style={styles.bulkSaveButtonText}>{submitting ? '还原中...' : '还原隐藏标签'}</Text>
+        </Pressable>
+      </View>
+    </KeyboardAvoidingView>
+  )
 }
 
 function DrawerSection({ title, headerAction, children }: DrawerSectionProps) {
@@ -1558,9 +1691,13 @@ const createStyles = (colors: ReturnType<typeof useTheme>['colors']) => StyleShe
     textAlign: 'center',
     paddingTop: 6
   },
-  settingsPanel: {
+  settingsScroll: {
     flex: 1,
+  },
+  settingsPanel: {
+    flexGrow: 1,
     padding: 20,
+    paddingBottom: 28,
     gap: 12
   },
   settingGroup: {

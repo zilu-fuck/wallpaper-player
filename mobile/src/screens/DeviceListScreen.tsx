@@ -7,7 +7,7 @@ import { MobileUpdateCard } from '../components/MobileUpdateCard'
 import { PrimaryButton } from '../components/PrimaryButton'
 import { unpairCurrentDevice } from '../services/api'
 import { checkDeviceAvailability, type DeviceAvailability } from '../services/connection-manager'
-import { removeDevice } from '../stores/devices'
+import { removeDevice } from '../persistence/devices'
 import type { StoredDevice } from '../types'
 import { useTheme } from '../theme-context'
 

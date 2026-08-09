@@ -3,7 +3,7 @@
     "name": "Wallpaper Player",
     "slug": "wallpaper-player-mobile",
     "version": "0.1.4",
-    "orientation": "portrait",
+    "orientation": "default",
     "userInterfaceStyle": "dark",
     "assetBundlePatterns": [
       "**/*"

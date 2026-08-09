@@ -1,4 +1,5 @@
 const LATEST_RELEASE_URL = 'https://api.github.com/repos/zilu-fuck/wallpaper-player/releases/latest'
+const UPDATE_FETCH_TIMEOUT_MS = 15000
 
 export type MobileUpdateInfo = {
   available: boolean
@@ -70,11 +71,24 @@ function findMobileReleaseAsset(release: GitHubRelease): MobileReleaseAsset | nu
 }
 
 export async function checkMobileUpdate(currentVersion: string): Promise<MobileUpdateInfo> {
-  const response = await fetch(LATEST_RELEASE_URL, {
-    headers: {
-      Accept: 'application/vnd.github+json'
+  const controller = new AbortController()
+  const timeoutTimer = setTimeout(() => controller.abort(), UPDATE_FETCH_TIMEOUT_MS)
+  let response: Response
+  try {
+    response = await fetch(LATEST_RELEASE_URL, {
+      headers: {
+        Accept: 'application/vnd.github+json'
+      },
+      signal: controller.signal
+    })
+  } catch (error) {
+    if (error instanceof Error && error.name === 'AbortError') {
+      throw new Error('检查更新超时，请稍后再试')
     }
-  })
+    throw error
+  } finally {
+    clearTimeout(timeoutTimer)
+  }
 
   if (!response.ok) {
     throw new Error(`检查更新失败: ${response.status}`)
@@ -83,7 +97,7 @@ export async function checkMobileUpdate(currentVersion: string): Promise<MobileU
   const release = await response.json() as GitHubRelease
   const mobileAsset = findMobileReleaseAsset(release)
   if (!mobileAsset) {
-    throw new Error('没有找到手机端安装包')
+    throw new Error('当前发布尚未提供手机端安装包，请等待后续发布或手动安装 APK')
   }
   const latestVersion = mobileAsset.version
 

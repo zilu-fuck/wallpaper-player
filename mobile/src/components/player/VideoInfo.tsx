@@ -10,11 +10,12 @@ type Props = {
   groupLine: string
   detailLine: string
   bottomOffset: number
+  leftOffset: number
 }
 
-export function VideoInfo({ video, favorite, groupLine, detailLine, bottomOffset }: Props) {
+export function VideoInfo({ video, favorite, groupLine, detailLine, bottomOffset, leftOffset }: Props) {
   return (
-    <View style={[styles.infoBlock, { bottom: bottomOffset }]} pointerEvents="none">
+    <View style={[styles.infoBlock, { bottom: bottomOffset, left: leftOffset }]} pointerEvents="none">
       <View style={styles.titleRow}>
         <Text style={styles.videoTitle} numberOfLines={2}>{getVideoTitle(video)}</Text>
         {favorite ? <Heart color={colors.danger} fill={colors.danger} size={15} /> : null}
@@ -28,7 +29,6 @@ export function VideoInfo({ video, favorite, groupLine, detailLine, bottomOffset
 const styles = StyleSheet.create({
   infoBlock: {
     position: 'absolute',
-    left: 16,
     width: '70%',
     paddingRight: 10,
     gap: 4

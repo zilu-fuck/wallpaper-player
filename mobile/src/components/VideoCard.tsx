@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { Image, Pressable, StyleSheet, Text, View } from 'react-native'
 import type { StoredDevice, VideoItem } from '../types'
 import { useTheme } from '../theme-context'
-import { formatBytes } from '../utils/url'
+import { formatBytes, withQueryToken } from '../utils/url'
 import { resolveRemoteUrl } from '../services/api'
 
 type Props = {
@@ -16,11 +16,6 @@ type Props = {
   selected?: boolean
   selectionMode?: boolean
   width?: number
-}
-
-function withQueryToken(url: string, key: string, token: string) {
-  const separator = url.includes('?') ? '&' : '?'
-  return `${url}${separator}${key}=${encodeURIComponent(token)}`
 }
 
 function formatDuration(seconds?: number) {
@@ -61,7 +56,7 @@ function VideoCardComponent({
   width
 }: Props) {
   const { colors } = useTheme()
-  const styles = createStyles(colors)
+  const styles = useMemo(() => createStyles(colors), [colors])
   const thumbnailUrl = useMemo(
     () => withQueryToken(
       resolveRemoteUrl(device, video.thumbnailUrl),

@@ -7,6 +7,9 @@ type RequestOptions = {
   body?: unknown
   token?: string
   timeoutMs?: number
+  signal?: AbortSignal
+  /** 返回原始字节而非 JSON 解析结果 */
+  raw?: boolean
 }
 
 export class ApiError extends Error {
@@ -27,13 +30,16 @@ function isAbortError(error: unknown) {
 
 async function requestJson<T>(endpoint: string, path: string, options: RequestOptions = {}): Promise<T> {
   const controller = new AbortController()
+  const abortRequest = () => controller.abort()
+  if (options.signal?.aborted) controller.abort()
+  options.signal?.addEventListener('abort', abortRequest, { once: true })
   const timeout = setTimeout(() => controller.abort(), options.timeoutMs ?? 10000)
 
   try {
     const response = await fetch(joinUrl(endpoint, path), {
       method: options.method ?? 'GET',
       headers: {
-        Accept: 'application/json',
+        Accept: options.raw ? 'application/octet-stream' : 'application/json',
         ...(options.body == null ? {} : { 'Content-Type': 'application/json' }),
         ...(options.token ? { Authorization: `Bearer ${options.token}` } : {})
       },
@@ -41,17 +47,33 @@ async function requestJson<T>(endpoint: string, path: string, options: RequestOp
       signal: controller.signal
     })
 
-    const text = await response.text()
-    const data = text ? JSON.parse(text) : null
-
     if (!response.ok) {
-      const error = data?.error
+      const text = await response.text().catch(() => '')
+      let errorData: { error?: { message?: string, code?: string } } | null = null
+      try {
+        errorData = text ? JSON.parse(text) : null
+      } catch {
+        errorData = null
+      }
+      const error = errorData?.error
       throw new ApiError(error?.message || `请求失败: ${response.status}`, response.status, error?.code)
     }
+
+    if (options.raw) {
+      return (await response.arrayBuffer()) as T
+    }
+
+    const text = await response.text()
+    const data = text ? JSON.parse(text) : null
 
     return data as T
   } catch (error) {
     if (error instanceof ApiError) throw error
+    if (options.signal?.aborted) {
+      const abortError = new Error('请求已取消')
+      abortError.name = 'AbortError'
+      throw abortError
+    }
     if (isAbortError(error)) {
       throw new ApiError('连接超时', 408, 'timeout')
     }
@@ -62,13 +84,15 @@ async function requestJson<T>(endpoint: string, path: string, options: RequestOp
     throw new ApiError(message || '网络请求失败', 0, 'network_error')
   } finally {
     clearTimeout(timeout)
+    options.signal?.removeEventListener('abort', abortRequest)
   }
 }
 
 export async function claimPairing(
   endpoint: string,
   payload: PairingPayload,
-  client: { clientId: string, clientName?: string } = { clientId: '' }
+  client: { clientId: string, clientName?: string } = { clientId: '' },
+  signal?: AbortSignal
 ) {
   return requestJson<{
     status?: 'pending' | 'approved'
@@ -83,6 +107,7 @@ export async function claimPairing(
   }>(endpoint, '/v1/pairing/claim', {
     method: 'POST',
     timeoutMs: 8000,
+    signal,
     body: {
       pairingId: payload.pairingId,
       oneTimeSecret: payload.oneTimeSecret,
@@ -103,32 +128,13 @@ export async function getInfo(endpoint: string) {
 }
 
 export async function measureDownloadSpeed(endpoint: string, token: string, bytes = 1024 * 1024) {
-  const controller = new AbortController()
-  const timeout = setTimeout(() => controller.abort(), 6000)
   const startedAt = Date.now()
-
   try {
-    const response = await fetch(joinUrl(endpoint, `/v1/speed-test?bytes=${encodeURIComponent(String(bytes))}`), {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        Accept: 'application/octet-stream'
-      },
-      signal: controller.signal
+    const body = await requestJson<ArrayBuffer>(endpoint, `/v1/speed-test?bytes=${encodeURIComponent(String(bytes))}`, {
+      token,
+      timeoutMs: 6000,
+      raw: true
     })
-
-    if (!response.ok) {
-      const text = await response.text().catch(() => '')
-      let data: { error?: { message?: string, code?: string } } | null = null
-      try {
-        data = text ? JSON.parse(text) : null
-      } catch {
-        data = null
-      }
-      const error = data?.error
-      throw new ApiError(error?.message || `测速失败: ${response.status}`, response.status, error?.code)
-    }
-
-    const body = await response.arrayBuffer()
     const elapsedMs = Math.max(Date.now() - startedAt, 1)
     const receivedBytes = body.byteLength || bytes
     return {
@@ -138,12 +144,7 @@ export async function measureDownloadSpeed(endpoint: string, token: string, byte
     }
   } catch (error) {
     if (error instanceof ApiError) throw error
-    if (isAbortError(error)) {
-      throw new ApiError('测速超时', 408, 'timeout')
-    }
     throw new ApiError('测速失败', 0, 'network_error')
-  } finally {
-    clearTimeout(timeout)
   }
 }
 
