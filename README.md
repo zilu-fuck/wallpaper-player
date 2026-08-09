@@ -140,6 +140,8 @@ npm run verify:mobile-lan
 npm run verify:remote-library
 npm run verify:video-metadata
 npm run verify:remote-pressure
+npm run verify:electron-api
+npm run verify:vendor
 npm run verify:plugins
 npm run verify:plugin-official
 npm run verify:plugin-video

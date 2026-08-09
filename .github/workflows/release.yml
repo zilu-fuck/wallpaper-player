@@ -5,13 +5,60 @@ on:
     tags:
       - "v*"
   workflow_dispatch:
+    inputs:
+      publish-mobile-apk:
+        description: "Also build and publish the Android APK (requires Expo prebuild + Gradle on the runner)"
+        type: boolean
+        required: false
+        default: false
 
 permissions:
   contents: write
 
 jobs:
+  verify:
+    name: Verification gate
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install root dependencies
+        run: npm ci
+
+      - name: Build desktop frontend
+        run: npm run build
+
+      - name: Verify remote identity
+        run: npm run verify:remote-mobile
+
+      - name: Verify remote settings
+        run: npm run verify:remote-settings
+
+      - name: Verify direct startup
+        run: npm run verify:startup
+
+      - name: Verify plugin registry
+        run: npm run verify:plugins
+
+      - name: Install mobile dependencies
+        working-directory: mobile
+        run: npm ci
+
+      - name: Mobile typecheck
+        working-directory: mobile
+        run: npm run typecheck
+
   release:
     runs-on: windows-latest
+    needs: verify
 
     steps:
       - name: Checkout
@@ -71,6 +118,11 @@ jobs:
             }
             (Resolve-Path -LiteralPath $assetPath).Path
           }
+          $pluginAssetPaths = @(Get-ChildItem -LiteralPath "release/plugins" -Filter "*.zip" -File | ForEach-Object { $_.FullName })
+          if ($pluginAssetPaths.Count -eq 0) {
+            throw "Missing release plugin assets: release/plugins/*.zip"
+          }
+          $assetPaths = @($assetPaths) + $pluginAssetPaths
 
           gh release view $tag --repo $repository *> $null
           if ($LASTEXITCODE -eq 0) {
@@ -78,4 +130,60 @@ jobs:
             Invoke-Gh release edit $tag --repo $repository --title $title @notesArgs --draft=false --prerelease=false --latest
           } else {
             Invoke-Gh release create $tag @assetPaths --repo $repository --title $title @notesArgs --latest
+          }
+
+  build-mobile-apk:
+    name: Build and publish Android APK
+    runs-on: windows-latest
+    needs: release
+    if: ${{ github.event.inputs.publish-mobile-apk == 'true' }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Setup JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Install mobile dependencies
+        working-directory: mobile
+        run: npm ci
+
+      - name: Prebuild Android project
+        working-directory: mobile
+        env:
+          CI: "1"
+        run: npx expo prebuild --platform android
+
+      - name: Build release APK
+        working-directory: mobile/android
+        env:
+          ANDROID_HOME: 'C:\Program Files (x86)\Android\android-sdk'
+        run: ./gradlew assembleRelease --no-daemon
+
+      - name: Publish APK asset
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          $version = (node -p "require('./mobile/package.json').version").Trim()
+          $apk = Get-ChildItem -LiteralPath "mobile/android/app/build/outputs/apk/release" -Filter "*.apk" -File | Select-Object -First 1
+          if (-not $apk) {
+            throw "No release APK produced under mobile/android/app/build/outputs/apk/release"
+          }
+          $renamed = Join-Path $apk.DirectoryName "wallpaper-player-mobile-$version.apk"
+          Copy-Item -LiteralPath $apk.FullName -Destination $renamed -Force
+          $tag = "${{ github.ref_name }}"
+          & gh release upload $tag $renamed --repo "${{ github.repository }}" --clobber
+          if ($LASTEXITCODE -ne 0) {
+            throw "gh release upload failed for $renamed"
           }

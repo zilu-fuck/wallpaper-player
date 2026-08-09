@@ -1,0 +1,116 @@
+name: CI
+
+on:
+  pull_request:
+    branches:
+      - main
+      - master
+  push:
+    branches:
+      - main
+      - master
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify-core:
+    name: Core verification (build + node scripts + typecheck)
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install root dependencies
+        run: npm ci
+
+      - name: Build desktop frontend
+        run: npm run build
+
+      - name: Verify remote identity
+        run: npm run verify:remote-mobile
+
+      - name: Verify remote settings
+        run: npm run verify:remote-settings
+
+      - name: Verify remote API smoke
+        run: npm run verify:remote-api
+
+      - name: Verify plugin registry
+        run: npm run verify:plugins
+
+      - name: Verify AI search
+        run: npm run verify:ai-search
+
+      - name: Verify electronAPI bridge types
+        run: npm run verify:electron-api
+
+      - name: Verify direct startup
+        run: npm run verify:startup
+
+      - name: Verify settings persistence
+        run: npm run verify:settings-persistence
+
+      - name: Install mobile dependencies
+        working-directory: mobile
+        run: npm ci
+
+      - name: Mobile typecheck
+        working-directory: mobile
+        run: npm run typecheck
+
+  verify-lan:
+    name: LAN / mobile flow verification (needs vendor binaries)
+    runs-on: windows-latest
+    needs: verify-core
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install root dependencies
+        run: npm ci
+
+      - name: Prepare vendor (mpv / ffmpeg / aria2 / yt-dlp)
+        run: node scripts/prepare-vendor.js --skip llama
+
+      - name: Verify remote library flow
+        run: npm run verify:remote-library
+
+      - name: Verify mobile multi-device
+        run: npm run verify:mobile-multi-device
+
+      - name: Verify mobile player structure
+        run: npm run verify:mobile-player
+
+      - name: Verify mobile performance budget
+        run: npm run verify:mobile-performance
+
+      - name: Verify mobile transcode command
+        run: npm run verify:mobile-transcode
+
+      - name: Verify mobile transcode concurrency
+        run: npm run verify:mobile-transcode-concurrency
+
+      - name: Verify remote pressure
+        run: npm run verify:remote-pressure
+
+      - name: Verify video metadata cache
+        run: npm run verify:video-metadata
+
+      - name: Verify thumbnail playback throttle
+        run: npm run verify:thumbnail-playback

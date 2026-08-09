@@ -221,12 +221,38 @@ async function preparePackage(pkg) {
   console.log(`[vendor] ready: ${pkg.name}`)
 }
 
+function parseSkippedPackages(args) {
+  const skipped = new Set()
+  for (let i = 0; i < args.length; i++) {
+    if (args[i] !== '--skip') continue
+    for (const token of (args[i + 1] || '').split(',')) {
+      const name = token.trim()
+      if (name) skipped.add(name)
+    }
+  }
+  if (skipped.has('llama')) {
+    for (const pkg of packages) {
+      if (pkg.name.startsWith('llama')) skipped.add(pkg.name)
+    }
+  }
+  return skipped
+}
+
 async function main() {
   if (process.platform !== 'win32') {
     throw new Error('Bundled mpv/FFmpeg preparation is configured for Windows builds only.')
   }
 
+  const skipped = parseSkippedPackages(process.argv.slice(2))
+  if (skipped.size > 0) {
+    console.log(`[vendor] skipping: ${[...skipped].join(', ')}`)
+  }
+
   for (const pkg of packages) {
+    if (skipped.has(pkg.name)) {
+      console.log(`[vendor] skipped ${pkg.name}`)
+      continue
+    }
     await preparePackage(pkg)
   }
 }
