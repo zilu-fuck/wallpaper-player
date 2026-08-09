@@ -1,4 +1,4 @@
-const { Tray, Menu, nativeImage, app } = require('electron')
+const { Tray, Menu, nativeImage, clipboard, app } = require('electron')
 const log = require('electron-log')
 const { EVENT } = require('../ipc-channels')
 const { loadSettings, saveSettingsAndFlush, sanitizeSettingsForSave } = require('../settings')

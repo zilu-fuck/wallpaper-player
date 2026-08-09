@@ -145,6 +145,8 @@ export default function RightDock({ open, tabs, activeTab, unreadTabs, onClose, 
     return () => window.removeEventListener('dragend', handleDragEnd)
   }, [])
 
+  const activeContent = tabs.find(tab => tab.id === activeTab)?.content
+
   return (
     <div
       ref={wrapperRef}
