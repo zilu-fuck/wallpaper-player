@@ -2,18 +2,10 @@ const assert = require('assert')
 const fs = require('fs')
 const os = require('os')
 const path = require('path')
+const { requestJson } = require('./verify-helpers')
 
 const projectRoot = path.resolve(__dirname, '..')
 const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'wallpaper-player-plugin-route-'))
-
-async function requestJson(url, options = {}) {
-  const response = await fetch(url, options)
-  const text = await response.text()
-  return {
-    status: response.status,
-    data: text ? JSON.parse(text) : null
-  }
-}
 
 process.chdir(tempRoot)
 

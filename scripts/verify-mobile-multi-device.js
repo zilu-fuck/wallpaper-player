@@ -2,6 +2,7 @@ const assert = require('assert')
 const fs = require('fs')
 const os = require('os')
 const path = require('path')
+const { claimDevice: claimDeviceShared, requestJson } = require('./verify-helpers')
 
 const projectRoot = path.resolve(__dirname, '..')
 const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'wallpaper-player-multi-device-'))
@@ -13,28 +14,6 @@ function clearProjectModules() {
     if (key.startsWith(path.join(projectRoot, 'main'))) {
       delete require.cache[key]
     }
-  }
-}
-
-function decodePairingPayload(pairingCode) {
-  const data = new URL(pairingCode).searchParams.get('data')
-  assert.ok(data, 'pairing code should include encoded payload')
-  return JSON.parse(Buffer.from(data, 'base64url').toString('utf8'))
-}
-
-async function requestJson(url, options = {}) {
-  const response = await fetch(url, {
-    ...options,
-    headers: {
-      Accept: 'application/json',
-      ...(options.body == null ? {} : { 'Content-Type': 'application/json' }),
-      ...(options.headers || {})
-    }
-  })
-  const text = await response.text()
-  return {
-    status: response.status,
-    data: text ? JSON.parse(text) : null
   }
 }
 
@@ -98,40 +77,17 @@ async function startDesktop(name, userDataDir, libraryDir) {
 }
 
 async function claimDevice(desktop, clientId) {
-  const pairing = desktop.createPairingCode({
-    endpoint: desktop.baseUrl,
-    endpoints: [desktop.baseUrl],
-    ttlMs: 60 * 1000
+  const result = await claimDeviceShared({
+    baseUrl: desktop.baseUrl,
+    clientId,
+    clientName: clientId,
+    approvePairingRequest: desktop.approvePairingRequest,
+    createPairingCode: desktop.createPairingCode,
+    projectRoot
   })
-  const payload = decodePairingPayload(pairing.pairingCode)
-  const pending = await requestJson(`${desktop.baseUrl}/v1/pairing/claim`, {
-    method: 'POST',
-    body: JSON.stringify({
-      pairingId: payload.pairingId,
-      oneTimeSecret: payload.oneTimeSecret,
-      clientId,
-      clientName: clientId,
-      platform: 'verify'
-    })
-  })
-  assert.strictEqual(pending.status, 200)
-  assert.strictEqual(pending.data.status, 'pending')
-  desktop.approvePairingRequest(pending.data.pairingRequestId)
-  const claimed = await requestJson(`${desktop.baseUrl}/v1/pairing/claim`, {
-    method: 'POST',
-    body: JSON.stringify({
-      pairingId: payload.pairingId,
-      oneTimeSecret: payload.oneTimeSecret,
-      clientId,
-      clientName: clientId,
-      platform: 'verify'
-    })
-  })
-  assert.strictEqual(claimed.status, 200)
-  assert.ok(claimed.data.token)
   return {
-    desktopId: claimed.data.deviceId,
-    token: claimed.data.token,
+    desktopId: result.deviceId,
+    token: result.token,
     endpoint: desktop.baseUrl
   }
 }

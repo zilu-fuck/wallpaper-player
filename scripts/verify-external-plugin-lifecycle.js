@@ -67,7 +67,8 @@ async function main() {
     manifestVersion: 1,
     id: 'video-analysis',
     name: 'Fake Video Analysis',
-    version: '1.0.0'
+    version: '1.0.0',
+    publisher: 'official'
   }, null, 2))
   fs.mkdirSync(permissionDeniedRoot, { recursive: true })
   fs.writeFileSync(path.join(permissionDeniedRoot, 'plugin.json'), JSON.stringify({
@@ -258,7 +259,7 @@ async function main() {
 
   await assert.rejects(
     () => installPlugin(officialCollisionRoot),
-    /官方插件 ID/
+    /官方插件包校验失败/
   )
 
   const installed = await installPlugin(sourceRoot)

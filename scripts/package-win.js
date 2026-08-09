@@ -1,11 +1,14 @@
 const fs = require('fs')
 const fsp = require('fs/promises')
-const os = require('os')
 const path = require('path')
 const { execFileSync } = require('child_process')
 
 const rootDir = path.join(__dirname, '..')
-const tempRoot = path.join(os.tmpdir(), 'wallpaper-player-build')
+const tempRoot = resolveAsciiBuildRoot()
+const pluginArtifactsDir = path.join(tempRoot, 'plugin-artifacts')
+const pluginStageRoot = path.join(tempRoot, 'plugin-stage')
+const packagedIntegrityPath = path.join(tempRoot, 'main', 'plugins', 'official-package-integrity.json')
+const sourceIntegrityPath = path.join(rootDir, 'main', 'plugins', 'official-package-integrity.json')
 const mirror = 'https://npmmirror.com/mirrors/electron-builder-binaries/'
 
 const copyItems = [
@@ -17,7 +20,6 @@ const copyItems = [
   'licenses',
   'main',
   'main.js',
-  'mpv.js',
   'node_modules',
   'package-lock.json',
   'package.json',
@@ -49,6 +51,20 @@ const requiredVideoComprehensionFiles = [
   path.join('video_comprehension', 'config.py'),
   path.join('video_comprehension', 'pipeline.py')
 ]
+
+function resolveAsciiBuildRoot(env = process.env, options = {}) {
+  const platform = options.platform || process.platform
+  const execPath = options.execPath || process.execPath
+  const defaultBase = platform === 'win32'
+    ? path.join(path.parse(execPath).root, 'wp-build')
+    : path.join(path.parse(execPath).root, 'tmp', 'wp-build')
+  const configuredBase = String(env.WALLPAPER_PLAYER_BUILD_ROOT || '').trim()
+  const buildRoot = path.resolve(configuredBase || defaultBase, 'wallpaper-player-build')
+  if (/[^\x20-\x7e]/.test(buildRoot)) {
+    throw new Error('Windows 打包目录必须是纯 ASCII 路径；请将 WALLPAPER_PLAYER_BUILD_ROOT 设置为可写的 ASCII 目录')
+  }
+  return buildRoot
+}
 
 async function assertVideoComprehensionProject(projectDir) {
   const missing = getMissingVideoComprehensionFiles(projectDir)
@@ -125,8 +141,12 @@ async function copyVideoComprehensionProject(sourceProject, targetProject) {
 }
 
 async function copyProject() {
-  await fsp.rm(tempRoot, { recursive: true, force: true })
-  await fsp.mkdir(tempRoot, { recursive: true })
+  try {
+    await fsp.rm(tempRoot, { recursive: true, force: true })
+    await fsp.mkdir(tempRoot, { recursive: true })
+  } catch (error) {
+    throw new Error(`无法创建纯 ASCII 打包目录 ${tempRoot}；可通过 WALLPAPER_PLAYER_BUILD_ROOT 指定其他可写 ASCII 目录：${error.message}`)
+  }
 
   for (const item of copyItems) {
     const src = path.join(rootDir, item)
@@ -158,22 +178,33 @@ async function copyReleaseBack() {
 
   await fsp.rm(targetRelease, { recursive: true, force: true })
   await fsp.cp(sourceRelease, targetRelease, { recursive: true })
+  await fsp.cp(pluginArtifactsDir, path.join(targetRelease, 'plugins'), { recursive: true })
 }
 
 function packagePlugins() {
   execFileSync(process.execPath, [path.join(rootDir, 'scripts', 'package-plugins.js')], {
     cwd: rootDir,
-    stdio: 'inherit'
+    stdio: 'inherit',
+    env: {
+      ...process.env,
+      WALLPAPER_PLUGIN_OUTPUT_DIR: pluginArtifactsDir,
+      WALLPAPER_PLUGIN_INTEGRITY_OUTPUT: packagedIntegrityPath,
+      WALLPAPER_PLUGIN_STAGE_ROOT: pluginStageRoot
+    }
   })
 }
 
 async function main() {
   await copyProject()
+  packagePlugins()
+  await fsp.copyFile(packagedIntegrityPath, sourceIntegrityPath)
 
   const electronBuilderCli = path.join(tempRoot, 'node_modules', 'electron-builder', 'cli.js')
   const publishMode = process.env.ELECTRON_PUBLISH || 'never'
+  // --dir 只产出 unpacked 目录（对应 pack:win）；默认产出完整安装包+便携版（对应 dist:win）
+  const targetFlag = process.argv.includes('--dir') ? '--dir' : '--win'
 
-  execFileSync(process.execPath, [electronBuilderCli, '--win', '--publish', publishMode], {
+  execFileSync(process.execPath, [electronBuilderCli, targetFlag, '--publish', publishMode], {
     cwd: tempRoot,
     stdio: 'inherit',
     env: {
@@ -183,10 +214,13 @@ async function main() {
   })
 
   await copyReleaseBack()
-  packagePlugins()
 }
 
-main().catch((err) => {
-  console.error(err)
-  process.exitCode = 1
-})
+if (require.main === module) {
+  main().catch((err) => {
+    console.error(err)
+    process.exitCode = 1
+  })
+}
+
+module.exports = { resolveAsciiBuildRoot }

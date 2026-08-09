@@ -1,9 +1,17 @@
 const assert = require('assert')
-const { execFileSync } = require('child_process')
 const fs = require('fs')
 const http = require('http')
 const os = require('os')
 const path = require('path')
+const {
+  claimDevice: claimDeviceShared,
+  createFixtureImage,
+  createFixtureVideo,
+  removeTempRootWithRetry,
+  requestJson,
+  requestRaw,
+  runExec
+} = require('./verify-helpers')
 
 const projectRoot = path.resolve(__dirname, '..')
 const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'wallpaper-player-library-flow-'))
@@ -14,88 +22,38 @@ const largeVideoPath = path.join(libraryDir, 'large-sample.mp4')
 const previewPath = path.join(libraryDir, 'preview.jpg')
 const ffmpeg = path.join(projectRoot, 'vendor', 'ffmpeg', 'bin', 'ffmpeg.exe')
 const ffprobe = path.join(projectRoot, 'vendor', 'ffmpeg', 'bin', 'ffprobe.exe')
+const { isAllowedPlaylistTarget } = require(path.join(projectRoot, 'main', 'remote', 'handlers', 'network-resources'))
+
+assert.strictEqual(
+  isAllowedPlaylistTarget('https://cdn.example-assets.com/segment.ts', 'https://video.example.com/master.m3u8'),
+  true,
+  'public cross-origin CDN playlist targets should be allowed'
+)
+assert.strictEqual(
+  isAllowedPlaylistTarget('http://127.0.0.1/segment.ts', 'https://video.example.com/master.m3u8'),
+  false,
+  'cross-origin private targets should be blocked'
+)
 
 function run(file, args) {
-  return execFileSync(file, args, {
-    cwd: projectRoot,
-    encoding: 'utf8',
-    stdio: ['ignore', 'pipe', 'pipe']
-  })
-}
-
-function decodePairingPayload(pairingCode) {
-  const data = new URL(pairingCode).searchParams.get('data')
-  assert.ok(data, 'pairing code should include encoded payload')
-  return JSON.parse(Buffer.from(data, 'base64url').toString('utf8'))
-}
-
-async function requestRaw(url, options = {}) {
-  const response = await fetch(url, options)
-  const body = Buffer.from(await response.arrayBuffer())
-  return {
-    status: response.status,
-    headers: response.headers,
-    body
-  }
-}
-
-async function requestJson(url, options = {}) {
-  const response = await fetch(url, {
-    ...options,
-    headers: {
-      Accept: 'application/json',
-      ...(options.body == null ? {} : { 'Content-Type': 'application/json' }),
-      ...(options.headers || {})
-    }
-  })
-  const text = await response.text()
-  return {
-    status: response.status,
-    data: text ? JSON.parse(text) : null
-  }
+  return runExec(file, args, { cwd: projectRoot })
 }
 
 async function claimDevice(baseUrl, clientId, clientName) {
   const { approvePairingRequest, createPairingCode } = require(path.join(projectRoot, 'main', 'remote', 'identity'))
-  const pairing = createPairingCode({
-    endpoint: baseUrl,
-    endpoints: [baseUrl],
-    ttlMs: 60 * 1000
+  const result = await claimDeviceShared({
+    baseUrl,
+    clientId,
+    clientName,
+    approvePairingRequest,
+    createPairingCode,
+    projectRoot
   })
-  const payload = decodePairingPayload(pairing.pairingCode)
-
-  const pending = await requestJson(`${baseUrl}/v1/pairing/claim`, {
-    method: 'POST',
-    body: JSON.stringify({
-      pairingId: payload.pairingId,
-      oneTimeSecret: payload.oneTimeSecret,
-      clientId,
-      clientName,
-      platform: 'verify'
-    })
-  })
-  assert.strictEqual(pending.status, 200, `${clientName} should request pairing successfully`)
-  assert.strictEqual(pending.data.status, 'pending', `${clientName} should wait for desktop approval`)
-  assert.ok(pending.data.pairingRequestId, `${clientName} should expose a pairing request id`)
-  approvePairingRequest(pending.data.pairingRequestId)
-  const claimed = await requestJson(`${baseUrl}/v1/pairing/claim`, {
-    method: 'POST',
-    body: JSON.stringify({
-      pairingId: payload.pairingId,
-      oneTimeSecret: payload.oneTimeSecret,
-      clientId,
-      clientName,
-      platform: 'verify'
-    })
-  })
-  assert.strictEqual(claimed.status, 200, `${clientName} should pair successfully`)
-  assert.ok(claimed.data.token, `${clientName} should receive a token`)
-  assert.strictEqual(claimed.data.pairedDeviceId, clientId)
-  return claimed.data.token
+  return result.token
 }
 
-async function getLibrary(baseUrl, token) {
-  return requestJson(`${baseUrl}/v1/library`, {
+async function getLibrary(baseUrl, token, query = '') {
+  return requestJson(`${baseUrl}/v1/library${query ? `?${query}` : ''}`, {
     headers: { Authorization: `Bearer ${token}` }
   })
 }
@@ -111,18 +69,6 @@ async function assertJsonError(url, expectedStatus, expectedCode, options = {}) 
   assert.strictEqual(response.status, expectedStatus)
   assert.strictEqual(response.data?.error?.code, expectedCode)
   return response
-}
-
-async function removeTempRootWithRetry(targetPath) {
-  for (let attempt = 0; attempt < 5; attempt += 1) {
-    try {
-      fs.rmSync(targetPath, { recursive: true, force: true })
-      return
-    } catch (error) {
-      if (attempt === 4 || error.code !== 'EBUSY') throw error
-      await new Promise(resolve => setTimeout(resolve, 250))
-    }
-  }
 }
 
 async function waitForTranscodeReady(baseUrl, videoId, token, quality = 'compatible') {
@@ -203,45 +149,37 @@ function assertNoDesktopPaths(value, context = 'response') {
 }
 
 async function createFixtureLibrary() {
-  fs.mkdirSync(libraryDir, { recursive: true })
-  assert.ok(fs.existsSync(ffmpeg), `missing ffmpeg: ${ffmpeg}`)
-
-  run(ffmpeg, [
-    '-hide_banner',
-    '-y',
-    '-f', 'lavfi',
-    '-i', 'testsrc=size=320x180:rate=15',
-    '-f', 'lavfi',
-    '-i', 'sine=frequency=880:sample_rate=44100',
-    '-t', '2',
-    '-c:v', 'libx264',
-    '-pix_fmt', 'yuv420p',
-    '-c:a', 'aac',
-    videoPath
-  ])
-  run(ffmpeg, [
-    '-hide_banner',
-    '-y',
-    '-f', 'lavfi',
-    '-i', 'testsrc=size=426x240:rate=15',
-    '-f', 'lavfi',
-    '-i', 'sine=frequency=660:sample_rate=48000',
-    '-t', '2',
-    '-c:v', 'libvpx-vp9',
-    '-b:v', '250k',
-    '-c:a', 'libopus',
-    incompatibleVideoPath
-  ])
+  createFixtureVideo({
+    ffmpeg,
+    destPath: videoPath,
+    size: '320x180',
+    rate: 15,
+    frequency: 880,
+    sampleRate: 44100,
+    duration: 2,
+    vcodec: 'libx264',
+    acodec: 'aac'
+  })
+  createFixtureVideo({
+    ffmpeg,
+    destPath: incompatibleVideoPath,
+    size: '426x240',
+    rate: 15,
+    frequency: 660,
+    sampleRate: 48000,
+    duration: 2,
+    vcodec: 'libvpx-vp9',
+    acodec: 'libopus',
+    extraArgs: ['-b:v', '250k']
+  })
   fs.writeFileSync(largeVideoPath, Buffer.alloc((33 * 1024 * 1024) + 128, 0))
 
-  run(ffmpeg, [
-    '-hide_banner',
-    '-y',
-    '-f', 'lavfi',
-    '-i', 'color=c=navy:size=480x270',
-    '-frames:v', '1',
-    previewPath
-  ])
+  createFixtureImage({
+    ffmpeg,
+    destPath: previewPath,
+    size: '480x270',
+    color: 'navy'
+  })
 
   fs.writeFileSync(path.join(libraryDir, 'project.json'), JSON.stringify({
     title: 'LAN Flow Sample',
@@ -257,7 +195,7 @@ async function main() {
   await createFixtureLibrary()
   process.chdir(tempRoot)
 
-  const { loadSettings, onSettingsChanged, saveSettings, sessionAllowedDirectories } = require(path.join(projectRoot, 'main', 'settings'))
+  const { flushSettingsWrites, loadSettings, onSettingsChanged, saveSettings, sessionAllowedDirectories } = require(path.join(projectRoot, 'main', 'settings'))
   const { createScopedToken, listPairedDevices } = require(path.join(projectRoot, 'main', 'remote', 'identity'))
   const { createRemoteServer } = require(path.join(projectRoot, 'main', 'remote', 'server'))
   const { getFavoriteKeyForVideoId } = require(path.join(projectRoot, 'main', 'remote', 'video-index'))
@@ -300,9 +238,26 @@ async function main() {
       res.end('#EXTM3U\n#EXT-X-STREAM-INF:BANDWIDTH=1280000\nmedia.m3u8\n')
       return
     }
+    if (req.url === '/cross-site-master.m3u8') {
+      const port = String(req.headers.host || '').split(':').pop()
+      res.writeHead(200, { 'Content-Type': 'application/vnd.apple.mpegurl' })
+      res.end(`#EXTM3U\n#EXT-X-TARGETDURATION:4\n#EXTINF:4,\nhttp://localhost:${port}/segment.ts\n#EXT-X-ENDLIST\n`)
+      return
+    }
     if (req.url === '/media.m3u8') {
       res.writeHead(200, { 'Content-Type': 'application/vnd.apple.mpegurl' })
       res.end('#EXTM3U\n#EXT-X-TARGETDURATION:4\n#EXT-X-MAP:URI="init.mp4"\n#EXTINF:4,\nsegment.ts\n#EXT-X-ENDLIST\n')
+      return
+    }
+    if (req.url === '/slow-network.mp4') {
+      res.writeHead(200, {
+        'Content-Type': 'video/mp4',
+        'Content-Length': segmentBody.length,
+        'Accept-Ranges': 'bytes'
+      })
+      setTimeout(() => {
+        res.end(segmentBody)
+      }, 800)
       return
     }
     if (req.url === '/init.mp4' || req.url === '/segment.ts') {
@@ -324,6 +279,8 @@ async function main() {
   assert.ok(upstreamAddress && typeof upstreamAddress === 'object', 'network fixture should listen on a local port')
   const networkUrl = `http://127.0.0.1:${upstreamAddress.port}/network-sample.mp4`
   const hlsUrl = `http://127.0.0.1:${upstreamAddress.port}/master.m3u8`
+  const crossSiteHlsUrl = `http://127.0.0.1:${upstreamAddress.port}/cross-site-master.m3u8`
+  const slowNetworkUrl = `http://127.0.0.1:${upstreamAddress.port}/slow-network.mp4`
   const episodeOneUrl = `http://127.0.0.1:${upstreamAddress.port}/episode-1.mp4`
   const episodeTwoUrl = `http://127.0.0.1:${upstreamAddress.port}/episode-2.mp4`
 
@@ -350,6 +307,20 @@ async function main() {
           referer: 'https://example.test/watch',
           userAgent: 'WallpaperTest/1.0'
         },
+        createdAt: new Date().toISOString()
+      },
+      {
+        id: 'verify-cross-site-hls',
+        kind: 'direct',
+        title: 'LAN Cross Site HLS Sample',
+        url: crossSiteHlsUrl,
+        createdAt: new Date().toISOString()
+      },
+      {
+        id: 'verify-slow-network',
+        kind: 'direct',
+        title: 'LAN Slow Network Sample',
+        url: slowNetworkUrl,
         createdAt: new Date().toISOString()
       },
       {
@@ -393,24 +364,50 @@ async function main() {
 
     const library = await getLibrary(baseUrl, phoneAToken)
     assert.strictEqual(library.status, 200)
-    assert.strictEqual(library.data.count, 7)
+    assert.strictEqual(library.data.count, 9)
+    assert.deepStrictEqual(library.data.pagination, {
+      offset: 0,
+      limit: 9,
+      total: 9,
+      returned: 9,
+      hasMore: false
+    })
     assertNoDesktopPaths(library.data, 'library response')
     assert.ok(Array.isArray(library.data.directories) && library.data.directories.length === 2)
     assert.ok(library.data.categoryGroups?.system?.some(category => category.name === 'Flow'))
     assert.ok(library.data.categoryGroups?.system?.some(category => category.name === 'R18'))
     assert.ok(library.data.categoryGroups?.system?.some(category => category.name === '网络资源'))
 
+    const pagedLibrary = await getLibrary(baseUrl, phoneAToken, 'limit=3&offset=2')
+    assert.strictEqual(pagedLibrary.status, 200)
+    assert.strictEqual(pagedLibrary.data.count, 9)
+    assert.strictEqual(pagedLibrary.data.items.length, 3)
+    assert.deepStrictEqual(pagedLibrary.data.pagination, {
+      offset: 2,
+      limit: 3,
+      total: 9,
+      returned: 3,
+      hasMore: true
+    })
+    assert.ok(Array.isArray(pagedLibrary.data.directories) && pagedLibrary.data.directories.length === 2)
+    assert.ok(pagedLibrary.data.categoryGroups?.system?.some(category => category.name === '网络资源'))
+    assertNoDesktopPaths(pagedLibrary.data, 'paged library response')
+
     const video = library.data.items.find(item => item.fileName === 'sample-video')
     const incompatibleVideo = library.data.items.find(item => item.fileName === 'vp9-opus-sample')
     const largeVideo = library.data.items.find(item => item.fileName === 'large-sample')
     const networkVideo = library.data.items.find(item => item.name === 'LAN Network Sample')
     const hlsVideo = library.data.items.find(item => item.name === 'LAN HLS Sample')
+    const crossSiteHlsVideo = library.data.items.find(item => item.name === 'LAN Cross Site HLS Sample')
+    const slowNetworkVideo = library.data.items.find(item => item.name === 'LAN Slow Network Sample')
     const episodeTwoVideo = library.data.items.find(item => item.name === '第2集')
     assert.ok(video, 'library should include playable fixture video')
     assert.ok(incompatibleVideo, 'library should include incompatible fixture video')
     assert.ok(largeVideo, 'library should include large fixture video')
     assert.ok(networkVideo, 'library should include desktop network resources for mobile')
     assert.ok(hlsVideo, 'library should include HLS network resources for mobile')
+    assert.ok(crossSiteHlsVideo, 'library should include cross-site HLS fixture')
+    assert.ok(slowNetworkVideo, 'library should include slow network fixture')
     assert.ok(episodeTwoVideo, 'library should include expanded webpage episodes for mobile')
     assert.ok(networkVideo.id.startsWith('network_'))
     assert.strictEqual(networkVideo.name, 'LAN Network Sample')
@@ -504,6 +501,13 @@ async function main() {
       `proxied HLS segment should keep desktop resource headers: ${JSON.stringify(upstreamRequests.filter(item => item.url === '/segment.ts'))}`
     )
 
+    await assertJsonError(
+      `${baseUrl}${crossSiteHlsVideo.streamUrl}`,
+      403,
+      'network_proxy_cross_site_blocked',
+      { headers: { Authorization: `Bearer ${phoneAToken}` } }
+    )
+
     const episodeTwoRange = await requestRaw(`${baseUrl}${episodeTwoVideo.streamUrl}`, {
       headers: {
         Authorization: `Bearer ${phoneAToken}`,
@@ -540,6 +544,15 @@ async function main() {
     }
     const repeatedResults = await Promise.all(repeatedFetches)
     assert.ok(repeatedResults.every(result => result.status === 206), 'concurrent small range reads should succeed')
+
+    const slowFetches = Array.from({ length: 7 }, () => requestRaw(`${baseUrl}${slowNetworkVideo.streamUrl}`, {
+      headers: { Authorization: `Bearer ${phoneAToken}` }
+    }))
+    const slowResults = await Promise.all(slowFetches)
+    const slowStatuses = slowResults.map(result => result.status)
+    assert.strictEqual(slowStatuses.filter(status => status === 429).length, 1, `one slow network request should be rate limited: ${slowStatuses.join(',')}`)
+    assert.ok(slowStatuses.every(status => status === 200 || status === 429), `slow network requests should either stream or be limited: ${slowStatuses.join(',')}`)
+
     await runLightLanPressure(baseUrl, video, library.data.count, phoneAToken, phoneBToken)
 
     const transcodedStreamUrl = await waitForTranscodeReady(baseUrl, video.id, phoneAToken, '720p')
@@ -641,6 +654,7 @@ async function main() {
     legacyCustomTags[incompatibleVideoPath] = ['legacy-path-tag']
     delete legacyCustomTags[incompatibleFavoriteKey]
     saveSettings({ customTags: legacyCustomTags })
+    await flushSettingsWrites()
 
     let settingsChangedPayload = null
     const removeSettingsChanged = onSettingsChanged((settings) => {
@@ -693,7 +707,7 @@ async function main() {
 
     const libraryFromPhoneB = await getLibrary(baseUrl, phoneBToken)
     assert.strictEqual(libraryFromPhoneB.status, 200)
-    assert.strictEqual(libraryFromPhoneB.data.count, 7)
+    assert.strictEqual(libraryFromPhoneB.data.count, 9)
     assert.strictEqual(libraryFromPhoneB.data.items.find(item => item.id === video.id)?.favorite, true)
 
     const forceCleanup = await requestJson(`${baseUrl}/v1/transcodes/cache`, {
@@ -715,6 +729,7 @@ async function main() {
     await new Promise(resolve => upstreamServer.close(resolve))
     const { unwatchAllDirectories } = require(path.join(projectRoot, 'main', 'scanner'))
     unwatchAllDirectories()
+    await flushSettingsWrites()
   }
 }
 

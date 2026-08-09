@@ -2,16 +2,10 @@ const assert = require('assert')
 const fs = require('fs')
 const os = require('os')
 const path = require('path')
+const { decodePairingPayload } = require('./verify-helpers')
 
 const projectRoot = path.resolve(__dirname, '..')
 const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'wallpaper-player-remote-verify-'))
-
-function decodePairingPayload(pairingCode) {
-  const url = new URL(pairingCode)
-  const data = url.searchParams.get('data')
-  assert.ok(data, 'pairing code should include encoded data')
-  return JSON.parse(Buffer.from(data, 'base64url').toString('utf8'))
-}
 
 function expectPairingFailure(fn, code) {
   try {

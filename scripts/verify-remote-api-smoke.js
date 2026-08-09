@@ -2,37 +2,15 @@ const assert = require('assert')
 const fs = require('fs')
 const os = require('os')
 const path = require('path')
+const { decodePairingPayload, requestJson, requestRaw } = require('./verify-helpers')
 
 const projectRoot = path.resolve(__dirname, '..')
 const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'wallpaper-player-api-smoke-'))
 
-function decodePairingPayload(pairingCode) {
-  const data = new URL(pairingCode).searchParams.get('data')
-  return JSON.parse(Buffer.from(data, 'base64url').toString('utf8'))
-}
-
-async function requestJson(url, options = {}) {
-  const response = await fetch(url, options)
-  const text = await response.text()
-  return {
-    status: response.status,
-    data: text ? JSON.parse(text) : null
-  }
-}
-
-async function requestBytes(url, options = {}) {
-  const response = await fetch(url, options)
-  const body = Buffer.from(await response.arrayBuffer())
-  return {
-    status: response.status,
-    body
-  }
-}
-
 process.chdir(tempRoot)
 
 const { approvePairingRequest, createPairingCode, loadIdentity } = require(path.join(projectRoot, 'main', 'remote', 'identity'))
-const { saveSettings } = require(path.join(projectRoot, 'main', 'settings'))
+const { flushSettingsWrites, saveSettings } = require(path.join(projectRoot, 'main', 'settings'))
 const { createRemoteServer } = require(path.join(projectRoot, 'main', 'remote', 'server'))
 
 async function main() {
@@ -121,7 +99,7 @@ async function main() {
     assert.strictEqual(claimed.status, 200)
     assert.ok(claimed.data.token, 'pairing claim should return a token')
 
-    const speed = await requestBytes(`${baseUrl}/v1/speed-test?bytes=65536`, {
+    const speed = await requestRaw(`${baseUrl}/v1/speed-test?bytes=65536`, {
       headers: { Authorization: `Bearer ${claimed.data.token}` }
     })
     assert.strictEqual(speed.status, 200)
@@ -133,7 +111,7 @@ async function main() {
     })
     assert.strictEqual(unpair.status, 200)
 
-    const revokedSpeed = await requestBytes(`${baseUrl}/v1/speed-test?bytes=65536`, {
+    const revokedSpeed = await requestRaw(`${baseUrl}/v1/speed-test?bytes=65536`, {
       headers: { Authorization: `Bearer ${claimed.data.token}` }
     })
     assert.strictEqual(revokedSpeed.status, 401)
@@ -141,6 +119,7 @@ async function main() {
     console.log('remote api smoke verification passed')
   } finally {
     await new Promise(resolve => server.close(resolve))
+    await flushSettingsWrites()
   }
 }
 

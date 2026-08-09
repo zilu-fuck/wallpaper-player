@@ -1,12 +1,24 @@
 const fs = require('fs')
 const fsp = require('fs/promises')
+const crypto = require('crypto')
 const os = require('os')
 const path = require('path')
 const { execFileSync } = require('child_process')
 
 const rootDir = path.join(__dirname, '..')
-const releasePluginsDir = path.join(rootDir, 'release', 'plugins')
+const releasePluginsDir = process.env.WALLPAPER_PLUGIN_OUTPUT_DIR
+  ? path.resolve(process.env.WALLPAPER_PLUGIN_OUTPUT_DIR)
+  : path.join(rootDir, 'release', 'plugins')
+const integrityOutputPath = process.env.WALLPAPER_PLUGIN_INTEGRITY_OUTPUT
+  ? path.resolve(process.env.WALLPAPER_PLUGIN_INTEGRITY_OUTPUT)
+  : path.join(rootDir, 'main', 'plugins', 'official-package-integrity.json')
+const pluginStageRoot = process.env.WALLPAPER_PLUGIN_STAGE_ROOT
+  ? path.resolve(process.env.WALLPAPER_PLUGIN_STAGE_ROOT)
+  : os.tmpdir()
 const officialPluginIds = ['video-analysis', 'ai-search', 'agent-bridge']
+const pluginDependencies = {
+  'ai-search': ['playwright-core']
+}
 
 const videoComprehensionItems = [
   '.env.example',
@@ -101,6 +113,13 @@ async function copyPluginSource(pluginId, targetDir) {
       return name !== 'resources'
     }
   })
+  for (const dependency of pluginDependencies[pluginId] || []) {
+    const dependencyDir = path.join(rootDir, 'node_modules', dependency)
+    if (!fs.existsSync(path.join(dependencyDir, 'package.json'))) {
+      throw new Error(`missing plugin dependency: ${dependency}`)
+    }
+    await fsp.cp(dependencyDir, path.join(targetDir, 'node_modules', dependency), { recursive: true })
+  }
 }
 
 async function copyVideoAnalysisResources(pluginDir) {
@@ -141,21 +160,67 @@ function zipDirectory(sourceDir, outputZip) {
 }
 
 async function packagePlugin(pluginId) {
-  const stageParent = await fsp.mkdtemp(path.join(os.tmpdir(), `wallpaper-player-${pluginId}-`))
+  await fsp.mkdir(pluginStageRoot, { recursive: true })
+  const stageParent = await fsp.mkdtemp(path.join(pluginStageRoot, `wallpaper-player-${pluginId}-`))
   const pluginDir = path.join(stageParent, pluginId)
   try {
     await copyPluginSource(pluginId, pluginDir)
     if (pluginId === 'video-analysis') {
       await copyVideoAnalysisResources(pluginDir)
     }
+    const payloadSha256 = await hashDirectorySha256(pluginDir)
     await fsp.mkdir(releasePluginsDir, { recursive: true })
     const manifest = JSON.parse(await fsp.readFile(path.join(pluginDir, 'plugin.json'), 'utf-8'))
     const outputZip = path.join(releasePluginsDir, `Wallpaper-Player-Plugin-${pluginId}-${manifest.version || '0.0.0'}.zip`)
     zipDirectory(pluginDir, outputZip)
-    return outputZip
+    return {
+      id: pluginId,
+      version: manifest.version || '0.0.0',
+      outputZip,
+      sha256: await hashFileSha256(outputZip),
+      payloadSha256
+    }
   } finally {
     await fsp.rm(stageParent, { recursive: true, force: true }).catch(() => {})
   }
+}
+
+function hashFileSha256(filePath) {
+  return new Promise((resolve, reject) => {
+    const hash = crypto.createHash('sha256')
+    const stream = fs.createReadStream(filePath)
+    stream.on('error', reject)
+    stream.on('data', chunk => hash.update(chunk))
+    stream.on('end', () => resolve(hash.digest('hex')))
+  })
+}
+
+async function hashDirectorySha256(directory) {
+  const hash = crypto.createHash('sha256')
+
+  async function visit(currentDir, relativeDir = '') {
+    const entries = await fsp.readdir(currentDir, { withFileTypes: true })
+    entries.sort((left, right) => left.name.localeCompare(right.name, 'en'))
+    for (const entry of entries) {
+      const relativePath = path.posix.join(relativeDir.replace(/\\/g, '/'), entry.name)
+      const fullPath = path.join(currentDir, entry.name)
+      if (entry.isDirectory()) {
+        await visit(fullPath, relativePath)
+      } else if (entry.isFile()) {
+        hash.update(`file:${relativePath}\0`)
+        await new Promise((resolve, reject) => {
+          const stream = fs.createReadStream(fullPath)
+          stream.on('error', reject)
+          stream.on('data', chunk => hash.update(chunk))
+          stream.on('end', resolve)
+        })
+        hash.update('\0')
+      }
+    }
+  }
+
+  await visit(directory)
+  return hash.digest('hex')
 }
 
 async function main() {
@@ -165,7 +230,17 @@ async function main() {
   for (const pluginId of officialPluginIds) {
     outputs.push(await packagePlugin(pluginId))
   }
-  console.log(`packaged plugins:\n${outputs.map(item => `- ${item}`).join('\n')}`)
+  const integrity = {
+    version: 1,
+    packages: Object.fromEntries(outputs.map(item => [item.id, {
+      version: item.version,
+      sha256: item.sha256,
+      payloadSha256: item.payloadSha256
+    }]))
+  }
+  await fsp.mkdir(path.dirname(integrityOutputPath), { recursive: true })
+  await fsp.writeFile(integrityOutputPath, `${JSON.stringify(integrity, null, 2)}\n`, 'utf-8')
+  console.log(`packaged plugins:\n${outputs.map(item => `- ${item.outputZip}`).join('\n')}`)
 }
 
 main().catch((err) => {

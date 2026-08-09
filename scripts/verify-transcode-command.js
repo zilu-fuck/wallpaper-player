@@ -1,8 +1,8 @@
 const assert = require('assert')
-const { execFileSync } = require('child_process')
 const fs = require('fs')
 const os = require('os')
 const path = require('path')
+const { createFixtureVideo, runExec } = require('./verify-helpers')
 
 const root = path.resolve(__dirname, '..')
 const ffmpeg = path.join(root, 'vendor', 'ffmpeg', 'bin', 'ffmpeg.exe')
@@ -14,43 +14,37 @@ const outputPath = path.join(tempRoot, 'mobile-output.tmp')
 const incompatibleOutputPath = path.join(tempRoot, 'mobile-vp9-output.tmp')
 
 function run(file, args) {
-  return execFileSync(file, args, {
-    encoding: 'utf8',
-    stdio: ['ignore', 'pipe', 'pipe']
-  })
+  return runExec(file, args)
 }
 
 try {
   assert.ok(fs.existsSync(ffmpeg), `missing ffmpeg: ${ffmpeg}`)
   assert.ok(fs.existsSync(ffprobe), `missing ffprobe: ${ffprobe}`)
 
-  run(ffmpeg, [
-    '-hide_banner',
-    '-y',
-    '-f', 'lavfi',
-    '-i', 'testsrc=size=320x240:rate=15',
-    '-f', 'lavfi',
-    '-i', 'sine=frequency=1000:sample_rate=44100',
-    '-t', '1',
-    '-c:v', 'libx264',
-    '-pix_fmt', 'yuv420p',
-    '-c:a', 'aac',
-    sourcePath
-  ])
+  createFixtureVideo({
+    ffmpeg,
+    destPath: sourcePath,
+    size: '320x240',
+    rate: 15,
+    frequency: 1000,
+    sampleRate: 44100,
+    duration: 1,
+    vcodec: 'libx264',
+    acodec: 'aac'
+  })
 
-  run(ffmpeg, [
-    '-hide_banner',
-    '-y',
-    '-f', 'lavfi',
-    '-i', 'testsrc=size=426x240:rate=15',
-    '-f', 'lavfi',
-    '-i', 'sine=frequency=660:sample_rate=48000',
-    '-t', '1',
-    '-c:v', 'libvpx-vp9',
-    '-b:v', '250k',
-    '-c:a', 'libopus',
-    incompatibleSourcePath
-  ])
+  createFixtureVideo({
+    ffmpeg,
+    destPath: incompatibleSourcePath,
+    size: '426x240',
+    rate: 15,
+    frequency: 660,
+    sampleRate: 48000,
+    duration: 1,
+    vcodec: 'libvpx-vp9',
+    acodec: 'libopus',
+    extraArgs: ['-b:v', '250k']
+  })
 
   run(ffmpeg, [
     '-hide_banner',
