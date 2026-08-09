@@ -1,0 +1,20 @@
+{
+  "version": 1,
+  "packages": {
+    "video-analysis": {
+      "version": "1.0.0",
+      "sha256": "552847152007d463424d43971778f40545b95139830dd15cc76957de59b4baa1",
+      "payloadSha256": "2ff7dc11b4e1ba0328233a046f7f631d5c062c0cc2879b4da65ca7cf81f43b2c"
+    },
+    "ai-search": {
+      "version": "0.1.0",
+      "sha256": "83f0949f361f03a78f78496c9b15510b0c6f8fb0581cea9bf8b94724faa7d781",
+      "payloadSha256": "23a776390e369c15f009ce90329bd3e635fdca74c8b0f4e1d16de75dec2e9f96"
+    },
+    "agent-bridge": {
+      "version": "0.1.0",
+      "sha256": "9f499408c282a144ffe411648d476fd4e36bd010c6e8974be3b9fd16460bed1a",
+      "payloadSha256": "6125b7c7d7b93ddeb331d73291fa51d3aa89628453c7d7f42ae202207a3862e9"
+    }
+  }
+}

@@ -1,5 +1,7 @@
 'use strict'
 
+const log = require('./logger')
+
 let playwrightCore = null
 
 function createAbortError() {
@@ -597,7 +599,7 @@ async function searchAndCollect(browser, query, options) {
         searchResults = await searchWithEngine(context, engine, query, timeout, { signal })
       } catch (err) {
         if (err?.code === 'TASK_CANCELLED' || signal?.aborted) throw createAbortError()
-        console.warn(`[ai-search] ${engine.name} search failed:`, err.message)
+        log.warn(`[ai-search] ${engine.name} search failed:`, err.message)
         onDetail?.({
           stage: 'browsing',
           title: engine.trusted ? `信任来源跳过: ${engine.name.replace(/^trusted:/, '')}` : `搜索源跳过: ${engine.name}`,

@@ -1,5 +1,6 @@
 'use strict'
 
+const log = require('./logger')
 const { buildBaseTitle, cleanTitle, extractPatterns, generateSearchQueries, getNextTargets, isWeakSearchTitle, normalizeSearchTitle } = require('./title-cleaner')
 const browserModule = require('./browser')
 const llmProvider = require('./llm-provider')
@@ -241,7 +242,7 @@ async function _runPipeline(task) {
         }
       } catch (err) {
         if (err?.code === 'TASK_CANCELLED') throw err
-        console.warn('[ai-search] browser launch failed:', err.message)
+        log.warn('[ai-search] browser launch failed:', err.message)
         _emit({
           type: 'progress',
           taskId,
@@ -555,7 +556,7 @@ async function collectEvidenceForQueries(task, browser, queries, options) {
       if (typeof options.stopWhen === 'function' && options.stopWhen(collected)) break
     } catch (err) {
       if (err?.code === 'TASK_CANCELLED') throw err
-      console.warn(`[ai-search] query failed: ${query}`, err.message)
+      log.warn(`[ai-search] query failed: ${query}`, err.message)
       _emitDetail(taskId, {
         stage: 'browsing',
         title: `${options.label || '查询'}失败`,
@@ -739,7 +740,7 @@ async function runReasoning(task, options) {
     })
   } catch (err) {
     if (err?.code === 'TASK_CANCELLED') throw err
-    console.error('[ai-search] LLM call failed:', err.message)
+    log.error('[ai-search] LLM call failed:', err.message)
     throw new Error(`LLM 调用失败: ${err.message}`)
   } finally {
     abortHandle.cleanup()
