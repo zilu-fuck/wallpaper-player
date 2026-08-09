@@ -180,13 +180,88 @@ export function DownloadStatusSection({
   )
 }
 
-export function AboutSection() {
+export function AboutSection({ appVersion = '' }) {
   return (
-    <section className="settings-section">
-      <h3 className="section-title">About</h3>
-      <div className="about-info">
-        <span>Wallpaper Player</span>
-        <span>License: Apache-2.0</span>
+    <section className="settings-section about-section">
+      <div className="about-brand">
+        <div className="about-brand-logo" aria-hidden="true">
+          <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6">
+            <rect x="2.5" y="4" width="19" height="13" rx="3" />
+            <path d="M2.5 12h19" />
+            <circle cx="5.5" cy="8.5" r="0.9" fill="currentColor" />
+            <circle cx="5.5" cy="12.5" r="0.9" fill="currentColor" />
+            <path d="M10 17l-1.5 3.5M14 17l1.5 3.5M8 20.5h8" />
+            <circle cx="17.5" cy="16" r="3.2" />
+            <path d="M17.5 14.5v3M15.8 16h3.4" />
+          </svg>
+        </div>
+        <div className="about-brand-copy">
+          <div className="about-brand-name">
+            <strong>Wallpaper Player</strong>
+            {appVersion ? <span className="about-version-badge">v{appVersion}</span> : null}
+          </div>
+          <span className="about-brand-tagline">本地视频画廊播放器 · 局域网随身看</span>
+        </div>
+      </div>
+
+      <div className="about-grid">
+        <div className="about-grid-item">
+          <span>许可证</span>
+          <strong>Apache-2.0</strong>
+        </div>
+        <div className="about-grid-item">
+          <span>平台</span>
+          <strong>Windows</strong>
+        </div>
+        <div className="about-grid-item">
+          <span>渲染</span>
+          <strong>Electron 35 · React 19</strong>
+        </div>
+        <div className="about-grid-item">
+          <span>播放内核</span>
+          <strong>mpv · FFmpeg</strong>
+        </div>
+      </div>
+
+      <div className="about-tech-chips">
+        <span>mpv</span>
+        <span>FFmpeg</span>
+        <span>aria2</span>
+        <span>yt-dlp</span>
+        <span>Vite</span>
+      </div>
+
+      <div className="about-links">
+        <button
+          className="btn btn-sm"
+          type="button"
+          onClick={() => {
+            navigator.clipboard?.writeText('https://github.com/zilu-fuck/wallpaper-player').catch(() => {})
+          }}
+          title="复制 GitHub 仓库地址"
+        >
+          GitHub 仓库
+        </button>
+        <button
+          className="btn btn-sm"
+          type="button"
+          onClick={() => {
+            navigator.clipboard?.writeText('https://github.com/zilu-fuck/wallpaper-player/releases').catch(() => {})
+          }}
+          title="复制更新发布页地址"
+        >
+          更新说明
+        </button>
+        <button
+          className="btn btn-sm"
+          type="button"
+          onClick={() => {
+            navigator.clipboard?.writeText('https://github.com/zilu-fuck/wallpaper-player/blob/master/THIRD_PARTY_NOTICES.md').catch(() => {})
+          }}
+          title="复制第三方声明地址"
+        >
+          第三方声明
+        </button>
       </div>
     </section>
   )

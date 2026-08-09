@@ -32,8 +32,8 @@
   align-items: center;
   padding: 12px 0;
   gap: 6px;
-  background: linear-gradient(180deg, var(--bg-secondary) 0%, var(--bg-primary) 100%);
-  border-left: 1px solid var(--border);
+  background: linear-gradient(180deg, var(--bg-surface) 0%, var(--bg-primary) 100%);
+  border-left: 1px solid var(--glass-border);
   transition: background var(--transition-fast);
 }
 
@@ -44,7 +44,7 @@
   align-items: center;
   justify-content: center;
   border: 1px solid transparent;
-  border-radius: 10px;
+  border-radius: var(--radius-md);
   background: transparent;
   color: var(--text-muted);
   cursor: pointer;
@@ -59,8 +59,8 @@
 
 .right-dock-activity-item:hover {
   color: var(--text-primary);
-  background: var(--bg-card-hover);
-  border-color: var(--border);
+  background: var(--glass-bg-strong);
+  border-color: var(--glass-border);
   transform: translateY(-1px);
 }
 
@@ -103,16 +103,16 @@
   height: 8px;
   border-radius: 50%;
   background: var(--accent);
-  box-shadow: 0 0 0 2px var(--bg-secondary);
+  box-shadow: 0 0 0 2px var(--bg-surface);
   animation: unread-pulse 2s ease-in-out infinite;
 }
 
 @keyframes unread-pulse {
   0%, 100% {
-    box-shadow: 0 0 0 2px var(--bg-secondary), 0 0 0 4px var(--accent-soft);
+    box-shadow: 0 0 0 2px var(--bg-surface), 0 0 0 4px var(--accent-soft);
   }
   50% {
-    box-shadow: 0 0 0 2px var(--bg-secondary), 0 0 0 6px var(--accent-soft);
+    box-shadow: 0 0 0 2px var(--bg-surface), 0 0 0 6px var(--accent-soft);
   }
 }
 
@@ -124,8 +124,8 @@
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  background: linear-gradient(180deg, var(--bg-secondary) 0%, var(--bg-primary) 100%);
-  border-left: 1px solid var(--border);
+  background: linear-gradient(180deg, var(--bg-surface) 0%, var(--bg-primary) 100%);
+  border-left: 1px solid var(--glass-border);
   opacity: 0;
   transform: translateX(16px);
   transition:
@@ -144,14 +144,18 @@
   align-items: center;
   gap: 12px;
   padding: 14px 16px;
-  background: linear-gradient(180deg, var(--bg-surface) 0%, var(--bg-secondary) 100%);
-  border-bottom: 1px solid var(--border);
+  background: linear-gradient(180deg, var(--glass-bg-soft) 0%, var(--bg-surface) 100%);
+  backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+  border-bottom: 1px solid var(--glass-border);
   box-shadow: 0 1px 0 rgba(255, 255, 255, 0.03);
   flex-shrink: 0;
 }
 
 .app.theme-light .right-dock-panel-header {
-  background: linear-gradient(180deg, var(--bg-card) 0%, var(--bg-secondary) 100%);
+  background: linear-gradient(180deg, var(--glass-bg) 0%, var(--bg-surface) 100%);
+  backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
   box-shadow: 0 1px 0 rgba(255, 255, 255, 0.6);
 }
 
@@ -168,7 +172,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 10px;
+  border-radius: var(--radius-md);
   background: linear-gradient(135deg, var(--accent-soft-2) 0%, var(--accent-soft) 100%);
   color: var(--accent);
   border: 1px solid var(--border-glow);
@@ -209,7 +213,7 @@
   border-radius: 50%;
   background: var(--success);
   display: inline-block;
-  box-shadow: 0 0 6px rgba(52, 199, 123, 0.45);
+  box-shadow: 0 0 6px rgba(52, 211, 153, 0.45);
 }
 
 .right-dock-panel-content {
@@ -240,9 +244,11 @@
 .download-task-detail,
 .download-center-notes,
 .download-center-empty {
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  background: var(--bg-card);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-md);
+  background: var(--glass-bg);
+  backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
 }
 
 .download-center-summary {
@@ -268,6 +274,7 @@
 }
 
 .download-speed-card {
+  flex: 1;
   min-width: 0;
 }
 
@@ -277,6 +284,9 @@
   font-size: 23px;
   font-weight: 760;
   line-height: 1.05;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .download-speed-card span,
@@ -340,25 +350,25 @@
 .download-engine-badge {
   flex-shrink: 0;
   padding: 3px 7px;
-  border-radius: 999px;
-  background: rgba(242, 177, 52, 0.13);
+  border-radius: var(--radius-pill);
+  background: rgba(251, 191, 36, 0.13);
   color: var(--warning);
   font-size: 10px;
   font-weight: 700;
 }
 
 .download-engine-badge.loading {
-  background: var(--bg-surface);
+  background: var(--glass-bg-soft);
   color: var(--text-muted);
 }
 
 .download-engine-badge.running {
-  background: rgba(52, 199, 123, 0.13);
+  background: rgba(52, 211, 153, 0.13);
   color: var(--success);
 }
 
 .download-engine-badge.missing {
-  background: rgba(239, 106, 100, 0.13);
+  background: rgba(248, 113, 113, 0.13);
   color: var(--danger);
 }
 
@@ -372,9 +382,9 @@
 .download-network-status > div {
   min-width: 0;
   padding: 6px 7px;
-  border: 1px solid var(--border);
-  border-radius: 7px;
-  background: var(--bg-secondary);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-sm);
+  background: var(--bg-surface);
 }
 
 .download-network-status span,
@@ -427,9 +437,9 @@ body:has(.sidebar.collapsed) .download-dialog-overlay {
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  border: 1px solid var(--border-strong);
-  border-radius: 8px;
-  background: var(--bg-secondary);
+  border: 1px solid var(--glass-border-strong);
+  border-radius: var(--radius-md);
+  background: var(--bg-surface);
   box-shadow: var(--shadow-lg);
 }
 
@@ -444,8 +454,10 @@ body:has(.sidebar.collapsed) .download-dialog-overlay {
 }
 
 .download-dialog-header {
-  border-bottom: 1px solid var(--border);
-  background: var(--bg-card);
+  border-bottom: 1px solid var(--glass-border);
+  background: var(--glass-bg);
+  backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
 }
 
 .download-dialog-header h2 {
@@ -470,8 +482,8 @@ body:has(.sidebar.collapsed) .download-dialog-overlay {
   min-height: 126px;
   max-height: 230px;
   padding: 11px 12px;
-  border: 1px solid var(--border);
-  border-radius: 8px;
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-md);
   background: var(--bg-primary);
   color: var(--text-primary);
   font-size: 13px;
@@ -499,17 +511,17 @@ body:has(.sidebar.collapsed) .download-dialog-overlay {
   min-width: 0;
   min-height: 62px;
   padding: 9px;
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  background: var(--bg-card);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-md);
+  background: var(--glass-bg);
   color: var(--text-primary);
   text-align: left;
   cursor: pointer;
 }
 
 .download-engine-picker button:hover:not(:disabled) {
-  border-color: var(--border-strong);
-  background: var(--bg-card-hover);
+  border-color: var(--glass-border-strong);
+  background: var(--glass-bg-strong);
 }
 
 .download-engine-picker button.active {
@@ -525,8 +537,10 @@ body:has(.sidebar.collapsed) .download-dialog-overlay {
 
 .download-dialog-footer {
   justify-content: flex-end;
-  border-top: 1px solid var(--border);
-  background: var(--bg-card);
+  border-top: 1px solid var(--glass-border);
+  background: var(--glass-bg);
+  backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
 }
 
 .download-destination {
@@ -536,9 +550,9 @@ body:has(.sidebar.collapsed) .download-dialog-overlay {
   align-items: center;
   gap: 8px;
   padding: 9px;
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  background: var(--bg-card);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-md);
+  background: var(--glass-bg);
 }
 
 .download-destination-check {
@@ -579,15 +593,15 @@ body:has(.sidebar.collapsed) .download-dialog-overlay {
   justify-content: space-between;
   padding: 8px 9px;
   border: 1px solid var(--border-glow);
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   background: var(--accent-soft);
 }
 
 .download-external-tip {
   padding: 9px;
-  border: 1px solid rgba(52, 199, 123, 0.24);
-  border-radius: 8px;
-  background: rgba(52, 199, 123, 0.08);
+  border: 1px solid rgba(52, 211, 153, 0.24);
+  border-radius: var(--radius-md);
+  background: rgba(52, 211, 153, 0.08);
 }
 
 .download-engine-card {
@@ -602,7 +616,7 @@ body:has(.sidebar.collapsed) .download-dialog-overlay {
   gap: 10px;
   padding: 10px;
   border: 1px solid var(--border-glow);
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   background: var(--accent-soft);
 }
 
@@ -639,9 +653,9 @@ body:has(.sidebar.collapsed) .download-dialog-overlay {
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   color: var(--danger);
-  background: rgba(239, 106, 100, 0.12);
+  background: rgba(248, 113, 113, 0.12);
 }
 
 .download-submit-btn {
@@ -653,7 +667,7 @@ body:has(.sidebar.collapsed) .download-dialog-overlay {
   margin: 0;
   padding: 8px 10px;
   border: 1px solid var(--border-glow);
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   background: var(--accent-soft);
   color: var(--text-secondary);
   font-size: 12px;
@@ -694,9 +708,9 @@ body:has(.sidebar.collapsed) .download-dialog-overlay {
   flex-direction: column;
   gap: 8px;
   padding: 12px;
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  background: var(--bg-secondary);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-md);
+  background: var(--bg-surface);
   color: var(--text-primary);
   cursor: pointer;
   text-align: left;
@@ -708,8 +722,10 @@ body:has(.sidebar.collapsed) .download-dialog-overlay {
 
 .download-center-task:hover,
 .download-center-task:focus-visible {
-  border-color: var(--border-strong);
-  background: var(--bg-card-hover);
+  border-color: var(--glass-border-strong);
+  background: var(--glass-bg-strong);
+  backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
   outline: none;
 }
 
@@ -720,18 +736,18 @@ body:has(.sidebar.collapsed) .download-dialog-overlay {
 }
 
 .download-center-task.complete {
-  border-color: rgba(52, 199, 123, 0.38);
+  border-color: rgba(52, 211, 153, 0.38);
 }
 
 .download-center-task.error {
-  border-color: rgba(239, 106, 100, 0.48);
+  border-color: rgba(248, 113, 113, 0.48);
 }
 
 .download-center-task.paused,
 .download-center-task.waiting,
 .download-center-task.connecting,
 .download-center-task.external {
-  border-color: rgba(242, 177, 52, 0.34);
+  border-color: rgba(251, 191, 36, 0.34);
 }
 
 .download-task-main {
@@ -747,8 +763,8 @@ body:has(.sidebar.collapsed) .download-dialog-overlay {
   display: inline-flex !important;
   align-items: center;
   justify-content: center;
-  border-radius: 8px;
-  background: rgba(242, 177, 52, 0.14);
+  border-radius: var(--radius-md);
+  background: rgba(251, 191, 36, 0.14);
   color: var(--warning) !important;
   font-size: 11px !important;
   font-weight: 800;
@@ -783,7 +799,7 @@ body:has(.sidebar.collapsed) .download-dialog-overlay {
 .download-task-state {
   flex-shrink: 0;
   padding: 2px 7px;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   background: rgba(112, 129, 150, 0.12);
   color: var(--text-muted);
   font-size: 10px;
@@ -794,7 +810,7 @@ body:has(.sidebar.collapsed) .download-dialog-overlay {
 
 .download-task-state.active,
 .download-task-state.complete {
-  background: rgba(52, 199, 123, 0.13);
+  background: rgba(52, 211, 153, 0.13);
   color: var(--success);
 }
 
@@ -802,12 +818,12 @@ body:has(.sidebar.collapsed) .download-dialog-overlay {
 .download-task-state.waiting,
 .download-task-state.connecting,
 .download-task-state.external {
-  background: rgba(242, 177, 52, 0.13);
+  background: rgba(251, 191, 36, 0.13);
   color: var(--warning);
 }
 
 .download-task-state.error {
-  background: rgba(239, 106, 100, 0.13);
+  background: rgba(248, 113, 113, 0.13);
   color: var(--danger);
 }
 
@@ -831,16 +847,16 @@ body:has(.sidebar.collapsed) .download-dialog-overlay {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  border: 1px solid var(--border);
-  border-radius: 7px;
-  background: var(--bg-card);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-sm);
+  background: var(--glass-bg);
   color: var(--text-secondary);
   cursor: pointer;
 }
 
 .download-icon-btn:hover:not(:disabled) {
   color: var(--accent);
-  border-color: var(--border-strong);
+  border-color: var(--glass-border-strong);
   background: var(--accent-soft);
 }
 
@@ -856,8 +872,8 @@ body:has(.sidebar.collapsed) .download-dialog-overlay {
 .download-section-head em {
   flex-shrink: 0;
   padding: 3px 7px;
-  border-radius: 999px;
-  background: rgba(242, 177, 52, 0.12);
+  border-radius: var(--radius-pill);
+  background: rgba(251, 191, 36, 0.12);
   color: var(--warning);
   font-size: 11px;
   font-weight: 700;
@@ -865,12 +881,12 @@ body:has(.sidebar.collapsed) .download-dialog-overlay {
 
 .download-section-head em.download-status-active,
 .download-section-head em.download-status-complete {
-  background: rgba(52, 199, 123, 0.13);
+  background: rgba(52, 211, 153, 0.13);
   color: var(--success);
 }
 
 .download-section-head em.download-status-error {
-  background: rgba(239, 106, 100, 0.13);
+  background: rgba(248, 113, 113, 0.13);
   color: var(--danger);
 }
 
@@ -878,15 +894,15 @@ body:has(.sidebar.collapsed) .download-dialog-overlay {
 .download-section-head em.download-status-waiting,
 .download-section-head em.download-status-connecting,
 .download-section-head em.download-status-external {
-  background: rgba(242, 177, 52, 0.13);
+  background: rgba(251, 191, 36, 0.13);
   color: var(--warning);
 }
 
 .download-progress {
   height: 5px;
   overflow: hidden;
-  border-radius: 999px;
-  background: var(--bg-surface);
+  border-radius: var(--radius-pill);
+  background: var(--glass-bg-soft);
 }
 
 .download-progress span {
@@ -940,9 +956,9 @@ body:has(.sidebar.collapsed) .download-dialog-overlay {
 .download-detail-grid > div {
   min-width: 0;
   padding: 8px;
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  background: var(--bg-secondary);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-md);
+  background: var(--bg-surface);
 }
 
 .download-health-card {
@@ -954,9 +970,9 @@ body:has(.sidebar.collapsed) .download-dialog-overlay {
 .download-health-card > div {
   min-width: 0;
   padding: 8px;
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  background: var(--bg-secondary);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-md);
+  background: var(--bg-surface);
 }
 
 .download-health-card p {
@@ -984,9 +1000,9 @@ body:has(.sidebar.collapsed) .download-dialog-overlay {
 
 .download-detail-row {
   padding: 8px;
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  background: var(--bg-secondary);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-md);
+  background: var(--bg-surface);
 }
 
 .download-detail-row strong {
@@ -1018,13 +1034,13 @@ body:has(.sidebar.collapsed) .download-dialog-overlay {
   gap: 8px;
   min-height: 26px;
   padding: 5px 6px;
-  border-radius: 6px;
+  border-radius: var(--radius-sm);
   color: var(--text-secondary);
   font-size: 12px;
 }
 
 .download-file-row:hover {
-  background: var(--bg-card-hover);
+  background: var(--glass-bg-strong);
 }
 
 .download-file-row span {
@@ -1078,7 +1094,7 @@ body:has(.sidebar.collapsed) .download-dialog-overlay {
   justify-content: space-between;
   gap: 12px;
   padding: 4px 0 8px;
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1px solid var(--glass-border);
 }
 
 .download-file-toolbar label,
@@ -1098,9 +1114,9 @@ body:has(.sidebar.collapsed) .download-dialog-overlay {
 
 .download-file-table {
   min-height: 210px;
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  background: var(--bg-card);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-md);
+  background: var(--glass-bg);
   overflow: hidden;
 }
 
@@ -1109,10 +1125,10 @@ body:has(.sidebar.collapsed) .download-dialog-overlay {
   grid-template-columns: minmax(0, 1fr) 70px 88px;
   gap: 10px;
   padding: 8px 12px 8px 40px;
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1px solid var(--glass-border);
   color: var(--text-muted);
   font-size: 12px;
-  background: var(--bg-surface);
+  background: var(--glass-bg-soft);
 }
 
 .download-file-table-body {
@@ -1141,7 +1157,7 @@ body:has(.sidebar.collapsed) .download-dialog-overlay {
   justify-content: center;
   flex-shrink: 0;
   border-radius: 5px;
-  background: var(--bg-surface);
+  background: var(--glass-bg-soft);
   color: var(--text-muted) !important;
   font-size: 10px !important;
   font-weight: 800;
@@ -1153,7 +1169,7 @@ body:has(.sidebar.collapsed) .download-dialog-overlay {
 }
 
 .download-file-type-icon.subtitle {
-  background: rgba(52, 199, 123, 0.13);
+  background: rgba(52, 211, 153, 0.13);
   color: var(--success) !important;
 }
 
@@ -1171,9 +1187,9 @@ body:has(.sidebar.collapsed) .download-dialog-overlay {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  background: var(--bg-card);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-md);
+  background: var(--glass-bg);
   color: var(--text-secondary);
   cursor: pointer;
   flex-shrink: 0;
@@ -1187,8 +1203,8 @@ body:has(.sidebar.collapsed) .download-dialog-overlay {
 
 .right-dock-close-btn:hover {
   color: var(--text-primary);
-  background: var(--bg-card-hover);
-  border-color: var(--border-strong);
+  background: var(--glass-bg-strong);
+  border-color: var(--glass-border-strong);
   transform: rotate(90deg);
 }
 
@@ -1262,19 +1278,19 @@ body:has(.sidebar.collapsed) .download-dialog-overlay {
   justify-content: space-between;
   align-items: center;
   padding: 12px 16px;
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1px solid var(--glass-border);
 }
 
 .right-dock-tabs {
   display: flex;
   gap: 4px;
   padding: 8px 12px;
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1px solid var(--glass-border);
 }
 
 .right-dock-tab {
   padding: 6px 14px;
-  border-radius: 6px;
+  border-radius: var(--radius-sm);
   border: none;
   background: transparent;
   color: var(--text-secondary);
@@ -1283,7 +1299,9 @@ body:has(.sidebar.collapsed) .download-dialog-overlay {
 }
 
 .right-dock-tab:hover {
-  background: var(--bg-card);
+  background: var(--glass-bg);
+  backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
   color: var(--text-primary);
 }
 
@@ -1298,13 +1316,7 @@ body:has(.sidebar.collapsed) .download-dialog-overlay {
   min-height: 0;
 }
 
-/* 桌面端窄屏：压缩面板宽度，避免主内容区被过度挤压 */
-@media (max-width: 900px) {
-  .right-dock-panel {
-    width: 280px;
-    flex: 0 0 280px;
-  }
-}
+/* 桌面端窄屏：压缩面板宽度，避免抽屉盖住全部主内容区（由新规则 min() 处理，见文件末尾） */
 
 /* ─── AI Search Panel ─── */
 .ai-search-panel {
@@ -1331,14 +1343,18 @@ body:has(.sidebar.collapsed) .download-dialog-overlay {
   align-items: center;
   justify-content: center;
   gap: 8px;
-  border: 2px dashed var(--border);
+  border: 2px dashed var(--glass-border);
   border-radius: var(--radius-lg);
   padding: 40px 20px;
   text-align: center;
   color: var(--text-muted);
   font-size: 13px;
-  background: var(--bg-card);
+  background: var(--glass-bg);
+  backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
   transition: border-color var(--transition-fast), background var(--transition-fast);
+  backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
 }
 
 .ai-search-drop-zone:hover {
@@ -1358,8 +1374,8 @@ body:has(.sidebar.collapsed) .download-dialog-overlay {
 
 /* 视频信息卡片 */
 .ai-search-video-card {
-  background: var(--bg-card);
-  border: 1px solid var(--border);
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
   border-radius: var(--radius-md);
   padding: 14px;
   box-shadow: var(--shadow-sm);
@@ -1388,8 +1404,8 @@ body:has(.sidebar.collapsed) .download-dialog-overlay {
 .ai-search-video-header button {
   flex-shrink: 0;
   padding: 3px 8px;
-  border: 1px solid var(--border);
-  border-radius: 6px;
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-sm);
   background: transparent;
   color: var(--text-muted);
   font-size: 11px;
@@ -1399,8 +1415,8 @@ body:has(.sidebar.collapsed) .download-dialog-overlay {
 
 .ai-search-video-header button:hover {
   color: var(--danger);
-  background: rgba(239, 106, 100, 0.08);
-  border-color: rgba(239, 106, 100, 0.35);
+  background: rgba(248, 113, 113, 0.08);
+  border-color: rgba(248, 113, 113, 0.35);
 }
 
 .ai-search-filename {
@@ -1475,9 +1491,9 @@ body:has(.sidebar.collapsed) .download-dialog-overlay {
 }
 
 .ai-search-keyword {
-  background: var(--bg-surface);
-  border: 1px solid var(--border);
-  border-radius: 999px;
+  background: var(--glass-bg-soft);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-pill);
   padding: 4px 10px 4px 12px;
   font-size: 12px;
   display: inline-flex;
@@ -1488,8 +1504,8 @@ body:has(.sidebar.collapsed) .download-dialog-overlay {
 }
 
 .ai-search-keyword:hover {
-  background: var(--bg-card-hover);
-  border-color: var(--border-strong);
+  background: var(--glass-bg-strong);
+  border-color: var(--glass-border-strong);
 }
 
 .ai-search-keyword button {
@@ -1498,7 +1514,7 @@ body:has(.sidebar.collapsed) .download-dialog-overlay {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background: var(--border);
+  background: var(--glass-border);
   border: none;
   border-radius: 50%;
   cursor: pointer;
@@ -1521,9 +1537,9 @@ body:has(.sidebar.collapsed) .download-dialog-overlay {
   width: 110px;
   min-height: 28px;
   padding: 0 10px;
-  border: 1px solid var(--border);
-  border-radius: 999px;
-  background: var(--bg-surface);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-pill);
+  background: var(--glass-bg-soft);
   color: var(--text-primary);
   font-size: 12px;
   outline: none;
@@ -1539,7 +1555,7 @@ body:has(.sidebar.collapsed) .download-dialog-overlay {
 .ai-search-keyword-add {
   padding: 4px 10px;
   border: 1px solid var(--accent);
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   background: var(--accent-soft);
   color: var(--accent);
   font-size: 12px;
@@ -1564,15 +1580,15 @@ body:has(.sidebar.collapsed) .download-dialog-overlay {
   display: flex;
   gap: 2px;
   padding: 3px;
-  background: var(--bg-surface);
-  border: 1px solid var(--border);
-  border-radius: 8px;
+  background: var(--glass-bg-soft);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-md);
 }
 
 .ai-search-intent-btn {
   flex: 1;
   padding: 7px 4px;
-  border-radius: 6px;
+  border-radius: var(--radius-sm);
   border: none;
   background: transparent;
   color: var(--text-secondary);
@@ -1584,11 +1600,11 @@ body:has(.sidebar.collapsed) .download-dialog-overlay {
 
 .ai-search-intent-btn:hover {
   color: var(--text-primary);
-  background: var(--bg-card-hover);
+  background: var(--glass-bg-strong);
 }
 
 .ai-search-intent-btn.active {
-  background: var(--bg-card);
+  background: var(--glass-bg);
   color: var(--accent);
   box-shadow: var(--shadow-sm);
 }
@@ -1612,7 +1628,7 @@ body:has(.sidebar.collapsed) .download-dialog-overlay {
   gap: 8px;
   padding: 10px 16px;
   border: none;
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   background: linear-gradient(135deg, var(--accent) 0%, var(--accent-hover) 100%);
   color: #fff;
   font-size: 13px;
@@ -1652,9 +1668,9 @@ body:has(.sidebar.collapsed) .download-dialog-overlay {
 
 .ai-search-cancel-btn {
   padding: 10px 14px;
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  background: var(--bg-card);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-md);
+  background: var(--glass-bg);
   color: var(--text-secondary);
   font-size: 13px;
   cursor: pointer;
@@ -1663,14 +1679,14 @@ body:has(.sidebar.collapsed) .download-dialog-overlay {
 
 .ai-search-cancel-btn:hover {
   color: var(--text-primary);
-  background: var(--bg-card-hover);
-  border-color: var(--border-strong);
+  background: var(--glass-bg-strong);
+  border-color: var(--glass-border-strong);
 }
 
 /* 进度 */
 .ai-search-progress {
-  background: var(--bg-card);
-  border: 1px solid var(--border);
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
   border-radius: var(--radius-md);
   padding: 12px 14px;
   display: flex;
@@ -1702,20 +1718,20 @@ body:has(.sidebar.collapsed) .download-dialog-overlay {
   justify-content: space-between;
   gap: 12px;
   padding: 12px 14px;
-  border: 1px solid rgba(52, 199, 123, 0.28);
+  border: 1px solid rgba(52, 211, 153, 0.28);
   border-radius: var(--radius-md);
-  background: rgba(52, 199, 123, 0.08);
+  background: rgba(52, 211, 153, 0.08);
   box-shadow: var(--shadow-sm);
 }
 
 .ai-search-summary.error {
-  border-color: rgba(239, 106, 100, 0.28);
-  background: rgba(239, 106, 100, 0.08);
+  border-color: rgba(248, 113, 113, 0.28);
+  background: rgba(248, 113, 113, 0.08);
 }
 
 .ai-search-summary.warning {
-  border-color: rgba(242, 177, 52, 0.3);
-  background: rgba(242, 177, 52, 0.09);
+  border-color: rgba(251, 191, 36, 0.3);
+  background: rgba(251, 191, 36, 0.09);
 }
 
 .ai-search-summary-label {
@@ -1744,9 +1760,9 @@ body:has(.sidebar.collapsed) .download-dialog-overlay {
 .ai-search-summary button,
 .ai-search-process-collapsed {
   flex-shrink: 0;
-  border: 1px solid var(--border);
-  border-radius: 7px;
-  background: var(--bg-card);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-sm);
+  background: var(--glass-bg);
   color: var(--text-secondary);
   padding: 5px 9px;
   font-size: 12px;
@@ -1757,8 +1773,8 @@ body:has(.sidebar.collapsed) .download-dialog-overlay {
 .ai-search-summary button:hover,
 .ai-search-process-collapsed:hover {
   color: var(--text-primary);
-  background: var(--bg-card-hover);
-  border-color: var(--border-strong);
+  background: var(--glass-bg-strong);
+  border-color: var(--glass-border-strong);
 }
 
 .ai-search-process-list {
@@ -1772,9 +1788,9 @@ body:has(.sidebar.collapsed) .download-dialog-overlay {
   align-items: center;
   gap: 10px;
   padding: 10px 12px;
-  border: 1px solid var(--border);
+  border: 1px solid var(--glass-border);
   border-radius: var(--radius-md);
-  background: var(--bg-card);
+  background: var(--glass-bg);
 }
 
 .ai-search-process-current > div {
@@ -1817,29 +1833,29 @@ body:has(.sidebar.collapsed) .download-dialog-overlay {
 }
 
 .ai-search-process-item.warning .ai-search-process-avatar {
-  background: rgba(242, 177, 52, 0.14);
+  background: rgba(251, 191, 36, 0.14);
   color: var(--warning);
-  border-color: rgba(242, 177, 52, 0.35);
+  border-color: rgba(251, 191, 36, 0.35);
 }
 
 .ai-search-process-item.error .ai-search-process-avatar {
-  background: rgba(239, 106, 100, 0.12);
+  background: rgba(248, 113, 113, 0.12);
   color: var(--danger);
-  border-color: rgba(239, 106, 100, 0.35);
+  border-color: rgba(248, 113, 113, 0.35);
 }
 
 .ai-search-process-item.success .ai-search-process-avatar {
-  background: rgba(52, 199, 123, 0.12);
+  background: rgba(52, 211, 153, 0.12);
   color: var(--success);
-  border-color: rgba(52, 199, 123, 0.35);
+  border-color: rgba(52, 211, 153, 0.35);
 }
 
 .ai-search-process-bubble {
   min-width: 0;
   padding: 9px 11px;
-  border: 1px solid var(--border);
+  border: 1px solid var(--glass-border);
   border-radius: var(--radius-md);
-  background: var(--bg-card);
+  background: var(--glass-bg);
   box-shadow: var(--shadow-sm);
 }
 
@@ -1879,8 +1895,8 @@ body:has(.sidebar.collapsed) .download-dialog-overlay {
   display: block;
   margin-top: 6px;
   padding: 6px 7px;
-  border-radius: 6px;
-  background: var(--bg-surface);
+  border-radius: var(--radius-sm);
+  background: var(--glass-bg-soft);
   color: var(--text-muted);
   font-size: 11px;
   line-height: 1.45;
@@ -1899,8 +1915,8 @@ body:has(.sidebar.collapsed) .download-dialog-overlay {
 
 .ai-search-process-bubble li {
   padding: 3px 7px;
-  border-radius: 999px;
-  background: var(--bg-surface);
+  border-radius: var(--radius-pill);
+  background: var(--glass-bg-soft);
   color: var(--text-muted);
   font-size: 11px;
 }
@@ -1908,7 +1924,7 @@ body:has(.sidebar.collapsed) .download-dialog-overlay {
 .ai-search-process-collapsed {
   width: 100%;
   text-align: center;
-  background: var(--bg-surface);
+  background: var(--glass-bg-soft);
 }
 
 /* 错误 */
@@ -1916,8 +1932,8 @@ body:has(.sidebar.collapsed) .download-dialog-overlay {
   display: flex;
   align-items: flex-start;
   gap: 8px;
-  background: rgba(239, 106, 100, 0.08);
-  border: 1px solid rgba(239, 106, 100, 0.25);
+  background: rgba(248, 113, 113, 0.08);
+  border: 1px solid rgba(248, 113, 113, 0.25);
   border-radius: var(--radius-md);
   padding: 12px 14px;
   color: var(--danger);
@@ -1955,12 +1971,14 @@ body:has(.sidebar.collapsed) .download-dialog-overlay {
   color: var(--accent);
   font-size: 11px;
   font-weight: 700;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
 }
 
 .ai-search-result-card {
-  background: var(--bg-card);
-  border: 1px solid var(--border);
+  background: var(--glass-bg);
+  backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+  border: 1px solid var(--glass-border);
   border-radius: var(--radius-md);
   padding: 14px;
   box-shadow: var(--shadow-sm);
@@ -1968,7 +1986,7 @@ body:has(.sidebar.collapsed) .download-dialog-overlay {
 }
 
 .ai-search-result-card:hover {
-  border-color: var(--border-strong);
+  border-color: var(--glass-border-strong);
   box-shadow: var(--shadow-card-hover);
 }
 
@@ -1997,18 +2015,18 @@ body:has(.sidebar.collapsed) .download-dialog-overlay {
 .ai-search-relationship-badge {
   flex-shrink: 0;
   padding: 3px 8px;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   font-size: 11px;
   font-weight: 600;
 }
 
 .ai-search-relationship-badge.sequel {
-  background: rgba(91, 140, 255, 0.12);
+  background: rgba(34, 211, 238, 0.12);
   color: var(--accent);
 }
 
 .ai-search-relationship-badge.prequel {
-  background: rgba(242, 177, 52, 0.14);
+  background: rgba(251, 191, 36, 0.14);
   color: #e0a020;
 }
 
@@ -2017,7 +2035,7 @@ body:has(.sidebar.collapsed) .download-dialog-overlay {
 }
 
 .ai-search-relationship-badge.same_series {
-  background: rgba(52, 199, 123, 0.12);
+  background: rgba(52, 211, 153, 0.12);
   color: var(--success);
 }
 
@@ -2027,7 +2045,7 @@ body:has(.sidebar.collapsed) .download-dialog-overlay {
 }
 
 .ai-search-relationship-badge.uncertain {
-  background: var(--bg-surface);
+  background: var(--glass-bg-soft);
   color: var(--text-muted);
 }
 
@@ -2041,27 +2059,29 @@ body:has(.sidebar.collapsed) .download-dialog-overlay {
 .ai-search-confidence-bar {
   flex: 1;
   height: 5px;
-  background: var(--bg-surface);
-  border-radius: 999px;
+  background: var(--glass-bg-soft);
+  backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+  border-radius: var(--radius-pill);
   overflow: hidden;
 }
 
 .ai-search-confidence-fill {
   height: 100%;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   transition: width 0.4s cubic-bezier(0.2, 0, 0.2, 1);
 }
 
 .ai-search-confidence-fill.high {
-  background: linear-gradient(90deg, #34c77b 0%, #4ade80 100%);
+  background: linear-gradient(90deg, var(--success) 0%, #4ade80 100%);
 }
 
 .ai-search-confidence-fill.medium {
-  background: linear-gradient(90deg, #f2b134 0%, #facc15 100%);
+  background: linear-gradient(90deg, var(--warning) 0%, #facc15 100%);
 }
 
 .ai-search-confidence-fill.low {
-  background: linear-gradient(90deg, #ef6a64 0%, #f87171 100%);
+  background: linear-gradient(90deg, var(--danger) 0%, #f87171 100%);
 }
 
 .ai-search-confidence > span {
@@ -2083,8 +2103,10 @@ body:has(.sidebar.collapsed) .download-dialog-overlay {
 .ai-search-confidence-details span {
   max-width: 100%;
   padding: 3px 7px;
-  border-radius: 999px;
-  background: var(--bg-surface);
+  border-radius: var(--radius-pill);
+  background: var(--glass-bg-soft);
+  backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
   color: var(--text-muted);
   font-size: 11px;
   line-height: 1.3;
@@ -2141,8 +2163,8 @@ body:has(.sidebar.collapsed) .download-dialog-overlay {
   color: var(--accent);
   word-break: break-all;
   padding: 4px 8px;
-  border-radius: 6px;
-  background: var(--bg-surface);
+  border-radius: var(--radius-sm);
+  background: var(--glass-bg-soft);
   transition: background var(--transition-fast);
 }
 
@@ -2153,7 +2175,7 @@ body:has(.sidebar.collapsed) .download-dialog-overlay {
 .ai-search-reason {
   margin-top: 10px;
   padding-top: 10px;
-  border-top: 1px solid var(--border);
+  border-top: 1px solid var(--glass-border);
   font-size: 12px;
   color: var(--text-secondary);
   line-height: 1.55;
@@ -2162,7 +2184,7 @@ body:has(.sidebar.collapsed) .download-dialog-overlay {
 .ai-search-feedback {
   margin-top: 10px;
   padding-top: 10px;
-  border-top: 1px solid var(--border);
+  border-top: 1px solid var(--glass-border);
   display: flex;
   align-items: center;
   gap: 8px;
@@ -2183,9 +2205,9 @@ body:has(.sidebar.collapsed) .download-dialog-overlay {
 .ai-search-rating button {
   width: 24px;
   height: 24px;
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  background: var(--bg-surface);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-sm);
+  background: var(--glass-bg-soft);
   color: var(--text-secondary);
   font-size: 12px;
   font-weight: 700;
@@ -2221,8 +2243,120 @@ body:has(.sidebar.collapsed) .download-dialog-overlay {
   font-size: 12px;
   color: var(--text-secondary);
   padding: 8px 12px;
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: 8px;
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-md);
   line-height: 1.5;
+}
+
+/* ─── v2 右 dock 悬浮抽屉 ─── */
+.right-dock-wrapper {
+  position: absolute;
+  top: 14px;
+  right: 0;
+  bottom: 14px;
+  height: auto;
+  z-index: 50;
+  display: flex;
+  flex-direction: row;
+  width: auto;
+  opacity: 1;
+  overflow: visible;
+}
+
+.right-dock-wrapper.open {
+  width: auto;
+  opacity: 1;
+  box-shadow: none;
+}
+
+/* 活动栏：常驻右侧玻璃竖条 */
+.right-dock-activity-bar {
+  width: 52px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 12px 0;
+  gap: 6px;
+  background: var(--glass-bg);
+  backdrop-filter: blur(18px) saturate(var(--glass-saturate));
+  -webkit-backdrop-filter: blur(18px) saturate(var(--glass-saturate));
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-lg);
+  box-shadow: inset 0 1px 0 var(--glass-highlight), var(--shadow-sm);
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.right-dock-wrapper.open .right-dock-activity-bar {
+  border-color: rgba(34, 211, 238, 0.3);
+  box-shadow: inset 0 1px 0 var(--glass-highlight), 0 0 18px var(--accent-glow);
+}
+
+/* 添加插件：活动栏底部入口（打开设置并定位插件管理页） */
+.right-dock-add-plugin-btn {
+  margin-top: auto;
+  width: 38px;
+  height: 38px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px dashed var(--glass-border-strong);
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: color var(--transition-fast), background var(--transition-fast), border-color var(--transition-fast), transform var(--transition-fast);
+}
+
+.right-dock-add-plugin-btn:hover {
+  color: var(--accent);
+  background: var(--accent-soft);
+  border-color: rgba(34, 211, 238, 0.45);
+  transform: scale(1.06);
+}
+
+.right-dock-add-plugin-btn:active {
+  transform: scale(0.94);
+}
+
+/* 面板：从竖条左侧浮层滑出 */
+.right-dock-panel {
+  position: absolute;
+  top: 0;
+  right: 64px;
+  bottom: 0;
+  width: min(var(--right-dock-open-width), 32vw);
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: var(--glass-bg);
+  backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+  border: 1px solid var(--glass-border-strong);
+  border-radius: var(--radius-lg);
+  box-shadow: inset 0 1px 0 var(--glass-highlight), -24px 0 60px rgba(0, 0, 0, 0.45);
+  opacity: 0;
+  pointer-events: none;
+  transform: translateX(calc(100% + 24px));
+  transition: transform 0.32s var(--ease-out), opacity 0.22s var(--ease-out);
+}
+
+.right-dock-panel.open {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateX(0);
+}
+
+.right-dock-panel.open::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: linear-gradient(180deg, transparent, var(--accent-glow), transparent);
+  opacity: 0.6;
+  pointer-events: none;
 }

@@ -928,7 +928,7 @@ export default function Settings() {
                   onSelectMpvPath={handleSelectMpvPath}
                 />
                 <FfmpegStatusSection ffmpegStatus={ffmpegStatus} />
-                <AboutSection />
+                <AboutSection appVersion={appVersion} />
                 <ShortcutsSection />
               </>
             ) : null}

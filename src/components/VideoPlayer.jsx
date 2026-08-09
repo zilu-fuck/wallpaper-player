@@ -1428,17 +1428,65 @@ export default function VideoPlayer({ video }) {
           playlistAvailable ? 'playlist-available' : '',
           analysisOpen && analysisAvailable ? 'analysis-open' : '',
           playlistOpen && playlistAvailable ? 'playlist-open' : '',
-          'controls-visible'
+          controlsVisible ? 'controls-visible' : 'controls-hidden'
         ].filter(Boolean).join(' ')}
         onMouseEnter={showControls}
         onMouseMove={showControls}
       >
         {!isWebpageMode && (
-        <button className="player-close" onClick={handleClose} title="关闭 (Esc)" type="button" aria-label="关闭播放器">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <path d="M18 6L6 18M6 6l12 12" />
-          </svg>
-        </button>
+        <div className="player-topbar" onClick={event => event.stopPropagation()}>
+          <button className="player-close" onClick={handleClose} title="关闭 (Esc)" type="button" aria-label="关闭播放器">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M18 6L6 18M6 6l12 12" />
+            </svg>
+          </button>
+          <div className="player-header-text">
+            <span className="player-title">{video?.name || video?.fileName || '视频'}</span>
+            <span className="player-meta">
+              {(video?.extension || '').replace(/^\./, '').toUpperCase() || 'VIDEO'}
+              {video?.size ? ` · ${(video.size / 1024 / 1024 / 1024).toFixed(1)} GB` : ''}
+              {video?.group ? ` · ${video.group}` : ''}
+            </span>
+          </div>
+          <div className="player-topbar-tools">
+            {videoAnalysisEnabled ? (
+              <button
+                className={`btn btn-icon player-control-btn player-analysis-toggle${analysisOpen ? ' active' : ''}`}
+                onClick={handleToggleAnalysis}
+                type="button"
+                disabled={!analysisAvailable || analysisRunning || analysisState.status === 'checking'}
+                title={analysisButtonTitle}
+                aria-label="视频理解"
+              >
+                {analysisState.status === 'checking' || analysisRunning ? (
+                  <span className="player-analysis-spinner" aria-hidden="true" />
+                ) : (
+                  <Icon path={<><path d="M4 5h16v10H4z" /><path d="M8 19h8" /><path d="M10 15v4M14 15v4" /><path d="M8 9h8M8 12h5" /></>} />
+                )}
+              </button>
+            ) : null}
+            {playlistAvailable ? (
+              <button
+                className={`btn btn-icon player-control-btn player-playlist-toggle${playlistOpen ? ' active' : ''}`}
+                onClick={handleTogglePlaylist}
+                type="button"
+                title={playlistOpen ? '收起列表' : `展开${playlistTitle}`}
+                aria-label={playlistOpen ? '收起播放列表' : '展开播放列表'}
+              >
+                <Icon path={<><path d="M8 6h12" /><path d="M8 12h12" /><path d="M8 18h12" /><path d="M4 6h.01M4 12h.01M4 18h.01" /></>} />
+              </button>
+            ) : null}
+            <button
+              className="btn btn-icon player-control-btn"
+              onClick={handleToggleFullscreen}
+              type="button"
+              title={isFullscreen ? '退出全屏' : '全屏'}
+              aria-label={isFullscreen ? '退出全屏' : '全屏'}
+            >
+              <Icon path={isFullscreen ? <path d="M9 3v6H3M15 3v6h6M9 21v-6H3M15 21v-6h6" /> : <path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5" />} />
+            </button>
+          </div>
+        </div>
         )}
 
         {isWebpageMode && (
@@ -1655,6 +1703,29 @@ export default function VideoPlayer({ video }) {
             onCancelAnalysis={handleCancelAnalysis}
           />
 
+            <div className="player-progress-row">
+              <span className="player-time-current">{formatTime(progressValue)}</span>
+              <div
+                className="player-progress-wrap"
+                onMouseMove={updateProgressPreview}
+                onMouseEnter={updateProgressPreview}
+                onMouseLeave={hideProgressPreview}
+              >
+                <input
+                  className="player-range player-progress-range"
+                  type="range"
+                  min="0"
+                  max={progressMax}
+                  step="0.1"
+                  value={progressValue}
+                  style={{ '--player-progress': `${progressPercent}%` }}
+                  onChange={(event) => handleSeekTo(event.target.value)}
+                  aria-label="播放进度"
+                />
+              </div>
+              <span className="player-time-total">{formatTime(duration)}</span>
+            </div>
+
             <div className="player-controls-row">
               <div className="player-left-controls">
                 <button
@@ -1699,48 +1770,9 @@ export default function VideoPlayer({ video }) {
                 >
                   <Icon path={<path d="M7 7h10V3l5 5-5 5V9H7a4 4 0 000 8h4v2H7a6 6 0 110-12z" />} />
                 </button>
-                <span className="player-time-current">{formatTime(progressValue)}</span>
-                <span className="player-time-divider">/</span>
-                <span className="player-time-total">{formatTime(duration)}</span>
-              </div>
-
-              <div
-                className="player-progress-wrap"
-                onMouseMove={updateProgressPreview}
-                onMouseEnter={updateProgressPreview}
-                onMouseLeave={hideProgressPreview}
-              >
-                <input
-                  className="player-range player-progress-range"
-                  type="range"
-                  min="0"
-                  max={progressMax}
-                  step="0.1"
-                  value={progressValue}
-                  style={{ '--player-progress': `${progressPercent}%` }}
-                  onChange={(event) => handleSeekTo(event.target.value)}
-                  aria-label="播放进度"
-                />
               </div>
 
               <div className="player-right-controls">
-                {videoAnalysisEnabled ? (
-                  <button
-                    className={`btn btn-icon player-control-btn player-analysis-toggle${analysisOpen ? ' active' : ''}`}
-                    onClick={handleToggleAnalysis}
-                    type="button"
-                    disabled={!analysisAvailable || analysisRunning || analysisState.status === 'checking'}
-                    title={analysisButtonTitle}
-                    aria-label="视频理解"
-                  >
-                    {analysisState.status === 'checking' || analysisRunning ? (
-                      <span className="player-analysis-spinner" aria-hidden="true" />
-                    ) : (
-                      <Icon path={<><path d="M4 5h16v10H4z" /><path d="M8 19h8" /><path d="M10 15v4M14 15v4" /><path d="M8 9h8M8 12h5" /></>} />
-                    )}
-                  </button>
-                ) : null}
-
                 <div className="player-popover-anchor">
                   <button className="player-text-button" type="button" title="清晰度" onClick={() => handleToggleMenu('quality')}>
                     {qualityLabel}
@@ -1810,24 +1842,6 @@ export default function VideoPlayer({ video }) {
                   aria-label="画中画"
                 >
                   <Icon path={<><rect x="3" y="5" width="18" height="14" rx="2" /><rect x="12" y="11" width="7" height="5" rx="1" /></>} />
-                </button>
-                <button
-                  className="btn btn-icon player-control-btn"
-                  onClick={handleToggleWebFullscreen}
-                  type="button"
-                  title={webFullscreen ? '退出网页全屏' : '网页全屏'}
-                  aria-label={webFullscreen ? '退出网页全屏' : '网页全屏'}
-                >
-                  <Icon path={webFullscreen ? <path d="M9 3v6H3M15 3v6h6M9 21v-6H3M15 21v-6h6" /> : <path d="M8 3H3v5M16 3h5v5M8 21H3v-5M16 21h5v-5" />} />
-                </button>
-                <button
-                  className="btn btn-icon player-control-btn"
-                  onClick={handleToggleFullscreen}
-                  type="button"
-                  title={isFullscreen ? '退出全屏' : '全屏'}
-                  aria-label={isFullscreen ? '退出全屏' : '全屏'}
-                >
-                  <Icon path={isFullscreen ? <path d="M9 3v6H3M15 3v6h6M9 21v-6H3M15 21v-6h6" /> : <path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5" />} />
                 </button>
                 </div>
             </div>
