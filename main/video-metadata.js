@@ -2,11 +2,11 @@ const crypto = require('crypto')
 const fs = require('fs')
 const fsp = require('fs/promises')
 const path = require('path')
-const { execFile } = require('child_process')
 const { app } = require('electron')
+const { execFileAsync } = require('./exec')
+const { getUserDataDir } = require('./user-data')
 const { getResourcePath } = require('./paths')
 
-const fallbackUserDataDir = path.join(process.cwd(), '.tmp-wallpaper-player')
 const CACHE_VERSION = 1
 const PROBE_TIMEOUT_MS = 12000
 const probePromises = new Map()
@@ -22,10 +22,6 @@ function delay(ms) {
 
 function setVideoMetadataWarmPaused(paused) {
   warmPaused = Boolean(paused)
-}
-
-function getUserDataDir() {
-  return app?.getPath ? app.getPath('userData') : fallbackUserDataDir
 }
 
 function getMetadataCachePath() {
@@ -54,15 +50,6 @@ function parseFps(value) {
   const [left, right] = value.split('/').map(Number)
   if (Number.isFinite(left) && Number.isFinite(right) && right > 0) return left / right
   return normalizeNumber(value)
-}
-
-function execFileAsync(file, args, options = {}) {
-  return new Promise((resolve, reject) => {
-    execFile(file, args, options, (err, stdout, stderr) => {
-      if (err) reject(err)
-      else resolve({ stdout, stderr })
-    })
-  })
 }
 
 function sanitizeStream(stream) {

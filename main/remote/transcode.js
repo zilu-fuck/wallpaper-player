@@ -2,8 +2,10 @@ const crypto = require('crypto')
 const fs = require('fs')
 const fsp = require('fs/promises')
 const path = require('path')
-const { execFile, spawn } = require('child_process')
+const { spawn } = require('child_process')
 const { app } = require('electron')
+const { execFileAsync } = require('../exec')
+const { getUserDataDir } = require('../user-data')
 const { findFfmpeg } = require('../thumbnail')
 const { getResourcePath } = require('../paths')
 
@@ -13,7 +15,6 @@ const MAX_RUNNING_TRANSCODES = 1
 const TRANSCODE_CACHE_MAX_FILES = 60
 const TRANSCODE_CACHE_MAX_AGE_MS = 14 * 24 * 60 * 60 * 1000
 let runningTranscodeSlots = 0
-const fallbackUserDataDir = path.join(process.cwd(), '.tmp-wallpaper-player')
 const QUALITY_PRESETS = {
   compatible: { label: 'compatible', landscapeWidth: 1920, landscapeHeight: 1080, portraitWidth: 1080, portraitHeight: 1920, crf: '23' },
   '1080p': { label: '1080p', landscapeWidth: 1920, landscapeHeight: 1080, portraitWidth: 1080, portraitHeight: 1920, crf: '23' },
@@ -22,10 +23,7 @@ const QUALITY_PRESETS = {
 }
 
 function getTranscodeDir() {
-  const baseDir = app?.getPath
-    ? app.getPath('userData')
-    : fallbackUserDataDir
-  const dir = path.join(baseDir, 'remote-transcodes')
+  const dir = path.join(getUserDataDir(), 'remote-transcodes')
   if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true })
   return dir
 }
@@ -57,15 +55,6 @@ function buildScaleFilter(quality) {
     `trunc(if(gte(iw\\,ih)\\,min(ih\\,${preset.landscapeHeight})\\,min(ih\\,${preset.portraitHeight}))/2)*2`,
     ':force_original_aspect_ratio=decrease'
   ].join('')
-}
-
-function execFileAsync(file, args, options = {}) {
-  return new Promise((resolve, reject) => {
-    execFile(file, args, options, (err, stdout, stderr) => {
-      if (err) reject(err)
-      else resolve({ stdout, stderr })
-    })
-  })
 }
 
 async function findFfprobe() {

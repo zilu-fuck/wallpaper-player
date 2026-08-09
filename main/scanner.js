@@ -3,11 +3,11 @@ const fs = require('fs')
 const fsp = require('fs/promises')
 const crypto = require('crypto')
 const { SCAN_CACHE_TTL } = require('./constants')
-const { pathKey, isPathInside, isVideoFile } = require('./paths')
+const { pathKey, isPathInside, isVideoFile, isVideoContentFile } = require('./paths')
 const { getAllowedVideoDirectories, setDirectoryChangeHandler, isSessionAllowedFile, resolvePathForAccess } = require('./settings')
 const { getCachedVideoMetadata, warmVideoMetadataCache } = require('./video-metadata')
+const { getUserDataDir } = require('./user-data')
 
-const fallbackUserDataDir = path.join(process.cwd(), '.tmp-wallpaper-player')
 const SCAN_INDEX_VERSION = 2
 
 // ─── 目录扫描缓存 + 文件监听 ──────────────────────────
@@ -19,15 +19,6 @@ const backgroundScanRefreshes = new Map()
 const workshopManifestCache = new Map()
 const R18_TAG = 'R18'
 const SCAN_METADATA_WARM_LIMIT = 24
-
-function getUserDataDir() {
-  try {
-    const { app } = require('electron')
-    return app?.getPath ? app.getPath('userData') : fallbackUserDataDir
-  } catch {
-    return fallbackUserDataDir
-  }
-}
 
 function getScanIndexDir() {
   const dir = path.join(getUserDataDir(), 'scan-index')
@@ -188,7 +179,7 @@ async function assertAllowedDirectory(dirPath) {
 async function assertAllowedVideoPath(filePath) {
   const resolved = await resolveExistingPath(filePath)
   const stats = await fsp.stat(resolved)
-  if (!stats.isFile() || !isVideoFile(resolved)) {
+  if (!stats.isFile() || !(await isVideoContentFile(resolved))) {
     throw new Error('路径不是支持的视频文件')
   }
 
@@ -368,7 +359,7 @@ async function getValidatedIndexedVideos(index, resolvedDir) {
 
     try {
       const stats = await fsp.stat(fullPath)
-      if (!stats.isFile()) continue
+      if (!stats.isFile() || !(await isVideoContentFile(fullPath))) continue
       const indexedSize = Number(entry.size ?? video.size) || 0
       const indexedModified = Math.round(Number(entry.modified ?? video.modified) || 0)
       if (indexedSize !== stats.size || indexedModified !== Math.round(stats.mtimeMs)) continue
@@ -450,6 +441,7 @@ async function scanDirectory(dirPath, baseDir, depth = 0, inheritedMetadata = nu
       }
     } else if (entry.isFile() && isVideoFile(entry.name)) {
       try {
+        if (!(await isVideoContentFile(fullPath))) continue
         const stats = await fsp.stat(fullPath)
         results.push(
           reuseIndexedVideo(index, fullPath, stats, metadata, entry.name, dirPath, baseDir) ||

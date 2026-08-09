@@ -1,6 +1,7 @@
-const { BrowserWindow, shell, session, app } = require('electron')
+const { BrowserWindow, shell, session, app, screen } = require('electron')
 const path = require('path')
 const fs = require('fs')
+const log = require('electron-log')
 
 let mainWindow = null
 let windowCloseHandler = null
@@ -44,11 +45,12 @@ function setupCSP() {
 }
 
 function createWindow() {
+  const { width: workWidth, height: workHeight } = screen.getPrimaryDisplay().workAreaSize
   mainWindow = new BrowserWindow({
-    width: 1440,
-    height: 900,
-    minWidth: 900,
-    minHeight: 600,
+    width: Math.min(1440, workWidth),
+    height: Math.min(900, workHeight),
+    minWidth: Math.min(900, workWidth),
+    minHeight: Math.min(600, workHeight),
     title: '视频画廊',
     backgroundColor: '#0a0a0f',
     autoHideMenuBar: true,
@@ -124,24 +126,25 @@ function createWindow() {
   if (!app.isPackaged) {
     mainWindow.webContents.on('console-message', (event, level, message, line, sourceId) => {
       const labels = ['debug', 'log', 'warn', 'error']
-      console.log(`[renderer:${labels[level] || level}] ${message} (${sourceId}:${line})`)
+      const methods = ['debug', 'info', 'warn', 'error']
+      log[methods[level] || 'info'](`[renderer:${labels[level] || level}] ${message} (${sourceId}:${line})`)
     })
   }
 
   mainWindow.webContents.on('render-process-gone', (event, details) => {
-    console.error('[renderer] render-process-gone:', details)
+    log.error('[renderer] render-process-gone:', details)
   })
 
   mainWindow.webContents.on('did-finish-load', () => {
-    console.log('[window] did-finish-load:', mainWindow.webContents.getURL())
+    log.info('[window] did-finish-load:', mainWindow.webContents.getURL())
   })
 
   mainWindow.webContents.on('did-fail-load', (event, errorCode, errorDescription, validatedURL) => {
-    console.error('[window] did-fail-load:', errorCode, errorDescription, validatedURL)
+    log.error('[window] did-fail-load:', errorCode, errorDescription, validatedURL)
   })
 
   mainWindow.webContents.on('preload-error', (event, preloadPath, error) => {
-    console.error('[window] preload-error:', preloadPath, error)
+    log.error('[window] preload-error:', preloadPath, error)
   })
 
   mainWindow.webContents.on('will-navigate', (event, url) => {

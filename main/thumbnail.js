@@ -2,8 +2,9 @@ const path = require('path')
 const fs = require('fs')
 const fsp = require('fs/promises')
 const crypto = require('crypto')
-const { execFile } = require('child_process')
 const { app } = require('electron')
+const { execFileAsync } = require('./exec')
+const { getUserDataDir } = require('./user-data')
 const { getResourcePath, isPathInside } = require('./paths')
 const { getAllowedVideoDirectories } = require('./settings')
 const { assertAllowedVideoPath, readWallpaperMetadata } = require('./scanner')
@@ -12,7 +13,6 @@ const { setVideoMetadataWarmPaused } = require('./video-metadata')
 let ffmpegPath = null
 let ffmpegSearchPromise = null
 let ffmpegSearchCompleted = false
-const fallbackUserDataDir = path.join(process.cwd(), '.tmp-wallpaper-player')
 const THUMBNAIL_FFMPEG_CONCURRENCY = 1
 const THUMBNAIL_SCALE = '256:-1'
 const PREVIEW_FRAME_SCALE = '200:-1'
@@ -69,23 +69,8 @@ function setMediaPlaybackActive(active) {
   if (!mediaPlaybackActive) drainThumbnailJobs()
 }
 
-function execFileAsync(file, args, options = {}) {
-  return new Promise((resolve, reject) => {
-    execFile(file, args, options, (err, stdout, stderr) => {
-      if (err) {
-        reject(err)
-      } else {
-        resolve({ stdout, stderr })
-      }
-    })
-  })
-}
-
 function getThumbnailDir() {
-  const baseDir = app?.getPath
-    ? app.getPath('userData')
-    : fallbackUserDataDir
-  const dir = path.join(baseDir, 'thumbnails')
+  const dir = path.join(getUserDataDir(), 'thumbnails')
   if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true })
   return dir
 }

@@ -3,17 +3,14 @@ const fsp = require('fs/promises')
 const path = require('path')
 const crypto = require('crypto')
 const os = require('os')
-const { execFile } = require('child_process')
 const { app } = require('electron')
 const { isPathInside, pathKey } = require('../paths')
 const { MANIFEST_FILE, normalizeManifest } = require('./manifest')
-const { officialPluginIds, isOfficialPluginId } = require('./official')
+const { officialPluginIds, isOfficialPluginId, getOfficialPackageIntegrity } = require('./official')
+const { execFileAsync } = require('../exec')
+const { getUserDataDir } = require('../user-data')
 
-const fallbackUserDataDir = path.join(process.cwd(), '.tmp-wallpaper-player')
-
-function getUserDataDir() {
-  return app?.getPath ? app.getPath('userData') : fallbackUserDataDir
-}
+const OFFICIAL_PACKAGE_MARKER = '.official-package.json'
 
 function getExternalPluginsDir() {
   return path.join(getUserDataDir(), 'plugins')
@@ -47,11 +44,27 @@ async function readJsonFile(filePath) {
   return JSON.parse(raw.replace(/^\uFEFF/, ''))
 }
 
-function stampManifestSource(manifest) {
+function assertOfficialPackageIntegrity(manifest, options = {}) {
+  const expected = getOfficialPackageIntegrity(manifest.id)
+  const packageSha256 = String(options.officialPackageSha256 || '').trim().toLowerCase()
+  const payloadSha256 = String(options.officialPayloadSha256 || '').trim().toLowerCase()
+  const packageMatches = Boolean(packageSha256 && expected?.sha256 === packageSha256)
+  const payloadMatches = Boolean(payloadSha256 && expected?.payloadSha256 === payloadSha256)
+  if (!packageMatches && !payloadMatches) {
+    throw new Error('官方插件包校验失败，请从项目 GitHub Releases 重新下载')
+  }
+  if (expected.version && manifest.version !== expected.version) {
+    throw new Error('官方插件包版本与校验清单不一致')
+  }
+  return expected
+}
+
+function stampManifestSource(manifest, options = {}) {
   if (isOfficialPluginId(manifest.id) && manifest.publisher !== 'official') {
     throw new Error('第三方插件不能使用官方插件 ID')
   }
   const official = isOfficialPluginId(manifest.id) && manifest.publisher === 'official'
+  if (official) assertOfficialPackageIntegrity(manifest, options)
   manifest.source = official ? 'official' : 'user'
   manifest.publisher = official ? 'official' : 'third-party'
   manifest.trusted = official
@@ -66,7 +79,23 @@ async function readManifestFromPath(inputPath, options = {}) {
     location: path.dirname(manifestPath)
   })
   if (!options.publisher && !options.source) {
-    stampManifestSource(manifest)
+    let officialPackageSha256 = options.officialPackageSha256
+    let officialPayloadSha256 = options.officialPayloadSha256
+    let migratedOfficialPackage = false
+    if (!officialPackageSha256 && isOfficialPluginId(manifest.id)) {
+      const markerPath = path.join(path.dirname(manifestPath), OFFICIAL_PACKAGE_MARKER)
+      const marker = await readJsonFile(markerPath).catch(() => null)
+      officialPayloadSha256 = await hashDirectorySha256(path.dirname(manifestPath))
+      migratedOfficialPackage = !marker
+    }
+    stampManifestSource(manifest, { officialPackageSha256, officialPayloadSha256 })
+    if (migratedOfficialPackage && manifest.source === 'official') {
+      await fsp.writeFile(path.join(path.dirname(manifestPath), OFFICIAL_PACKAGE_MARKER), JSON.stringify({
+        id: manifest.id,
+        version: manifest.version,
+        payloadSha256: officialPayloadSha256
+      }, null, 2), 'utf-8').catch(() => {})
+    }
   }
   return {
     manifest,
@@ -158,20 +187,6 @@ async function assertSafeInstallSource(sourcePath, pluginsDir) {
   return source
 }
 
-function execFileAsync(file, args, options) {
-  return new Promise((resolve, reject) => {
-    execFile(file, args, options, (error, stdout, stderr) => {
-      if (error) {
-        error.stdout = stdout
-        error.stderr = stderr
-        reject(error)
-        return
-      }
-      resolve({ stdout, stderr })
-    })
-  })
-}
-
 async function extractZipToTemp(sourceZip) {
   const extractDir = await fsp.mkdtemp(path.join(os.tmpdir(), 'wallpaper-player-plugin-'))
   await execFileAsync('powershell.exe', [
@@ -218,6 +233,7 @@ async function copyPluginDirectory(sourceDir, targetDir) {
   await fsp.mkdir(targetDir, { recursive: true })
   const entries = await fsp.readdir(sourceDir, { withFileTypes: true })
   for (const entry of entries) {
+    if (entry.name === OFFICIAL_PACKAGE_MARKER) continue
     const source = path.join(sourceDir, entry.name)
     const target = path.join(targetDir, entry.name)
     if (entry.isDirectory()) {
@@ -228,12 +244,11 @@ async function copyPluginDirectory(sourceDir, targetDir) {
   }
 }
 
-async function readInstallManifest(source) {
-  const { manifest, manifestPath } = await readManifestFromPath(source)
-  return {
-    manifest: stampManifestSource(manifest),
-    manifestPath
-  }
+async function readInstallManifest(source, options = {}) {
+  return readManifestFromPath(source, {
+    officialPackageSha256: options.officialPackageSha256,
+    officialPayloadSha256: options.officialPayloadSha256
+  })
 }
 
 async function createTempInstallDir(pluginsDir, pluginId, suffix) {
@@ -256,9 +271,9 @@ async function restoreBackupDirectory(targetDir, backupDir, installedReplacement
   }
 }
 
-async function installPreparedPlugin(source) {
+async function installPreparedPlugin(source, options = {}) {
   const pluginsDir = await ensureExternalPluginsDir()
-  const { manifest, manifestPath } = await readInstallManifest(source)
+  const { manifest, manifestPath } = await readInstallManifest(source, options)
   const sourceDir = path.dirname(manifestPath)
   const targetDir = path.resolve(pluginsDir, manifest.id)
   if (!isPathInside(pluginsDir, targetDir)) {
@@ -273,9 +288,17 @@ async function installPreparedPlugin(source) {
 
   try {
     await copyPluginDirectory(sourceDir, stageDir)
-    const { manifest: stagedManifest } = await readInstallManifest(stageDir)
+    const { manifest: stagedManifest } = await readInstallManifest(stageDir, options)
     if (stagedManifest.id !== manifest.id) {
       throw new Error('Installed plugin manifest id changed during copy')
+    }
+    if (stagedManifest.source === 'official') {
+      await fsp.writeFile(path.join(stageDir, OFFICIAL_PACKAGE_MARKER), JSON.stringify({
+        id: stagedManifest.id,
+        version: stagedManifest.version,
+        sha256: options.officialPackageSha256,
+        payloadSha256: getOfficialPackageIntegrity(stagedManifest.id)?.payloadSha256 || ''
+      }, null, 2), 'utf-8')
     }
 
     if (await pathExists(targetDir)) {
@@ -323,8 +346,11 @@ async function installExternalPlugin(sourcePath) {
   try {
     const stats = await fsp.stat(source)
     if (stats.isFile() && path.extname(source).toLowerCase() === '.zip') {
+      const packageSha256 = await hashFileSha256(source)
       extractedDir = await extractZipToTemp(source)
-      return await installPreparedPlugin(await findPluginRoot(extractedDir))
+      return await installPreparedPlugin(await findPluginRoot(extractedDir), {
+        officialPackageSha256: packageSha256
+      })
     }
     return await installPreparedPlugin(source)
   } finally {
@@ -332,6 +358,45 @@ async function installExternalPlugin(sourcePath) {
       await fsp.rm(extractedDir, { recursive: true, force: true }).catch(() => {})
     }
   }
+}
+
+function hashFileSha256(filePath) {
+  return new Promise((resolve, reject) => {
+    const hash = crypto.createHash('sha256')
+    const stream = fs.createReadStream(filePath)
+    stream.on('error', reject)
+    stream.on('data', chunk => hash.update(chunk))
+    stream.on('end', () => resolve(hash.digest('hex')))
+  })
+}
+
+async function hashDirectorySha256(directory) {
+  const hash = crypto.createHash('sha256')
+
+  async function visit(currentDir, relativeDir = '') {
+    const entries = await fsp.readdir(currentDir, { withFileTypes: true })
+    entries.sort((left, right) => left.name.localeCompare(right.name, 'en'))
+    for (const entry of entries) {
+      if (entry.name === OFFICIAL_PACKAGE_MARKER) continue
+      const relativePath = path.posix.join(relativeDir.replace(/\\/g, '/'), entry.name)
+      const fullPath = path.join(currentDir, entry.name)
+      if (entry.isDirectory()) {
+        await visit(fullPath, relativePath)
+      } else if (entry.isFile()) {
+        hash.update(`file:${relativePath}\0`)
+        await new Promise((resolve, reject) => {
+          const stream = fs.createReadStream(fullPath)
+          stream.on('error', reject)
+          stream.on('data', chunk => hash.update(chunk))
+          stream.on('end', resolve)
+        })
+        hash.update('\0')
+      }
+    }
+  }
+
+  await visit(directory)
+  return hash.digest('hex')
 }
 
 async function uninstallExternalPlugin(pluginId, options = {}) {

@@ -3,19 +3,16 @@ const fs = require('fs')
 const path = require('path')
 const { app } = require('electron')
 const log = require('electron-log')
+const { getUserDataDir } = require('../user-data')
 
 const IDENTITY_FILE = 'remote-identity.json'
 const DEFAULT_PAIRING_TTL_MS = 5 * 60 * 1000
 const LAST_SEEN_WRITE_INTERVAL_MS = 60 * 1000
-const fallbackUserDataDir = path.join(process.cwd(), '.tmp-wallpaper-player')
 let identityCorruptedAt = 0
 const pairingSessions = new Map()
 
 function getIdentityPath() {
-  const baseDir = app?.getPath
-    ? app.getPath('userData')
-    : fallbackUserDataDir
-  return path.join(baseDir, IDENTITY_FILE)
+  return path.join(getUserDataDir(), IDENTITY_FILE)
 }
 
 function getAppName() {

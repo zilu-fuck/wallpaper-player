@@ -1,7 +1,9 @@
 const path = require('path')
 const fs = require('fs')
+const fsp = fs.promises
 const crypto = require('crypto')
 const { app } = require('electron')
+const { getUserDataDir } = require('./user-data')
 const { pathKey, isExistingFile, isMpvExecutablePath } = require('./paths')
 
 const PRIVACY_PASSWORD_ITERATIONS = 120000
@@ -13,10 +15,19 @@ const sessionPrivateDirectories = new Set()
 const sessionAllowedMpvPaths = new Set()
 const sessionAllowedFiles = new Set()
 const settingsSections = new Map()
-const fallbackUserDataDir = path.join(process.cwd(), '.tmp-wallpaper-player')
+const SETTINGS_WRITE_DEBOUNCE_MS = 75
 
 let directoryChangeHandler = null
 const settingsChangeHandlers = new Set()
+let settingsCache = null
+let settingsCachePath = ''
+let pendingSettingsWrite = null
+let settingsWriteTimer = null
+let settingsWriteChain = Promise.resolve()
+let settingsFlushHooksInstalled = false
+let settingsWriteCounter = 0
+let settingsWriteError = null
+let settingsWriteInFlight = false
 
 function setDirectoryChangeHandler(handler) {
   directoryChangeHandler = handler
@@ -37,10 +48,7 @@ function notifySettingsChanged(settings) {
 }
 
 function getSettingsPath() {
-  const baseDir = app?.getPath
-    ? app.getPath('userData')
-    : fallbackUserDataDir
-  return path.join(baseDir, 'settings.json')
+  return path.join(getUserDataDir(), 'settings.json')
 }
 
 function normalizeDirectoryList(directories) {
@@ -418,6 +426,27 @@ function getSettingsSectionDefaults() {
   )
 }
 
+function getDefaultSettings() {
+  return {
+    theme: 'dark',
+    directories: [],
+    privateDirectories: [],
+    defaultDirectory: '',
+    favorites: [],
+    customTags: {},
+    hiddenTags: [],
+    networkResources: [],
+    downloadDirectories: [],
+    playbackStates: {},
+    playbackMode: 'order',
+    privacy: normalizePrivacy(),
+    remoteAccess: normalizeRemoteAccess(),
+    windowClose: normalizeWindowClose(),
+    plugins: normalizePlugins(),
+    ...getSettingsSectionDefaults()
+  }
+}
+
 function normalizeRegisteredSettingsSections(settings) {
   const normalized = {}
   for (const [key, section] of settingsSections.entries()) {
@@ -439,9 +468,11 @@ function registerSettingsSection(key, definition = {}) {
     sanitizeForSave: definition.sanitizeForSave
   }
   settingsSections.set(sectionKey, section)
+  if (settingsCache) settingsCache = normalizeSettings(settingsCache)
   return () => {
     if (settingsSections.get(sectionKey) === section) {
       settingsSections.delete(sectionKey)
+      if (settingsCache) settingsCache = normalizeSettings(settingsCache)
     }
   }
 }
@@ -482,65 +513,169 @@ function isSessionAllowedFile(filePath) {
   return sessionAllowedFiles.has(getPlaybackStateKey(filePath))
 }
 
-function loadSettings() {
-  const defaults = {
-    theme: 'dark',
-    directories: [],
-    privateDirectories: [],
-    defaultDirectory: '',
-    favorites: [],
-    customTags: {},
-    hiddenTags: [],
-    networkResources: [],
-    downloadDirectories: [],
-    playbackStates: {},
-    playbackMode: 'order',
-    privacy: normalizePrivacy(),
-    remoteAccess: normalizeRemoteAccess(),
-    windowClose: normalizeWindowClose(),
-    plugins: normalizePlugins(),
-    ...getSettingsSectionDefaults()
-  }
+function cloneSettings(settings) {
+  return JSON.parse(JSON.stringify(settings))
+}
 
+function normalizeSettings(settings) {
+  const defaults = getDefaultSettings()
+  const parsed = settings && typeof settings === 'object' && !Array.isArray(settings)
+    ? settings
+    : {}
+  const directories = normalizeDirectoryList(parsed.directories)
+  const privateDirectories = normalizePrivateDirectories(parsed.privateDirectories, directories)
+  const publicDirectories = getPublicDirectories(directories, privateDirectories)
+  const defaultDirectory = typeof parsed.defaultDirectory === 'string' && publicDirectories.includes(parsed.defaultDirectory)
+    ? parsed.defaultDirectory
+    : publicDirectories[0] || ''
+
+  return {
+    ...defaults,
+    ...parsed,
+    directories,
+    privateDirectories,
+    defaultDirectory,
+    favorites: Array.isArray(parsed.favorites) ? parsed.favorites : defaults.favorites,
+    customTags: normalizeCustomTags(parsed.customTags),
+    hiddenTags: normalizeHiddenTags(parsed.hiddenTags),
+    networkResources: normalizeNetworkResources(parsed.networkResources),
+    downloadDirectories: normalizeDownloadDirectories(parsed.downloadDirectories),
+    playbackStates: normalizePlaybackStates(parsed.playbackStates),
+    playbackMode: ['order', 'shuffle', 'single'].includes(parsed.playbackMode) ? parsed.playbackMode : defaults.playbackMode,
+    privacy: normalizePrivacy(parsed.privacy),
+    remoteAccess: normalizeRemoteAccess(parsed.remoteAccess),
+    windowClose: normalizeWindowClose(parsed.windowClose),
+    plugins: normalizePlugins(parsed.plugins),
+    ...normalizeRegisteredSettingsSections(parsed)
+  }
+}
+
+function readSettingsFromDisk() {
   try {
     const raw = fs.readFileSync(getSettingsPath(), 'utf-8').replace(/^\uFEFF/, '')
-    const parsed = JSON.parse(raw)
-    const directories = normalizeDirectoryList(parsed.directories)
-    const privateDirectories = normalizePrivateDirectories(parsed.privateDirectories, directories)
-    const publicDirectories = getPublicDirectories(directories, privateDirectories)
-    const defaultDirectory = typeof parsed.defaultDirectory === 'string' && publicDirectories.includes(parsed.defaultDirectory)
-      ? parsed.defaultDirectory
-      : publicDirectories[0] || ''
-
-    return {
-      ...defaults,
-      ...parsed,
-      directories,
-      privateDirectories,
-      defaultDirectory,
-      favorites: Array.isArray(parsed.favorites) ? parsed.favorites : defaults.favorites,
-      customTags: normalizeCustomTags(parsed.customTags),
-      hiddenTags: normalizeHiddenTags(parsed.hiddenTags),
-      networkResources: normalizeNetworkResources(parsed.networkResources),
-      downloadDirectories: normalizeDownloadDirectories(parsed.downloadDirectories),
-      playbackStates: normalizePlaybackStates(parsed.playbackStates),
-      playbackMode: ['order', 'shuffle', 'single'].includes(parsed.playbackMode) ? parsed.playbackMode : defaults.playbackMode,
-      privacy: normalizePrivacy(parsed.privacy),
-      remoteAccess: normalizeRemoteAccess(parsed.remoteAccess),
-      windowClose: normalizeWindowClose(parsed.windowClose),
-      plugins: normalizePlugins(parsed.plugins),
-      ...normalizeRegisteredSettingsSections(parsed)
-    }
+    return normalizeSettings(JSON.parse(raw))
   } catch {
-    return defaults
+    return getDefaultSettings()
   }
+}
+
+function loadSettings() {
+  const settingsPath = getSettingsPath()
+  if (!settingsCache || settingsCachePath !== settingsPath) {
+    settingsCache = readSettingsFromDisk()
+    settingsCachePath = settingsPath
+  }
+  return cloneSettings(settingsCache)
+}
+
+function getCachedSettings() {
+  const settingsPath = getSettingsPath()
+  if (!settingsCache || settingsCachePath !== settingsPath) {
+    settingsCache = readSettingsFromDisk()
+    settingsCachePath = settingsPath
+  }
+  return settingsCache
+}
+
+function writeSettingsFileSync(settings) {
+  const settingsPath = getSettingsPath()
+  const dir = path.dirname(settingsPath)
+  if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true })
+  const tempPath = `${settingsPath}.${process.pid}.${++settingsWriteCounter}.tmp`
+  try {
+    fs.writeFileSync(tempPath, JSON.stringify(settings, null, 2))
+    fs.renameSync(tempPath, settingsPath)
+  } finally {
+    if (fs.existsSync(tempPath)) fs.rmSync(tempPath, { force: true })
+  }
+}
+
+async function writeSettingsFile(settings) {
+  const settingsPath = getSettingsPath()
+  const dir = path.dirname(settingsPath)
+  await fsp.mkdir(dir, { recursive: true })
+  const tempPath = `${settingsPath}.${process.pid}.${++settingsWriteCounter}.tmp`
+  try {
+    await fsp.writeFile(tempPath, JSON.stringify(settings, null, 2), 'utf-8')
+    await fsp.rename(tempPath, settingsPath)
+  } finally {
+    await fsp.rm(tempPath, { force: true }).catch(() => {})
+  }
+}
+
+function flushPendingSettingsWriteSync() {
+  if (settingsWriteTimer) {
+    clearTimeout(settingsWriteTimer)
+    settingsWriteTimer = null
+  }
+  if (!pendingSettingsWrite && !settingsWriteInFlight) return
+  const settings = pendingSettingsWrite || settingsCache
+  pendingSettingsWrite = null
+  writeSettingsFileSync(settings)
+  settingsWriteError = null
+}
+
+function flushPendingSettingsWrite() {
+  if (!pendingSettingsWrite) return settingsWriteChain
+  const settings = pendingSettingsWrite
+  pendingSettingsWrite = null
+  settingsWriteChain = settingsWriteChain
+    .catch(() => {})
+    .then(async () => {
+      settingsWriteError = null
+      settingsWriteInFlight = true
+      try {
+        await writeSettingsFile(settings)
+      } finally {
+        settingsWriteInFlight = false
+      }
+    })
+    .catch(error => {
+      settingsWriteError = error
+      console.error('Failed to write settings:', error)
+    })
+  return settingsWriteChain
+}
+
+async function flushSettingsWrites() {
+  do {
+    if (settingsWriteTimer) {
+      clearTimeout(settingsWriteTimer)
+      settingsWriteTimer = null
+    }
+    await flushPendingSettingsWrite()
+    await settingsWriteChain
+  } while (pendingSettingsWrite)
+
+  if (settingsWriteError) {
+    const error = settingsWriteError
+    settingsWriteError = null
+    throw error
+  }
+}
+
+function installSettingsFlushHooks() {
+  if (settingsFlushHooksInstalled) return
+  settingsFlushHooksInstalled = true
+  process.on('beforeExit', flushPendingSettingsWriteSync)
+  process.on('exit', flushPendingSettingsWriteSync)
+}
+
+function scheduleSettingsWrite(settings) {
+  pendingSettingsWrite = cloneSettings(settings)
+  installSettingsFlushHooks()
+  if (settingsWriteTimer) clearTimeout(settingsWriteTimer)
+  settingsWriteTimer = setTimeout(() => {
+    settingsWriteTimer = null
+    flushPendingSettingsWrite()
+  }, SETTINGS_WRITE_DEBOUNCE_MS)
 }
 
 function saveSettings(settings) {
   const dir = path.dirname(getSettingsPath())
   if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true })
 
-  const currentSettings = loadSettings()
+  const currentSettings = getCachedSettings()
   const merged = {
     ...currentSettings,
     ...settings
@@ -577,14 +712,22 @@ function saveSettings(settings) {
   merged.plugins = normalizePlugins(merged.plugins)
   Object.assign(merged, normalizeRegisteredSettingsSections(merged))
 
-  fs.writeFileSync(getSettingsPath(), JSON.stringify(merged, null, 2))
+  settingsCache = cloneSettings(merged)
+  settingsCachePath = getSettingsPath()
+  scheduleSettingsWrite(settingsCache)
 
   if (Object.hasOwn(settings, 'directories') || Object.hasOwn(settings, 'privateDirectories')) {
     directoryChangeHandler?.(merged.directories)
   }
 
-  notifySettingsChanged(merged)
-  return merged
+  notifySettingsChanged(cloneSettings(merged))
+  return cloneSettings(merged)
+}
+
+async function saveSettingsAndFlush(settings) {
+  const saved = saveSettings(settings)
+  await flushSettingsWrites()
+  return saved
 }
 
 function getAllowedVideoDirectories() {
@@ -754,6 +897,8 @@ module.exports = {
   registerSettingsSection,
   loadSettings,
   saveSettings,
+  saveSettingsAndFlush,
+  flushSettingsWrites,
   sanitizeSettingsForSave,
   sanitizeSettingsForRenderer,
   normalizeDirectoryList,

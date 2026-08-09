@@ -4,15 +4,15 @@ const fsp = require('fs/promises')
 const http = require('http')
 const net = require('net')
 const crypto = require('crypto')
-const { spawn, execFile } = require('child_process')
-const { promisify } = require('util')
+const { spawn } = require('child_process')
 const { app } = require('electron')
 const log = require('electron-log')
+const { execFileAsync } = require('./exec')
+const { getUserDataDir } = require('./user-data')
 const { getResourcePath, isExistingFile } = require('./paths')
 const { detectYtDlp, getSystemProxy, getYtDlpStatus } = require('./ytdlp-service')
+const { createXunleiManager } = require('./download-xunlei')
 
-const execFileAsync = promisify(execFile)
-const fallbackUserDataDir = path.join(process.cwd(), '.tmp-wallpaper-player')
 const RPC_TIMEOUT_MS = 5000
 const START_TIMEOUT_MS = 10000
 const BT_PORT_RANGE = process.env.WALLPAPER_PLAYER_BT_PORT_RANGE || '51413-51423'
@@ -41,13 +41,8 @@ let startPromise = null
 let lastRuntimeError = ''
 let lastBtPortStatus = null
 let lastBtPortCheckedAt = 0
-let detectedXunlei = null
-let xunleiDetectError = ''
-let xunleiDetectPromise = null
 
-function getUserDataDir() {
-  return app?.getPath ? app.getPath('userData') : fallbackUserDataDir
-}
+const xunlei = createXunleiManager({ getDownloadStateDir })
 
 function getDownloadStateDir() {
   return path.join(getUserDataDir(), 'downloads')
@@ -59,10 +54,6 @@ function getDefaultDownloadDir() {
 
 function getAria2SessionPath() {
   return path.join(getDownloadStateDir(), 'aria2.session')
-}
-
-function getXunleiTasksPath() {
-  return path.join(getDownloadStateDir(), 'xunlei-tasks.json')
 }
 
 function isProcessRunning() {
@@ -559,12 +550,7 @@ function getEngineStatus() {
     btPortRange: BT_PORT_RANGE,
     btPortStatus: lastBtPortStatus,
     trackerCount: PUBLIC_BT_TRACKERS.length,
-    xunlei: detectedXunlei || {
-      available: false,
-      path: '',
-      name: '迅雷',
-      error: xunleiDetectError || ''
-    },
+    xunlei: xunlei.getStatus(),
     features: {
       dht: true,
       dht6: true,
@@ -586,7 +572,7 @@ async function getSnapshot(options = {}) {
   const refresh = Boolean(options.refresh)
   await detectAria2c(refresh)
   await detectYtDlp(refresh).catch(() => null)
-  await detectXunlei(refresh).catch(() => null)
+  await xunlei.detect(refresh).catch(() => null)
   await checkBtPortStatus(refresh).catch((err) => {
     lastBtPortStatus = {
       range: BT_PORT_RANGE,
@@ -601,31 +587,31 @@ async function getSnapshot(options = {}) {
   if (!detectedAria2Path) {
     return {
       engine: getEngineStatus(),
-      tasks: (await loadXunleiTasks()).map(normalizeXunleiTask)
+      tasks: (await xunlei.loadTasks()).map(xunlei.normalizeTask)
     }
   }
 
   if (!start && !isProcessRunning()) {
     return {
       engine: getEngineStatus(),
-      tasks: (await loadXunleiTasks()).map(normalizeXunleiTask)
+      tasks: (await xunlei.loadTasks()).map(xunlei.normalizeTask)
     }
   }
 
   try {
     const [tasks, xunleiTasks] = await Promise.all([
       listTasks(),
-      loadXunleiTasks()
+      xunlei.loadTasks()
     ])
     return {
       engine: getEngineStatus(),
-      tasks: [...tasks, ...xunleiTasks.map(normalizeXunleiTask)]
+      tasks: [...tasks, ...xunleiTasks.map(xunlei.normalizeTask)]
     }
   } catch (err) {
     lastRuntimeError = err.message
     return {
       engine: getEngineStatus(),
-      tasks: (await loadXunleiTasks()).map(normalizeXunleiTask)
+      tasks: (await xunlei.loadTasks()).map(xunlei.normalizeTask)
     }
   }
 }
@@ -639,221 +625,10 @@ async function assertDownloadDirectory(dir) {
   return resolved
 }
 
-function stripQuotes(value) {
-  return String(value || '').trim().replace(/^"|"$/g, '')
-}
-
-function extractExecutableFromCommand(command) {
-  const value = String(command || '').trim()
-  if (!value) return ''
-  const quoted = value.match(/^"([^"]+\.exe)"/i)
-  if (quoted) return quoted[1]
-  const plain = value.match(/^([^\s]+\.exe)/i)
-  return plain ? plain[1] : ''
-}
-
-function getXunleiCandidatePaths() {
-  const candidates = [
-    process.env.WALLPAPER_PLAYER_XUNLEI,
-    'E:\\Thunder\\Program\\Thunder.exe',
-    'C:\\Program Files\\Thunder Network\\Thunder\\Program\\Thunder.exe',
-    'C:\\Program Files (x86)\\Thunder Network\\Thunder\\Program\\Thunder.exe',
-    'C:\\Program Files\\Thunder\\Program\\Thunder.exe',
-    'C:\\Program Files (x86)\\Thunder\\Program\\Thunder.exe'
-  ]
-
-  for (const base of [
-    process.env.LOCALAPPDATA,
-    process.env.PROGRAMFILES,
-    process.env['ProgramFiles(x86)']
-  ]) {
-    if (!base) continue
-    candidates.push(
-      path.join(base, 'Thunder', 'Program', 'Thunder.exe'),
-      path.join(base, 'Xunlei', 'Program', 'Thunder.exe'),
-      path.join(base, '迅雷', 'Program', 'Thunder.exe')
-    )
-  }
-
-  if (process.platform === 'win32') {
-    try {
-      const { execFileSync } = require('child_process')
-      const raw = execFileSync('reg', ['query', 'HKCU\\Software\\Classes\\magnet\\shell\\open\\command', '/ve'], {
-        windowsHide: true,
-        encoding: 'utf8',
-        timeout: 1500
-      })
-      const command = raw.split(/\r?\n/).find(line => line.includes('REG_SZ'))?.replace(/^.*REG_SZ\s+/, '')
-      const exe = extractExecutableFromCommand(command)
-      if (exe) candidates.unshift(exe)
-    } catch {}
-  }
-
-  return candidates.map(stripQuotes).filter(Boolean)
-}
-
-async function detectXunlei(refresh = false) {
-  if (!refresh && detectedXunlei) return detectedXunlei
-  if (xunleiDetectPromise) return xunleiDetectPromise
-
-  xunleiDetectPromise = (async () => {
-    detectedXunlei = null
-    xunleiDetectError = ''
-    const tried = []
-    for (const candidate of getXunleiCandidatePaths()) {
-      const normalized = path.resolve(candidate)
-      if (tried.includes(normalized)) continue
-      tried.push(normalized)
-      if (isExistingFile(normalized)) {
-        detectedXunlei = {
-          available: true,
-          path: normalized,
-          name: '迅雷'
-        }
-        return detectedXunlei
-      }
-    }
-    xunleiDetectError = '未检测到本机迅雷客户端，请先安装迅雷后再使用接管下载。'
-    detectedXunlei = {
-      available: false,
-      path: '',
-      name: '迅雷',
-      error: xunleiDetectError
-    }
-    return detectedXunlei
-  })().finally(() => {
-    xunleiDetectPromise = null
-  })
-
-  return xunleiDetectPromise
-}
-
-async function loadXunleiTasks() {
-  try {
-    const parsed = JSON.parse(await fsp.readFile(getXunleiTasksPath(), 'utf-8'))
-    return Array.isArray(parsed?.tasks) ? parsed.tasks : []
-  } catch {
-    return []
-  }
-}
-
-async function saveXunleiTasks(tasks) {
-  await fsp.mkdir(getDownloadStateDir(), { recursive: true })
-  await fsp.writeFile(getXunleiTasksPath(), JSON.stringify({
-    version: 1,
-    tasks: Array.isArray(tasks) ? tasks.slice(0, 80) : []
-  }, null, 2), 'utf-8')
-}
-
-function getDisplayNameFromDownloadInput(input) {
-  const value = String(input || '').trim()
-  if (value.toLowerCase().startsWith('magnet:?')) {
-    try {
-      const queryIndex = value.indexOf('?')
-      const params = new URLSearchParams(queryIndex >= 0 ? value.slice(queryIndex + 1) : '')
-      const name = params.get('dn')
-      if (name) return name
-    } catch {}
-    return '迅雷磁链任务'
-  }
-  try {
-    const parsed = new URL(value)
-    return decodeURIComponent(parsed.pathname.split('/').filter(Boolean).pop() || '') || parsed.hostname || '迅雷下载任务'
-  } catch {
-    return '迅雷下载任务'
-  }
-}
-
-function getXunleiProtocolUrl(input, dir) {
-  return String(input || '').trim()
-}
+// 迅雷接管适配已拆出至 ./download-xunlei
 
 async function addXunleiTask({ url, dir }) {
-  const input = String(url || '').trim()
-  if (!input) throw new Error('请输入链接或磁链')
-  const lower = input.toLowerCase()
-  if (!lower.startsWith('magnet:?') && !/^https?:\/\//i.test(input)) {
-    throw new Error('迅雷接管仅支持 magnet 或 http/https 链接')
-  }
-  const targetDir = await assertDownloadDirectory(dir)
-  const xunlei = await detectXunlei()
-  if (!xunlei?.available || !xunlei.path) {
-    return {
-      success: false,
-      xunlei,
-      error: xunlei?.error || xunleiDetectError || '未检测到本机迅雷客户端'
-    }
-  }
-
-  const launchUrl = getXunleiProtocolUrl(input, targetDir)
-  const launchArgs = lower.startsWith('magnet:?')
-    ? [launchUrl, '-StartType:magnet']
-    : [launchUrl]
-  spawn(xunlei.path, launchArgs, {
-    detached: true,
-    stdio: 'ignore',
-    windowsHide: false
-  }).unref()
-
-  const task = {
-    gid: `xunlei-${Date.now()}-${crypto.randomBytes(3).toString('hex')}`,
-    engine: 'xunlei',
-    name: getDisplayNameFromDownloadInput(input),
-    url: input,
-    dir: targetDir,
-    status: 'external',
-    createdAt: new Date().toISOString(),
-    message: '此任务已由迅雷接管，详细速度和进度请在迅雷查看；请在迅雷中确认保存目录一致。'
-  }
-  const current = await loadXunleiTasks()
-  await saveXunleiTasks([task, ...current.filter(item => item?.gid !== task.gid)])
-
-  return {
-    success: true,
-    task,
-    xunlei
-  }
-}
-
-function normalizeXunleiTask(task) {
-  return {
-    gid: task?.gid || '',
-    engine: 'xunlei',
-    name: task?.name || '迅雷下载任务',
-    status: 'external',
-    totalLength: 0,
-    completedLength: 0,
-    downloadSpeed: 0,
-    uploadSpeed: 0,
-    connections: 0,
-    numSeeders: 0,
-    seeder: false,
-    errorCode: '',
-    errorMessage: '',
-    dir: typeof task?.dir === 'string' ? task.dir : '',
-    files: [],
-    bittorrent: null,
-    followedBy: [],
-    following: '',
-    url: task?.url || '',
-    createdAt: task?.createdAt || '',
-    message: task?.message || '此任务已由迅雷接管，详细速度和进度请在迅雷查看；请在迅雷中确认保存目录一致。',
-    sourceHealth: {
-      kind: 'external',
-      label: '迅雷接管',
-      detail: '详细速度和进度请在迅雷查看；请确认保存目录一致',
-      trackerCount: 0,
-      trackerStatus: '外部客户端'
-    }
-  }
-}
-
-async function removeXunleiTask(gid) {
-  const normalizedGid = String(gid || '').trim()
-  if (!normalizedGid) throw new Error('下载任务无效')
-  const tasks = await loadXunleiTasks()
-  await saveXunleiTasks(tasks.filter(task => task?.gid !== normalizedGid))
-  return getSnapshot({ start: true })
+  return xunlei.addTask({ url, dir, assertDownloadDirectory })
 }
 
 async function addUrl({ url, dir, httpHeaders }) {
@@ -976,7 +751,8 @@ async function remove(gid) {
   const normalizedGid = String(gid || '').trim()
   if (!normalizedGid) throw new Error('下载任务无效')
   if (normalizedGid.startsWith('xunlei-')) {
-    return removeXunleiTask(normalizedGid)
+    await xunlei.removeTask(normalizedGid)
+    return getSnapshot({ start: true })
   }
   await ensureStarted()
   try {
@@ -1000,7 +776,7 @@ function disposeDownloadManager() {
 
 module.exports = {
   detectAria2c,
-  detectXunlei,
+  detectXunlei: xunlei.detect,
   checkBtPortStatus,
   getSnapshot,
   addUrl,

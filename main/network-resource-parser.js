@@ -1,5 +1,6 @@
 const http = require('http')
 const https = require('https')
+const { assertResolvedTargetPublic } = require('./ip-utils')
 const { parseWithYtDlp } = require('./ytdlp-service')
 
 const DEFAULT_TIMEOUT_MS = 12000
@@ -118,7 +119,10 @@ function fetchText(url, redirects = 0, options = {}) {
           reject(new Error('网页重定向次数过多'))
           return
         }
-        fetchText(toAbsoluteUrl(location, url), redirects + 1, options).then(resolve, reject)
+        const nextUrl = toAbsoluteUrl(location, url)
+        // 解析阶段重定向到内网 → SSRF 防线；局域网网页（url 本身是内网）放行。
+        assertResolvedTargetPublic(url, nextUrl, '网页重定向到本地或内网地址，已停止解析')
+        fetchText(nextUrl, redirects + 1, options).then(resolve, reject)
         return
       }
 

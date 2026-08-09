@@ -1,8 +1,6 @@
-const path = require('path')
 const { app } = require('electron')
+const { configurePortableUserData } = require('./main/portable-user-data')
 
-if (process.env.PORTABLE_EXECUTABLE_DIR) {
-  app.setPath('userData', path.join(process.env.PORTABLE_EXECUTABLE_DIR, 'Data'))
-}
+configurePortableUserData(app)
 
 require('./main/index.js')

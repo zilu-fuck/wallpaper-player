@@ -28,6 +28,40 @@ function isVideoFile(filePath) {
   return VIDEO_EXTENSIONS.has(path.extname(filePath).toLowerCase())
 }
 
+function hasMpegTransportStreamSignature(buffer) {
+  if (!Buffer.isBuffer(buffer) || buffer.length < 3 * 188) return false
+  for (const packetSize of [188, 192, 204]) {
+    const maxOffset = Math.min(packetSize, buffer.length - (packetSize * 2))
+    for (let offset = 0; offset < maxOffset; offset++) {
+      if (
+        buffer[offset] === 0x47 &&
+        buffer[offset + packetSize] === 0x47 &&
+        buffer[offset + (packetSize * 2)] === 0x47
+      ) {
+        return true
+      }
+    }
+  }
+  return false
+}
+
+async function isVideoContentFile(filePath) {
+  if (!isVideoFile(filePath)) return false
+  if (path.extname(filePath).toLowerCase() !== '.ts') return true
+
+  let handle
+  try {
+    handle = await fs.promises.open(filePath, 'r')
+    const buffer = Buffer.alloc(4096)
+    const { bytesRead } = await handle.read(buffer, 0, buffer.length, 0)
+    return hasMpegTransportStreamSignature(buffer.subarray(0, bytesRead))
+  } catch {
+    return false
+  } finally {
+    await handle?.close().catch(() => {})
+  }
+}
+
 function isExistingFile(inputPath) {
   try {
     return fs.statSync(inputPath).isFile()
@@ -47,6 +81,8 @@ module.exports = {
   pathKey,
   isPathInside,
   isVideoFile,
+  isVideoContentFile,
+  hasMpegTransportStreamSignature,
   isExistingFile,
   isMpvExecutablePath
 }

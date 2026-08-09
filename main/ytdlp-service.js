@@ -1,15 +1,13 @@
 const path = require('path')
-const { execFile, execFileSync } = require('child_process')
-const { promisify } = require('util')
+const { execFileSync } = require('child_process')
+const { execFileAsync } = require('./exec')
 const { getResourcePath, isExistingFile } = require('./paths')
-
-const execFileAsync = promisify(execFile)
+const { isPrivateOrLocalHostname } = require('./ip-utils')
 
 const DEFAULT_TIMEOUT_MS = 45000
 const DEFAULT_BROWSER_UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/126 Safari/537.36'
 const WINDOWS_INTERNET_SETTINGS_KEY = 'HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Internet Settings'
 const SUPPORTED_COOKIE_BROWSERS = new Set(['chrome', 'edge', 'firefox'])
-const LOCAL_HOSTS = new Set(['localhost', 'localhost.localdomain'])
 
 let detectedYtDlpPath = null
 let detectError = ''
@@ -18,21 +16,6 @@ let lastProxyState = null
 
 function escapeRegExp(value) {
   return String(value || '').replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
-}
-
-function isPrivateIp(hostname) {
-  const value = String(hostname || '').trim().toLowerCase()
-  if (!value) return false
-  if (LOCAL_HOSTS.has(value)) return true
-  if (value === '::1' || value.startsWith('127.')) return true
-  const match = value.match(/^(\d+)\.(\d+)\.(\d+)\.(\d+)$/)
-  if (!match) return false
-  const [a, b] = match.slice(1).map(Number)
-  return a === 10 ||
-    a === 127 ||
-    (a === 172 && b >= 16 && b <= 31) ||
-    (a === 192 && b === 168) ||
-    (a === 169 && b === 254)
 }
 
 function getHostname(value) {
@@ -186,7 +169,7 @@ function isBypassedByWindowsOverride(url, override) {
     .filter(Boolean)
     .some(pattern => {
       if (pattern.toLowerCase() === '<local>') {
-        return !hostname.includes('.') || isPrivateIp(hostname)
+        return isPrivateOrLocalHostname(hostname)
       }
       return wildcardMatches(pattern, hostname)
     })
@@ -195,7 +178,7 @@ function isBypassedByWindowsOverride(url, override) {
 function shouldBypassProxy(url, proxy) {
   const hostname = getHostname(url)
   if (!hostname) return false
-  if (isPrivateIp(hostname)) return true
+  if (isPrivateOrLocalHostname(hostname)) return true
   if (proxy?.source === 'windows' && isBypassedByWindowsOverride(url, proxy.override)) return true
   return false
 }
