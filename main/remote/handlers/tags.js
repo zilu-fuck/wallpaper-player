@@ -1,38 +1,15 @@
-const { getPlaybackState, loadSettings, saveSettings, upsertPlaybackState, verifyPrivacyPassword } = require('../../settings')
+const { getPlaybackState, loadSettings, saveSettingsAndFlush, upsertPlaybackState, verifyPrivacyPassword } = require('../../settings')
 const { assertAllowedVideoPath } = require('../../scanner')
+const { createFailureLimiter } = require('../../rate-limiter')
 const { getFavoriteKeyForVideoId } = require('../video-index')
 const { readBody, sendError, sendJson } = require('../http-utils')
 const { getLegacyNetworkFavoriteKey, getNetworkFavoriteKey, getRemoteNetworkItemById } = require('./network-resources')
 
-// 远程隐私密码尝试频率限制（与桌面端 IPC 一致：5 次失败后锁定 30 秒）
-const REMOTE_PRIVACY_FAILURE_LIMIT = 5
-const REMOTE_PRIVACY_LOCK_MS = 30 * 1000
-const remotePrivacyFailures = new Map()
+// 远程隐私密码尝试频率限制（与桌面端 IPC 共用同一套规则：5 次失败后锁定 30 秒）
+const remotePrivacyLimiter = createFailureLimiter({ limit: 5, lockMs: 30 * 1000 })
 
 function getClientIp(req) {
   return String(req?.socket?.remoteAddress || 'unknown')
-}
-
-function getRemotePrivacyWaitMs(ip) {
-  const current = remotePrivacyFailures.get(ip)
-  if (!current || !current.lockUntil) return 0
-  const waitMs = current.lockUntil - Date.now()
-  if (waitMs <= 0) {
-    remotePrivacyFailures.delete(ip)
-    return 0
-  }
-  return waitMs
-}
-
-function recordRemotePrivacyFailure(ip) {
-  const current = remotePrivacyFailures.get(ip) || { count: 0, lockUntil: 0 }
-  const nextCount = current.count + 1
-  const next = {
-    count: nextCount,
-    lockUntil: nextCount >= REMOTE_PRIVACY_FAILURE_LIMIT ? Date.now() + REMOTE_PRIVACY_LOCK_MS : 0
-  }
-  remotePrivacyFailures.set(ip, next)
-  return next.lockUntil ? REMOTE_PRIVACY_LOCK_MS : 0
 }
 
 function normalizeRequestTags(tags) {
@@ -79,7 +56,7 @@ function createTagsHandlers({ resolveVideoPath }) {
       position: Number(body.position) || 0,
       updatedAt: Date.now()
     })
-    saveSettings({ playbackStates })
+    await saveSettingsAndFlush({ playbackStates })
     sendJson(req, res, 200, { success: true })
   }
 
@@ -102,7 +79,7 @@ function createTagsHandlers({ resolveVideoPath }) {
         item !== target.legacyFavoriteKey &&
         item !== target.path
       ))
-    saveSettings({ favorites: nextFavorites })
+    await saveSettingsAndFlush({ favorites: nextFavorites })
     sendJson(req, res, 200, { success: true, favorite })
   }
 
@@ -124,7 +101,7 @@ function createTagsHandlers({ resolveVideoPath }) {
     } else {
       delete customTags[target.favoriteKey]
     }
-    saveSettings({ customTags })
+    await saveSettingsAndFlush({ customTags })
     sendJson(req, res, 200, { success: true, customTags: tags })
   }
 
@@ -162,14 +139,14 @@ function createTagsHandlers({ resolveVideoPath }) {
       updatedCount += 1
     }
 
-    saveSettings({ customTags })
+    await saveSettingsAndFlush({ customTags })
     sendJson(req, res, 200, { success: true, updatedCount, tags })
   }
 
   // 还原所有隐藏标签：需验证隐私密码，通过后清空 hiddenTags
   async function handleRestoreHiddenTags(req, res) {
     const clientIp = getClientIp(req)
-    const waitMs = getRemotePrivacyWaitMs(clientIp)
+    const waitMs = remotePrivacyLimiter.getWaitMs(clientIp)
     if (waitMs > 0) {
       sendError(req, res, 429, 'too_many_attempts', `密码错误次数过多，请 ${Math.ceil(waitMs / 1000)} 秒后再试`)
       return
@@ -184,7 +161,7 @@ function createTagsHandlers({ resolveVideoPath }) {
       return
     }
     if (!verifyPrivacyPassword(password, settings.privacy)) {
-      const lockedMs = recordRemotePrivacyFailure(clientIp)
+      const lockedMs = remotePrivacyLimiter.recordFailure(clientIp)
       if (lockedMs > 0) {
         sendError(req, res, 429, 'too_many_attempts', `密码错误次数过多，请 ${Math.ceil(lockedMs / 1000)} 秒后再试`)
         return
@@ -192,9 +169,9 @@ function createTagsHandlers({ resolveVideoPath }) {
       sendError(req, res, 403, 'invalid_password', '隐私密码不正确')
       return
     }
-    remotePrivacyFailures.delete(clientIp)
+    remotePrivacyLimiter.reset(clientIp)
 
-    await saveSettings({ hiddenTags: [] })
+    await saveSettingsAndFlush({ hiddenTags: [] })
     sendJson(req, res, 200, { success: true })
   }
 

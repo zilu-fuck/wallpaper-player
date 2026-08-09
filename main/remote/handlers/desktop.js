@@ -1,5 +1,6 @@
 const { shell } = require('electron')
-const { loadSettings, saveSettings, upsertPlaybackState } = require('../../settings')
+const { EVENT } = require('../../ipc-channels')
+const { loadSettings, saveSettingsAndFlush, upsertPlaybackState } = require('../../settings')
 const { getMainWindow } = require('../../window')
 const { readBody, sendError, sendJson } = require('../http-utils')
 const { getRemoteNetworkItemById } = require('./network-resources')
@@ -15,7 +16,7 @@ function createDesktopHandlers({ resolveVideoPath }) {
       position,
       updatedAt: Date.now()
     })
-    saveSettings({ playbackStates })
+    await saveSettingsAndFlush({ playbackStates })
 
     const win = getMainWindow()
     if (!win || win.isDestroyed()) {
@@ -27,12 +28,12 @@ function createDesktopHandlers({ resolveVideoPath }) {
     if (!win.isVisible()) win.show()
     win.focus()
     if (networkItem) {
-      win.webContents.send('remote-play-on-desktop', {
+      win.webContents.send(EVENT.REMOTE_PLAY_ON_DESKTOP, {
         networkResource: networkItem.desktopResource,
         position
       })
     } else {
-      win.webContents.send('remote-play-on-desktop', {
+      win.webContents.send(EVENT.REMOTE_PLAY_ON_DESKTOP, {
         filePath: videoPath,
         position
       })

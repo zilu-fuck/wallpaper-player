@@ -1,7 +1,9 @@
 const fs = require('fs')
 const path = require('path')
 const { execFileSync } = require('child_process')
-const MpvManager = require('../mpv')
+const log = require('electron-log')
+const MpvManager = require('./mpv')
+const { EVENT } = require('./ipc-channels')
 const { isMpvExecutablePath, isExistingFile } = require('./paths')
 const { loadSettings, saveSettings, upsertPlaybackState } = require('./settings')
 const { getMainWindow } = require('./window')
@@ -93,16 +95,16 @@ async function initMpv() {
   const found = await resolveMpvPath()
 
   if (found) {
-    console.log('[mpv] 已找到:', found)
+    log.info('[mpv] 已找到:', found)
   } else {
-    console.log('[mpv] 未找到，首次使用时将自动下载')
+    log.info('[mpv] 未找到，首次使用时将自动下载')
   }
 
   mpvManager.on('state', (data) => {
     persistPlaybackState(data, Boolean(data?.paused) || Boolean(data?.eofReached))
     const win = getMainWindow()
     if (win && !win.isDestroyed()) {
-      win.webContents.send('mpv-state', data)
+      win.webContents.send(EVENT.MPV_STATE, data)
     }
   })
 
@@ -111,14 +113,7 @@ async function initMpv() {
     persistPlaybackState(mpvManager.getState(), true)
     const win = getMainWindow()
     if (win && !win.isDestroyed()) {
-      win.webContents.send('mpv-ended', data)
-    }
-  })
-
-  mpvManager.on('mpv-event', (data) => {
-    const win = getMainWindow()
-    if (win && !win.isDestroyed()) {
-      win.webContents.send('mpv-event', data)
+      win.webContents.send(EVENT.MPV_ENDED, data)
     }
   })
 
@@ -126,7 +121,7 @@ async function initMpv() {
     setMediaPlaybackActive(false)
     const win = getMainWindow()
     if (win && !win.isDestroyed()) {
-      win.webContents.send('mpv-error', data)
+      win.webContents.send(EVENT.MPV_ERROR, data)
     }
   })
 }

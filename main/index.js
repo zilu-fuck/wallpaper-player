@@ -1,5 +1,6 @@
 const { app, dialog, globalShortcut } = require('electron')
 const log = require('electron-log')
+const { IPC, EVENT } = require('./ipc-channels')
 const { setupCSP, createWindow, getMainWindow, setWindowCloseHandler } = require('./window')
 const { setupIPC } = require('./ipc')
 const { setupAutoUpdater, disposeUpdater } = require('./updater')
@@ -8,8 +9,8 @@ const { disposeDownloadManager } = require('./download-manager')
 const { unwatchAllDirectories } = require('./scanner')
 const { loadSettings, saveSettings, sanitizeSettingsForSave, sanitizeSettingsForRenderer, onSettingsChanged } = require('./settings')
 const { setupPlugins, disposePlugins } = require('./plugins')
+const { getPortableDataFallback } = require('./portable-user-data')
 const {
-  setupRemoteIPC,
   initRemoteAccess,
   disposeRemoteAccess,
   shouldKeepRunningInTray,
@@ -29,6 +30,7 @@ setupConsoleEncoding()
 let isAppQuitting = false
 let closePromptOpen = false
 let removeSettingsChangedListener = null
+let pendingSecondInstance = false
 
 function getTodayKey() {
   const now = new Date()
@@ -41,7 +43,7 @@ function getTodayKey() {
 function sendPlayerShortcut(action, value) {
   const win = getMainWindow()
   if (!win || win.isDestroyed()) return false
-  win.webContents.send('player-shortcut', { action, value })
+  win.webContents.send(EVENT.PLAYER_SHORTCUT, { action, value })
   return true
 }
 
@@ -50,21 +52,16 @@ function setupSettingsSync() {
   removeSettingsChangedListener = onSettingsChanged((settings) => {
     const win = getMainWindow()
     if (!win || win.isDestroyed()) return
-    win.webContents.send('settings-changed', sanitizeSettingsForRenderer(settings))
+    win.webContents.send(EVENT.SETTINGS_CHANGED, sanitizeSettingsForRenderer(settings))
   })
 }
 
-function registerPlayerShortcuts() {
+function registerGlobalMediaShortcuts() {
   const shortcuts = [
     ['MediaPlayPause', () => sendPlayerShortcut('play-pause')],
     ['MediaNextTrack', () => sendPlayerShortcut('next')],
     ['MediaPreviousTrack', () => sendPlayerShortcut('prev')],
-    ['MediaStop', () => sendPlayerShortcut('stop')],
-    ['Ctrl+O', () => sendPlayerShortcut('open-file')],
-    ['Ctrl+Right', () => sendPlayerShortcut('seek-forward', 5)],
-    ['Ctrl+Left', () => sendPlayerShortcut('seek-backward', 5)],
-    ['Ctrl+Up', () => sendPlayerShortcut('volume-up', 5)],
-    ['Ctrl+Down', () => sendPlayerShortcut('volume-down', 5)]
+    ['MediaStop', () => sendPlayerShortcut('stop')]
   ]
 
   for (const [accelerator, callback] of shortcuts) {
@@ -74,6 +71,32 @@ function registerPlayerShortcuts() {
       log.warn('[shortcut] register failed:', accelerator, err.message)
     }
   }
+}
+
+function focusMainWindow() {
+  const win = getMainWindow()
+  if (!win || win.isDestroyed()) return false
+  if (win.isMinimized()) win.restore()
+  win.show()
+  win.focus()
+  return true
+}
+
+function showPortableDataFallbackNotice(win) {
+  const fallback = getPortableDataFallback()
+  if (!fallback) return
+  log.warn('[portable] Data 目录不可写，已回退系统 userData:', fallback)
+  dialog.showMessageBox(win, {
+    type: 'warning',
+    title: '便携数据目录不可写',
+    message: '已改用系统数据目录保存本次数据',
+    detail: `便携目录：${fallback.requestedPath}\n系统目录：${fallback.fallbackPath}\n\n便携目录恢复可写后，数据不会自动迁回。`,
+    buttons: ['知道了'],
+    defaultId: 0,
+    noLink: true
+  }).catch(error => {
+    log.warn('[portable] fallback notice failed:', error?.message || error)
+  })
 }
 
 function minimizeWindow(win) {
@@ -172,10 +195,14 @@ async function start() {
   })
   await setupPlugins()
   setupIPC()
-  setupRemoteIPC()
   setupSettingsSync()
-  createWindow()
-  registerPlayerShortcuts()
+  const win = createWindow()
+  showPortableDataFallbackNotice(win)
+  registerGlobalMediaShortcuts()
+  if (pendingSecondInstance) {
+    pendingSecondInstance = false
+    focusMainWindow()
+  }
   setupAutoUpdater()
   initRemoteAccess().catch((error) => {
     log.error('[remote] 初始化失败:', error)
@@ -185,42 +212,48 @@ async function start() {
   })
 
   app.on('activate', () => {
-    const win = getMainWindow()
-    if (win && !win.isDestroyed()) {
-      win.show()
-      win.focus()
-    } else {
+    if (!focusMainWindow()) {
       createWindow()
     }
   })
 }
 
-app.whenReady().then(start).catch((error) => {
-  log.error('[app] 启动失败:', error)
+const hasSingleInstanceLock = app.requestSingleInstanceLock()
+
+if (!hasSingleInstanceLock) {
   app.quit()
-})
-
-app.on('window-all-closed', () => {
-  if (shouldKeepRunningInTray()) return
-  if (process.platform !== 'darwin') app.quit()
-})
-
-app.on('before-quit', () => {
-  isAppQuitting = true
-  markQuitting()
-  removeSettingsChangedListener?.()
-  removeSettingsChangedListener = null
-  globalShortcut.unregisterAll()
-  disposeUpdater()
-  unwatchAllDirectories()
-  disposeRemoteAccess().catch((error) => {
-    log.error('[remote] dispose failed:', error)
+} else {
+  app.on('second-instance', () => {
+    if (!focusMainWindow()) pendingSecondInstance = true
   })
-  disposePlugins().catch((error) => {
-    log.error('[plugins] dispose failed:', error)
+
+  app.whenReady().then(start).catch((error) => {
+    log.error('[app] 启动失败:', error)
+    app.quit()
   })
-  disposeDownloadManager()
-  destroyMpv()
-})
+
+  app.on('window-all-closed', () => {
+    if (shouldKeepRunningInTray()) return
+    if (process.platform !== 'darwin') app.quit()
+  })
+
+  app.on('before-quit', () => {
+    isAppQuitting = true
+    markQuitting()
+    removeSettingsChangedListener?.()
+    removeSettingsChangedListener = null
+    globalShortcut.unregisterAll()
+    disposeUpdater()
+    unwatchAllDirectories()
+    disposeRemoteAccess().catch((error) => {
+      log.error('[remote] dispose failed:', error)
+    })
+    disposePlugins().catch((error) => {
+      log.error('[plugins] dispose failed:', error)
+    })
+    disposeDownloadManager()
+    destroyMpv()
+  })
+}
 
 module.exports = { start }

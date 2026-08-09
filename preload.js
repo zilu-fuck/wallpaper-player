@@ -1,4 +1,9 @@
-const { contextBridge, ipcRenderer } = require('electron')
+const { contextBridge, ipcRenderer, webUtils } = require('electron')
+
+// 注意：本文件运行在 Electron 沙箱化的 preload 上下文中，
+// require() 只能加载 electron 内置模块，不能 require 本地文件，
+// 因此通道名以字符串字面量书写；与 main/ipc-channels.js 的一致性
+// 由 scripts/verify-electron-api-types.js 在 CI 中强制校验。
 
 function on(channel, callback) {
   const handler = (_event, data) => callback(data)
@@ -9,7 +14,6 @@ function on(channel, callback) {
 contextBridge.exposeInMainWorld('electronAPI', {
   scanDirectory: (dirPath, force) => ipcRenderer.invoke('scan-directory', dirPath, force),
   generateThumbnail: (videoPath) => ipcRenderer.invoke('generate-thumbnail', videoPath),
-  generateThumbnails: (videoPaths) => ipcRenderer.invoke('generate-thumbnails', videoPaths),
   getThumbnailUrl: (thumbnailPath) => ipcRenderer.invoke('get-thumbnail-url', thumbnailPath),
   generatePreviewFrame: (videoPath, seconds) => ipcRenderer.invoke('generate-preview-frame', videoPath, seconds),
   getVideoMetadata: (videoPath, options) => ipcRenderer.invoke('get-video-metadata', videoPath, options),
@@ -28,7 +32,6 @@ contextBridge.exposeInMainWorld('electronAPI', {
   downloadAddUrl: (payload) => ipcRenderer.invoke('download-add-url', payload),
   downloadAddMagnet: (payload) => ipcRenderer.invoke('download-add-magnet', payload),
   downloadAddXunlei: (payload) => ipcRenderer.invoke('download-add-xunlei', payload),
-  downloadGetXunleiState: (options) => ipcRenderer.invoke('download-get-xunlei-state', options),
   downloadSelectFiles: (gid, fileIndexes) => ipcRenderer.invoke('download-select-files', gid, fileIndexes),
   downloadPause: (gid) => ipcRenderer.invoke('download-pause', gid),
   downloadResume: (gid) => ipcRenderer.invoke('download-resume', gid),
@@ -62,6 +65,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
   selectVideoDirectory: () => ipcRenderer.invoke('select-video-directory'),
   openVideoFile: () => ipcRenderer.invoke('open-video-file'),
   allowVideoFile: (filePath) => ipcRenderer.invoke('allow-video-file', filePath),
+  getPathForFile: (file) => webUtils.getPathForFile(file),
 
   showInFolder: (filePath) => ipcRenderer.invoke('show-in-folder', filePath),
   getFileUrl: (filePath) => ipcRenderer.invoke('get-file-url', filePath),
@@ -88,8 +92,6 @@ contextBridge.exposeInMainWorld('electronAPI', {
   saveVideoAnalysisVlmConfig: (patch) => ipcRenderer.invoke('video-analysis-vlm-save-config', patch),
   selectVideoAnalysisVlmModelFile: () => ipcRenderer.invoke('video-analysis-vlm-select-model-file'),
   selectVideoAnalysisVlmServerExecutable: () => ipcRenderer.invoke('video-analysis-vlm-select-server-executable'),
-  listVideoAnalysisVlmHfFiles: (patch) => ipcRenderer.invoke('video-analysis-vlm-hf-list-files', patch),
-  selectVideoAnalysisVlmHfFile: (file) => ipcRenderer.invoke('video-analysis-vlm-hf-select-file', file),
   listVideoAnalysisLocalVlmFiles: () => ipcRenderer.invoke('video-analysis-vlm-local-list-files'),
   selectVideoAnalysisLocalVlmFile: (filePath) => ipcRenderer.invoke('video-analysis-vlm-local-select-file', filePath),
   downloadVideoAnalysisVlmModel: (selection) => ipcRenderer.invoke('video-analysis-vlm-download', selection),
@@ -112,33 +114,21 @@ contextBridge.exposeInMainWorld('electronAPI', {
   setMediaPlaybackActive: (active) => ipcRenderer.invoke('set-media-playback-active', active),
   mpvSetHostBounds: (bounds) => ipcRenderer.invoke('mpv-set-host-bounds', bounds),
   mpvStop: () => ipcRenderer.invoke('mpv-stop'),
-  mpvIsPlaying: () => ipcRenderer.invoke('mpv-is-playing'),
   mpvGetState: () => ipcRenderer.invoke('mpv-get-state'),
-  mpvCommand: (method, ...args) => ipcRenderer.invoke('mpv-command', method, ...args),
   mpvSeekTo: (position) => ipcRenderer.invoke('mpv-command', 'seekTo', position),
   mpvSeekRelative: (delta) => ipcRenderer.invoke('mpv-command', 'seekRelative', delta),
   mpvCyclePause: () => ipcRenderer.invoke('mpv-command', 'cyclePause'),
   mpvSetPaused: (paused) => ipcRenderer.invoke('mpv-command', 'setPaused', paused),
   mpvSetVolume: (volume) => ipcRenderer.invoke('mpv-command', 'setVolume', volume),
-  mpvSetMuted: (muted) => ipcRenderer.invoke('mpv-command', 'setMuted', muted),
   mpvToggleMute: () => ipcRenderer.invoke('mpv-command', 'toggleMute'),
   mpvSetSpeed: (speed) => ipcRenderer.invoke('mpv-command', 'setSpeed', speed),
-  mpvCycleSpeed: () => ipcRenderer.invoke('mpv-command', 'cycleSpeed'),
   mpvSetAudioTrack: (trackId) => ipcRenderer.invoke('mpv-command', 'setAudioTrack', trackId),
-  mpvCycleAudioTrack: () => ipcRenderer.invoke('mpv-command', 'cycleAudioTrack'),
   mpvSetSubtitleTrack: (trackId) => ipcRenderer.invoke('mpv-command', 'setSubtitleTrack', trackId),
-  mpvCycleSubtitleTrack: () => ipcRenderer.invoke('mpv-command', 'cycleSubtitleTrack'),
-  mpvSetSubtitleVisible: (visible) => ipcRenderer.invoke('mpv-command', 'setSubtitleVisible', visible),
-  mpvToggleSubtitleVisible: () => ipcRenderer.invoke('mpv-command', 'toggleSubtitleVisible'),
   mpvSetSubtitleScale: (scale) => ipcRenderer.invoke('mpv-command', 'setSubtitleScale', scale),
-  mpvSetLoopMode: (mode) => ipcRenderer.invoke('mpv-command', 'setLoopMode', mode),
-  mpvSetABLoop: (a, b) => ipcRenderer.invoke('mpv-command', 'setABLoop', a, b),
-  mpvClearABLoop: () => ipcRenderer.invoke('mpv-command', 'clearABLoop'),
   mpvScreenshot: () => ipcRenderer.invoke('mpv-command', 'screenshot'),
   selectMpvPath: () => ipcRenderer.invoke('select-mpv-path'),
   onMpvState: (callback) => on('mpv-state', callback),
   onMpvEnded: (callback) => on('mpv-ended', callback),
-  onMpvEvent: (callback) => on('mpv-event', callback),
   onMpvError: (callback) => on('mpv-error', callback),
   onMpvDownloadProgress: (callback) => on('mpv-download-progress', callback),
 

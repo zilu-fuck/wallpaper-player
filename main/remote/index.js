@@ -1,7 +1,7 @@
-const { ipcMain, clipboard, Tray, Menu, nativeImage, app } = require('electron')
+const { Tray, Menu, nativeImage, app } = require('electron')
 const log = require('electron-log')
-const QRCode = require('qrcode')
-const { loadSettings, saveSettings, sanitizeSettingsForSave } = require('../settings')
+const { EVENT } = require('../ipc-channels')
+const { loadSettings, saveSettingsAndFlush, sanitizeSettingsForSave } = require('../settings')
 const { createWindow, getMainWindow } = require('../window')
 const {
   approvePairingRequest,
@@ -79,7 +79,7 @@ function getRemoteState() {
 function sendRemoteState() {
   const win = getMainWindow()
   if (win && !win.isDestroyed()) {
-    win.webContents.send('remote-access-state', getRemoteState())
+    win.webContents.send(EVENT.REMOTE_ACCESS_STATE, getRemoteState())
   }
 }
 
@@ -138,7 +138,7 @@ function updateTrayMenu() {
         const settings = loadSettings()
         const remoteAccess = normalizeRemoteSettings(settings)
         const next = { ...remoteAccess, enabled: !state.running }
-        saveSettings(sanitizeSettingsForSave({ remoteAccess: next }))
+        await saveSettingsAndFlush(sanitizeSettingsForSave({ remoteAccess: next }))
         if (next.enabled) {
           await startRemoteAccess()
         } else {
@@ -213,7 +213,7 @@ async function applyRemoteSettings(nextRemoteSettings) {
   const currentSettings = loadSettings()
   const currentRemoteAccess = normalizeRemoteSettings(currentSettings)
   const remoteAccess = normalizeRemoteSettings(nextRemoteSettings)
-  saveSettings(sanitizeSettingsForSave({ remoteAccess }))
+  await saveSettingsAndFlush(sanitizeSettingsForSave({ remoteAccess }))
 
   try {
     if (remoteAccess.enabled) {
@@ -231,7 +231,7 @@ async function applyRemoteSettings(nextRemoteSettings) {
       endpoints: [],
       accessToken: loadIdentity().accessToken
     }
-    saveSettings(sanitizeSettingsForSave({
+    await saveSettingsAndFlush(sanitizeSettingsForSave({
       ...currentSettings,
       remoteAccess: { ...remoteAccess, enabled: false }
     }))
@@ -263,68 +263,8 @@ function shouldKeepRunningInTray() {
 }
 
 function setupRemoteIPC() {
-  ipcMain.handle('remote-get-state', async () => getRemoteState())
-  ipcMain.handle('remote-save-settings', async (_event, remoteSettings) => applyRemoteSettings(remoteSettings))
-  ipcMain.handle('remote-copy-endpoint', async () => {
-    const state = getRemoteState()
-    clipboard.writeText(state.endpoint)
-    return { success: true, text: state.endpoint }
-  })
-  ipcMain.handle('remote-copy-token', async () => {
-    const state = getRemoteState()
-    if (!state.settings.allowLegacyToken) {
-      throw new Error('请先开启“兼容旧版手动 Token”')
-    }
-    const token = loadIdentity().accessToken
-    clipboard.writeText(token)
-    return { success: true }
-  })
-  ipcMain.handle('remote-rotate-token', async () => {
-    rotateAccessToken()
-    sendRemoteState()
-    return getRemoteState()
-  })
-  ipcMain.handle('remote-create-pairing-code', async () => {
-    const state = getRemoteState()
-    if (!state.running) {
-      throw new Error('请先开启手机访问')
-    }
-    const pairing = createPairingCode({
-      endpoint: state.endpoint,
-      endpoints: state.endpoints
-    })
-    const qrDataUrl = await QRCode.toDataURL(pairing.pairingCode, {
-      errorCorrectionLevel: 'Q',
-      margin: 4,
-      width: 360
-    })
-    return {
-      ...pairing,
-      qrDataUrl
-    }
-  })
-  ipcMain.handle('remote-copy-pairing-code', async (_event, pairingCode) => {
-    if (typeof pairingCode === 'string' && pairingCode.trim()) {
-      clipboard.writeText(pairingCode.trim())
-      return { success: true }
-    }
-    return { success: false }
-  })
-  ipcMain.handle('remote-remove-paired-device', async (_event, deviceId) => {
-    const success = revokePairedDevice(deviceId)
-    sendRemoteState()
-    return { success, state: getRemoteState() }
-  })
-  ipcMain.handle('remote-approve-pairing-request', async (_event, requestId) => {
-    approvePairingRequest(requestId)
-    sendRemoteState()
-    return { success: true, state: getRemoteState() }
-  })
-  ipcMain.handle('remote-reject-pairing-request', async (_event, requestId) => {
-    rejectPairingRequest(requestId)
-    sendRemoteState()
-    return { success: true, state: getRemoteState() }
-  })
+  // 远程访问 IPC 已迁移至 main/ipc/remote.js，由 main/ipc.js 统一注册。
+  // 保留此占位导出是为了避免破坏外部引用；下一版本可删除。
 }
 
 async function disposeRemoteAccess() {
@@ -348,6 +288,8 @@ function markQuitting() {
 module.exports = {
   DEFAULT_REMOTE_SETTINGS,
   normalizeRemoteSettings,
+  applyRemoteSettings,
+  sendRemoteState,
   setupRemoteIPC,
   initRemoteAccess,
   startRemoteAccess,

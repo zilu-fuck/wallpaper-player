@@ -1,8 +1,10 @@
 const { app } = require('electron')
 const { autoUpdater } = require('electron-updater')
 const log = require('electron-log')
+const { EVENT } = require('./ipc-channels')
 const { isPortableApp } = require('./paths')
 const { getMainWindow } = require('./window')
+const RELEASES_URL = 'https://github.com/zilu-fuck/wallpaper-player/releases/latest'
 
 let updateCheckTimer = null
 let updateState = {
@@ -59,7 +61,7 @@ function setUpdateState(status, payload = {}) {
 
   const win = getMainWindow()
   if (win && !win.isDestroyed()) {
-    win.webContents.send('updater-status', updateState)
+    win.webContents.send(EVENT.UPDATER_STATUS, updateState)
   }
 
   return updateState
@@ -81,16 +83,18 @@ function checkForUpdates() {
 }
 
 function getUpdaterDisabledState() {
+  const portable = isPortableApp()
   return {
     status: 'disabled',
     currentVersion: app.getVersion(),
-    message: isPortableApp() ? '便携版不支持自动更新' : '开发模式不检查更新'
+    message: portable ? '便携版不支持自动安装，请到 GitHub Releases 下载新版' : '开发模式不检查更新',
+    releaseUrl: portable ? RELEASES_URL : ''
   }
 }
 
 function setupAutoUpdater() {
   if (!app.isPackaged || isPortableApp()) {
-    console.log('[updater] 跳过自动更新检查')
+    log.info('[updater] 跳过自动更新检查')
     setUpdateState('disabled', getUpdaterDisabledState())
     return
   }
