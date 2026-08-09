@@ -30,6 +30,12 @@ function getDirectoryName(dirPath) {
   return path.basename(resolved) || path.parse(resolved).root || '目录'
 }
 
+function createThumbnailToken(videoId, accessToken) {
+  return accessToken
+    ? createBoundScopedToken('thumbnail', videoId, accessToken, THUMBNAIL_TOKEN_TTL_MS)
+    : ''
+}
+
 function getFallbackFavoriteKey(fullPath) {
   return `file:${Buffer.from(fullPath).toString('base64url')}`
 }
@@ -85,9 +91,7 @@ function toRemoteVideo(video, basePath, context = {}) {
     directoryId: context.directoryId || '',
     directoryName: context.directoryName || '',
     thumbnailUrl: `${basePath}/v1/videos/${encodeURIComponent(id)}/thumbnail`,
-    thumbnailToken: context.accessToken
-      ? createBoundScopedToken('thumbnail', id, context.accessToken, THUMBNAIL_TOKEN_TTL_MS)
-      : '',
+    thumbnailToken: createThumbnailToken(id, context.accessToken),
     streamUrl: `${basePath}/v1/videos/${encodeURIComponent(id)}/stream`,
     media: sanitizeMedia(video.media)
   }
@@ -101,6 +105,12 @@ function rememberVideos(videos) {
       idToFavoriteKey.set(id, video.favoriteKey || getFallbackFavoriteKey(video.fullPath))
     }
   }
+}
+
+function replaceRememberedVideos(videos) {
+  idToPath.clear()
+  idToFavoriteKey.clear()
+  rememberVideos(videos)
 }
 
 function getPathForVideoId(videoId) {
@@ -117,8 +127,10 @@ module.exports = {
   getVideoId,
   getDirectoryId,
   getDirectoryName,
+  createThumbnailToken,
   toRemoteVideo,
   rememberVideos,
+  replaceRememberedVideos,
   getPathForVideoId,
   getFavoriteKeyForVideoId
 }

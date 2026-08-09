@@ -5,6 +5,7 @@ const { resolveThumbnail } = require('../../thumbnail')
 const { getVideoMetadata } = require('../../video-metadata')
 const { sendError, sendJson } = require('../http-utils')
 const { getImageContentType, getVideoContentType, streamFileWithRange } = require('../streaming')
+const { clearLibrarySnapshotCache } = require('./library')
 
 const THUMBNAIL_HIGH_WATER_MARK = 256 * 1024
 
@@ -56,8 +57,10 @@ function createMediaHandlers({ resolveVideoPath }) {
 
   async function handleGetVideoMetadata(req, res, videoId) {
     const videoPath = await resolveVideoPath(videoId)
+    const media = await getVideoMetadata(videoPath)
+    clearLibrarySnapshotCache()
     sendJson(req, res, 200, {
-      media: await getVideoMetadata(videoPath),
+      media,
       checkedAt: Date.now()
     })
   }

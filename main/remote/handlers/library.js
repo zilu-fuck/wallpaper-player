@@ -1,6 +1,12 @@
-const { getPublicVideoDirectories, loadSettings } = require('../../settings')
+const { getPublicVideoDirectories, loadSettings, onSettingsChanged } = require('../../settings')
 const { scanWithCache } = require('../../scanner')
-const { getDirectoryId, getDirectoryName, toRemoteVideo } = require('../video-index')
+const {
+  createThumbnailToken,
+  getDirectoryId,
+  getDirectoryName,
+  replaceRememberedVideos,
+  toRemoteVideo
+} = require('../video-index')
 const { sendJson } = require('../http-utils')
 const {
   NETWORK_DIRECTORY_ID,
@@ -9,7 +15,19 @@ const {
   toRemoteNetworkVideo
 } = require('./network-resources')
 
-// 过滤掉含隐藏标签的视频（隐藏标签持久化在 settings.hiddenTags，受密码保护）
+const LIBRARY_SNAPSHOT_TTL_MS = 1000
+const DEFAULT_PAGE_LIMIT = 100
+const MAX_PAGE_LIMIT = 500
+
+let librarySnapshotCache = null
+let pendingLibrarySnapshot = null
+
+function clearLibrarySnapshotCache() {
+  librarySnapshotCache = null
+}
+
+onSettingsChanged(clearLibrarySnapshotCache)
+
 function filterHiddenTags(items, hiddenTags) {
   if (!Array.isArray(hiddenTags) || hiddenTags.length === 0) return items
   const hiddenSet = new Set(hiddenTags)
@@ -72,75 +90,154 @@ function applyDesktopMetadata(video, settings) {
   }
 }
 
-function createLibraryHandlers({ getRequestToken }) {
-  async function handleLibrary(req, res, url) {
-    const directories = getPublicVideoDirectories()
-    const items = []
-    const directorySummaries = []
-    const settings = loadSettings()
-    const favoriteKeys = new Set(Array.isArray(settings.favorites) ? settings.favorites : [])
-    const accessToken = getRequestToken(req, url, false)
-    let indexed = false
-    let refreshing = false
+function parsePositiveInteger(value, fallback) {
+  const parsed = Number(value)
+  return Number.isInteger(parsed) && parsed >= 0 ? parsed : fallback
+}
 
-    for (const directory of directories) {
-      const directoryId = getDirectoryId(directory)
-      const directoryName = getDirectoryName(directory)
-      const result = await scanWithCache(directory)
-      indexed = indexed || Boolean(result?.indexed)
-      refreshing = refreshing || Boolean(result?.refreshing)
-      if (Array.isArray(result?.videos)) {
-        const remoteVideos = result.videos.map(video => toRemoteVideo(
-          applyDesktopMetadata(video, settings),
-          '',
-          { directoryId, directoryName, favoriteKeys, accessToken }
-        ))
-        items.push(...remoteVideos)
-        directorySummaries.push({
-          id: directoryId,
-          name: directoryName,
-          count: remoteVideos.length
-        })
-      }
+function getPagination(url, total) {
+  const hasLimit = url.searchParams.has('limit')
+  const hasOffset = url.searchParams.has('offset')
+  const offset = Math.min(parsePositiveInteger(url.searchParams.get('offset'), 0), total)
+  if (!hasLimit && !hasOffset) {
+    return {
+      offset: 0,
+      limit: total,
+      paginated: false
     }
+  }
 
-    const networkItems = listRemoteNetworkItems(settings).map(item => toRemoteNetworkVideo(item, {
-      favoriteKeys,
-      customTags: settings.customTags || {}
-    }))
-    items.push(...networkItems)
-    if (networkItems.length > 0) {
+  const rawLimit = parsePositiveInteger(url.searchParams.get('limit'), DEFAULT_PAGE_LIMIT)
+  const limit = Math.max(1, Math.min(rawLimit || DEFAULT_PAGE_LIMIT, MAX_PAGE_LIMIT))
+  return {
+    offset,
+    limit,
+    paginated: true
+  }
+}
+
+function addRequestThumbnailTokens(items, accessToken) {
+  if (!accessToken) return items
+  return items.map(item => item.id?.startsWith('video_')
+    ? {
+      ...item,
+      thumbnailToken: createThumbnailToken(item.id, accessToken)
+    }
+    : item)
+}
+
+async function buildLibrarySnapshot() {
+  const directories = getPublicVideoDirectories()
+  const items = []
+  const localIndexVideos = []
+  const directorySummaries = []
+  const settings = loadSettings()
+  const favoriteKeys = new Set(Array.isArray(settings.favorites) ? settings.favorites : [])
+  let indexed = false
+  let refreshing = false
+
+  for (const directory of directories) {
+    const directoryId = getDirectoryId(directory)
+    const directoryName = getDirectoryName(directory)
+    const result = await scanWithCache(directory)
+    indexed = indexed || Boolean(result?.indexed)
+    refreshing = refreshing || Boolean(result?.refreshing)
+    if (Array.isArray(result?.videos)) {
+      const localVideos = result.videos.map(video => applyDesktopMetadata(video, settings))
+      const remoteVideos = localVideos.map(video => toRemoteVideo(
+        video,
+        '',
+        { directoryId, directoryName, favoriteKeys }
+      ))
+      localIndexVideos.push(...localVideos)
+      items.push(...remoteVideos)
       directorySummaries.push({
-        id: NETWORK_DIRECTORY_ID,
-        name: NETWORK_DIRECTORY_NAME,
-        count: networkItems.length
+        id: directoryId,
+        name: directoryName,
+        count: remoteVideos.length
       })
     }
+  }
 
-    // 应用隐藏标签过滤（与桌面端 useVideoFilter 一致：含隐藏标签的视频从画廊移除）
-    const hiddenTags = Array.isArray(settings.hiddenTags) ? settings.hiddenTags : []
-    const filteredItems = filterHiddenTags(items, hiddenTags)
+  replaceRememberedVideos(localIndexVideos)
 
-    // 基于过滤后的视频重新计算各目录计数，保持与画廊一致
-    const filteredCounts = new Map()
-    for (const item of filteredItems) {
-      const dirId = item.directoryId
-      if (dirId) filteredCounts.set(dirId, (filteredCounts.get(dirId) || 0) + 1)
-    }
-    for (const summary of directorySummaries) {
-      summary.count = filteredCounts.get(summary.id) || 0
-    }
+  const networkItems = listRemoteNetworkItems(settings).map(item => toRemoteNetworkVideo(item, {
+    favoriteKeys,
+    customTags: settings.customTags || {}
+  }))
+  items.push(...networkItems)
+  if (networkItems.length > 0) {
+    directorySummaries.push({
+      id: NETWORK_DIRECTORY_ID,
+      name: NETWORK_DIRECTORY_NAME,
+      count: networkItems.length
+    })
+  }
+
+  const hiddenTags = Array.isArray(settings.hiddenTags) ? settings.hiddenTags : []
+  const filteredItems = filterHiddenTags(items, hiddenTags)
+
+  const filteredCounts = new Map()
+  for (const item of filteredItems) {
+    const dirId = item.directoryId
+    if (dirId) filteredCounts.set(dirId, (filteredCounts.get(dirId) || 0) + 1)
+  }
+  for (const summary of directorySummaries) {
+    summary.count = filteredCounts.get(summary.id) || 0
+  }
+
+  return {
+    items: filteredItems,
+    count: filteredItems.length,
+    directories: directorySummaries,
+    categoryGroups: buildCategoryGroups(filteredItems),
+    favoriteCount: filteredItems.filter(item => item.favorite).length,
+    hiddenTagCount: hiddenTags.length,
+    scannedAt: Date.now(),
+    indexed,
+    refreshing
+  }
+}
+
+async function getLibrarySnapshot() {
+  const now = Date.now()
+  if (librarySnapshotCache && now - librarySnapshotCache.createdAt < LIBRARY_SNAPSHOT_TTL_MS) {
+    return librarySnapshotCache.snapshot
+  }
+  if (pendingLibrarySnapshot) return pendingLibrarySnapshot
+
+  pendingLibrarySnapshot = buildLibrarySnapshot()
+    .then(snapshot => {
+      librarySnapshotCache = {
+        createdAt: Date.now(),
+        snapshot
+      }
+      return snapshot
+    })
+    .finally(() => {
+      pendingLibrarySnapshot = null
+    })
+  return pendingLibrarySnapshot
+}
+
+function createLibraryHandlers({ getRequestToken }) {
+  async function handleLibrary(req, res, url) {
+    const accessToken = getRequestToken(req, url, false)
+    const snapshot = await getLibrarySnapshot()
+    const pagination = getPagination(url, snapshot.items.length)
+    const pageItems = snapshot.items.slice(pagination.offset, pagination.offset + pagination.limit)
+    const items = addRequestThumbnailTokens(pageItems, accessToken)
 
     sendJson(req, res, 200, {
-      items: filteredItems,
-      count: filteredItems.length,
-      directories: directorySummaries,
-      categoryGroups: buildCategoryGroups(filteredItems),
-      favoriteCount: filteredItems.filter(item => item.favorite).length,
-      hiddenTagCount: hiddenTags.length,
-      scannedAt: Date.now(),
-      indexed,
-      refreshing
+      ...snapshot,
+      items,
+      pagination: {
+        offset: pagination.offset,
+        limit: pagination.limit,
+        total: snapshot.count,
+        returned: items.length,
+        hasMore: pagination.offset + items.length < snapshot.count
+      }
     })
   }
 
@@ -152,5 +249,6 @@ function createLibraryHandlers({ getRequestToken }) {
 module.exports = {
   buildCategoryGroups,
   applyDesktopMetadata,
+  clearLibrarySnapshotCache,
   createLibraryHandlers
 }

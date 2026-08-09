@@ -3,7 +3,14 @@ const http = require('http')
 const https = require('https')
 const { NETWORK_VIDEO_EXTENSIONS } = require('../../constants')
 const { loadSettings } = require('../../settings')
+const {
+  assertResolvedTargetPublic,
+  isLocalHostname,
+  isPrivateIpAddress,
+  normalizeHostname
+} = require('../../ip-utils')
 const { parseNetworkResourcePage } = require('../../network-resource-parser')
+const { enrichNetworkResource, WEBPAGE_SSRF_GUARD_HINT } = require('../../ipc/network-resource-service')
 const { sendError } = require('../http-utils')
 const { createBoundScopedToken, signScopedToken, verifyBoundScopedToken } = require('../identity')
 
@@ -12,7 +19,14 @@ const NETWORK_DIRECTORY_NAME = '网络资源'
 const DEFAULT_BROWSER_UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/126 Safari/537.36'
 const MAX_REDIRECTS = 4
 const MAX_PLAYLIST_BYTES = 5 * 1024 * 1024
+const MAX_NETWORK_PROXY_CONCURRENCY = 16
+const MAX_NETWORK_PROXY_PER_RESOURCE = 6
 const NETWORK_PROXY_TOKEN_TTL_MS = 6 * 60 * 60 * 1000
+
+const activeNetworkProxyRequests = {
+  total: 0,
+  byNetworkId: new Map()
+}
 
 function normalizeUrl(value) {
   try {
@@ -38,6 +52,59 @@ function getHostName(value) {
   } catch {
     return ''
   }
+}
+
+function isSameSiteUrl(targetUrl, baseUrl) {
+  try {
+    const target = new URL(targetUrl)
+    const base = new URL(baseUrl)
+    if (target.protocol !== 'http:' && target.protocol !== 'https:') return false
+    const targetHost = normalizeHostname(target.hostname)
+    const baseHost = normalizeHostname(base.hostname)
+    if (!targetHost || !baseHost) return false
+    return targetHost === baseHost
+  } catch {
+    return false
+  }
+}
+
+function isAllowedPlaylistTarget(targetUrl, baseUrl, options = {}) {
+  if (isSameSiteUrl(targetUrl, baseUrl)) return true
+  const allowedHosts = Array.isArray(options.allowedHosts) ? options.allowedHosts : []
+  const targetHost = normalizeHostname(getHostName(targetUrl))
+  if (!targetHost) return false
+  if (allowedHosts.some(host => targetHost === normalizeHostname(host))) return true
+  if (isLocalHostname(targetHost) || isPrivateIpAddress(targetHost)) return false
+  return true
+}
+
+function withNetworkProxySlot(networkId, fn) {
+  const key = String(networkId || 'unknown')
+  const currentForResource = activeNetworkProxyRequests.byNetworkId.get(key) || 0
+  if (
+    activeNetworkProxyRequests.total >= MAX_NETWORK_PROXY_CONCURRENCY ||
+    currentForResource >= MAX_NETWORK_PROXY_PER_RESOURCE
+  ) {
+    throw Object.assign(new Error('网络资源代理请求过多，请稍后再试'), {
+      status: 429,
+      code: 'network_proxy_busy'
+    })
+  }
+
+  activeNetworkProxyRequests.total += 1
+  activeNetworkProxyRequests.byNetworkId.set(key, currentForResource + 1)
+
+  return Promise.resolve()
+    .then(fn)
+    .finally(() => {
+      activeNetworkProxyRequests.total = Math.max(0, activeNetworkProxyRequests.total - 1)
+      const nextForResource = (activeNetworkProxyRequests.byNetworkId.get(key) || 1) - 1
+      if (nextForResource > 0) {
+        activeNetworkProxyRequests.byNetworkId.set(key, nextForResource)
+      } else {
+        activeNetworkProxyRequests.byNetworkId.delete(key)
+      }
+    })
 }
 
 function getRemoteNetworkId(value) {
@@ -260,15 +327,26 @@ function createProxyPath(networkId, targetUrl, options = {}) {
   return `/v1/network-resources/${encodeURIComponent(networkId)}/proxy?target=${encodeURIComponent(encodeProxyTarget(targetUrl))}&networkToken=${encodeURIComponent(token)}`
 }
 
+function createCheckedProxyPath(networkId, targetUrl, baseUrl, options = {}) {
+  if (!isAllowedPlaylistTarget(targetUrl, baseUrl, options)) {
+    throw Object.assign(new Error('播放列表包含不受信任的跨站资源，已停止代理'), {
+      status: 403,
+      code: 'network_proxy_cross_site_blocked'
+    })
+  }
+  return createProxyPath(networkId, targetUrl, options)
+}
+
 function rewritePlaylistLine(line, baseUrl, networkId, proxyOptions) {
-  if (!line || line.startsWith('#EXT-X-KEY') || line.startsWith('#EXT-X-MAP')) {
+  if (!line || line.startsWith('#EXT-X-KEY') || line.startsWith('#EXT-X-MAP') || line.startsWith('#EXT-X-MEDIA')) {
     return line.replace(/URI="([^"]+)"/g, (_match, uri) => {
       const targetUrl = toAbsolutePlaylistUrl(uri, baseUrl)
-      return `URI="${createProxyPath(networkId, targetUrl, proxyOptions)}"`
+      return `URI="${createCheckedProxyPath(networkId, targetUrl, baseUrl, proxyOptions)}"`
     })
   }
   if (line.startsWith('#')) return line
-  return createProxyPath(networkId, toAbsolutePlaylistUrl(line, baseUrl), proxyOptions)
+  const targetUrl = toAbsolutePlaylistUrl(line, baseUrl)
+  return createCheckedProxyPath(networkId, targetUrl, baseUrl, proxyOptions)
 }
 
 function rewriteM3u8Playlist(text, baseUrl, networkId, proxyOptions) {
@@ -284,14 +362,30 @@ async function resolveNetworkPlayback(item) {
     item.kind !== 'webpage' ||
     NETWORK_VIDEO_EXTENSIONS.has(getUrlExtension(item.url))
   ) {
+    const url = item.playbackUrl || item.url
+    // 网页类资源（含升级前已持久化的存量数据）的播放地址可能来自解析器，禁止公网网页指向内网。
+    // 用户显式添加的局域网网页（item.url 本身是内网）与 direct 直链（NAS）放行。
+    if (item.kind === 'webpage') {
+      assertResolvedTargetPublic(item.url, url, '网页资源的播放地址指向本地或内网，已停止代理')
+    }
     return {
-      url: item.playbackUrl || item.url,
+      url,
       httpHeaders: item.httpHeaders
     }
   }
 
-  const parsed = await parseNetworkResourcePage(item.url)
-  const playbackUrl = normalizeUrl(parsed?.playbackUrl)
+  // 解析路径与桌面端 IPC 收敛到同一实现（enrichNetworkResource）：
+  // 包含网页解析、播放地址/剧集逐条 SSRF 校验与 httpHeaders 规整。
+  let resolved
+  try {
+    resolved = await enrichNetworkResource(item)
+  } catch (err) {
+    if (typeof err?.message === 'string' && err.message.includes(WEBPAGE_SSRF_GUARD_HINT)) {
+      throw Object.assign(err, { status: 403, code: 'network_webpage_ssrf_blocked' })
+    }
+    throw err
+  }
+  const playbackUrl = normalizeUrl(resolved?.playbackUrl)
   if (!playbackUrl) {
     throw Object.assign(new Error('该网页资源需要在电脑端内置网页中观看'), {
       status: 422,
@@ -300,7 +394,7 @@ async function resolveNetworkPlayback(item) {
   }
   return {
     url: playbackUrl,
-    httpHeaders: normalizeHttpHeaders(parsed.httpHeaders) || item.httpHeaders
+    httpHeaders: normalizeHttpHeaders(resolved.httpHeaders) || item.httpHeaders
   }
 }
 
@@ -335,7 +429,15 @@ function pipeNetworkResponse(req, res, targetUrl, playbackHeaders, options = {},
           reject(Object.assign(new Error('网络资源重定向次数过多'), { status: 502, code: 'network_redirect_limit' }))
           return
         }
-        pipeNetworkResponse(req, res, toAbsolutePlaylistUrl(location, targetUrl), playbackHeaders, options, redirects + 1).then(resolve, reject)
+        const nextUrl = toAbsolutePlaylistUrl(location, targetUrl)
+        if (!isAllowedPlaylistTarget(nextUrl, targetUrl, options)) {
+          reject(Object.assign(new Error('网络资源重定向到不受信任的地址，已停止代理'), {
+            status: 403,
+            code: 'network_redirect_blocked'
+          }))
+          return
+        }
+        pipeNetworkResponse(req, res, nextUrl, playbackHeaders, options, redirects + 1).then(resolve, reject)
         return
       }
 
@@ -368,12 +470,18 @@ function pipeNetworkResponse(req, res, targetUrl, playbackHeaders, options = {},
           chunks.push(chunk)
         })
         response.on('end', () => {
-          const body = Buffer.from(rewriteM3u8Playlist(
-            Buffer.concat(chunks).toString('utf8'),
-            targetUrl,
-            options.networkId,
-            options
-          ), 'utf8')
+          let body
+          try {
+            body = Buffer.from(rewriteM3u8Playlist(
+              Buffer.concat(chunks).toString('utf8'),
+              targetUrl,
+              options.networkId,
+              options
+            ), 'utf8')
+          } catch (err) {
+            reject(err)
+            return
+          }
           res.writeHead(statusCode, {
             ...headersToSend,
             'Content-Type': 'application/vnd.apple.mpegurl; charset=utf-8',
@@ -382,6 +490,7 @@ function pipeNetworkResponse(req, res, targetUrl, playbackHeaders, options = {},
           res.end(body)
           resolve()
         })
+        response.on('error', reject)
         return
       }
 
@@ -429,10 +538,10 @@ function createNetworkResourceHandlers({ getRequestToken, allowLegacyToken } = {
     }
     const playback = await resolveNetworkPlayback(item)
     const accessToken = typeof getRequestToken === 'function' ? getRequestToken(req, requestUrl, false) : ''
-    await pipeNetworkResponse(req, res, playback.url, playback.httpHeaders, {
+    await withNetworkProxySlot(networkId, () => pipeNetworkResponse(req, res, playback.url, playback.httpHeaders, {
       networkId,
       accessToken
-    })
+    }))
   }
 
   async function handleNetworkProxy(req, res, networkId, requestUrl) {
@@ -452,11 +561,11 @@ function createNetworkResourceHandlers({ getRequestToken, allowLegacyToken } = {
     }
 
     const networkTokenFactory = createNetworkProxyTokenFactory(networkId, networkToken)
-    await pipeNetworkResponse(req, res, targetUrl, item.httpHeaders, {
+    await withNetworkProxySlot(networkId, () => pipeNetworkResponse(req, res, targetUrl, item.httpHeaders, {
       networkId,
       networkToken,
       networkTokenFactory
-    })
+    }))
   }
 
   return {
@@ -467,6 +576,7 @@ function createNetworkResourceHandlers({ getRequestToken, allowLegacyToken } = {
 }
 
 module.exports = {
+  isAllowedPlaylistTarget,
   NETWORK_DIRECTORY_ID,
   NETWORK_DIRECTORY_NAME,
   createNetworkResourceHandlers,
