@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from 'react'
+import { useEffect, useState, useCallback, useRef } from 'react'
 
 // 应用级基础状态：settings / 当前目录 / loading / UI 开关 / 系统状态
 export function useAppState() {
@@ -11,6 +11,8 @@ export function useAppState() {
   const [mpvStatus, setMpvStatus] = useState(null)
   const [plugins, setPlugins] = useState([])
   const [pluginsLoaded, setPluginsLoaded] = useState(false)
+  const [settingsSaveError, setSettingsSaveError] = useState('')
+  const settingsSaveSequenceRef = useRef(0)
 
   const theme = settings?.theme || 'dark'
   const playbackMode = settings?.playbackMode || 'order'
@@ -25,17 +27,30 @@ export function useAppState() {
 
   // 合并写入并持久化设置（乐观更新）
   const saveSettings = useCallback(async (partial) => {
+    const requestId = settingsSaveSequenceRef.current + 1
+    settingsSaveSequenceRef.current = requestId
+    let previous
     let merged
     setSettings(prev => {
+      previous = prev
       merged = { ...prev, ...partial }
       return merged
     })
-    const result = await window.electronAPI.saveSettings(partial)
-    if (result?.settings) {
-      setSettings(result.settings)
-      return result.settings
+    setSettingsSaveError('')
+    try {
+      const result = await window.electronAPI.saveSettings(partial)
+      if (result?.settings) {
+        setSettings(result.settings)
+        return result.settings
+      }
+      return merged
+    } catch (error) {
+      if (settingsSaveSequenceRef.current === requestId) {
+        setSettings(previous)
+      }
+      setSettingsSaveError(error?.message || '设置保存失败')
+      throw error
     }
-    return merged
   }, [])
 
   const handleThemeChange = useCallback(async (nextTheme) => {
@@ -71,6 +86,8 @@ export function useAppState() {
     setPlugins,
     pluginsLoaded,
     setPluginsLoaded,
+    settingsSaveError,
+    setSettingsSaveError,
     refreshPlugins,
     currentDir,
     setCurrentDir,

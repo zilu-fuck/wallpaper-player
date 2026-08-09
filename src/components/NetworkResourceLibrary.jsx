@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
+import { WINDOW_EVENTS } from '../api/events'
 
 const VIDEO_EXTENSIONS = new Set([
   '.mp4',
@@ -190,13 +191,13 @@ export default function NetworkResourceLibrary({
   }, [closeEditDialog, editResource, editing])
 
   const openAddResource = useCallback(() => {
-    window.dispatchEvent(new CustomEvent('wallpaper-player-open-resource-dialog', {
+    window.dispatchEvent(new CustomEvent(WINDOW_EVENTS.OPEN_RESOURCE_DIALOG, {
       detail: { mode: 'network' }
     }))
   }, [])
 
   const downloadResource = useCallback((resource) => {
-    window.dispatchEvent(new CustomEvent('wallpaper-player-open-download-center', {
+    window.dispatchEvent(new CustomEvent(WINDOW_EVENTS.OPEN_DOWNLOAD_CENTER, {
       detail: {
         type: 'network',
         resource

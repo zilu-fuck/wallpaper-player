@@ -1,17 +1,29 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { lazy, Suspense, useCallback, useEffect, useRef, useState } from 'react'
+import { WINDOW_EVENTS } from './api/events'
 import AppProvider from './components/AppProvider'
 import Gallery from './components/Gallery'
 import VideoPlayer from './components/VideoPlayer'
-import Settings from './components/Settings'
 import Sidebar from './components/Sidebar'
 import TagEditor from './components/TagEditor'
 import UpdateNotice from './components/UpdateNotice'
-import VideoAnalysisSidebar, { VideoAnalysisResultModal } from './components/VideoAnalysisSidebar'
 import RightDock from './components/RightDock'
-import AISearchPanel from './components/AISearchPanel'
-import DownloadCenter from './components/DownloadCenter'
-import NetworkResourceLibrary from './components/NetworkResourceLibrary'
 import { useApp } from './context/AppContext'
+
+const Settings = lazy(() => import('./components/Settings'))
+const VideoAnalysisSidebar = lazy(() => import('./components/VideoAnalysisSidebar'))
+const VideoAnalysisResultModal = lazy(() => import('./components/VideoAnalysisSidebar')
+  .then(module => ({ default: module.VideoAnalysisResultModal })))
+const AISearchPanel = lazy(() => import('./components/AISearchPanel'))
+const DownloadCenter = lazy(() => import('./components/DownloadCenter'))
+const NetworkResourceLibrary = lazy(() => import('./components/NetworkResourceLibrary'))
+
+function PanelFallback({ className = '' }) {
+  return (
+    <div className={`lazy-panel-fallback ${className}`.trim()} role="status" aria-label="Loading">
+      <div className="loading-spinner" />
+    </div>
+  )
+}
 
 function AppInner() {
   const {
@@ -20,6 +32,8 @@ function AppInner() {
     videos,
     scanning,
     thumbProgress,
+    scanError,
+    scanErrorDir,
     currentDir,
     searchQuery,
     setSearchQuery,
@@ -34,11 +48,14 @@ function AppInner() {
     hasFilter,
     settings,
     setSettings,
+    settingsSaveError,
+    setSettingsSaveError,
     handleDirectoriesChange,
     handleSelectDirectory,
     handleOpenFile,
     handleDropFiles,
     handlePlayNetworkResource,
+    runPlayerCommand,
     scanAndLoad,
     playingVideo,
     showSettings,
@@ -112,18 +129,18 @@ function AppInner() {
       })
       handleTabChange('downloads')
     }
-    window.addEventListener('wallpaper-player-open-download-center', handler)
-    return () => window.removeEventListener('wallpaper-player-open-download-center', handler)
+    window.addEventListener(WINDOW_EVENTS.OPEN_DOWNLOAD_CENTER, handler)
+    return () => window.removeEventListener(WINDOW_EVENTS.OPEN_DOWNLOAD_CENTER, handler)
   }, [handleTabChange])
 
   useEffect(() => {
     const openNetworkLibrary = () => setMainView('network')
     const openLocalLibrary = () => setMainView('local')
-    window.addEventListener('wallpaper-player-open-network-library', openNetworkLibrary)
-    window.addEventListener('wallpaper-player-open-local-library', openLocalLibrary)
+    window.addEventListener(WINDOW_EVENTS.OPEN_NETWORK_LIBRARY, openNetworkLibrary)
+    window.addEventListener(WINDOW_EVENTS.OPEN_LOCAL_LIBRARY, openLocalLibrary)
     return () => {
-      window.removeEventListener('wallpaper-player-open-network-library', openNetworkLibrary)
-      window.removeEventListener('wallpaper-player-open-local-library', openLocalLibrary)
+      window.removeEventListener(WINDOW_EVENTS.OPEN_NETWORK_LIBRARY, openNetworkLibrary)
+      window.removeEventListener(WINDOW_EVENTS.OPEN_LOCAL_LIBRARY, openLocalLibrary)
     }
   }, [])
 
@@ -144,7 +161,7 @@ function AppInner() {
       if (!dir) return
       const directories = settings?.directories || []
       if (directories.some(item => isSameOrInsidePath(item, dir))) {
-        window.dispatchEvent(new CustomEvent('wallpaper-player-library-directory-added', {
+        window.dispatchEvent(new CustomEvent(WINDOW_EVENTS.LIBRARY_DIRECTORY_ADDED, {
           detail: { dir, alreadyAdded: true }
         }))
         refreshLibraryDirectory(dir)
@@ -159,12 +176,12 @@ function AppInner() {
         defaultDirectory
       })
       scanAndLoad(dir, true)
-      window.dispatchEvent(new CustomEvent('wallpaper-player-library-directory-added', {
+      window.dispatchEvent(new CustomEvent(WINDOW_EVENTS.LIBRARY_DIRECTORY_ADDED, {
         detail: { dir, alreadyAdded: false }
       }))
     }
-    window.addEventListener('wallpaper-player-download-add-library-directory', handler)
-    return () => window.removeEventListener('wallpaper-player-download-add-library-directory', handler)
+    window.addEventListener(WINDOW_EVENTS.DOWNLOAD_ADD_LIBRARY_DIRECTORY, handler)
+    return () => window.removeEventListener(WINDOW_EVENTS.DOWNLOAD_ADD_LIBRARY_DIRECTORY, handler)
   }, [handleDirectoriesChange, isSameOrInsidePath, refreshLibraryDirectory, scanAndLoad, settings])
 
   // 处理视频拖放到右侧
@@ -189,13 +206,15 @@ function AppInner() {
       id: 'downloads',
       label: '下载中心',
       content: (
-        <DownloadCenter
-          pendingRequest={pendingDownloadRequest}
-          onPendingRequestConsumed={() => setPendingDownloadRequest(null)}
-          onRefreshLibraryDirectory={refreshLibraryDirectory}
-          onSettingsChanged={setSettings}
-          libraryDirectories={settings?.directories || []}
-        />
+        <Suspense fallback={<PanelFallback className="dock" />}>
+          <DownloadCenter
+            pendingRequest={pendingDownloadRequest}
+            onPendingRequestConsumed={() => setPendingDownloadRequest(null)}
+            onRefreshLibraryDirectory={refreshLibraryDirectory}
+            onSettingsChanged={setSettings}
+            libraryDirectories={settings?.directories || []}
+          />
+        </Suspense>
       )
     }
   ]
@@ -206,22 +225,24 @@ function AppInner() {
       id: 'video-analysis',
       label: '视频理解',
       content: (
-        <VideoAnalysisSidebar
-          open
-          tasks={analysisTasks}
-          counts={analysisTaskCounts}
-          getStatusLabel={getAnalysisTaskStatusLabel}
-          onClose={handleCloseDock}
-          onCancelRunning={cancelRunningAnalysisTask}
-          onRetry={retryAnalysisTask}
-          onHideFinished={hideFinishedAnalysisTasks}
-          onRefreshSaved={refreshSavedAnalysisResults}
-          onDeleteSaved={deleteSavedAnalysisTask}
-          onDeleteSavedBatch={deleteSavedAnalysisTasks}
-          savedResultsLoading={savedAnalysisResultsLoading}
-          savedResultsMessage={savedAnalysisResultsMessage}
-          onOpenResult={openAnalysisResultTask}
-        />
+        <Suspense fallback={<PanelFallback className="dock" />}>
+          <VideoAnalysisSidebar
+            open
+            tasks={analysisTasks}
+            counts={analysisTaskCounts}
+            getStatusLabel={getAnalysisTaskStatusLabel}
+            onClose={handleCloseDock}
+            onCancelRunning={cancelRunningAnalysisTask}
+            onRetry={retryAnalysisTask}
+            onHideFinished={hideFinishedAnalysisTasks}
+            onRefreshSaved={refreshSavedAnalysisResults}
+            onDeleteSaved={deleteSavedAnalysisTask}
+            onDeleteSavedBatch={deleteSavedAnalysisTasks}
+            savedResultsLoading={savedAnalysisResultsLoading}
+            savedResultsMessage={savedAnalysisResultsMessage}
+            onOpenResult={openAnalysisResultTask}
+          />
+        </Suspense>
       )
     })
   }
@@ -230,11 +251,13 @@ function AppInner() {
       id: 'ai-search',
       label: 'AI 搜索',
       content: (
-        <AISearchPanel
-          ref={aiSearchRef}
-          pendingVideo={pendingAiSearchVideo}
-          onPendingVideoConsumed={() => setPendingAiSearchVideo(null)}
-        />
+        <Suspense fallback={<PanelFallback className="dock" />}>
+          <AISearchPanel
+            ref={aiSearchRef}
+            pendingVideo={pendingAiSearchVideo}
+            onPendingVideoConsumed={() => setPendingAiSearchVideo(null)}
+          />
+        </Suspense>
       )
     })
   }
@@ -251,8 +274,8 @@ function AppInner() {
       handleTabChange('ai-search')
       setPendingAiSearchVideo(e.detail)
     }
-    window.addEventListener('wallpaper-player-ai-search', handler)
-    return () => window.removeEventListener('wallpaper-player-ai-search', handler)
+    window.addEventListener(WINDOW_EVENTS.AI_SEARCH, handler)
+    return () => window.removeEventListener(WINDOW_EVENTS.AI_SEARCH, handler)
   }, [handleTabChange])
 
   // 当有新分析任务时显示未读提示
@@ -295,12 +318,15 @@ function AppInner() {
   const onRefresh = useCallback(() => {
     if (currentDir) scanAndLoad(currentDir, true)
   }, [currentDir, scanAndLoad])
+  const onRetryScan = useCallback(() => {
+    if (scanErrorDir) scanAndLoad(scanErrorDir, true)
+  }, [scanErrorDir, scanAndLoad])
   const onSelectDirectory = useCallback(() => {
     setMainView('local')
     handleSelectDirectory?.()
   }, [handleSelectDirectory])
   const onOpenNetworkResourceDialog = useCallback(() => {
-    window.dispatchEvent(new CustomEvent('wallpaper-player-open-resource-dialog', {
+    window.dispatchEvent(new CustomEvent(WINDOW_EVENTS.OPEN_RESOURCE_DIALOG, {
       detail: { mode: 'network' }
     }))
   }, [])
@@ -315,6 +341,38 @@ function AppInner() {
     event.preventDefault()
     handleDropFiles?.(Array.from(event.dataTransfer?.files || []))
   }, [handleDropFiles])
+
+  useEffect(() => {
+    const handleWindowShortcut = (event) => {
+      if (!(event.ctrlKey || event.metaKey) || event.altKey) return
+      if (showSettings || selectedAnalysisResultTask) return
+      const target = event.target
+      const tagName = target?.tagName?.toLowerCase?.()
+      if (target?.isContentEditable || ['input', 'textarea', 'select'].includes(tagName)) return
+
+      const key = event.key.toLowerCase()
+      if (key === 'o') {
+        event.preventDefault()
+        handleOpenFile?.()
+        return
+      }
+      if (!playingVideo) return
+
+      const playerShortcuts = {
+        arrowleft: ['seek-backward', 5],
+        arrowright: ['seek-forward', 5],
+        arrowup: ['volume-up', 5],
+        arrowdown: ['volume-down', 5]
+      }
+      const command = playerShortcuts[key]
+      if (!command) return
+      event.preventDefault()
+      runPlayerCommand?.(command[0], command[1])
+    }
+
+    window.addEventListener('keydown', handleWindowShortcut)
+    return () => window.removeEventListener('keydown', handleWindowShortcut)
+  }, [handleOpenFile, playingVideo, runPlayerCommand, selectedAnalysisResultTask, showSettings])
 
   if (loading) {
     return (
@@ -423,6 +481,13 @@ function AppInner() {
         </div>
       </header>
 
+      {settingsSaveError ? (
+        <div className="settings-save-error" role="alert">
+          <span>设置保存失败：{settingsSaveError}</span>
+          <button type="button" onClick={() => setSettingsSaveError('')} aria-label="关闭设置保存错误">关闭</button>
+        </div>
+      ) : null}
+
       <div className="content-row">
         <Sidebar />
 
@@ -447,11 +512,21 @@ function AppInner() {
           <div className="main-workspace">
             <main className="main-content">
               {isNetworkView ? (
-                <NetworkResourceLibrary
-                  resources={networkResources}
-                  onPlay={handlePlayNetworkResource}
-                  onSettingsChanged={setSettings}
-                />
+                <Suspense fallback={<PanelFallback className="main" />}>
+                  <NetworkResourceLibrary
+                    resources={networkResources}
+                    onPlay={handlePlayNetworkResource}
+                    onSettingsChanged={setSettings}
+                  />
+                </Suspense>
+              ) : scanError && !scanning ? (
+                <div className="empty-state" role="alert">
+                  <h2>无法读取当前目录</h2>
+                  <p>{scanError}</p>
+                  <button className="btn btn-primary" onClick={onRetryScan} disabled={!scanErrorDir}>
+                    重试扫描
+                  </button>
+                </div>
               ) : videos.length === 0 && !scanning ? (
                 <div className="empty-state">
                   <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
@@ -511,15 +586,23 @@ function AppInner() {
       )}
 
       {/* 设置面板 */}
-      {showSettings && <Settings />}
+      {showSettings && (
+        <Suspense fallback={<PanelFallback className="overlay" />}>
+          <Settings />
+        </Suspense>
+      )}
 
       {/* 标签编辑器 */}
       <TagEditor />
 
-      <VideoAnalysisResultModal
-        task={selectedAnalysisResultTask}
-        onClose={closeAnalysisResultTask}
-      />
+      {selectedAnalysisResultTask && (
+        <Suspense fallback={<PanelFallback className="overlay" />}>
+          <VideoAnalysisResultModal
+            task={selectedAnalysisResultTask}
+            onClose={closeAnalysisResultTask}
+          />
+        </Suspense>
+      )}
 
       <UpdateNotice />
     </div>

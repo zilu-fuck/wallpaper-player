@@ -1148,9 +1148,14 @@ export default function VideoPlayer({ video }) {
   useEffect(() => {
     if (!video) return undefined
 
-    const isFormTarget = (target) => {
+    const isTextEntryTarget = (target) => {
       const tagName = target?.tagName?.toLowerCase?.()
-      return ['input', 'textarea', 'select'].includes(tagName)
+      return target?.isContentEditable || ['input', 'textarea', 'select'].includes(tagName)
+    }
+
+    const isInteractiveTarget = (target) => {
+      const tagName = target?.tagName?.toLowerCase?.()
+      return isTextEntryTarget(target) || ['button', 'a'].includes(tagName)
     }
 
     const startArrowHold = (key) => {
@@ -1209,13 +1214,23 @@ export default function VideoPlayer({ video }) {
     }
 
     const onKeyDown = (event) => {
-      if (isFormTarget(event.target)) return
+      if (event.key === 'Escape') {
+        if (isTextEntryTarget(event.target)) return
+        event.preventDefault()
+        event.stopImmediatePropagation()
+        if (activeMenu) {
+          setActiveMenu(null)
+        } else if (webFullscreen) {
+          setWebFullscreen(false)
+        } else {
+          handleClose()
+        }
+        return
+      }
+      if (isInteractiveTarget(event.target)) return
+      if (event.ctrlKey || event.metaKey) return
 
       switch (event.key) {
-        case 'Escape':
-          event.preventDefault()
-          handleClose()
-          break
         case ' ':
           event.preventDefault()
           handleTogglePause()
@@ -1242,16 +1257,16 @@ export default function VideoPlayer({ video }) {
       finishArrowHold(event.key)
     }
 
-    window.addEventListener('keydown', onKeyDown)
+    window.addEventListener('keydown', onKeyDown, true)
     window.addEventListener('keyup', onKeyUp)
     window.addEventListener('blur', clearArrowHolds)
     return () => {
-      window.removeEventListener('keydown', onKeyDown)
+      window.removeEventListener('keydown', onKeyDown, true)
       window.removeEventListener('keyup', onKeyUp)
       window.removeEventListener('blur', clearArrowHolds)
       clearArrowHolds()
     }
-  }, [applySpeed, handleClose, handleOpenFile, handleSeek, handleTogglePause, video])
+  }, [activeMenu, applySpeed, handleClose, handleOpenFile, handleSeek, handleTogglePause, video, webFullscreen])
 
   useEffect(() => {
     if (mode !== 'html5' || !html5Url) return

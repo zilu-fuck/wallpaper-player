@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { WINDOW_EVENTS } from '../api/events'
 import { createPortal } from 'react-dom'
 
 const VIDEO_EXTENSIONS = new Set([
@@ -454,8 +455,8 @@ export default function DownloadCenter({
         ? '保存目录已在视频库中，已触发刷新。'
         : '保存目录已加入视频库，下载完成后会刷新该目录。')
     }
-    window.addEventListener('wallpaper-player-library-directory-added', handler)
-    return () => window.removeEventListener('wallpaper-player-library-directory-added', handler)
+    window.addEventListener(WINDOW_EVENTS.LIBRARY_DIRECTORY_ADDED, handler)
+    return () => window.removeEventListener(WINDOW_EVENTS.LIBRARY_DIRECTORY_ADDED, handler)
   }, [saveDir])
 
   const chooseSaveDir = useCallback(async () => {
@@ -661,8 +662,8 @@ export default function DownloadCenter({
         closeDownloadDialog()
       }
     }
-    window.addEventListener('wallpaper-player-close-download-dialogs', handler)
-    return () => window.removeEventListener('wallpaper-player-close-download-dialogs', handler)
+    window.addEventListener(WINDOW_EVENTS.CLOSE_DOWNLOAD_DIALOGS, handler)
+    return () => window.removeEventListener(WINDOW_EVENTS.CLOSE_DOWNLOAD_DIALOGS, handler)
   }, [cancelFileDialogTask, closeDownloadDialog, downloadDialogOpen, fileDialogTaskGid])
 
   const controlTask = useCallback(async (task, action) => {
@@ -687,7 +688,7 @@ export default function DownloadCenter({
 
   const addDirectoryToLibrary = useCallback((dir) => {
     if (!dir) return
-    window.dispatchEvent(new CustomEvent('wallpaper-player-download-add-library-directory', {
+    window.dispatchEvent(new CustomEvent(WINDOW_EVENTS.DOWNLOAD_ADD_LIBRARY_DIRECTORY, {
       detail: { dir }
     }))
   }, [])

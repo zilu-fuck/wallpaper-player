@@ -54,6 +54,16 @@ export default function RightDock({ open, tabs, activeTab, unreadTabs, onClose, 
   const wrapperRef = useRef(null)
   const panelRef = useRef(null)
 
+  // 已挂载过的 Tab 保持挂载（display:none 隐藏而非卸载），
+  // 避免 DownloadCenter/AISearchPanel 等面板切换后本地状态丢失。
+  const [mountedTabs, setMountedTabs] = useState(() => new Set())
+
+  useEffect(() => {
+    if (open && activeTab) {
+      setMountedTabs(prev => (prev.has(activeTab) ? prev : new Set(prev).add(activeTab)))
+    }
+  }, [open, activeTab])
+
   const handleActivityClick = useCallback((tabId) => {
     if (activeTab === tabId && open) {
       onClose()
@@ -135,8 +145,6 @@ export default function RightDock({ open, tabs, activeTab, unreadTabs, onClose, 
     return () => window.removeEventListener('dragend', handleDragEnd)
   }, [])
 
-  const activeContent = tabs.find(tab => tab.id === activeTab)?.content
-
   return (
     <div
       ref={wrapperRef}
@@ -211,9 +219,17 @@ export default function RightDock({ open, tabs, activeTab, unreadTabs, onClose, 
               </div>
             )}
 
-            {/* 面板内容 */}
+            {/* 面板内容：已挂载过的 Tab 用 hidden 保留，避免状态丢失 */}
             <div className="right-dock-panel-content">
-              {activeContent}
+              {tabs.map(tab => mountedTabs.has(tab.id) ? (
+                <div
+                  key={tab.id}
+                  className={`right-dock-tab-content${tab.id === activeTab ? ' active' : ''}`}
+                  hidden={tab.id !== activeTab}
+                >
+                  {tab.content}
+                </div>
+              ) : null)}
             </div>
           </>
         ) : null}

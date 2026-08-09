@@ -260,8 +260,15 @@ export function usePlayer({ queueVideos = [], videoSource = queueVideos, playbac
     }
 
     try {
-      await window.electronAPI?.allowVideoFile(filePath)
-    } catch {}
+      const result = await window.electronAPI?.allowVideoFile(filePath)
+      if (result?.success === false) {
+        setPlayerError(result.error || '文件格式不受支持')
+        return null
+      }
+    } catch (error) {
+      setPlayerError(error?.message || '无法验证视频文件')
+      return null
+    }
 
     const playOptions = Object.hasOwn(options, 'queueVideos')
       ? options
@@ -303,8 +310,17 @@ export function usePlayer({ queueVideos = [], videoSource = queueVideos, playbac
 
   const handleDropFiles = useCallback(async (payload) => {
     const entries = Array.isArray(payload) ? payload : Array.from(payload || [])
-    const filePath = entries
-      .map(item => item?.path || item?.fullPath || item)
+    const paths = await Promise.all(entries.map(async (item) => {
+      if (typeof item === 'string') return item
+      if (typeof item?.path === 'string') return item.path
+      if (typeof item?.fullPath === 'string') return item.fullPath
+      try {
+        return await window.electronAPI?.getPathForFile?.(item) || ''
+      } catch {
+        return ''
+      }
+    }))
+    const filePath = paths
       .find(item => typeof item === 'string' && isSupportedVideoPath(item))
 
     if (!filePath) return null
@@ -493,6 +509,7 @@ export function usePlayer({ queueVideos = [], videoSource = queueVideos, playbac
     handlePrev,
     handleReplayCurrent,
     handleAdvanceFromEnd,
+    runPlayerCommand,
     registerPlayerCommandTarget
   }
 }

@@ -1,4 +1,5 @@
 import { useRef, useEffect, useCallback } from 'react'
+import { WINDOW_EVENTS } from '../api/events'
 import { useAppState } from './useAppState'
 import { useScan } from './useScan'
 import { useFavorites } from './useFavorites'
@@ -102,7 +103,7 @@ export function useAppController() {
     if (needsPrivacyPassword) {
       const payload = { dir, privateDirectory: true, needsPrivacyPassword: true }
       if (!options.returnPasswordRequired) {
-        window.dispatchEvent(new CustomEvent('wallpaper-player-private-directory-password-required', { detail: payload }))
+        window.dispatchEvent(new CustomEvent(WINDOW_EVENTS.PRIVATE_DIRECTORY_PASSWORD_REQUIRED, { detail: payload }))
       }
       return payload
     }
@@ -154,7 +155,7 @@ export function useAppController() {
   }, [appState, scan, filter, setCurrentDir])
 
   const handleCheckUpdate = useCallback(() => {
-    window.dispatchEvent(new Event('wallpaper-player-check-update'))
+    window.dispatchEvent(new Event(WINDOW_EVENTS.CHECK_UPDATE))
     appState.setShowSettings(false)
   }, [appState])
 

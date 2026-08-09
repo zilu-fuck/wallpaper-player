@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import VideoAnalysisPanel from './VideoAnalysisPanel'
-import { useApp } from '../context/AppContext'
+import { useAppActions } from '../context/AppContext'
 
 function formatTime(value) {
   if (!value) return ''
@@ -296,7 +296,7 @@ export default function VideoAnalysisSidebar({
 }
 
 export function VideoAnalysisResultModal({ task, onClose }) {
-  const { handleAppendCustomTags } = useApp()
+  const { handleAppendCustomTags } = useAppActions()
   if (!task) return null
   const analysis = task.analysis
 

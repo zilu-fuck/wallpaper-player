@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
+import { WINDOW_EVENTS } from '../api/events'
 
 function formatBytes(bytes) {
   if (bytes === 0) return '0 B'
@@ -153,17 +154,18 @@ export default function UpdateNotice() {
       setUpdateState(status)
     })
 
-    window.addEventListener('wallpaper-player-check-update', handleCheck)
+    window.addEventListener(WINDOW_EVENTS.CHECK_UPDATE, handleCheck)
 
     return () => {
       mounted = false
       cleanup?.()
-      window.removeEventListener('wallpaper-player-check-update', handleCheck)
+      window.removeEventListener(WINDOW_EVENTS.CHECK_UPDATE, handleCheck)
     }
   }, [handleCheck, updaterApi])
 
   const status = updateState?.status || 'idle'
   const updateInfo = updateState?.updateInfo
+  const releaseUrl = updateInfo?.releaseUrl || updateState?.releaseUrl
   const statusKey = `${status}:${updateInfo?.version || updateInfo?.currentVersion || updateState?.message || updateState?.error || manualMessage || ''}`
   const visible = useMemo(() => {
     if (!updateState || status === 'idle') return false
@@ -278,9 +280,9 @@ export default function UpdateNotice() {
             重新检查
           </button>
         )}
-        {updateInfo?.releaseUrl && status !== 'checking' && status !== 'downloading' && (
-          <a className="btn btn-sm" href={updateInfo.releaseUrl} target="_blank" rel="noreferrer">
-            查看详情
+        {releaseUrl && status !== 'checking' && status !== 'downloading' && (
+          <a className="btn btn-sm" href={releaseUrl} target="_blank" rel="noreferrer">
+            {status === 'disabled' ? '下载新版' : '查看详情'}
           </a>
         )}
         {status === 'available' && (

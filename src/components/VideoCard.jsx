@@ -1,4 +1,5 @@
 import { memo, useState, useRef, useEffect, useCallback, useMemo, useLayoutEffect } from 'react'
+import { WINDOW_EVENTS } from '../api/events'
 import { createPortal } from 'react-dom'
 import { useApp } from '../context/AppContext'
 
@@ -213,6 +214,11 @@ function VideoCard({
     handlePlay(video, { queueVideos })
   }, [selectionActive, video, handleToggleVideoSelection, handlePlay, queueVideos])
 
+  const handlePrimaryAction = useCallback((event) => {
+    event.stopPropagation()
+    handleClick()
+  }, [handleClick])
+
   const handleContextMenu = useCallback((e) => {
     e.preventDefault()
     setMenuOpen(true)
@@ -249,7 +255,7 @@ function VideoCard({
   const handleSendToAISearch = useCallback((e) => {
     e.stopPropagation()
     setMenuOpen(false)
-    window.dispatchEvent(new CustomEvent('wallpaper-player-ai-search', { detail: buildVideoInfo(video) }))
+    window.dispatchEvent(new CustomEvent(WINDOW_EVENTS.AI_SEARCH, { detail: buildVideoInfo(video) }))
   }, [video])
 
   const handleToggleSelectionClick = useCallback((e) => {
@@ -506,11 +512,16 @@ function VideoCard({
             </svg>
           </div>
         ) : null}
-        <div className="list-play-btn">
+        <button
+          className="list-play-btn"
+          type="button"
+          onClick={handlePrimaryAction}
+          aria-label={`${selectionActive ? (isSelected ? '取消选择' : '选择') : '播放'} ${video.name}`}
+        >
           <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
             <polygon points="5 3 19 12 5 21 5 3" />
           </svg>
-        </div>
+        </button>
       </div>
     )
   }
@@ -549,11 +560,16 @@ function VideoCard({
 
         {/* 悬停播放图标 */}
         <div className="card-overlay">
-          <div className="play-circle">
+          <button
+            className="play-circle"
+            type="button"
+            onClick={handlePrimaryAction}
+            aria-label={`${selectionActive ? (isSelected ? '取消选择' : '选择') : '播放'} ${video.name}`}
+          >
             <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor">
               <polygon points="6 3 20 12 6 21 6 3" />
             </svg>
-          </div>
+          </button>
         </div>
 
         {/* 格式标签 */}

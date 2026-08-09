@@ -1,6 +1,9 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { WINDOW_EVENTS } from '../api/events'
 import { createPortal } from 'react-dom'
 import { useApp } from '../context/AppContext'
+
+const EMPTY_LIST = []
 
 function dirName(dir) {
   return dir.split(/[/\\]/).pop()
@@ -28,9 +31,9 @@ export default function Sidebar() {
     saveSettings
   } = useApp()
 
-  const directories = settings?.directories || []
-  const networkResources = settings?.networkResources || []
-  const privateDirectories = settings?.privateDirectories || []
+  const directories = settings?.directories || EMPTY_LIST
+  const networkResources = settings?.networkResources || EMPTY_LIST
+  const privateDirectories = settings?.privateDirectories || EMPTY_LIST
   const privateDirSet = useMemo(() => new Set(privateDirectories), [privateDirectories])
   const hiddenPrivateCount = useMemo(
     () => privateDirectories.filter(dir => directories.includes(dir)).length,
@@ -88,18 +91,18 @@ export default function Sidebar() {
   useEffect(() => {
     if (showPrivateDirs || !currentDir || !privateDirSet.has(currentDir)) return
     const publicDirs = getPublicDirs(directories, privateDirectories)
-    window.dispatchEvent(new CustomEvent('wallpaper-player-open-local-library'))
+    window.dispatchEvent(new CustomEvent(WINDOW_EVENTS.OPEN_LOCAL_LIBRARY))
     handleDirectoryChange(publicDirs[0] || null)
   }, [currentDir, directories, getPublicDirs, handleDirectoryChange, privateDirSet, privateDirectories, showPrivateDirs])
 
   useEffect(() => {
     const openNetwork = () => setLibraryView('network')
     const openLocal = () => setLibraryView('local')
-    window.addEventListener('wallpaper-player-open-network-library', openNetwork)
-    window.addEventListener('wallpaper-player-open-local-library', openLocal)
+    window.addEventListener(WINDOW_EVENTS.OPEN_NETWORK_LIBRARY, openNetwork)
+    window.addEventListener(WINDOW_EVENTS.OPEN_LOCAL_LIBRARY, openLocal)
     return () => {
-      window.removeEventListener('wallpaper-player-open-network-library', openNetwork)
-      window.removeEventListener('wallpaper-player-open-local-library', openLocal)
+      window.removeEventListener(WINDOW_EVENTS.OPEN_NETWORK_LIBRARY, openNetwork)
+      window.removeEventListener(WINDOW_EVENTS.OPEN_LOCAL_LIBRARY, openLocal)
     }
   }, [])
 
@@ -114,8 +117,8 @@ export default function Sidebar() {
       setPrivacyAction('unlockPrivateDirs')
       setPrivacyDialogOpen(true)
     }
-    window.addEventListener('wallpaper-player-private-directory-password-required', openPendingPrivateDirectory)
-    return () => window.removeEventListener('wallpaper-player-private-directory-password-required', openPendingPrivateDirectory)
+    window.addEventListener(WINDOW_EVENTS.PRIVATE_DIRECTORY_PASSWORD_REQUIRED, openPendingPrivateDirectory)
+    return () => window.removeEventListener(WINDOW_EVENTS.PRIVATE_DIRECTORY_PASSWORD_REQUIRED, openPendingPrivateDirectory)
   }, [])
 
   const lockPrivateDirs = useCallback(() => {
@@ -256,14 +259,14 @@ export default function Sidebar() {
 
   useEffect(() => {
     const handler = (event) => openResourceDialog(event.detail || {})
-    window.addEventListener('wallpaper-player-open-resource-dialog', handler)
-    return () => window.removeEventListener('wallpaper-player-open-resource-dialog', handler)
+    window.addEventListener(WINDOW_EVENTS.OPEN_RESOURCE_DIALOG, handler)
+    return () => window.removeEventListener(WINDOW_EVENTS.OPEN_RESOURCE_DIALOG, handler)
   }, [openResourceDialog])
 
   const handleAddLocalResource = useCallback(async () => {
     try {
       closeResourceDialog()
-      window.dispatchEvent(new CustomEvent('wallpaper-player-open-local-library'))
+      window.dispatchEvent(new CustomEvent(WINDOW_EVENTS.OPEN_LOCAL_LIBRARY))
       const result = await handleAddDirectory?.({ returnPasswordRequired: true })
       if (result?.needsPrivacyPassword && result.dir) {
         setPendingPrivateDirectory(result.dir)
@@ -285,7 +288,7 @@ export default function Sidebar() {
 
   const handleOpenMagnetForm = useCallback(() => {
     closeResourceDialog()
-    window.dispatchEvent(new CustomEvent('wallpaper-player-open-download-center', {
+    window.dispatchEvent(new CustomEvent(WINDOW_EVENTS.OPEN_DOWNLOAD_CENTER, {
       detail: {
         type: 'magnet'
       }
@@ -313,7 +316,7 @@ export default function Sidebar() {
         setSettings?.(result.settings)
       }
       closeResourceDialog()
-      window.dispatchEvent(new CustomEvent('wallpaper-player-open-network-library', {
+      window.dispatchEvent(new CustomEvent(WINDOW_EVENTS.OPEN_NETWORK_LIBRARY, {
         detail: { resourceId: result.resource?.id }
       }))
     } catch (err) {
@@ -324,7 +327,7 @@ export default function Sidebar() {
   }, [closeResourceDialog, networkTitle, networkUrl, setSettings])
 
   const openLocalLibrary = useCallback(() => {
-    window.dispatchEvent(new CustomEvent('wallpaper-player-open-local-library'))
+    window.dispatchEvent(new CustomEvent(WINDOW_EVENTS.OPEN_LOCAL_LIBRARY))
   }, [])
 
   const changeDirectory = useCallback((dir) => {
@@ -334,7 +337,7 @@ export default function Sidebar() {
 
   const openNetworkLibrary = useCallback(() => {
     setDirectoryMenu(null)
-    window.dispatchEvent(new CustomEvent('wallpaper-player-open-network-library'))
+    window.dispatchEvent(new CustomEvent(WINDOW_EVENTS.OPEN_NETWORK_LIBRARY))
   }, [])
 
   const openNetworkResourceDialog = useCallback((event) => {
@@ -389,7 +392,7 @@ export default function Sidebar() {
   }, [removePrivateDirectory])
 
   const handleCategorySelect = useCallback((categoryKey) => {
-    window.dispatchEvent(new CustomEvent('wallpaper-player-open-local-library'))
+    window.dispatchEvent(new CustomEvent(WINDOW_EVENTS.OPEN_LOCAL_LIBRARY))
     setActiveCategory?.(categoryKey)
   }, [setActiveCategory])
 
@@ -415,7 +418,7 @@ export default function Sidebar() {
 
   const onToggle = useCallback(() => setSidebarCollapsed(!sidebarCollapsed), [sidebarCollapsed, setSidebarCollapsed])
   const onOpenSettings = useCallback(() => {
-    window.dispatchEvent(new CustomEvent('wallpaper-player-close-download-dialogs'))
+    window.dispatchEvent(new CustomEvent(WINDOW_EVENTS.CLOSE_DOWNLOAD_DIALOGS))
     setShowSettings(true)
   }, [setShowSettings])
 
@@ -482,7 +485,7 @@ export default function Sidebar() {
 
   return (
     <aside className={`sidebar${sidebarCollapsed ? ' collapsed' : ''}`} aria-label="导航">
-      <div className={`sidebar-collapsed-content sidebar-pane${sidebarCollapsed ? ' active' : ''}`} aria-hidden={!sidebarCollapsed}>
+      <div className={`sidebar-collapsed-content sidebar-pane${sidebarCollapsed ? ' active' : ''}`} aria-hidden={!sidebarCollapsed} inert={!sidebarCollapsed}>
           <button className="sidebar-toggle-btn" onClick={onToggle} title="展开侧边栏" aria-label="展开侧边栏">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <rect x="3" y="3" width="18" height="18" rx="2" />
@@ -549,7 +552,7 @@ export default function Sidebar() {
             </button>
           </div>
         </div>
-      <div className={`sidebar-full-content sidebar-pane${sidebarCollapsed ? '' : ' active'}`} aria-hidden={sidebarCollapsed}>
+      <div className={`sidebar-full-content sidebar-pane${sidebarCollapsed ? '' : ' active'}`} aria-hidden={sidebarCollapsed} inert={sidebarCollapsed}>
           <div className="sidebar-header">
             <h1 className="sidebar-title">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
