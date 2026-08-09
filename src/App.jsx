@@ -59,6 +59,7 @@ function AppInner() {
     scanAndLoad,
     playingVideo,
     showSettings,
+    setShowSettings,
     plugins,
     analysisTasks,
     analysisSidebarOpen,
@@ -84,6 +85,7 @@ function AppInner() {
   const [unreadTabs, setUnreadTabs] = useState(() => new Set())
   const [pendingAiSearchVideo, setPendingAiSearchVideo] = useState(null)
   const [pendingDownloadRequest, setPendingDownloadRequest] = useState(null)
+  const [settingsInitialPage, setSettingsInitialPage] = useState('')
   const [mainView, setMainView] = useState('local')
   const networkResources = settings?.networkResources || []
   const isNetworkView = mainView === 'network'
@@ -120,6 +122,18 @@ function AppInner() {
   const handleCloseDock = useCallback(() => {
     setAnalysisSidebarOpen(false)
   }, [setAnalysisSidebarOpen])
+
+  // 设置关闭后重置初始页，避免下次从其他入口打开时仍停留在上次定位的页面
+  useEffect(() => {
+    if (!showSettings) {
+      setSettingsInitialPage('')
+    }
+  }, [showSettings])
+
+  const handleOpenPluginManager = useCallback(() => {
+    setSettingsInitialPage('plugins')
+    setShowSettings(true)
+  }, [setShowSettings])
 
   useEffect(() => {
     const handler = (event) => {
@@ -575,6 +589,7 @@ function AppInner() {
               onClose={handleCloseDock}
               onTabChange={handleTabChange}
               onDropVideo={handleDropVideo}
+              onAddPlugin={handleOpenPluginManager}
             />
           </div>
         </div>
@@ -588,7 +603,7 @@ function AppInner() {
       {/* 设置面板 */}
       {showSettings && (
         <Suspense fallback={<PanelFallback className="overlay" />}>
-          <Settings />
+          <Settings initialPage={settingsInitialPage} />
         </Suspense>
       )}
 

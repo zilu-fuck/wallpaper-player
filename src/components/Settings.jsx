@@ -51,7 +51,7 @@ const SETTINGS_PAGES = [
   { id: 'system', label: '系统状态', desc: '依赖与关于' }
 ]
 
-export default function Settings() {
+export default function Settings({ initialPage = '' }) {
   const {
     settings,
     plugins,
@@ -98,7 +98,7 @@ export default function Settings() {
   const [selectedVlmPrecision, setSelectedVlmPrecision] = useState('Q4_K_M')
   const [localVlmFiles, setLocalVlmFiles] = useState([])
   const [localVlmLoading, setLocalVlmLoading] = useState(false)
-  const [activePage, setActivePage] = useState('basic')
+  const [activePage, setActivePage] = useState(initialPage || 'basic')
   const [activePluginId, setActivePluginId] = useState('video-analysis')
   const [pluginBusyId, setPluginBusyId] = useState('')
   const [pluginMessage, setPluginMessage] = useState('')

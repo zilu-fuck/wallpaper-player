@@ -49,7 +49,7 @@ const AGENT_LABELS = {
  * @param {Function} props.onTabChange - 切换标签
  * @param {Function} props.onDropVideo - 拖入视频时的回调
  */
-export default function RightDock({ open, tabs, activeTab, unreadTabs, onClose, onTabChange, onDropVideo }) {
+export default function RightDock({ open, tabs, activeTab, unreadTabs, onClose, onTabChange, onDropVideo, onAddPlugin }) {
   const [isDragOver, setIsDragOver] = useState(false)
   const wrapperRef = useRef(null)
   const panelRef = useRef(null)
@@ -174,6 +174,18 @@ export default function RightDock({ open, tabs, activeTab, unreadTabs, onClose, 
             )}
           </button>
         ))}
+        <button
+          className="right-dock-add-plugin-btn"
+          type="button"
+          onClick={onAddPlugin}
+          title="添加插件"
+          aria-label="添加插件"
+        >
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+            <line x1="12" y1="5" x2="12" y2="19" />
+            <line x1="5" y1="12" x2="19" y2="12" />
+          </svg>
+        </button>
       </div>
 
       {/* 插件面板 */}
