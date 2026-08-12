@@ -19,6 +19,17 @@ function pathKey(inputPath) {
   return process.platform === 'win32' ? resolved.toLowerCase() : resolved
 }
 
+// realpath 归一化后的 pathKey：解析 subst/junction/大小写差异。
+// 路径不存在时回退为普通 pathKey（如已删除文件的遗留标签键）。
+function normalizedPathKey(inputPath) {
+  const resolved = path.resolve(inputPath)
+  try {
+    return pathKey(fs.realpathSync.native(resolved))
+  } catch {
+    return pathKey(resolved)
+  }
+}
+
 function isPathInside(parentPath, targetPath) {
   const relative = path.relative(parentPath, targetPath)
   return relative === '' || (!relative.startsWith('..') && !path.isAbsolute(relative))
@@ -79,6 +90,7 @@ module.exports = {
   getResourcePath,
   isPortableApp,
   pathKey,
+  normalizedPathKey,
   isPathInside,
   isVideoFile,
   isVideoContentFile,

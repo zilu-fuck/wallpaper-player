@@ -1,7 +1,7 @@
 const { getPlaybackState, loadSettings, saveSettingsAndFlush, upsertPlaybackState, verifyPrivacyPassword } = require('../../settings')
 const { assertAllowedVideoPath } = require('../../scanner')
 const { createFailureLimiter } = require('../../rate-limiter')
-const { pathKey } = require('../../paths')
+const { pathKey, normalizedPathKey } = require('../../paths')
 const { getFavoriteKeyForVideoId, getPathForVideoId } = require('../video-index')
 const { readBody, sendError, sendJson } = require('../http-utils')
 const { getLegacyNetworkFavoriteKey, getNetworkFavoriteKey, getRemoteNetworkItemById } = require('./network-resources')
@@ -10,11 +10,20 @@ const { getLegacyNetworkFavoriteKey, getNetworkFavoriteKey, getRemoteNetworkItem
 const remotePrivacyLimiter = createFailureLimiter({ limit: 5, lockMs: 30 * 1000 })
 
 // 旧版本以原始路径字符串作为 customTags 键，而当前解析走 realpath 规范化，
-// Windows 上大小写/连接点差异会导致键不匹配。按 pathKey 归一化匹配，
+// Windows 上大小写、subst 映射盘、junction 差异都会导致键不匹配。
+// 先按 pathKey 快路径匹配，未命中时按 realpath 归一化慢路径匹配，
 // 保证遗留 path-key 标签在迁移/展示时不丢失。
 function collectLegacyTagEntries(customTags, target) {
-  const wanted = new Set([target.path, target.rawPath].filter(Boolean).map(pathKey))
-  return Object.entries(customTags).filter(([key]) => wanted.has(pathKey(key)))
+  const candidates = [target.path, target.rawPath].filter(Boolean)
+  const fastKeys = new Set(candidates.map(pathKey))
+  const realKeys = new Set(candidates.map(normalizedPathKey))
+  const entries = []
+  for (const [key, tags] of Object.entries(customTags)) {
+    if (fastKeys.has(pathKey(key)) || realKeys.has(normalizedPathKey(key))) {
+      entries.push([key, tags])
+    }
+  }
+  return entries
 }
 
 function getClientIp(req) {
