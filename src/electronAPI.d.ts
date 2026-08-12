@@ -214,10 +214,6 @@ export interface UpdaterStatus {
   [key: string]: unknown
 }
 
-export interface ThumbnailProgressEvent {
-  [key: string]: unknown
-}
-
 export interface RemotePlayOnDesktopPayload {
   filePath?: string
   networkResource?: NetworkResource
@@ -244,7 +240,6 @@ export interface ElectronAPI {
   getThumbnailUrl(thumbnailPath: string): Promise<string | null>
   generatePreviewFrame(videoPath: string, seconds: number): Promise<IpcResult>
   getVideoMetadata(videoPath: string, options?: unknown): Promise<VideoMediaInfo | { available: boolean; error: string; probedAt: number }>
-  onThumbnailProgress(callback: (event: ThumbnailProgressEvent) => void): () => void
 
   // 设置与通用
   getSettings(): Promise<AppSettings>
@@ -366,6 +361,7 @@ export interface ElectronAPI {
   mpvSetSpeed(speed: number): Promise<IpcResult>
   mpvSetAudioTrack(trackId: number | null): Promise<IpcResult>
   mpvSetSubtitleTrack(trackId: number | 'off' | 'auto' | null): Promise<IpcResult>
+  mpvSetSubtitleVisible(visible: boolean): Promise<IpcResult>
   mpvSetSubtitleScale(scale: number): Promise<IpcResult>
   mpvScreenshot(): Promise<IpcResult>
   onMpvState(callback: (state: MpvState) => void): () => void

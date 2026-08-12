@@ -17,7 +17,6 @@ contextBridge.exposeInMainWorld('electronAPI', {
   getThumbnailUrl: (thumbnailPath) => ipcRenderer.invoke('get-thumbnail-url', thumbnailPath),
   generatePreviewFrame: (videoPath, seconds) => ipcRenderer.invoke('generate-preview-frame', videoPath, seconds),
   getVideoMetadata: (videoPath, options) => ipcRenderer.invoke('get-video-metadata', videoPath, options),
-  onThumbnailProgress: (callback) => on('thumbnail-progress', callback),
 
   getSettings: () => ipcRenderer.invoke('get-settings'),
   getAppVersion: () => ipcRenderer.invoke('get-app-version'),
@@ -124,6 +123,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
   mpvSetSpeed: (speed) => ipcRenderer.invoke('mpv-command', 'setSpeed', speed),
   mpvSetAudioTrack: (trackId) => ipcRenderer.invoke('mpv-command', 'setAudioTrack', trackId),
   mpvSetSubtitleTrack: (trackId) => ipcRenderer.invoke('mpv-command', 'setSubtitleTrack', trackId),
+  mpvSetSubtitleVisible: (visible) => ipcRenderer.invoke('mpv-command', 'setSubtitleVisible', visible),
   mpvSetSubtitleScale: (scale) => ipcRenderer.invoke('mpv-command', 'setSubtitleScale', scale),
   mpvScreenshot: () => ipcRenderer.invoke('mpv-command', 'screenshot'),
   selectMpvPath: () => ipcRenderer.invoke('select-mpv-path'),
