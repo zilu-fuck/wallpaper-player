@@ -93,7 +93,6 @@ const IPC = {
 // 主进程 → 渲染进程事件通道
 const EVENT = {
   SETTINGS_CHANGED: 'settings-changed',
-  THUMBNAIL_PROGRESS: 'thumbnail-progress',
   REMOTE_ACCESS_STATE: 'remote-access-state',
   REMOTE_PLAY_ON_DESKTOP: 'remote-play-on-desktop',
   PLAYER_SHORTCUT: 'player-shortcut',

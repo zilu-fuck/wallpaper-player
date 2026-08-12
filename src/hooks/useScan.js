@@ -1,23 +1,13 @@
-import { useState, useRef, useEffect, useCallback } from 'react'
+import { useState, useRef, useCallback } from 'react'
 
-// 扫描目录 + 缩略图生成进度
+// 扫描目录
 export function useScan({ setCurrentDir, setLoading }) {
   const [videos, setVideos] = useState([])
   const [thumbnails, setThumbnails] = useState({})
   const [scanning, setScanning] = useState(false)
-  const [thumbProgress, setThumbProgress] = useState(null)
   const [scanError, setScanError] = useState('')
   const [scanErrorDir, setScanErrorDir] = useState('')
   const scanRequestRef = useRef(0)
-
-  // 监听缩略图生成进度（注册一次，带清理）
-  useEffect(() => {
-    const cleanup = window.electronAPI?.onThumbnailProgress((data) => {
-      if (data?.requestId !== scanRequestRef.current) return
-      setThumbProgress(data)
-    })
-    return cleanup
-  }, [])
 
   // 取消正在进行的扫描（让旧任务的回调失效）
   const cancelScan = useCallback(() => {
@@ -33,7 +23,6 @@ export function useScan({ setCurrentDir, setLoading }) {
     const requestId = scanRequestRef.current + 1
     scanRequestRef.current = requestId
     setScanning(true)
-    setThumbProgress(null)
     setScanError('')
     setScanErrorDir('')
     try {
@@ -45,7 +34,6 @@ export function useScan({ setCurrentDir, setLoading }) {
         setScanErrorDir(dirPath)
         setScanning(false)
         setLoading(false)
-        setThumbProgress(null)
         return
       }
 
@@ -72,7 +60,6 @@ export function useScan({ setCurrentDir, setLoading }) {
     }
     if (requestId !== scanRequestRef.current) return
     setScanning(false)
-    setThumbProgress(null)
   }
 
   return {
@@ -82,8 +69,6 @@ export function useScan({ setCurrentDir, setLoading }) {
     setThumbnails,
     scanning,
     setScanning,
-    thumbProgress,
-    setThumbProgress,
     scanError,
     setScanError,
     scanErrorDir,

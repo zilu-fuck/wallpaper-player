@@ -31,7 +31,6 @@ function AppInner() {
     theme,
     videos,
     scanning,
-    thumbProgress,
     scanError,
     scanErrorDir,
     currentDir,
@@ -506,19 +505,10 @@ function AppInner() {
         <Sidebar />
 
         <div className="content-body">
-          {/* 缩略图生成进度条 */}
+          {/* 扫描进度提示 */}
           {scanning && (
-            <div className={`progress-bar${!thumbProgress ? ' scanning' : ''}`}>
-              {thumbProgress && (
-                <div className="progress-fill" style={{
-                  width: `${(thumbProgress.completed / thumbProgress.total) * 100}%`
-                }} />
-              )}
-              <span className="progress-text">
-                {thumbProgress
-                  ? `生成缩略图: ${thumbProgress.completed} / ${thumbProgress.total}`
-                  : '扫描文件中...'}
-              </span>
+            <div className="progress-bar scanning">
+              <span className="progress-text">扫描文件中...</span>
             </div>
           )}
 

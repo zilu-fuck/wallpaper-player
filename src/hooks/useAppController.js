@@ -146,7 +146,6 @@ export function useAppController() {
       scan.resetGallery()
       setCurrentDir(null)
       scan.setScanning(false)
-      scan.setThumbProgress(null)
       return
     }
     scan.resetGallery()
