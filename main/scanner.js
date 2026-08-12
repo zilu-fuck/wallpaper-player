@@ -26,10 +26,14 @@ function getScanIndexDir() {
   return dir
 }
 
+// 索引路径按 realpath 归一化：扫描入口（scanWithCache）会把目录
+// resolvePathForAccess 后再保存索引，调用方若传字面量路径（subst 映射盘/
+// junction/大小写差异）会导致读写路径不一致、索引永不命中。
 function getScanIndexPath(dirPath) {
+  const resolved = resolvePathForAccess(dirPath)
   const digest = crypto
     .createHash('sha256')
-    .update(pathKey(path.resolve(dirPath)))
+    .update(pathKey(resolved))
     .digest('hex')
   return path.join(getScanIndexDir(), `${digest}.json`)
 }

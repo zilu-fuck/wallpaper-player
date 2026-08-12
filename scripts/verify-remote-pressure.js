@@ -20,13 +20,13 @@ function run(file, args) {
   return runExec(file, args, { cwd: projectRoot })
 }
 
-function createFixtureLibrary() {
+async function createFixtureLibrary() {
   fs.mkdirSync(libraryDir, { recursive: true })
   assert.ok(fs.existsSync(ffmpeg), `missing ffmpeg: ${ffmpeg}`)
 
   for (let index = 0; index < 3; index += 1) {
     const dir = path.join(libraryDir, `sample-${index}`)
-    createFixtureVideo({
+    await createFixtureVideo({
       ffmpeg,
       destPath: path.join(dir, `sample-${index}.mp4`),
       size: `${320 + index * 16}x180`,
@@ -37,7 +37,7 @@ function createFixtureLibrary() {
       vcodec: 'libx264',
       acodec: 'aac'
     })
-    createFixtureImage({
+    await createFixtureImage({
       ffmpeg,
       destPath: path.join(dir, 'preview.jpg'),
       size: '480x270',
@@ -91,7 +91,7 @@ async function runPressure(baseUrl, token, videos) {
 }
 
 async function main() {
-  createFixtureLibrary()
+  await createFixtureLibrary()
   process.chdir(tempRoot)
 
   const { saveSettings, sessionAllowedDirectories } = require(path.join(projectRoot, 'main', 'settings'))

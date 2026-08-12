@@ -39,10 +39,13 @@ async function requestRaw(url, options = {}) {
   }
 }
 
+// 同步执行外部命令。带 2 分钟超时：CI 上刚下载的 ffmpeg/ffprobe 可能被
+// Defender 实时扫描拖慢，无超时的 execFileSync 会让步骤无限挂起。
 function runExec(file, args, options = {}) {
   return execFileSync(file, args, {
     encoding: 'utf8',
     stdio: ['ignore', 'pipe', 'pipe'],
+    timeout: 2 * 60 * 1000,
     ...options
   })
 }
@@ -101,11 +104,13 @@ async function removeTempRootWithRetry(targetPath, { attempts = 5, delayMs = 250
   }
 }
 
-// 生成带音轨的 h264/aac 测试视频（ffmpeg lavfi）
+// 生成带音轨的 h264/aac 测试视频（ffmpeg lavfi）。
+// 返回 runExec 的 promise，调用方必须 await，否则慢环境下后续断言会
+// 在文件生成前执行（CI 上 ffmpeg 被 Defender 扫描时尤其明显）。
 function createFixtureVideo({ ffmpeg, destPath, size = '320x180', rate = 15, frequency = 880, sampleRate = 44100, duration = 2, vcodec = 'libx264', acodec = 'aac', extraArgs = [] }) {
   fs.mkdirSync(require('path').dirname(destPath), { recursive: true })
   assert.ok(fs.existsSync(ffmpeg), `missing ffmpeg: ${ffmpeg}`)
-  runExec(ffmpeg, [
+  return runExec(ffmpeg, [
     '-hide_banner',
     '-y',
     '-f', 'lavfi',
@@ -121,11 +126,11 @@ function createFixtureVideo({ ffmpeg, destPath, size = '320x180', rate = 15, fre
   ])
 }
 
-// 生成单帧图片（preview.jpg 等）
+// 生成单帧图片（preview.jpg 等）。返回 runExec 的 promise，调用方必须 await。
 function createFixtureImage({ ffmpeg, destPath, size = '480x270', color = 'navy' }) {
   fs.mkdirSync(require('path').dirname(destPath), { recursive: true })
   assert.ok(fs.existsSync(ffmpeg), `missing ffmpeg: ${ffmpeg}`)
-  runExec(ffmpeg, [
+  return runExec(ffmpeg, [
     '-hide_banner',
     '-y',
     '-f', 'lavfi',

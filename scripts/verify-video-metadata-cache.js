@@ -3,6 +3,7 @@ const fs = require('fs')
 const os = require('os')
 const path = require('path')
 const { createFixtureVideo, runExec } = require('./verify-helpers')
+const { normalizedPathKey } = require('../main/paths')
 
 const projectRoot = path.resolve(__dirname, '..')
 const ffmpeg = path.join(projectRoot, 'vendor', 'ffmpeg', 'bin', 'ffmpeg.exe')
@@ -18,7 +19,7 @@ function run(file, args) {
 
 async function main() {
   assert.ok(fs.existsSync(ffmpeg), `missing ffmpeg: ${ffmpeg}`)
-  createFixtureVideo({
+  await createFixtureVideo({
     ffmpeg,
     destPath: videoPath,
     size: '424x240',
@@ -29,7 +30,7 @@ async function main() {
     vcodec: 'libx264',
     acodec: 'aac'
   })
-  run(ffmpeg, [
+  await run(ffmpeg, [
     '-hide_banner',
     '-y',
     '-f', 'lavfi',
@@ -76,9 +77,12 @@ async function main() {
 
   const firstScan = await scanWithCache(libraryDir, true)
   assert.strictEqual(firstScan.count, 2)
-  assert.ok(firstScan.videos.some(item => item.fullPath === videoPath && item.media?.videoCodec === 'h264'))
-  assert.ok(firstScan.videos.some(item => item.fullPath === transportStreamPath))
-  assert.ok(!firstScan.videos.some(item => item.fullPath === typeScriptPath))
+  // 扫描器返回的 fullPath 是 realpath 后的，与 fixture 字面量在 subst/junction
+  // 环境下不同，按归一化路径键比较
+  const firstVideo = firstScan.videos.find(item => normalizedPathKey(item.fullPath) === normalizedPathKey(videoPath))
+  assert.ok(firstVideo?.media?.videoCodec === 'h264', 'scanned video media should come from cache')
+  assert.ok(firstScan.videos.some(item => normalizedPathKey(item.fullPath) === normalizedPathKey(transportStreamPath)))
+  assert.ok(!firstScan.videos.some(item => normalizedPathKey(item.fullPath) === normalizedPathKey(typeScriptPath)))
 
   const indexPath = getScanIndexPath(libraryDir)
   assert.ok(fs.existsSync(indexPath), 'scan index should be persisted')
@@ -100,17 +104,28 @@ async function main() {
   assert.strictEqual(staleIndexScan.count, 0)
   assert.strictEqual(staleIndexScan.indexed, undefined)
   await waitForBackgroundScanRefreshes()
+}
 
-  unwatchAllDirectories()
-  console.log('video metadata cache verification passed')
+async function cleanup() {
+  try {
+    const { unwatchAllDirectories } = require(path.join(projectRoot, 'main', 'scanner'))
+    unwatchAllDirectories()
+  } catch {}
+  process.chdir(projectRoot)
+  fs.rmSync(tempRoot, { recursive: true, force: true })
 }
 
 main()
+  .then(() => {
+    console.log('video metadata cache verification passed')
+  })
   .catch(error => {
     console.error(error)
     process.exitCode = 1
   })
-  .finally(() => {
-    process.chdir(projectRoot)
-    fs.rmSync(tempRoot, { recursive: true, force: true })
+  .finally(async () => {
+    await cleanup()
+    // 显式退出：未 await 的 ffmpeg 子进程或 fs.watch 句柄会阻止进程自然退出，
+    // 否则断言失败时 CI 步骤会无限挂起
+    process.exit(process.exitCode || 0)
   })

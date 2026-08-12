@@ -149,7 +149,7 @@ function assertNoDesktopPaths(value, context = 'response') {
 }
 
 async function createFixtureLibrary() {
-  createFixtureVideo({
+  await createFixtureVideo({
     ffmpeg,
     destPath: videoPath,
     size: '320x180',
@@ -160,7 +160,7 @@ async function createFixtureLibrary() {
     vcodec: 'libx264',
     acodec: 'aac'
   })
-  createFixtureVideo({
+  await createFixtureVideo({
     ffmpeg,
     destPath: incompatibleVideoPath,
     size: '426x240',
@@ -174,7 +174,7 @@ async function createFixtureLibrary() {
   })
   fs.writeFileSync(largeVideoPath, Buffer.alloc((33 * 1024 * 1024) + 128, 0))
 
-  createFixtureImage({
+  await createFixtureImage({
     ffmpeg,
     destPath: previewPath,
     size: '480x270',

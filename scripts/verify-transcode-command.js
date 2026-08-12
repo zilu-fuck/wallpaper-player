@@ -17,11 +17,11 @@ function run(file, args) {
   return runExec(file, args)
 }
 
-try {
+async function main() {
   assert.ok(fs.existsSync(ffmpeg), `missing ffmpeg: ${ffmpeg}`)
   assert.ok(fs.existsSync(ffprobe), `missing ffprobe: ${ffprobe}`)
 
-  createFixtureVideo({
+  await createFixtureVideo({
     ffmpeg,
     destPath: sourcePath,
     size: '320x240',
@@ -33,7 +33,7 @@ try {
     acodec: 'aac'
   })
 
-  createFixtureVideo({
+  await createFixtureVideo({
     ffmpeg,
     destPath: incompatibleSourcePath,
     size: '426x240',
@@ -46,7 +46,7 @@ try {
     extraArgs: ['-b:v', '250k']
   })
 
-  run(ffmpeg, [
+  await run(ffmpeg, [
     '-hide_banner',
     '-y',
     '-i', sourcePath,
@@ -64,7 +64,7 @@ try {
     outputPath
   ])
 
-  run(ffmpeg, [
+  await run(ffmpeg, [
     '-hide_banner',
     '-y',
     '-i', incompatibleSourcePath,
@@ -87,38 +87,46 @@ try {
   const incompatibleStat = fs.statSync(incompatibleOutputPath)
   assert.ok(incompatibleStat.isFile() && incompatibleStat.size > 0, 'incompatible transcoded output should exist')
 
-  const videoCodec = run(ffprobe, [
+  const videoCodec = (await run(ffprobe, [
     '-v', 'error',
     '-select_streams', 'v:0',
     '-show_entries', 'stream=codec_name',
     '-of', 'csv=p=0',
     outputPath
-  ]).trim()
-  const audioCodec = run(ffprobe, [
+  ])).trim()
+  const audioCodec = (await run(ffprobe, [
     '-v', 'error',
     '-select_streams', 'a:0',
     '-show_entries', 'stream=codec_name',
     '-of', 'csv=p=0',
     outputPath
-  ]).trim()
+  ])).trim()
 
   assert.strictEqual(videoCodec, 'h264')
   assert.strictEqual(audioCodec, 'aac')
-  assert.strictEqual(run(ffprobe, [
+  assert.strictEqual((await run(ffprobe, [
     '-v', 'error',
     '-select_streams', 'v:0',
     '-show_entries', 'stream=codec_name',
     '-of', 'csv=p=0',
     incompatibleOutputPath
-  ]).trim(), 'h264')
-  assert.strictEqual(run(ffprobe, [
+  ])).trim(), 'h264')
+  assert.strictEqual((await run(ffprobe, [
     '-v', 'error',
     '-select_streams', 'a:0',
     '-show_entries', 'stream=codec_name',
     '-of', 'csv=p=0',
     incompatibleOutputPath
-  ]).trim(), 'aac')
+  ])).trim(), 'aac')
   console.log('mobile transcode command verification passed')
-} finally {
-  fs.rmSync(tempRoot, { recursive: true, force: true })
 }
+
+main()
+  .catch(error => {
+    console.error(error)
+    process.exitCode = 1
+  })
+  .finally(() => {
+    fs.rmSync(tempRoot, { recursive: true, force: true })
+    process.exit(process.exitCode || 0)
+  })

@@ -5,7 +5,7 @@ const path = require('path')
 const { app } = require('electron')
 const { execFileAsync } = require('./exec')
 const { getUserDataDir } = require('./user-data')
-const { getResourcePath } = require('./paths')
+const { getResourcePath, normalizedPathKey } = require('./paths')
 
 const CACHE_VERSION = 1
 const PROBE_TIMEOUT_MS = 12000
@@ -28,8 +28,11 @@ function getMetadataCachePath() {
   return path.join(getUserDataDir(), 'video-metadata-cache.json')
 }
 
+// 缓存键按 realpath 归一化：扫描器返回的 fullPath 是 realpath 后的，
+// 而探测入口可能收到用户字面量路径，subst 映射盘/junction/大小写差异下
+// 两者不一致会导致缓存永远未命中。归一化后统一。
 function getCacheKey(filePath) {
-  return crypto.createHash('sha256').update(path.resolve(filePath)).digest('hex')
+  return crypto.createHash('sha256').update(normalizedPathKey(filePath)).digest('hex')
 }
 
 async function getFileSignature(filePath) {
