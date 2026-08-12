@@ -8,11 +8,11 @@ Windows 发布包内置 mpv、FFmpeg、aria2 和 yt-dlp，普通用户不需要�
 
 | 端 | 版本 | 产物 |
 | --- | --- | --- |
-| Windows 电脑端 | `1.5.0` | `release/Wallpaper-Player-Setup-1.5.0.exe`、`release/Wallpaper-Player-1.5.0.exe` |
+| Windows 电脑端 | `1.5.1` | `release/Wallpaper-Player-Setup-1.5.1.exe`、`release/Wallpaper-Player-1.5.1.exe` |
 | Android 手机端 | `0.1.4` | `mobile/dist/wallpaper-player-mobile-0.1.4-arm64-release.apk` |
 | 插件包 | `video-analysis 1.0.0`、`ai-search 0.1.0`、`agent-bridge 0.1.0` | `release/plugins/*.zip` |
 
-本批更新说明见 [release-notes/v1.5.0.md](release-notes/v1.5.0.md)，开发记录见 [docs/dev-log-v1.3.0.md](docs/dev-log-v1.3.0.md)。
+本批更新说明见 [release-notes/v1.5.1.md](release-notes/v1.5.1.md)，开发记录见 [docs/dev-log-v1.3.0.md](docs/dev-log-v1.3.0.md)。
 
 ## 主要功能
 
