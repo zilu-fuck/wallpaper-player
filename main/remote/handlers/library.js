@@ -1,5 +1,6 @@
 const { getPublicVideoDirectories, loadSettings, onSettingsChanged } = require('../../settings')
 const { scanWithCache } = require('../../scanner')
+const { pathKey } = require('../../paths')
 const {
   createThumbnailToken,
   getDirectoryId,
@@ -75,11 +76,17 @@ function buildCategoryGroups(items) {
 function applyDesktopMetadata(video, settings) {
   const favoriteKey = video.favoriteKey
   const systemTags = Array.isArray(video.tags) ? video.tags : []
-  const customTags = Array.isArray(settings.customTags?.[favoriteKey])
+  const directTags = Array.isArray(settings.customTags?.[favoriteKey])
     ? settings.customTags[favoriteKey]
-    : Array.isArray(settings.customTags?.[video.fullPath])
-      ? settings.customTags[video.fullPath]
-      : []
+    : []
+  // 旧版本以原始路径字符串为键写入，与 fullPath 存在大小写/realpath 差异时
+  // 按 pathKey 归一化匹配，保证 legacy path-key 标签在库中可见
+  const legacyTags = directTags.length
+    ? []
+    : (Object.entries(settings.customTags || {})
+        .filter(([key]) => pathKey(key) === pathKey(video.fullPath))
+        .flatMap(([, tags]) => (Array.isArray(tags) ? tags : [])))
+  const customTags = directTags.length ? directTags : legacyTags
 
   return {
     ...video,

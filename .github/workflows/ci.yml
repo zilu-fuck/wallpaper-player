@@ -91,6 +91,9 @@ jobs:
       - name: Verify remote library flow
         run: npm run verify:remote-library
 
+      - name: Verify legacy path-key tag compatibility
+        run: npm run verify:legacy-tags
+
       - name: Verify mobile multi-device
         run: npm run verify:mobile-multi-device
 

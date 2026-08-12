@@ -1,12 +1,21 @@
 const { getPlaybackState, loadSettings, saveSettingsAndFlush, upsertPlaybackState, verifyPrivacyPassword } = require('../../settings')
 const { assertAllowedVideoPath } = require('../../scanner')
 const { createFailureLimiter } = require('../../rate-limiter')
-const { getFavoriteKeyForVideoId } = require('../video-index')
+const { pathKey } = require('../../paths')
+const { getFavoriteKeyForVideoId, getPathForVideoId } = require('../video-index')
 const { readBody, sendError, sendJson } = require('../http-utils')
 const { getLegacyNetworkFavoriteKey, getNetworkFavoriteKey, getRemoteNetworkItemById } = require('./network-resources')
 
 // 远程隐私密码尝试频率限制（与桌面端 IPC 共用同一套规则：5 次失败后锁定 30 秒）
 const remotePrivacyLimiter = createFailureLimiter({ limit: 5, lockMs: 30 * 1000 })
+
+// 旧版本以原始路径字符串作为 customTags 键，而当前解析走 realpath 规范化，
+// Windows 上大小写/连接点差异会导致键不匹配。按 pathKey 归一化匹配，
+// 保证遗留 path-key 标签在迁移/展示时不丢失。
+function collectLegacyTagEntries(customTags, target) {
+  const wanted = new Set([target.path, target.rawPath].filter(Boolean).map(pathKey))
+  return Object.entries(customTags).filter(([key]) => wanted.has(pathKey(key)))
+}
 
 function getClientIp(req) {
   return String(req?.socket?.remoteAddress || 'unknown')
@@ -36,7 +45,8 @@ function createTagsHandlers({ resolveVideoPath }) {
     return {
       favoriteKey,
       legacyFavoriteKey: '',
-      path: videoPath
+      path: videoPath,
+      rawPath: getPathForVideoId(videoId)
     }
   }
 
@@ -95,7 +105,7 @@ function createTagsHandlers({ resolveVideoPath }) {
     const settings = loadSettings()
     const customTags = { ...(settings.customTags || {}) }
     if (target.legacyFavoriteKey) delete customTags[target.legacyFavoriteKey]
-    delete customTags[target.path]
+    for (const [key] of collectLegacyTagEntries(customTags, target)) delete customTags[key]
     if (tags.length > 0) {
       customTags[target.favoriteKey] = tags
     } else {
@@ -128,14 +138,15 @@ function createTagsHandlers({ resolveVideoPath }) {
     for (const videoId of videoIds) {
       const target = await resolveFavoriteTarget(videoId)
       if (!target) continue
+      const legacyEntries = collectLegacyTagEntries(customTags, target)
       const currentTags = [
         ...(Array.isArray(customTags[target.favoriteKey]) ? customTags[target.favoriteKey] : []),
         ...(target.legacyFavoriteKey && Array.isArray(customTags[target.legacyFavoriteKey]) ? customTags[target.legacyFavoriteKey] : []),
-        ...(Array.isArray(customTags[target.path]) ? customTags[target.path] : [])
+        ...legacyEntries.flatMap(([, tags]) => (Array.isArray(tags) ? tags : []))
       ]
       customTags[target.favoriteKey] = [...new Set([...currentTags, ...tags])]
       if (target.legacyFavoriteKey) delete customTags[target.legacyFavoriteKey]
-      delete customTags[target.path]
+      for (const [key] of legacyEntries) delete customTags[key]
       updatedCount += 1
     }
 
@@ -187,5 +198,6 @@ function createTagsHandlers({ resolveVideoPath }) {
 
 module.exports = {
   createTagsHandlers,
-  normalizeRequestTags
+  normalizeRequestTags,
+  collectLegacyTagEntries
 }

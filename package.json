@@ -15,6 +15,7 @@
     "verify:remote-settings": "node scripts/verify-remote-settings.js",
     "verify:remote-api": "node scripts/verify-remote-api-smoke.js",
     "verify:remote-library": "node scripts/verify-remote-library-flow.js",
+    "verify:legacy-tags": "node scripts/verify-legacy-tags-path-key.js",
     "verify:thumbnail-playback": "node scripts/verify-thumbnail-playback-throttle.js",
     "verify:plugin-official": "electron scripts/verify-official-plugin-sync.js",
     "verify:ai-search": "node scripts/verify-ai-search.js",
