@@ -1,0 +1,95 @@
+{
+  "date": "2026-10-24T05:57:16.761Z",
+  "localDate": "2026-10-24",
+  "status": "Local credential/activity separation verified; remote CI and release remain pending",
+  "trigger": {
+    "workflow": "https://github.com/zilu-fuck/wallpaper-player/actions/runs/40066919342",
+    "assertion": "The held gzip response returned 200 rather than 401 after an external revocation",
+    "cause": "A pending last-seen atomic rename could replace the credential document with the snapshot read before the external edit"
+  },
+  "change": {
+    "activityFile": "remote-device-activity.json",
+    "authorityFile": "remote-identity.json",
+    "compatibility": "Legacy lastSeenAt/lastAddress remain defaults; optional metadata merges only for the same computer fingerprint, paired ID and token hash. Revoked devices never regain authority from activity data.",
+    "failure": "Invalid optional metadata is retained and stops activity updates without disabling valid credentials. Invalid credential documents continue to fail closed.",
+    "conflicts": "Credential writes compare current bytes before committing and reject observed replacements. Activity updates never rename over the credential file.",
+    "scope": "Pre-commit credential checking is not filesystem compare-and-swap or an uncooperative cross-process writer lock; backup/journal and broader recovery work remain open."
+  },
+  "deterministic": {
+    "passed": true,
+    "fixture": "E:\\wallpaper播放器\\.tmp\\refactor-tests\\identity-write-ownership-iDFk16",
+    "comparison": {
+      "before": {
+        "bytesRetained": false,
+        "revoked": false,
+        "authorizationRevision": 2
+      },
+      "after": {
+        "bytesRetained": true,
+        "revoked": true,
+        "authorizationRevision": 3
+      }
+    },
+    "cases": [
+      "telemetry cannot replace a newer observed external revocation or unknown field",
+      "a stale authoritative write rejects an externally replaced future-version file and invalidates cached authorization",
+      "ordinary queued credential mutations remain durable and preserve paired credentials",
+      "activity survives a cold owner without storing plain credentials, and invalid optional metadata is retained without blocking authorization"
+    ],
+    "sourceSha256": "2be91209e04825a510ee468342b41b209210dffd6e448d0b2bd47d55f9585a83",
+    "scope": "Actual identity code with owned real files; telemetry pauses immediately before rename to prove it cannot overwrite the separate credential document. Credential writes retain a pre-commit content check, which is not a filesystem compare-and-swap or a cross-process lock."
+  },
+  "otherChecks": [
+    {
+      "script": "verify:identity-write-ownership",
+      "exitCode": 0
+    },
+    {
+      "script": "verify:identity-io",
+      "exitCode": 0
+    },
+    {
+      "script": "verify:json-responses",
+      "exitCode": 0
+    },
+    {
+      "script": "verify:identity-read-safety",
+      "exitCode": 0
+    },
+    {
+      "script": "verify:remote-mobile",
+      "exitCode": 0
+    },
+    {
+      "script": "verify:network-stream-lifecycle",
+      "exitCode": 0
+    },
+    {
+      "script": "verify:packaged-contracts",
+      "exitCode": 0
+    },
+    {
+      "script": "verify:shutdown-persistence",
+      "exitCode": 0
+    },
+    {
+      "script": "verify:remote-server-lifecycle",
+      "exitCode": 1
+    }
+  ],
+  "followUp": "The shutdown ownership fixture was updated to hold the new activity rename; the corrected full remote-server/body checks and protocol compatibility check passed.",
+  "sources": {
+    "main/remote/identity.js": "2be91209e04825a510ee468342b41b209210dffd6e448d0b2bd47d55f9585a83",
+    "main/repositories/device-activity.js": "9460a14c31084ac75fb351f4fb685318ee988cd84053d82247522a418f313bea",
+    "scripts/verify-identity-write-ownership.js": "8cfe4d490aea8bf132d2780b2f0f4ed65579be9f588540d89725b21973bdb68e",
+    "scripts/verify-identity-lifecycle.js": "c6500e22620604dd28244d5fda31bf0f25bf21c0f9363ee5f416fbf61aa16c24",
+    "scripts/verify-remote-server-lifecycle.js": "50d5dd6e56a2d15c8b9bd4a8bc3bb20e9a351feb6c817369ea94966598b0b092",
+    "scripts/verify-packaged-contracts.js": "3abd18a810679ecdbce416eb50aab05b9cf34103461ccb7aba46b1aca7684135"
+  },
+  "context": {
+    "baseCommit": "0def7ef8c260008243158f4c4ab4f10ced4d9ff6",
+    "noProductionInstall": true,
+    "noPublishedUpdateYet": true,
+    "physicalPhoneAdded": false
+  }
+}

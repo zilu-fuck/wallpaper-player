@@ -5,6 +5,7 @@ const { app } = require('electron')
 const log = require('electron-log')
 const { getUserDataDir } = require('../user-data')
 const { parseIdentityDocument } = require('../repositories/identity-document')
+const { createDeviceActivity } = require('../repositories/device-activity')
 
 const IDENTITY_FILE = 'remote-identity.json'
 const DEFAULT_PAIRING_TTL_MS = 5 * 60 * 1000
@@ -106,7 +107,8 @@ function normalizeIdentity(identity) {
 function identityStore() {
   const file = getIdentityPath()
   if (!identityStores.has(file)) identityStores.set(file, { file, identity: null, queue: Promise.resolve(),
-    pending: 0, queuedRefresh: null, touches: new Map(), touchTask: null, readError: null, unavailableAt: 0 })
+    pending: 0, queuedRefresh: null, touches: new Map(), touchTask: null, readError: null, unavailableAt: 0, diskText: null,
+    activity: createDeviceActivity(path.join(path.dirname(file), 'remote-device-activity.json')) })
   return identityStores.get(file)
 }
 
@@ -155,21 +157,39 @@ function readOrCreateIdentity(store, error) {
 
 async function writeIdentity(store, identity) {
   const temporary = `${store.file}.${process.pid}.${++identityWriteCounter}.tmp`
+  const expected = store.diskText, text = JSON.stringify(identity, null, 2)
   try {
     await fs.promises.mkdir(path.dirname(store.file), { recursive: true })
-    await fs.promises.writeFile(temporary, JSON.stringify(identity, null, 2), { encoding: 'utf8', mode: 0o600 })
+    await fs.promises.writeFile(temporary, text, { encoding: 'utf8', mode: 0o600 })
+    let latest = null
+    try { latest = await fs.promises.readFile(store.file, 'utf8') }
+    catch (error) { if (error.code !== 'ENOENT') throw identityReadFailure(store, error) }
+    if (latest !== expected) rejectChangedIdentity(store, latest)
     await fs.promises.rename(temporary, store.file)
+    store.diskText = text
   } catch (cause) {
-    throw Object.assign(new Error('设备身份保存失败，原文件未替换；请重试'), { code: cause.code || 'identity_write_failed', status: 503 })
+    throw Object.assign(new Error(cause.code === 'identity_changed' ? '设备身份已变化，未覆盖新文件；请刷新后重试' : '设备身份保存失败，原文件未替换；请重试'),
+      { code: cause.code || 'identity_write_failed', status: 503, retryable: cause.code === 'identity_changed' })
   } finally { await fs.promises.rm(temporary, { force: true }).catch(() => {}) }
 }
 
-async function readIdentity(store) {
-  let parsed, identity
-  try { parsed = parseIdentityDocument(await fs.promises.readFile(store.file, 'utf8')); identity = normalizeIdentity(parsed) }
-  catch (error) { identity = readOrCreateIdentity(store, error) }
-  if (JSON.stringify(identity) !== JSON.stringify(parsed)) await writeIdentity(store, identity)
+function rejectChangedIdentity(store, text) {
+  if (text === null) throw identityReadFailure(store, { code: 'ENOENT' })
+  let identity
+  try { identity = normalizeIdentity(parseIdentityDocument(text)) }
+  catch (error) { throw identityReadFailure(store, error) }
+  store.diskText = text
   publishIdentity(store, identity)
+  throw Object.assign(new Error('设备身份已变化，未覆盖新文件；请刷新后重试'), { code: 'identity_changed', status: 503, retryable: true })
+}
+
+async function readIdentity(store) {
+  let parsed, identity, text = null
+  try { text = await fs.promises.readFile(store.file, 'utf8'); parsed = parseIdentityDocument(text); identity = normalizeIdentity(parsed) }
+  catch (error) { identity = readOrCreateIdentity(store, error) }
+  store.diskText = text
+  if (JSON.stringify(identity) !== JSON.stringify(parsed)) await writeIdentity(store, identity)
+  publishIdentity(store, await store.activity.read(identity))
   return store.identity
 }
 
@@ -178,16 +198,24 @@ async function readIdentity(store) {
 function refreshIdentitySync() {
   const store = identityStore()
   if (store.pending) throw Object.assign(new Error('身份仓库正在提交，请重试'), { status: 503, code: 'identity_busy' })
-  let parsed, identity
-  try { parsed = parseIdentityDocument(fs.readFileSync(store.file, 'utf8')); identity = normalizeIdentity(parsed) }
+  let parsed, identity, text = null
+  try { text = fs.readFileSync(store.file, 'utf8'); parsed = parseIdentityDocument(text); identity = normalizeIdentity(parsed) }
   catch (error) { identity = readOrCreateIdentity(store, error) }
+  store.diskText = text
   if (JSON.stringify(identity) !== JSON.stringify(parsed)) {
     const temporary = `${store.file}.${process.pid}.${++identityWriteCounter}.tmp`
-    try { fs.mkdirSync(path.dirname(store.file), { recursive: true }); fs.writeFileSync(temporary, JSON.stringify(identity, null, 2), { mode: 0o600 }); fs.renameSync(temporary, store.file) }
+    try {
+      fs.mkdirSync(path.dirname(store.file), { recursive: true }); const nextText = JSON.stringify(identity, null, 2)
+      fs.writeFileSync(temporary, nextText, { mode: 0o600 })
+      let latest = null
+      try { latest = fs.readFileSync(store.file, 'utf8') } catch (error) { if (error.code !== 'ENOENT') throw identityReadFailure(store, error) }
+      if (latest !== text) rejectChangedIdentity(store, latest)
+      fs.renameSync(temporary, store.file); store.diskText = nextText
+    }
     catch (cause) { throw Object.assign(new Error('设备身份保存失败，原文件未替换；请重试'), { code: cause.code || 'identity_write_failed', status: 503 }) }
     finally { fs.rmSync(temporary, { force: true }) }
   }
-  publishIdentity(store, identity)
+  publishIdentity(store, store.activity.readSync(identity))
 }
 
 function loadIdentity() {
@@ -302,7 +330,7 @@ function scheduleLastSeen(store) {
       changed = true
       return { ...device, lastSeenAt: Math.max(device.lastSeenAt, touch.lastSeenAt), lastAddress: touch.lastAddress }
     })
-    if (changed) { const next = { ...identity, pairedDevices }; await writeIdentity(store, next); publishIdentity(store, next) }
+    if (changed) { const next = { ...identity, pairedDevices }; await store.activity.save(next); publishIdentity(store, next) }
   })
   store.touchTask = task.catch(error => { log.warn('[identity] 设备最近访问记录写入失败:', error.message) })
     .finally(() => { store.touchTask = null; scheduleLastSeen(store) })

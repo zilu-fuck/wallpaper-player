@@ -183,6 +183,9 @@ jobs:
       - name: Verify asynchronous identity IO, durable authorization and response ownership
         run: npm run verify:identity-io
 
+      - name: Verify identity writes preserve newer observed credential files
+        run: npm run verify:identity-write-ownership
+
       - name: Verify tag versions and editor conflicts
         run: npm run verify:tag-conflicts
 

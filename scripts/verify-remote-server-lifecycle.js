@@ -74,10 +74,12 @@ async function main() {
     const input = { pairingId: pairing.pairingId, oneTimeSecret: pairing.oneTimeSecret, clientId: 'shutdown-phone' }
     const pending = await identity.claimPairing(input); identity.approvePairingRequest(pending.pairingRequestId)
     const phone = await identity.claimPairing(input), nativeRename = fs.promises.rename
+    const activityFile = path.join(path.dirname(identity.getIdentityPath()), 'remote-device-activity.json')
+    const credentialsBeforeActivity = fs.readFileSync(identity.getIdentityPath(), 'utf8')
     let releaseIdentity, enteredIdentity
     const identityHeld = new Promise(done => { releaseIdentity = done }), identityStarted = new Promise(done => { enteredIdentity = done })
     fs.promises.rename = async function (from, to, ...args) {
-      if (to === identity.getIdentityPath()) { enteredIdentity(); await identityHeld }
+      if (to === activityFile) { enteredIdentity(); await identityHeld }
       return nativeRename.call(this, from, to, ...args)
     }
     try {
@@ -86,7 +88,8 @@ async function main() {
       const stopIdentity = remote.stopRemoteAccess().then(() => { identityStopped = true })
       await new Promise(done => setTimeout(done, 10)); assert.strictEqual(identityStopped, false)
       releaseIdentity(); await stopIdentity
-      assert.strictEqual(JSON.parse(fs.readFileSync(identity.getIdentityPath(), 'utf8')).pairedDevices.find(device => device.id === 'shutdown-phone').lastAddress, 'shutdown-address')
+      assert.strictEqual(JSON.parse(fs.readFileSync(activityFile, 'utf8')).devices.find(device => device.id === 'shutdown-phone').lastAddress, 'shutdown-address')
+      assert.strictEqual(fs.readFileSync(identity.getIdentityPath(), 'utf8'), credentialsBeforeActivity)
     } finally { fs.promises.rename = nativeRename; releaseIdentity() }
     await remote.startRemoteAccess()
     const restarting = remote.startRemoteAccess({ forceRestart: true })

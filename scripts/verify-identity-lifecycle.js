@@ -13,12 +13,14 @@ const identity = require('../main/remote/identity')
 const originals = { readFile: fs.promises.readFile, rename: fs.promises.rename }
 const passed = [], deferred = () => { let resolve; const promise = new Promise(done => { resolve = done }); return { promise, resolve } }
 const file = () => path.join(profile, 'remote-identity.json')
+const activityFile = () => path.join(profile, 'remote-device-activity.json')
 const readDisk = async () => JSON.parse(await originals.readFile.call(fs.promises, file(), 'utf8'))
+const readActivity = async () => JSON.parse(await originals.readFile.call(fs.promises, activityFile(), 'utf8'))
 const deadline = setTimeout(() => { console.error('identity lifecycle timed out'); process.exit(1) }, 45000)
-function holdRename(fail = false) {
+function holdRename(fail = false, target = file()) {
   const started = deferred(), gate = deferred()
   fs.promises.rename = async function (from, to, ...args) {
-    if (to !== file()) return originals.rename.call(this, from, to, ...args)
+    if (to !== target) return originals.rename.call(this, from, to, ...args)
     started.resolve(); await gate.promise
     fs.promises.rename = originals.rename
     if (fail) throw Object.assign(Error('controlled rename denied'), { code: 'EACCES' })
@@ -87,20 +89,21 @@ async function main() {
   assert.equal((await readDisk()).pairedDevices.find(x => x.id === 'phone-b').lastAddress, '')
   passed.push('late last-seen update cannot overwrite a rebound device')
 
-  let writes = 0; const renameBeforeCount = fs.promises.rename
-  fs.promises.rename = async function (...args) { if (args[1] === file()) writes++; return renameBeforeCount.apply(this, args) }
+  let writes = 0; const renameBeforeCount = fs.promises.rename, credentialsBeforeActivity = await originals.readFile(file(), 'utf8')
+  fs.promises.rename = async function (...args) { if (args[1] === activityFile()) writes++; return renameBeforeCount.apply(this, args) }
   for (let i = 0; i < 25; i++) assert(identity.verifyAccessTokenWithType(rebound.token, { remoteAddress: 'new-address' }).authorized)
   await identity.flushIdentityWrites(); fs.promises.rename = renameBeforeCount
-  assert.equal(writes, 1); assert.equal((await readDisk()).pairedDevices.find(x => x.id === 'phone-b').lastAddress, 'new-address')
+  assert.equal(writes, 1); assert.equal((await readActivity()).devices.find(x => x.id === 'phone-b').lastAddress, 'new-address')
+  assert.equal(await originals.readFile(file(), 'utf8'), credentialsBeforeActivity)
   passed.push('last-seen writes coalesce and flush owns actual completion')
 
-  const telemetryFailure = holdRename(true)
+  const telemetryFailure = holdRename(true, activityFile())
   assert(identity.verifyAccessTokenWithType(rebound.token, { remoteAddress: 'retry-address' }).authorized)
   await telemetryFailure.started; telemetryFailure.release(); await identity.flushIdentityWrites()
-  assert.equal((await readDisk()).pairedDevices.find(x => x.id === 'phone-b').lastAddress, 'new-address')
+  assert.equal((await readActivity()).devices.find(x => x.id === 'phone-b').lastAddress, 'new-address')
   assert(identity.verifyAccessTokenWithType(rebound.token, { remoteAddress: 'retry-address' }).authorized)
   await identity.flushIdentityWrites()
-  assert.equal((await readDisk()).pairedDevices.find(x => x.id === 'phone-b').lastAddress, 'retry-address')
+  assert.equal((await readActivity()).devices.find(x => x.id === 'phone-b').lastAddress, 'retry-address')
   passed.push('failed last-seen write is nonfatal and retries without publishing failed state')
 
   const started = deferred(), gate = deferred(); let reads = 0

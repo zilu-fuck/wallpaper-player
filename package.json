@@ -68,6 +68,7 @@
     "verify:plugins": "node scripts/run-verify.cjs scripts/verify-plugin-registry.js",
     "verify:plugin-settings": "node scripts/run-verify.cjs scripts/verify-plugin-settings-lifecycle.js",
     "verify:identity-read-safety": "node scripts/run-verify.cjs scripts/verify-identity-read-safety.js",
+    "verify:identity-write-ownership": "node scripts/run-verify.cjs scripts/verify-identity-write-ownership.js",
     "verify:plugin-remote": "node scripts/run-verify.cjs scripts/verify-plugin-remote-route.js",
     "verify:plugin-video": "node scripts/run-verify.cjs --electron scripts/verify-plugin-video-lifecycle.js",
     "verify:plugin-external": "node scripts/run-verify.cjs --electron scripts/verify-external-plugin-lifecycle.js",
