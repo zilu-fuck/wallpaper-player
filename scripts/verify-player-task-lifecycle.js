@@ -80,10 +80,17 @@ async function main() {
     await harness.settle(); await until(() => control.closed > closedBeforeSwitch)
     control.analysisGate.resolve(); control.analysisGate = null
     await harness.settle()
-    assert.strictEqual(find(page(1), 'VideoAnalysisSheet').props.state, null)
+    assert.ok(!find(harness.tree(), 'VideoAnalysisSheet'), 'switching videos dismisses the previous analysis sheet')
+    control.analysisGate = deferred()
+    find(page(1), 'VideoOverlay').props.onAnalysis()
+    await harness.settle()
+    await until(() => control.requests.some(request => request.method === 'GET' && request.path.includes('/b/analysis')))
+    assert.strictEqual(find(harness.tree(), 'VideoAnalysisSheet').props.state, null, 'the next video cannot inherit the previous analysis result')
+    control.analysisGate.resolve(); control.analysisGate = null
+    await harness.settle()
 
     control.analysisStartGate = deferred()
-    const pendingStart = find(page(1), 'VideoAnalysisSheet').props.onStart()
+    const pendingStart = find(harness.tree(), 'VideoAnalysisSheet').props.onStart()
     await until(() => control.requests.some(request => request.method === 'POST' && request.path.includes('/b/analysis')))
     const closedBeforePause = control.closed
     appListeners.forEach(listener => listener('background')); await harness.settle()
@@ -94,10 +101,11 @@ async function main() {
     appListeners.forEach(listener => listener('active'))
     try { await harness.until(() => control.requests.length > beforeResume) }
     catch (error) { console.error({ requests: control.requests, listeners: appListeners.size,
-      starting: find(page(1), 'VideoAnalysisSheet').props.starting }); throw error }
+      starting: find(harness.tree(), 'VideoAnalysisSheet')?.props.starting }); throw error }
     assert.strictEqual(control.requests.filter(request => request.method === 'POST' && request.path.includes('/b/analysis')).length, 1,
       'an ambiguous accepted start must resume through GET, never repeated POST')
     assert.strictEqual(control.requests.filter(request => request.method === 'DELETE').length, 0, 'leaving only stops observation, not shared server work')
+    find(harness.tree(), 'VideoAnalysisSheet').props.onClose(); await harness.settle()
     control.ready = false
     await find(page(1), 'VideoOverlay').props.onTranscode(); await harness.settle()
     control.loseCancel = true
@@ -115,23 +123,25 @@ async function main() {
     appListeners.forEach(listener => listener('active')); await harness.settle()
     assert.strictEqual(control.requests.filter(request => request.method === 'GET' && request.path.includes('/b/transcode')).length, beforeCancelledGets,
       'a cancelled terminal task cannot restart polling after returning to the foreground')
+    find(page(1), 'VideoOverlay').props.onAnalysis()
+    await harness.until(() => find(harness.tree(), 'VideoAnalysisSheet')?.props.state?.job?.canCancel)
     control.analysisLoseCancel = true
-    await find(page(1), 'VideoAnalysisSheet').props.onCancel(); await harness.settle()
-    await find(page(1), 'VideoAnalysisSheet').props.onCancel(); await harness.settle()
+    await find(harness.tree(), 'VideoAnalysisSheet').props.onCancel(); await harness.settle()
+    await find(harness.tree(), 'VideoAnalysisSheet').props.onCancel(); await harness.settle()
     const cancelledAnalysisPaths = control.requests.filter(request => request.method === 'DELETE' && request.path.includes('/analysis')).map(request => request.path)
     assert.strictEqual(cancelledAnalysisPaths.length, 2); assert.strictEqual(cancelledAnalysisPaths[0], cancelledAnalysisPaths[1], 'an unconfirmed analysis cancellation retries the same nonce')
-    assert.ok(find(page(1), 'VideoOverlay').props.gestureHint.includes('其他设备'))
-    await find(page(1), 'VideoAnalysisSheet').props.onStart(); await harness.settle()
+    assert.ok(find(harness.tree(), 'VideoAnalysisSheet').props.notice.includes('其他设备'))
+    await find(harness.tree(), 'VideoAnalysisSheet').props.onStart(); await harness.settle()
     const previousInterest = control.analysisInterest
     assert.ok(!control.analysisReleased.has(previousInterest), 'a new explicit analysis starts with a new nonce')
     control.analysisCancelGate = deferred()
-    const oldCancel = find(page(1), 'VideoAnalysisSheet').props.onCancel()
+    const oldCancel = find(harness.tree(), 'VideoAnalysisSheet').props.onCancel()
     await until(() => control.analysisReleased.has(previousInterest))
-    await find(page(1), 'VideoAnalysisSheet').props.onStart(); await harness.settle()
+    await find(harness.tree(), 'VideoAnalysisSheet').props.onStart(); await harness.settle()
     assert.notStrictEqual(control.analysisInterest, previousInterest)
     control.analysisCancelGate.resolve(); control.analysisCancelGate = null; await oldCancel; await harness.settle()
-    assert.strictEqual(find(page(1), 'VideoAnalysisSheet').props.state.job.canCancel, true, 'an old cancel response cannot clear the newer analysis interest')
-    assert.strictEqual(find(page(1), 'VideoAnalysisSheet').props.cancelling, false)
+    assert.strictEqual(find(harness.tree(), 'VideoAnalysisSheet').props.state.job.canCancel, true, 'an old cancel response cannot clear the newer analysis interest')
+    assert.strictEqual(find(harness.tree(), 'VideoAnalysisSheet').props.cancelling, false)
     harness.unmount(); await harness.settle()
     assert.strictEqual(appListeners.size, 0)
     assert.strictEqual(harness.players.filter(player => !player.released).length, 0)

@@ -17,7 +17,7 @@ async function native() {
     if(held && [IPC.GET_SETTINGS,IPC.GET_SETTINGS_FEED].includes(channel)) await held
     return action(...args)
   })}})
-  for(const [channel,result] of [[IPC.PLUGINS_LIST,[]],[IPC.CHECK_FFMPEG,{available:false}],[IPC.CHECK_MPV,{available:false}],[IPC.SCAN_DIRECTORY,{videos:[]}],[IPC.UPDATER_GET_STATUS,{status:'disabled'}]]) ipcMain.handle(channel,async()=>result)
+  for(const [channel,result] of [[IPC.PLUGINS_LIST,[]],[IPC.CHECK_FFMPEG,{available:false}],[IPC.CHECK_MPV,{available:false}],[IPC.SCAN_DIRECTORY,{videos:[]}],[IPC.UPDATER_GET_STATUS,{status:'disabled'}],[IPC.WINDOW_GET_STATE,{maximized:false}]]) ipcMain.handle(channel,async()=>result)
   const results=[]
   try {
     for(const scenario of ['fast','wall-clock-jump','raf-and-settings-held']) {
@@ -35,6 +35,7 @@ async function native() {
         mark(scenario+': blank loaded')
         window.webContents.debugger.attach('1.3')
         await window.webContents.debugger.sendCommand('Page.enable')
+        await window.webContents.debugger.sendCommand('Emulation.setEmulatedMedia', { features: [{ name: 'prefers-reduced-motion', value: 'no-preference' }] })
         mark(scenario+': page enabled')
         await window.webContents.debugger.sendCommand('Page.addScriptToEvaluateOnNewDocument',{source:`
           window.__splashObserved = { scenario: ${JSON.stringify(scenario)}, errors: [] };
@@ -60,7 +61,7 @@ async function native() {
           observer.observe(document, { childList: true, subtree: true, attributes: true, attributeFilter: ['class'] });
         `})
         mark(scenario+': observer installed')
-        window.showInactive(); await window.loadFile(entry)
+        window.setIgnoreMouseEvents(true); window.show(); window.focus(); await window.loadFile(entry)
         mark(scenario+': loaded')
         const deadline=Date.now()+10000
         while(!await run('Number.isFinite(window.__splashObserved?.removed)')) {
@@ -89,6 +90,7 @@ async function native() {
             window.setContentSize(...size)
             await run(`document.getElementById('app-splash-replay').click(); true`)
             assert.equal((await state()).inert,true)
+            await run(`new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)))`)
             await run(`new Promise(resolve => setTimeout(resolve,1350))`)
             const visual = await run(`({ image: document.querySelector('.splash-mark img').complete && document.querySelector('.splash-mark img').naturalWidth, trace: getComputedStyle(document.querySelector('.splash-trace')).strokeDashoffset, spacing: parseFloat(getComputedStyle(document.querySelector('.splash-title')).letterSpacing), scene: getComputedStyle(document.querySelector('.splash-scene')).transform, count: document.querySelectorAll('#app-splash').length })`)
             assert.equal(visual.image,1024); assert.equal(visual.trace,'0px'); assert.equal(visual.count,1); assert.ok(visual.spacing>=8 && visual.spacing<24)
