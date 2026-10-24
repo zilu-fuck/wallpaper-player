@@ -24,10 +24,11 @@ async function main() {
     'main/application/download-service.js', 'main/application/download-tasks.js', 'main/application/mpv-version-cache.js',
     'main/exec.js', 'main/process-lifecycle.js', 'main/media-pressure.js',
     'main/window.js', 'main/ipc-channels.js', 'main/security/ipc.js', 'main/security/ipc-sender.js', 'main/security/privacy-password.js', 'main/remote/json-responses.js',
-    'main/application/media-mutation-paths.js', 'main/settings.js', 'main/paths.js', 'main/constants.js',
-    'main/user-data.js', 'main/repositories/tag-state.js', 'main/repositories/user-media.js', 'main/repositories/settings-file.js', 'main/security/media-access.js',
+    'main/application/media-mutation-paths.js', 'main/settings.js', 'main/paths.js', 'main/path-identity.js', 'main/constants.js',
+    'main/user-data.js', 'main/repositories/tag-state.js', 'main/repositories/tag-normalizers.js', 'main/repositories/user-media.js', 'main/repositories/settings-file.js',
+    'main/repositories/settings-normalize.js', 'main/repositories/settings-renderer.js', 'main/repositories/identity-document.js', 'main/security/media-access.js',
     'main/application/media-mutations.js', 'main/ipc/media-data.js', 'main/ipc/window-shell.js', 'main/ipc/app-dialogs.js', 'main/application/confirm.js', 'main/remote/media-mutations.js', 'main/remote/identity.js',
-    'main/application/settings-json.js', 'main/application/settings-json-worker.js', 'main/application/settings-broadcast.js', 'main/application/settings-startup.js']
+    'main/application/settings-json.js', 'main/application/settings-json-worker.js', 'main/application/settings-reader.js', 'main/application/settings-read-worker.js', 'main/application/settings-broadcast.js', 'main/application/settings-startup.js']
   for (const artifact of artifacts) {
     assert.ok(included(artifact), 'electron-builder must include ' + artifact)
     const target = path.join(stage, artifact)
