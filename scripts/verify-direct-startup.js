@@ -6,13 +6,10 @@ const projectRoot = path.resolve(__dirname, '..')
 const packageJson = JSON.parse(fs.readFileSync(path.join(projectRoot, 'package.json'), 'utf-8'))
 const launcher = fs.readFileSync(path.join(projectRoot, 'scripts', 'start-electron-direct.js'), 'utf-8')
 const mainEntry = fs.readFileSync(path.join(projectRoot, 'main', 'index.js'), 'utf-8')
-const packageWinSource = fs.readFileSync(path.join(projectRoot, 'scripts', 'package-win.js'), 'utf-8')
-const releaseWorkflow = fs.readFileSync(path.join(projectRoot, '.github', 'workflows', 'release.yml'), 'utf-8')
 const updaterSource = fs.readFileSync(path.join(projectRoot, 'main', 'updater.js'), 'utf-8')
 const appSource = fs.readFileSync(path.join(projectRoot, 'src', 'App.jsx'), 'utf-8')
 const settingsSource = fs.readFileSync(path.join(projectRoot, 'src', 'components', 'Settings.jsx'), 'utf-8')
 const scanSource = fs.readFileSync(path.join(projectRoot, 'src', 'hooks', 'useScan.js'), 'utf-8')
-const appStateSource = fs.readFileSync(path.join(projectRoot, 'src', 'hooks', 'useAppState.js'), 'utf-8')
 const { configurePortableUserData, getPortableDataFallback } = require(path.join(projectRoot, 'main', 'portable-user-data'))
 const { resolveAsciiBuildRoot } = require(path.join(projectRoot, 'scripts', 'package-win'))
 
@@ -31,15 +28,10 @@ assert.match(appSource, /arrowup:\s*\['volume-up', 5\]/)
 assert.match(appSource, /scanErrorDir[\s\S]*onRetryScan/)
 assert.match(settingsSource, /activeElement\.blur\(\)/)
 assert.match(scanSource, /setScanErrorDir\(dirPath\)/)
-assert.match(appStateSource, /setSettings\(previous\)/)
-assert.match(appStateSource, /setSettingsSaveError/)
-assert.match(releaseWorkflow, /release\/plugins/)
+// Settings rollback and reply ordering are exercised by verify:settings-snapshots.
 assert.match(updaterSource, /releases\/latest/)
 
-const mainBuildBody = packageWinSource.slice(packageWinSource.indexOf('async function main()'))
-assert.ok(mainBuildBody.indexOf('packagePlugins()') < mainBuildBody.indexOf('electronBuilderCli'))
-assert.ok(mainBuildBody.indexOf('electronBuilderCli') < mainBuildBody.indexOf('copyReleaseBack()'))
-assert.match(packageWinSource, /fsp\.cp\(pluginArtifactsDir/)
+// Copy ordering, retained outputs and embedded integrity are exercised by verify:packaging.
 assert.throws(
   () => resolveAsciiBuildRoot(
     { WALLPAPER_PLAYER_BUILD_ROOT: 'C:\\构建目录' },

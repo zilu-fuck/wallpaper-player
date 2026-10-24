@@ -1,14 +1,19 @@
+const settingsNormalizer = require('./repositories/settings-normalize')
+const { normalizeDirectoryList, resolvePathForAccess, normalizePrivateDirectories, getPublicDirectories, normalizeDownloadDirectories, normalizeHiddenTags, normalizeCustomTags, normalizePlaybackState, normalizePlaybackStates, normalizeNetworkResources, normalizeNetworkResourcePage, normalizeRemoteAccess, normalizeWindowClose, normalizePlugins } = settingsNormalizer
 const path = require('path')
 const fs = require('fs')
-const fsp = fs.promises
 const crypto = require('crypto')
 const { app } = require('electron')
 const { getUserDataDir } = require('./user-data')
-const { pathKey, isExistingFile, isMpvExecutablePath } = require('./paths')
-
-const PRIVACY_PASSWORD_ITERATIONS = 120000
-const PRIVACY_PASSWORD_KEY_LENGTH = 32
-const PRIVACY_PASSWORD_DIGEST = 'sha256'
+const { pathKey, isPathInside, isExistingFile, isMpvExecutablePath } = require('./paths')
+const { normalizeTagRevisions, normalizeTagReceipts } = require('./repositories/tag-state')
+const { normalizePrivacy, createPrivacyPassword, verifyPrivacyPassword: verifyPassword } = require('./security/privacy-password')
+const { createSettingsJson } = require('./application/settings-json')
+const { createSettingsReader } = require('./application/settings-reader')
+const { sanitizeRendererSettings } = require('./repositories/settings-renderer')
+const { SETTINGS_MAP_FIELDS, diffSettingsMap, applySettingsMap } = require('../packages/contracts/dist/settings-feed')
+const { CURRENT_SCHEMA_VERSION, createSettingsFile } = require('./repositories/settings-file')
+const settingsFiles = new Map()
 
 const sessionAllowedDirectories = new Set()
 const sessionPrivateDirectories = new Set()
@@ -19,15 +24,122 @@ const SETTINGS_WRITE_DEBOUNCE_MS = 75
 
 let directoryChangeHandler = null
 const settingsChangeHandlers = new Set()
+const settingsCommitHandlers = new Set()
 let settingsCache = null
 let settingsCachePath = ''
 let pendingSettingsWrite = null
 let settingsWriteTimer = null
 let settingsWriteChain = Promise.resolve()
 let settingsFlushHooksInstalled = false
-let settingsWriteCounter = 0
+let settingsRecoveryInFlight = false
 let settingsWriteError = null
 let settingsWriteInFlight = false
+const snapshotEpoch = crypto.randomUUID()
+const snapshotVersions = new WeakMap()
+let snapshotRevision = 0
+const ownedSettingsPatches = new WeakSet()
+const normalizedSettingsPatchFields = new WeakMap()
+const settingsJsonSnapshots = new WeakMap()
+let settingsJson = null
+let settingsReader = null
+let settingsInitialization = null
+let settingsSectionsRevision = 0
+let settingsSerializationGeneration = 0
+
+function settingsSnapshot(settings, text = JSON.stringify(settings)) {
+  const owned = JSON.parse(text)
+  if (!owned || typeof owned !== 'object' || Array.isArray(owned)) throw Object.assign(Error('设置必须序列化为 JSON 对象'), { code: 'settings_invalid_document' })
+  if (owned.schemaVersion !== CURRENT_SCHEMA_VERSION) { owned.schemaVersion = CURRENT_SCHEMA_VERSION; text = JSON.stringify(owned) }
+  return { text, owned }
+}
+function ownSettingsSnapshot(settings) {
+  const { text, owned } = settingsSnapshot(settings)
+  stampSettings(owned)
+  settingsJsonSnapshots.set(owned, { text, id: null })
+  return owned
+}
+
+async function encodeSettings(settings, { base = settings, patch } = {}) {
+  if (settingsInitialization) {
+    try { await settingsInitialization.promise }
+    catch (error) { if (error.code === 'app_quitting') throw error }
+  }
+  if (typeof settings.toJSON === 'function') {
+    const { text, owned } = settingsSnapshot(settings)
+    return { text, bytes: Buffer.from(JSON.stringify(owned, null, 2)), snapshot: owned, id: null }
+  }
+  const keys = patch ? new Set(Object.keys(patch)) : new Set()
+  if (['directories', 'privateDirectories', 'defaultDirectory'].some(key => keys.has(key))) {
+    for (const key of ['directories', 'privateDirectories', 'defaultDirectory']) keys.add(key)
+  }
+  const changes = [...keys].filter(key => key !== '_settingsVersion').map(key => {
+    let value = settings[key]
+    // Custom serializers keep the original property-key JSON semantics. Their
+    // output is captured before crossing the worker boundary.
+    if (!ownedSettingsPatches.has(patch) || settingsSections.has(key)) value = JSON.parse(JSON.stringify({ [key]: value }))[key]
+    return [key, value]
+  })
+  settingsJson ||= createSettingsJson()
+  const result = await settingsJson.encode({ base, baseId: settingsJsonSnapshots.get(base)?.id, changes, mapDeltas: true })
+  if (result.documentVersion !== CURRENT_SCHEMA_VERSION) throw Object.assign(Error('设置编码格式版本无效'), { code: 'settings_invalid_document' })
+  const snapshot = { ...base }
+  for (const field of result.fields) {
+    if (field.present) Object.defineProperty(snapshot, field.key, { value: field.mapDelta ? applySettingsMap(base[field.key], field.mapDelta) : field.value, enumerable: true, writable: true, configurable: true })
+    else delete snapshot[field.key]
+  }
+  delete snapshot._settingsVersion
+  return { ...result, snapshot }
+}
+
+async function disposeSettingsSerialization(options) {
+  settingsSerializationGeneration++
+  const current = settingsJson, reader = settingsReader
+  await Promise.all([current?.close(options), reader?.close(options)])
+  if (settingsJson === current) settingsJson = null
+  if (settingsReader === reader) settingsReader = null
+}
+
+function captureSettingsPatch(patch) {
+  if (!patch || typeof patch !== 'object' || ownedSettingsPatches.has(patch)) return patch
+  const visiting = new WeakSet(), checked = new WeakSet()
+  function plainData(value) {
+    if (!value || typeof value !== 'object') return !['function', 'symbol'].includes(typeof value)
+    if (checked.has(value)) return true
+    if (visiting.has(value)) return false
+    const array = Array.isArray(value), prototype = Object.getPrototypeOf(value)
+    if (prototype !== (array ? Array.prototype : Object.prototype) && prototype !== null) return false
+    visiting.add(value)
+    for (const [key, descriptor] of Object.entries(Object.getOwnPropertyDescriptors(value))) {
+      if (key === 'toJSON' || (array && key !== 'length' && !descriptor.enumerable)) return false
+      if (descriptor.enumerable && (descriptor.get || descriptor.set || !plainData(descriptor.value))) return false
+    }
+    visiting.delete(value); checked.add(value); return true
+  }
+  try {
+    const prototype = Object.getPrototypeOf(patch)
+    if (Array.isArray(patch) || (prototype !== Object.prototype && prototype !== null)) return patch
+    const descriptors = Object.entries(Object.getOwnPropertyDescriptors(patch)).filter(([, descriptor]) => descriptor.enumerable)
+    if (Object.hasOwn(patch, 'toJSON') || descriptors.some(([, descriptor]) => descriptor.get || descriptor.set)) return patch
+    const direct = { customTags: normalizeCustomTags, customTagRevisions: normalizeTagRevisions,
+      tagMutationReceipts: normalizeTagReceipts, hiddenTags: normalizeHiddenTags }
+    const normalizer = key => settingsSections.has(key) || !Object.hasOwn(direct, key) ? undefined : direct[key]
+    if (descriptors.some(([key, descriptor]) => !normalizer(key) && !plainData(descriptor.value))) return patch
+    const normalized = new Map()
+    const captured = Object.fromEntries(descriptors.map(([key, descriptor]) => {
+      const normalize = normalizer(key)
+      if (normalize) normalized.set(key, normalize)
+      return [key, normalize ? normalize(descriptor.value) : structuredClone(descriptor.value)]
+    }))
+    ownedSettingsPatches.add(captured)
+    normalizedSettingsPatchFields.set(captured, normalized)
+    return captured
+  } catch { return patch }
+}
+
+function stampSettings(settings) {
+  snapshotVersions.set(settings, Object.freeze({ epoch: snapshotEpoch, revision: ++snapshotRevision }))
+  return settings
+}
 
 function setDirectoryChangeHandler(handler) {
   directoryChangeHandler = handler
@@ -39,329 +151,102 @@ function onSettingsChanged(handler) {
   return () => settingsChangeHandlers.delete(handler)
 }
 
-function notifySettingsChanged(settings) {
-  for (const handler of settingsChangeHandlers) {
-    try {
-      handler(settings)
-    } catch {}
+function onSettingsCommitted(handler) {
+  if (typeof handler !== 'function') return () => {}
+  settingsCommitHandlers.add(handler)
+  return () => settingsCommitHandlers.delete(handler)
+}
+
+function notifySettingsChanged(settings, changedKeys, previous, allowPatch = false) {
+  if (!settingsChangeHandlers.size && !settingsCommitHandlers.size) return
+  const keys = new Set(changedKeys)
+  if (['directories', 'privateDirectories', 'defaultDirectory'].some(key => keys.has(key))) {
+    for (const key of ['directories', 'privateDirectories', 'defaultDirectory']) keys.add(key)
   }
+  const effectiveKeys = Object.freeze([...keys])
+  if (settingsChangeHandlers.size) {
+    const snapshot = cloneSettings(settings)
+    for (const handler of settingsChangeHandlers) { try { handler(snapshot, { changedKeys: [...effectiveKeys] }) } catch {} }
+  }
+  if (!settingsCommitHandlers.size) return
+  const event = Object.freeze({
+    changedKeys: effectiveKeys, version: Object.freeze(getSettingsSnapshotVersion(settings)),
+    baseVersion: previous ? Object.freeze(getSettingsSnapshotVersion(previous)) : undefined,
+    requiresSnapshot: !allowPatch,
+    readSnapshot: () => cloneSettings(settings),
+    captureRendererSnapshot: () => captureRendererSnapshot(settings),
+    readFields: fields => cloneSettingsFields(settings, fields),
+    readPatch: () => {
+      const set = Object.create(null), maps = Object.create(null), removed = []
+      for (const key of effectiveKeys) {
+        if (['_settingsVersion', 'tagMutationReceipts'].includes(key)) continue
+        if (!Object.hasOwn(settings, key)) { removed.push(key); continue }
+        const delta = SETTINGS_MAP_FIELDS.includes(key) ? diffSettingsMap(previous?.[key], settings[key], 'identity') : null
+        if (delta) maps[key] = delta
+        else set[key] = settings[key]
+      }
+      return JSON.parse(JSON.stringify({ set, maps, removed }))
+    }
+  })
+  for (const handler of settingsCommitHandlers) { try { handler(event) } catch {} }
 }
 
 function getSettingsPath() {
   return path.join(getUserDataDir(), 'settings.json')
 }
 
-function normalizeDirectoryList(directories) {
-  return Array.isArray(directories)
-    ? directories.filter(dir => typeof dir === 'string' && dir.trim())
-    : []
+
+
+
+
+
+
+
+
+
+
+function verifyPrivacyPassword(password, privacy = loadSettingsFields(['privacy']).privacy, check) { return verifyPassword(password, privacy, check) }
+
+function getSettingsSnapshotVersion(settings) {
+  const version = settings && snapshotVersions.get(settings)
+  return version ? { ...version } : undefined
 }
 
-function resolvePathForAccess(inputPath) {
-  const resolved = path.resolve(inputPath)
-  try {
-    return fs.realpathSync.native(resolved)
-  } catch {
-    return resolved
-  }
+function sanitizeSettingsForRenderer(settings, { partial = false } = {}) {
+  return sanitizeRendererSettings(settings, getSettingsSnapshotVersion(settings), { partial })
 }
 
-function normalizePrivateDirectories(privateDirectories, directories = []) {
-  const directoryKeys = new Set(normalizeDirectoryList(directories).map(dir => pathKey(resolvePathForAccess(dir))))
-  return normalizeDirectoryList(privateDirectories)
-    .map(dir => resolvePathForAccess(dir))
-    .filter(dir => directoryKeys.has(pathKey(dir)))
+function captureRendererSettings() {
+  return captureRendererSnapshot(getCachedSettings())
 }
 
-function getPublicDirectories(directories, privateDirectories = []) {
-  const privateKeys = new Set(normalizePrivateDirectories(privateDirectories, directories).map(pathKey))
-  return normalizeDirectoryList(directories)
-    .map(dir => resolvePathForAccess(dir))
-    .filter(dir => !privateKeys.has(pathKey(dir)))
+function captureRendererSnapshot(snapshot) {
+  const text = settingsJsonSnapshots.get(snapshot)?.text
+  if (typeof text !== 'string') throw Object.assign(Error('设置快照不可用'), { code: 'settings_snapshot_missing' })
+  const version = Object.freeze(getSettingsSnapshotVersion(snapshot))
+  return Object.freeze({ version, read: () => {
+    settingsReader ||= createSettingsReader()
+    return settingsReader.read(text, version)
+  } })
 }
 
-function normalizeDownloadDirectories(downloadDirectories) {
-  const seen = new Set()
-  return normalizeDirectoryList(downloadDirectories)
-    .map(dir => resolvePathForAccess(dir))
-    .filter(dir => {
-      const key = pathKey(dir)
-      if (seen.has(key)) return false
-      seen.add(key)
-      return true
-    })
-}
 
-function normalizePrivacy(privacy) {
-  const value = privacy && typeof privacy === 'object' && !Array.isArray(privacy)
-    ? privacy
-    : {}
-  const salt = typeof value.salt === 'string' && /^[0-9a-f]{32}$/i.test(value.salt)
-    ? value.salt.toLowerCase()
-    : ''
-  const passwordHash = typeof value.passwordHash === 'string' && /^[0-9a-f]{64}$/i.test(value.passwordHash)
-    ? value.passwordHash.toLowerCase()
-    : ''
-  return {
-    salt,
-    passwordHash,
-    passwordSet: Boolean(salt && passwordHash)
-  }
-}
 
-function hashPrivacyPassword(password, salt) {
-  return crypto.pbkdf2Sync(
-    String(password),
-    salt,
-    PRIVACY_PASSWORD_ITERATIONS,
-    PRIVACY_PASSWORD_KEY_LENGTH,
-    PRIVACY_PASSWORD_DIGEST
-  ).toString('hex')
-}
 
-function createPrivacyPassword(password) {
-  const normalized = typeof password === 'string' ? password : ''
-  if (normalized.length < 4) {
-    throw new Error('隐私密码至少需要 4 位')
-  }
-  const salt = crypto.randomBytes(16).toString('hex')
-  return normalizePrivacy({
-    salt,
-    passwordHash: hashPrivacyPassword(normalized, salt)
-  })
-}
 
-function verifyPrivacyPassword(password, privacy = loadSettings().privacy) {
-  const current = normalizePrivacy(privacy)
-  if (!current.passwordSet) return false
-  const nextHash = hashPrivacyPassword(typeof password === 'string' ? password : '', current.salt)
-  const expected = Buffer.from(current.passwordHash, 'hex')
-  const actual = Buffer.from(nextHash, 'hex')
-  return expected.length === actual.length && crypto.timingSafeEqual(expected, actual)
-}
 
-function sanitizeSettingsForRenderer(settings) {
-  const privacy = normalizePrivacy(settings?.privacy)
-  return {
-    ...settings,
-    privacy: {
-      passwordSet: privacy.passwordSet
-    }
-  }
-}
 
-function normalizeHiddenTags(hiddenTags) {
-  if (!Array.isArray(hiddenTags)) return []
-  const seen = new Set()
-  const result = []
-  for (const value of hiddenTags) {
-    const tag = String(value || '').trim()
-    if (!tag || seen.has(tag)) continue
-    seen.add(tag)
-    result.push(tag)
-  }
-  return result
-}
 
-function normalizeCustomTags(customTags) {
-  if (!customTags || typeof customTags !== 'object' || Array.isArray(customTags)) {
-    return {}
-  }
 
-  return Object.fromEntries(
-    Object.entries(customTags)
-      .filter(([key]) => typeof key === 'string' && key.trim())
-      .map(([key, tags]) => [
-        key,
-        Array.isArray(tags)
-          ? [...new Set(tags.filter(tag => typeof tag === 'string' && tag.trim()).map(tag => tag.trim()))]
-          : []
-      ])
-      .filter(([, tags]) => tags.length > 0)
-  )
-}
 
-function normalizePlaybackState(state) {
-  if (!state || typeof state !== 'object' || Array.isArray(state)) return null
 
-  const position = Number(state.position)
-  const volume = Number(state.volume)
-  const speed = Number(state.speed)
-  const subtitleScale = Number(state.subtitleScale)
-  const audioId = state.audioId == null || state.audioId === '' ? null : Number(state.audioId)
-  const subtitleId = state.subtitleId == null || state.subtitleId === '' ? null : Number(state.subtitleId)
-  const abLoopA = state.abLoopA == null || state.abLoopA === '' ? null : Number(state.abLoopA)
-  const abLoopB = state.abLoopB == null || state.abLoopB === '' ? null : Number(state.abLoopB)
-  const updatedAt = Number(state.updatedAt)
 
-  return {
-    position: Number.isFinite(position) && position >= 0 ? position : 0,
-    volume: Number.isFinite(volume) ? Math.max(0, Math.min(100, volume)) : 100,
-    speed: Number.isFinite(speed) && speed > 0 ? speed : 1,
-    muted: Boolean(state.muted),
-    audioId: Number.isFinite(audioId) ? audioId : null,
-    subtitleId: Number.isFinite(subtitleId) ? subtitleId : null,
-    subtitleVisible: state.subtitleVisible == null ? true : Boolean(state.subtitleVisible),
-    subtitleScale: Number.isFinite(subtitleScale) && subtitleScale > 0 ? subtitleScale : 1,
-    loopMode: ['off', 'inf', 'a-b'].includes(state.loopMode) ? state.loopMode : 'off',
-    abLoopA: Number.isFinite(abLoopA) ? abLoopA : null,
-    abLoopB: Number.isFinite(abLoopB) ? abLoopB : null,
-    updatedAt: Number.isFinite(updatedAt) ? updatedAt : Date.now()
-  }
-}
 
-function normalizePlaybackStates(playbackStates) {
-  if (!playbackStates || typeof playbackStates !== 'object' || Array.isArray(playbackStates)) {
-    return {}
-  }
 
-  return Object.fromEntries(
-    Object.entries(playbackStates)
-      .filter(([key]) => typeof key === 'string' && key.trim())
-      .map(([key, state]) => [key, normalizePlaybackState(state)])
-      .filter(([, state]) => Boolean(state))
-      .sort((a, b) => (b[1].updatedAt || 0) - (a[1].updatedAt || 0))
-      .slice(0, 200)
-  )
-}
 
-function normalizeNetworkResources(resources) {
-  if (!Array.isArray(resources)) return []
-  const seen = new Set()
-  const seenIds = new Set()
-  const result = []
-  for (const item of resources) {
-    if (!item || typeof item !== 'object' || Array.isArray(item)) continue
-    const url = typeof item.url === 'string' ? item.url.trim() : ''
-    let parsed
-    try {
-      parsed = new URL(url)
-    } catch {
-      continue
-    }
-    if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') continue
-    const normalizedUrl = parsed.toString()
-    const key = normalizedUrl.toLowerCase()
-    if (seen.has(key)) continue
-    seen.add(key)
-    const title = typeof item.title === 'string' ? item.title.trim().slice(0, 120) : ''
-    const kind = item.kind === 'webpage' ? 'webpage' : 'direct'
-    const playbackUrl = typeof item.playbackUrl === 'string' ? item.playbackUrl.trim() : ''
-    const rawHttpHeaders = item.httpHeaders && typeof item.httpHeaders === 'object' && !Array.isArray(item.httpHeaders)
-      ? item.httpHeaders
-      : null
-    const httpHeaders = rawHttpHeaders
-      ? {
-        referer: typeof rawHttpHeaders.referer === 'string' ? rawHttpHeaders.referer.trim() : '',
-        userAgent: typeof rawHttpHeaders.userAgent === 'string' ? rawHttpHeaders.userAgent.trim() : ''
-      }
-      : null
-    const parser = typeof item.parser === 'string' ? item.parser.trim().slice(0, 40) : ''
-    const page = item.page && typeof item.page === 'object' && !Array.isArray(item.page)
-      ? normalizeNetworkResourcePage(item.page)
-      : null
-    const createdAt = typeof item.createdAt === 'string' && item.createdAt.trim()
-      ? item.createdAt.trim()
-      : new Date().toISOString()
-    const fallbackId = crypto.createHash('sha1').update(normalizedUrl).digest('hex').slice(0, 16)
-    let id = typeof item.id === 'string' && item.id.trim()
-      ? item.id.trim()
-      : fallbackId
-    if (seenIds.has(id)) {
-      id = fallbackId
-    }
-    let suffix = 2
-    while (seenIds.has(id)) {
-      id = `${fallbackId}-${suffix}`
-      suffix += 1
-    }
-    seenIds.add(id)
-    result.push({
-      id,
-      kind,
-      title,
-      url: normalizedUrl,
-      playbackUrl,
-      httpHeaders,
-      parser,
-      page,
-      createdAt
-    })
-  }
-  return result.slice(0, 200)
-}
 
-function normalizeNetworkResourcePage(page) {
-  const normalized = { ...page }
-  if (Array.isArray(normalized.episodes)) {
-    normalized.episodes = normalized.episodes.slice(0, 2000).map(episode => {
-      if (!episode || typeof episode !== 'object' || Array.isArray(episode)) return episode
-      const rawHeaders = episode.httpHeaders && typeof episode.httpHeaders === 'object' && !Array.isArray(episode.httpHeaders)
-        ? episode.httpHeaders
-        : null
-      const httpHeaders = rawHeaders
-        ? {
-          referer: typeof rawHeaders.referer === 'string' ? rawHeaders.referer.trim() : '',
-          userAgent: typeof rawHeaders.userAgent === 'string' ? rawHeaders.userAgent.trim() : ''
-        }
-        : null
-      return httpHeaders
-        ? { ...episode, httpHeaders }
-        : { ...episode, httpHeaders: undefined }
-    })
-  }
-  return normalized
-}
 
-function normalizeRemoteAccess(remoteAccess) {
-  const remote = remoteAccess && typeof remoteAccess === 'object' && !Array.isArray(remoteAccess)
-    ? remoteAccess
-    : {}
-  const port = Number(remote.port)
-  return {
-    enabled: Boolean(remote.enabled),
-    port: Number.isInteger(port) && port > 0 && port <= 65535 ? port : 38127,
-    keepRunningInTray: remote.keepRunningInTray == null ? true : Boolean(remote.keepRunningInTray),
-    allowLegacyToken: Boolean(remote.allowLegacyToken)
-  }
-}
 
-function normalizeWindowClose(windowClose) {
-  const close = windowClose && typeof windowClose === 'object' && !Array.isArray(windowClose)
-    ? windowClose
-    : {}
-  return {
-    mode: ['ask', 'minimize', 'exit'].includes(close.mode) ? close.mode : 'ask',
-    rememberedAction: ['minimize', 'exit'].includes(close.rememberedAction) ? close.rememberedAction : '',
-    rememberedDate: typeof close.rememberedDate === 'string' ? close.rememberedDate : ''
-  }
-}
-
-function normalizePlugins(plugins) {
-  if (!plugins || typeof plugins !== 'object' || Array.isArray(plugins)) {
-    return {}
-  }
-
-  return Object.fromEntries(
-    Object.entries(plugins)
-      .filter(([pluginId, state]) => (
-        typeof pluginId === 'string' &&
-        pluginId.trim() &&
-        state &&
-        typeof state === 'object' &&
-        !Array.isArray(state)
-      ))
-      .map(([pluginId, state]) => [
-        pluginId.trim(),
-        {
-          ...(Object.hasOwn(state, 'enabled') ? { enabled: Boolean(state.enabled) } : {}),
-          ...(state.config && typeof state.config === 'object' && !Array.isArray(state.config) ? { config: state.config } : {}),
-          ...(typeof state.installedAt === 'string' ? { installedAt: state.installedAt } : {}),
-          ...(typeof state.updatedAt === 'string' ? { updatedAt: state.updatedAt } : {})
-        }
-      ])
-  )
-}
 
 function mergePlugins(currentPlugins, nextPlugins) {
   const current = normalizePlugins(currentPlugins)
@@ -426,38 +311,16 @@ function getSettingsSectionDefaults() {
   )
 }
 
-function getDefaultSettings() {
-  return {
-    theme: 'dark',
-    directories: [],
-    privateDirectories: [],
-    defaultDirectory: '',
-    favorites: [],
-    customTags: {},
-    hiddenTags: [],
-    networkResources: [],
-    downloadDirectories: [],
-    playbackStates: {},
-    playbackMode: 'order',
-    privacy: normalizePrivacy(),
-    remoteAccess: normalizeRemoteAccess(),
-    windowClose: normalizeWindowClose(),
-    plugins: normalizePlugins(),
-    ...getSettingsSectionDefaults()
-  }
-}
+function getDefaultSettings() { return settingsNormalizer.getDefaultSettings(getSettingsSectionDefaults()) }
 
 function normalizeRegisteredSettingsSections(settings) {
-  const normalized = {}
-  for (const [key, section] of settingsSections.entries()) {
-    normalized[key] = normalizeSettingsSectionValue(section, settings?.[key])
-  }
-  return normalized
+  return Object.fromEntries([...settingsSections].map(([key, section]) => [key, normalizeSettingsSectionValue(section, settings?.[key])]))
 }
 
-function registerSettingsSection(key, definition = {}) {
+function addSettingsSection(key, definition = {}) {
   const sectionKey = typeof key === 'string' ? key.trim() : ''
   if (!sectionKey) throw new Error('Settings section key is required')
+  if (['_settingsVersion', 'schemaVersion'].includes(sectionKey)) throw new Error('Settings snapshot/storage metadata is reserved')
   if (settingsSections.has(sectionKey)) {
     throw new Error(`Settings section already registered: ${sectionKey}`)
   }
@@ -468,13 +331,98 @@ function registerSettingsSection(key, definition = {}) {
     sanitizeForSave: definition.sanitizeForSave
   }
   settingsSections.set(sectionKey, section)
-  if (settingsCache) settingsCache = normalizeSettings(settingsCache)
+  settingsSectionsRevision++
+  return { sectionKey, section }
+}
+
+function registerSettingsSection(key, definition = {}) {
+  const { sectionKey, section } = addSettingsSection(key, definition)
+  if (settingsCache) settingsCache = ownSettingsSnapshot(normalizeSettings(cloneSettings(settingsCache)))
   return () => {
     if (settingsSections.get(sectionKey) === section) {
       settingsSections.delete(sectionKey)
-      if (settingsCache) settingsCache = normalizeSettings(settingsCache)
+      settingsSectionsRevision++
+      if (settingsCache) settingsCache = ownSettingsSnapshot(normalizeSettings(cloneSettings(settingsCache)))
     }
   }
+}
+
+async function normalizePreparedSettingsSections(prepared, keys, check, stable) {
+  let owned = prepared.value, text = prepared.text, id = prepared.id
+  if (keys.length) {
+    // Extension callbacks stay in their main-thread owner. Only their output is
+    // captured here; the full document remains the worker's canonical base.
+    getSettingsSectionDefaults()
+    const sections = normalizeRegisteredSettingsSections(prepared.sections)
+    check(); if (!stable()) return null
+    const changes = keys.map(key => {
+      const captured = JSON.parse(JSON.stringify({ [key]: sections[key] }))
+      return [key, Object.hasOwn(captured, key) ? captured[key] : undefined]
+    })
+    const encoded = await settingsJson.encode({ base: owned, baseId: id, changes })
+    check(); if (!stable()) return null
+    owned = { ...owned }
+    for (const field of encoded.fields) {
+      if (field.present) Object.defineProperty(owned, field.key, { value: field.value, enumerable: true, writable: true, configurable: true })
+      else delete owned[field.key]
+    }
+    text = encoded.text; id = encoded.id
+  }
+  return { owned, text, id }
+}
+
+function enqueueSettingsSectionPreparation(operation) {
+  const task = settingsWriteChain.catch(() => {}).then(operation)
+  settingsWriteChain = task.then(() => undefined, () => undefined)
+  return task
+}
+
+async function prepareRegisteredSettingsCache(check) {
+  for (let attempt = 0; attempt < 8; attempt++) {
+    check()
+    const base = getCachedSettings(), revision = settingsSectionsRevision, keys = [...settingsSections.keys()]
+    const stable = () => settingsCache === base && settingsSectionsRevision === revision
+    const canonical = settingsJsonSnapshots.get(base)
+    if (!canonical) throw Object.assign(Error('设置快照缺少规范数据'), { code: 'settings_invalid_document' })
+    settingsJson ||= createSettingsJson()
+    let prepared
+    try { prepared = await settingsJson.prepare(Buffer.from(canonical.text), { sectionKeys: keys, cwd: process.cwd() }) }
+    catch (error) { check(); throw error }
+    check(); if (!stable()) continue
+    const snapshot = await normalizePreparedSettingsSections(prepared, keys, check, stable)
+    check(); if (!snapshot || !stable()) continue
+    stampSettings(snapshot.owned)
+    settingsJsonSnapshots.set(snapshot.owned, { text: snapshot.text, id: snapshot.id })
+    settingsCache = snapshot.owned
+    return
+  }
+  throw Object.assign(Error('插件设置准备期间配置持续变化，请重试'), { code: 'settings_sections_changed' })
+}
+
+// Declared plugin sections use the existing settings queue without writing a
+// file. Legacy synchronous defineSection/registerSettingsSection stays intact.
+function registerSettingsSectionAsync(key, definition = {}) {
+  const filename = getSettingsPath(), generation = settingsSerializationGeneration
+  const ownsScope = () => generation === settingsSerializationGeneration && getSettingsPath() === filename
+  const check = () => {
+    if (generation !== settingsSerializationGeneration) throw Object.assign(Error('应用正在关闭'), { code: 'app_quitting' })
+    if (getSettingsPath() !== filename) throw Object.assign(Error('插件设置所属目录已改变'), { code: 'settings_sections_retired' })
+  }
+  return enqueueSettingsSectionPreparation(async () => {
+    check(); await initializeSettings(); check()
+    const { sectionKey, section } = addSettingsSection(key, definition)
+    try { await prepareRegisteredSettingsCache(check) }
+    catch (error) {
+      if (settingsSections.get(sectionKey) === section) { settingsSections.delete(sectionKey); settingsSectionsRevision++ }
+      throw error
+    }
+    let removal
+    return () => removal ||= enqueueSettingsSectionPreparation(async () => {
+      if (settingsSections.get(sectionKey) !== section) return
+      settingsSections.delete(sectionKey); settingsSectionsRevision++
+      if (ownsScope() && settingsCache) await prepareRegisteredSettingsCache(check)
+    })
+  })
 }
 
 function getPlaybackStateKey(filePath) {
@@ -514,55 +462,113 @@ function isSessionAllowedFile(filePath) {
 }
 
 function cloneSettings(settings) {
-  return JSON.parse(JSON.stringify(settings))
+  const clone = JSON.parse(settingsJsonSnapshots.get(settings)?.text ?? JSON.stringify(settings))
+  const version = snapshotVersions.get(settings)
+  if (version) snapshotVersions.set(clone, version)
+  return clone
 }
 
-function normalizeSettings(settings) {
-  const defaults = getDefaultSettings()
-  const parsed = settings && typeof settings === 'object' && !Array.isArray(settings)
-    ? settings
-    : {}
-  const directories = normalizeDirectoryList(parsed.directories)
-  const privateDirectories = normalizePrivateDirectories(parsed.privateDirectories, directories)
-  const publicDirectories = getPublicDirectories(directories, privateDirectories)
-  const defaultDirectory = typeof parsed.defaultDirectory === 'string' && publicDirectories.includes(parsed.defaultDirectory)
-    ? parsed.defaultDirectory
-    : publicDirectories[0] || ''
-
-  return {
-    ...defaults,
-    ...parsed,
-    directories,
-    privateDirectories,
-    defaultDirectory,
-    favorites: Array.isArray(parsed.favorites) ? parsed.favorites : defaults.favorites,
-    customTags: normalizeCustomTags(parsed.customTags),
-    hiddenTags: normalizeHiddenTags(parsed.hiddenTags),
-    networkResources: normalizeNetworkResources(parsed.networkResources),
-    downloadDirectories: normalizeDownloadDirectories(parsed.downloadDirectories),
-    playbackStates: normalizePlaybackStates(parsed.playbackStates),
-    playbackMode: ['order', 'shuffle', 'single'].includes(parsed.playbackMode) ? parsed.playbackMode : defaults.playbackMode,
-    privacy: normalizePrivacy(parsed.privacy),
-    remoteAccess: normalizeRemoteAccess(parsed.remoteAccess),
-    windowClose: normalizeWindowClose(parsed.windowClose),
-    plugins: normalizePlugins(parsed.plugins),
-    ...normalizeRegisteredSettingsSections(parsed)
-  }
+function cloneSettingsFields(settings, fields) {
+  validateSettingsFields(fields)
+  const selected = Object.fromEntries([...new Set(fields)].filter(key => Object.hasOwn(settings, key)).map(key => [key, settings[key]]))
+  const version = snapshotVersions.get(settings)
+  if (version) snapshotVersions.set(selected, version)
+  return cloneSettings(selected)
 }
+
+function loadSettingsFields(fields) { return cloneSettingsFields(getCachedSettings(), fields) }
+function validateSettingsFields(fields) {
+  if (!Array.isArray(fields) || fields.length > 512 || fields.some(key => typeof key !== 'string')) throw new TypeError('Invalid settings fields')
+  return fields
+}
+function loadSettingsMapKeys(field) {
+  if (!SETTINGS_MAP_FIELDS.includes(field)) throw new TypeError('Invalid settings map field')
+  return Object.keys(getCachedSettings()[field] || {})
+}
+function readPlaybackState(filePath) { return cloneSettings({ value: getPlaybackState(getCachedSettings().playbackStates, filePath) }).value }
+
+function normalizeSettings(settings) { return settingsNormalizer.normalizeSettings(settings, { sectionDefaults: getSettingsSectionDefaults(), normalizeSections: normalizeRegisteredSettingsSections }) }
 
 function readSettingsFromDisk() {
+  return normalizeSettings(settingsFile().read())
+}
+function settingsFile() {
+  const filename = getSettingsPath(), key = pathKey(filename)
+  if (!settingsFiles.has(key)) settingsFiles.set(key, createSettingsFile(filename, { onWarning: error => {
+    if (app?.getPath) require('electron-log').warn('[settings storage]', error.message)
+    else console.error('[settings storage]', error.message)
+  } }))
+  return settingsFiles.get(key)
+}
+async function recoverSettingsBackup(recoveryId) {
+  if (settingsRecoveryInFlight || settingsWriteInFlight || pendingSettingsWrite) throw Object.assign(Error('设置仍在使用，请重新启动后恢复'), { code: 'settings_busy' })
+  settingsRecoveryInFlight = true
+  const generation = settingsSerializationGeneration
+  const check = () => { if (generation !== settingsSerializationGeneration) throw Object.assign(Error('应用正在关闭'), { code: 'app_quitting' }) }
   try {
-    const raw = fs.readFileSync(getSettingsPath(), 'utf-8').replace(/^\uFEFF/, '')
-    return normalizeSettings(JSON.parse(raw))
-  } catch {
-    return getDefaultSettings()
+    const result = await settingsFile().recover(recoveryId, { check, decode: async bytes => {
+      check(); settingsJson ||= createSettingsJson()
+      const parsed = await settingsJson.prepare(bytes); check(); return parsed
+    } })
+    settingsCache = null; settingsCachePath = ''
+    return result
+  } finally { settingsRecoveryInFlight = false }
+}
+
+// Startup owns one asynchronous preparation. Synchronous compatibility readers
+// can still establish a newer cache; a late startup result never replaces it.
+function initializeSettings() {
+  const filename = getSettingsPath()
+  if (settingsCache && settingsCachePath === filename) return Promise.resolve()
+  if (settingsInitialization) {
+    if (settingsInitialization.filename === filename) return settingsInitialization.promise
+    return settingsInitialization.promise.catch(() => {}).then(() => initializeSettings())
   }
+  const request = { filename }, generation = settingsSerializationGeneration, cwd = process.cwd(), file = settingsFile()
+  const current = () => {
+    if (generation !== settingsSerializationGeneration) throw Object.assign(Error('应用正在关闭'), { code: 'app_quitting' })
+    if (getSettingsPath() !== filename) throw Object.assign(Error('启动设置所属目录已改变'), { code: 'settings_startup_retired' })
+  }
+  const alreadyLoaded = () => settingsCache && settingsCachePath === filename
+  settingsInitialization = request
+  request.promise = (async () => {
+    for (let attempt = 0; attempt < 8; attempt++) {
+      current()
+      if (alreadyLoaded()) return
+      const revision = settingsSectionsRevision, keys = [...settingsSections.keys()]
+      let prepared
+      try {
+        await file.readAsync(async bytes => {
+          current(); settingsJson ||= createSettingsJson()
+          prepared = await settingsJson.prepare(bytes, { sectionKeys: keys, cwd }); current()
+          return prepared
+        })
+      } catch (error) {
+        current()
+        if (alreadyLoaded()) return
+        throw error
+      }
+      current()
+      if (alreadyLoaded()) return
+      if (revision !== settingsSectionsRevision) continue
+      const snapshot = await normalizePreparedSettingsSections(prepared, keys, current,
+        () => !alreadyLoaded() && revision === settingsSectionsRevision)
+      current(); if (alreadyLoaded()) return
+      if (!snapshot || revision !== settingsSectionsRevision) continue
+      const { owned, text, id } = snapshot
+      stampSettings(owned); settingsJsonSnapshots.set(owned, { text, id })
+      settingsCache = owned; settingsCachePath = filename
+      return
+    }
+    throw Object.assign(Error('启动期间插件设置持续变化，请重新启动'), { code: 'settings_startup_changed' })
+  })().finally(() => { if (settingsInitialization === request) settingsInitialization = null })
+  return request.promise
 }
 
 function loadSettings() {
   const settingsPath = getSettingsPath()
   if (!settingsCache || settingsCachePath !== settingsPath) {
-    settingsCache = readSettingsFromDisk()
+    settingsCache = ownSettingsSnapshot(readSettingsFromDisk())
     settingsCachePath = settingsPath
   }
   return cloneSettings(settingsCache)
@@ -571,36 +577,21 @@ function loadSettings() {
 function getCachedSettings() {
   const settingsPath = getSettingsPath()
   if (!settingsCache || settingsCachePath !== settingsPath) {
-    settingsCache = readSettingsFromDisk()
+    settingsCache = ownSettingsSnapshot(readSettingsFromDisk())
     settingsCachePath = settingsPath
   }
   return settingsCache
 }
 
 function writeSettingsFileSync(settings) {
-  const settingsPath = getSettingsPath()
-  const dir = path.dirname(settingsPath)
-  if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true })
-  const tempPath = `${settingsPath}.${process.pid}.${++settingsWriteCounter}.tmp`
-  try {
-    fs.writeFileSync(tempPath, JSON.stringify(settings, null, 2))
-    fs.renameSync(tempPath, settingsPath)
-  } finally {
-    if (fs.existsSync(tempPath)) fs.rmSync(tempPath, { force: true })
-  }
+  settingsFile().writeSync(Buffer.from(JSON.stringify(settings, null, 2)))
 }
 
-async function writeSettingsFile(settings) {
-  const settingsPath = getSettingsPath()
-  const dir = path.dirname(settingsPath)
-  await fsp.mkdir(dir, { recursive: true })
-  const tempPath = `${settingsPath}.${process.pid}.${++settingsWriteCounter}.tmp`
-  try {
-    await fsp.writeFile(tempPath, JSON.stringify(settings, null, 2), 'utf-8')
-    await fsp.rename(tempPath, settingsPath)
-  } finally {
-    await fsp.rm(tempPath, { force: true }).catch(() => {})
-  }
+async function writeSettingsFile(settings, options) {
+  const encoded = await encodeSettings(settings, options)
+  await settingsFile().write(encoded.bytes)
+  if (settingsJsonSnapshots.has(settings)) settingsJsonSnapshots.set(settings, { text: encoded.text, id: encoded.id })
+  return encoded
 }
 
 function flushPendingSettingsWriteSync() {
@@ -609,7 +600,7 @@ function flushPendingSettingsWriteSync() {
     settingsWriteTimer = null
   }
   if (!pendingSettingsWrite && !settingsWriteInFlight) return
-  const settings = pendingSettingsWrite || settingsCache
+  const settings = settingsCache
   pendingSettingsWrite = null
   writeSettingsFileSync(settings)
   settingsWriteError = null
@@ -617,7 +608,6 @@ function flushPendingSettingsWriteSync() {
 
 function flushPendingSettingsWrite() {
   if (!pendingSettingsWrite) return settingsWriteChain
-  const settings = pendingSettingsWrite
   pendingSettingsWrite = null
   settingsWriteChain = settingsWriteChain
     .catch(() => {})
@@ -625,7 +615,7 @@ function flushPendingSettingsWrite() {
       settingsWriteError = null
       settingsWriteInFlight = true
       try {
-        await writeSettingsFile(settings)
+        await writeSettingsFile(getCachedSettings())
       } finally {
         settingsWriteInFlight = false
       }
@@ -661,8 +651,8 @@ function installSettingsFlushHooks() {
   process.on('exit', flushPendingSettingsWriteSync)
 }
 
-function scheduleSettingsWrite(settings) {
-  pendingSettingsWrite = cloneSettings(settings)
+function scheduleSettingsWrite() {
+  pendingSettingsWrite = true
   installSettingsFlushHooks()
   if (settingsWriteTimer) clearTimeout(settingsWriteTimer)
   settingsWriteTimer = setTimeout(() => {
@@ -671,67 +661,148 @@ function scheduleSettingsWrite(settings) {
   }, SETTINGS_WRITE_DEBOUNCE_MS)
 }
 
-function saveSettings(settings) {
-  const dir = path.dirname(getSettingsPath())
-  if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true })
-
-  const currentSettings = getCachedSettings()
+function mergeSettingsPatch(currentSettings, settings) {
   const merged = {
     ...currentSettings,
     ...settings
   }
+  merged.schemaVersion = CURRENT_SCHEMA_VERSION
+  delete merged._settingsVersion
   if (settings && Object.hasOwn(settings, 'plugins')) {
     merged.plugins = mergePlugins(currentSettings.plugins, settings.plugins)
   }
   for (const [key, section] of settingsSections.entries()) {
     if (settings && Object.hasOwn(settings, key)) {
-      merged[key] = mergeSettingsSectionValue(section, currentSettings[key], settings[key])
+      const currentSection = cloneSettings({ value: currentSettings[key] }).value
+      merged[key] = mergeSettingsSectionValue(section, currentSection, settings[key])
     }
   }
 
-  merged.directories = normalizeDirectoryList(merged.directories)
-  merged.privateDirectories = normalizePrivateDirectories(merged.privateDirectories, merged.directories)
-  const privateDirectoryKeys = new Set(merged.privateDirectories.map(pathKey))
-  for (const key of [...sessionPrivateDirectories]) {
-    if (!privateDirectoryKeys.has(key)) sessionPrivateDirectories.delete(key)
+  const changed = key => Object.hasOwn(settings || {}, key)
+  if (['directories', 'privateDirectories', 'defaultDirectory'].some(changed)) {
+    merged.directories = normalizeDirectoryList(merged.directories)
+    merged.privateDirectories = normalizePrivateDirectories(merged.privateDirectories, merged.directories)
+    const publicDirectories = getPublicDirectories(merged.directories, merged.privateDirectories)
+    if (!merged.defaultDirectory || !publicDirectories.includes(merged.defaultDirectory)) merged.defaultDirectory = publicDirectories[0] || ''
   }
-  const publicDirectories = getPublicDirectories(merged.directories, merged.privateDirectories)
-  if (!merged.defaultDirectory || !publicDirectories.includes(merged.defaultDirectory)) {
-    merged.defaultDirectory = publicDirectories[0] || ''
+  if (changed('favorites') && !Array.isArray(merged.favorites)) merged.favorites = []
+  for (const [key, normalize] of Object.entries({ customTags: normalizeCustomTags, customTagRevisions: normalizeTagRevisions,
+    tagMutationReceipts: normalizeTagReceipts, hiddenTags: normalizeHiddenTags, networkResources: normalizeNetworkResources,
+    downloadDirectories: normalizeDownloadDirectories, playbackStates: normalizePlaybackStates, privacy: normalizePrivacy,
+    remoteAccess: normalizeRemoteAccess, windowClose: normalizeWindowClose, plugins: normalizePlugins })) {
+    if (changed(key) && (settingsSections.has(key) || normalizedSettingsPatchFields.get(settings)?.get(key) !== normalize)) merged[key] = normalize(merged[key])
   }
-  if (!Array.isArray(merged.favorites)) merged.favorites = []
-  merged.customTags = normalizeCustomTags(merged.customTags)
-  merged.hiddenTags = normalizeHiddenTags(merged.hiddenTags)
-  merged.networkResources = normalizeNetworkResources(merged.networkResources)
-  merged.downloadDirectories = normalizeDownloadDirectories(merged.downloadDirectories)
-  merged.playbackStates = normalizePlaybackStates(merged.playbackStates)
-  merged.playbackMode = ['order', 'shuffle', 'single'].includes(merged.playbackMode) ? merged.playbackMode : 'order'
-  merged.privacy = normalizePrivacy(merged.privacy)
-  merged.remoteAccess = normalizeRemoteAccess(merged.remoteAccess)
-  merged.windowClose = normalizeWindowClose(merged.windowClose)
-  merged.plugins = normalizePlugins(merged.plugins)
-  Object.assign(merged, normalizeRegisteredSettingsSections(merged))
+  if (changed('playbackMode')) merged.playbackMode = ['order', 'shuffle', 'single'].includes(merged.playbackMode) ? merged.playbackMode : 'order'
+  for (const [key, section] of settingsSections) if (changed(key)) merged[key] = normalizeSettingsSectionValue(section, merged[key])
 
-  settingsCache = cloneSettings(merged)
+  return merged
+}
+
+function publishSettingsCache(merged, settings, encoded) {
+  const prepared = encoded?.snapshot ? { text: encoded.text, owned: encoded.snapshot } : settingsSnapshot(merged, encoded?.text)
+  const { text, owned } = prepared
+  stampSettings(owned)
+  settingsJsonSnapshots.set(owned, { text, id: encoded?.id ?? null })
+  settingsCache = owned
   settingsCachePath = getSettingsPath()
-  scheduleSettingsWrite(settingsCache)
 
   if (Object.hasOwn(settings, 'directories') || Object.hasOwn(settings, 'privateDirectories')) {
-    directoryChangeHandler?.(merged.directories)
+    const privateDirectoryKeys = new Set(merged.privateDirectories.map(pathKey))
+    for (const key of [...sessionPrivateDirectories]) {
+      if (!privateDirectoryKeys.has(key)) sessionPrivateDirectories.delete(key)
+    }
+    directoryChangeHandler?.([...owned.directories])
   }
+  return owned
+}
 
-  notifySettingsChanged(cloneSettings(merged))
-  return cloneSettings(merged)
+function saveSettings(settings) {
+  if (settingsRecoveryInFlight) throw Object.assign(Error('设置正在恢复'), { code: 'settings_busy' })
+  const previous = getCachedSettings()
+  const merged = mergeSettingsPatch(previous, settings)
+  const committed = publishSettingsCache(merged, settings)
+  scheduleSettingsWrite()
+  notifySettingsChanged(committed, Object.keys(settings || {}), previous)
+  return cloneSettings(committed)
+}
+
+// 所有异步配置提交和媒体修改共享落盘队列。更新函数在获得队列后
+// 读取最新状态，写入成功才发布媒体数据；失败不改变缓存或广播。
+// 异步准备和最多三次重试也由同一队列持有；更新函数本身保持同步。
+function updateSettingsAndFlush(update, options) {
+  return enqueueSettingsUpdate(update, options)
+}
+
+function enqueueSettingsUpdate(update, { prepare, retryPreparation, readOnly = false, returnSettings = true, returnVersion = false,
+  fields, prepareFields = fields } = {}, directMutation) {
+  // Capture selection before queueing, just like direct mutation intent.
+  const selected = fields === undefined ? undefined : [...validateSettingsFields(fields)]
+  const preparationSelection = prepareFields === undefined ? undefined : [...validateSettingsFields(prepareFields)]
+  installSettingsFlushHooks()
+  const task = settingsWriteChain.catch(() => {}).then(async () => {
+    if (settingsRecoveryInFlight) throw Object.assign(Error('设置正在恢复'), { code: 'settings_busy' })
+    settingsWriteInFlight = true
+    if (!readOnly) settingsWriteError = null
+    try {
+      let current, mutation, base
+      for (let attempt = 0; ; attempt++) {
+        try {
+          const prepared = prepare ? await prepare(preparationSelection === undefined ? loadSettings() : loadSettingsFields(preparationSelection)) : undefined
+          base = getCachedSettings()
+          current = directMutation ? undefined : selected === undefined ? cloneSettings(base) : cloneSettingsFields(base, selected)
+          mutation = directMutation || update(current, prepared)
+          break
+        } catch (error) {
+          if (!prepare || attempt >= 2 || !retryPreparation?.(error)) throw error
+        }
+      }
+      if (!mutation || typeof mutation.then === 'function') {
+        throw new Error('Settings transaction must return a synchronous mutation')
+      }
+      const patch = captureSettingsPatch(mutation.patch || {})
+      if (readOnly && Object.keys(patch).length) throw new Error('Read-only settings operation cannot commit a patch')
+      if (!Object.keys(patch).length) return { ...(returnSettings ? { settings: cloneSettings(selected === undefined ? current || base : base) } : {}),
+        ...(returnVersion ? { settingsVersion: getSettingsSnapshotVersion(base) } : {}), value: mutation.value }
+      const draft = mergeSettingsPatch(base, patch)
+      const encoded = await writeSettingsFile(draft, { base, patch })
+      // 兼容同步内部配置写入：在落盘期间发生的其他字段更新不能丢失。
+      const latest = getCachedSettings()
+      const pathPatch = ['directories', 'privateDirectories', 'defaultDirectory', 'downloadDirectories'].some(key => Object.hasOwn(patch, key))
+      const rebased = latest !== base || pathPatch
+      const committed = rebased ? mergeSettingsPatch(latest, patch) : draft
+      const committedText = latest === base && pathPatch ? JSON.stringify(committed) : undefined
+      const sameEncoded = committed === draft || committedText === encoded.text
+      const published = publishSettingsCache(committed, patch, sameEncoded ? encoded : committedText === undefined ? undefined : { text: committedText })
+      if (latest !== base || (pathPatch && !sameEncoded)) scheduleSettingsWrite()
+      notifySettingsChanged(published, Object.keys(patch), latest, sameEncoded)
+      return { ...(returnSettings ? { settings: cloneSettings(published) } : {}),
+        ...(returnVersion ? { settingsVersion: getSettingsSnapshotVersion(published) } : {}), value: mutation.value }
+    } finally {
+      settingsWriteInFlight = false
+    }
+  })
+  settingsWriteChain = task.then(() => undefined, () => undefined)
+  return task
+}
+
+function commitSettingsPatch(settings, options) {
+  const patch = captureSettingsPatch(settings)
+  return enqueueSettingsUpdate(null, options, { patch })
 }
 
 async function saveSettingsAndFlush(settings) {
-  const saved = saveSettings(settings)
-  await flushSettingsWrites()
-  return saved
+  return (await commitSettingsPatch(settings)).settings
 }
 
+function getMediaAccessSettings() {
+  const settings = getCachedSettings()
+  return { directories: [...settings.directories], privateDirectories: [...settings.privateDirectories] }
+}
+
+function getRemoteAccessSettings() { return { ...getCachedSettings().remoteAccess } }
+
 function getAllowedVideoDirectories() {
-  const settings = loadSettings()
+  const settings = getCachedSettings()
   const seen = new Set()
   return [
     ...normalizeDirectoryList(settings.directories),
@@ -747,7 +818,7 @@ function getAllowedVideoDirectories() {
 }
 
 function getAllowedDownloadDirectories() {
-  const settings = loadSettings()
+  const settings = getCachedSettings()
   const seen = new Set()
   return [
     ...normalizeDirectoryList(settings.directories),
@@ -764,18 +835,23 @@ function getAllowedDownloadDirectories() {
 }
 
 function getPublicVideoDirectories() {
-  const settings = loadSettings()
-  const privateKeys = new Set([
-    ...normalizePrivateDirectories(settings.privateDirectories, settings.directories).map(pathKey),
+  const settings = getCachedSettings()
+  const privateRoots = [
+    ...normalizePrivateDirectories(settings.privateDirectories, settings.directories),
     ...sessionPrivateDirectories
-  ])
+  ].map(resolvePathForAccess)
   return getAllowedVideoDirectories()
-    .filter(dir => !privateKeys.has(pathKey(dir)))
+    .filter(dir => !privateRoots.some(root => isPathInside(root, dir)))
 }
 
 function sanitizeSettingsForSave(settings) {
-  const current = loadSettings()
+  const fields = Object.keys(settings || {})
+  const current = fields.length > 500 ? loadSettings() : loadSettingsFields([
+    ...fields, 'directories', 'privateDirectories', 'downloadDirectories', 'mpvPath'
+  ])
   const sanitized = { ...settings }
+  delete sanitized._settingsVersion
+  delete sanitized.schemaVersion
 
   if (Object.hasOwn(sanitized, 'directories')) {
     const allowedDirectoryKeys = new Set([
@@ -894,13 +970,25 @@ module.exports = {
   sessionAllowedFiles,
   setDirectoryChangeHandler,
   onSettingsChanged,
+  onSettingsCommitted,
   registerSettingsSection,
+  registerSettingsSectionAsync,
   loadSettings,
+  captureRendererSettings,
+  initializeSettings,
+  recoverSettingsBackup,
+  loadSettingsFields,
+  loadSettingsMapKeys,
+  readPlaybackState,
   saveSettings,
   saveSettingsAndFlush,
+  commitSettingsPatch,
+  updateSettingsAndFlush,
   flushSettingsWrites,
+  disposeSettingsSerialization,
   sanitizeSettingsForSave,
   sanitizeSettingsForRenderer,
+  getSettingsSnapshotVersion,
   normalizeDirectoryList,
   normalizePrivateDirectories,
   normalizePrivacy,
@@ -925,6 +1013,8 @@ module.exports = {
   addSessionAllowedFile,
   isSessionAllowedFile,
   getAllowedVideoDirectories,
+  getMediaAccessSettings,
+  getRemoteAccessSettings,
   getAllowedDownloadDirectories,
   getPublicVideoDirectories
 }

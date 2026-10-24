@@ -31,7 +31,7 @@ export function SearchScreen({ navigation, device, videos }: Props) {
   return (
     <View style={styles.shell}>
       <View style={styles.header}>
-        <Pressable style={styles.backButton} onPress={() => navigation.navigate({ name: 'library', device })}>
+        <Pressable style={styles.backButton} accessibilityRole="button" accessibilityLabel="返回视频库" onPress={() => { if (!navigation.back()) navigation.navigate({ name: 'library', device }) }}>
           <ArrowLeft color={colors.text} size={22} />
         </Pressable>
         <View style={styles.searchBox}>
@@ -43,6 +43,7 @@ export function SearchScreen({ navigation, device, videos }: Props) {
             placeholder="搜索名称、分组、标签"
             placeholderTextColor={colors.subtle}
             style={styles.input}
+            accessibilityLabel="搜索名称、分组和标签"
           />
         </View>
       </View>
@@ -82,9 +83,9 @@ const createStyles = (colors: ReturnType<typeof useTheme>['colors']) => StyleShe
     borderBottomColor: colors.border
   },
   backButton: {
-    width: 44,
-    height: 44,
-    borderRadius: 8,
+    width: 48,
+    height: 48,
+    borderRadius: 14,
     backgroundColor: colors.surface,
     borderWidth: 1,
     borderColor: colors.border,
@@ -93,8 +94,8 @@ const createStyles = (colors: ReturnType<typeof useTheme>['colors']) => StyleShe
   },
   searchBox: {
     flex: 1,
-    height: 44,
-    borderRadius: 8,
+    minHeight: 48,
+    borderRadius: 14,
     backgroundColor: colors.surface,
     borderWidth: 1,
     borderColor: colors.border,
@@ -105,6 +106,8 @@ const createStyles = (colors: ReturnType<typeof useTheme>['colors']) => StyleShe
   },
   input: {
     flex: 1,
+    minWidth: 0,
+    paddingVertical: 8,
     color: colors.text,
     fontSize: 16
   },

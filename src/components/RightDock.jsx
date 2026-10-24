@@ -1,11 +1,13 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { useMediaQuery } from '../hooks/useMediaQuery'
+import { useOverlayFocus } from '../hooks/useOverlayFocus'
 
 /**
  * Agent图标定义 - 每个插件对应一个图标
  */
 const AGENT_ICONS = {
   'video-analysis': (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
       <path d="M2 12.5a2.5 2.5 0 0 1 2.5-2.5h9a2.5 2.5 0 0 1 2.5 2.5v4a2.5 2.5 0 0 1-2.5 2.5h-9A2.5 2.5 0 0 1 2 16.5v-4z" />
       <path d="M18 10l4-2v8l-4-2" />
       <path d="M7 7h.01" />
@@ -53,6 +55,8 @@ export default function RightDock({ open, tabs, activeTab, unreadTabs, onClose, 
   const [isDragOver, setIsDragOver] = useState(false)
   const wrapperRef = useRef(null)
   const panelRef = useRef(null)
+  const compact = useMediaQuery('(max-width: 1080px)')
+  useOverlayFocus(wrapperRef, compact && open, onClose)
 
   // 已挂载过的 Tab 保持挂载（display:none 隐藏而非卸载），
   // 避免 DownloadCenter/AISearchPanel 等面板切换后本地状态丢失。
@@ -75,6 +79,9 @@ export default function RightDock({ open, tabs, activeTab, unreadTabs, onClose, 
   // 键盘快捷键：Ctrl/Cmd + 1/2 切换插件，Esc 关闭
   useEffect(() => {
     const handleKeyDown = (e) => {
+      if (e.defaultPrevented) return
+      const modal = document.activeElement?.closest?.('[aria-modal="true"]')
+      if (modal && modal !== wrapperRef.current) return
       if (!tabs.length) return
       const isMod = e.ctrlKey || e.metaKey
       if (!isMod) {
@@ -148,8 +155,15 @@ export default function RightDock({ open, tabs, activeTab, unreadTabs, onClose, 
   const activeContent = tabs.find(tab => tab.id === activeTab)?.content
 
   return (
+    <>
+    {compact && open && <button className="workspace-overlay-scrim" data-overlay-backdrop="" tabIndex={-1} aria-label="收起面板" onClick={onClose} />}
     <div
       ref={wrapperRef}
+      data-compact={compact}
+      role={compact && open ? 'dialog' : undefined}
+      aria-modal={compact && open ? true : undefined}
+      aria-label={compact && open ? AGENT_LABELS[activeTab] || '工具面板' : undefined}
+      tabIndex={compact && open ? -1 : undefined}
       className={`right-dock-wrapper${open ? ' open' : ''}${isDragOver ? ' drag-over' : ''}`}
       onDragEnter={handleDragEnter}
       onDragOver={handleDragOver}
@@ -166,6 +180,7 @@ export default function RightDock({ open, tabs, activeTab, unreadTabs, onClose, 
             onClick={() => handleActivityClick(tab.id)}
             title={`${AGENT_LABELS[tab.id] || tab.label} (${index + 1})`}
             aria-label={AGENT_LABELS[tab.id] || tab.label}
+            aria-expanded={activeTab === tab.id && open}
           >
             {AGENT_ICONS[tab.id] || <span>{tab.label[0]}</span>}
             {activeTab === tab.id && open && <div className="activity-active-indicator" />}
@@ -177,7 +192,7 @@ export default function RightDock({ open, tabs, activeTab, unreadTabs, onClose, 
         <button
           className="right-dock-add-plugin-btn"
           type="button"
-          onClick={onAddPlugin}
+          onClick={() => { onClose(); onAddPlugin?.() }}
           title="添加插件"
           aria-label="添加插件"
         >
@@ -191,6 +206,8 @@ export default function RightDock({ open, tabs, activeTab, unreadTabs, onClose, 
       {/* 插件面板 */}
       <div
         ref={panelRef}
+        inert={!open}
+        aria-hidden={!open}
         className={`right-dock-panel${open ? ' open' : ''}${isDragOver ? ' drag-target' : ''}`}
       >
         {open && activeContent ? (
@@ -249,5 +266,6 @@ export default function RightDock({ open, tabs, activeTab, unreadTabs, onClose, 
         ) : null}
       </div>
     </div>
+    </>
   )
 }

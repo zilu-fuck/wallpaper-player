@@ -1,0 +1,877 @@
+{
+  "date": "2026-10-23T15:13:34.480Z",
+  "status": "Local Windows desktop resource and concurrent response gates passed; full R6/R7/R8 remain active",
+  "requestScope": "User made the computer available again; authorized foreground QA resumed with normal stacking, never always-on-top. Other user app sessions were not operated.",
+  "productionChangesThisStage": [],
+  "build": {
+    "passed": true,
+    "directory": "E:\\wallpaper播放器\\release\\windows-1.5.1-681574df-1a6a-4e26-baed-c87963ce8c67",
+    "version": "1.5.1",
+    "productionSourceChanges": [
+      "main/settings.js",
+      "main/application/settings-reader.js",
+      "main/application/settings-read-worker.js",
+      "main/repositories/settings-renderer.js",
+      "main/application/settings-broadcast.js",
+      "main/ipc/settings.js",
+      "preload.js",
+      "src/services/settings-client.js",
+      "packages/contracts/src/settings-feed.ts",
+      "main/application/player-service.js",
+      "main/ipc/player.js",
+      "main/mpv-integration.js",
+      "main/mpv.js",
+      "main/ipc/network-resource-service.js"
+    ],
+    "qaWrapperAbsent": true,
+    "archive": {
+      "file": "E:\\wallpaper播放器\\release\\windows-1.5.1-681574df-1a6a-4e26-baed-c87963ce8c67\\win-unpacked\\resources\\app.asar",
+      "bytes": 16524876,
+      "sha256": "848aa4e8a6d3a140a76fb4dfbb19de98a0984e478ec5721af05e23af3e1d7d4a",
+      "sha512": "b4XiQIJrHODkq7NNLaoelMWujXeE/qc2QCYymlxM4FXT9KQGNrwvS7tz7yNYHKCsb6fv++SwtCs+stv7oP9c1A=="
+    },
+    "embedded": [
+      "main/application/confirm.js",
+      "main/application/download-service.js",
+      "main/application/download-tasks.js",
+      "main/application/extract-mpv.ps1",
+      "main/application/library-service.js",
+      "main/application/media-mutation-paths.js",
+      "main/application/media-mutations.js",
+      "main/application/media-work-service.js",
+      "main/application/mpv-installer.js",
+      "main/application/mpv-version-cache.js",
+      "main/application/player-service.js",
+      "main/application/resource-scheduler.js",
+      "main/application/settings-broadcast.js",
+      "main/application/settings-json-worker.js",
+      "main/application/settings-json.js",
+      "main/application/settings-read-worker.js",
+      "main/application/settings-reader.js",
+      "main/application/settings-startup.js",
+      "main/application/transcode-service.js",
+      "main/constants.js",
+      "main/download-manager.js",
+      "main/download-xunlei.js",
+      "main/exec.js",
+      "main/index.js",
+      "main/ip-utils.js",
+      "main/ipc/app-dialogs.js",
+      "main/ipc/downloads.js",
+      "main/ipc/files.js",
+      "main/ipc/media-data.js",
+      "main/ipc/media.js",
+      "main/ipc/network-resource-service.js",
+      "main/ipc/network-resources.js",
+      "main/ipc/player.js",
+      "main/ipc/plugins.js",
+      "main/ipc/privacy.js",
+      "main/ipc/remote.js",
+      "main/ipc/settings.js",
+      "main/ipc/updater.js",
+      "main/ipc/window-shell.js",
+      "main/ipc-channels.js",
+      "main/ipc.js",
+      "main/media-pressure.js",
+      "main/mpv-host.js",
+      "main/mpv-integration.js",
+      "main/mpv.js",
+      "main/network-resource-parser.js",
+      "main/paths.js",
+      "main/plugins/builtin.js",
+      "main/plugins/capabilities.js",
+      "main/plugins/core-api.js",
+      "main/plugins/index.js",
+      "main/plugins/loader.js",
+      "main/plugins/manifest.js",
+      "main/plugins/official.js",
+      "main/plugins/registry.js",
+      "main/portable-user-data.js",
+      "main/process-lifecycle.js",
+      "main/rate-limiter.js",
+      "main/remote/handlers/desktop.js",
+      "main/remote/handlers/info.js",
+      "main/remote/handlers/library.js",
+      "main/remote/handlers/media.js",
+      "main/remote/handlers/network-resources.js",
+      "main/remote/handlers/tags.js",
+      "main/remote/handlers/transcode.js",
+      "main/remote/http-utils.js",
+      "main/remote/identity.js",
+      "main/remote/index.js",
+      "main/remote/json-responses.js",
+      "main/remote/media-mutations.js",
+      "main/remote/network.js",
+      "main/remote/request-lifecycle.js",
+      "main/remote/server.js",
+      "main/remote/streaming.js",
+      "main/remote/transcode-cache.js",
+      "main/remote/transcode.js",
+      "main/remote/video-index.js",
+      "main/repositories/settings-file.js",
+      "main/repositories/settings-renderer.js",
+      "main/repositories/tag-state.js",
+      "main/repositories/user-media.js",
+      "main/scanner.js",
+      "main/security/ipc-sender.js",
+      "main/security/ipc.js",
+      "main/security/media-access.js",
+      "main/security/privacy-password.js",
+      "main/settings.js",
+      "main/thumbnail.js",
+      "main/updater.js",
+      "main/user-data.js",
+      "main/video-metadata.js",
+      "main/window.js",
+      "main/ytdlp-service.js",
+      "dist/assets/AISearchPanel-f5jPGUQ0.js",
+      "dist/assets/app-icon-CdBj8JsL.svg",
+      "dist/assets/DownloadCenter-DwaAhLnS.js",
+      "dist/assets/index-D6oHSdmM.js",
+      "dist/assets/index-SE4eTmbk.css",
+      "dist/assets/NetworkResourceLibrary-BELFGnlf.js",
+      "dist/assets/Settings-4cX7FzuX.js",
+      "dist/assets/useDownloadStateObserver-Dk65bcIb.js",
+      "dist/assets/VideoAnalysisSidebar-BrjsUOgC.js",
+      "dist/index.html",
+      "packages/contracts/dist/index.js",
+      "packages/contracts/dist/schema.js",
+      "packages/contracts/dist/settings-feed.js",
+      "packages/contracts/package.json",
+      "packages/domain/dist/index.js",
+      "packages/domain/package.json",
+      "build/icon.png",
+      "main.js",
+      "preload.js"
+    ],
+    "vendor": [
+      "vendor/aria2/aria2c.exe",
+      "vendor/aria2/AUTHORS",
+      "vendor/aria2/ChangeLog",
+      "vendor/aria2/COPYING",
+      "vendor/aria2/LICENSE.OpenSSL",
+      "vendor/aria2/NEWS",
+      "vendor/aria2/README.html",
+      "vendor/aria2/README.mingw",
+      "vendor/ffmpeg/bin/ffmpeg.exe",
+      "vendor/ffmpeg/bin/ffplay.exe",
+      "vendor/ffmpeg/bin/ffprobe.exe",
+      "vendor/ffmpeg/LICENSE",
+      "vendor/ffmpeg/presets/libvpx-1080p.ffpreset",
+      "vendor/ffmpeg/presets/libvpx-1080p50_60.ffpreset",
+      "vendor/ffmpeg/presets/libvpx-360p.ffpreset",
+      "vendor/ffmpeg/presets/libvpx-720p.ffpreset",
+      "vendor/ffmpeg/presets/libvpx-720p50_60.ffpreset",
+      "vendor/ffmpeg/README.txt",
+      "vendor/mpv/mpv-register.bat",
+      "vendor/mpv/mpv-unregister.bat",
+      "vendor/mpv/mpv.com",
+      "vendor/mpv/mpv.exe",
+      "vendor/mpv/vulkan-1.dll",
+      "vendor/yt-dlp/yt-dlp.exe"
+    ],
+    "assets": [
+      {
+        "file": "Wallpaper-Player-Setup-1.5.1.exe",
+        "role": "installer",
+        "bytes": 232522468,
+        "sha256": "6719856378d692f6d6bc6b04b155756123a2df9495ad89f808d75e7a1c9ea091",
+        "sha512": "EB3cMON+dxvbE+Yvu8wYZUcupEiPsmKA+B+6n864RgtNd8YnpoFMHtfmFtoJoZMdF0CJrL1ygf2+grDylocAkg==",
+        "bootstrapArch": "ia32",
+        "productVersion": "1.5.1",
+        "signing": {
+          "status": "NotSigned",
+          "certificateSha256": null
+        }
+      },
+      {
+        "file": "Wallpaper-Player-1.5.1.exe",
+        "role": "portable",
+        "bytes": 232077963,
+        "sha256": "55c2bc5bf10baee346caaa602d6dc88622c4b1bc53a7e3e8da65a38d8fcb6d1c",
+        "sha512": "kWN1+MlEPzy97SxjNzrVYh/cHyjxUDmP4ATJohAePg5PKjYSmOjmZ1k7dLD4j4Ziu3/Ai+ChSsrOQCc311plsg==",
+        "bootstrapArch": "ia32",
+        "productVersion": "1.5.1",
+        "signing": {
+          "status": "NotSigned",
+          "certificateSha256": null
+        }
+      },
+      {
+        "file": "Wallpaper-Player-Setup-1.5.1.exe.blockmap",
+        "role": "blockmap",
+        "bytes": 242996,
+        "sha256": "c8232a6c7789bf866c10e1778d36f10a2f7d54c1766c31b1ffd625c8803070cf",
+        "sha512": "R+VGjpzkuooT8k9UV0hUCTBBL1WY9RI4Ch0NAFpO6Nl3Cp/M2okmkqhOmt1MgPDUI/77mGwxHIJvKSuDNOcFdw=="
+      },
+      {
+        "file": "latest.yml",
+        "role": "desktop-update-metadata",
+        "bytes": 361,
+        "sha256": "ceecaa1f5792c191f5086b45358c9c33e00122c76132e842e571908e9ebd7969",
+        "sha512": "lg84994jbC94NeSvlyYKor7uahC2QcZcYMHWjxM5S8zn4lCH9ACstaqgzyK0MARYl+Nkgb6ewK0Bc2Rh77zOig=="
+      },
+      {
+        "file": "Wallpaper-Player-Plugin-video-analysis-1.0.0.zip",
+        "source": "plugins/Wallpaper-Player-Plugin-video-analysis-1.0.0.zip",
+        "role": "plugin",
+        "pluginId": "video-analysis",
+        "version": "1.0.0",
+        "bytes": 570218532,
+        "sha256": "365c2f5ccbec6afe7df5ce4b5c5df1699728cac113884abd48898d8209a5502a",
+        "sha512": "5W7hIMUaK+frnE+0/87KhyfC6BKbFTT2R3GgW+TCtG7Z037HNRooT/RVGrJTOMq5eDFEBHKhlSiVZQ9vMI838w=="
+      },
+      {
+        "file": "Wallpaper-Player-Plugin-ai-search-0.1.0.zip",
+        "source": "plugins/Wallpaper-Player-Plugin-ai-search-0.1.0.zip",
+        "role": "plugin",
+        "pluginId": "ai-search",
+        "version": "0.1.0",
+        "bytes": 2955069,
+        "sha256": "464e129ebb9a4731fff800c26c6e4c94ddbe33fbd1699486c166d9e112a97fc8",
+        "sha512": "rKd4RQyHFHEIADm+H3KQddNRMuu2UbSuiK4OK+hkfrp3JV36mLcSdLA0UNlAPW+7L5X1xi5kiTVNPmq1lDzOKw=="
+      },
+      {
+        "file": "Wallpaper-Player-Plugin-agent-bridge-0.1.0.zip",
+        "source": "plugins/Wallpaper-Player-Plugin-agent-bridge-0.1.0.zip",
+        "role": "plugin",
+        "pluginId": "agent-bridge",
+        "version": "0.1.0",
+        "bytes": 1093,
+        "sha256": "9f499408c282a144ffe411648d476fd4e36bd010c6e8974be3b9fd16460bed1a",
+        "sha512": "W5qWvlCSHQT8RlE31UF1e06dN3162tSZVhs7nqyFBhFLJdcN7Z8rE2WDw6ZMjQIygO89K/Xbuev/TJY+ImfSqg=="
+      }
+    ],
+    "originalData": 42,
+    "historicalArtifacts": 8,
+    "oldQaArtifactsPreserved": true,
+    "releasePublished": false
+  },
+  "signatures": [
+    {
+      "status": "NotSigned",
+      "file": "E:\\wallpaper播放器\\release\\windows-1.5.1-681574df-1a6a-4e26-baed-c87963ce8c67\\Wallpaper-Player-Setup-1.5.1.exe"
+    },
+    {
+      "status": "NotSigned",
+      "file": "E:\\wallpaper播放器\\release\\windows-1.5.1-681574df-1a6a-4e26-baed-c87963ce8c67\\Wallpaper-Player-1.5.1.exe"
+    },
+    {
+      "status": "NotSigned",
+      "file": "E:\\wallpaper播放器\\release\\windows-1.5.1-681574df-1a6a-4e26-baed-c87963ce8c67\\win-unpacked\\Wallpaper Player.exe"
+    }
+  ],
+  "setup": {
+    "id": "3ce30520",
+    "root": "E:\\wallpaper播放器",
+    "base": "E:/wpres10k-3ce30520",
+    "runtime": "E:\\wpres10k-3ce30520\\runtime-current-95a1896a",
+    "data": "E:\\wpres10k-3ce30520\\runtime-current-95a1896a\\Data",
+    "executable": "E:\\wpres10k-3ce30520\\runtime-current-95a1896a\\Wallpaper-Player.exe",
+    "artifact": {
+      "file": "E:\\wallpaper播放器\\release\\windows-1.5.1-681574df-1a6a-4e26-baed-c87963ce8c67\\Wallpaper-Player-1.5.1.exe",
+      "sha256": "55c2bc5bf10baee346caaa602d6dc88622c4b1bc53a7e3e8da65a38d8fcb6d1c"
+    },
+    "archive": {
+      "file": "E:\\wallpaper播放器\\release\\windows-1.5.1-681574df-1a6a-4e26-baed-c87963ce8c67\\win-unpacked\\resources\\app.asar",
+      "bytes": 16524876,
+      "sha256": "848aa4e8a6d3a140a76fb4dfbb19de98a0984e478ec5721af05e23af3e1d7d4a",
+      "sha512": "b4XiQIJrHODkq7NNLaoelMWujXeE/qc2QCYymlxM4FXT9KQGNrwvS7tz7yNYHKCsb6fv++SwtCs+stv7oP9c1A=="
+    },
+    "mediaDirectory": "E:\\wpres10k-3ce30520\\media",
+    "media": [
+      {
+        "file": "E:\\wpres10k-3ce30520\\media\\00000-landscape.mp4",
+        "width": 1920,
+        "height": 1080,
+        "audio": "AAC stereo silence",
+        "video": "H26430fps",
+        "sha256": "286fde20e163ec77b49fc8dcf80a72f11220d20757d1ddccef015bb7d700d5ee",
+        "source": "E:\\wpres-c04aa8bb\\media\\landscape.mp4"
+      },
+      {
+        "file": "E:\\wpres10k-3ce30520\\media\\00001-portrait.mp4",
+        "width": 720,
+        "height": 1280,
+        "audio": "AAC stereo silence",
+        "video": "H26430fps",
+        "sha256": "d286b52cbfb235526f85c803f821b20c3e615e6bace8653f7891f6e031f0c38f",
+        "source": "E:\\wpres-c04aa8bb\\media\\portrait.mp4"
+      }
+    ],
+    "libraryCount": 10000,
+    "corpus": "10000 distinct NTFS paths in ten groups, each with two valid H264/AAC clip copies and 500 hardlinks per copy; original media has no hardlink to this fixture",
+    "date": "2026-10-23T14:50:14.645Z",
+    "previousFixture": ".tmp/refactor-tests/r6-native-10k-current",
+    "note": "Current source distribution; new sibling Data; old media corpus reused read-only; normal window, never always-on-top"
+  },
+  "environment": {
+    "date": "2026-10-23T15:12:29.9482237Z",
+    "capture": "Post-run hardware/environment inventory; run window bounds and actual visibility are also recorded in each timed sample",
+    "os": {
+      "ramBytes": 34274947072,
+      "build": "26300",
+      "version": "10.0.26300",
+      "caption": "Microsoft Windows 11 专业版"
+    },
+    "cpu": [
+      {
+        "Name": "AMD Ryzen 7 5800X 8-Core Processor             ",
+        "NumberOfCores": 8,
+        "NumberOfLogicalProcessors": 16
+      }
+    ],
+    "disk": [
+      {
+        "FriendlyName": "ST1000DM003-1SB102",
+        "BusType": "SATA",
+        "PartitionStyle": "MBR",
+        "Size": 1000204886016
+      },
+      {
+        "FriendlyName": "ST4000VX000-2AG166",
+        "BusType": "SATA",
+        "PartitionStyle": "GPT",
+        "Size": 4000787030016
+      },
+      {
+        "FriendlyName": "HYV1TBXX3(PRO)",
+        "BusType": "NVMe",
+        "PartitionStyle": "MBR",
+        "Size": 1024209543168
+      },
+      {
+        "FriendlyName": "WD Blue SN580 1TB",
+        "BusType": "NVMe",
+        "PartitionStyle": "GPT",
+        "Size": 1000204886016
+      }
+    ],
+    "screens": [
+      {
+        "Primary": true,
+        "Bounds": "{X=0,Y=0,Width=1920,Height=1080}",
+        "WorkArea": "{X=0,Y=0,Width=1920,Height=1032}"
+      }
+    ],
+    "network": "Two authenticated loopback-only clients, not physical LAN",
+    "electron": "44.9.0",
+    "media": "10000 distinct NTFS paths in ten hardlink groups; two synthetic H264 30fps/AAC stereo-silence contents, 20s, landscape 1920x1080 and portrait 720x1280; warmed filesystem cache",
+    "measurement": "15 minutes concurrent requests and actual native player including planned 5min hidden pause, then 5min idle; 15s OS process and 1s media-child sampling; normal stacking, never always-on-top"
+  },
+  "run": {
+    "tag": "resource-soak-7",
+    "elapsedSeconds": 1207.201,
+    "cycles": 30,
+    "playbackSamples": 60,
+    "visibleSamples": 40,
+    "hiddenSamples": 20,
+    "visibleConcurrentSeconds": 601.28,
+    "idleSamples": 20,
+    "manualPausePreserved": true,
+    "plannedPauseAt": 1792767416184,
+    "plannedResumeAt": 1792767716571,
+    "automationWindow": {
+      "ignoreMouseEvents": true,
+      "skipTaskbar": false,
+      "focusable": true,
+      "alwaysOnTop": false,
+      "bounds": {
+        "x": 1020,
+        "y": 432,
+        "width": 900,
+        "height": 600
+      },
+      "reason": "User authorized use of the computer; normal focused QA window without always-on-top, original occlusion remains enabled and explicit minimize/restore are measured"
+    },
+    "completePreloadListenerMapRestored": true,
+    "listenerBaseline": {
+      "ai-search-event": 1,
+      "app-ask": 1,
+      "mpv-state": 1,
+      "player-shortcut": 1,
+      "privacy-state-changed": 1,
+      "remote-play-on-desktop": 1,
+      "settings-patched": 2,
+      "updater-status": 1,
+      "window-close-prompt": 1,
+      "window-maximized-changed": 1
+    },
+    "peakNativePlayers": 1,
+    "nativePlayerStarts": 63,
+    "nativePlayerCloses": 63,
+    "ffmpegStarts": 2745,
+    "peakObservedFfmpegChildren": 1,
+    "finalChildren": [],
+    "themeWrites": 0,
+    "themeObservation": "All sampled settings and DOM stayed dark; historical theme drift remains unresolved"
+  },
+  "budgets": {
+    "eventLoop": {
+      "passed": true,
+      "targetP95Ms": 50,
+      "aggregateAllConcurrent": {
+        "p95Ms": 19.906559,
+        "maxMs": 237.109247,
+        "count": 63925
+      },
+      "confirmedVisibleCallbackIntervals": {
+        "p95Ms": 20.086783,
+        "maxMs": 237.109247,
+        "count": 42867
+      },
+      "visibleRecordedSeconds": 601.2403841,
+      "resolutionMs": 10,
+      "method": "Native event-loop delay histogram remains enabled continuously for the concurrent interval. A separate RecordableHistogram records real intervals of a 10ms callback only for adjacent confirmed foreground-playback samples; inactive samples reset the timing baseline. Callback intervals include the requested 10ms period. No histogram restart gap or p95-of-p95 aggregation."
+    },
+    "query": {
+      "passed": true,
+      "targetP95Ms": 500,
+      "clients": 2,
+      "requests": 6606,
+      "p50Ms": 6.026500000036322,
+      "p95Ms": 12.54390000004787,
+      "maxMs": 5591.697500000009,
+      "responseBytes": {
+        "first": 131783,
+        "last": 131950,
+        "min": 131171,
+        "max": 133964
+      },
+      "measurement": "Authenticated fetch through complete decoded response body on loopback, before client JSON.parse; byte counts are decoded JSON payload, not compressed wire bytes",
+      "returnedItems": 200,
+      "sorts": [
+        "name",
+        "date",
+        "size",
+        "type"
+      ]
+    },
+    "thumbnails": {
+      "requests": 2744,
+      "uniqueVideoIds": 2744,
+      "p95Ms": 189.95630000001984,
+      "jpegSignatureVerified": true,
+      "cacheStartIndex": 300
+    },
+    "failures": [],
+    "cancellationsAtStop": []
+  },
+  "resources": {
+    "mainRssMiB": {
+      "first": 234.45703125,
+      "last": 188.7109375,
+      "min": 125.58203125,
+      "max": 372.34765625
+    },
+    "mainHeapMiB": {
+      "first": 23.465778350830078,
+      "last": 48.516475677490234,
+      "min": 17.03704833984375,
+      "max": 91.71086502075195
+    },
+    "osRoles": {
+      "Browser": {
+        "samples": 81,
+        "workingSetMiB": {
+          "first": 197.62109375,
+          "last": 188.70703125,
+          "min": 133.4609375,
+          "max": 364.71484375
+        },
+        "privateMiB": {
+          "first": 153.7109375,
+          "last": 226.0625,
+          "min": 147.7578125,
+          "max": 330.53515625
+        },
+        "handles": {
+          "first": 1341,
+          "last": 1313,
+          "min": 1311,
+          "max": 1386
+        },
+        "threads": {
+          "first": 65,
+          "last": 55,
+          "min": 53,
+          "max": 65
+        },
+        "oneCoreCpuPercent": 36.86948639443806
+      },
+      "GPU": {
+        "samples": 81,
+        "workingSetMiB": {
+          "first": 177.2421875,
+          "last": 53.57421875,
+          "min": 25.72265625,
+          "max": 177.2421875
+        },
+        "privateMiB": {
+          "first": 283.16015625,
+          "last": 150.4609375,
+          "min": 150.2734375,
+          "max": 312.69140625
+        },
+        "handles": {
+          "first": 758,
+          "last": 746,
+          "min": 744,
+          "max": 759
+        },
+        "threads": {
+          "first": 73,
+          "last": 72,
+          "min": 71,
+          "max": 73
+        },
+        "oneCoreCpuPercent": 0.7527191918286605
+      },
+      "Utility": {
+        "samples": 81,
+        "workingSetMiB": {
+          "first": 52.94140625,
+          "last": 7.75390625,
+          "min": 0.65625,
+          "max": 52.94140625
+        },
+        "privateMiB": {
+          "first": 12.29296875,
+          "last": 11.9296875,
+          "min": 11.87109375,
+          "max": 12.29296875
+        },
+        "handles": {
+          "first": 341,
+          "last": 332,
+          "min": 330,
+          "max": 341
+        },
+        "threads": {
+          "first": 25,
+          "last": 20,
+          "min": 18,
+          "max": 25
+        },
+        "oneCoreCpuPercent": 0.0025007282120553505
+      },
+      "Tab": {
+        "samples": 81,
+        "workingSetMiB": {
+          "first": 180.8515625,
+          "last": 101.07421875,
+          "min": 39.62109375,
+          "max": 197.890625
+        },
+        "privateMiB": {
+          "first": 114.44921875,
+          "last": 95.84765625,
+          "min": 93.171875,
+          "max": 132.93359375
+        },
+        "handles": {
+          "first": 357,
+          "last": 355,
+          "min": 351,
+          "max": 357
+        },
+        "threads": {
+          "first": 24,
+          "last": 25,
+          "min": 24,
+          "max": 26
+        },
+        "oneCoreCpuPercent": 0.770224289313048
+      },
+      "mpv": {
+        "samples": 57,
+        "workingSetMiB": {
+          "first": 149.89453125,
+          "last": 70.41015625,
+          "min": 57.1640625,
+          "max": 150.76171875
+        },
+        "privateMiB": {
+          "first": 227.28125,
+          "last": 212.5078125,
+          "min": 205.234375,
+          "max": 236.39453125
+        },
+        "handles": {
+          "first": 858,
+          "last": 850,
+          "min": 787,
+          "max": 859
+        },
+        "threads": {
+          "first": 88,
+          "last": 83,
+          "min": 77,
+          "max": 88
+        },
+        "oneCoreCpuPercent": 7.567614979177809
+      }
+    },
+    "mediaSampling": {
+      "samples": 1088,
+      "ffmpegSnapshots": 95,
+      "observedFfmpegPids": 92,
+      "peakObservedPrivateMiB": 30.08203125,
+      "method": "One-second direct child-process samples; short-lived workers may be missed. Full spawn/close and concurrency counts use native ChildProcess events."
+    },
+    "idleDiagnostics": {
+      "passed": true,
+      "at": 1792768025645,
+      "pid": 35900,
+      "profile": "E:\\wpres10k-3ce30520\\runtime-current-95a1896a\\Data",
+      "json": {
+        "active": 0,
+        "reservedBytes": 0,
+        "compressing": 0,
+        "queued": 0
+      },
+      "scheduler": {
+        "queued": 0,
+        "running": 0,
+        "interests": 0,
+        "used": {
+          "prepare": 0,
+          "media": 0
+        },
+        "closing": false
+      },
+      "streams": {
+        "active": 0
+      },
+      "pressure": {
+        "desktopActive": false,
+        "remoteStreams": 0,
+        "active": false
+      },
+      "mediaWork": {
+        "owners": 0,
+        "pending": 0
+      },
+      "native": {
+        "filePath": null,
+        "timePos": 0,
+        "duration": 0,
+        "paused": false,
+        "buffering": false,
+        "volume": 100,
+        "muted": false,
+        "speed": 1,
+        "audioId": null,
+        "subtitleId": null,
+        "subtitleVisible": true,
+        "subtitleScale": 1,
+        "loopFile": "no",
+        "abLoopA": null,
+        "abLoopB": null,
+        "playlistPos": 0,
+        "playlistCount": 0,
+        "eofReached": false,
+        "trackList": [],
+        "sessionId": "player_78356d5a-e6e9-44fa-8361-5bc39c4f6aa7",
+        "engineSessionId": 285,
+        "ready": false
+      }
+    },
+    "closure": {
+      "at": "2026-10-23T15:12:25.7511397Z",
+      "expectedMainPid": 35900,
+      "runtime": "E:\\wpres10k-3ce30520\\runtime-current-95a1896a",
+      "extractedCoreDirectory": "C:\\Users\\s1897\\AppData\\Local\\Temp\\3L6G5NPvug8Xry7PxELMAPCmAdB",
+      "stillOwnedAlive": [],
+      "action": "Read-only verification; no unrelated process operated or killed"
+    }
+  },
+  "preservation": {
+    "originalData": 42,
+    "historicalPublicArtifacts": 8,
+    "sourceFiles": 128,
+    "productionPortableAndAsarUnchanged": true
+  },
+  "retainedFailures": [
+    "Previous fixture exceeded native hardlink count; rebuilt in ten groups capped at 500 links per clip copy. No original clip hardlinks.",
+    "Previous first native run requested screenshot immediately after restored timePos=1; failed before decoded readiness. Later waits for clock advancement and bounded screenshot availability.",
+    "Previous second native run changed only --user-data-dir; strict guard rejected the portable launcher selecting its sibling Data directory. Later runs use separate runtime and Data; guard unchanged.",
+    "Previous third run completed cycles and 15-minute pressure but failed the idle wrapper field lookup; native foreground histogram restart also included a background wall gap and was invalid. Both methods corrected; original failures retained.",
+    "Previous fourth run was occluded before cycles; production correctly paused. QA foreground window is controlled using normal stacking and authorized focus; always-on-top is disabled and original occlusion detection stays enabled.",
+    "Previous fifth pilot was two cycles only, not a 20-minute acceptance.",
+    "Earlier resource run in r6-player-visibility was interrupted by real pointer input during idle; not retrospectively passed.",
+    "The prior sixth run was cancelled before formal sampling when the user was gaming. Its window was hidden and processes closed; this seventh run uses fresh Data and the newly integrated distribution.",
+    "Two preparation commands were issued before the current build verifier completed. Neither launched an app; the same live verifier was awaited before runtime preparation and this measured run."
+  ],
+  "limits": [
+    "Valid 20-second H264/AAC synthetic media with two repeated contents and warm filesystem cache; ten groups of hardlinks provide 10000 distinct paths, not 10000 distinct video contents. Disk/OS/CPU environment recorded separately.",
+    "Authenticated clients use a loopback-only instance of the unchanged production HTTP server. No physical Android/Wi-Fi/FPS/PSS claim.",
+    "Own automated 900x600 window uses normal stacking and authorized focus, never always-on-top, ignores pointer input and remains in the taskbar; idle window is hidden. Native occlusion remains enabled; actual visibility/pauses are recorded.",
+    "No heavy unrelated build/emulator ran during measured concurrency. OS sampling and read-only CDP observers plus in-memory event/process counters have their own overhead.",
+    "Windows10/other Windows11/displays, media/network matrices, formal Android signing/migration, native iOS and historical theme drift remain open.",
+    "Concurrent native event-loop p95 passes the documented 50ms gate; the observed maximum is also retained and is not claimed to be below 50ms.",
+    "The new local production-identity installer, portable and app executables are NotSigned; no installation, public publication or signed-update acceptance was performed."
+  ],
+  "raw": [
+    {
+      "file": ".tmp/refactor-tests/r6-native-10k-release/baseline.json",
+      "sha256": "4d3f06fce6c45e32aa116b97b7b005e6fac8ac90294b95bf609265e6ccb3c8ef"
+    },
+    {
+      "file": ".tmp/refactor-tests/r6-native-10k-release/build-verification.json",
+      "sha256": "66920af25347c11e160f83f755dbd90266530ee46cbcf2a168f155dfe161ff99"
+    },
+    {
+      "file": ".tmp/refactor-tests/r6-native-10k-release/build.cjs",
+      "sha256": "3d4684c175c947b8e0afaf683cb545eb7c68ed9c3e622f8d6aef9e51c04f75fd"
+    },
+    {
+      "file": ".tmp/refactor-tests/r6-native-10k-release/build.json",
+      "sha256": "bfab5d5368a1587f1c8618830e4758af63c8a47eceb8ac578a72101bd3bbc140"
+    },
+    {
+      "file": ".tmp/refactor-tests/r6-native-10k-release/builder.live.log",
+      "sha256": "c0390f9e6a28532f2f41636a22bfdf380a9871d3f53f71b3924bd9b88632467d"
+    },
+    {
+      "file": ".tmp/refactor-tests/r6-native-10k-release/builder.live.log.process.json",
+      "sha256": "5dc281d00be4e45e6330a5b3045fa2627cc39fc9501eae7d3ff0385d6fdda784"
+    },
+    {
+      "file": ".tmp/refactor-tests/r6-native-10k-release/capture-environment.ps1",
+      "sha256": "3680dc5d8d7d2a7c0f4f3c5fa5f867b6ef592ce4ae45f397e808e057c7d48767"
+    },
+    {
+      "file": ".tmp/refactor-tests/r6-native-10k-release/environment.json",
+      "sha256": "94306e9c7710b77af2bcad3ee8dac8df50397d346cdc502efdac0e4f0b21cef7"
+    },
+    {
+      "file": ".tmp/refactor-tests/r6-native-10k-release/finalize.cjs",
+      "sha256": "5657c88bc945bccc1da8ef0f04e5e12fa220972b587eb8da2abb863120a34b4a"
+    },
+    {
+      "file": ".tmp/refactor-tests/r6-native-10k-release/idle-diagnostics.json",
+      "sha256": "5d1384231b4c0a75f62d740cf682058b57a5827ef9a65882f346b654e968c067"
+    },
+    {
+      "file": ".tmp/refactor-tests/r6-native-10k-release/inspect-idle.cjs",
+      "sha256": "bee0344b9d3488533c131870c590c5d7172473e792de73e85657bcc88e451950"
+    },
+    {
+      "file": ".tmp/refactor-tests/r6-native-10k-release/main-observer.cjs",
+      "sha256": "4e168efcac1dac5ac6422df83f0f57a4ad87ab975150ed06e78f206b531b8211"
+    },
+    {
+      "file": ".tmp/refactor-tests/r6-native-10k-release/media-paths.json",
+      "sha256": "f4a36bbff98c208da788f298df06470120c3eaf91fb2fab078b832703b4cbb20"
+    },
+    {
+      "file": ".tmp/refactor-tests/r6-native-10k-release/method.json",
+      "sha256": "d0dbb744abb5fb0246d78bd9a5fd25e3aef187c44abd8d20be8b99460cadcb85"
+    },
+    {
+      "file": ".tmp/refactor-tests/r6-native-10k-release/prepare-build.cjs",
+      "sha256": "14e87d96f4a9502b3bde19d62e7b7aa74432480005e3e8bc5224cd5e156affdc"
+    },
+    {
+      "file": ".tmp/refactor-tests/r6-native-10k-release/prepare-harness.cjs",
+      "sha256": "b69351d9d7047a15349588502e7b7047819f624f6787f791f79597b6a93ed0ad"
+    },
+    {
+      "file": ".tmp/refactor-tests/r6-native-10k-release/prepare-runtime.cjs",
+      "sha256": "c157651202ef905b93fe1f0bafff1761e9cd045324f9e9912234053dbf126c08"
+    },
+    {
+      "file": ".tmp/refactor-tests/r6-native-10k-release/pressure-result.json",
+      "sha256": "c0a08b473b0bb63579073751d8ac09ad4b39f7255a57bfb57ff25e0f4a87c061"
+    },
+    {
+      "file": ".tmp/refactor-tests/r6-native-10k-release/pressure-thumbnail-1.jpg",
+      "sha256": "46e168bb45cce33692f46183660ebb231519d8626525c1782f5baf6e6e7061a0"
+    },
+    {
+      "file": ".tmp/refactor-tests/r6-native-10k-release/pressure-thumbnail-2.jpg",
+      "sha256": "3a83e54275315e21675b4cd12feb98df43831375e21af0847da1663ca0d7b52b"
+    },
+    {
+      "file": ".tmp/refactor-tests/r6-native-10k-release/pressure.cjs",
+      "sha256": "8b5ad4030d921f3115cff5753b5a5eb9cccca998c10c8ccdc7ad7d1495098843"
+    },
+    {
+      "file": ".tmp/refactor-tests/r6-native-10k-release/process-closure.json",
+      "sha256": "c65207a3089fe7444945f648a15940d618f41f8384174b919323cbbeb976dcd8"
+    },
+    {
+      "file": ".tmp/refactor-tests/r6-native-10k-release/protocol.cjs",
+      "sha256": "6942d277f108ede63524f5e58dc92b57283d575335633033bfcd3825436f0e37"
+    },
+    {
+      "file": ".tmp/refactor-tests/r6-native-10k-release/resource-run.cjs",
+      "sha256": "795482200487ffa2a30503e9c6c1343a85ba68d1e52f8831c10c6cfe7a2318fc"
+    },
+    {
+      "file": ".tmp/refactor-tests/r6-native-10k-release/resource-setup.json",
+      "sha256": "5b1c71839a7d4466044a820635aaaa2913a6c8723d96f4d081e1393092cec106"
+    },
+    {
+      "file": ".tmp/refactor-tests/r6-native-10k-release/resource-soak-7-final.png",
+      "sha256": "7e8b5fa3302b25327ad4a3dd28479df4cb1dbac0d2f68282f68f5abcf42d2210"
+    },
+    {
+      "file": ".tmp/refactor-tests/r6-native-10k-release/resource-soak-7-media-os.jsonl",
+      "sha256": "a9d8aab8057bc7c84db54739b127d2d4f7b3e463b2e57c8717bcee5eef6d3f54"
+    },
+    {
+      "file": ".tmp/refactor-tests/r6-native-10k-release/resource-soak-7-os.jsonl",
+      "sha256": "cf2501a290f3d0cd10e5c3e07d872b0d6a4157cc64b40e733c123566a8e2bd4b"
+    },
+    {
+      "file": ".tmp/refactor-tests/r6-native-10k-release/resource-soak-7-process.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": ".tmp/refactor-tests/r6-native-10k-release/resource-soak-7-progress.json",
+      "sha256": "b80cdccb0fc60f10cf05bc61639fad62e378b4659549881ba179fa377b18f4c8"
+    },
+    {
+      "file": ".tmp/refactor-tests/r6-native-10k-release/resource-soak-7-result.json",
+      "sha256": "ce4be3b13a8e50732c807fabca07eab7797d853184cc14bddc187fabce414b4e"
+    },
+    {
+      "file": ".tmp/refactor-tests/r6-native-10k-release/resource-soak-7-started.json",
+      "sha256": "f7ebfda9fd424f1933bf879d05cf23af61772d798797da32a16c92d701d85f23"
+    },
+    {
+      "file": ".tmp/refactor-tests/r6-native-10k-release/sample-media.ps1",
+      "sha256": "c82dd50e74f33b0f5b3b9f0f1914481d97400d530065520d949864d2e87081d0"
+    },
+    {
+      "file": ".tmp/refactor-tests/r6-native-10k-release/sample-os.cjs",
+      "sha256": "6f7333f5c970e17ba49daddba466afa15c873a0a7cf29961399203d898e4bdac"
+    },
+    {
+      "file": ".tmp/refactor-tests/r6-native-10k-release/sample-processes.ps1",
+      "sha256": "bd95cb6d117d617bebdeb378159eaae392906919dfa68da9bcb3173b45f2ed06"
+    },
+    {
+      "file": ".tmp/refactor-tests/r6-native-10k-release/setup.json",
+      "sha256": "f92d66bb73e94df75a2cde965892a43078c443945c4ca771f68ab7024a134717"
+    },
+    {
+      "file": ".tmp/refactor-tests/r6-native-10k-release/signatures.json",
+      "sha256": "fbb6708c32879758304b20f40d33d3c2d591385efc5effbd0d13417363a52332"
+    },
+    {
+      "file": ".tmp/refactor-tests/r6-native-10k-release/source-inputs.json",
+      "sha256": "968d1290c93becacbee7a211bed7d911a884b22281d93181dfb80d915aaaafee"
+    },
+    {
+      "file": ".tmp/refactor-tests/r6-native-10k-release/verify-build.cjs",
+      "sha256": "343e2a473ab1a70ffcc003ceed83bd0d43ef7a56122bb74d5f7753e9be02c283"
+    },
+    {
+      "file": ".tmp/refactor-tests/r6-native-10k-release/verify-closure.ps1",
+      "sha256": "e510318cbb6ba81872bab0821aa814247ae2b95e88b515f74907c321362da8eb"
+    }
+  ]
+}

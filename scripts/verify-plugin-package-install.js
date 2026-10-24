@@ -6,14 +6,22 @@ const { app } = require('electron')
 
 const projectRoot = path.resolve(__dirname, '..')
 const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'wallpaper-player-plugin-package-'))
-const pluginPackageDir = process.env.WALLPAPER_PLUGIN_TEST_DIR
-  ? path.resolve(process.env.WALLPAPER_PLUGIN_TEST_DIR)
-  : path.join(projectRoot, 'release', 'plugins')
+let pluginPackageDir, runtimeRoot
 
 async function main() {
   app.setPath('userData', path.join(tempRoot, 'user-data'))
-  const { pluginRegistry, setupPlugins, disposePlugins, installPlugin, uninstallPlugin } = require(path.join(projectRoot, 'main', 'plugins'))
-  const { readManifestFromPath } = require(path.join(projectRoot, 'main', 'plugins', 'loader'))
+  if (process.env.WALLPAPER_PLUGIN_TEST_DIR) {
+    assert.ok(process.env.WALLPAPER_PLUGIN_TEST_APP_ROOT, 'explicit plugin ZIPs require their matching built app root')
+    pluginPackageDir = path.resolve(process.env.WALLPAPER_PLUGIN_TEST_DIR)
+    runtimeRoot = path.resolve(process.env.WALLPAPER_PLUGIN_TEST_APP_ROOT)
+  } else {
+    const output = await require('./build-output.cjs').resolveOutput(projectRoot, 'windows', { version: require('../package.json').version })
+    await require('./package-win.js').validateWindowsOutput(output.directory, { version: output.record.version, mode: output.record.mode })
+    pluginPackageDir = path.join(output.directory, 'plugins')
+    runtimeRoot = path.join(output.directory, 'win-unpacked/resources/app.asar')
+  }
+  const { pluginRegistry, setupPlugins, disposePlugins, installPlugin, uninstallPlugin } = require(path.join(runtimeRoot, 'main', 'plugins'))
+  const { readManifestFromPath } = require(path.join(runtimeRoot, 'main', 'plugins', 'loader'))
 
   await setupPlugins()
   const zipPath = path.join(pluginPackageDir, 'Wallpaper-Player-Plugin-video-analysis-1.0.0.zip')

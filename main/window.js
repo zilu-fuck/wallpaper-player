@@ -2,6 +2,9 @@ const { BrowserWindow, shell, session, app, screen } = require('electron')
 const path = require('path')
 const fs = require('fs')
 const log = require('electron-log')
+const { pathToFileURL } = require('url')
+const { bindAppWindow, guardAppNavigation } = require('./security/ipc-sender')
+const { watchWindowState } = require('./ipc/window-shell')
 
 let mainWindow = null
 let windowCloseHandler = null
@@ -52,8 +55,15 @@ function createWindow() {
     minWidth: Math.min(900, workWidth),
     minHeight: Math.min(600, workHeight),
     title: '视频画廊',
-    backgroundColor: '#0a0a0f',
+    icon: path.join(__dirname, '..', 'build', 'icon.png'),
+    backgroundColor: '#070a11',
     autoHideMenuBar: true,
+    // 自绘标题栏：去掉系统原生标题栏，窗口按钮由渲染层绘制，
+    // 这样标题栏也能跟随主题与设计系统。窗口拖拽依靠渲染层的
+    // -webkit-app-region: drag 区域。
+    frame: false,
+    // thickFrame 保留 Windows 的边缘拖拽缩放与窗口阴影
+    thickFrame: true,
     webPreferences: {
       preload: path.join(__dirname, '..', 'preload.js'),
       contextIsolation: true,
@@ -64,17 +74,16 @@ function createWindow() {
   })
 
   setMainWindow(mainWindow)
+  const distPath = path.join(__dirname, '..', 'dist', 'index.html')
+  const useFile = app.isPackaged || fs.existsSync(distPath)
+  const entryUrl = useFile ? pathToFileURL(distPath).href : 'http://localhost:5173/'
+  bindAppWindow(mainWindow, entryUrl)
+  guardAppNavigation(mainWindow.webContents, entryUrl, url => { void shell.openExternal(url).catch(() => {}) })
   mainWindow.setAutoHideMenuBar(true)
   mainWindow.setMenuBarVisibility(false)
   mainWindow.setMenu(null)
-
-  function isAppNavigationUrl(url) {
-    return (
-      url.startsWith('file://') ||
-      url.startsWith('http://localhost:5173') ||
-      url.startsWith('http://127.0.0.1:5173')
-    )
-  }
+  const stopWatchingWindowState = watchWindowState(mainWindow)
+  mainWindow.once('closed', () => stopWatchingWindowState())
 
   mainWindow.webContents.setWindowOpenHandler(({ url }) => {
     if (url.startsWith('http://') || url.startsWith('https://')) {
@@ -124,10 +133,9 @@ function createWindow() {
 
   // 仅在开发模式转发渲染进程日志到主进程 stdout，避免打包后刷屏
   if (!app.isPackaged) {
-    mainWindow.webContents.on('console-message', (event, level, message, line, sourceId) => {
-      const labels = ['debug', 'log', 'warn', 'error']
-      const methods = ['debug', 'info', 'warn', 'error']
-      log[methods[level] || 'info'](`[renderer:${labels[level] || level}] ${message} (${sourceId}:${line})`)
+    mainWindow.webContents.on('console-message', details => {
+      const methods = { debug: 'debug', info: 'info', warning: 'warn', error: 'error' }
+      log[methods[details.level] || 'info'](`[renderer:${details.level}] ${details.message} (${details.sourceId}:${details.lineNumber})`)
     })
   }
 
@@ -147,18 +155,7 @@ function createWindow() {
     log.error('[window] preload-error:', preloadPath, error)
   })
 
-  mainWindow.webContents.on('will-navigate', (event, url) => {
-    const currentUrl = mainWindow.webContents.getURL()
-    if (url === currentUrl || (!currentUrl && isAppNavigationUrl(url))) return
-
-    event.preventDefault()
-    if (url.startsWith('http://') || url.startsWith('https://')) {
-      shell.openExternal(url)
-    }
-  })
-
-  const distPath = path.join(__dirname, '..', 'dist', 'index.html')
-  if (fs.existsSync(distPath)) {
+  if (useFile) {
     mainWindow.loadFile(distPath)
   } else {
     mainWindow.loadURL('http://localhost:5173')

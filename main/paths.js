@@ -1,3 +1,4 @@
+const { pathKey, isPathInside } = require('./path-identity')
 const path = require('path')
 const fs = require('fs')
 const { app } = require('electron')
@@ -14,10 +15,7 @@ function isPortableApp() {
   return Boolean(process.env.PORTABLE_EXECUTABLE_FILE || process.env.PORTABLE_EXECUTABLE_DIR)
 }
 
-function pathKey(inputPath) {
-  const resolved = path.resolve(inputPath)
-  return process.platform === 'win32' ? resolved.toLowerCase() : resolved
-}
+
 
 // realpath 归一化后的 pathKey：解析 subst/junction/大小写差异。
 // 路径不存在时回退为普通 pathKey（如已删除文件的遗留标签键）。
@@ -30,10 +28,33 @@ function normalizedPathKey(inputPath) {
   }
 }
 
-function isPathInside(parentPath, targetPath) {
-  const relative = path.relative(parentPath, targetPath)
-  return relative === '' || (!relative.startsWith('..') && !path.isAbsolute(relative))
+async function resolvePathForAccessAsync(inputPath) {
+  const resolved = path.resolve(inputPath)
+  try { return await fs.promises.realpath(resolved) } catch { return resolved }
 }
+
+// Keep large legacy-key/index batches off the main thread without issuing one IO per item at once.
+// Wait for issued IO even when a policy/generation check fails; no work outlives the batch.
+async function resolvePathsForAccess(inputPaths, check = () => {}) {
+  check()
+  const entries = [...new Set(inputPaths)], resolved = new Map()
+  let next = 0, failed = false
+  const results = await Promise.allSettled(Array.from({ length: Math.min(8, entries.length) }, async () => {
+    try {
+      while (!failed && next < entries.length) {
+        check(); const entry = entries[next++]
+        const canonical = await resolvePathForAccessAsync(entry)
+        check(); resolved.set(entry, canonical)
+      }
+    } catch (error) { failed = true; throw error }
+  }))
+  const rejected = results.find(result => result.status === 'rejected')
+  if (rejected) throw rejected.reason
+  check()
+  return resolved
+}
+
+
 
 function isVideoFile(filePath) {
   return VIDEO_EXTENSIONS.has(path.extname(filePath).toLowerCase())
@@ -91,6 +112,8 @@ module.exports = {
   isPortableApp,
   pathKey,
   normalizedPathKey,
+  resolvePathForAccessAsync,
+  resolvePathsForAccess,
   isPathInside,
   isVideoFile,
   isVideoContentFile,

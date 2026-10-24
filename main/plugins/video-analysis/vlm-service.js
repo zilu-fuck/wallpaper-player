@@ -4,15 +4,17 @@ const http = require('http')
 const https = require('https')
 const net = require('net')
 const path = require('path')
-const { execFileSync, spawn } = require('child_process')
+const { spawn } = require('child_process')
+const crypto = require('crypto')
 const { BrowserWindow } = require('electron')
 const { core } = require('./core')
 const { getResourcePath } = core('paths')
-const { getAnalysisModelDirectory, getVideoAnalysisRuntimeConfig, saveVideoAnalysisRuntimeConfig } = require('./service')
+const { getAnalysisModelDirectory, getVideoAnalysisRuntimeConfig, saveVideoAnalysisRuntimeConfig, updateVideoAnalysisRuntimeConfig } = require('./service')
 
 let vlmProcess = null
 let vlmLastOutput = ''
 let vlmDownload = null
+let vlmClosing = false, vlmStarting = null, vlmStartPromise = null, vlmClosed = Promise.resolve()
 function getPluginResourcePath(...segments) {
   return path.join(__dirname, 'resources', ...segments)
 }
@@ -133,7 +135,7 @@ function canConnect(host, port, timeoutMs = 1200) {
   })
 }
 
-function requestVlmModels(baseUrl, timeoutMs = 1200) {
+function requestVlmModels(baseUrl, timeoutMs = 1200, signal) {
   return new Promise((resolve) => {
     let url
     try {
@@ -143,25 +145,32 @@ function requestVlmModels(baseUrl, timeoutMs = 1200) {
       return
     }
     const client = url.protocol === 'https:' ? https : http
-    const request = client.get(url, (response) => {
-      response.resume()
-      resolve({ ok: response.statusCode === 200, statusCode: response.statusCode })
+    let timer, settled = false
+    const finish = result => { if (settled) return; settled = true; clearTimeout(timer); request.destroy(); resolve(result) }
+    const request = client.get(url, { signal }, (response) => {
+      response.destroy()
+      finish({ ok: response.statusCode === 200, statusCode: response.statusCode })
     })
-    request.setTimeout(timeoutMs, () => {
-      request.destroy(new Error('timeout'))
-    })
+    timer = setTimeout(() => finish({ ok: false, error: '模型服务检查超时' }), timeoutMs)
+    timer.unref?.()
     request.on('error', (err) => {
-      resolve({ ok: false, error: err.message })
+      finish({ ok: false, error: err.message })
     })
   })
 }
 
-async function waitForVlmReady(baseUrl, timeoutMs = 240000) {
+async function waitForVlmReady(baseUrl, timeoutMs = 240000, signal) {
   const startedAt = Date.now()
   while (Date.now() - startedAt < timeoutMs) {
-    const result = await requestVlmModels(baseUrl, 1500)
+    if (signal?.aborted) return false
+    const result = await requestVlmModels(baseUrl, 1500, signal)
     if (result.ok) return true
-    await new Promise(resolve => setTimeout(resolve, 1000))
+    if (signal?.aborted) return false
+    await new Promise(resolve => {
+      const finish = () => { clearTimeout(timer); signal?.removeEventListener('abort', finish); resolve() }
+      const timer = setTimeout(finish, 1000); signal?.addEventListener('abort', finish, { once: true })
+      if (signal?.aborted) finish()
+    })
   }
   return false
 }
@@ -298,8 +307,8 @@ async function getVlmServiceState() {
     modelExists,
     running: Boolean(vlmProcess && !vlmProcess.killed),
     connected,
-    downloading: Boolean(vlmDownload),
-    download: vlmDownload ? vlmDownload.progress : null,
+    downloading: Boolean(vlmDownload && !vlmDownload.finished),
+    download: vlmDownload && !vlmDownload.finished ? vlmDownload.progress : null,
     lastOutput: vlmLastOutput
   }
 }
@@ -371,19 +380,15 @@ function resolveVlmModelPreset(modelId, precision) {
 }
 
 async function applyVlmModelPreset(modelId, precision) {
-  const current = await getVideoAnalysisRuntimeConfig()
   const selected = resolveVlmModelPreset(modelId, precision)
-  const modelDir = path.join(current.modelStorageDir || getAnalysisModelDirectory(), 'vlm')
-  const modelPath = path.join(modelDir, path.basename(selected.filename))
-  const config = await saveVideoAnalysisRuntimeConfig({
-    ...current,
+  const config = await updateVideoAnalysisRuntimeConfig(current => ({
     vlmProvider: 'local',
     vlmName: path.basename(selected.filename),
-    vlmModelPath: modelPath,
+    vlmModelPath: path.join(current.modelStorageDir || getAnalysisModelDirectory(), 'vlm', path.basename(selected.filename)),
     vlmModelDownloadUrl: selected.downloadUrl,
     vlmHfRepo: selected.repo,
     vlmHfRevision: selected.revision
-  })
+  }))
   return { selected, config }
 }
 
@@ -446,7 +451,6 @@ async function listHuggingFaceModelFiles(patch = {}) {
     .sort((a, b) => a.name.localeCompare(b.name))
 
   const config = await saveVideoAnalysisRuntimeConfig({
-    ...current,
     vlmHfRepo: repo,
     vlmHfRevision: revision,
     vlmHfToken: token
@@ -467,14 +471,11 @@ async function selectHuggingFaceModelFile(file) {
     return { success: false, error: '请选择 Hugging Face 模型文件' }
   }
 
-  const modelDir = current.vlmModelPath ? path.dirname(current.vlmModelPath) : path.join(getAnalysisModelDirectory(), 'vlm')
-  const modelPath = path.join(modelDir, path.basename(filename))
-  const config = await saveVideoAnalysisRuntimeConfig({
-    ...current,
+  const config = await updateVideoAnalysisRuntimeConfig(latest => ({
     vlmName: path.basename(filename),
-    vlmModelPath: modelPath,
+    vlmModelPath: path.join(latest.vlmModelPath ? path.dirname(latest.vlmModelPath) : path.join(latest.modelStorageDir, 'vlm'), path.basename(filename)),
     vlmModelDownloadUrl: downloadUrl
-  })
+  }))
   return { success: true, config, state: await getVlmServiceState() }
 }
 
@@ -551,9 +552,7 @@ async function selectLocalVlmModelFile(filePath) {
     return { success: false, error: `模型文件不存在：${resolvedPath}` }
   }
 
-  const current = await getVideoAnalysisRuntimeConfig()
   const config = await saveVideoAnalysisRuntimeConfig({
-    ...current,
     vlmProvider: 'local',
     vlmName: path.basename(resolvedPath),
     vlmModelPath: resolvedPath
@@ -562,11 +561,7 @@ async function selectLocalVlmModelFile(filePath) {
 }
 
 async function saveVlmServiceConfig(patch) {
-  const current = await getVideoAnalysisRuntimeConfig()
-  const config = await saveVideoAnalysisRuntimeConfig({
-    ...current,
-    ...patch
-  })
+  const config = await saveVideoAnalysisRuntimeConfig(patch)
   return { success: true, config, state: await getVlmServiceState() }
 }
 
@@ -625,12 +620,32 @@ function renderArgsTemplate(template, config) {
     .replaceAll('{port}', String(port))
 }
 
-async function startVlmService() {
+function startVlmService() {
+  if (vlmClosing) return Promise.resolve({ success: false, error: '模型服务正在关闭' })
+  if (vlmStartPromise) return vlmStartPromise
+  const record = { controller: new AbortController() }; vlmStarting = record
+  const timeout = setTimeout(() => record.controller.abort(new Error('模型启动等待超时')), 240000)
+  timeout.unref?.()
+  vlmStartPromise = startVlmServiceInternal(record).catch(async error => {
+    record.controller.abort(error)
+    if (record.child) await core('process-lifecycle').stopProcessTree(record.child, { processGroup: process.platform !== 'win32' }).catch(() => {})
+    await record.closed
+    return { success: false, error: error?.message || '模型启动失败' }
+  }).finally(() => {
+    clearTimeout(timeout); if (vlmStarting === record) vlmStarting = null; vlmStartPromise = null
+  })
+  return vlmStartPromise
+}
+
+async function startVlmServiceInternal(record) {
+  const check = () => { if (vlmClosing || record.controller.signal.aborted || vlmStarting !== record) throw record.controller.signal.reason || new Error('模型启动已取消') }
+  await vlmClosed; check()
   if (vlmProcess && !vlmProcess.killed) {
     return { success: true, state: await getVlmServiceState() }
   }
 
   const config = await getVideoAnalysisRuntimeConfig()
+  check()
   if (config.vlmProvider === 'api') {
     return { success: false, error: '外接 VLM API 不需要由播放器启动' }
   }
@@ -650,17 +665,24 @@ async function startVlmService() {
   }
 
   const { args, autoMmprojPath } = buildServerArgs(config, serverExecutable)
-  const executableExt = path.extname(serverExecutable).toLowerCase()
-  const useShell = executableExt === '.bat' || executableExt === '.cmd'
+  check()
   vlmLastOutput = ''
-  vlmProcess = spawn(serverExecutable, args, {
-    cwd: path.dirname(serverExecutable),
-    windowsHide: true,
-    shell: useShell
-  })
-  const child = vlmProcess
+  const lifecycle = core('process-lifecycle')
+  const spec = lifecycle.workerSpawnSpec(serverExecutable, args, { cwd: path.dirname(serverExecutable), windowsHide: true,
+    detached: process.platform !== 'win32' })
+  const child = spawn(spec.file, spec.args, spec.options); vlmProcess = child; record.child = child
+  const abortProcess = () => { void lifecycle.stopProcessTree(child, { processGroup: process.platform !== 'win32' }).catch(() => {}) }
+  record.controller.signal.addEventListener('abort', abortProcess, { once: true })
+  vlmClosed = record.closed = new Promise(resolve => child.once('close', () => {
+    record.controller.signal.removeEventListener('abort', abortProcess)
+    if (vlmProcess === child) vlmProcess = null
+    if (vlmStarting === record && !record.controller.signal.aborted) record.controller.abort(new Error('模型服务在就绪前退出'))
+    resolve()
+  }))
+
 
   const appendOutput = (chunk) => {
+    if (vlmProcess !== child) return
     vlmLastOutput = `${vlmLastOutput}${chunk}`.slice(-4000)
     emitVlmEvent({ type: 'output', output: vlmLastOutput })
   }
@@ -669,138 +691,108 @@ async function startVlmService() {
   child.stdout?.on('data', appendOutput)
   child.stderr?.on('data', appendOutput)
   child.on('error', (err) => {
+    record.controller.abort(err)
     vlmLastOutput = err.message
     emitVlmEvent({ type: 'error', error: err.message })
   })
-  child.on('exit', (code, signal) => {
+  child.once('close', (code, signal) => {
+    child.stdout?.off('data', appendOutput); child.stderr?.off('data', appendOutput)
     emitVlmEvent({ type: 'exit', code, signal })
-    if (vlmProcess === child) vlmProcess = null
   })
 
   emitVlmEvent({ type: 'started', autoMmprojPath })
-  emitVlmEvent({ type: 'output', output: `启动 VLM 服务：${serverExecutable}\n${args.join(' ')}` })
-  const connected = await waitForVlmReady(config.vlmBaseUrl)
+  emitVlmEvent({ type: 'output', output: '正在启动模型服务' })
+  const connected = await waitForVlmReady(config.vlmBaseUrl, Math.max(1, 240000), record.controller.signal)
+  check()
   const state = await getVlmServiceState()
   if (!connected) {
     const outputHint = vlmLastOutput ? `最近输出：${vlmLastOutput.slice(-500)}` : ''
     if (vlmProcess === child) {
-      vlmProcess = null
-      killVlmProcessTree(child)
+      await lifecycle.stopProcessTree(child, { processGroup: process.platform !== 'win32' })
+      await vlmClosed
     }
     return { success: false, error: `VLM 服务已启动，但模型尚未就绪，请检查启动参数和服务输出。${outputHint}`, state }
   }
+  check()
   return { success: true, state }
 }
 
-function killVlmProcessTree(child) {
-  if (!child || child.killed) return
-  if (child.exitCode !== null || child.signalCode !== null) return
-  try {
-    if (process.platform === 'win32' && child.pid) {
-      execFileSync('taskkill', ['/pid', String(child.pid), '/T', '/F'], {
-        stdio: 'ignore',
-        windowsHide: true
-      })
-      return
-    }
-  } catch {}
-
-  try {
-    child.kill()
-  } catch {}
+async function stopModelProcess() {
+  vlmStarting?.controller.abort(new Error('模型启动已取消'))
+  const child = vlmProcess
+  if (child) await core('process-lifecycle').stopProcessTree(child, { processGroup: process.platform !== 'win32' })
+  await vlmStartPromise?.catch(() => {})
+  await vlmClosed
 }
 
-function disposeVlmService() {
-  if (vlmProcess && !vlmProcess.killed) {
-    const child = vlmProcess
-    vlmProcess = null
-    killVlmProcessTree(child)
-  }
+async function disposeVlmService() {
+  vlmClosing = true
+  cancelVlmModelDownload()
+  await stopModelProcess()
+  await vlmDownload?.completion
+  await core('application/resource-scheduler').mediaScheduler.waitForIdle(['model-download'])
 }
-
+function resumeVlmService() { if (!vlmProcess && !vlmDownload && !vlmStartPromise) vlmClosing = false }
 async function stopVlmService() {
-  disposeVlmService()
+  await stopModelProcess()
   return { success: true, state: await getVlmServiceState() }
 }
-
-function downloadFile(url, targetPath, token = '') {
-  return new Promise((resolve, reject) => {
-    const client = url.startsWith('https:') ? https : http
-    const request = client.get(url, {
-      headers: token ? { Authorization: `Bearer ${token}` } : {}
-    }, (response) => {
-      if (response.statusCode >= 300 && response.statusCode < 400 && response.headers.location) {
-        response.resume()
-        downloadFile(new URL(response.headers.location, url).toString(), targetPath, token).then(resolve, reject)
-        return
-      }
-      if (response.statusCode !== 200) {
-        response.resume()
-        reject(new Error(`下载失败：HTTP ${response.statusCode}`))
-        return
-      }
-
-      const total = Number(response.headers['content-length']) || 0
-      let transferred = 0
-      const file = fs.createWriteStream(targetPath)
-      response.on('data', (chunk) => {
-        transferred += chunk.length
-        if (vlmDownload) {
-          vlmDownload.progress = {
-            percent: total ? Math.round((transferred / total) * 1000) / 10 : 0,
-            transferred,
-            total
-          }
-          emitVlmEvent({ type: 'download-progress', progress: vlmDownload.progress })
-        }
-      })
-      response.pipe(file)
-      file.on('finish', () => file.close(resolve))
-      file.on('error', reject)
-    })
-    request.setTimeout(30000, () => {
-      request.destroy(new Error('模型下载连接超时，请检查网络或代理'))
-    })
-    request.on('error', reject)
-  })
+function cancelVlmModelDownload() {
+  const owner = vlmDownload
+  if (!owner || owner.finished) return { success: true, cancelled: false }
+  owner.controller.abort(new Error('模型下载已取消'))
+  return { success: true, cancelled: true }
 }
 
-async function downloadVlmModel(selection = {}) {
-  if (vlmDownload) return { success: true, state: await getVlmServiceState() }
-  let selected = null
-  let config = await getVideoAnalysisRuntimeConfig()
-  if (selection?.modelId) {
-    const applied = await applyVlmModelPreset(selection.modelId, selection.precision)
-    selected = applied.selected
-    config = applied.config
-  }
-  if (!config.vlmModelDownloadUrl) {
-    return { success: false, error: '请先填写 VLM 模型下载地址' }
-  }
-  if (!config.vlmModelPath) {
-    return { success: false, error: '请先配置 VLM 模型文件路径' }
-  }
+function downloadVlmModel(selection = {}) {
+  if (vlmClosing) return Promise.resolve({ success: false, error: '模型服务正在关闭' })
+  if (vlmDownload?.finished) return vlmDownload.completion.then(() => downloadVlmModel(selection))
+  if (vlmDownload) return Promise.resolve({ success: true }).then(async value => ({ ...value, state: await getVlmServiceState() }))
+  const owner = { id: crypto.randomUUID(), controller: new AbortController(), progress: { percent: 0, transferred: 0, total: 0 } }
+  vlmDownload = owner
+  const timeout = setTimeout(() => owner.controller.abort(new Error('模型下载超过最长等待时间')), 24 * 60 * 60 * 1000)
+  timeout.unref?.()
+  owner.completion = downloadVlmModelOwned(owner, selection).finally(() => { clearTimeout(timeout); if (vlmDownload === owner) vlmDownload = null })
+  return owner.completion
+}
 
-  await fsp.mkdir(path.dirname(config.vlmModelPath), { recursive: true })
-  const partialPath = `${config.vlmModelPath}.part`
-  vlmDownload = {
-    progress: { percent: 0, transferred: 0, total: 0 }
-  }
-  emitVlmEvent({ type: 'download-started', progress: vlmDownload.progress, selected })
+async function downloadVlmModelOwned(owner, selection) {
+  const scheduler = core('application/resource-scheduler').mediaScheduler
+  const check = () => { if (vlmClosing || owner.controller.signal.aborted || vlmDownload !== owner) throw owner.controller.signal.reason || new Error('模型下载已结束') }
+  let selected = null, partialPath
   try {
-    await fsp.rm(partialPath, { force: true })
-    await downloadFile(config.vlmModelDownloadUrl, partialPath, config.vlmHfToken)
-    await fsp.rename(partialPath, config.vlmModelPath)
-    vlmDownload = null
-    emitVlmEvent({ type: 'download-complete', modelPath: config.vlmModelPath, selected })
+    let config = await getVideoAnalysisRuntimeConfig()
+    check()
+    if (selection?.modelId) { const applied = await applyVlmModelPreset(selection.modelId, selection.precision); selected = applied.selected; config = applied.config }
+    check()
+    if (!config.vlmModelDownloadUrl || !config.vlmModelPath) throw new Error('请先配置模型下载地址和保存位置')
+    const target = path.resolve(config.vlmModelPath)
+    partialPath = target + '.' + owner.id + '.part'
+    emitVlmEvent({ type: 'download-started', progress: owner.progress, selected })
+    await core('application/download-service').downloadArtifact(config.vlmModelDownloadUrl, partialPath, {
+      key: 'model-download:' + owner.id, type: 'model-download', signal: owner.controller.signal, token: config.vlmHfToken,
+      onProgress: ({ transferred, total }) => {
+        if (vlmDownload !== owner || owner.controller.signal.aborted) return
+        owner.progress = { transferred, total, percent: total ? Math.round(transferred / total * 1000) / 10 : 0 }
+        emitVlmEvent({ type: 'download-progress', progress: owner.progress })
+      },
+      validate: async filePath => {
+        if (path.extname(target).toLowerCase() !== '.gguf') return
+        const file = await fsp.open(filePath, 'r')
+        try {
+          const header = Buffer.alloc(24), read = await file.read(header, 0, header.length, 0)
+          if (read.bytesRead !== header.length || header.subarray(0, 4).toString('ascii') !== 'GGUF' || ![2, 3].includes(header.readUInt32LE(4))) throw new Error('下载内容不是有效的 GGUF 模型文件')
+        } finally { await file.close() }
+      }
+    })
+    await core('application/download-service').publishArtifact(partialPath, target, check, () => { owner.finished = true })
+    emitVlmEvent({ type: 'download-complete', modelPath: target, selected })
     return { success: true, config: await getVideoAnalysisRuntimeConfig(), selected, state: await getVlmServiceState() }
-  } catch (err) {
-    fsp.unlink(partialPath).catch(() => {})
-    vlmDownload = null
-    emitVlmEvent({ type: 'download-error', error: err.message })
-    return { success: false, error: err.message, config: await getVideoAnalysisRuntimeConfig(), selected, state: await getVlmServiceState() }
-  } finally {
-    vlmDownload = null
+  } catch (error) {
+    await scheduler.waitForIdle(['model-download'])
+    if (partialPath) await fsp.unlink(partialPath).catch(() => {})
+    emitVlmEvent({ type: 'download-error', error: error?.message || '模型下载失败' })
+    return { success: false, error: error?.message || '模型下载失败', selected }
   }
 }
 
@@ -811,6 +803,8 @@ module.exports = {
   startVlmService,
   stopVlmService,
   disposeVlmService,
+  resumeVlmService,
+  cancelVlmModelDownload,
   downloadVlmModel,
   listLocalVlmModelFiles,
   selectLocalVlmModelFile,

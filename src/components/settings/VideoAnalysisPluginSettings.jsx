@@ -16,11 +16,17 @@ export default function VideoAnalysisPluginSettings({
   analysisModelMessage,
   analysisRuntimeConfig,
   analysisRuntimeLoaded,
+  analysisRuntimeLoading,
+  analysisRuntimeError,
   analysisConfigSaving,
   analysisConfigMessage,
+  analysisConfigDirty,
+  vlmConfigDirty,
   vlmState,
   vlmSaving,
   vlmStarting,
+  vlmDownloading,
+  vlmObservationError,
   vlmMessage,
   vlmModelOptions,
   selectedVlmModelId,
@@ -37,6 +43,7 @@ export default function VideoAnalysisPluginSettings({
   onSelectedVlmPrecisionChange,
   onSaveVlmConfig,
   onDownloadVlmModel,
+  onCancelVlmDownload,
   onStartVlmService,
   onStopVlmService,
   onRefreshVlmState,
@@ -47,7 +54,8 @@ export default function VideoAnalysisPluginSettings({
   onAnalysisRuntimeChange,
   onLlmProviderChange,
   onSaveAnalysisRuntimeConfig,
-  onResetAnalysisRuntimeConfig
+  onResetAnalysisRuntimeConfig,
+  onReloadAnalysisRuntimeConfig
 }) {
   const currentVlmModelOption = vlmModelOptions.models?.find(item => item.id === selectedVlmModelId)
   const availableVlmPrecisions = currentVlmModelOption?.precisions?.length
@@ -93,6 +101,11 @@ export default function VideoAnalysisPluginSettings({
       </p>
       {pluginEnabled && enabled ? (
         <div className="analysis-settings-expanded">
+          {analysisRuntimeError ? <p className="hint error" role="status">
+            {analysisRuntimeError}{' '}
+            <button className="btn btn-sm" type="button" disabled={analysisRuntimeLoading} onClick={onReloadAnalysisRuntimeConfig}>重新读取配置</button>
+          </p> : null}
+          {vlmObservationError ? <p className="hint error" role="status">{vlmObservationError}</p> : null}
           <p className="hint video-analysis-settings-hint">
             最简单用法：保持默认目录，下载或选择一个 GGUF 视觉模型，点击“启动模型”，看到“已连接”后回到视频卡片发起分析。换电脑后如果显示“模型未找到”，把同名模型放到 {vlmModelDirectory}，再点“检测目录模型”。
           </p>
@@ -260,10 +273,13 @@ export default function VideoAnalysisPluginSettings({
                     className="btn btn-sm"
                     type="button"
                     onClick={onDownloadVlmModel}
-                    disabled={vlmState?.downloading || !selectedVlmModelId}
+                    disabled={!analysisRuntimeLoaded || vlmDownloading || vlmSaving || vlmState?.downloading || !selectedVlmModelId}
                   >
                     {vlmState?.downloading ? '下载中...' : '下载并配置'}
                   </button>
+                  {vlmState?.downloading && (
+                    <button type="button" className="btn-secondary" onClick={onCancelVlmDownload}>取消下载</button>
+                  )}
                   <div className="analysis-vlm-download-meta">
                     <span title={currentVlmModelOption?.repo || ''}>
                       {currentVlmModelOption?.repo || '请选择模型'}
@@ -381,7 +397,8 @@ export default function VideoAnalysisPluginSettings({
               </>
             )}
             <div className="analysis-vlm-footer">
-              <button className="btn btn-sm" type="button" onClick={() => onSaveVlmConfig()} disabled={vlmSaving}>
+              {vlmConfigDirty ? <span className="hint" role="status">视觉模型配置有未保存的更改</span> : null}
+              <button className="btn btn-sm" type="button" onClick={() => onSaveVlmConfig()} disabled={!analysisRuntimeLoaded || vlmSaving}>
                 {vlmSaving ? '保存中...' : '保存设置'}
               </button>
               <p className="hint video-analysis-settings-hint">
@@ -470,12 +487,13 @@ export default function VideoAnalysisPluginSettings({
               </label>
             </div>
           </div>
+          {analysisConfigDirty ? <p className="hint" role="status">分析参数有未保存的更改</p> : null}
           <div className="mpv-actions">
             <button
               className="btn btn-sm btn-primary"
               type="button"
               onClick={onSaveAnalysisRuntimeConfig}
-              disabled={analysisConfigSaving}
+              disabled={!analysisRuntimeLoaded || analysisConfigSaving}
             >
               {analysisConfigSaving ? '保存中...' : '保存分析参数'}
             </button>
@@ -483,7 +501,7 @@ export default function VideoAnalysisPluginSettings({
               className="btn btn-sm"
               type="button"
               onClick={onResetAnalysisRuntimeConfig}
-              disabled={analysisConfigSaving}
+              disabled={!analysisRuntimeLoaded || analysisConfigSaving}
             >
               恢复本地默认
             </button>

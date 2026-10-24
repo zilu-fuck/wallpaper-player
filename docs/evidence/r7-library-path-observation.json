@@ -1,0 +1,109 @@
+{
+  "date": "2026-10-15T10:55:44.421Z",
+  "sourceSha256": {
+    "main/paths.js": "3422ec30987c55308fea878739efec3f6ad8f4cf132e157d042a037061dc671b",
+    "main/scanner.js": "cb0ba79b0359a065e28a80020995617067d2f29a9a5121dd7a9fa5fa16c07b5d",
+    "main/security/media-access.js": "c5263dcdc6cfd1c4486774061ddae6764ea4a6abcc84b4972497dd7c296f9bac",
+    "main/application/library-service.js": "e5be614d48ee989238fb640b1e9d624df8b13af857251269da07801282ec04bd",
+    "main/video-metadata.js": "ff4a40f6b3882b1567c9ab7a42e0a6a62a535a66d33bb873709efc6f0eae3801",
+    "scripts/verify-library-performance.js": "d4761999c972e2f7ab1ff3586d95e1cfd83e07fa6279d79b646ab761dfb11fdb"
+  },
+  "libraryPerformance": {
+    "date": "2026-10-15T10:54:26.057Z",
+    "platform": "win32",
+    "node": "v24.14.0",
+    "cpu": "AMD Ryzen 7 5800X 8-Core Processor             ",
+    "memoryGb": 31.921031951904297,
+    "results": [
+      {
+        "size": 5000,
+        "fixture": "24-byte MP4 headers on local disk; real scanner/settings/HTTP; no decoder or native UI",
+        "coldScanMs": 2251.2308000000003,
+        "firstQueryMs": 295.3230000000003,
+        "queryP95Ms": 14.669499999999971,
+        "searchP95Ms": 8.590099999999893,
+        "responseP95Bytes": 137527,
+        "revisionMs": 1.6068000000004758,
+        "eventLoopP95Ms": 13.656063,
+        "snapshotBuilds": 1,
+        "hotIndexedFirstPageMs": 960.0997,
+        "count": 5000
+      },
+      {
+        "size": 10000,
+        "fixture": "24-byte MP4 headers on local disk; real scanner/settings/HTTP; no decoder or native UI",
+        "coldScanMs": 5275.1585,
+        "firstQueryMs": 593.546699999999,
+        "queryP95Ms": 18.15360000000146,
+        "searchP95Ms": 14.4204000000027,
+        "responseP95Bytes": 137521,
+        "revisionMs": 1.6440000000002328,
+        "eventLoopP95Ms": 16.670719,
+        "snapshotBuilds": 1,
+        "hotIndexedFirstPageMs": 2093.4416,
+        "count": 10000,
+        "desktopWarmupMs": 4860.846099999995,
+        "desktopInteractiveMs": 1577.7865999999995,
+        "desktopSamples": [
+          {
+            "desktopInteractiveMs": 1577.7865999999995,
+            "firstPageCards": 100,
+            "filteredCards": 1,
+            "searchHandled": true,
+            "progressiveScan": true,
+            "phases": {
+              "mainRequiredMs": 295.1521,
+              "nativeReadyMs": 346.9411,
+              "windowCreatedMs": 500.1662,
+              "documentLoadedMs": 703.948,
+              "scanStartMs": 798.3242999999999,
+              "scanEndMs": 911.3117000000001,
+              "scanCount": 107,
+              "firstCardsMs": 1057.1045
+            }
+          },
+          {
+            "desktopInteractiveMs": 1549.6515999999974,
+            "firstPageCards": 100,
+            "filteredCards": 1,
+            "searchHandled": true,
+            "progressiveScan": true,
+            "phases": {
+              "mainRequiredMs": 293.8882,
+              "nativeReadyMs": 350.6571,
+              "windowCreatedMs": 520.8197,
+              "documentLoadedMs": 741.8968000000001,
+              "scanStartMs": 822.5619,
+              "scanEndMs": 928.9234,
+              "scanCount": 107,
+              "firstCardsMs": 1062.8555999999999
+            }
+          },
+          {
+            "desktopInteractiveMs": 1466.7687000000005,
+            "firstPageCards": 100,
+            "filteredCards": 1,
+            "searchHandled": true,
+            "progressiveScan": true,
+            "phases": {
+              "mainRequiredMs": 289.6173,
+              "nativeReadyMs": 341.17240000000004,
+              "windowCreatedMs": 484.5372,
+              "documentLoadedMs": 680.8078,
+              "scanStartMs": 762.1682000000001,
+              "scanEndMs": 858.788,
+              "scanCount": 107,
+              "firstCardsMs": 984.3141
+            }
+          }
+        ]
+      }
+    ],
+    "pending": [
+      "native phone first screen and scroll frames",
+      "playback/thumb contention and PSS",
+      "installed/portable Windows device matrix"
+    ]
+  },
+  "observation": "First R7 batch 8 run: scored desktop starts passed 2 s but the separately excluded warmup took 4860.8461 ms. Its phases were not retained by the existing verifier, so the cause is unproven. Preserve this observation; repeat with warmup phases and explicit metadata service teardown. No product source changes between the two samples are planned."
+}

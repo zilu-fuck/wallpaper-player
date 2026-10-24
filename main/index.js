@@ -3,11 +3,12 @@ const log = require('electron-log')
 const { IPC, EVENT } = require('./ipc-channels')
 const { setupCSP, createWindow, getMainWindow, setWindowCloseHandler } = require('./window')
 const { setupIPC } = require('./ipc')
+const { settingsBroadcast } = require('./application/settings-broadcast')
 const { setupAutoUpdater, disposeUpdater } = require('./updater')
 const { initMpv, destroyMpv } = require('./mpv-integration')
 const { disposeDownloadManager } = require('./download-manager')
 const { unwatchAllDirectories } = require('./scanner')
-const { loadSettings, saveSettings, sanitizeSettingsForSave, sanitizeSettingsForRenderer, onSettingsChanged } = require('./settings')
+const { loadSettings, saveSettings, sanitizeSettingsForSave, flushSettingsWrites, disposeSettingsSerialization } = require('./settings')
 const { setupPlugins, disposePlugins } = require('./plugins')
 const { getPortableDataFallback } = require('./portable-user-data')
 const {
@@ -31,6 +32,8 @@ let isAppQuitting = false
 let closePromptOpen = false
 let removeSettingsChangedListener = null
 let pendingSecondInstance = false
+let shutdownStarted = false
+let shutdownComplete = false
 
 function getTodayKey() {
   const now = new Date()
@@ -49,11 +52,7 @@ function sendPlayerShortcut(action, value) {
 
 function setupSettingsSync() {
   removeSettingsChangedListener?.()
-  removeSettingsChangedListener = onSettingsChanged((settings) => {
-    const win = getMainWindow()
-    if (!win || win.isDestroyed()) return
-    win.webContents.send(EVENT.SETTINGS_CHANGED, sanitizeSettingsForRenderer(settings))
-  })
+  removeSettingsChangedListener = settingsBroadcast.start()
 }
 
 function registerGlobalMediaShortcuts() {
@@ -86,14 +85,12 @@ function showPortableDataFallbackNotice(win) {
   const fallback = getPortableDataFallback()
   if (!fallback) return
   log.warn('[portable] Data 目录不可写，已回退系统 userData:', fallback)
-  dialog.showMessageBox(win, {
-    type: 'warning',
+  // 启动早期窗口可能还没装载好，notify 内部会自动回退到系统对话框。
+  require('./application/confirm').notify(win, {
+    tone: 'warning',
     title: '便携数据目录不可写',
     message: '已改用系统数据目录保存本次数据',
-    detail: `便携目录：${fallback.requestedPath}\n系统目录：${fallback.fallbackPath}\n\n便携目录恢复可写后，数据不会自动迁回。`,
-    buttons: ['知道了'],
-    defaultId: 0,
-    noLink: true
+    detail: `便携目录：${fallback.requestedPath}\n系统目录：${fallback.fallbackPath}\n\n便携目录恢复可写后，数据不会自动迁回。`
   }).catch(error => {
     log.warn('[portable] fallback notice failed:', error?.message || error)
   })
@@ -154,7 +151,11 @@ async function handleWindowClose(event, win) {
       return
     }
 
-    const result = await dialog.showMessageBox(win, {
+    // 优先用应用内自绘的询问框（与设计系统一致）；
+    // 渲染层不可用（正在重载、崩溃、超时）时回退到系统对话框。
+    const { askRendererToClose, canAskRenderer } = require('./ipc/window-shell')
+    const inApp = canAskRenderer(win) ? await askRendererToClose(win) : null
+    const result = inApp || await dialog.showMessageBox(win, {
       type: 'question',
       title: '关闭应用',
       message: '要最小化/隐藏到后台，还是退出应用？',
@@ -169,8 +170,12 @@ async function handleWindowClose(event, win) {
       noLink: true
     })
 
-    const action = result.response === 1 ? 'exit' : 'minimize'
-    if (result.checkboxChecked) {
+    // 应用内询问框可以回答 cancel（保持窗口打开）——此时什么都不做。
+    if (inApp && inApp.action === 'cancel') return
+
+    const action = (inApp ? inApp.action : (result.response === 1 ? 'exit' : 'minimize')) === 'exit' ? 'exit' : 'minimize'
+    const rememberAction = inApp ? Boolean(inApp.remember) : Boolean(result.checkboxChecked)
+    if (rememberAction) {
       saveSettings(sanitizeSettingsForSave({
         windowClose: {
           rememberedAction: action,
@@ -186,7 +191,14 @@ async function handleWindowClose(event, win) {
 }
 
 async function start() {
+  const settingsReady = await require('./application/settings-startup').prepareSettingsForStartup({ dialog })
+  if (isAppQuitting) return
+  if (!settingsReady) { app.exit(1); return }
   setupCSP()
+  await require('./remote/identity').refreshIdentity().catch(error => {
+    log.error('[identity] 初始化失败:', error)
+  })
+  if (isAppQuitting) return
   setWindowCloseHandler((event, win) => {
     handleWindowClose(event, win).catch((error) => {
       log.error('[window] close prompt failed:', error)
@@ -194,6 +206,7 @@ async function start() {
     })
   })
   await setupPlugins()
+  if (isAppQuitting) return
   setupIPC()
   setupSettingsSync()
   const win = createWindow()
@@ -237,7 +250,11 @@ if (!hasSingleInstanceLock) {
     if (process.platform !== 'darwin') app.quit()
   })
 
-  app.on('before-quit', () => {
+  app.on('before-quit', (event) => {
+    if (shutdownComplete) return
+    event.preventDefault()
+    if (shutdownStarted) return
+    shutdownStarted = true
     isAppQuitting = true
     markQuitting()
     removeSettingsChangedListener?.()
@@ -245,14 +262,40 @@ if (!hasSingleInstanceLock) {
     globalShortcut.unregisterAll()
     disposeUpdater()
     unwatchAllDirectories()
-    disposeRemoteAccess().catch((error) => {
-      log.error('[remote] dispose failed:', error)
+    require('./application/media-work-service').mediaWorkService.dispose()
+    require('./application/resource-scheduler').mediaScheduler.beginShutdown?.({ preserveTypes: ['download-daemon'] })
+    let resourceCleanup
+    const disposeResourceScheduler = () => resourceCleanup ||= require('./application/resource-scheduler').mediaScheduler.dispose()
+    const teardown = (async () => {
+      const results = await Promise.allSettled([
+        disposeRemoteAccess(), require('./remote/transcode').disposeTranscodes(), disposePlugins(), destroyMpv(), disposeDownloadManager(),
+        require('./video-metadata').disposeVideoMetadata()
+      ])
+      for (const result of results) {
+        if (result.status === 'rejected') log.error('[shutdown] cleanup failed:', result.reason)
+      }
+      await disposeResourceScheduler()
+      await flushSettingsWrites()
+      await disposeSettingsSerialization()
+    })()
+    let deadline
+    const bounded = new Promise(resolve => {
+      deadline = setTimeout(() => {
+        log.warn('[shutdown] cleanup exceeded 5 seconds')
+        void disposeSettingsSerialization({ cancel: true }).catch(error => log.error('[shutdown] forced settings cleanup failed:', error))
+        void disposeResourceScheduler().catch(error => log.error('[shutdown] forced resource cleanup failed:', error))
+        const forced = require('./mpv-integration').mpvManager.destroy()
+        forced?.catch?.(error => log.error('[shutdown] forced player cleanup failed:', error))
+        resolve()
+      }, 5000)
     })
-    disposePlugins().catch((error) => {
-      log.error('[plugins] dispose failed:', error)
+    Promise.race([teardown, bounded]).catch(error => {
+      log.error('[shutdown] persistence failed:', error)
+    }).finally(() => {
+      clearTimeout(deadline)
+      shutdownComplete = true
+      app.quit()
     })
-    disposeDownloadManager()
-    destroyMpv()
   })
 }
 

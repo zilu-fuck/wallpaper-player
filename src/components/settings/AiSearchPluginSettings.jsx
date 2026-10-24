@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from 'react'
+import { useCallback, useMemo } from 'react'
 
 const PROVIDER_OPTIONS = [
   { value: 'local', label: '本地 LLM', description: 'Ollama / LM Studio 等本地服务' },
@@ -109,6 +109,9 @@ export default function AiSearchPluginSettings({
   configDrafts,
   configErrors,
   busy,
+  editingDisabled,
+  uiState,
+  onUiChange,
   onDraftChange,
   onSaveDraftConfig,
   onCommitConfig,
@@ -122,12 +125,13 @@ export default function AiSearchPluginSettings({
   const trustedRules = useMemo(() => (
     normalizeTrustedRules(trustedRuleDraft)
   ), [trustedRuleDraft])
-  const [trustedSiteInput, setTrustedSiteInput] = useState('')
-  const [bindingTagInput, setBindingTagInput] = useState('')
-  const [bindingSiteInput, setBindingSiteInput] = useState('')
-  const [selectedBindingTags, setSelectedBindingTags] = useState([])
-  const [tagSearch, setTagSearch] = useState('')
-  const [tagPickerOpen, setTagPickerOpen] = useState(false)
+  const { trustedSiteInput = '', bindingTagInput = '', bindingSiteInput = '', selectedBindingTags = [], tagSearch = '', tagPickerOpen = false } = uiState
+  const setTrustedSiteInput = value => onUiChange({ trustedSiteInput: value })
+  const setBindingTagInput = value => onUiChange({ bindingTagInput: value })
+  const setBindingSiteInput = value => onUiChange({ bindingSiteInput: value })
+  const setSelectedBindingTags = value => onUiChange({ selectedBindingTags: value })
+  const setTagSearch = value => onUiChange({ tagSearch: value })
+  const setTagPickerOpen = value => onUiChange({ tagPickerOpen: value })
   const normalizedAvailableTags = useMemo(() => uniqueTags(availableTags), [availableTags])
   const selectedTagKeys = useMemo(() => (
     new Set(selectedBindingTags.map(tag => tag.toLocaleLowerCase()))
@@ -283,7 +287,7 @@ export default function AiSearchPluginSettings({
                 value={configDrafts.difyEndpoint ?? ''}
                 onChange={e => handleDraft('difyEndpoint', e.target.value)}
                 placeholder="https://api.dify.dev/v1"
-                disabled={busy}
+                disabled={editingDisabled}
               />
             </Field>
             <Field
@@ -297,7 +301,7 @@ export default function AiSearchPluginSettings({
                 value={configDrafts.difyApiKey ?? ''}
                 onChange={e => handleDraft('difyApiKey', e.target.value)}
                 placeholder="app-xxxxxxxx"
-                disabled={busy}
+                disabled={editingDisabled}
               />
             </Field>
           </div>
@@ -320,7 +324,7 @@ export default function AiSearchPluginSettings({
                 value={configDrafts.cloudBaseUrl ?? ''}
                 onChange={e => handleDraft('cloudBaseUrl', e.target.value)}
                 placeholder="https://api.openai.com/v1"
-                disabled={busy}
+                disabled={editingDisabled}
               />
             </Field>
             <Field
@@ -334,7 +338,7 @@ export default function AiSearchPluginSettings({
                 value={configDrafts.cloudModelName ?? ''}
                 onChange={e => handleDraft('cloudModelName', e.target.value)}
                 placeholder="gpt-4o"
-                disabled={busy}
+                disabled={editingDisabled}
               />
             </Field>
             <Field
@@ -348,7 +352,7 @@ export default function AiSearchPluginSettings({
                 value={configDrafts.cloudApiKey ?? ''}
                 onChange={e => handleDraft('cloudApiKey', e.target.value)}
                 placeholder="sk-xxxxxxxx"
-                disabled={busy}
+                disabled={editingDisabled}
               />
             </Field>
           </div>
@@ -371,7 +375,7 @@ export default function AiSearchPluginSettings({
                 value={configDrafts.localBaseUrl ?? ''}
                 onChange={e => handleDraft('localBaseUrl', e.target.value)}
                 placeholder="http://localhost:11434"
-                disabled={busy}
+                disabled={editingDisabled}
               />
             </Field>
             <Field
@@ -385,7 +389,7 @@ export default function AiSearchPluginSettings({
                 value={configDrafts.localModelName ?? ''}
                 onChange={e => handleDraft('localModelName', e.target.value)}
                 placeholder="qwen2.5"
-                disabled={busy}
+                disabled={editingDisabled}
               />
             </Field>
             <Field
@@ -398,7 +402,7 @@ export default function AiSearchPluginSettings({
                 value={configDrafts.localApiKey ?? ''}
                 onChange={e => handleDraft('localApiKey', e.target.value)}
                 placeholder="可选"
-                disabled={busy}
+                disabled={editingDisabled}
               />
             </Field>
           </div>
@@ -420,7 +424,7 @@ export default function AiSearchPluginSettings({
               max={50}
               value={configDrafts.maxPages ?? ''}
               onChange={e => handleDraft('maxPages', e.target.value)}
-              disabled={busy}
+              disabled={editingDisabled}
             />
           </Field>
           <Field
@@ -434,7 +438,7 @@ export default function AiSearchPluginSettings({
               max={300}
               value={configDrafts.timeout ?? ''}
               onChange={e => handleDraft('timeout', e.target.value)}
-              disabled={busy}
+              disabled={editingDisabled}
             />
           </Field>
           <Field
@@ -448,7 +452,7 @@ export default function AiSearchPluginSettings({
               max={20}
               value={configDrafts.trustedMinEvidence ?? ''}
               onChange={e => handleDraft('trustedMinEvidence', e.target.value)}
-              disabled={busy}
+              disabled={editingDisabled}
             />
           </Field>
           <Field
@@ -463,7 +467,7 @@ export default function AiSearchPluginSettings({
               step={0.01}
               value={configDrafts.trustedConfidenceThreshold ?? ''}
               onChange={e => handleDraft('trustedConfidenceThreshold', e.target.value)}
-              disabled={busy}
+              disabled={editingDisabled}
             />
           </Field>
         </div>
@@ -482,7 +486,7 @@ export default function AiSearchPluginSettings({
                 value={trustedSiteInput}
                 onChange={e => setTrustedSiteInput(e.target.value)}
                 placeholder={'bangumi.tv\nbilibili.com'}
-                disabled={busy}
+                disabled={editingDisabled}
               />
             </Field>
             <button
@@ -558,7 +562,7 @@ export default function AiSearchPluginSettings({
               value={bindingTagInput}
               onChange={e => setBindingTagInput(e.target.value)}
               placeholder="手动补充标签"
-              disabled={busy}
+              disabled={editingDisabled}
             />
           </Field>
           <Field label="绑定网站" description="多个网站可用空格、逗号或换行分隔">
@@ -566,7 +570,7 @@ export default function AiSearchPluginSettings({
               value={bindingSiteInput}
               onChange={e => setBindingSiteInput(e.target.value)}
               placeholder={'bangumi.tv\npixiv.net'}
-              disabled={busy}
+              disabled={editingDisabled}
             />
           </Field>
           <button

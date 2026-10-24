@@ -1,20 +1,26 @@
 const crypto = require('crypto')
 const path = require('path')
 const { pathKey } = require('../paths')
-const { createBoundScopedToken, loadIdentity } = require('./identity')
+const { createBoundScopedToken, createBoundScopedTokenSigner, loadIdentity } = require('./identity')
 
 const idToPath = new Map()
 const idToFavoriteKey = new Map()
 const THUMBNAIL_TOKEN_TTL_MS = 24 * 60 * 60 * 1000
 
 function getStableId(prefix, value) {
-  const identity = loadIdentity()
-  const digest = crypto
-    .createHmac('sha256', identity.machineSecret)
+  return createStableIdFactory(prefix)(value)
+}
+
+function createStableIdFactory(prefix = 'video') {
+  const { machineSecret } = loadIdentity()
+  return value => {
+    const digest = crypto
+    .createHmac('sha256', machineSecret)
     .update(pathKey(value))
     .digest('base64url')
     .slice(0, 32)
   return `${prefix}_${digest}`
+  }
 }
 
 function getVideoId(fullPath) {
@@ -34,6 +40,10 @@ function createThumbnailToken(videoId, accessToken) {
   return accessToken
     ? createBoundScopedToken('thumbnail', videoId, accessToken, THUMBNAIL_TOKEN_TTL_MS)
     : ''
+}
+
+function createThumbnailTokenFactory(accessToken) {
+  return accessToken ? createBoundScopedTokenSigner('thumbnail', accessToken, THUMBNAIL_TOKEN_TTL_MS) : () => ''
 }
 
 function getFallbackFavoriteKey(fullPath) {
@@ -67,7 +77,7 @@ function sanitizeMedia(media) {
 }
 
 function toRemoteVideo(video, basePath, context = {}) {
-  const id = getVideoId(video.fullPath)
+  const id = (context.videoIdFactory || getVideoId)(video.fullPath)
   const favoriteKey = video.favoriteKey || getFallbackFavoriteKey(video.fullPath)
   const systemTags = normalizeTags(video.systemTags ?? video.tags)
   const customTags = normalizeTags(video.customTags)
@@ -87,6 +97,7 @@ function toRemoteVideo(video, basePath, context = {}) {
     tags: allTags,
     systemTags,
     customTags,
+    customTagsRevision: Number(video.customTagsRevision) || 0,
     favorite: Boolean(context.favoriteKeys?.has(favoriteKey) || context.favoriteKeys?.has(video.fullPath)),
     directoryId: context.directoryId || '',
     directoryName: context.directoryName || '',
@@ -98,9 +109,10 @@ function toRemoteVideo(video, basePath, context = {}) {
 }
 
 function rememberVideos(videos) {
+  const getId = createStableIdFactory()
   for (const video of videos) {
     if (video?.fullPath) {
-      const id = getVideoId(video.fullPath)
+      const id = getId(video.fullPath)
       idToPath.set(id, video.fullPath)
       idToFavoriteKey.set(id, video.favoriteKey || getFallbackFavoriteKey(video.fullPath))
     }
@@ -128,6 +140,8 @@ module.exports = {
   getDirectoryId,
   getDirectoryName,
   createThumbnailToken,
+  createThumbnailTokenFactory,
+  createStableIdFactory,
   toRemoteVideo,
   rememberVideos,
   replaceRememberedVideos,

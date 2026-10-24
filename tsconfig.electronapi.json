@@ -1,4 +1,5 @@
 {
+  "extends": "./tsconfig.shared-aliases.json",
   "compilerOptions": {
     "noEmit": true,
     "strict": true,

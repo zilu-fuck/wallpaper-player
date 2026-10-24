@@ -1,0 +1,361 @@
+{
+  "date": "2026-10-15T11:01:07.609Z",
+  "phase": "R7 batch 8: asynchronous scanner, library and metadata path preparation",
+  "sourceSha256": {
+    "main/paths.js": "3422ec30987c55308fea878739efec3f6ad8f4cf132e157d042a037061dc671b",
+    "main/scanner.js": "cb0ba79b0359a065e28a80020995617067d2f29a9a5121dd7a9fa5fa16c07b5d",
+    "main/security/media-access.js": "c5263dcdc6cfd1c4486774061ddae6764ea4a6abcc84b4972497dd7c296f9bac",
+    "main/application/library-service.js": "e5be614d48ee989238fb640b1e9d624df8b13af857251269da07801282ec04bd",
+    "main/video-metadata.js": "ff4a40f6b3882b1567c9ab7a42e0a6a62a535a66d33bb873709efc6f0eae3801",
+    "main/application/resource-scheduler.js": "af4d6ab3e34e0ea4e498820a6fba5cced8d67790fa1d4f18fa713b6674f91682",
+    "main/settings.js": "42f3b5a00fcab73dfd42aad0a8d88f59f6c1b69c419e4adfdb6d46f5c0e78bde",
+    "scripts/verify-library-path-resolution.js": "71cea85110af2e80a853e28441060432c60044c8d6731d222829943c95775db5",
+    "scripts/verify-library-performance.js": "0cc8563de37522762dd55bdbd1c0ca43b287aa7541c45b019ae20315db60e2f2",
+    "scripts/probe-desktop-library-startup.js": "219bb6fac3ffa70b47277f231367be15af3ad2e7f63081690e7df75506734203",
+    "scripts/verify-async-media-policy.js": "f457c64889b0326641407571769cf4ff3a9758a65378af306e3f94d5bc5288d6",
+    "scripts/verify-media-access.js": "27d992e9853d3bd69db855552b074b358766c0613bd2035e927377c6df3acb45",
+    "scripts/verify-video-metadata-cache.js": "5d1351211815c32a9e581d867e9aab511ebacdcf5c9f78fba76c474c6e18026b",
+    "scripts/verify-media-job-lifecycle.js": "593a61fb568708d373c494849c010d36541c7ad402380e32b67b7b53e363eb38",
+    "package.json": "615e76ac6deeac35c322b6a584853f6f9581a79a5cf56c791088e97b42469342",
+    ".github/workflows/ci.yml": "4b9be4607f22d745dddaeb0dfaf91edef7645f3f721b0f5359bda2ba35607d01"
+  },
+  "environment": {
+    "platform": "win32",
+    "node": "v24.14.0",
+    "cpu": "AMD Ryzen 7 5800X 8-Core Processor             ",
+    "memoryGb": 31.921031951904297,
+    "electronTestArgs": [
+      "--in-process-gpu",
+      "--no-sandbox"
+    ],
+    "productionAndCiDefaultsChanged": false
+  },
+  "correctness": {
+    "date": "2026-10-15T10:53:00.477Z",
+    "files": 49,
+    "legacyAliases": 48,
+    "batchMaximum": 8,
+    "warmAdmitted": 512,
+    "syncRealpathCalls": 0,
+    "controlWhileBlockedMs": 3.8122000000000185,
+    "conditions": "Real 24-byte local MP4 headers, junction on Windows, production scanner/index/library/metadata and authenticated HTTP. Async realpath gates prove control progress, bounded batches, privacy/tag invalidation and shutdown ownership. Metadata background scheduler intentionally paused; no decoder performance claim."
+  },
+  "limits": {
+    "pathCallsPerBatch": 8,
+    "indexValidationWorkers": 8,
+    "metadataWarmAcrossStages": 512,
+    "metadataWarmPreparationBatches": 1,
+    "scope": "Eight path calls per batch, not a global process-wide filesystem semaphore. Metadata raw waiting paths, issued path resolutions, canonical waiting work and active warm jobs share the 512-item capacity. Existing native media scheduler limits remain unchanged."
+  },
+  "libraryPerformance": {
+    "date": "2026-10-15T10:57:20.061Z",
+    "platform": "win32",
+    "node": "v24.14.0",
+    "cpu": "AMD Ryzen 7 5800X 8-Core Processor             ",
+    "memoryGb": 31.921031951904297,
+    "results": [
+      {
+        "size": 5000,
+        "fixture": "24-byte MP4 headers on local disk; real scanner/settings/HTTP; no decoder or native UI",
+        "coldScanMs": 2232.3964,
+        "firstQueryMs": 231.55470000000014,
+        "queryP95Ms": 16.19210000000021,
+        "searchP95Ms": 9.711299999999937,
+        "responseP95Bytes": 137495,
+        "revisionMs": 2.1864000000000487,
+        "eventLoopP95Ms": 16.171007,
+        "snapshotBuilds": 1,
+        "hotIndexedFirstPageMs": 1056.2354,
+        "count": 5000
+      },
+      {
+        "size": 10000,
+        "fixture": "24-byte MP4 headers on local disk; real scanner/settings/HTTP; no decoder or native UI",
+        "coldScanMs": 4224.817399999998,
+        "firstQueryMs": 457.7989000000016,
+        "queryP95Ms": 17.086999999999534,
+        "searchP95Ms": 9.507799999999406,
+        "responseP95Bytes": 137598,
+        "revisionMs": 1.3541000000004715,
+        "eventLoopP95Ms": 13.877247,
+        "snapshotBuilds": 1,
+        "hotIndexedFirstPageMs": 1887.9019,
+        "count": 10000,
+        "desktopWarmupMs": 2107.0375999999997,
+        "desktopWarmup": {
+          "desktopInteractiveMs": 2107.0375999999997,
+          "firstPageCards": 100,
+          "filteredCards": 1,
+          "searchHandled": true,
+          "progressiveScan": true,
+          "phases": {
+            "mainRequiredMs": 334.99240000000003,
+            "nativeReadyMs": 405.4477,
+            "windowCreatedMs": 615.4175,
+            "documentLoadedMs": 957.31,
+            "scanStartMs": 1067.4541,
+            "scanEndMs": 1198.886,
+            "scanCount": 107,
+            "firstCardsMs": 1431.8169
+          }
+        },
+        "desktopWarmupWithinBudget": false,
+        "desktopInteractiveMs": 1456.3535000000047,
+        "desktopSamples": [
+          {
+            "desktopInteractiveMs": 1456.3535000000047,
+            "firstPageCards": 100,
+            "filteredCards": 1,
+            "searchHandled": true,
+            "progressiveScan": true,
+            "phases": {
+              "mainRequiredMs": 292.30999999999995,
+              "nativeReadyMs": 344.9087999999999,
+              "windowCreatedMs": 481.1381,
+              "documentLoadedMs": 673.977,
+              "scanStartMs": 751.4298,
+              "scanEndMs": 849.0414999999999,
+              "scanCount": 107,
+              "firstCardsMs": 978.9396
+            }
+          },
+          {
+            "desktopInteractiveMs": 1404.7117999999973,
+            "firstPageCards": 100,
+            "filteredCards": 1,
+            "searchHandled": true,
+            "progressiveScan": true,
+            "phases": {
+              "mainRequiredMs": 278.0615,
+              "nativeReadyMs": 329.10400000000004,
+              "windowCreatedMs": 464.34080000000006,
+              "documentLoadedMs": 663.6709000000001,
+              "scanStartMs": 742.5527,
+              "scanEndMs": 843.6639,
+              "scanCount": 107,
+              "firstCardsMs": 960.1131
+            }
+          },
+          {
+            "desktopInteractiveMs": 1423.280700000003,
+            "firstPageCards": 100,
+            "filteredCards": 1,
+            "searchHandled": true,
+            "progressiveScan": true,
+            "phases": {
+              "mainRequiredMs": 274.5843,
+              "nativeReadyMs": 324.75829999999996,
+              "windowCreatedMs": 464.139,
+              "documentLoadedMs": 680.2618000000001,
+              "scanStartMs": 758.7121000000001,
+              "scanEndMs": 852.5598000000001,
+              "scanCount": 107,
+              "firstCardsMs": 979.3205999999999
+            }
+          }
+        ]
+      }
+    ],
+    "pending": [
+      "desktop first-launch stability (separate warmup and its phases are recorded, not included in three scored starts)",
+      "native phone first screen and scroll frames",
+      "playback/thumb contention and PSS",
+      "installed/portable Windows device matrix"
+    ]
+  },
+  "earlierRun": {
+    "file": "docs/evidence/r7-library-path-observation.json",
+    "sha256": "193ef2078a5af5b87f019e5f988c4ec62b76bfe8e9febdb9b6837fca5269079d",
+    "sameProductSources": true,
+    "verifierDifference": "Second run retains warmup phases and waits for metadata-service disposal between fixture sizes. Budgets and the three scored starts are unchanged."
+  },
+  "previousBatch": {
+    "file": "docs/evidence/r7-json-responses.json",
+    "libraryPerformance": {
+      "date": "2026-10-15T10:27:19.506Z",
+      "platform": "win32",
+      "node": "v24.14.0",
+      "cpu": "AMD Ryzen 7 5800X 8-Core Processor             ",
+      "memoryGb": 31.921031951904297,
+      "results": [
+        {
+          "size": 5000,
+          "fixture": "24-byte MP4 headers on local disk; real scanner/settings/HTTP; no decoder or native UI",
+          "coldScanMs": 3433.1492,
+          "firstQueryMs": 293.5499999999993,
+          "queryP95Ms": 12.876900000000205,
+          "searchP95Ms": 10.87249999999949,
+          "responseP95Bytes": 137497,
+          "revisionMs": 1.5191999999997279,
+          "eventLoopP95Ms": 15.384575,
+          "snapshotBuilds": 1,
+          "hotIndexedFirstPageMs": 2098.2938000000004,
+          "count": 5000
+        },
+        {
+          "size": 10000,
+          "fixture": "24-byte MP4 headers on local disk; real scanner/settings/HTTP; no decoder or native UI",
+          "coldScanMs": 7709.097599999999,
+          "firstQueryMs": 571.1538,
+          "queryP95Ms": 12.410800000001473,
+          "searchP95Ms": 11.719900000000052,
+          "responseP95Bytes": 137598,
+          "revisionMs": 1.4945000000006985,
+          "eventLoopP95Ms": 17.776639,
+          "snapshotBuilds": 1,
+          "hotIndexedFirstPageMs": 4498.4703,
+          "count": 10000,
+          "desktopWarmupMs": 1616.179400000001,
+          "desktopInteractiveMs": 1424.743300000002,
+          "desktopSamples": [
+            {
+              "desktopInteractiveMs": 1424.743300000002,
+              "firstPageCards": 100,
+              "filteredCards": 1,
+              "searchHandled": true,
+              "progressiveScan": true,
+              "phases": {
+                "mainRequiredMs": 266.1445,
+                "nativeReadyMs": 313.6898,
+                "windowCreatedMs": 442.81410000000005,
+                "documentLoadedMs": 643.9056,
+                "scanStartMs": 706.986,
+                "scanEndMs": 854.9943,
+                "scanCount": 131,
+                "firstCardsMs": 980.8807
+              }
+            },
+            {
+              "desktopInteractiveMs": 1336.9871999999887,
+              "firstPageCards": 100,
+              "filteredCards": 1,
+              "searchHandled": true,
+              "progressiveScan": true,
+              "phases": {
+                "mainRequiredMs": 257.29760000000005,
+                "nativeReadyMs": 299.6959,
+                "windowCreatedMs": 421.8802,
+                "documentLoadedMs": 612.5138,
+                "scanStartMs": 696.637,
+                "scanEndMs": 828.2193,
+                "scanCount": 131,
+                "firstCardsMs": 940.0169999999998
+              }
+            },
+            {
+              "desktopInteractiveMs": 1317.403099999996,
+              "firstPageCards": 100,
+              "filteredCards": 1,
+              "searchHandled": true,
+              "progressiveScan": true,
+              "phases": {
+                "mainRequiredMs": 253.21770000000004,
+                "nativeReadyMs": 296.8171,
+                "windowCreatedMs": 414.80449999999996,
+                "documentLoadedMs": 597.4685,
+                "scanStartMs": 654.1277,
+                "scanEndMs": 799.6084,
+                "scanCount": 131,
+                "firstCardsMs": 921.1391
+              }
+            }
+          ]
+        }
+      ],
+      "pending": [
+        "native phone first screen and scroll frames",
+        "playback/thumb contention and PSS",
+        "installed/portable Windows device matrix"
+      ]
+    },
+    "interpretation": "Historical same-host/same-fixture observations, not an isolated causal experiment. Both before and after include ordinary OS/cache/load variance. Steady query P95 did not uniformly improve."
+  },
+  "startupBudgetFullyProven": false,
+  "startupObservations": {
+    "excludedWarmupsMs": [
+      4860.846099999995,
+      2107.0375999999997
+    ],
+    "lastWarmupWithinBudget": false,
+    "interpretation": "Both excluded warmups exceeded 2 seconds; three scored starts met the existing verifier budget in both runs. Three-sample P95 is the maximum, not a long-term percentile. Warmup phases now retained; attribution and first-launch stability remain incomplete.",
+    "desktopScope": "Actual production main/preload/React in hidden Electron. First 100 cards with working search under progressive scan; prefix count 107, not completion of the full 10000-file scan.",
+    "fixtures": "Real local 24-byte MP4 headers and generated legacy tags. No decoder, physical-phone first frame, scroll frames or long-session memory acceptance."
+  },
+  "verification": [
+    {
+      "command": "npm run verify:library-paths",
+      "exitCode": 0
+    },
+    {
+      "command": "npm run verify:library-performance -- --in-process-gpu --no-sandbox",
+      "runs": 2,
+      "exitCode": 0,
+      "caveat": "CLI scored gates passed; separately recorded warmups exceeded budget."
+    },
+    {
+      "command": "npm run verify:library-query",
+      "exitCode": 0,
+      "scope": "Production desktop hook, phone API/repository/page lifecycle, cursor/query semantics, persisted index and scan invalidation."
+    },
+    {
+      "command": "npm run verify:library-invalidation",
+      "exitCode": 0
+    },
+    {
+      "command": "npm run verify:media-access",
+      "exitCode": 0,
+      "scope": "Privacy, junction/subst/case, stale signatures and snapshot rebuild race."
+    },
+    {
+      "command": "node scripts/verify-async-media-policy.js",
+      "exitCode": 0
+    },
+    {
+      "command": "npm run verify:video-metadata",
+      "exitCode": 0
+    },
+    {
+      "command": "npm run verify:media-job-lifecycle",
+      "exitCode": 0,
+      "scope": "Actual FFmpeg/ffprobe, shared HTTP/IPC cancellation, lock races and process cleanup."
+    },
+    {
+      "command": "npm run verify:remote-library",
+      "exitCode": 0
+    },
+    {
+      "command": "npm run verify:json-responses",
+      "exitCode": 0
+    },
+    {
+      "command": "npm run verify:shutdown-persistence",
+      "exitCode": 0
+    },
+    {
+      "command": "npm run build",
+      "exitCode": 0
+    },
+    {
+      "command": "npx tsc --noEmit",
+      "cwd": "mobile",
+      "exitCode": 0
+    },
+    {
+      "command": "git diff --check",
+      "exitCode": 0
+    }
+  ],
+  "retainedCompatibility": [
+    "Existing stable media IDs, HTTP/IPC JSON structures, old/full library and paginated phone clients",
+    "Legacy raw/canonical path tags including junction aliases and nonexistent-path lexical fallback",
+    "Synchronous normalizedPathKey and exported getScanIndexPath compatibility helpers remain; production scanner IO uses asynchronous internal canonicalization",
+    "Current privacy policy and library revision are rechecked across asynchronous preparation; sent data cannot be recalled and this is not an atomic filesystem transaction"
+  ],
+  "pending": [
+    "First-launch startup stability; both excluded warmups exceeded 2 seconds",
+    "Media mutation synchronous legacy path matching and credential repository reads/writes",
+    "First settings/metadata cache load, contract validation and JSON serialization latency/heap",
+    "Remaining feature decomposition, typed entrypoints and full desktop/mobile responsive, theme, large-font, return-position and accessibility matrix",
+    "R6 actual decoder, contention, physical-phone rotation and long-session memory; R8 dependency, crash recovery, signing/update/TLS/native delivery"
+  ]
+}

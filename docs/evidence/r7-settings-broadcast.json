@@ -1,0 +1,170 @@
+{
+  "date": "2026-10-23T14:32:42.911Z",
+  "status": "Negotiated full broadcasts implemented and verified in background; overall R6/R7/R8 remain active",
+  "implementation": {
+    "transport": "Current preload negotiates json-v1 for legacy subscription notifications. Negotiated feed fallback snapshots and legacy full notifications reuse the redacting worker reader; public callbacks still receive ordinary object snapshots.",
+    "snapshotOwnership": "Each committed event captures its exact immutable canonical text and version. Later commits cannot relabel a previous captured snapshot.",
+    "queue": {
+      "maxQueuedPerFrame": 32,
+      "maxInFlightPerFrame": 1,
+      "overflow": "Replace queued intermediate notifications with the latest complete snapshot, followed by later patches. Durable writes are neither skipped nor compacted.",
+      "fastPath": "An ordinary patch without legacy listeners, queued work or an in-flight full snapshot still sends immediately."
+    },
+    "recovery": "Worker failure clears stale queued messages, emits only feed/version or legacy subscription identifiers and requires an authoritative baseline. Modern clients coalesce reads and expose read failures without automatic failure loops; legacy callbacks retain their best-effort API.",
+    "lifetime": "Frame/navigation scope and broadcaster generation are checked after awaits. Retired subscription sequences and stale shutdown closures cannot affect new owners. Legacy recovery coalesces per listener and does not overwrite a newer live version.",
+    "compatibility": "Older option-free feed/legacy requests keep object transport. Existing getSettings/getSettingsFeed/onSettingsPatched/onSettingsChanged method names and channel names remain unchanged."
+  },
+  "verification": {
+    "node": [
+      "a captured historical full snapshot is delivered before later patches, without rewinding the next patch base",
+      "bounded queue compaction preserves the latest complete state and later patch causality, including earlier favorites and tags",
+      "worker failures emit body-free recovery hints, force a fresh baseline and do not strand commits enqueued during recovery",
+      "legacy unsubscribe/rejoin, navigation, close/restart and stale stop/listener closures cannot publish into newer owners",
+      "option-free older feeds and legacy subscriptions retain their ordinary object replies",
+      "actual preload decodes full packets, coalesces recovery once per listener and blocks stale reads and retired subscription callbacks",
+      "renderer resync hints coalesce authoritative reads, report failures without retry loops and reject late disposed reads",
+      "actual 10000-tag commits: old legacy full main JSON.parse 1, encoded legacy 0, encoded forced-fallback 0; public snapshots stay redacted"
+    ],
+    "mainFullParses": {
+      "tags": 10000,
+      "legacy": 1,
+      "encodedLegacy": 0,
+      "encodedFallback": 0
+    },
+    "native": [
+      "initial encoded 10000-tag feed crosses real sandbox IPC with zero full main-thread JSON.parse",
+      "production sandbox preload and SettingsClient receive only narrow actual Electron events",
+      "encoded legacy notifications cross the real sandbox with zero full main JSON.parse, ordinary public values and safe unsubscribe",
+      "a version-gap full snapshot decodes in actual preload, stays public and redacted, and needs no extra feed read or full main JSON.parse",
+      "a lost native event produces one authoritative full resync",
+      "foreign navigation cannot read or receive settings and an authorized reload gets a fresh feed",
+      "production SettingsClient requests version-only durable save replies without an extra full read",
+      "a version acknowledgment repairs a lost final save event with one authoritative full read",
+      "production media adapters use small version replies, recover a lost last event and preserve tag replay, bulk and legacy reads"
+    ],
+    "nativeFullBroadcastParses": {
+      "legacy": 0,
+      "fallback": 0
+    },
+    "nativeFullReadParses": 0,
+    "nativeShownWindows": 0,
+    "readCases": 9,
+    "regressions": {
+      "settings-feed-lifecycle.json": 11,
+      "settings-replies-lifecycle.json": 10,
+      "settings-json-lifecycle.json": 14
+    },
+    "asar": {
+      "passed": true,
+      "electron": "44.9.0",
+      "asar": true,
+      "tags": 10000,
+      "windowsCreated": 0,
+      "workerRetired": true,
+      "afterClose": {
+        "closed": true,
+        "active": false,
+        "queued": 0,
+        "worker": false,
+        "started": 2,
+        "completed": 2,
+        "cacheHits": 1
+      },
+      "scope": "Actual Electron worker module loaded from a dedicated minimal ASAR; no production installer, decoder, window or foreground activity"
+    },
+    "otherChecks": [
+      "shared generated contracts and compatibility boundaries",
+      "138 preload APIs / 127 channels and bridge typecheck",
+      "API adapter typecheck",
+      "npm run build: 91 modules",
+      "CI YAML and updated settings-feed entry parsed locally; cloud CI not run",
+      "git diff --check"
+    ],
+    "conditions": "10000 generated tags; actual Node repository/workers and actual hidden software-rendered Electron sandbox IPC with freshly bundled SettingsClient. Delays, queue overflow and reader failures also controlled in dedicated tests. No window shown or set always-on-top; no decoder, native-game, sustained-latency or memory benchmark."
+  },
+  "preservation": {
+    "originalDataFiles": 42,
+    "historicalPublicAssets": 8,
+    "selectedSvgUnchanged": true,
+    "packageLockUnchanged": true,
+    "latestFormalAsarUnchanged": true,
+    "latestFormalPackage": "E:\\wallpaper播放器\\release\\windows-1.5.1-14f3526e-d50d-47b3-8899-6f5e74d12c75",
+    "newDistributionBuilt": false,
+    "productionInstallationReplaced": false
+  },
+  "limits": [
+    "Cold startup file IO/normalization, option-free older full reads/broadcasts, internal main onSettingsChanged callbacks and other full mutation replies can still prepare large objects on main.",
+    "Patch preparation, IPC string copying, renderer full JSON parsing/schema work, sustained CPU/RSS and concurrent event-loop p95 still need measurement. Bounded queue is not a memory-budget acceptance.",
+    "No new complete production Windows distribution built. The existing local distribution remains the previously verified splash bundle.",
+    "R6 foreground/native resource acceptance stays deferred while the user is gaming. Physical Android, native iOS, signing/identity migration, production TLS/update delivery and historical theme drift remain open."
+  ],
+  "harnessCorrections": [
+    "The initial stale-stop fixture accidentally referenced its replacement stop closure; corrected to capture the original closure.",
+    "The compatibility fixture was missing its option-free loadSettings method; supplied the actual compatibility dependency.",
+    "The native extension fixture now provides its normalizer; its defaults alone do not initialize a newly registered cached section. No production behavior was weakened to satisfy these fixtures."
+  ],
+  "sourceHashes": [
+    {
+      "file": "main/settings.js",
+      "sha256": "7208ff2eb10b1591a0c8d9fba5db65a4d9c73f34cc2afd9ea15983961ea6a696"
+    },
+    {
+      "file": "main/application/settings-broadcast.js",
+      "sha256": "d85e811740a81df6a15098b1ee6e15a19bc80acc6734ad3551e6e2c27bb0c636"
+    },
+    {
+      "file": "main/application/settings-reader.js",
+      "sha256": "039b02fbedc727d1b1e7c870a538d1b8a0bda87c35b183479f10f6834b0ba0ec"
+    },
+    {
+      "file": "main/application/settings-read-worker.js",
+      "sha256": "a99932bc87743ad6b03461e773829acc482c7cb9ffeb67084ed317ac00a41fc1"
+    },
+    {
+      "file": "main/repositories/settings-renderer.js",
+      "sha256": "b76f7a95e4e2c3c98830bd373b1a3c8de2fbc8a65fdd2766015f763da68f8dbc"
+    },
+    {
+      "file": "preload.js",
+      "sha256": "9e3618917ee44cefb70430d71d999464e0b72dc920436ae649189b240e18cc70"
+    },
+    {
+      "file": "src/services/settings-client.js",
+      "sha256": "1e87fcae2de357a29f5e3262b5974c9121c5c0b961c4bc763db6ac1eae412b39"
+    },
+    {
+      "file": "packages/contracts/src/settings-feed.ts",
+      "sha256": "baa5baed32a9a11072e3e6a9409b0f3cd220387f50ff66af5c8caaef7fc7bfde"
+    },
+    {
+      "file": "packages/contracts/dist/settings-feed.js",
+      "sha256": "fe05d833d06277fc0c56c70819f4eae460b156b456c10fb7ad8b7a40aaaf6c9a"
+    },
+    {
+      "file": "packages/contracts/dist/settings-feed.d.ts",
+      "sha256": "5c10712f74d1c2c4098194d6048f64ec8a7523542a522c772f0432fae2a4f65f"
+    },
+    {
+      "file": "scripts/verify-settings-broadcast-lifecycle.js",
+      "sha256": "ce2f35ab6ebfd7ecb2edeabaa96f632db163e77904ded735da34f8722660d2ae"
+    },
+    {
+      "file": "scripts/verify-settings-feed-electron.js",
+      "sha256": "306b663120dd03ab402773e50be0d29963fd11307f6ceb9ac18651f3d9b13ddb"
+    },
+    {
+      "file": "package.json",
+      "sha256": "433f415d1f2917cbb1c6558e7fdafbd716d68d82679b33e6e20f21a70a6c4d42"
+    },
+    {
+      "file": ".github/workflows/ci.yml",
+      "sha256": "17b959c29e798af92d267e84678d71984dc77b7804332a91bf43fa0f42b30bad"
+    }
+  ],
+  "raw": {
+    "node": ".tmp/refactor-tests/r7-settings-broadcast/node-result.json",
+    "native": ".tmp/refactor-tests/r7-settings-broadcast/native-feed.json",
+    "read": ".tmp/refactor-tests/r7-settings-broadcast/read-result.json",
+    "asar": ".tmp/refactor-tests/r7-settings-broadcast/asar-result.json"
+  }
+}

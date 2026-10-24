@@ -1,7 +1,8 @@
 import { memo, useState, useRef, useEffect, useCallback, useMemo, useLayoutEffect } from 'react'
 import { WINDOW_EVENTS } from '../api/events'
 import { createPortal } from 'react-dom'
-import { useApp } from '../context/AppContext'
+import { useAppActions, useAppSelection } from '../context/AppContext'
+import { mediaRequestId } from '../services/player-resources'
 
 const THUMBNAIL_LOAD_DELAY_MS = 160
 const METADATA_LOAD_DELAY_MS = 240
@@ -18,7 +19,6 @@ function rememberMetadataState(filePath, state) {
   metadataRequestStates.set(filePath, state)
   if (metadataRequestStates.size <= METADATA_REQUEST_STATE_LIMIT) return
   for (const key of metadataRequestStates.keys()) {
-    if (metadataRequestStates.get(key) === 'pending') continue
     metadataRequestStates.delete(key)
     if (metadataRequestStates.size <= METADATA_REQUEST_STATE_LIMIT) break
   }
@@ -147,22 +147,22 @@ function VideoCard({
   queueVideos
 }) {
   const {
-    settings,
-    plugins,
-    pluginsLoaded,
-    thumbnails,
-    favoriteKeys,
     handlePlay,
     handleToggleFavorite,
     handleOpenInFolder,
     handleOpenTagEditor,
     queueVideoAnalysis,
     setVideos,
-    selectedVideoKeys,
-    selectedVideoKeySet,
     handleToggleVideoSelection,
     handleSelectOnlyVideo
-  } = useApp()
+  } = useAppActions()
+  const videoKey = video.favoriteKey || video.fullPath
+  const { thumbnail, isFavorite, isSelected, selectionActive, videoAnalysisEnabled, aiSearchEnabled } = useAppSelection(state => ({
+    thumbnail: state.thumbnails[video.fullPath], isFavorite: state.favoriteKeys.has(videoKey),
+    isSelected: state.selectedVideoKeySet?.has(videoKey), selectionActive: (state.selectedVideoKeys?.length || 0) > 0,
+    videoAnalysisEnabled: Boolean(state.pluginsLoaded && state.settings?.videoAnalysis?.enabled && state.plugins?.some(plugin => plugin.id === 'video-analysis' && plugin.enabled)),
+    aiSearchEnabled: Boolean(state.pluginsLoaded && state.plugins?.some(plugin => plugin.id === 'ai-search' && plugin.enabled))
+  }))
 
   const [imgLoaded, setImgLoaded] = useState(false)
   const [imgError, setImgError] = useState(false)
@@ -176,15 +176,6 @@ function VideoCard({
   const menuRef = useRef(null)
   const displayMeta = useMemo(() => getDisplayMeta(video), [video])
   const animationDelay = useMemo(() => `${(index % 20) * 30}ms`, [index])
-  const thumbnail = thumbnails[video.fullPath]
-  const isFavorite = favoriteKeys.has(video.favoriteKey || video.fullPath)
-  const videoKey = video.favoriteKey || video.fullPath
-  const isSelected = selectedVideoKeySet?.has(videoKey)
-  const selectionActive = (selectedVideoKeys?.length || 0) > 0
-  const videoAnalysisPlugin = plugins?.find?.(plugin => plugin.id === 'video-analysis')
-  const videoAnalysisEnabled = Boolean(pluginsLoaded && videoAnalysisPlugin?.enabled && settings?.videoAnalysis?.enabled)
-  const aiSearchPlugin = plugins?.find?.(plugin => plugin.id === 'ai-search')
-  const aiSearchEnabled = Boolean(pluginsLoaded && aiSearchPlugin?.enabled)
   const mediaMissing = !video.media?.available
 
   // 懒加载：只有卡片进入视口时才加载缩略图
@@ -194,10 +185,7 @@ function VideoCard({
 
     const observer = new IntersectionObserver(
       ([entry]) => {
-        if (entry.isIntersecting) {
-          setVisible(true)
-          observer.unobserve(el)
-        }
+        setVisible(Boolean(entry.isIntersecting))
       },
       { rootMargin: '32px' }
     )
@@ -226,7 +214,7 @@ function VideoCard({
 
   const handleFavoriteClick = useCallback((e) => {
     e.stopPropagation()
-    handleToggleFavorite?.(video)
+    handleToggleFavorite?.(video)?.catch(() => {})
   }, [video, handleToggleFavorite])
 
   const handleMenuClick = useCallback((e) => {
@@ -401,6 +389,8 @@ function VideoCard({
 
   useEffect(() => {
     let canceled = false
+    const requestId = mediaRequestId()
+    let requestStarted = false, requestFinished = false
     setImgLoaded(false)
     setImgError(false)
     setThumbUrl(null)
@@ -409,7 +399,13 @@ function VideoCard({
 
     async function loadThumbnail() {
       try {
-        const thumbnailPath = thumbnail || (await window.electronAPI?.generateThumbnail?.(video.fullPath))?.thumbPath
+        let thumbnailPath = thumbnail
+        if (!thumbnailPath) {
+          requestStarted = true
+          try { thumbnailPath = (await window.electronAPI?.generateThumbnail?.(video.fullPath, requestId))?.thumbPath }
+          finally { requestFinished = true }
+        }
+        if (canceled) return
         if (!thumbnailPath) throw new Error('thumbnail unavailable')
         const url = await window.electronAPI?.getThumbnailUrl(thumbnailPath)
         if (!canceled) setThumbUrl(url)
@@ -423,41 +419,39 @@ function VideoCard({
     return () => {
       canceled = true
       window.clearTimeout(loadTimer)
+      if (requestStarted && !requestFinished) window.electronAPI?.cancelMediaWork?.(requestId)?.catch(() => {})
     }
   }, [thumbnail, video.fullPath, visible])
 
   useEffect(() => {
     if (!visible || !mediaMissing || !video.fullPath || !window.electronAPI?.getVideoMetadata || !setVideos) return undefined
-    if (metadataRequestStates.has(video.fullPath)) return undefined
+    const cacheKey = JSON.stringify([video.fullPath, video.modified, video.size])
+    if (metadataRequestStates.get(cacheKey) === 'resolved') return undefined
 
-    let requestStarted = false
-    rememberMetadataState(video.fullPath, 'pending')
+    let canceled = false, requestStarted = false, requestFinished = false
+    const requestId = mediaRequestId()
     async function loadMetadata() {
       requestStarted = true
       try {
-        const result = await window.electronAPI.getVideoMetadata(video.fullPath)
-        if (result?.success && result.media?.available) {
-          rememberMetadataState(video.fullPath, 'resolved')
+        const result = await window.electronAPI.getVideoMetadata(video.fullPath, { requestId })
+        if (!canceled && result?.success && result.media?.available) {
+          rememberMetadataState(cacheKey, 'resolved')
           scheduleMetadataUpdate(setVideos, video.fullPath, result.media)
           return
         }
-        metadataRequestStates.delete(video.fullPath)
       } catch {}
       finally {
-        if (metadataRequestStates.get(video.fullPath) === 'pending') {
-          metadataRequestStates.delete(video.fullPath)
-        }
+        requestFinished = true
       }
     }
 
     const loadTimer = window.setTimeout(loadMetadata, METADATA_LOAD_DELAY_MS + (index % 12) * 40)
     return () => {
       window.clearTimeout(loadTimer)
-      if (!requestStarted && metadataRequestStates.get(video.fullPath) === 'pending') {
-        metadataRequestStates.delete(video.fullPath)
-      }
+      canceled = true
+      if (requestStarted && !requestFinished) window.electronAPI?.cancelMediaWork?.(requestId)?.catch(() => {})
     }
-  }, [index, mediaMissing, setVideos, video.fullPath, visible])
+  }, [index, mediaMissing, setVideos, video.fullPath, video.modified, video.size, visible])
 
   if (viewMode === 'list') {
     return (

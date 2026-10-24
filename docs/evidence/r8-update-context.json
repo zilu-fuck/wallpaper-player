@@ -1,0 +1,1739 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-10-23T06:12:32.221Z",
+  "phase": "R8 current desktop update context, binding ownership and bidirectional protocols",
+  "previousEvidence": "docs/evidence/r8-mobile-updates.json",
+  "previousGoalTurn": "progress: mobile manifest discovery and native identity verification completed",
+  "implementation": {
+    "context": "Subscribed navigation top device/binding IDs, fresh scoped credential read, identity/auth confirmation and final binding revalidation",
+    "invalidation": [
+      "different computer/global route, returning does not revive prior work",
+      "removal/re-pairing, including lost-notification final check",
+      "last navigation unmount or ambiguous owners"
+    ],
+    "retainedScope": "same PC player/search/media changes",
+    "globalFallbackProtocol": 1,
+    "maxConcurrentConnectionRequests": 2,
+    "healthyModernConfirmationRequests": 2,
+    "maxCandidateEndpoints": 8,
+    "normalConnectionNegotiationUnchanged": true,
+    "updatePurposeMayReadNewerClientRequirement": true,
+    "protocolCachePersisted": false,
+    "compatibility": [
+      "APK.minServerProtocol <= PC.protocolVersion",
+      "APK.clientProtocol >= PC.minClientProtocol"
+    ],
+    "legacyMissingClientProtocol": 1,
+    "clientProtocolDeclaration": "Derived from current shared PROTOCOL_VERSION, checked in plan/Android part/assembly; this is a controlled build declaration, not client APK bytecode inspection",
+    "actualCurrentSharedProtocol": 2,
+    "wholeCheckDeadlineMs": 15000,
+    "productionUiModified": false,
+    "candidateDownloadedOrInstalled": false
+  },
+  "automated": {
+    "passed": true,
+    "cases": [
+      "focused navigation automatically confirms protocol2 using public info then fresh authorization",
+      "DeviceList/global context uses protocol1 even after other devices report protocol2",
+      "each check revalidates the current protocol and explicit values cannot override a focused computer",
+      "newer required client protocol blocks playback connection but allows an authenticated update discovery",
+      "a candidate client protocol below the server minimum cannot be recommended or overridden",
+      "route change during native environment lookup cancels the originally captured device before any LAN request",
+      "switching computer aborts held info before credentials and a late response cannot be reused",
+      "switching away and back during a manifest transfer invalidates the earlier scope and closes its socket",
+      "same-device player/search transitions and media updates do not cancel the current computer scope",
+      "removal or re-pairing cancels the old binding even before navigation processes device changes",
+      "a lost binding notification still cannot publish an update after the repository identity changes",
+      "unrelated removal and unavailable unrelated credentials do not affect the selected computer",
+      "offline, revoked authorization or mismatched identity do not fall back to an assumed protocol",
+      "removing the focused binding while discovery is pending closes info without sending credentials",
+      "one departing update interest does not cancel another shared confirmation and respects the request budget",
+      "legacy authorization retains the explicit protocol1 fallback and uses only its existing 64KiB probe",
+      "ambiguous live navigators are rejected and the last subscription releases context on unmount",
+      "whole-check deadline includes context discovery and cancels the only remaining info reader"
+    ],
+    "fixture": "E:\\wallpaper播放器\\.tmp\\refactor-tests\\update-context-TQzrk5",
+    "scope": "Production navigation, persistence, connection and update TS modules with synthetic credentials and real localhost HTTP; no production server, APK download or device data used."
+  },
+  "inheritedUpdateChecks": {
+    "passed": true,
+    "checks": [
+      "actual release-gate assembler manifest is consumed; desktop tag never becomes mobile version",
+      "desktop-only releases and pagination preserve the older compatible mobile release",
+      "mobile version code, not release order or desktop tag, selects the latest compatible APK",
+      "wrong platform ABI cannot advertise an update",
+      "wrong application identity cannot advertise an update",
+      "wrong signing certificate cannot advertise an update",
+      "newer minimum Android SDK cannot advertise an update",
+      "newer server protocol requirement cannot advertise an update",
+      "explicit server protocol allows a compatible protocol2 release; default remains legacy compatible",
+      "known public APK pin survives desktop-only latest; current version returns no download",
+      "legacy assets require exact pinned tag, bytes and GitHub SHA256",
+      "manifest version, commit, tag, signature claims, asset bytes/hash and URL must agree",
+      "malicious URLs, path aliases, duplicate assets and invalid stable versions fail closed",
+      "draft, prerelease and IPA-only releases are ignored; iOS never receives an APK",
+      "native identity is mandatory; neither JS version nor missing/multiple signing identities can override it",
+      "versionCode rollback, inconsistent versionName and same-code different files cannot be advertised",
+      "unknown newer legacy APK and malformed manifest never silently fall back to an older current result",
+      "incompatible newer release is reported instead of claiming the older current build is latest",
+      "HTTP errors, invalid JSON and incomplete pagination return errors",
+      "list and manifest streaming limits cancel the reader even without content-length",
+      "one deadline covers native metadata, headers and stalled response bodies; caller abort is preserved",
+      "real local HTTP transport streams release and manifest data without downloading the APK"
+    ],
+    "fixture": "E:\\wallpaper播放器\\.tmp\\refactor-tests\\mobile-updates-WcGCeI",
+    "producerManifestSha256": "24cb99a4ef65813e490a6aba6b3a8c3b32abc0b364176e9626b03de48a5affd4",
+    "scope": "Production TS modules in isolated VM; actual release-gate assembler output, frozen public metadata and local streaming HTTP. No APK downloaded, installed or published by this verifier."
+  },
+  "regressions": [
+    {
+      "command": "npm run verify:update-context",
+      "exitCode": 0,
+      "log": ".tmp/refactor-tests/r8-update-context/context.log"
+    },
+    {
+      "command": "npm run verify:mobile-updates",
+      "exitCode": 0,
+      "log": ".tmp/refactor-tests/r8-update-context/updates.log"
+    },
+    {
+      "command": "npm run verify:connection-lifecycle",
+      "exitCode": 0,
+      "log": ".tmp/refactor-tests/r8-update-context/connection.log"
+    },
+    {
+      "command": "npm run verify:mobile-navigation",
+      "exitCode": 0,
+      "log": ".tmp/refactor-tests/r8-update-context/navigation.log"
+    },
+    {
+      "command": "npm run verify:mobile-correctness",
+      "exitCode": 0,
+      "log": ".tmp/refactor-tests/r8-update-context/mobile-correctness.log"
+    },
+    {
+      "command": "npm run typecheck --prefix mobile",
+      "exitCode": 0,
+      "log": ".tmp/refactor-tests/r8-update-context/typecheck.log"
+    },
+    {
+      "command": "npm run verify:release-gate",
+      "exitCode": 0,
+      "log": ".tmp/refactor-tests/r8-update-context/release-gate.log"
+    }
+  ],
+  "native": {
+    "setup": {
+      "date": "2026-10-23T05:39:22.999Z",
+      "stage": "E:/wpc-ff48f12c",
+      "source": "E:\\wallpaper播放器",
+      "sdk": "E:/wp-native-qa-lRJFHV/sdk",
+      "java": "C:/Program Files/Java/jdk-21",
+      "gradle": "E:/wp-sdk58-qa-c4c02030/bootstrap/gradle-9.4.1/bin/gradle.bat",
+      "appId": "com.wallpaperplayer.mobile.qa.updatecontext",
+      "versionCode": 1,
+      "purpose": "Isolated update protocol context and native binding/cancellation QA; no production renderer or credentials"
+    },
+    "apk": {
+      "apk": "E:\\wpc-ff48f12c\\mobile\\android\\app\\build\\outputs\\apk\\release\\app-release.apk",
+      "bytes": 32725715,
+      "sha256": "19de36e1d86c72850d05251ca7c9933c5628e87ca9937c0bf8440681ab24b056",
+      "sha512": "qJYsgXO3SH/+SPQWerrqditG2w9yVwJ8tYuH1TRqzdXoKr92XQToRByfzMgP7CuzSuDscpM7/gOp5qiLWcv9iQ==",
+      "actual": {
+        "applicationId": "com.wallpaperplayer.mobile.qa.updatecontext",
+        "versionCode": 1,
+        "version": "0.1.4",
+        "certificateSha256": "fac61745dc0903786fb9ede62a962b399f7348f0bb6f899b8332667591033b9c",
+        "debugCertificate": true,
+        "abi": [
+          "x86_64"
+        ],
+        "minSdk": 24,
+        "targetSdk": 36,
+        "verified": true
+      },
+      "hermes": {
+        "bytes": 1404844,
+        "magic": "C6-1F-BC-03-C1-03-19-1F"
+      },
+      "r8Mapping": {
+        "file": "E:\\wpc-ff48f12c\\mobile\\android\\app\\build\\outputs\\mapping\\release\\mapping.txt",
+        "bytes": 85198302,
+        "sha256": "b7114af7167e9a14be0550f5fa044d89e57e4945f28bdf9179b29852e9f60842",
+        "sha512": "5Qbr1bKkvrfyCtQhWzC7KcdeSOfhTQOR/dT1sP7CauBDRZgk0JZuml92ftQkfeq41JslcVV9Um+w6X7GaubKcQ=="
+      }
+    },
+    "result": {
+      "passed": true,
+      "environment": {
+        "platform": "android",
+        "applicationId": "com.wallpaperplayer.mobile.qa.updatecontext",
+        "version": "0.1.4",
+        "versionCode": 1,
+        "supportedAbis": [
+          "x86_64",
+          "arm64-v8a"
+        ],
+        "sdkVersion": 36,
+        "certificateSha256": [
+          "fac61745dc0903786fb9ede62a962b399f7348f0bb6f899b8332667591033b9c"
+        ]
+      },
+      "results": [
+        "native navigation and SecureStore binding automatically select the authenticated protocol2 PC",
+        "normal connection rejects required client3 and update selection rejects candidate client2",
+        "authenticated update bootstrap selects only a declared client3 candidate for the newer PC",
+        "device-list/global checks keep protocol1 and do not probe or borrow a previous PC",
+        "fresh native authorization revocation stops catalog lookup",
+        "route changes cancel a held manifest and native transport closes it before release",
+        "native re-pairing cancels old scope, rejects old route, and confirms the replacement binding",
+        "whole-check native deadline includes PC discovery and closes held info",
+        "last navigation unmount releases native confirmation and every context observer"
+      ],
+      "diagnostics": {
+        "owners": 0,
+        "listeners": 0,
+        "kind": "none"
+      },
+      "network": {
+        "info": 10,
+        "auth": 6,
+        "catalog": 14,
+        "gateId": 0,
+        "receivedGate": 0,
+        "closedGates": [
+          1,
+          2,
+          3,
+          4
+        ]
+      },
+      "requests": [
+        {
+          "path": "/configure",
+          "method": "POST",
+          "authenticated": false,
+          "at": 1792734880400
+        },
+        {
+          "path": "/pc/v1/info",
+          "method": "GET",
+          "authenticated": false,
+          "at": 1792734880517
+        },
+        {
+          "path": "/pc/v1/auth",
+          "method": "GET",
+          "authenticated": true,
+          "at": 1792734880530
+        },
+        {
+          "path": "/catalog/list",
+          "method": "GET",
+          "authenticated": false,
+          "at": 1792734880542
+        },
+        {
+          "path": "/catalog/manifest",
+          "method": "GET",
+          "authenticated": false,
+          "at": 1792734880550
+        },
+        {
+          "path": "/configure",
+          "method": "POST",
+          "authenticated": false,
+          "at": 1792734880564
+        },
+        {
+          "path": "/pc/v1/info",
+          "method": "GET",
+          "authenticated": false,
+          "at": 1792734880577
+        },
+        {
+          "path": "/pc/v1/info",
+          "method": "GET",
+          "authenticated": false,
+          "at": 1792734880599
+        },
+        {
+          "path": "/pc/v1/auth",
+          "method": "GET",
+          "authenticated": true,
+          "at": 1792734880611
+        },
+        {
+          "path": "/catalog/list",
+          "method": "GET",
+          "authenticated": false,
+          "at": 1792734880621
+        },
+        {
+          "path": "/catalog/manifest",
+          "method": "GET",
+          "authenticated": false,
+          "at": 1792734880628
+        },
+        {
+          "path": "/configure",
+          "method": "POST",
+          "authenticated": false,
+          "at": 1792734880636
+        },
+        {
+          "path": "/pc/v1/info",
+          "method": "GET",
+          "authenticated": false,
+          "at": 1792734880651
+        },
+        {
+          "path": "/pc/v1/auth",
+          "method": "GET",
+          "authenticated": true,
+          "at": 1792734880666
+        },
+        {
+          "path": "/catalog/list",
+          "method": "GET",
+          "authenticated": false,
+          "at": 1792734880680
+        },
+        {
+          "path": "/catalog/manifest",
+          "method": "GET",
+          "authenticated": false,
+          "at": 1792734880686
+        },
+        {
+          "path": "/configure",
+          "method": "POST",
+          "authenticated": false,
+          "at": 1792734880700
+        },
+        {
+          "path": "/state",
+          "method": "GET",
+          "authenticated": false,
+          "at": 1792734880705
+        },
+        {
+          "path": "/catalog/list",
+          "method": "GET",
+          "authenticated": false,
+          "at": 1792734880711
+        },
+        {
+          "path": "/catalog/manifest",
+          "method": "GET",
+          "authenticated": false,
+          "at": 1792734880715
+        },
+        {
+          "path": "/configure",
+          "method": "POST",
+          "authenticated": false,
+          "at": 1792734880726
+        },
+        {
+          "path": "/catalog/list",
+          "method": "GET",
+          "authenticated": false,
+          "at": 1792734880733
+        },
+        {
+          "path": "/catalog/manifest",
+          "method": "GET",
+          "authenticated": false,
+          "at": 1792734880738
+        },
+        {
+          "path": "/state",
+          "method": "GET",
+          "authenticated": false,
+          "at": 1792734880743
+        },
+        {
+          "path": "/configure",
+          "method": "POST",
+          "authenticated": false,
+          "at": 1792734880747
+        },
+        {
+          "path": "/state",
+          "method": "GET",
+          "authenticated": false,
+          "at": 1792734880751
+        },
+        {
+          "path": "/pc/v1/info",
+          "method": "GET",
+          "authenticated": false,
+          "at": 1792734880766
+        },
+        {
+          "path": "/pc/v1/auth",
+          "method": "GET",
+          "authenticated": true,
+          "at": 1792734880776
+        },
+        {
+          "path": "/state",
+          "method": "GET",
+          "authenticated": false,
+          "at": 1792734880781
+        },
+        {
+          "path": "/configure",
+          "method": "POST",
+          "authenticated": false,
+          "at": 1792734880786
+        },
+        {
+          "path": "/configure",
+          "method": "POST",
+          "authenticated": false,
+          "at": 1792734880790
+        },
+        {
+          "path": "/state",
+          "method": "GET",
+          "authenticated": false,
+          "at": 1792734880797
+        },
+        {
+          "path": "/pc/v1/info",
+          "method": "GET",
+          "authenticated": false,
+          "at": 1792734880810
+        },
+        {
+          "path": "/pc/v1/auth",
+          "method": "GET",
+          "authenticated": true,
+          "at": 1792734880819
+        },
+        {
+          "path": "/catalog/list",
+          "method": "GET",
+          "authenticated": false,
+          "at": 1792734880828
+        },
+        {
+          "path": "/catalog/manifest",
+          "method": "GET",
+          "authenticated": false,
+          "at": 1792734880833
+        },
+        {
+          "path": "/state",
+          "method": "GET",
+          "authenticated": false,
+          "at": 1792734880842
+        },
+        {
+          "path": "/state",
+          "method": "GET",
+          "authenticated": false,
+          "at": 1792734880849
+        },
+        {
+          "path": "/configure",
+          "method": "POST",
+          "authenticated": false,
+          "at": 1792734880854
+        },
+        {
+          "path": "/configure",
+          "method": "POST",
+          "authenticated": false,
+          "at": 1792734880858
+        },
+        {
+          "path": "/state",
+          "method": "GET",
+          "authenticated": false,
+          "at": 1792734880864
+        },
+        {
+          "path": "/pc/v1/info",
+          "method": "GET",
+          "authenticated": false,
+          "at": 1792734880878
+        },
+        {
+          "path": "/state",
+          "method": "GET",
+          "authenticated": false,
+          "at": 1792734880910
+        },
+        {
+          "path": "/state",
+          "method": "GET",
+          "authenticated": false,
+          "at": 1792734880947
+        },
+        {
+          "path": "/configure",
+          "method": "POST",
+          "authenticated": false,
+          "at": 1792734880952
+        },
+        {
+          "path": "/pc/v1/info",
+          "method": "GET",
+          "authenticated": false,
+          "at": 1792734880970
+        },
+        {
+          "path": "/pc/v1/auth",
+          "method": "GET",
+          "authenticated": true,
+          "at": 1792734880981
+        },
+        {
+          "path": "/catalog/list",
+          "method": "GET",
+          "authenticated": false,
+          "at": 1792734880992
+        },
+        {
+          "path": "/catalog/manifest",
+          "method": "GET",
+          "authenticated": false,
+          "at": 1792734880997
+        },
+        {
+          "path": "/configure",
+          "method": "POST",
+          "authenticated": false,
+          "at": 1792734881011
+        },
+        {
+          "path": "/pc/v1/info",
+          "method": "GET",
+          "authenticated": false,
+          "at": 1792734881027
+        },
+        {
+          "path": "/state",
+          "method": "GET",
+          "authenticated": false,
+          "at": 1792734881777
+        },
+        {
+          "path": "/configure",
+          "method": "POST",
+          "authenticated": false,
+          "at": 1792734881782
+        },
+        {
+          "path": "/configure",
+          "method": "POST",
+          "authenticated": false,
+          "at": 1792734881786
+        },
+        {
+          "path": "/state",
+          "method": "GET",
+          "authenticated": false,
+          "at": 1792734881791
+        },
+        {
+          "path": "/pc/v1/info",
+          "method": "GET",
+          "authenticated": false,
+          "at": 1792734881805
+        },
+        {
+          "path": "/state",
+          "method": "GET",
+          "authenticated": false,
+          "at": 1792734881842
+        },
+        {
+          "path": "/state",
+          "method": "GET",
+          "authenticated": false,
+          "at": 1792734881848
+        },
+        {
+          "path": "/configure",
+          "method": "POST",
+          "authenticated": false,
+          "at": 1792734881853
+        },
+        {
+          "path": "/result",
+          "method": "POST",
+          "authenticated": false,
+          "at": 1792734881857
+        }
+      ],
+      "scope": "Owned synthetic PC/catalog; no update APK transferred"
+    },
+    "stopped": {
+      "date": "2026-10-23T05:56:38.726Z",
+      "verified": true,
+      "oldPackageAfter": "package:/data/app/~~s6xS4PGkgwYhTfKbPbqgMQ==/com.wallpaperplayer.mobile.qa.sdk58-xBDaPMM0hJYfqhYzN_HTPA==/base.apk",
+      "stoppedPackage": "com.wallpaperplayer.mobile.qa.updatecontext",
+      "nativeIdentityMatchesApk": true,
+      "observerCountsZero": true,
+      "fourCancelledConnectionsClosed": true,
+      "catalogCredentialLeaks": 0,
+      "reverseRemoved": 61641,
+      "emulatorStop": "OK: killing emulator, bye bye\r\r\nOK\r\r\n"
+    },
+    "emulator": {
+      "ownedPid": 32212,
+      "adb": "List of devices attached\n",
+      "stopped": true,
+      "date": "2026-10-23T06:03:05.3553330Z"
+    },
+    "sourceMap": {
+      "file": "../wpc-ff48f12c/mobile/android/app/build/generated/sourcemaps/react/release/index.android.bundle.map",
+      "bytes": 4460113,
+      "sha256": "baef653df2710fc3926a36547779c1617461f0641dca77a15e799d3c8daab856",
+      "sha512": "b2dEMk4g6c4gXVd3lTJ+Gee+ZjdzajR78NJevBkF/4omP/hUnDYoFv2sekljdV+q7lw1U79UmIwWhuwjHIue+A=="
+    },
+    "compiled": [
+      {
+        "file": "mobile/src/services/updates.ts",
+        "sha256": "7da81705108f39f413861a866f27851185410756fa63c3cb275e0aa4d7b29265"
+      },
+      {
+        "file": "mobile/src/services/api.ts",
+        "sha256": "92c6dd8c797ba5e96fc250973c4181a888b162c1abc18408411d62160c5233f0"
+      },
+      {
+        "file": "mobile/src/services/connection-manager.ts",
+        "sha256": "3f92c54fad30daeab135ecea44896935f663bc0c43b578481d3c7223698b444e"
+      },
+      {
+        "file": "mobile/src/services/navigation-store.ts",
+        "sha256": "53d18e5557f1e6f0e2b30f1b656754b7356ade19159efcc4add0a2c722cbd5e0"
+      },
+      {
+        "file": "mobile/src/services/update-manifest.ts",
+        "sha256": "609f326ccffbc7dbcc227b6314e5ca31d4a938957934786f1f7fa42649e22831"
+      },
+      {
+        "file": "mobile/src/persistence/devices.ts",
+        "sha256": "8ae8324b8a271d432b07fa391eee9afdc428f43f1c8fac9fb8916adbd6f14d36"
+      },
+      {
+        "file": "mobile/src/services/active-device-context.ts",
+        "sha256": "10042da861eca926e14db332e2393de5dfa6ea1b727056444eefb3f2a02b29a5"
+      },
+      {
+        "file": "mobile/src/services/update-server-context.ts",
+        "sha256": "29ebd3afcb946840b51025907a1bb895e80419112cfc92c85013c8ef7687d704"
+      },
+      {
+        "file": "packages/contracts/dist/index.js",
+        "sha256": "6fd89ec15d078d06f85781f98d2c8e9dd4815586539ec255cd40662f23c99ef3"
+      }
+    ],
+    "frozenInputs": [
+      {
+        "file": "../wpc-ff48f12c/mobile/src/persistence/device-caches.ts",
+        "bytes": 551,
+        "sha256": "7c0ac5e84b93def4753a3ebcd4cff0a399621aa4e802f83d5ff7a827991c5e9a",
+        "sha512": "cVD1KauGS62drYg+cQVQ+iZPL691bXI+rCH4TaVnqYonkJxwbSkLrZ290ytk/M/n/m9dkJ0Ae9NK0zx9BdZ+Yw=="
+      },
+      {
+        "file": "../wpc-ff48f12c/mobile/src/persistence/devices.ts",
+        "bytes": 7801,
+        "sha256": "8ae8324b8a271d432b07fa391eee9afdc428f43f1c8fac9fb8916adbd6f14d36",
+        "sha512": "sbVP0fwZFMN7Nnn4sdlIO9LbdUBNyQGjBqsnwHM1jz/DrmB7RZHs/yel6cT9WnKtR8ta3BfG+Af6YGTbQGWD7w=="
+      },
+      {
+        "file": "../wpc-ff48f12c/mobile/src/services/active-device-context.ts",
+        "bytes": 1720,
+        "sha256": "10042da861eca926e14db332e2393de5dfa6ea1b727056444eefb3f2a02b29a5",
+        "sha512": "CKMptQd7ClbAIqK9Gcd+EKCumeXePclLotEwvnQa1lqFfm3FWJWd2BP3av5B9qBNYSIROlwue5YmBZ03PXWM8g=="
+      },
+      {
+        "file": "../wpc-ff48f12c/mobile/src/services/api.ts",
+        "bytes": 16541,
+        "sha256": "92c6dd8c797ba5e96fc250973c4181a888b162c1abc18408411d62160c5233f0",
+        "sha512": "yClL8zEdDOwo+tJ5r+IFzFhPZyzAt4a7TaAPdQFIuiz6Ew4vjN5e2Z530fPd3W4iyG6+p6taomFUdksm+Ek4aQ=="
+      },
+      {
+        "file": "../wpc-ff48f12c/mobile/src/services/connection-manager.ts",
+        "bytes": 11098,
+        "sha256": "3f92c54fad30daeab135ecea44896935f663bc0c43b578481d3c7223698b444e",
+        "sha512": "vdNAgVlgJSTHB1xpQ4KOSp46De7/hquArurPMqVEmOLT+yYUVE7faVEvyWiMjKNGnO2SWG7mVicXOt7iKBS8aw=="
+      },
+      {
+        "file": "../wpc-ff48f12c/mobile/src/services/legacy-mobile-releases.json",
+        "bytes": 483,
+        "sha256": "e846affb95cffef73ad1dbc638e56400b249e62eab8ba5fece819ddab132e517",
+        "sha512": "6Tw1vB8tRjM+o1IYU1MbX2VcfYciYQke6cUaXx6uJ0mpiOEPwofUEuF11rtrSCgULcpxuBHTNmcyGg1p9THAIw=="
+      },
+      {
+        "file": "../wpc-ff48f12c/mobile/src/services/navigation-store.ts",
+        "bytes": 7586,
+        "sha256": "53d18e5557f1e6f0e2b30f1b656754b7356ade19159efcc4add0a2c722cbd5e0",
+        "sha512": "Y0ct59qvXCS9peE2ytzRfwKrWXy/3dkN6dPXi2s8rXnKMIr8fbnRwJyG0bMdRA/I7voC9A0OUQUNKp80xPz3AQ=="
+      },
+      {
+        "file": "../wpc-ff48f12c/mobile/src/services/update-environment.ts",
+        "bytes": 721,
+        "sha256": "adc0fe1c6f2f45c4a57a8ae9f18c95a00b42487683804981d9143329ef05acf6",
+        "sha512": "3g82B2i+9femI5ztSrFfBrdgacJRLH9Ti6okp3wW2cpZ1VSO5dzFQ0VSLASglWsi29xDs6/qP2Eb6PMgxqDbyg=="
+      },
+      {
+        "file": "../wpc-ff48f12c/mobile/src/services/update-manifest.ts",
+        "bytes": 10865,
+        "sha256": "609f326ccffbc7dbcc227b6314e5ca31d4a938957934786f1f7fa42649e22831",
+        "sha512": "UIMKLQBEoeGbdbGkU4bii4T893uQKUWMShcimd1ZosT3sNDWUouh18+/g426oJJsiMKHQaVMVa0brTl1dUsdfg=="
+      },
+      {
+        "file": "../wpc-ff48f12c/mobile/src/services/update-server-context.ts",
+        "bytes": 3079,
+        "sha256": "29ebd3afcb946840b51025907a1bb895e80419112cfc92c85013c8ef7687d704",
+        "sha512": "oV/rNFxdd+0wttH40dXfv9Ev9GmysrkpFp3F2rjQiNv8SyUOEQK/NvMPdbtCDGRKYgA3n5Aa1hw6ZT8Si7/izQ=="
+      },
+      {
+        "file": "../wpc-ff48f12c/mobile/src/services/updates.ts",
+        "bytes": 11076,
+        "sha256": "7da81705108f39f413861a866f27851185410756fa63c3cb275e0aa4d7b29265",
+        "sha512": "Y9+uGAhC6OUWvB9kx57zMKFhnK4rxwWTRzzfdPdfiekaG3goV6YZcnJ2IA3uOz9GOgy/9lRZJ3QMZWsosFcE8A=="
+      },
+      {
+        "file": "../wpc-ff48f12c/mobile/src/types.ts",
+        "bytes": 626,
+        "sha256": "24bac51f5ce1bc913c57f5805185737d6cc92af05049f1dd169d5cd792f49d1e",
+        "sha512": "NccoiaIiicXy6HnA2QfGzO5p9uP/S61TsfMbiGUOMJ85/oyPqgjm5vRBTdPL+kA4Bk3FJSXfDlEfmW/8C7JAug=="
+      },
+      {
+        "file": "../wpc-ff48f12c/mobile/src/utils/url.ts",
+        "bytes": 2636,
+        "sha256": "ddbf305c3932482cd7af23e2f0f6d01b51d8a35824cec501f06bc425a34aead6",
+        "sha512": "pdBiB7RXZk9/EP82uc3WgRUJXkrxfW2Od6EZUbfeBu43bBYrInPcHLfmJRNmZ+RQl8hjnYfFyMXVx7c2GnjcKg=="
+      },
+      {
+        "file": "../wpc-ff48f12c/mobile/modules/wallpaper-update-environment/android/build.gradle",
+        "bytes": 228,
+        "sha256": "f6f8948d380b9ecc62524bd085c23f46f7c9cdd6eae8bac314b227b4e83f750e",
+        "sha512": "2FalahVdtRaS1GucqAJOlV+zSFeDI83wfiK/gGQL0WGs+6GtV4OLS/1oQJAfBYPOcvS9TXY5g1qOkkrmj/LE/g=="
+      },
+      {
+        "file": "../wpc-ff48f12c/mobile/modules/wallpaper-update-environment/android/src/main/AndroidManifest.xml",
+        "bytes": 72,
+        "sha256": "343d5be1ac17cdd45d1a2f2ddc616c509290e655869125a9422a96d88aa66066",
+        "sha512": "737AMN+E344kkF9qOwGN08Dy99leB8+qwXp+SUmOHpyojPmBTyABjDNlUijj9PMgFvwIArhXKTmgHrjQClvHwQ=="
+      },
+      {
+        "file": "../wpc-ff48f12c/mobile/modules/wallpaper-update-environment/android/src/main/java/wallpaper/updates/UpdateEnvironmentModule.kt",
+        "bytes": 1570,
+        "sha256": "2e0727fbd32d200cfa0573e4362ea24c145bea8037a137786c36c6b9ab094b70",
+        "sha512": "lns/NKS0hOeV3+yYvqfPeBm0Ceu9ug5YSLSHAUdqklHSfCVSH4lrsh5Nn1lrpz5CIqfR9QWZ/4U0XJcpY8DPqg=="
+      },
+      {
+        "file": "../wpc-ff48f12c/mobile/modules/wallpaper-update-environment/expo-module.config.json",
+        "bytes": 112,
+        "sha256": "763ad996d094f59e77ca00201467523a560bb78c8191ba1fb06d714ee51a86d1",
+        "sha512": "RWASPhV5NcIlRZxEtFwLhV8BLXMXb2jiRpR5pbVndSPZC3D9ETen++Zi71vnk1c+2d4h19SNVuMCcxe6CIUtzA=="
+      },
+      {
+        "file": "../wpc-ff48f12c/mobile/modules/wallpaper-update-environment/package.json",
+        "bytes": 86,
+        "sha256": "1e6b8086accae594e23fafe819938b52b264dc975cf039c91457ff29ce4056d5",
+        "sha512": "clt9gw92aLyscIkXSYAkFOFoDhvnv0wR8xaF5RcnFBN5+XlwTWtAggwg3EKwcJi5vuhpISxzwh6Nt9zBrnm+8Q=="
+      },
+      {
+        "file": "../wpc-ff48f12c/packages/contracts/dist/index.d.ts",
+        "bytes": 41420,
+        "sha256": "70fe20ec736e996b75a46ee355b125669da5cee2ad0388f6b6f156d4a3017e4d",
+        "sha512": "yPVbleKBOeVKKS9PKWc/m9L4Hkw4vhiqJGyWCYAJuCFnvlGGiX466zSNmnPsv+yPK7Fvj3kcHxwK6MbJQ60iPQ=="
+      },
+      {
+        "file": "../wpc-ff48f12c/packages/contracts/dist/index.js",
+        "bytes": 33545,
+        "sha256": "6fd89ec15d078d06f85781f98d2c8e9dd4815586539ec255cd40662f23c99ef3",
+        "sha512": "/UAibOEIEu2tSLxQxdJ2k43STtx/ztJxowy3bsnXFC508ViT4QJoI/8H3ZM4cr9oKBg5LN+2UhRuw8TxMT06KQ=="
+      },
+      {
+        "file": "../wpc-ff48f12c/packages/contracts/dist/schema.d.ts",
+        "bytes": 1603,
+        "sha256": "72e7865d7f010b0c4c7bc72bb08dc0b88e43177e74f7053400497b5fe91d3770",
+        "sha512": "7WSJWUq4odRFoZmFCAbCbNwZoBbS+VTrNax1qVdEQ22yMrqf7trc+KB/OXD6eTrFU0og7m/YOaVRz2HBcr7rug=="
+      },
+      {
+        "file": "../wpc-ff48f12c/packages/contracts/dist/schema.js",
+        "bytes": 4436,
+        "sha256": "6b889492fa4260b6ef309bd8823813802ddb38b71dbc162c0359441819dfc91b",
+        "sha512": "1WJBIDdqoXmsBKvt6EIxvusDiPZkPrujrw0tuKh5PZsTj+0AJYXEn80G8spMlAL14XqWZvaajb5HKnETNUKmKQ=="
+      },
+      {
+        "file": "../wpc-ff48f12c/packages/contracts/dist/settings-feed.d.ts",
+        "bytes": 1930,
+        "sha256": "d111c15b37ea6f1d0967eeb799a423a4a09adbe3ebc0339f3977acb18363ee28",
+        "sha512": "byCD68pwxBr0A/Z9iBts3t1PixsCBtCknrxVfnmFXPH8OdrWGCljpexRJj7fFN/IIxgQqC4Tyo3rh/aOZtO1ww=="
+      },
+      {
+        "file": "../wpc-ff48f12c/packages/contracts/dist/settings-feed.js",
+        "bytes": 4718,
+        "sha256": "d3de55971030b50e35ee4f8e70ebdd1c65a3353553f211aea31e6bf58e98424c",
+        "sha512": "UK84mcHW6zhWS52z8YGswnwysFxMzma+XCVD47ksUbxReaIP4dsPAT6woPsnHTKGMIlZzldl8VpSEpvx1NvZdg=="
+      },
+      {
+        "file": "../wpc-ff48f12c/packages/contracts/package.json",
+        "bytes": 135,
+        "sha256": "caacf7b4a6a770186fd6765f25d2b10e46f81f41c66d861b67e3e44a837ce08f",
+        "sha512": "/pDfEjGBcor9QMpegI2WbsMtHywMAsAg7KcQNOCWIAQWBiKN/4G1qgGBE/oY4cpRzu2eFI2WRDI/35TCTErNmg=="
+      },
+      {
+        "file": "../wpc-ff48f12c/packages/contracts/src/index.ts",
+        "bytes": 27583,
+        "sha256": "23ecb23d50d0b6cba74eed99238c20205c70d56a62ca5a7c0350db088a0e7af1",
+        "sha512": "KJ8h3ZAqnCFytZ9zvj4Ya9NcDU0pk/aUHEGSt6LMHfsRsDcenoD3ImCBGARV1qiJD+fD4zmjrK1OkLzLrvJ4TA=="
+      },
+      {
+        "file": "../wpc-ff48f12c/packages/contracts/src/schema.ts",
+        "bytes": 4917,
+        "sha256": "46f3cb5aaf929e8a455bd7a151cfce63915af534092ff0075bc998ba31cf35b7",
+        "sha512": "pS9tLVsmi9Hoj989ACIr7vbtJRFLVyB/965aVr4E9RaTOLDMQDUPXxZ/1EUSReg+++VXaReHrp9kyT/2HkUuOg=="
+      },
+      {
+        "file": "../wpc-ff48f12c/packages/contracts/src/settings-feed.ts",
+        "bytes": 4479,
+        "sha256": "8266d590aa5b9b2ac6bfa2a72fb4f9a269cd9e29de0de4cdf76832f7805342f6",
+        "sha512": "gKHjntRZdfRV/8d8FUhH/edKp6i5SjTjn+1twl4nYwoVU15VHMNdSRrI1tu/3xDLntutsnKqzucCvd92HaJHCg=="
+      },
+      {
+        "file": "../wpc-ff48f12c/packages/contracts/tsconfig.json",
+        "bytes": 272,
+        "sha256": "30e5e6740fbe29b3983d6f4dc01f1e145ee81ec95c5d0a79a59ad6dd297531d2",
+        "sha512": "GZpN3hZYzDe2fz4Lh3paaxK/CuDn/lTHrc5kTpST+PhP/YQ3ny/arvHpyFMH0NubAEi0fuu9rsaeMJL3jklBaA=="
+      },
+      {
+        "file": "../wpc-ff48f12c/packages/domain/dist/index.d.ts",
+        "bytes": 1992,
+        "sha256": "85710e7819cb78865ef1b2af3c256d23d7d420008e76020dd04ce5c57b91fc8f",
+        "sha512": "0hWBGWjfjhw15j4gFaZfg4/tUvBI37y7iN5VWT0omd6EGt/95uJMpRCtMkA7RuwZyH9zrpxlsQOWnMmIXuOl1g=="
+      },
+      {
+        "file": "../wpc-ff48f12c/packages/domain/dist/index.js",
+        "bytes": 8610,
+        "sha256": "e16a487dbda471e000a1d37a362583167d20f8020c5a017ca81fadfad36a4bdb",
+        "sha512": "neflMo9vF2+55Y6V5MBG55RFI1mJiSNRTvuihijJ+nKwyrUbIOSLpdqeFgYjoRaRuY5z9RFHzc8VhVTZ6TvXeg=="
+      },
+      {
+        "file": "../wpc-ff48f12c/packages/domain/package.json",
+        "bytes": 132,
+        "sha256": "daf3324204bab2539ec92a09b401da82f1f60b82164944c04d148d8f2d6218a1",
+        "sha512": "M06BsGqMZ78eJyBKB4bFpXLlKMYfERhGSH/yz2i6kHWNh8L+RHc6mYuLQiRAJAGDcnbJqRzkFsWi3L1dHo8FfA=="
+      },
+      {
+        "file": "../wpc-ff48f12c/packages/domain/src/index.ts",
+        "bytes": 8155,
+        "sha256": "ba59e7a5e015bcecd29e791fabdc0acbc9c8dd9cda7a6d6a2cdf783f87a4a6fa",
+        "sha512": "Vopsbx3X75zWKVktUaBBvO65o44IirH72h/eUZbmH64jwDllVlAwITAN+TJzEoqEYbOGc037l6D1ZcHdma5AxQ=="
+      },
+      {
+        "file": "../wpc-ff48f12c/packages/domain/tsconfig.json",
+        "bytes": 272,
+        "sha256": "30e5e6740fbe29b3983d6f4dc01f1e145ee81ec95c5d0a79a59ad6dd297531d2",
+        "sha512": "GZpN3hZYzDe2fz4Lh3paaxK/CuDn/lTHrc5kTpST+PhP/YQ3ny/arvHpyFMH0NubAEi0fuu9rsaeMJL3jklBaA=="
+      },
+      {
+        "file": "../wpc-ff48f12c/mobile/App.tsx",
+        "bytes": 7632,
+        "sha256": "8eaaa51cefef661c62c38c30f9365a5504315fc242649c97027ac57f42dcfe50",
+        "sha512": "3KT27/vWLErWaXt0yJYhBhvbe39IJHq2y0krH40RgT6ag51jQQbFcUNY0WDLDOEedNeleBgXXZ70vDDVcgJz0Q=="
+      },
+      {
+        "file": "../wpc-ff48f12c/mobile/app.json",
+        "bytes": 697,
+        "sha256": "b0591e445341b89318bdf83319b22fde965737c191615dae3ce09d1cb6a077b7",
+        "sha512": "4gGqCB5wayRlf3TbzHu7wMXvDNjSSazkE/cc2Z0fiKCdLYKnxdk7NauLegZzBLD5v7KaCZoIW9Kd14v4rpKEdQ=="
+      },
+      {
+        "file": "../wpc-ff48f12c/mobile/package.json",
+        "bytes": 1182,
+        "sha256": "1ce981a25f1254563d86081ceed97647db0107425c21031b64c5c00801ae1a2e",
+        "sha512": "3ATU7EQtbMIw7aZjkxiHIlcuH3oiNlVbG2q+MrFJ0a6LBFYyxcO/kVSKg5hVKWSKOSRNbuupGcfMd2tV9UE75g=="
+      },
+      {
+        "file": "../wpc-ff48f12c/mobile/package-lock.json",
+        "bytes": 243933,
+        "sha256": "3ec79a6d47c6fda299304ccaecb5304596900e5c45740ea90ec22e228fecf45a",
+        "sha512": "g2VgwByHafoUxtlMU0Pn8OYiF5W8GiTSse/vVC3fnLkdN07F/I0gWGT6a1q06/dQUSbKEn5knRK2aOlaKRgJjA=="
+      },
+      {
+        "file": "../wpc-ff48f12c/mobile/metro.config.js",
+        "bytes": 628,
+        "sha256": "ed13b2c5c51bb5066f4e765f93445ed73cd4eebde5f513c7d74369732294105e",
+        "sha512": "JbnYLtk3RWLrptVws1MV3D6IcCgHYGmpjS1GWxn8CjpNKBU7giWFC3ZzAyxjGIXg7h2X0wdAgm2DLwOcH099gQ=="
+      }
+    ],
+    "matchingInputs": [
+      "mobile/src/persistence/device-caches.ts",
+      "mobile/src/persistence/devices.ts",
+      "mobile/src/services/active-device-context.ts",
+      "mobile/src/services/api.ts",
+      "mobile/src/services/connection-manager.ts",
+      "mobile/src/services/legacy-mobile-releases.json",
+      "mobile/src/services/navigation-store.ts",
+      "mobile/src/services/update-environment.ts",
+      "mobile/src/services/update-manifest.ts",
+      "mobile/src/services/update-server-context.ts",
+      "mobile/src/services/updates.ts",
+      "mobile/src/types.ts",
+      "mobile/src/utils/url.ts",
+      "mobile/modules/wallpaper-update-environment/android/build.gradle",
+      "mobile/modules/wallpaper-update-environment/android/src/main/AndroidManifest.xml",
+      "mobile/modules/wallpaper-update-environment/android/src/main/java/wallpaper/updates/UpdateEnvironmentModule.kt",
+      "mobile/modules/wallpaper-update-environment/expo-module.config.json",
+      "mobile/modules/wallpaper-update-environment/package.json",
+      "packages/contracts/dist/index.d.ts",
+      "packages/contracts/dist/index.js",
+      "packages/contracts/dist/schema.d.ts",
+      "packages/contracts/dist/schema.js",
+      "packages/contracts/dist/settings-feed.d.ts",
+      "packages/contracts/dist/settings-feed.js",
+      "packages/contracts/package.json",
+      "packages/contracts/src/index.ts",
+      "packages/contracts/src/schema.ts",
+      "packages/contracts/src/settings-feed.ts",
+      "packages/contracts/tsconfig.json",
+      "packages/domain/dist/index.d.ts",
+      "packages/domain/dist/index.js",
+      "packages/domain/package.json",
+      "packages/domain/src/index.ts",
+      "packages/domain/tsconfig.json"
+    ],
+    "bytecode": {
+      "file": "../wpc-ff48f12c/mobile/android/app/build/generated/assets/react/release/index.android.bundle",
+      "bytes": 1404844,
+      "sha256": "8069cb73a8d0b0e831e93108cfb1e907ad5e4cf14ef9fa3843fa6c2577406212",
+      "sha512": "G7hS22YslGxgv1UTjAg5fBYi99avIddb1VQlIYagACVPeVNPQVsIu/FiocHNf0ewRhTKdF8aFaaf6jlmAfkogQ==",
+      "matchesEmbeddedApk": true
+    },
+    "initialArtifact": {
+      "file": ".tmp/refactor-tests/r8-update-context/native-initial.apk",
+      "bytes": 32725711,
+      "sha256": "7efc79a96cca5f658df2e1bf6898ad41576024af1fa1ae1977acc3eea7c8ec75",
+      "sha512": "zLIOiOjIMF2dhnQkW9q0rLSWqYtBmDdFI41KJDYRJ6AqyKVMlESiTd96/mr6pW5nGAQHubxOG93obLtHbUo6XA=="
+    },
+    "build": {
+      "java": 21,
+      "gradle": "9.4.1",
+      "compileSdk": 37,
+      "targetSdk": 36,
+      "initialTasks": {
+        "total": 423,
+        "executed": 423
+      },
+      "finalTasks": {
+        "total": 423,
+        "executed": 11,
+        "upToDate": 412
+      },
+      "minified": true
+    },
+    "limitations": [
+      "Independent test-signed package with minimal entry and owned synthetic PC/catalog; no production frontend or credentials",
+      "Synthetic protocol3 PC/candidate declarations only; actual current compiled client remains protocol2; no protocol3 APK or server upgrade accepted",
+      "No production signer migration, candidate download/install, physical arm64/iOS or long-run acceptance",
+      "All earlier QA source stages retained untouched; only this phase stage was rebuilt"
+    ]
+  },
+  "preservation": {
+    "originalFallbackFiles": [
+      {
+        "file": ".tmp-wallpaper-player/analysis-results/G086 Bronya分析结果2026-06-22_20-00-44.json",
+        "bytes": 3873,
+        "sha256": "01db5f778601802471791e416b40c3ac8f96248e4542b78a867eaee77dd265e4",
+        "sha512": "iyw4/Gr6XPWtLoQ9c+6Y4MfSAkwIJ5GEXlylTSgcauA7JdITUqkvviqngOcXtmt0/acatShPvnKSYPYQS4i7Gw=="
+      },
+      {
+        "file": ".tmp-wallpaper-player/downloads/aria2.session",
+        "bytes": 2428,
+        "sha256": "bbe9d72e7e5001c01f3a012fa73e5d35b6d53b9e76e08190bba58973ce1ba9bc",
+        "sha512": "kUeLdSNzgAIPCflk0SjGHwcnPI0onGBAaWNfOWR5mIirAx8P8X5NsaKcuLcanGTkbao6rDlYwv7IkTgAO9IDSw=="
+      },
+      {
+        "file": ".tmp-wallpaper-player/llama-server-err.log",
+        "bytes": 87774,
+        "sha256": "5744b9bb378569a3a4f664b62aad9a4b0025cd7d419cba73b793fb62cb737f42",
+        "sha512": "ZnN0RcBburL6Ar6DvnUg0DSfCPYsKYjnYEas3nHGA5qdG7eXIh4U5vUPxKG8YLizNa7WQQb5kQV0lv/WGbknvw=="
+      },
+      {
+        "file": ".tmp-wallpaper-player/llama-server-out.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "sha512": "z4PhNX7vuL3xVChQ1m2AB9Yg5AULVxXcg/SpIdNs6c5H0NE8XYXysP+DGNKHfuwvY7kxvUdBeoGlODJ6+SfaPg=="
+      },
+      {
+        "file": ".tmp-wallpaper-player/remote-identity.json",
+        "bytes": 566,
+        "sha256": "0abcd8df9c1443a348b050b5abe28ac419ecef717ddf31a0daa680f153061324",
+        "sha512": "XvbFfKC+cCrSnQH/oJMKUFaEalXRT7nfaUR+/x5+PU2zpJAupUIQXIA1l82Fqgb/FrOSVKPPBcZqrkF6ns7qWw=="
+      },
+      {
+        "file": ".tmp-wallpaper-player/scan-index/029fa92465c3409cba74ce3db6b927dfec0d4f581b12122975041a32ab324e8a.json",
+        "bytes": 3642,
+        "sha256": "33b1310886821b4f01322041a561c8a6b4ed10aa351772effb396e7b1b547cfd",
+        "sha512": "5EiJNPPQONupaa7Sh+Sg71Y+rVxn0lfb60Yh9efMOD3utOoQoj49EeQxjkdAHBfMporaGhtWpL7/E58686/zew=="
+      },
+      {
+        "file": ".tmp-wallpaper-player/scan-index/06cf5926d93db3cc7b30882ee7dbecb69d51ce4e00de7901de3d48b866f9afc3.json",
+        "bytes": 2804,
+        "sha256": "274848604327a2f96f0d152b9f23a7b4e5470fdd67c744e1c181e86c2d284059",
+        "sha512": "SfqtOuo1zybHY9rNSzVPEY8GX8ze3//TDKguB+bnjwnkeuVpuQVj2Vty2ylkDHPMjPXmp0jUt68R9zoI+4GX0w=="
+      },
+      {
+        "file": ".tmp-wallpaper-player/scan-index/0e65747e6e0fc76a1e0c86e951c35d6c7392c184ba6cb43724d7d58856ff212a.json",
+        "bytes": 3544,
+        "sha256": "3ac45a0678e6ed4554fe1f315f923d999b0311096acd3c9394e3d85826d37db9",
+        "sha512": "JgrxWZh+aE0Nin+UuLG8ox8+HknyXbJTVUwtv1hCfiFDKIt6NGjqeAY2VvlkIwFriM2ckV6ivxe3Y/gML3K55Q=="
+      },
+      {
+        "file": ".tmp-wallpaper-player/scan-index/114890f3437dd45b34313ba38d9d3c36a09701d5d672bf8abd7af8c922db61af.json",
+        "bytes": 2804,
+        "sha256": "3796d21463d2b2418c485565780e9628a50ab4f1a69d8faeadec1eb70a9af290",
+        "sha512": "HhTKLIOn4KVc35dqiq1C8/vgYqjsy283HCb5hf059Oxtbv5JDDvFX04oTo2bELF3+lKXVphJ6unFDntwFAZ2mQ=="
+      },
+      {
+        "file": ".tmp-wallpaper-player/scan-index/1465f8e823323fe9c4383abb5a38c9e17fc550dd44cd2f14fd7f7242bc309e12.json",
+        "bytes": 3644,
+        "sha256": "1be5fefdb59d8af06de2a6be0eeb0025a96253d719de1e0daced6f1fe35cdde0",
+        "sha512": "CpOFNP0GX5osz0op032Dd7FLmQAOzPuyE93/eojg+9ByVjB+EYnL+lRCNtYYpHKtgUDa70CsKgqsKmj9zrvYjw=="
+      },
+      {
+        "file": ".tmp-wallpaper-player/scan-index/153bae098b5d3524553fcf4d8cbb1eacef2471314948819d043b26cebe199e14.json",
+        "bytes": 3542,
+        "sha256": "689305d629290f70b40c5ea8454db685486f87be218b38da7aa4f0594a1d1cb8",
+        "sha512": "8kerKuwc+cRXh4AudNWIRGsiyRbNQ8/zxsYjznmUe+rNeNL/WnHBot6q/4Vuw2UNi4TyHXw8m0V0MBn46xYkSA=="
+      },
+      {
+        "file": ".tmp-wallpaper-player/scan-index/165f4a9a9309a7ac323647e9acefd754a66c6295cab7db6bdb50830914bf0d68.json",
+        "bytes": 3648,
+        "sha256": "5b0738883aee24ac7e17fc108a221e395380d2bae6a32f3ba3f70606e4b27ebe",
+        "sha512": "GZ7tj7mlwK/O89WI8ML7AjmqLVxdj5e7mYbY14b0R/bjfpE9QZCEPFWI7PzE1Qgd0cUausDqYOydvmZlpzZGEg=="
+      },
+      {
+        "file": ".tmp-wallpaper-player/scan-index/1db67e5d68a60a19388b0338ed1ee18c2a2bcd0025ab168a1d69920c929bd647.json",
+        "bytes": 3648,
+        "sha256": "b19f9d1c96db4b9106b2a28058ab1c33f4d3edc45fa693126cad0efe48cd44dd",
+        "sha512": "vrUy+UuWCJRS4x5JPcvCK5+TjuF5mjdMCEjabdWa9LC7tHyQxtzDHRZml+sMMTD97TLeiKrAoJXOZD0Nis7/PA=="
+      },
+      {
+        "file": ".tmp-wallpaper-player/scan-index/3032598f9f4655037a67986db404cfbf60011a2ca84a1e6edcec794c7deab956.json",
+        "bytes": 2806,
+        "sha256": "db1c59c38bb8ba2122afad18a73d956ec55d4580f4cad17f365b37b71d7e3db8",
+        "sha512": "HVNYzoort16/Ncksp7jBnqk5WCQZJa4KO8eaE0ahR40LJw5m05O/JyT4YGKP1eQfiLxzahH9JX78x69NcGb/jg=="
+      },
+      {
+        "file": ".tmp-wallpaper-player/scan-index/358da0698a4692a8052707f22ba2b9c94b5c4e73080d12c721e622b66a80614c.json",
+        "bytes": 2804,
+        "sha256": "f1fb6fbd25b3d96027a86d6c797b162a74c95544c04f64470ed733ddbc8983ee",
+        "sha512": "rysp1c9kbIPLesxhSgtiIrnJ83hfhytNyyNk0uH6e7GdN/vMbOiHlE642t1ZXqJTauM2hfzPz2e8rL/nP2JdRQ=="
+      },
+      {
+        "file": ".tmp-wallpaper-player/scan-index/5eb5da5dcf86cb8c66f674df75935c030f8e12d86b6373ebcdaa3d7aba7eb672.json",
+        "bytes": 2804,
+        "sha256": "489328dc3fa24223d6db18869658db5d01f915838ba97532de8193f8bedc6f93",
+        "sha512": "T8qvhLmNGsRKWXxfl4Gtw8GwUFVG5yADJG77jBAw7k4f2VWaKPNrLLpNloWUbAjc07irh5+8XbgOBV9XZftm0A=="
+      },
+      {
+        "file": ".tmp-wallpaper-player/scan-index/5f59f687750abe3eb7d55cdb1aa86cb802bf22f3b00e3bb369f77a7ef2584d06.json",
+        "bytes": 3308,
+        "sha256": "ae2763e5e5553a4eb759576c8f26efcffc9ef5aa741ddd6aad78b2e33716a719",
+        "sha512": "0g+ToYRbljDXBhGZZKZcofBZ+hEyEgd0rmuhucc707de8aCvJ5oNX0d74t8MZbS9EKgJ0tRmDrbYpkPcLjoGLg=="
+      },
+      {
+        "file": ".tmp-wallpaper-player/scan-index/602ae02092dd5e362dec6b88bd5afb39f14c218b3e0f0fbd52e5a8d09eddeb0d.json",
+        "bytes": 2804,
+        "sha256": "cd75909f0b53f3d449d479531d62f3ff1bb3144eb918086cc7a25d05816c2a7d",
+        "sha512": "/4Odv2/hdYwttrHPlYyGSedfSREkrg8GsABmSmYCLRSdfMf1X5p3/0ojSEOGXzX8ZeJNvo706Z1EIe+7zwq35g=="
+      },
+      {
+        "file": ".tmp-wallpaper-player/scan-index/664a4a47b45908fdfdf2d6bb5ec7024e41699d7dd2af4110f2889d4eac6dd2d7.json",
+        "bytes": 3644,
+        "sha256": "64835ce867a827d40088ce1b9c8e4e19cb996d0df4c2e676cbb215cf38868556",
+        "sha512": "NVP/GLwJxIW5cfXNSvpnzFyWtmDeu4DzE63wNyLSWFA1nfhwqkcYqVc0+SIKigFFGQqzLt+tHGpUA6eRZPGgkw=="
+      },
+      {
+        "file": ".tmp-wallpaper-player/scan-index/6a4b7a95d1ae5d67f63cc87a4f3486c0a22c35af457355ae63f4303d7bdbcaa1.json",
+        "bytes": 3644,
+        "sha256": "7ab98d842e31b5da1227cf6e00d98e3e32287c53b0965f3e8a964dbc9e982b20",
+        "sha512": "NyiKXbyq1oe6J2npG624E+HF+rCXCdRYs6Il4Ef0gzTtslMoRsfE+DLoPapLYHQSW6U8ExbHQTcwAnDM0U9wqQ=="
+      },
+      {
+        "file": ".tmp-wallpaper-player/scan-index/6c2bfaa6b9f2b41ef00e065bab2a6d71c599e2ce76cc3f5939228ecc7b8be650.json",
+        "bytes": 2804,
+        "sha256": "33dd4002ba26ea91ef1c97f264ef0337dd78b37d06f03a538f514ee0809c5107",
+        "sha512": "F+Ey+/oGXuwgd17lgc1XOAv8Z72NWNqPxumGRLqvou3fyWyHxy2LmBHssjF4dOjZtkNQn//W6Cw/iqQaDi1mOQ=="
+      },
+      {
+        "file": ".tmp-wallpaper-player/scan-index/703cb3b91afdc3a4a39fb95f9d0c0289fe6dcdab34f10425d71858a05164ce3b.json",
+        "bytes": 3648,
+        "sha256": "217ca6aa5c2c3b721795e93c7cb5d819317fa55546fee842c81420f84c353fe8",
+        "sha512": "IUU53piv+yx2nQR68jiDyzrLOW1IAUZbbp7T+GWa1ccecbCAnTooc+xE5NS8IcdbmoCyoaJTQ/obZvI8F3u1ug=="
+      },
+      {
+        "file": ".tmp-wallpaper-player/scan-index/85bd705cb26d94f80943f15877c1c71cc9f9a665c0bf24f8ab568b0b6bacf550.json",
+        "bytes": 2806,
+        "sha256": "d4bb5033f4315903b0083789b87e09f4e06cb294a17313439f21987dd0b3a527",
+        "sha512": "NrfeVgZKaLZ30q5dyBAvCcDZkgicLHIvehVasAO2XXOZZTCWIIRy3nHfXkQmhANQK3YKmTpqnaKrs4GBI6h5nA=="
+      },
+      {
+        "file": ".tmp-wallpaper-player/scan-index/87720e2b63644af82253d5ec9ace977d27e42c03a6033c6811af6c6094928e09.json",
+        "bytes": 2802,
+        "sha256": "2b01b9760b6e8f5605fd9bb0cbc74e6f248c0bec7428982ce0dbb848c1f6e589",
+        "sha512": "iCCi1mNzPOVPyR1cbkBM7AxK/MkwbFER9KR2S0aBAAndRi0T+hVSA0cZ9M9vmDPyjWHgrfGjXb+btYMs44Cd1Q=="
+      },
+      {
+        "file": ".tmp-wallpaper-player/scan-index/959e88efa835995e2afff87fc4257966a41b7f45da19d44dc3369ba0d88599c9.json",
+        "bytes": 3542,
+        "sha256": "bec93346f2dfbf0938b593658fd80e43a9be33b0bd4a0f7bcbf9a8997198ba9e",
+        "sha512": "dQAtg3U7P2g5MYh7BExWdhxBNOsAzhiI/T8QULgKXtsXMNOS6Wz8FFuvvbDEsYEVfidJyTx7XDcM1TNba/snpw=="
+      },
+      {
+        "file": ".tmp-wallpaper-player/scan-index/9d7bcef01cadb37f1a59d31b708084c192007deea8564d134dcc473b0605201c.json",
+        "bytes": 3646,
+        "sha256": "04d6bfae12cdb3e73f828813477825cd39dc803c37893be82455ecebe7734312",
+        "sha512": "mmyVIHPDUxg0J1fw4absJBT8pxXVxGydWULDVqoGgZ/T6n2K+HT+MPsDPC4Q4fzt42I9w93/WkKClNUeKsQBEg=="
+      },
+      {
+        "file": ".tmp-wallpaper-player/scan-index/a02253e6f623d27dfaa6674be31d9b43fc3d9b2c6bcda125418f1c3dd2a25709.json",
+        "bytes": 3646,
+        "sha256": "90f629426a02dbbe9d60c7ad0c28090bd77a96693fcd1187b5215eda49184b86",
+        "sha512": "fG5aIsYjKTh7Jkzn4jXeCKXo7MkJ1MI81w7aVbEp0wp6+hDwsZxg1sDGGEVFKjyaLFL03yzuCSwzSWpm0RaOdg=="
+      },
+      {
+        "file": ".tmp-wallpaper-player/scan-index/a17738a5c4b4bc1ce4358ecff69b8e44a1e1a33a7511d9a11eddecd94b9e58cd.json",
+        "bytes": 3648,
+        "sha256": "a1fd92c4c4c8b9bbfeb105da251cc5230f16f1f68edf7cf909a468da0c242d99",
+        "sha512": "F5HdrOrZUO8fIHS1o89eF7h/7ML40JlbFL20LjQjJ6QyZV1sM7mgbHMrrhmwBmPW7jD9SSG9DJU8RixzIRb4pA=="
+      },
+      {
+        "file": ".tmp-wallpaper-player/scan-index/c53e2ac468d9387f39255a1ee9893eba1abe325ab086dea0025a18d1ef67e75f.json",
+        "bytes": 2804,
+        "sha256": "2042c353b3e1c29eb236d1a1dfce79afdb85839f40f02f0b70d521eff607e6bb",
+        "sha512": "q+AwWtox8bz3pRPCOQJbIhLMae2jHK2MpFgVQOOFSbY2eK9wXc+JsZVZhcuZriT9T6O3virpdZjldWTted0Www=="
+      },
+      {
+        "file": ".tmp-wallpaper-player/scan-index/cb702390842effe5e6e22e77acbda7b2bbea77ed51a5c07e66c3c5d8d0bc15bf.json",
+        "bytes": 3648,
+        "sha256": "718b65c8b9b80caa3c5d34bc3244f750cd8243dc4b8743f637c3b12dbbbbda4a",
+        "sha512": "VwI5kOJHT0HBNfNf53S8wPNjIKD0E1xyayfBFLo7R9GrCm+JAChnXDUD6GVWERfnX/o+g8v1KUXIc6RYwVmZSg=="
+      },
+      {
+        "file": ".tmp-wallpaper-player/scan-index/cbf568b1144651ce061c2dc94a347128724334dd45ac2dd4ebf6890d74c66251.json",
+        "bytes": 2806,
+        "sha256": "e22fd608a0197ea15fdbd8e3320b49d60e518bb4054b74ffb7504cd8e6035134",
+        "sha512": "R+e155qYNIEMMkhu21Nr6saous6xPVus16OS660Z33iA457ArcVOPLhrvG4WJ0zuO30PXvrIgNBH1K82vrgnDQ=="
+      },
+      {
+        "file": ".tmp-wallpaper-player/scan-index/d6cd75e4bc356e88ed2b4c2272c32263e568d67a07b4017d73b22e09c23e8306.json",
+        "bytes": 2804,
+        "sha256": "d3ccf77f170934b4987c22301d34abbb8b7646d45af03f575057804e4c892629",
+        "sha512": "RqfvOli86TmrbwzJg6/0qmhbU+xZfSXhyRoUE3CglspacMmAObLy0iVsbsLa6XNu3LmUWLcwPLHb+u8dPh4DkQ=="
+      },
+      {
+        "file": ".tmp-wallpaper-player/scan-index/db34a207b303445fed1e9654c8e68883c93c5123070913181f89844225e4636a.json",
+        "bytes": 3648,
+        "sha256": "81149ad6956bdb73b468e88036ef043043faecd14d34901ba5eaa49b775d3a72",
+        "sha512": "XX9oIcBnulsAfGyi3UgTmRmy0XKAlHrsFNcW2LUSpKGIpLXeRcNfUij50lShTYa6Ng+LTQMCVKrjrmH8GYlMAg=="
+      },
+      {
+        "file": ".tmp-wallpaper-player/scan-index/de13066bd94cc789543a5fa9e6100f3297df42c5dd715cccf10b11383b6f1d68.json",
+        "bytes": 3648,
+        "sha256": "d2ac7243b636179c0e35727cb899a4f608b7c044d759e6b6a52c8f501a3a6945",
+        "sha512": "/iBjVcHVkmDBH0UfuUv7GFI7zmWhQwiurz/Q5x8id5LLqaDcLdWEjCcgyR6lyob3aW56aY/2hxTjNHPUh1Z0kg=="
+      },
+      {
+        "file": ".tmp-wallpaper-player/scan-index/eba7ad116c30f43341d30f06e5f9efe510565b2a31a16c0eccab8fc4c303e6bc.json",
+        "bytes": 3646,
+        "sha256": "636392edc5a9f41da4b70492833939eac890636623ab957400a7118bba472fc7",
+        "sha512": "+ZUzFXtHhbC1NoZ6p6668vkdiHbZam7+MUDiSkmJY7VPe8u4nXV1DyhmCatQr+7PKNKljbBUXV0KJua57UUx/A=="
+      },
+      {
+        "file": ".tmp-wallpaper-player/scan-index/f16070f230607bf79853b98a8c462b8e7b854deeb16fe246ba6c9d783c9b2832.json",
+        "bytes": 3644,
+        "sha256": "becff49c6c81b5dfd4688bbb272be352a8821ce42120b45282ea86c65f6378c2",
+        "sha512": "551Jsgf2K8+PezP3FuKxD517yMnQKj+S9Ao6VIZ3gkkvhsbABUL8u2lnMgM7bxHhRlv7bUILXp9nQ2ku2Wj9BQ=="
+      },
+      {
+        "file": ".tmp-wallpaper-player/scan-index/f408135604349a60c1b7caa1d60757de692af100c4518e5588f38b619995f186.json",
+        "bytes": 3646,
+        "sha256": "b894250b5d420a09b89350f33103a5d08edb5fc3d20f3cddf7604ed1fcb9df3a",
+        "sha512": "xheXBso55dwHEgykAvfDZf4n/26SCAP7fAyW0+BzsBmCJ+kcBgURcjEGCeYNaqTQqihKydkgsGs46ew8DHyERg=="
+      },
+      {
+        "file": ".tmp-wallpaper-player/scan-index/f7b0c1004febecbe36453be10ef2ddc2523e5b92f4af5f318ce1049990e93053.json",
+        "bytes": 3646,
+        "sha256": "77f2b4ded7202b828e8a6e281d549eecd1e79aea4030dfb2a7d918202ab090c5",
+        "sha512": "l/iSSuhoNjz2tFcSPobHYiXReYIlJaCmkLixky5HUeo+x272kifGGRjKSUukapRVTnvVQybUWX45ju2TN7gcew=="
+      },
+      {
+        "file": ".tmp-wallpaper-player/scan-index/f892c389d585d65dff3d06f6c86d3355dc90100c808a4f80da22b2f7e81865ba.json",
+        "bytes": 3644,
+        "sha256": "b0f007ba8b4249849d726eee7a9fec6cf5926742e62d3cb833bd464423af520e",
+        "sha512": "Fs2lK+N0GU/ztNoqj/OAFg2rQzejqj+cdVpT5Q1w52Tp4KZKJNwMi4VyEKTGTbDwOTj/opUURVbIaFzdTeVJpg=="
+      },
+      {
+        "file": ".tmp-wallpaper-player/scan-index/fc41c7e68e94b6f115983997d8498353a4f8f41b61fc91662dd84affe70fc9fb.json",
+        "bytes": 3646,
+        "sha256": "fa79531cd58ae0323d29102813386358d2e599ecb63902231ed73e264196abdc",
+        "sha512": "snnACJ0NqnrAILRdOeWbzApt189/MsfL+hNou4uzRTPDa2NELP3D44teP3+gIe3arlc7mcdslaPIlyO8XtDHSg=="
+      },
+      {
+        "file": ".tmp-wallpaper-player/settings.json",
+        "bytes": 22291,
+        "sha256": "6fb990f7edfe0707bb48b8bed65455cc2a521d33e028b45ce77f98b6a466a0d5",
+        "sha512": "5ZkzZzpz3QlA05Qeu4IOhPuUYVIAuCnMfvzvH0loMSNBo58NFt578k3Q+wWhPLsHh5hjfxeh1Db0boZ00WSsaA=="
+      },
+      {
+        "file": ".tmp-wallpaper-player/video-metadata-cache.json",
+        "bytes": 39687,
+        "sha256": "616205b2e97a75ea8842d3b4f6f3de778fc545493659d45e5c0139c6d7087f47",
+        "sha512": "vImCz/hAu8kdmXwFXl6Atw2rREaBoO44lHfPhdDlXBJrHxMC0PIO7KzRlV7WM5IaAfPT3aE7Dgtvr2NmHiUT4Q=="
+      }
+    ],
+    "count": 42,
+    "retainedPublicArtifacts": [
+      {
+        "file": "release/Wallpaper-Player-Setup-1.4.0.exe",
+        "bytes": 204165215,
+        "sha256": "ebea8ed1eda6529d98edf8937645236826e1120cffd5e79ad3ffea50da1351c8",
+        "sha512": "+1/EwHV0Iu01FqWY7JOXtJ7aRDavagF0wIz0aEoA4ZnULIxkWi68Ys9pXK/8xjrsr6OGIivw5hj7NW58ql/Wrw=="
+      },
+      {
+        "file": "release/Wallpaper-Player-1.4.0.exe",
+        "bytes": 203941071,
+        "sha256": "23fcd04385d3b895259711f00983c7fec5fefce1834fce2cc8e2c469fdcd6f14",
+        "sha512": "bRFR1d7pmRUeRVtX7FToivqxdNaac16ot4NbB/uMOMj9VNnhHnEbVLXG1RUR5N8DJXy12/6aUYZwpnakGyxGxA=="
+      },
+      {
+        "file": "release/Wallpaper-Player-Setup-1.4.0.exe.blockmap",
+        "bytes": 212662,
+        "sha256": "725f928d1ff169d97633f85175878ecab838d0707864a35be60634ba9e2abd7e",
+        "sha512": "hlfYqOfkaDWX0+sorrDPuJH4QHRibVyuDhBeokDrfe1w78XM1Vh2UjsMRVmtGv4t2aRg3uh781h+TQ6RfJW9FA=="
+      },
+      {
+        "file": "release/latest.yml",
+        "bytes": 361,
+        "sha256": "4f5c80d6597d12f99f6b9aa2f6b64ad6b89b84b43b49cfc6204dd8651ed1edb9",
+        "sha512": "F/zeGav7F4QoOW6ZDET2h/9JHcnPf4ZMD2QmkQqM2BF4ZNUAFUetG2ncaDAAUx1kFzPNHXaD2bv3oGIb5Uq07w=="
+      },
+      {
+        "file": "release/plugins/Wallpaper-Player-Plugin-video-analysis-1.0.0.zip",
+        "bytes": 570209084,
+        "sha256": "552847152007d463424d43971778f40545b95139830dd15cc76957de59b4baa1",
+        "sha512": "LVbf4akQEqnAWSanp4f4obrc1ZY+td2XHD8b/IDoRZ28IbVLWP2nGuMOgafC2jaOziVa31WuyZYAAEfbmH912Q=="
+      },
+      {
+        "file": "release/plugins/Wallpaper-Player-Plugin-ai-search-0.1.0.zip",
+        "bytes": 2955538,
+        "sha256": "83f0949f361f03a78f78496c9b15510b0c6f8fb0581cea9bf8b94724faa7d781",
+        "sha512": "tyJjoVTN9JitDPVFx2+Lv01fzo5Bik3ELcl64iyxz5QBl7YSmTvJXT3MGyyVlkD1I+BO8tPtbHqtpQ8koXuatw=="
+      },
+      {
+        "file": "release/plugins/Wallpaper-Player-Plugin-agent-bridge-0.1.0.zip",
+        "bytes": 1093,
+        "sha256": "9f499408c282a144ffe411648d476fd4e36bd010c6e8974be3b9fd16460bed1a",
+        "sha512": "W5qWvlCSHQT8RlE31UF1e06dN3162tSZVhs7nqyFBhFLJdcN7Z8rE2WDw6ZMjQIygO89K/Xbuev/TJY+ImfSqg=="
+      },
+      {
+        "file": "mobile/dist/wallpaper-player-mobile-0.1.4-arm64-release.apk",
+        "bytes": 40710234,
+        "sha256": "f7e46638aa17f66ce68c9c96484909667af7e720bcc63fdc4f46ced39cbaec22",
+        "sha512": "TVvLeuH/1CXDXpspYbDHt8xwcX76SAe134l24lPwQkAGhg2FGJgUWumA2KeVmQ2sCePdONcklROdfjANnJ7lKg=="
+      }
+    ],
+    "unchangedFiles": [
+      {
+        "file": "mobile/App.tsx",
+        "bytes": 10585,
+        "sha256": "f22dd5fe3757a007b517ad3d8d5f0f8bfc6b414ee588a619b636d691df4510fb",
+        "sha512": "kf2KOwokdrirNvTsBW1XFvOvrDI0oQxdglCh6k+8Weia65KZW51Q75RKUeKtMFzKtunXQ1xuqLobUjaxgtymJQ=="
+      },
+      {
+        "file": "mobile/src/components/MobileUpdateCard.tsx",
+        "bytes": 3961,
+        "sha256": "a5de054d744c7acfe71b5693157ccb4f4e7b5c73f0ee5271b0ee9c7395b99b61",
+        "sha512": "NR0yzmaf/jdua00CiM8sBBl98rakl5/tds1Ou9KR8fcJoymIUS6+nMbU6NFv/rkBiLdqUw9ZljxwzBlVWSIA+w=="
+      },
+      {
+        "file": "mobile/package.json",
+        "bytes": 1182,
+        "sha256": "1ce981a25f1254563d86081ceed97647db0107425c21031b64c5c00801ae1a2e",
+        "sha512": "3ATU7EQtbMIw7aZjkxiHIlcuH3oiNlVbG2q+MrFJ0a6LBFYyxcO/kVSKg5hVKWSKOSRNbuupGcfMd2tV9UE75g=="
+      },
+      {
+        "file": "mobile/package-lock.json",
+        "bytes": 243933,
+        "sha256": "3ec79a6d47c6fda299304ccaecb5304596900e5c45740ea90ec22e228fecf45a",
+        "sha512": "g2VgwByHafoUxtlMU0Pn8OYiF5W8GiTSse/vVC3fnLkdN07F/I0gWGT6a1q06/dQUSbKEn5knRK2aOlaKRgJjA=="
+      },
+      {
+        "file": "mobile/app.json",
+        "bytes": 999,
+        "sha256": "326d496a86ba0b28d4f4fc3b3e645cedb784a1b07523c955005877414477e9dd",
+        "sha512": "GX6N9JLy7lwS7gA9SXSP8WG0kFss2gDAmBF/JQfAPpFXSqIQmBqJL+OjLA9SnL/qQVS/GQDY5pnmslSdfNqUxA=="
+      },
+      {
+        "file": "package-lock.json",
+        "bytes": 203306,
+        "sha256": "7366f3a5de4b9fbbafdea8a1febbc35828fa788fe006635b87727d559f4d149a",
+        "sha512": "RlEJSH/3FNIOlPddlsGbHoUyOf0H6r167tEABKn3fwuJOG3HkQK4ST6WAvPNMMrAolSeTabf7JjrIjMxnp5cEw=="
+      }
+    ],
+    "otherFrontendChanges": [],
+    "rootPackageOnlyAddedScript": [
+      "verify:update-context"
+    ],
+    "nativeGuardViolations": 0,
+    "originalQaPackagePathPreserved": true,
+    "originalAvdDataRetained": true
+  },
+  "workflow": {
+    "actionlint": {
+      "version": "1.7.12",
+      "exitCode": 0
+    },
+    "powershell": {
+      "errors": [],
+      "powershell": "7.6.5",
+      "scripts": 111
+    },
+    "fullCloudCiTriggered": false
+  },
+  "sources": [
+    {
+      "file": "mobile/src/services/updates.ts",
+      "bytes": 11076,
+      "sha256": "7da81705108f39f413861a866f27851185410756fa63c3cb275e0aa4d7b29265",
+      "sha512": "Y9+uGAhC6OUWvB9kx57zMKFhnK4rxwWTRzzfdPdfiekaG3goV6YZcnJ2IA3uOz9GOgy/9lRZJ3QMZWsosFcE8A=="
+    },
+    {
+      "file": "mobile/src/services/api.ts",
+      "bytes": 16541,
+      "sha256": "92c6dd8c797ba5e96fc250973c4181a888b162c1abc18408411d62160c5233f0",
+      "sha512": "yClL8zEdDOwo+tJ5r+IFzFhPZyzAt4a7TaAPdQFIuiz6Ew4vjN5e2Z530fPd3W4iyG6+p6taomFUdksm+Ek4aQ=="
+    },
+    {
+      "file": "mobile/src/services/connection-manager.ts",
+      "bytes": 11098,
+      "sha256": "3f92c54fad30daeab135ecea44896935f663bc0c43b578481d3c7223698b444e",
+      "sha512": "vdNAgVlgJSTHB1xpQ4KOSp46De7/hquArurPMqVEmOLT+yYUVE7faVEvyWiMjKNGnO2SWG7mVicXOt7iKBS8aw=="
+    },
+    {
+      "file": "mobile/src/services/navigation-store.ts",
+      "bytes": 7586,
+      "sha256": "53d18e5557f1e6f0e2b30f1b656754b7356ade19159efcc4add0a2c722cbd5e0",
+      "sha512": "Y0ct59qvXCS9peE2ytzRfwKrWXy/3dkN6dPXi2s8rXnKMIr8fbnRwJyG0bMdRA/I7voC9A0OUQUNKp80xPz3AQ=="
+    },
+    {
+      "file": "mobile/src/services/update-manifest.ts",
+      "bytes": 10865,
+      "sha256": "609f326ccffbc7dbcc227b6314e5ca31d4a938957934786f1f7fa42649e22831",
+      "sha512": "UIMKLQBEoeGbdbGkU4bii4T893uQKUWMShcimd1ZosT3sNDWUouh18+/g426oJJsiMKHQaVMVa0brTl1dUsdfg=="
+    },
+    {
+      "file": "mobile/src/persistence/devices.ts",
+      "bytes": 7801,
+      "sha256": "8ae8324b8a271d432b07fa391eee9afdc428f43f1c8fac9fb8916adbd6f14d36",
+      "sha512": "sbVP0fwZFMN7Nnn4sdlIO9LbdUBNyQGjBqsnwHM1jz/DrmB7RZHs/yel6cT9WnKtR8ta3BfG+Af6YGTbQGWD7w=="
+    },
+    {
+      "file": "mobile/src/services/active-device-context.ts",
+      "bytes": 1720,
+      "sha256": "10042da861eca926e14db332e2393de5dfa6ea1b727056444eefb3f2a02b29a5",
+      "sha512": "CKMptQd7ClbAIqK9Gcd+EKCumeXePclLotEwvnQa1lqFfm3FWJWd2BP3av5B9qBNYSIROlwue5YmBZ03PXWM8g=="
+    },
+    {
+      "file": "mobile/src/services/update-server-context.ts",
+      "bytes": 3079,
+      "sha256": "29ebd3afcb946840b51025907a1bb895e80419112cfc92c85013c8ef7687d704",
+      "sha512": "oV/rNFxdd+0wttH40dXfv9Ev9GmysrkpFp3F2rjQiNv8SyUOEQK/NvMPdbtCDGRKYgA3n5Aa1hw6ZT8Si7/izQ=="
+    },
+    {
+      "file": "scripts/release-gate.cjs",
+      "bytes": 22738,
+      "sha256": "4ade750081675041128f7396f13a0c62208021cea5b817676a46c899a4a181a3",
+      "sha512": "SioiCM8d+3lcYnAEurw+7s6uXo57s/5AtPoJ1LuBwxLU1seF6cak2MdJzrzf1NPfAu5jOW40gyVjkRapa4/q3Q=="
+    },
+    {
+      "file": "scripts/verify-release-gate.js",
+      "bytes": 17606,
+      "sha256": "d5f9aa5bdcb8b9101998d89c4444e8464ece61b05889509ec3c10d296cdd8611",
+      "sha512": "2j1Q+oH0aEJZkTRp2FDF/zxSfJUYkl/wVXi+7uoMU2oGZfR65TtPF0/EHoYyx/y3Wc5Y+r9puOfQ6HrSakio9w=="
+    },
+    {
+      "file": "scripts/verify-mobile-updates.js",
+      "bytes": 20869,
+      "sha256": "b704114cc567583d9381726d107cf1140e3a82a50b3edd99c2631d0b3f0e44d9",
+      "sha512": "A46VUrFQW06jGdAUqLFlnS/oqLI5S88laVhFYFLB7UXwpQWT3jiHZaqJRtbyxjJ1VLkQHk6RwZiXOSjGKolK7w=="
+    },
+    {
+      "file": "scripts/verify-update-server-context.js",
+      "bytes": 19592,
+      "sha256": "a2e6f87012c0444a96910d3e51449226e4c700733f4698337d0cef70dbdb50bf",
+      "sha512": "GGvlYZDgqRvW+ubeM0v74fMn6XclvJUkoYS9QfhxRaMLWDBWFj6HIcRBMW4/gxYfUlt5GbFy0bCRJUKnHaF9CA=="
+    },
+    {
+      "file": ".github/workflows/ci.yml",
+      "bytes": 12000,
+      "sha256": "abad470fc4e96e14b3a936f81e1ad783b482553a0d1cb3c38c1bef3b9868dc75",
+      "sha512": "czUKmbRcrS+r5hv4shWxdvOnOv7qzbapTt5e1u6qOQ7sdU5EE+J8kmdu63Heau0tU/PKFHMITrh2Wtvw+vVVEw=="
+    },
+    {
+      "file": "package.json",
+      "bytes": 15244,
+      "sha256": "17f7c10b6d562fbe73208cbdae694637cfb9b4a082c38160a1cfd6cd59e84f9b",
+      "sha512": "4LbfP/clUXm8vcR2dBFoCTUHucn1gWRSpur6H3r0qKdUOvqXlXV48rW+h8RLipZTOHPLg6AZ9hghcQYs+I0jpA=="
+    },
+    {
+      "file": "README.md",
+      "bytes": 11544,
+      "sha256": "cf3a5023ee155b66a8537f783ff899417812765de06cd9f7c9149148ba77c67f",
+      "sha512": "ltxGvGhGZnCv/9qZSSCIMFhMbozvs4zon2L79L9DvQ72SBkUjkEQk+6OS0Cyn07JJzwVwWhyhybCpuli21ugvg=="
+    },
+    {
+      "file": "mobile/README.md",
+      "bytes": 8491,
+      "sha256": "113d5a994ffcf9771f5c0fe1cb9fcb4498eb7358aed40dad1ec94ca2645a1b2b",
+      "sha512": "mInlcN8T6U/RHg0C1P4C2SdRq9vlKnRRE3ZNznYPgLs5N8YxhTsKFwI2lMuKACsfwtwOZ6FB4yqFP/nJgNrPtw=="
+    },
+    {
+      "file": "docs/release-delivery.md",
+      "bytes": 15081,
+      "sha256": "ce4d37eb21c0d59ff9aa365a714767bea804ed38a80f1f07443478db6ea979d0",
+      "sha512": "HmnUeuScPYEN/bzbGIMAp52gLiLqZwslXq/cGD2i5EMdKQTIYBlRr/EKtbqf6fiOauIN45VzMmn5738tLfHsxw=="
+    },
+    {
+      "file": "docs/desktop-mobile-review-and-refactor-plan.md",
+      "bytes": 56417,
+      "sha256": "52b69e96a8affa7cb8a50daf31ea89f5ef14ae64d80de8f19c16328ad049427f",
+      "sha512": "yJsfqfiaJP19OsuD/IiXQpqmGzZV4zGt/hEoLOb/f6aIMiPudarKA8Ptuxl4JujXIhlTjbOGllxw/M2ECHhxbA=="
+    },
+    {
+      "file": "docs/refactor-progress.md",
+      "bytes": 224571,
+      "sha256": "e4369439f12ccca85ad8186dd9e998d78ea1766961b95e1665264b59e3620169",
+      "sha512": "a8XkwWWTi/3X+zop3kSWE5Oezz5PQvixeohDbaH9kkDMusUVbOkuzAhwndld7q4hvDr4xANxKAG1vwZJxx3e1g=="
+    }
+  ],
+  "rawEvidence": [
+    {
+      "file": ".tmp/refactor-tests/r8-update-context/actionlint.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "sha512": "z4PhNX7vuL3xVChQ1m2AB9Yg5AULVxXcg/SpIdNs6c5H0NE8XYXysP+DGNKHfuwvY7kxvUdBeoGlODJ6+SfaPg=="
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-update-context/apk-metadata.json",
+      "bytes": 1070,
+      "sha256": "c861f25c9a53cd655f5ec8f12a115cc9ddb16a8b7afef50346bb378f44348214",
+      "sha512": "Vj36tqromS9Dz8zEHIBL+9+evZg7m/Nt863cKwRdVp+3tDMGioryLbUZghq/tswD8gNTTUjD+87pY1f4URVvNQ=="
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-update-context/baseline.json",
+      "bytes": 27860,
+      "sha256": "989efe8e857de234c4f56df724c8b3013bcc7aa96311d9572ae1af333694c3c5",
+      "sha512": "33YirYbPEIPvxycWFk/IIDiNjR7485OzI7mfKV87Fkcivh8Uq6P9DPX/4F7PmfBKuvBUzeYSQ5kYhGqzD1ei5A=="
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-update-context/connection.log",
+      "bytes": 479,
+      "sha256": "3d8efe690c9afd75ddf6fb4a51c9086f05404a8c39adfb4d152543228690265f",
+      "sha512": "AqVJb9iLYOkEh7nxokAz1UP71q1lsb2tI1H7D5FyMIlcbseB4Mwiu5xcl5+gA0f2IOcj8GlGPc8OGrVEWqiH7A=="
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-update-context/context.log",
+      "bytes": 2428,
+      "sha256": "9fd74c96f766d014c7a858161e5458bf8982e69eaec8d8bd99eb570379c4758e",
+      "sha512": "mNewDcoU5RzBsC2YyOE18BHLA6jlPta5xOT4HQKOHZVeBZk6qJyvxqfF/PIzTbtZNDxFFEGl3rZXf16Sbn8QZg=="
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-update-context/emulator-error.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "sha512": "z4PhNX7vuL3xVChQ1m2AB9Yg5AULVxXcg/SpIdNs6c5H0NE8XYXysP+DGNKHfuwvY7kxvUdBeoGlODJ6+SfaPg=="
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-update-context/emulator-launch.json",
+      "bytes": 120,
+      "sha256": "42fc63ef831529bfc9a5813b54451b4af255626a457ee301ade79d2a1ab05a1e",
+      "sha512": "k/VWP9WZ6vfOlQLyJ6iBzbCtrMeXwz9H3900VNTbx+zbbf24ZXRXqLlWeg965Ke12ZrzIUoRZVvfqvrThfs4cw=="
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-update-context/emulator-stopped.json",
+      "bytes": 128,
+      "sha256": "56386017a6ea1f54d708a17589ba7cd1ce2734c4f7656a15d927e9c1a82b8ace",
+      "sha512": "mddfIH1HPeur5CSKGVZF7yOTblxqH7/6RgVlieUnC86snfNPqMDHlR4/fxyfa1Yis48xhukeiAnwTc+xYPV+AA=="
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-update-context/emulator.log",
+      "bytes": 10577,
+      "sha256": "c9b1fb6c952fa745699c7e07e4541e853cd65f78c24cef8dd2a6d55853268989",
+      "sha512": "wqqJTqVzT9qmcRhP7L7HvoNAWdMU6juGmTYju/XQdheBN+h0wLlAP0wCgxph/V8tf1qz3WAyRMhdEkf4/QnDqQ=="
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-update-context/finalize-evidence.cjs",
+      "bytes": 13057,
+      "sha256": "9367c23b37d75053dd45c0786a328e92394241e9a46c8ba496eb0aac3eadcf4d",
+      "sha512": "dVj6GTVELeFtnbmArnXUxCoLVYlfuOxKxyy8dofAsFstrjh6JkAicSRkcqdHsj788Gps9eNEkviDCZGMfUwnhw=="
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-update-context/legacy-mobile-releases.before.json",
+      "bytes": 483,
+      "sha256": "e846affb95cffef73ad1dbc638e56400b249e62eab8ba5fece819ddab132e517",
+      "sha512": "6Tw1vB8tRjM+o1IYU1MbX2VcfYciYQke6cUaXx6uJ0mpiOEPwofUEuF11rtrSCgULcpxuBHTNmcyGg1p9THAIw=="
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-update-context/mobile-correctness.log",
+      "bytes": 507,
+      "sha256": "a2f6f8a07c28d741f0695a24a066859f6e7e6271baac33ce32b60fac664b2f9c",
+      "sha512": "m2l5a1vKgF76ZB/qRLpUg1U61kRLe7ais9D/QNccaOcXRjHH0wq/wj5wFTYHIJXMSD/dYSMwfTguarWClr5Q5A=="
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-update-context/native-build.ps1",
+      "bytes": 1630,
+      "sha256": "29aa4b41c7ebdeddc7d198dcb814389156ae73168bab7ddf21e964b9df4fa76d",
+      "sha512": "rQqH1qHRnYIJnWq8TsVhD+mQAYwdlS06q5ROo8ZHCMuk/FyyesEj6WB6hzXNZK5/RkYKA8Fu/OetPFP9t5BOFA=="
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-update-context/native-context-initial.ts",
+      "bytes": 3101,
+      "sha256": "a07301321dc059272b7983ba2d16302f74c253aeeeb74ad3f7408eb4494f41ac",
+      "sha512": "+NQ0Hbgx+2bEzUmcBJ8xo+Y8wGuqN/o7xCpiHssjj0KXgKIuhiaxdS1NQxug4gCrof5+a3WApFKuBipvEVk04w=="
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-update-context/native-gradle-initial.log",
+      "bytes": 49542,
+      "sha256": "dea3b1e300a9522a0e77729f4985ba13c2a16ad0392149a94734e2bc6bd904f3",
+      "sha512": "6XV/wnbo+c3BI9RHeVwPMWnKm7ayqz6vfGLOCm7nhm05f3ss1vkuqP4d3dXWq/ynyfjJG1BXZIbHmnyz8t0aDg=="
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-update-context/native-gradle.log",
+      "bytes": 39620,
+      "sha256": "ea5c1d8da4b153329b901dba025a4935eae25c9f13ca3562ef1848a7873b0483",
+      "sha512": "X6XAi+Gnqpub2ZodKf/4MHhG/PEswDIHVXUNhnHeZz81tV9M/HiIcFa0kirgl6qDe0e1089uXcItl6TdDApqLQ=="
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-update-context/native-initial.map",
+      "bytes": 4460131,
+      "sha256": "0f909f561a03987e7a9e756bf2a77dcc153392a1b4c8dd4a49c0d311834b9c1d",
+      "sha512": "4e6VEHwqxs/EKJ3duptsgPqSjCYrq/FOb8s+G7NC+mjYmpyhKAWmS1Njh3KYUPnfFYaXOtY2ChfDE/0g0g3tBg=="
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-update-context/native-install.cjs",
+      "bytes": 3440,
+      "sha256": "6ed929502722a8be670e1ba84455308e5c95c0350ed19df4e2571349b1fadea3",
+      "sha512": "9t9eIW0sdw4RnIhx/D9fgx+bd3ul4rFTZNZ5KkE2go+Gs4o+kRmtKdX3JeYm6169Z0wQ5wIqMoaOrRBPMHgrXw=="
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-update-context/native-install.json",
+      "bytes": 494,
+      "sha256": "583f161f9f0eec8c6cb4fc5004d7a3e1956c8d923703552673fee11a16b72579",
+      "sha512": "dlOOUcbl4OteHyy3UeuhbRyRXgrhj8uysYwNQNSprTn95K99nx1bO8rmJ6zOAQjYUWSoW5fLvWM0bQjeRYhZnQ=="
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-update-context/native-install.log",
+      "bytes": 443,
+      "sha256": "ea606bd687d2914da94b0ae583b38e50f71c724300a9856465a5ad04ef0a6020",
+      "sha512": "UrgdvhySiWnMVVge93w+cPSRKH5NexaABRqEVltW0aIkpGjcVRAHWuTrNIa1qMb7Wf0jLYBiCjAu6XpXmdc6Cg=="
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-update-context/native-logcat.log",
+      "bytes": 93,
+      "sha256": "35e1e5c57c59f5fbd84322075eef48a00acc43ecb4f6c6071e437531ca1e918e",
+      "sha512": "Cnj9vPAuekrdrEg5JS2GSahRZ2lE55tfyUFadcdNIQozEE1TJAY1G5qU2beIeToErJ6t4szjJ4tP6cdyLOcOZA=="
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-update-context/native-patches.log",
+      "bytes": 869,
+      "sha256": "7d87859f2f4d771e001878411612cc60a8f74b74bdb9b324bfef7e8644d089f3",
+      "sha512": "D/T9S8/RRluRsluToEmEp4tqCSks7u5G69uyUTo/IbyhZyn9hv7+hWUGwZG6PDSObKgwC3fiC/x9uR/qrLiovw=="
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-update-context/native-prebuild.log",
+      "bytes": 172,
+      "sha256": "d5e4be0a0c10691bffa446716505e068d943d1fca32f0d93d5af6f817e29c4e4",
+      "sha512": "ZxIyXJZqhcrGq3CobgOhH9ZAEloeWjlsx1Zk8qaf9juPUY55GjAJswpN8YyxFYcLUHrHOLPAHfU6DK7q+84xnQ=="
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-update-context/native-result.json",
+      "bytes": 8779,
+      "sha256": "04bb00844e7dd156e792780d417b5a452794d6678c57d929a1af741155ece82e",
+      "sha512": "+DKX9QBb8ttYWkH6anmkCf6Kqwa8LPlQbPg9IhOc+/yiWLViHMm0JsojHLc/UH9TZJs9ukWHa9cDJF7pFlKo2A=="
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-update-context/native-server.cjs",
+      "bytes": 6140,
+      "sha256": "0d88c26551c87b2ca94bbe8f4a15baf8c0de35b34ffbdf8e86cd72af8ea9760c",
+      "sha512": "s93vrS8hCULrc5MZcSeYEHCSuatOyJ6E6NOs5yj2Zyr0Rfr7eEFZSp5Z7T46CetoXQjBeF57AONKxslhGhNX4g=="
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-update-context/native-server.json",
+      "bytes": 105,
+      "sha256": "d90b95a0c4be50606be10ed12e93354b52d28d5bd49d7dba8c7d321bc1074327",
+      "sha512": "3kA8TsWsK1cYhixUopeZMykm+6cOK900+3OHxKeEajzt8OX/C3+sBbujq6/66/J36Xt8h+HMTqF6c09ZlggZDA=="
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-update-context/native-server.log",
+      "bytes": 176,
+      "sha256": "ede854a65e97792fcd14c35a101e816b024363cdc1a5699ccbdba17de7f6b29e",
+      "sha512": "znzOxBcBTwHV41Ah0avzh7lsNvLYK4/3kOsYaHdp8DAKbELeVJLnmZJnqK2hEmREtLDPs4qBOsQLoAw8h7aNzg=="
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-update-context/native-stage.cjs",
+      "bytes": 3650,
+      "sha256": "0bf9d10dbdcec88f5c8da2d8b308304410152645903796f555289d76e792d422",
+      "sha512": "m8y0sZsN7qteCCQcCMhi6mf9q44lXe9vRdItHdZXn7oeJTNj7T9Vbh1Iol7LlbwBYYOHU4HFX/3ylp53Tepc0w=="
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-update-context/native-stage.json",
+      "bytes": 468,
+      "sha256": "0bb259d8f5298e5dfd46203d6ced4d92fb20e67a896e5567cba86e22dd278034",
+      "sha512": "Eqd6Jck+yPcXJ2XqWQ9vMuokgqLy+HMH0qQMQvg2mU7le+WLj2FzBOOE95m7A4TLzuuXVsACniQgbR4Gw9AgjA=="
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-update-context/native-stage.log",
+      "bytes": 479,
+      "sha256": "d03ebdd50f7cd866277be05baa7927b6ef92b240ddf86ae7147a0c4919189e93",
+      "sha512": "Gi4guts5WYHflcvb8XgK+Ppmjzm4wRzwX8GEM0HSW7l83ZgqI6IV94sJGM2UOCjg70ur0VXghFa1jEAQWuVKeg=="
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-update-context/native-stop.cjs",
+      "bytes": 2680,
+      "sha256": "f9b932fa7485196cf0e0500f02297ee7cdf7a0277a18750934fc09dbf6fd21e8",
+      "sha512": "rGjdfQ7ho4hQKVcUboc3VbiVnBtjWLhckkZgz9ZO9B7yaCnx1U+XcM+Bz1PUzGF7HTw06OJmkEx2eyfIkbvVGg=="
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-update-context/native-stop.json",
+      "bytes": 498,
+      "sha256": "296e24564bed522c2cec02ddfe1c158ef7f05785930744b2a77d91b8c15a5413",
+      "sha512": "i73NrI6flY0gdqfZDjCjz1mH2teierq1qHWHuvWPGQ8cGmzD2gKh5dYqeQdBOnbIXCDIqcBhsmXEcf6z3HY7Ag=="
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-update-context/NativeApp.tsx",
+      "bytes": 7625,
+      "sha256": "182159b918d6022d26fe9d05c87e80280aa026168cfe938e34266bbafdd17f48",
+      "sha512": "SmVO+EjgJ6/NHIiTVM2XqfvgRw6jw60jso2zKSQ1p+Q+0CRy6hIwJ9eKRq6YwVOw8CiuHMXCwsWDwAdMtJNRPg=="
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-update-context/navigation.log",
+      "bytes": 441,
+      "sha256": "327eacc8b9cff480ae92eeda163f86465acbb4724572a604438f417ac106e215",
+      "sha512": "N53Vfj9tr+l3i2GHTqOR4OFZ6/6NFgus3q1cXFflwWZ553QbQzeqUVGYGnXX484bdCh86npsI2gZTxQQFlW3hg=="
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-update-context/powershell-parse.json",
+      "bytes": 65,
+      "sha256": "c4f9b37de05ae079d875b0bd607746174da2ec4292e317ecc4c4326940c314d4",
+      "sha512": "d1PYIbjIHYbr+zJKd7z95QgqrQ3ElLNcGFAEPZttvngPjDPZm/XKi/KXKZUngKYqlofEat4A5V9MtqIUGsbybQ=="
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-update-context/prepare.cjs",
+      "bytes": 2062,
+      "sha256": "59eee0e8d67acd353d69a10c0ba5119ef1dd62deb11b2c0b8c33be711bf702b8",
+      "sha512": "TgkJHp3H6poxXCuTZGdpg53MBgs/XxC/dcVOW0QLHGXFpOwypdBpMB23YWdYZ77MEbSgu+6/Vnw4cW6IZYNo2g=="
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-update-context/regressions.json",
+      "bytes": 1015,
+      "sha256": "b56b4b9e8b2186bd61f8f63fc9f7c50621f8e79428438a7560dec8dae2058a3e",
+      "sha512": "4YvkU0biF3CVMuryw4pRx0QVEaoE92ZDqFJPviPrudWnKLhOFTNrt+41U1utpiRjo3P0ppmr7GnZeUZZ1POwIg=="
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-update-context/release-gate.before.cjs",
+      "bytes": 22261,
+      "sha256": "ec29a7dc610ac631a041b14693d1117145dce3562a4e00ec286e51fac2a91eca",
+      "sha512": "zQGBe7saxKkdCAf0sN4wSydfLVsLoZzo/e+jLB+n2QrJhzWaoYaZJRvqb/oj3LI5YVvUTRGU6+kfn3Wf1GY/Lw=="
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-update-context/release-gate.log",
+      "bytes": 1618,
+      "sha256": "237a31e4afdc78fb6ef66c08e96ebfaf62c2833d9217e436137baeb9eebb5895",
+      "sha512": "n/aD1b/MYyRihzY0Txo3PC72c2bT04ZsxWO3ng7SbDwT80A+MleyWg0c5zeREBtg3etXg5cc61N4gFzOUkBSxw=="
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-update-context/sync-native-inputs.cjs",
+      "bytes": 1219,
+      "sha256": "834c45c0b4495bfecd69c809931d7969e1c6be019d025cbc77cc21b91dd6b8a1",
+      "sha512": "VXSS9Mx4gNURpmmsDOmPhNRRaEVrzOMauL+0Ihf/xp8VbV7fj+aDkk3DAHAPOPi3HaCbbR2BxWX/QWYiXGP1cQ=="
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-update-context/typecheck.log",
+      "bytes": 63,
+      "sha256": "1e0f0490123b26a1e922ddceb0d3a75f1acc55b8dbd07d5c200b38c8cde87737",
+      "sha512": "Moc81G24pTWPYYWhbsHkAKap5rqEI773oPoGLKArE29G5d7LrTJylx7DXtZVR5wyRLFl1SXjhUzRWsB3KjsuMg=="
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-update-context/update-manifest.before.ts",
+      "bytes": 10608,
+      "sha256": "bdec064bedeb6355abe2e3add6d35924adb1077f21789115d1946988bc350103",
+      "sha512": "MVwZBuMc1gYwZOKtXjG3+E2wTvS1yRBC7VJBRcitDLcV5/NcukrN1EmsjfRW8dYoUNTvSqfT0IJgbnbryH1JRA=="
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-update-context/updates.log",
+      "bytes": 2589,
+      "sha256": "7a402e91e02f9771a906c75bd111482761532b81f00d044b7a82e0a8081e0acb",
+      "sha512": "UixVhzy5YZVh30kQ9F7IpRZIkBcmyYLjFGjFuKZ89/r/18kulTKYyahTqYQASI9xFIwbEkRZ3cc8HCKr5WbrvQ=="
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-update-context/verify-evidence.cjs",
+      "bytes": 2452,
+      "sha256": "ce742058db08e3b0801b07bfee5cf11a7583e0fb60a608748b2d39c9bd8350a4",
+      "sha512": "UGwxassRNJzqpBw9E0FWagV4fF/e6scZNOLcvHLXxcSc9Kq1FjFdCBSpyu7XgqRBzvDKUP+xpN5C3HsNbeNBnw=="
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-update-context/workflow-scripts.cjs",
+      "bytes": 739,
+      "sha256": "dc18f14d0736587af7aa26c57b97d7444c39c427eca14615f0dc2727717d5d1d",
+      "sha512": "6QDDCVtVq1SPN2eJB7+u7KKDjoxpVu3w4a/RZgzynMAI5G+aUeQgzJ4beHvWsaqp4Q9FoD7n9oWFsqT2V17Tew=="
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-update-context/workflow-scripts.json",
+      "bytes": 21688,
+      "sha256": "4ac60704e8a0db13db500ead4a841c8c3fbd1b8fb5f73b8b9ee6d728260796e5",
+      "sha512": "WKGMpMPpfNui40ztKvov35o5j7P4EWA/o3sF8ofpKyHCi+WweNnH1TW43RUgXs2aY9hcxCIYL3X9ueV4OxOZtQ=="
+    },
+    {
+      "file": ".tmp/refactor-tests/update-context-TQzrk5/result.json",
+      "bytes": 2170,
+      "sha256": "a17fb461ef26dd5c2d04033b12abd9ef6a96cd6f44bf4f4155ee955158938337",
+      "sha512": "yc6M+VNPQtm9/PpF6X8oTda54oYAnnZB1b07QKRsboRdv2iG33iSVAEWOS7xsxta0M11vQWgY5mE/pd9LEhyog=="
+    },
+    {
+      "file": ".tmp/refactor-tests/mobile-updates-WcGCeI/result.json",
+      "bytes": 2333,
+      "sha256": "0830fd477a4fe72205925038f276b2d8098855e66145021724c462fd36240b02",
+      "sha512": "RkEmP+M3wjNpm//8YONTrTaNLBMXNslDTpmWSGFRbsx/8WfDNb4+BLKj9An4jOjHOeU+V0DgO09qDeMSIskOXg=="
+    },
+    {
+      "file": ".tmp/refactor-tests/mobile-updates-WcGCeI/producer-manifest.json",
+      "bytes": 4943,
+      "sha256": "bada2f6a9d6ccedd1e4af1096e74158bd11babe06278bcc082b31c8e522e747f",
+      "sha512": "holzRvoPjeblq81Q6FYGibLjWg4f/R1oLj2hBPHh5GAecOWncL3DP3TfE7eDSSkPcCDvqKNMtvKbxoiJFauwlQ=="
+    }
+  ],
+  "frontendIntegration": {
+    "source": {
+      "file": "mobile/src/screens/LibraryScreen.tsx",
+      "bytes": 69192,
+      "sha256": "559c8c727e713103588fe8dc37508209f3177d2fa0ef9247349f30bc4b89c834",
+      "sha512": "6JtMKa9AJMibIRXdhGOHXVqpCumHliDEYZQvKQBCj/cuTFqYWhxg2DV59TmdIj8LxNaIFJIiQk+cb/MPSpQigg=="
+    },
+    "gap": "Initial !ready connection gate has retry/back only; MobileUpdateCard is inside the later settings branch. Protocol3 bootstrap cases validate the service, not a complete reachable UI upgrade flow.",
+    "coordination": "Asked asynchronously whether DeepSeek frontend work has finished; preserve existing frontend edits meanwhile"
+  },
+  "published": false,
+  "goalStatus": "active",
+  "remaining": [
+    "Expose scoped update UI in failed initial connection and coordinate DeepSeek frontend integration",
+    "Production Android identity/signing migration and versionCode",
+    "Full Windows installer/portable delivery and cloud publishing",
+    "LAN transport, physical/long-run/iOS and remaining R6/R7/R8/frontend acceptance"
+  ]
+}

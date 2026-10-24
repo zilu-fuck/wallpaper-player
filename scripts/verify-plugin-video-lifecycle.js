@@ -4,13 +4,15 @@ const fsp = require('fs/promises')
 const os = require('os')
 const path = require('path')
 const { app } = require('electron')
+require('./test-data-guard.cjs')
+app.disableHardwareAcceleration()
 
 const projectRoot = path.resolve(__dirname, '..')
 const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'wallpaper-player-video-plugin-'))
+app.setPath('userData', tempRoot)
+app.setPath('sessionData', path.join(tempRoot, 'session'))
 
 async function main() {
-  app.setPath('userData', tempRoot)
-
   const { loadSettings, saveSettings, sanitizeSettingsForSave } = require(path.join(projectRoot, 'main', 'settings'))
   const { pluginRegistry, setupPlugins, disposePlugins } = require(path.join(projectRoot, 'main', 'plugins'))
 
@@ -125,6 +127,35 @@ async function main() {
     `saved model path should persist migrated current-machine path: ${savedModelLine}`
   )
 
+  const service = require(path.join(projectRoot, 'main', 'plugins', 'video-analysis', 'service'))
+  const rename = fsp.rename
+  let releaseWrite, announceWrite, stopped = false
+  const heldWrite = new Promise(resolve => { releaseWrite = resolve })
+  const writing = new Promise(resolve => { announceWrite = resolve })
+  fsp.rename = async function (from, to) {
+    if (to === path.join(runtimeDir, '.env') && path.basename(from).startsWith('.runtime-env-write-')) {
+      announceWrite(); await heldWrite
+    }
+    return rename.call(this, from, to)
+  }
+  const pendingSave = service.saveVideoAnalysisRuntimeConfig({ llmName: 'save accepted before disable' })
+  let disabling
+  try {
+    await writing
+    disabling = pluginRegistry.setPluginEnabled('video-analysis', false).then(result => { stopped = true; return result })
+    await new Promise(resolve => setImmediate(resolve))
+    assert.strictEqual(stopped, false, 'plugin disposal must wait for accepted configuration IO')
+    releaseWrite()
+    assert.strictEqual((await pendingSave).llmName, 'save accepted before disable')
+    assert.strictEqual((await disabling).success, true)
+  } finally {
+    releaseWrite(); fsp.rename = rename
+    await Promise.allSettled([pendingSave, disabling])
+  }
+  await assert.rejects(service.getVideoAnalysisRuntimeConfig(), error => error.code === 'runtime_config_stopping')
+  assert.strictEqual((await pluginRegistry.setPluginEnabled('video-analysis', true)).success, true)
+  assert.strictEqual((await service.getVideoAnalysisRuntimeConfig()).llmName, 'save accepted before disable')
+
   saveSettings(sanitizeSettingsForSave({ videoAnalysis: { enabled: false } }))
   const analysisSummary = pluginRegistry.getCapability('video-analysis.summary')
   assert.ok(analysisSummary)
@@ -157,14 +188,15 @@ async function main() {
   console.log('video analysis plugin lifecycle verification passed')
 }
 
-app.whenReady()
-  .then(main)
-  .finally(() => {
-    fs.rmSync(tempRoot, { recursive: true, force: true })
-    app.quit()
-  })
-  .catch((error) => {
-    console.error(error)
-    process.exitCode = 1
-    app.quit()
-  })
+async function finish(code) {
+  try {
+    await require(path.join(projectRoot, 'main/plugins')).disposePlugins()
+    const settings = require(path.join(projectRoot, 'main/settings'))
+    await settings.flushSettingsWrites(); await settings.disposeSettingsSerialization({ cancel: true })
+  } catch (error) { console.error(error); code = 1 }
+  // Chromium still owns session files until process exit. Keep the isolated
+  // fixture rather than deleting an active profile on Windows.
+  console.log('Retained isolated plugin fixture: ' + tempRoot)
+  app.exit(code)
+}
+app.whenReady().then(main).then(() => finish(0), error => { console.error(error); finish(1) })

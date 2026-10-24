@@ -1,4 +1,5 @@
-const { dialog, ipcMain, shell } = require('electron')
+const { dialog, shell } = require('electron')
+const { ipcMain: appIpcMain } = require('../security/ipc')
 const { pathToFileURL } = require('url')
 const fsp = require('fs/promises')
 const { IPC } = require('../ipc-channels')
@@ -9,19 +10,20 @@ const {
   getPlaybackState,
   loadSettings,
   resolvePathForAccess,
-  saveSettingsAndFlush,
   sessionAllowedDirectories,
-  sessionPrivateDirectories,
-  upsertPlaybackState
+  sessionPrivateDirectories
 } = require('../settings')
 const { assertAllowedVideoPath, resolveExistingPath } = require('../scanner')
+const { createMediaMutationService } = require('../application/media-mutations')
+const { s, desktopPlaybackPatchSchema, ipcPlaybackSchema } = require('../../packages/contracts')
 const { getMainWindow } = require('../window')
+const { ask } = require('../application/confirm')
 const {
   isKnownNetworkResource,
   normalizeNetworkResourceInput
 } = require('./network-resource-service')
 
-function registerFileIpc() {
+function registerFileIpc(ipcMain = appIpcMain) {
   ipcMain.handle(IPC.SELECT_DIRECTORY, async () => {
     const win = getMainWindow()
     const result = await dialog.showOpenDialog(win, {
@@ -42,8 +44,8 @@ function registerFileIpc() {
     })
     if (result.canceled || result.filePaths.length === 0) return null
     const selectedDir = resolvePathForAccess(result.filePaths[0])
-    const response = await dialog.showMessageBox(win, {
-      type: 'question',
+    const response = await ask(win, {
+      tone: 'question',
       buttons: ['添加', '取消'],
       defaultId: 0,
       cancelId: 1,
@@ -51,8 +53,7 @@ function registerFileIpc() {
       message: '是否将这个目录设为隐私目录？',
       detail: '隐私目录默认不会出现在侧栏和手机远程库中。你可以在侧栏临时显示后进入或移除。',
       checkboxLabel: '设为隐私目录',
-      checkboxChecked: false,
-      noLink: true
+      checkboxChecked: false
     })
     if (response.response === 1) return null
     sessionAllowedDirectories.add(selectedDir)
@@ -118,18 +119,19 @@ function registerFileIpc() {
 
   ipcMain.handle(IPC.GET_PLAYBACK_STATE, async (_event, filePath) => {
     try {
+      filePath = s.string(32768, 1).parse(filePath)
       if (typeof filePath === 'string' && filePath.trim()) {
         try {
           const resource = normalizeNetworkResourceInput({ url: filePath })
           if (isKnownNetworkResource(resource.url)) {
             const settings = loadSettings()
-            return getPlaybackState(settings.playbackStates, resource.url)
+            return ipcPlaybackSchema.parse(getPlaybackState(settings.playbackStates, resource.url))
           }
         } catch {}
       }
       const resolvedPath = await assertAllowedVideoPath(filePath)
       const settings = loadSettings()
-      return getPlaybackState(settings.playbackStates, resolvedPath)
+      return ipcPlaybackSchema.parse(getPlaybackState(settings.playbackStates, resolvedPath))
     } catch {
       return null
     }
@@ -152,8 +154,7 @@ function registerFileIpc() {
       if (!target) {
         target = await assertAllowedVideoPath(filePath)
       }
-      const playbackStates = upsertPlaybackState(settings.playbackStates, target, statePatch)
-      await saveSettingsAndFlush({ playbackStates })
+      await createMediaMutationService().savePlayback({ fullPath: target }, desktopPlaybackPatchSchema.parse(statePatch))
       return { success: true }
     } catch (err) {
       return { success: false, error: err.message }

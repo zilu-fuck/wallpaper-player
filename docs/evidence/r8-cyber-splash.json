@@ -1,0 +1,640 @@
+{
+  "date": "2026-10-23T13:20:33.818Z",
+  "request": "先展示开屏，再结合当前项目已选 SVG 接入项目",
+  "status": "local Windows distribution complete",
+  "selection": "Existing option 2 gradient four-tile SVG, preserved byte-for-byte",
+  "implementation": {
+    "changes": [
+      "index.html",
+      "src/main.jsx",
+      "src/services/splash.js",
+      "src/styles/splash.css",
+      "animation-pages/nexus-splash.html"
+    ],
+    "singleFile": "animation-pages/nexus-splash.html",
+    "background": "#07080c",
+    "ambientBlurPx": 80,
+    "traceMs": [
+      0,
+      1200
+    ],
+    "brandMs": [
+      900,
+      1800
+    ],
+    "letterSpacingPx": [
+      24,
+      8
+    ],
+    "portalMs": [
+      1800,
+      2500
+    ],
+    "splashScale": [
+      1,
+      20
+    ],
+    "workspaceScale": [
+      0.92,
+      1
+    ],
+    "parallax": true,
+    "replay": true,
+    "workspaceRemounts": false,
+    "dependenciesAdded": false
+  },
+  "verification": {
+    "monotonicClockCases": 13,
+    "nativeProjectCases": [
+      {
+        "scenario": "fast",
+        "errors": [],
+        "clock": "performance",
+        "start": 52.5,
+        "leave": 1799.6999999955297,
+        "primaryUi": true,
+        "removed": 2501.6999999955297
+      },
+      {
+        "scenario": "project-replay-responsive",
+        "size": [
+          1100,
+          760
+        ],
+        "visual": {
+          "image": 1024,
+          "trace": "0px",
+          "spacing": 12.2271,
+          "scene": "none",
+          "count": 1
+        },
+        "ready": {
+          "visible": false,
+          "inert": false,
+          "rootTransform": "none",
+          "phase": "",
+          "width": 1100,
+          "scrollWidth": 1100
+        }
+      },
+      {
+        "scenario": "project-replay-responsive",
+        "size": [
+          390,
+          844
+        ],
+        "visual": {
+          "image": 1024,
+          "trace": "0px",
+          "spacing": 13.8543,
+          "scene": "none",
+          "count": 1
+        },
+        "ready": {
+          "visible": false,
+          "inert": false,
+          "rootTransform": "none",
+          "phase": "",
+          "width": 390,
+          "scrollWidth": 390
+        }
+      },
+      {
+        "scenario": "project-replay-responsive",
+        "size": [
+          320,
+          568
+        ],
+        "visual": {
+          "image": 1024,
+          "trace": "0px",
+          "spacing": 12.2259,
+          "scene": "none",
+          "count": 1
+        },
+        "ready": {
+          "visible": false,
+          "inert": false,
+          "rootTransform": "none",
+          "phase": "",
+          "width": 320,
+          "scrollWidth": 320
+        }
+      },
+      {
+        "scenario": "project-replay-responsive",
+        "size": [
+          844,
+          390
+        ],
+        "visual": {
+          "image": 1024,
+          "trace": "0px",
+          "spacing": 11.7383,
+          "scene": "none",
+          "count": 1
+        },
+        "ready": {
+          "visible": false,
+          "inert": false,
+          "rootTransform": "none",
+          "phase": "",
+          "width": 844,
+          "scrollWidth": 844
+        }
+      },
+      {
+        "scenario": "project-rapid-replay",
+        "ready": {
+          "visible": false,
+          "inert": false,
+          "rootTransform": "none",
+          "phase": "",
+          "width": 844,
+          "scrollWidth": 844
+        }
+      },
+      {
+        "scenario": "project-reduced-motion",
+        "ready": {
+          "visible": false,
+          "inert": false,
+          "rootTransform": "none",
+          "phase": "",
+          "width": 844,
+          "scrollWidth": 844
+        }
+      },
+      {
+        "scenario": "project-block-replay-while-player-open",
+        "passed": true
+      },
+      {
+        "scenario": "wall-clock-jump",
+        "errors": [],
+        "clock": "performance",
+        "start": 64.90000000596046,
+        "leave": 1800.1999999955297,
+        "primaryUi": true,
+        "removed": 2510.2999999970198
+      },
+      {
+        "scenario": "raf-and-settings-held",
+        "errors": [],
+        "clock": "performance",
+        "start": 61.600000001490116,
+        "leave": 1800.5999999940395,
+        "primaryUi": false,
+        "removed": 2504.2999999970198
+      }
+    ],
+    "standaloneCases": [
+      {
+        "scenario": "three-visual-stages",
+        "passed": true,
+        "portalState": {
+          "phase": "opening",
+          "hidden": false,
+          "inert": true,
+          "width": 1440,
+          "scrollWidth": 1440,
+          "splash": {
+            "opacity": 0.632016,
+            "transform": "matrix(7.99169, 0, 0, 7.99169, 0, 0)",
+            "spacing": "normal",
+            "dash": "0px"
+          },
+          "workspace": {
+            "opacity": 0.367984,
+            "transform": "matrix(0.949439, 0, 0, 0.949439, 0, 0)",
+            "spacing": "normal",
+            "dash": "0px"
+          },
+          "title": {
+            "opacity": 1,
+            "transform": "none",
+            "spacing": "8px",
+            "dash": "0px"
+          },
+          "trace": {
+            "opacity": 1,
+            "transform": "none",
+            "spacing": "normal",
+            "dash": "0px"
+          }
+        }
+      },
+      {
+        "scenario": "live-completion",
+        "passed": true,
+        "elapsedMs": 2541.7999999970198
+      },
+      {
+        "scenario": "rapid-replay",
+        "passed": true
+      },
+      {
+        "scenario": "reduced-motion",
+        "passed": true,
+        "state": {
+          "phase": "ready",
+          "hidden": true,
+          "inert": false,
+          "width": 1440,
+          "scrollWidth": 1440,
+          "splash": {
+            "opacity": 1,
+            "transform": "none",
+            "spacing": "normal",
+            "dash": "0px"
+          },
+          "workspace": {
+            "opacity": 1,
+            "transform": "matrix(1, 0, 0, 1, 0, 0)",
+            "spacing": "normal",
+            "dash": "0px"
+          },
+          "title": {
+            "opacity": 1,
+            "transform": "none",
+            "spacing": "8px",
+            "dash": "0px"
+          },
+          "trace": {
+            "opacity": 1,
+            "transform": "none",
+            "spacing": "normal",
+            "dash": "0px"
+          }
+        }
+      },
+      {
+        "scenario": "responsive",
+        "width": 390,
+        "height": 844,
+        "passed": true
+      },
+      {
+        "scenario": "responsive",
+        "width": 320,
+        "height": 568,
+        "passed": true
+      },
+      {
+        "scenario": "responsive",
+        "width": 768,
+        "height": 1024,
+        "passed": true
+      },
+      {
+        "scenario": "responsive",
+        "width": 844,
+        "height": 390,
+        "passed": true
+      },
+      {
+        "scenario": "native-pointer-parallax",
+        "passed": true,
+        "tilt": {
+          "fine": true,
+          "x": "3.75deg",
+          "y": "4.67deg"
+        }
+      },
+      {
+        "scenario": "search-favorites-template-create-list-and-text-safety",
+        "passed": true
+      }
+    ],
+    "externalRequests": 0,
+    "actualPackagedCases": [
+      "actual packaged boot: 1800ms brand + 700ms portal",
+      "rapid replay returns to same real gallery without remount",
+      "packaged reduced motion"
+    ],
+    "actualPackagedTiming": {
+      "errors": [],
+      "leave": 1800.7000000029802,
+      "removed": 2507.10000000149
+    },
+    "packagedObservation": "Real production renderer reloaded after initial launch and probe settled; observer installed before navigation",
+    "qaWindow": {
+      "ignoreInput": true,
+      "focusable": false,
+      "alwaysOnTop": true,
+      "reason": "Controlled foreground composition for visual timeline; no production flags or files changed"
+    },
+    "initialProbe": {
+      "available": true,
+      "path": "C:\\Users\\s1897\\AppData\\Local\\Temp\\3L64KQBnSbawmuqwFunmEHTNYzj\\resources\\vendor\\ffmpeg\\bin\\ffmpeg.exe",
+      "version": "ffmpeg version 8.1.1-essentials_build-www.gyan.dev Copyright (c) 2000-2026 the FFmpeg developers"
+    },
+    "build": "npm run build passed",
+    "diffCheck": "passed",
+    "standaloneRendering": "Isolated offscreen software rendering for visual/DOM checks; actual packaged production Electron used separately",
+    "nativeRaw": ".tmp/refactor-tests/splash-ui-NDjQH5"
+  },
+  "windows": {
+    "passed": true,
+    "directory": "E:\\wallpaper播放器\\release\\windows-1.5.1-14f3526e-d50d-47b3-8899-6f5e74d12c75",
+    "version": "1.5.1",
+    "productionSourceChanges": [
+      "index.html",
+      "src/main.jsx",
+      "src/services/splash.js",
+      "src/styles/splash.css",
+      "animation-pages/nexus-splash.html"
+    ],
+    "qaWrapperAbsent": true,
+    "archive": {
+      "file": "E:\\wallpaper播放器\\release\\windows-1.5.1-14f3526e-d50d-47b3-8899-6f5e74d12c75\\win-unpacked\\resources\\app.asar",
+      "bytes": 16507040,
+      "sha256": "5135ee844cb50670bb5aa48c1783b2e53076d6686941efb890f3ce0487898e9c",
+      "sha512": "Z/tx5xNsbXQpLflVNOOYou3fpCk/AlpF7FUUXquxeQmla7P67n1391M6K4ou0/1IFFRKN/Fx8L7PwjmxOlmPUw=="
+    },
+    "embedded": [
+      "main/application/confirm.js",
+      "main/application/download-service.js",
+      "main/application/download-tasks.js",
+      "main/application/extract-mpv.ps1",
+      "main/application/library-service.js",
+      "main/application/media-mutation-paths.js",
+      "main/application/media-mutations.js",
+      "main/application/media-work-service.js",
+      "main/application/mpv-installer.js",
+      "main/application/mpv-version-cache.js",
+      "main/application/player-service.js",
+      "main/application/resource-scheduler.js",
+      "main/application/settings-broadcast.js",
+      "main/application/settings-json-worker.js",
+      "main/application/settings-json.js",
+      "main/application/settings-startup.js",
+      "main/application/transcode-service.js",
+      "main/constants.js",
+      "main/download-manager.js",
+      "main/download-xunlei.js",
+      "main/exec.js",
+      "main/index.js",
+      "main/ip-utils.js",
+      "main/ipc/app-dialogs.js",
+      "main/ipc/downloads.js",
+      "main/ipc/files.js",
+      "main/ipc/media-data.js",
+      "main/ipc/media.js",
+      "main/ipc/network-resource-service.js",
+      "main/ipc/network-resources.js",
+      "main/ipc/player.js",
+      "main/ipc/plugins.js",
+      "main/ipc/privacy.js",
+      "main/ipc/remote.js",
+      "main/ipc/settings.js",
+      "main/ipc/updater.js",
+      "main/ipc/window-shell.js",
+      "main/ipc-channels.js",
+      "main/ipc.js",
+      "main/media-pressure.js",
+      "main/mpv-host.js",
+      "main/mpv-integration.js",
+      "main/mpv.js",
+      "main/network-resource-parser.js",
+      "main/paths.js",
+      "main/plugins/builtin.js",
+      "main/plugins/capabilities.js",
+      "main/plugins/core-api.js",
+      "main/plugins/index.js",
+      "main/plugins/loader.js",
+      "main/plugins/manifest.js",
+      "main/plugins/official.js",
+      "main/plugins/registry.js",
+      "main/portable-user-data.js",
+      "main/process-lifecycle.js",
+      "main/rate-limiter.js",
+      "main/remote/handlers/desktop.js",
+      "main/remote/handlers/info.js",
+      "main/remote/handlers/library.js",
+      "main/remote/handlers/media.js",
+      "main/remote/handlers/network-resources.js",
+      "main/remote/handlers/tags.js",
+      "main/remote/handlers/transcode.js",
+      "main/remote/http-utils.js",
+      "main/remote/identity.js",
+      "main/remote/index.js",
+      "main/remote/json-responses.js",
+      "main/remote/media-mutations.js",
+      "main/remote/network.js",
+      "main/remote/request-lifecycle.js",
+      "main/remote/server.js",
+      "main/remote/streaming.js",
+      "main/remote/transcode-cache.js",
+      "main/remote/transcode.js",
+      "main/remote/video-index.js",
+      "main/repositories/settings-file.js",
+      "main/repositories/tag-state.js",
+      "main/repositories/user-media.js",
+      "main/scanner.js",
+      "main/security/ipc-sender.js",
+      "main/security/ipc.js",
+      "main/security/media-access.js",
+      "main/security/privacy-password.js",
+      "main/settings.js",
+      "main/thumbnail.js",
+      "main/updater.js",
+      "main/user-data.js",
+      "main/video-metadata.js",
+      "main/window.js",
+      "main/ytdlp-service.js",
+      "dist/assets/AISearchPanel-TMj3EtyW.js",
+      "dist/assets/app-icon-CdBj8JsL.svg",
+      "dist/assets/DownloadCenter-CJvTRqta.js",
+      "dist/assets/index-C3T7_gKi.js",
+      "dist/assets/index-SE4eTmbk.css",
+      "dist/assets/NetworkResourceLibrary-7uBEPLvL.js",
+      "dist/assets/Settings-CSUJv5v1.js",
+      "dist/assets/useDownloadStateObserver-BmViEXoL.js",
+      "dist/assets/VideoAnalysisSidebar-CXUUXdij.js",
+      "dist/index.html",
+      "packages/contracts/dist/index.js",
+      "packages/contracts/dist/schema.js",
+      "packages/contracts/dist/settings-feed.js",
+      "packages/contracts/package.json",
+      "packages/domain/dist/index.js",
+      "packages/domain/package.json",
+      "build/icon.png",
+      "main.js",
+      "preload.js"
+    ],
+    "vendor": [
+      "vendor/aria2/aria2c.exe",
+      "vendor/aria2/AUTHORS",
+      "vendor/aria2/ChangeLog",
+      "vendor/aria2/COPYING",
+      "vendor/aria2/LICENSE.OpenSSL",
+      "vendor/aria2/NEWS",
+      "vendor/aria2/README.html",
+      "vendor/aria2/README.mingw",
+      "vendor/ffmpeg/bin/ffmpeg.exe",
+      "vendor/ffmpeg/bin/ffplay.exe",
+      "vendor/ffmpeg/bin/ffprobe.exe",
+      "vendor/ffmpeg/LICENSE",
+      "vendor/ffmpeg/presets/libvpx-1080p.ffpreset",
+      "vendor/ffmpeg/presets/libvpx-1080p50_60.ffpreset",
+      "vendor/ffmpeg/presets/libvpx-360p.ffpreset",
+      "vendor/ffmpeg/presets/libvpx-720p.ffpreset",
+      "vendor/ffmpeg/presets/libvpx-720p50_60.ffpreset",
+      "vendor/ffmpeg/README.txt",
+      "vendor/mpv/mpv-register.bat",
+      "vendor/mpv/mpv-unregister.bat",
+      "vendor/mpv/mpv.com",
+      "vendor/mpv/mpv.exe",
+      "vendor/mpv/vulkan-1.dll",
+      "vendor/yt-dlp/yt-dlp.exe"
+    ],
+    "assets": [
+      {
+        "file": "Wallpaper-Player-Setup-1.5.1.exe",
+        "role": "installer",
+        "bytes": 232519549,
+        "sha256": "3bbe073c710804f3f359890ec70a540a29c5a1d36ecf7f3095bacf13c389b15d",
+        "sha512": "k2gVlOl+smEamYGB4eq31Z7yXqZVeazd4Iy4X/CJQeOnva2SOBBYVLd8xo2yldDgVE+DZFn78cnYfRAWqWXuYg==",
+        "bootstrapArch": "ia32",
+        "productVersion": "1.5.1",
+        "signing": {
+          "status": "NotSigned",
+          "certificateSha256": null
+        }
+      },
+      {
+        "file": "Wallpaper-Player-1.5.1.exe",
+        "role": "portable",
+        "bytes": 232075170,
+        "sha256": "be8e8f50c8512b84130ab8cc338ba1232f75983f1c2d7464f44e362907ac9bc2",
+        "sha512": "cfZheZ5Q7Q+zwWtlb1VlkJ+D6oOAqvcwWRacfqDPcZfMtIePuvtQBTSdR0Jh2/DtfNfaOcs5B8b7c3iZJroPvw==",
+        "bootstrapArch": "ia32",
+        "productVersion": "1.5.1",
+        "signing": {
+          "status": "NotSigned",
+          "certificateSha256": null
+        }
+      },
+      {
+        "file": "Wallpaper-Player-Setup-1.5.1.exe.blockmap",
+        "role": "blockmap",
+        "bytes": 243084,
+        "sha256": "a17d58e67f09bdcf2bb42b0a3a737823c51db42d2f28c91448022ef4854b6442",
+        "sha512": "bZNQifWDidYRc+5GgSIzAvNwJk27FAnf9VwuUMTFgDRligwoNGFt21FbcEG151dHYC9/qrw2LGP0aKK0WG8+iQ=="
+      },
+      {
+        "file": "latest.yml",
+        "role": "desktop-update-metadata",
+        "bytes": 361,
+        "sha256": "159aee408f0fec6275d8091d85f1f4745d288399839c5b2ee259c9ec48042170",
+        "sha512": "NT44QJbE9Kp96XU/rRdFua46Ox7dkkMw1ZbWgqNPb4QRPXGz0oamAm4Tl2yzAy70+7QDbLqo5Xx3EAijw6K6oQ=="
+      },
+      {
+        "file": "Wallpaper-Player-Plugin-video-analysis-1.0.0.zip",
+        "source": "plugins/Wallpaper-Player-Plugin-video-analysis-1.0.0.zip",
+        "role": "plugin",
+        "pluginId": "video-analysis",
+        "version": "1.0.0",
+        "bytes": 570218532,
+        "sha256": "365c2f5ccbec6afe7df5ce4b5c5df1699728cac113884abd48898d8209a5502a",
+        "sha512": "5W7hIMUaK+frnE+0/87KhyfC6BKbFTT2R3GgW+TCtG7Z037HNRooT/RVGrJTOMq5eDFEBHKhlSiVZQ9vMI838w=="
+      },
+      {
+        "file": "Wallpaper-Player-Plugin-ai-search-0.1.0.zip",
+        "source": "plugins/Wallpaper-Player-Plugin-ai-search-0.1.0.zip",
+        "role": "plugin",
+        "pluginId": "ai-search",
+        "version": "0.1.0",
+        "bytes": 2955069,
+        "sha256": "464e129ebb9a4731fff800c26c6e4c94ddbe33fbd1699486c166d9e112a97fc8",
+        "sha512": "rKd4RQyHFHEIADm+H3KQddNRMuu2UbSuiK4OK+hkfrp3JV36mLcSdLA0UNlAPW+7L5X1xi5kiTVNPmq1lDzOKw=="
+      },
+      {
+        "file": "Wallpaper-Player-Plugin-agent-bridge-0.1.0.zip",
+        "source": "plugins/Wallpaper-Player-Plugin-agent-bridge-0.1.0.zip",
+        "role": "plugin",
+        "pluginId": "agent-bridge",
+        "version": "0.1.0",
+        "bytes": 1093,
+        "sha256": "9f499408c282a144ffe411648d476fd4e36bd010c6e8974be3b9fd16460bed1a",
+        "sha512": "W5qWvlCSHQT8RlE31UF1e06dN3162tSZVhs7nqyFBhFLJdcN7Z8rE2WDw6ZMjQIygO89K/Xbuev/TJY+ImfSqg=="
+      }
+    ],
+    "originalData": 42,
+    "historicalArtifacts": 8,
+    "oldQaArtifactsPreserved": true,
+    "releasePublished": false,
+    "signatures": [
+      {
+        "File": "E:\\wallpaper播放器\\release\\windows-1.5.1-14f3526e-d50d-47b3-8899-6f5e74d12c75\\Wallpaper-Player-Setup-1.5.1.exe",
+        "Status": "NotSigned"
+      },
+      {
+        "File": "E:\\wallpaper播放器\\release\\windows-1.5.1-14f3526e-d50d-47b3-8899-6f5e74d12c75\\Wallpaper-Player-1.5.1.exe",
+        "Status": "NotSigned"
+      },
+      {
+        "File": "E:\\wallpaper播放器\\release\\windows-1.5.1-14f3526e-d50d-47b3-8899-6f5e74d12c75\\win-unpacked\\Wallpaper Player.exe",
+        "Status": "NotSigned"
+      }
+    ],
+    "published": false,
+    "productionInstallationReplaced": false,
+    "scope": "Local production-identity x64 NSIS and portable builds; actual unmodified packaged main/App, isolated Data, no user application replacement"
+  },
+  "preserved": {
+    "originalDataFiles": 42,
+    "historicalPublicAssets": 8,
+    "priorQaAndFormalArtifacts": true,
+    "appIconSourceUnchanged": true
+  },
+  "limits": [
+    "Responsive HTML and Electron viewport checks do not establish native Android APK splash integration, real-device frame rate or 60-minute memory acceptance.",
+    "Existing Android signing migration, real LAN/iOS, historical theme anomaly and unfinished R6 long-run acceptance remain open."
+  ],
+  "rawFailures": "Earlier screenshot-surface, offscreen event-delivery and scrollbar-width harness failures remain in native-failure-*.log. Packaged first/second failed observations retain separate JSON/logs: an image-ready check ran before boot/CSS readiness; another run was occluded. Final packaged observation waits for initial probe settlement and controls foreground composition. The earlier passed observation showing a retryable probe cancellation after QA reload also remains preserved. Final checks passed with unchanged production artifacts.",
+  "sourceHashes": [
+    {
+      "file": "index.html",
+      "sha256": "c02e49a0167a8be732ece60f758469332c5fe04d9053c2de8fe68b46f35c062b"
+    },
+    {
+      "file": "src/main.jsx",
+      "sha256": "2fe0e0fd99bce92fbdbb105029addabf1287790e43036ce07132f82514126223"
+    },
+    {
+      "file": "src/services/splash.js",
+      "sha256": "99e1adb54de92eb4c6ca18899adcd28f93715684d517b63b718946c3238eecc2"
+    },
+    {
+      "file": "src/styles/splash.css",
+      "sha256": "64e10766002e67716303a355da4377ec7c63ea1105180052113a0a1797e38ad9"
+    },
+    {
+      "file": "animation-pages/nexus-splash.html",
+      "sha256": "4a8f6b9f69cbc24db4b2aa2e85d1c9fd79192cb70e3fc8bf6c2eec6aba400ab1"
+    },
+    {
+      "file": "src/assets/app-icon.svg",
+      "sha256": "eaa426754c16cc83fc1ccd5e55fc539522018ee6cdb08a142dd849887670e206"
+    },
+    {
+      "file": "src/splash-boot.js",
+      "sha256": "23385eef8ebc1a1bd6c2c710293010cfca3c9d616e3c08539399ec91409a3125"
+    },
+    {
+      "file": "scripts/verify-splash-clock.js",
+      "sha256": "1a9538e062d347992ab039d2892bb6f2f5fd159d4a83a9a178b6b2a02759a8b8"
+    },
+    {
+      "file": "scripts/verify-splash-ui.js",
+      "sha256": "d696058e5a37a7088e752edb930e0ad0e4e64311a4ac749ae60c6fc6ed552001"
+    }
+  ],
+  "raw": {
+    "preview": ".tmp/refactor-tests/nexus-splash-ui/result.json",
+    "packaged": ".tmp/refactor-tests/nexus-splash-ui/packaged-result.json",
+    "screenshot": ".tmp/refactor-tests/nexus-splash-ui/packaged-splash.png"
+  }
+}

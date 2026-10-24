@@ -1,0 +1,316 @@
+{
+  "date": "2026-10-23T15:47:57.875Z",
+  "status": "Initial core settings preparation completed and verified; full R7/R8 goal remains active",
+  "implementation": {
+    "startup": "main/index awaits one private initializeSettings owner before identity, plugins, IPC and window creation. Existing synchronous loadSettings API is retained for compatibility.",
+    "worker": "Async settings-file IO feeds the existing bounded settings worker. Pure shared normalization, parsing and full canonical JSON run there; main receives the owned cache and text. Worker base is reused by later encoding.",
+    "extensions": "Main-owned registered-section defaults/normalizers retain callback order and property-key toJSON semantics. Extension fields alone are recanonicalized; registration changes retry at most eight times.",
+    "lifecycle": "Profile/generation checks reject late owners; sync compatibility reads/writes supersede pending startup. Debounced encoding waits for startup. Graceful/forced disposal prevents worker resurrection.",
+    "recovery": "Async primary and backup validation preserves explicit restore, future-version refusal, exact legacy bytes and corrupt originals. Read generation and bytes are checked again before adoption. Private parse fragments are masked.",
+    "publicApi": "initializeSettings and recoverSettingsBackup remain hidden from the plugin settings facade. Renderer settings still use the separate redacting reader; public result shapes are unchanged."
+  },
+  "verification": {
+    "nodeCases": [
+      "coalesced startup publishes one detached canonical cache, preserves private/extension data and special keys, and remains read-only",
+      "10000-tag initial preparation performs zero full main JSON.parse, synchronous settings reads and synchronous canonical-path calls; captured previous source is a positive control when present",
+      "a synchronous reader/write during startup supersedes the old storage read and its newer cache cannot be overwritten",
+      "a debounced synchronous save waits for an actually blocked startup worker, then durably commits the newer intent without a busy-serializer failure",
+      "late extension registration retries the owned read, keeps main-owned callback/toJSON semantics and hides startup privileges from the plugin facade",
+      "changed profile scopes and shutdown invalidate late preparation, without publishing an old profile or reviving a closed worker",
+      "storage generation and byte revalidation reject superseded/external edits, while later backups retain exact previous committed bytes",
+      "asynchronous startup keeps explicit backup consent, corrupt originals, future-version refusal and read-only missing-profile behavior",
+      "startup worker masks private parser fragments, enforces configured size limits, hands its canonical base to later encoding and closes without a shutdown dialog",
+      "startup crash, malformed reply, timeout and worker construction failure settle callers, retire owned workers and permit recovery"
+    ],
+    "initialPreparationComparison": {
+      "before": {
+        "fullParses": 3,
+        "syncReads": 1,
+        "syncRealpaths": 4
+      },
+      "after": {
+        "fullParses": 0,
+        "syncReads": 0,
+        "syncRealpaths": 0
+      },
+      "tags": 10000
+    },
+    "regressions": {
+      "jsonWorker": 14,
+      "recovery": 19,
+      "nativeRecoveryModes": 5,
+      "feed": 11,
+      "broadcasts": 8,
+      "replies": 10,
+      "shutdownPersistence": "durable final progress, repeated quit and bounded stuck cleanup passed after final settings change"
+    },
+    "asar": {
+      "date": "2026-10-23T15:34:57.620Z",
+      "passed": true,
+      "electron": "44.9.0",
+      "asar": true,
+      "tags": 10000,
+      "windowsCreated": 0,
+      "workerRetired": true,
+      "afterClose": {
+        "worker": false,
+        "active": false,
+        "closed": true
+      },
+      "scope": "Actual Electron preparation and subsequent encode from a dedicated minimal ASAR, including all relative worker/normalizer/schema imports. No native window, full installer or interactive startup timing."
+    },
+    "nativeRuntime": {
+      "profile": "E:\\wallpaper播放器\\.tmp\\refactor-tests\\runtime-native-中文 空格-p3h8Kt",
+      "electron": "44.9.0",
+      "initialSettingsPreparation": {
+        "fullParses": 0,
+        "syncSettingsReads": 0,
+        "syncLibraryRealpaths": 0
+      },
+      "windows": [
+        {
+          "startupComplete": true,
+          "alwaysOnTop": false
+        }
+      ],
+      "publicSettingsTags": 10000,
+      "privacyRedacted": true,
+      "lazyModules": [
+        {
+          "prefix": "Settings",
+          "file": "Settings-4cX7FzuX.js",
+          "exports": [
+            "default"
+          ]
+        },
+        {
+          "prefix": "VideoAnalysisSidebar",
+          "file": "VideoAnalysisSidebar-BrjsUOgC.js",
+          "exports": [
+            "VideoAnalysisResultModal",
+            "default"
+          ]
+        },
+        {
+          "prefix": "AISearchPanel",
+          "file": "AISearchPanel-f5jPGUQ0.js",
+          "exports": [
+            "default"
+          ]
+        },
+        {
+          "prefix": "DownloadCenter",
+          "file": "DownloadCenter-DwaAhLnS.js",
+          "exports": [
+            "default"
+          ]
+        },
+        {
+          "prefix": "NetworkResourceLibrary",
+          "file": "NetworkResourceLibrary-BELFGnlf.js",
+          "exports": [
+            "default"
+          ]
+        },
+        {
+          "prefix": "useDownloadStateObserver",
+          "file": "useDownloadStateObserver-Dk65bcIb.js",
+          "exports": [
+            "t"
+          ]
+        }
+      ],
+      "splashReleasedWorkbench": true,
+      "persistedAfterShutdown": true,
+      "screenshot": ".tmp/refactor-tests/r7-settings-startup/runtime-window.png"
+    },
+    "entryPoints": [
+      "npm run verify:settings-startup",
+      "npm run verify:settings-recovery",
+      "npm run verify:electron-runtime"
+    ],
+    "ci": "Local script mapping and YAML parsed; cloud CI not executed.",
+    "conditions": "Actual Node workers/storage in isolated VM owners; controlled delay/fault cases. Minimal Electron ASAR exercises the real worker module tree. Complete source main/index, preload, IPC and existing production dist run in a separate Chinese/space profile with 10000 generated tag keys and an empty library; native window was hidden except showInactive capture, never always-on-top. Hardware acceleration disabled for this smoke test. No real video decode or native performance budget acceptance."
+  },
+  "preservation": {
+    "originalDataFiles": 42,
+    "historicalPublicArtifacts": 8,
+    "selectedSvgUnchanged": true,
+    "packageLockUnchanged": true,
+    "latestFormalPackage": "release/windows-1.5.1-681574df-1a6a-4e26-baed-c87963ce8c67",
+    "latestFormalAsarAndSevenAssetsUnchanged": true,
+    "newFullDistributionBuilt": false,
+    "productionInstallationReplaced": false,
+    "nativeTestExitedNormally": true
+  },
+  "limits": [
+    "Only initial core settings preparation moved off-main. Later plugin registration can still normalize/clone the entire cache; plugin and other legacy loadSettings consumers remain synchronous.",
+    "Large extension callbacks execute in their main-thread owner. Worker messages still structured-clone values; renderer JSON/contract preparation is separate.",
+    "This does not establish total application startup latency or the original two-second interaction gate. The explicitly requested splash remains a 2.5-second presentation.",
+    "Worker timeout and generation checks bound owned work and reject stale publication; an OS filesystem call in a worker is not a promise of immediate physical cancellation.",
+    "The unchanged R6 Windows bundle predates this stage. Prior 20-minute native results apply to that frozen bundle and are not reattributed to current startup source.",
+    "Physical Android 60-minute PSS/FPS/LAN, other Windows/media matrices, iOS, signing/identity migration and historical theme drift remain open."
+  ],
+  "retainedFailures": [
+    "The first evidence finalizer stopped after preservation checks because the local yaml module is absent. It was corrected to use the already installed js-yaml module; no application test or production source failed in that step."
+  ],
+  "baselineSources": [
+    {
+      "file": "main/settings.js",
+      "sha256": "7208ff2eb10b1591a0c8d9fba5db65a4d9c73f34cc2afd9ea15983961ea6a696"
+    },
+    {
+      "file": "main/paths.js",
+      "sha256": "3422ec30987c55308fea878739efec3f6ad8f4cf132e157d042a037061dc671b"
+    },
+    {
+      "file": "main/repositories/tag-state.js",
+      "sha256": "046376c6bb56d3251c6f4a1d80c8e0273eeeac247b5d8031209787ace1852065"
+    },
+    {
+      "file": "main/repositories/settings-file.js",
+      "sha256": "e45a80bf524c810073ca7395785086207d92b1e012ba50d95bbf4b179677d672"
+    },
+    {
+      "file": "main/application/settings-json.js",
+      "sha256": "b051646df7c453b943e1c51f0e58a23caaea1c06b8d4fe243c476e86bfeb60ba"
+    },
+    {
+      "file": "main/application/settings-json-worker.js",
+      "sha256": "40bfb2cf2e6312eb91cb246e9ae20537f79ca89bfd23ddf9e702c43ced57c799"
+    },
+    {
+      "file": "main/application/settings-startup.js",
+      "sha256": "234f64cf9b018eb7e20114a576fe8659101641d55ff7453192954b97d5de919e"
+    },
+    {
+      "file": "main/plugins/core-api.js",
+      "sha256": "053244b815819208cf7fc553dbcaaa187b71efc7e862a66b66c02d6a6bb495a4"
+    }
+  ],
+  "sourceHashes": [
+    {
+      "file": "main/settings.js",
+      "sha256": "5912ac7a79902dc3db50c4982a43bab05e5e5066df5ac63cbc9a5b20a12a7bc2"
+    },
+    {
+      "file": "main/repositories/settings-file.js",
+      "sha256": "a37dc0dfb6e5b94e9b3babfc2e34231409560f7fe8e8fc9298b48e135da19b05"
+    },
+    {
+      "file": "main/repositories/settings-normalize.js",
+      "sha256": "eaae2d09cfc719c207185f29ea97437b7dd7288f8e0d736d5e7add493a9c9d9f"
+    },
+    {
+      "file": "main/path-identity.js",
+      "sha256": "dc9b5dd278a036423699ce80dc09ff3b75699f521c35912fc0f0929b1526d012"
+    },
+    {
+      "file": "main/repositories/tag-state.js",
+      "sha256": "8b36e67b4ea3e68a61c0a3512c13995dcdf0bafda1e98467cd8a666cd3300bab"
+    },
+    {
+      "file": "main/repositories/tag-normalizers.js",
+      "sha256": "8718d506befd558142a32f0ece617c0f5fcae30f097e9d0bd35d4d325f5ee302"
+    },
+    {
+      "file": "main/application/settings-json.js",
+      "sha256": "65c0569b0c2c86f6d02187032a80425888f89e1867fa60b93cea94f136ab0940"
+    },
+    {
+      "file": "main/application/settings-json-worker.js",
+      "sha256": "10eb447940743dd7380bec006dc611c20eeeafcbd91dfa597fa458ccf4caeaa4"
+    },
+    {
+      "file": "main/application/settings-startup.js",
+      "sha256": "63dcc047149ecc0bdc25f1621b606e9b85d67ec2849dc3df49037d8e71713089"
+    },
+    {
+      "file": "main/index.js",
+      "sha256": "b5f21b01bde2f9aa46d54de0d2e05bc017caa0fc79ca135fd0729b86d28ada2f"
+    },
+    {
+      "file": "main/plugins/core-api.js",
+      "sha256": "a41852f048cb033065d49e69a8680e0257a7a42e859a4066b78c3d4dc2698023"
+    },
+    {
+      "file": "scripts/verify-settings-startup.js",
+      "sha256": "880c0f7325e6d5be9e216d598a87b538b1043b9bfddbf25dc9040a330d51151e"
+    },
+    {
+      "file": "main/paths.js",
+      "sha256": "2834643a1f30fc4707060e7508dabd3177c60ba69e32c00ab3c57181bab9171a"
+    },
+    {
+      "file": "scripts/verify-settings-startup-asar.js",
+      "sha256": "bc532e693a93d8aec28efddd5ed220b05ade227fcb205ecd4e8aa96579ae8cab"
+    },
+    {
+      "file": "scripts/verify-settings-recovery-electron.js",
+      "sha256": "d2fe1e162d4849fbf100951b7c3b9619a09e8b34fa2b4aaf32b26170e8d80c0b"
+    },
+    {
+      "file": "scripts/verify-electron-runtime.js",
+      "sha256": "59184806bc709d8b2806385873642e9127aa9d8d21eb27a2df190a8cd1b8a3c4"
+    },
+    {
+      "file": "scripts/verify-electron-runtime-electron.js",
+      "sha256": "fdea0c17eac14d778deb01c7048fe96f9a07b7a978e2a1f9179e5c374d80f053"
+    },
+    {
+      "file": "package.json",
+      "sha256": "d999c190a54d8d832f52dcd92f818dc1cde34cd8d0bd952da1786e0fb51ed29d"
+    },
+    {
+      "file": ".github/workflows/ci.yml",
+      "sha256": "f80690182635f358a3a034e5ce56e93ef7d9f27f7ed3e8b22ba2e3f02c574e72"
+    }
+  ],
+  "raw": {
+    "directory": ".tmp/refactor-tests/r7-settings-startup",
+    "records": [
+      {
+        "file": ".tmp/refactor-tests/r7-settings-startup/startup-node.json",
+        "source": ".tmp/refactor-tests/settings-startup-GjBVJM/result.json"
+      },
+      {
+        "file": ".tmp/refactor-tests/r7-settings-startup/startup-asar.json",
+        "source": ".tmp/refactor-tests/settings-startup-asar-MhnkDH/result.json"
+      },
+      {
+        "file": ".tmp/refactor-tests/r7-settings-startup/startup-asar-sources.json",
+        "source": ".tmp/refactor-tests/settings-startup-asar-MhnkDH/source-hashes.json"
+      },
+      {
+        "file": ".tmp/refactor-tests/r7-settings-startup/json-lifecycle.json",
+        "source": ".tmp/refactor-tests/settings-json-lifecycle.json"
+      },
+      {
+        "file": ".tmp/refactor-tests/r7-settings-startup/recovery-node.json",
+        "source": ".tmp/refactor-tests/settings-recovery-lifecycle.json"
+      },
+      {
+        "file": ".tmp/refactor-tests/r7-settings-startup/recovery-electron.json",
+        "source": ".tmp/refactor-tests/settings-recovery-electron.json"
+      },
+      {
+        "file": ".tmp/refactor-tests/r7-settings-startup/feed-lifecycle.json",
+        "source": ".tmp/refactor-tests/settings-feed-lifecycle.json"
+      },
+      {
+        "file": ".tmp/refactor-tests/r7-settings-startup/broadcast-lifecycle.json",
+        "source": ".tmp/refactor-tests/settings-broadcast-H2PW4E/result.json"
+      },
+      {
+        "file": ".tmp/refactor-tests/r7-settings-startup/replies-lifecycle.json",
+        "source": ".tmp/refactor-tests/settings-replies-lifecycle.json"
+      },
+      {
+        "file": ".tmp/refactor-tests/r7-settings-startup/runtime.json",
+        "source": ".tmp/refactor-tests/electron-runtime-evidence.json"
+      }
+    ],
+    "screenshotPersonallyInspected": true,
+    "preservationCheck": ".tmp/refactor-tests/r7-settings-startup/preservation.json"
+  }
+}

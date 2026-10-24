@@ -86,13 +86,15 @@ function VideoCardComponent({
   const isNetworkVideo = video.sourceType === 'network'
 
   return (
+    <View style={[styles.card, { width: width ?? '100%' }, selected && styles.cardSelected]}>
     <Pressable
-      style={({ pressed }) => [
-        styles.card,
-        { width: width ?? '100%' },
-        selected && styles.cardSelected,
-        pressed && styles.pressed
-      ]}
+      style={({ pressed }) => pressed && styles.pressed}
+      accessibilityRole={selectionMode ? 'checkbox' : 'button'}
+      accessibilityLabel={`${video.name || video.fileName || video.id}，${metaLine}`}
+      accessibilityHint={selectionMode ? '切换选择状态' : onLongPress ? '播放视频，也可长按选择' : '播放视频'}
+      accessibilityState={selectionMode ? { checked: selected } : undefined}
+      accessibilityActions={onLongPress ? [{ name: 'longpress', label: '选择视频' }] : undefined}
+      onAccessibilityAction={event => { if (event.nativeEvent.actionName === 'longpress') handleLongPress() }}
       onPress={handlePress}
       onLongPress={onLongPress ? handleLongPress : undefined}
       delayLongPress={170}
@@ -109,15 +111,6 @@ function VideoCardComponent({
         <View style={styles.thumbFallback}>
           <Film color={colors.muted} size={24} />
         </View>
-        {onToggleFavorite ? (
-          <Pressable style={styles.favoriteButton} onPress={handleToggleFavorite}>
-            <Heart
-              color={video.favorite ? colors.text : colors.muted}
-              fill={video.favorite ? colors.danger : 'none'}
-              size={17}
-            />
-          </Pressable>
-        ) : null}
         {selectionMode ? (
           <View style={[styles.selectionBadge, selected && styles.selectionBadgeActive]}>
             {selected ? <Check color="#ffffff" size={16} strokeWidth={3} /> : null}
@@ -126,7 +119,7 @@ function VideoCardComponent({
       </View>
       <View style={styles.body}>
         <Text style={styles.name} numberOfLines={2}>{video.name || video.fileName || video.id}</Text>
-        <Text style={styles.meta} numberOfLines={1}>
+        <Text style={styles.meta} numberOfLines={2}>
           {metaLine}
         </Text>
         {video.tags?.length ? (
@@ -134,6 +127,13 @@ function VideoCardComponent({
         ) : null}
       </View>
     </Pressable>
+    {onToggleFavorite ? (
+      <Pressable style={styles.favoriteButton} onPress={handleToggleFavorite} accessibilityRole="button"
+        accessibilityLabel={`${video.favorite ? '取消收藏' : '收藏'} ${video.name || video.fileName || video.id}`} accessibilityState={{ selected: Boolean(video.favorite) }}>
+        <Heart color="#ffffff" fill={video.favorite ? colors.danger : 'none'} size={20} />
+      </Pressable>
+    ) : null}
+    </View>
   )
 }
 
@@ -141,7 +141,7 @@ export const VideoCard = memo(VideoCardComponent)
 
 const createStyles = (colors: ReturnType<typeof useTheme>['colors']) => StyleSheet.create({
   card: {
-    borderRadius: 8,
+    borderRadius: 16,
     backgroundColor: colors.surface,
     borderWidth: 1,
     borderColor: colors.border,
@@ -169,13 +169,13 @@ const createStyles = (colors: ReturnType<typeof useTheme>['colors']) => StyleShe
   },
   favoriteButton: {
     position: 'absolute',
-    right: 7,
-    top: 7,
+    right: 6,
+    top: 6,
     zIndex: 3,
-    width: 30,
-    height: 30,
-    borderRadius: 8,
-    backgroundColor: 'rgba(11,15,20,0.72)',
+    width: 48,
+    height: 48,
+    borderRadius: 999,
+    backgroundColor: colors.overlay,
     alignItems: 'center',
     justifyContent: 'center'
   },
@@ -186,10 +186,10 @@ const createStyles = (colors: ReturnType<typeof useTheme>['colors']) => StyleShe
     zIndex: 4,
     width: 30,
     height: 30,
-    borderRadius: 15,
+    borderRadius: 999,
     borderWidth: 2,
     borderColor: 'rgba(255,255,255,0.78)',
-    backgroundColor: 'rgba(11,15,20,0.52)',
+    backgroundColor: 'rgba(11,15,20,0.5)',
     alignItems: 'center',
     justifyContent: 'center'
   },
@@ -199,15 +199,16 @@ const createStyles = (colors: ReturnType<typeof useTheme>['colors']) => StyleShe
   },
   body: {
     minHeight: 72,
-    paddingHorizontal: 9,
-    paddingTop: 8,
-    paddingBottom: 9,
+    paddingHorizontal: 10,
+    paddingTop: 9,
+    paddingBottom: 10,
     gap: 4
   },
   name: {
     color: colors.text,
     fontSize: 13,
-    fontWeight: '700'
+    fontWeight: '700',
+    lineHeight: 18
   },
   meta: {
     color: colors.muted,

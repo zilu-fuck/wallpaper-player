@@ -4,27 +4,35 @@
   "private": true,
   "main": "expo/AppEntry.js",
   "scripts": {
+    "prestart": "node scripts/apply-dependency-patches.cjs --check",
     "start": "expo start",
+    "preandroid": "node scripts/apply-dependency-patches.cjs --check",
     "android": "expo run:android",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "patch:dependencies": "node scripts/apply-dependency-patches.cjs",
+    "postinstall": "node scripts/apply-dependency-patches.cjs"
   },
   "dependencies": {
     "@react-native-async-storage/async-storage": "2.2.0",
-    "expo": "^56.0.12",
-    "expo-camera": "^56.0.8",
-    "expo-clipboard": "~56.0.4",
-    "expo-screen-orientation": "~56.0.5",
-    "expo-secure-store": "^56.0.4",
-    "expo-status-bar": "~56.0.4",
-    "expo-video": "^56.1.4",
+    "expo": "58.0.17",
+    "expo-camera": "~58.0.12",
+    "expo-clipboard": "~58.0.4",
+    "expo-screen-orientation": "~58.0.3",
+    "expo-secure-store": "~58.0.2",
+    "expo-status-bar": "~58.0.4",
+    "expo-video": "~58.0.12",
     "lucide-react-native": "^1.21.0",
-    "react": "19.2.3",
-    "react-native": "0.85.3",
-    "react-native-safe-area-context": "~5.7.0",
-    "react-native-svg": "15.15.4"
+    "react": "19.3.0",
+    "react-native": "0.88.0",
+    "react-native-safe-area-context": "~5.10.1",
+    "react-native-svg": "15.16.0",
+    "expo-system-ui": "~58.0.6"
   },
   "devDependencies": {
-    "@types/react": "^19.2.17",
+    "@types/react": "^19.3.0",
     "typescript": "^6.0.3"
+  },
+  "engines": {
+    "node": "^22.13.0 || ^24.3.0 || ^26.0.0 || >=27.0.0"
   }
 }

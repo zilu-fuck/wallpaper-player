@@ -1,0 +1,485 @@
+{
+  "date": "2026-10-19T11:43:34.264Z",
+  "stage": "R8 scoped Xcode UUID fix and native bundle build-tool boundary",
+  "environment": {
+    "node": "v24.14.0",
+    "platform": "win32",
+    "arch": "x64"
+  },
+  "dependencyChange": {
+    "selector": "xcode@3.0.1 > uuid",
+    "override": "11.1.1",
+    "reason": "Patched CommonJS release preserves the only Xcode consumer API (v4); not a global UUID override",
+    "changes": [
+      {
+        "path": "node_modules/uuid",
+        "before": "7.0.3",
+        "after": "11.1.1",
+        "integrity": "sha512-vIYxrBCC/N/K+Js3qSN88go7kIfNPssr/hHCesKCQNAjmgvYS2oqr69kIufEG+O4+PfezOH4EbIeHCfFov8ZgQ=="
+      }
+    ]
+  },
+  "audits": {
+    "registry": "https://registry.npmjs.org",
+    "scope": "Complete mobile dependency tree, including build tools",
+    "before": {
+      "info": 0,
+      "low": 0,
+      "moderate": 7,
+      "high": 15,
+      "critical": 0,
+      "total": 22
+    },
+    "after": {
+      "info": 0,
+      "low": 0,
+      "moderate": 0,
+      "high": 15,
+      "critical": 0,
+      "total": 15
+    },
+    "removedEntries": [
+      "@expo/config",
+      "@expo/config-plugins",
+      "@expo/inline-modules",
+      "@expo/local-build-cache-provider",
+      "@expo/prebuild-config",
+      "uuid",
+      "xcode"
+    ],
+    "uniqueFixedAdvisory": "GHSA-w5hq-g745-h8pq",
+    "remaining": {
+      "@expo/cli": {
+        "severity": "high",
+        "via": [
+          "@expo/code-signing-certificates",
+          "@expo/metro",
+          "@expo/metro-config",
+          "node-forge"
+        ]
+      },
+      "@expo/code-signing-certificates": {
+        "severity": "high",
+        "via": [
+          "node-forge"
+        ]
+      },
+      "@expo/metro": {
+        "severity": "high",
+        "via": [
+          "metro",
+          "metro-config",
+          "metro-file-map",
+          "metro-transform-worker"
+        ]
+      },
+      "@expo/metro-config": {
+        "severity": "high",
+        "via": [
+          "@expo/metro"
+        ]
+      },
+      "@react-native/community-cli-plugin": {
+        "severity": "high",
+        "via": [
+          "metro"
+        ]
+      },
+      "@react-native/virtualized-lists": {
+        "severity": "high",
+        "via": [
+          "react-native"
+        ]
+      },
+      "braces": {
+        "severity": "high",
+        "via": [
+          {
+            "source": 1240992,
+            "name": "braces",
+            "dependency": "braces",
+            "title": "braces vulnerable to stack-exhaustion denial of service through deeply nested patterns",
+            "url": "https://github.com/advisories/GHSA-vfj7-8cjw-p6xm",
+            "severity": "high",
+            "cwe": [
+              "CWE-674"
+            ],
+            "cvss": {
+              "score": 7.5,
+              "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H"
+            },
+            "range": "<=3.0.3"
+          }
+        ]
+      },
+      "expo": {
+        "severity": "high",
+        "via": [
+          "@expo/cli",
+          "@expo/metro",
+          "@expo/metro-config"
+        ]
+      },
+      "metro": {
+        "severity": "high",
+        "via": [
+          "metro-config",
+          "metro-file-map",
+          "metro-transform-worker"
+        ]
+      },
+      "metro-config": {
+        "severity": "high",
+        "via": [
+          "metro"
+        ]
+      },
+      "metro-file-map": {
+        "severity": "high",
+        "via": [
+          "micromatch"
+        ]
+      },
+      "metro-transform-worker": {
+        "severity": "high",
+        "via": [
+          "metro"
+        ]
+      },
+      "micromatch": {
+        "severity": "high",
+        "via": [
+          "braces"
+        ]
+      },
+      "node-forge": {
+        "severity": "high",
+        "via": [
+          {
+            "source": 1240912,
+            "name": "node-forge",
+            "dependency": "node-forge",
+            "title": "node-forge RSA PKCS#1 v1.5 signature verification accepts extra nested DigestAlgorithm elements",
+            "url": "https://github.com/advisories/GHSA-86w9-cpqp-85rv",
+            "severity": "high",
+            "cwe": [
+              "CWE-347"
+            ],
+            "cvss": {
+              "score": 7.5,
+              "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:H/A:N"
+            },
+            "range": "<=1.4.0"
+          }
+        ]
+      },
+      "react-native": {
+        "severity": "high",
+        "via": [
+          "@react-native/community-cli-plugin",
+          "@react-native/virtualized-lists"
+        ]
+      }
+    }
+  },
+  "validation": {
+    "mobileSecurity": {
+      "passed": true,
+      "actualConsumer": "Expo config-plugins resolves xcode which resolves locked UUID11.1.1",
+      "xcodeReferenceSamples": 128,
+      "outOfBoundsBufferCases": 18,
+      "positiveBufferCases": 6,
+      "note": "Buffer and Uint8Array, v3/v5/v6; invalid buffers throw before writes, valid outputs retain sentinels"
+    },
+    "desktopSecurity": "passed, existing tar/Unicode/PAX/YAML checks",
+    "xcodeIosMod": {
+      "date": "2026-10-19T11:40:09.093Z",
+      "success": true,
+      "scope": "Actual Expo iOS Xcode mod/compiler and SDK58 template, not Xcode build/signing",
+      "template": {
+        "version": "expo-template-bare-minimum@58.0.23",
+        "originalPbxSha256": "f6eed93f64de44b00c841b565232cdfd24c7922943ddc9eb859ac740f178edaa"
+      },
+      "modifiedPbxSha256": "cc86e2b74415051141d4ddf6c9d9b233caf2e28ba00131022218d984e36fa62d",
+      "newIdentifiers": 5,
+      "swiftSourceAdded": true,
+      "resourceAdded": true,
+      "buildPhaseAdded": true,
+      "sceneTemplatePresent": true,
+      "serializationRoundtrip": true,
+      "noShellPhaseExecuted": true,
+      "fixture": "E:\\wallpaper播放器\\.tmp\\refactor-tests\\r8-mobile-residual\\xcode-cng-N6uniC"
+    },
+    "typecheck": "exit0",
+    "expoCompatibility": "Dependencies are up to date",
+    "doctor": "20/20",
+    "regressions": [
+      {
+        "name": "verify:remote-library",
+        "exit": 0,
+        "log": ".tmp/refactor-tests/r8-mobile-residual/verify-remote-library.log"
+      },
+      {
+        "name": "verify:privacy-passwords",
+        "exit": 0,
+        "log": ".tmp/refactor-tests/r8-mobile-residual/verify-privacy-passwords.log"
+      },
+      {
+        "name": "verify:update-metadata",
+        "exit": 0,
+        "log": ".tmp/refactor-tests/r8-mobile-residual/verify-update-metadata.log"
+      },
+      {
+        "name": "verify:mobile-correctness",
+        "exit": 0,
+        "log": ".tmp/refactor-tests/r8-mobile-residual/verify-mobile-correctness.log"
+      }
+    ],
+    "bundles": [
+      {
+        "platform": "android",
+        "bytes": 3090080,
+        "modules": 2565,
+        "reactVersion": "19.3.0",
+        "sharedContracts": true,
+        "excludedBuildOnlyAdvisories": [
+          "braces",
+          "node-forge"
+        ]
+      },
+      {
+        "platform": "ios",
+        "bytes": 3085252,
+        "modules": 2567,
+        "reactVersion": "19.3.0",
+        "sharedContracts": true,
+        "excludedBuildOnlyAdvisories": [
+          "braces",
+          "node-forge"
+        ]
+      }
+    ],
+    "packagePresence": [
+      {
+        "platform": "android",
+        "bytes": 3090080,
+        "sha256": "2ecc1732b3349f7cab6adc75b3664af11264aac8a99685a0c1b57c7c03dc913b",
+        "sourceMapSha256": "7e4f20558fc0a3895c315c0db105160665f790192b5ffae0288d3624d22afb9d",
+        "packageSourceCounts": {
+          "braces": 0,
+          "node-forge": 0,
+          "uuid": 0,
+          "xcode": 0
+        }
+      },
+      {
+        "platform": "ios",
+        "bytes": 3085252,
+        "sha256": "14ef3ccdb1de8c721ddbebe1809e3eb9be0c68357dd5d29afbc50cd06e12b275",
+        "sourceMapSha256": "4b5725f028ea3666d46cff5bffa3a75fff4bc756dcfe27bc5826a7709daaf7ef",
+        "packageSourceCounts": {
+          "braces": 0,
+          "node-forge": 0,
+          "uuid": 0,
+          "xcode": 0
+        }
+      }
+    ],
+    "newNativeApkBuilt": false,
+    "priorNativeCheckpoint": "docs/evidence/r8-expo58.json",
+    "unchangedNativeCodeInputs": 76,
+    "boundary": "Current source maps prove unresolved braces/node-forge absent from Android/iOS Hermes. They remain available to Node build/development tools and their advisories remain open."
+  },
+  "ci": {
+    "core": "existing verify:dependency-security-mobile and verify:mobile-bundles now exercise new checks",
+    "release": "Added mobile consumer/security verifier after mobile install in verify and APK build jobs; not dispatched remotely"
+  },
+  "dataPreservation": {
+    "preservedFallbackFiles": [
+      [
+        "analysis-results\\G086 Bronya分析结果2026-06-22_20-00-44.json",
+        "01db5f778601802471791e416b40c3ac8f96248e4542b78a867eaee77dd265e4"
+      ],
+      [
+        "downloads\\aria2.session",
+        "bbe9d72e7e5001c01f3a012fa73e5d35b6d53b9e76e08190bba58973ce1ba9bc"
+      ],
+      [
+        "llama-server-err.log",
+        "5744b9bb378569a3a4f664b62aad9a4b0025cd7d419cba73b793fb62cb737f42"
+      ],
+      [
+        "llama-server-out.log",
+        "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      ],
+      [
+        "remote-identity.json",
+        "0abcd8df9c1443a348b050b5abe28ac419ecef717ddf31a0daa680f153061324"
+      ],
+      [
+        "scan-index\\029fa92465c3409cba74ce3db6b927dfec0d4f581b12122975041a32ab324e8a.json",
+        "33b1310886821b4f01322041a561c8a6b4ed10aa351772effb396e7b1b547cfd"
+      ],
+      [
+        "scan-index\\06cf5926d93db3cc7b30882ee7dbecb69d51ce4e00de7901de3d48b866f9afc3.json",
+        "274848604327a2f96f0d152b9f23a7b4e5470fdd67c744e1c181e86c2d284059"
+      ],
+      [
+        "scan-index\\0e65747e6e0fc76a1e0c86e951c35d6c7392c184ba6cb43724d7d58856ff212a.json",
+        "3ac45a0678e6ed4554fe1f315f923d999b0311096acd3c9394e3d85826d37db9"
+      ],
+      [
+        "scan-index\\114890f3437dd45b34313ba38d9d3c36a09701d5d672bf8abd7af8c922db61af.json",
+        "3796d21463d2b2418c485565780e9628a50ab4f1a69d8faeadec1eb70a9af290"
+      ],
+      [
+        "scan-index\\1465f8e823323fe9c4383abb5a38c9e17fc550dd44cd2f14fd7f7242bc309e12.json",
+        "1be5fefdb59d8af06de2a6be0eeb0025a96253d719de1e0daced6f1fe35cdde0"
+      ],
+      [
+        "scan-index\\153bae098b5d3524553fcf4d8cbb1eacef2471314948819d043b26cebe199e14.json",
+        "689305d629290f70b40c5ea8454db685486f87be218b38da7aa4f0594a1d1cb8"
+      ],
+      [
+        "scan-index\\165f4a9a9309a7ac323647e9acefd754a66c6295cab7db6bdb50830914bf0d68.json",
+        "5b0738883aee24ac7e17fc108a221e395380d2bae6a32f3ba3f70606e4b27ebe"
+      ],
+      [
+        "scan-index\\1db67e5d68a60a19388b0338ed1ee18c2a2bcd0025ab168a1d69920c929bd647.json",
+        "b19f9d1c96db4b9106b2a28058ab1c33f4d3edc45fa693126cad0efe48cd44dd"
+      ],
+      [
+        "scan-index\\3032598f9f4655037a67986db404cfbf60011a2ca84a1e6edcec794c7deab956.json",
+        "db1c59c38bb8ba2122afad18a73d956ec55d4580f4cad17f365b37b71d7e3db8"
+      ],
+      [
+        "scan-index\\358da0698a4692a8052707f22ba2b9c94b5c4e73080d12c721e622b66a80614c.json",
+        "f1fb6fbd25b3d96027a86d6c797b162a74c95544c04f64470ed733ddbc8983ee"
+      ],
+      [
+        "scan-index\\5eb5da5dcf86cb8c66f674df75935c030f8e12d86b6373ebcdaa3d7aba7eb672.json",
+        "489328dc3fa24223d6db18869658db5d01f915838ba97532de8193f8bedc6f93"
+      ],
+      [
+        "scan-index\\5f59f687750abe3eb7d55cdb1aa86cb802bf22f3b00e3bb369f77a7ef2584d06.json",
+        "ae2763e5e5553a4eb759576c8f26efcffc9ef5aa741ddd6aad78b2e33716a719"
+      ],
+      [
+        "scan-index\\602ae02092dd5e362dec6b88bd5afb39f14c218b3e0f0fbd52e5a8d09eddeb0d.json",
+        "cd75909f0b53f3d449d479531d62f3ff1bb3144eb918086cc7a25d05816c2a7d"
+      ],
+      [
+        "scan-index\\664a4a47b45908fdfdf2d6bb5ec7024e41699d7dd2af4110f2889d4eac6dd2d7.json",
+        "64835ce867a827d40088ce1b9c8e4e19cb996d0df4c2e676cbb215cf38868556"
+      ],
+      [
+        "scan-index\\6a4b7a95d1ae5d67f63cc87a4f3486c0a22c35af457355ae63f4303d7bdbcaa1.json",
+        "7ab98d842e31b5da1227cf6e00d98e3e32287c53b0965f3e8a964dbc9e982b20"
+      ],
+      [
+        "scan-index\\6c2bfaa6b9f2b41ef00e065bab2a6d71c599e2ce76cc3f5939228ecc7b8be650.json",
+        "33dd4002ba26ea91ef1c97f264ef0337dd78b37d06f03a538f514ee0809c5107"
+      ],
+      [
+        "scan-index\\703cb3b91afdc3a4a39fb95f9d0c0289fe6dcdab34f10425d71858a05164ce3b.json",
+        "217ca6aa5c2c3b721795e93c7cb5d819317fa55546fee842c81420f84c353fe8"
+      ],
+      [
+        "scan-index\\85bd705cb26d94f80943f15877c1c71cc9f9a665c0bf24f8ab568b0b6bacf550.json",
+        "d4bb5033f4315903b0083789b87e09f4e06cb294a17313439f21987dd0b3a527"
+      ],
+      [
+        "scan-index\\87720e2b63644af82253d5ec9ace977d27e42c03a6033c6811af6c6094928e09.json",
+        "2b01b9760b6e8f5605fd9bb0cbc74e6f248c0bec7428982ce0dbb848c1f6e589"
+      ],
+      [
+        "scan-index\\959e88efa835995e2afff87fc4257966a41b7f45da19d44dc3369ba0d88599c9.json",
+        "bec93346f2dfbf0938b593658fd80e43a9be33b0bd4a0f7bcbf9a8997198ba9e"
+      ],
+      [
+        "scan-index\\9d7bcef01cadb37f1a59d31b708084c192007deea8564d134dcc473b0605201c.json",
+        "04d6bfae12cdb3e73f828813477825cd39dc803c37893be82455ecebe7734312"
+      ],
+      [
+        "scan-index\\a02253e6f623d27dfaa6674be31d9b43fc3d9b2c6bcda125418f1c3dd2a25709.json",
+        "90f629426a02dbbe9d60c7ad0c28090bd77a96693fcd1187b5215eda49184b86"
+      ],
+      [
+        "scan-index\\a17738a5c4b4bc1ce4358ecff69b8e44a1e1a33a7511d9a11eddecd94b9e58cd.json",
+        "a1fd92c4c4c8b9bbfeb105da251cc5230f16f1f68edf7cf909a468da0c242d99"
+      ],
+      [
+        "scan-index\\c53e2ac468d9387f39255a1ee9893eba1abe325ab086dea0025a18d1ef67e75f.json",
+        "2042c353b3e1c29eb236d1a1dfce79afdb85839f40f02f0b70d521eff607e6bb"
+      ],
+      [
+        "scan-index\\cb702390842effe5e6e22e77acbda7b2bbea77ed51a5c07e66c3c5d8d0bc15bf.json",
+        "718b65c8b9b80caa3c5d34bc3244f750cd8243dc4b8743f637c3b12dbbbbda4a"
+      ],
+      [
+        "scan-index\\cbf568b1144651ce061c2dc94a347128724334dd45ac2dd4ebf6890d74c66251.json",
+        "e22fd608a0197ea15fdbd8e3320b49d60e518bb4054b74ffb7504cd8e6035134"
+      ],
+      [
+        "scan-index\\d6cd75e4bc356e88ed2b4c2272c32263e568d67a07b4017d73b22e09c23e8306.json",
+        "d3ccf77f170934b4987c22301d34abbb8b7646d45af03f575057804e4c892629"
+      ],
+      [
+        "scan-index\\db34a207b303445fed1e9654c8e68883c93c5123070913181f89844225e4636a.json",
+        "81149ad6956bdb73b468e88036ef043043faecd14d34901ba5eaa49b775d3a72"
+      ],
+      [
+        "scan-index\\de13066bd94cc789543a5fa9e6100f3297df42c5dd715cccf10b11383b6f1d68.json",
+        "d2ac7243b636179c0e35727cb899a4f608b7c044d759e6b6a52c8f501a3a6945"
+      ],
+      [
+        "scan-index\\eba7ad116c30f43341d30f06e5f9efe510565b2a31a16c0eccab8fc4c303e6bc.json",
+        "636392edc5a9f41da4b70492833939eac890636623ab957400a7118bba472fc7"
+      ],
+      [
+        "scan-index\\f16070f230607bf79853b98a8c462b8e7b854deeb16fe246ba6c9d783c9b2832.json",
+        "becff49c6c81b5dfd4688bbb272be352a8821ce42120b45282ea86c65f6378c2"
+      ],
+      [
+        "scan-index\\f408135604349a60c1b7caa1d60757de692af100c4518e5588f38b619995f186.json",
+        "b894250b5d420a09b89350f33103a5d08edb5fc3d20f3cddf7604ed1fcb9df3a"
+      ],
+      [
+        "scan-index\\f7b0c1004febecbe36453be10ef2ddc2523e5b92f4af5f318ce1049990e93053.json",
+        "77f2b4ded7202b828e8a6e281d549eecd1e79aea4030dfb2a7d918202ab090c5"
+      ],
+      [
+        "scan-index\\f892c389d585d65dff3d06f6c86d3355dc90100c808a4f80da22b2f7e81865ba.json",
+        "b0f007ba8b4249849d726eee7a9fec6cf5926742e62d3cb833bd464423af520e"
+      ],
+      [
+        "scan-index\\fc41c7e68e94b6f115983997d8498353a4f8f41b61fc91662dd84affe70fc9fb.json",
+        "fa79531cd58ae0323d29102813386358d2e599ecb63902231ed73e264196abdc"
+      ],
+      [
+        "settings.json",
+        "6fb990f7edfe0707bb48b8bed65455cc2a521d33e028b45ce77f98b6a466a0d5"
+      ],
+      [
+        "video-metadata-cache.json",
+        "616205b2e97a75ea8842d3b4f6f3de778fc545493659d45e5c0139c6d7087f47"
+      ]
+    ],
+    "settingsSha256": "6fb990f7edfe0707bb48b8bed65455cc2a521d33e028b45ce77f98b6a466a0d5",
+    "desktopPackageAndLockUnchanged": true
+  },
+  "limitations": [
+    "15 high full-tree entries remain, propagated from unpatched braces3.0.3 and node-forge1.4.0; no upstream fixed version as checked on2026-10-19",
+    "iOS mod/template parsing and writing does not prove Xcode compilation, signing, scene/window behavior or physical-device acceptance",
+    "No replacement APK, physical arm64, production signing/upgrade-install, publication or complete R6/R7/R8 acceptance",
+    "One initial regression command used a singular script name; corrected to verify:privacy-passwords, preserved diagnostic log and valid final results"
+  ],
+  "sources": [
+    "https://github.com/advisories/GHSA-w5hq-g745-h8pq",
+    "https://github.com/uuidjs/uuid/releases/tag/v11.1.1",
+    "https://github.com/advisories/GHSA-vfj7-8cjw-p6xm",
+    "https://github.com/advisories/GHSA-86w9-cpqp-85rv",
+    "https://github.com/digitalbazaar/forge/pull/1152"
+  ],
+  "rawEvidence": ".tmp/refactor-tests/r8-mobile-residual"
+}

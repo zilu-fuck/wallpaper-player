@@ -1,6 +1,7 @@
 const { claimPairing, getPublicIdentity, revokePairedDeviceByToken } = require('../identity')
 const { getLanAddresses, getPrimaryEndpoint } = require('../network')
 const { readBody, sendError, sendJson } = require('../http-utils')
+const { PROTOCOL_VERSION, MIN_CLIENT_PROTOCOL } = require('../../../packages/contracts')
 
 const MAX_SPEED_TEST_BYTES = 4 * 1024 * 1024
 const DEFAULT_SPEED_TEST_BYTES = 1024 * 1024
@@ -30,9 +31,13 @@ function waitForDrainOrClose(res) {
 
 function createInfoHandlers({ getRequestToken }) {
   async function handleInfo(req, res, port) {
-    sendJson(req, res, 200, {
+    return sendJson(req, res, 200, {
       ...getPublicIdentity(),
       version: 1,
+      protocolVersion: PROTOCOL_VERSION,
+      minClientProtocol: MIN_CLIENT_PROTOCOL,
+      capabilities: { favoriteState: true, mediaMutationResults: true, playbackRevision: true, tagRevisions: true,
+        libraryQuery: true, libraryRevision: true, cursorPagination: true, authProbe: true, taskInterests: true, analysisInterests: true },
       endpoint: getPrimaryEndpoint(port),
       endpoints: getLanAddresses(port),
       transport: {
@@ -46,24 +51,27 @@ function createInfoHandlers({ getRequestToken }) {
 
   async function handlePairingClaim(req, res) {
     const body = await readBody(req)
-    const result = claimPairing({
+    const result = await claimPairing({
       pairingId: body.pairingId,
       oneTimeSecret: body.oneTimeSecret,
       clientId: body.clientId,
       clientName: body.clientName,
       platform: body.platform
     })
-    sendJson(req, res, 200, result)
+    return sendJson(req, res, 200, result)
   }
 
   async function handleUnpairCurrentDevice(req, res, url) {
     const token = getRequestToken(req, url, false)
-    const revoked = revokePairedDeviceByToken(token)
+    const revoked = await revokePairedDeviceByToken(token)
     if (!revoked) {
       sendError(req, res, 400, 'device_not_paired', '当前设备不是扫码绑定设备，已在手机端本地移除')
       return
     }
-    sendJson(req, res, 200, { success: true, device: revoked })
+    // The accepted unpair deliberately revokes this request's own credential.
+    req.assertJsonResponseCurrent = null
+    req.refreshJsonResponseAuthorization = null
+    return sendJson(req, res, 200, { success: true, device: revoked })
   }
 
   async function handleSpeedTest(req, res, url) {
@@ -101,6 +109,7 @@ function createInfoHandlers({ getRequestToken }) {
 
   return {
     handleInfo,
+    handleAuthorization: async (req, res) => sendJson(req, res, 200, { authorized: true, deviceId: getPublicIdentity().deviceId }),
     handlePairingClaim,
     handleUnpairCurrentDevice,
     handleSpeedTest

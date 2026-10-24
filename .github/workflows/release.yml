@@ -1,4 +1,4 @@
-name: Release Windows
+name: Release desktop or desktop and Android
 
 on:
   push:
@@ -7,183 +7,185 @@ on:
   workflow_dispatch:
     inputs:
       publish-mobile-apk:
-        description: "Also build and publish the Android APK (requires Expo prebuild + Gradle on the runner)"
+        description: "Joint release: require a verified signed Android APK before any release is published"
         type: boolean
         required: false
         default: false
 
 permissions:
-  contents: write
+  contents: read
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  RELEASE_INCLUDE_MOBILE: ${{ github.event_name == 'workflow_dispatch' && inputs['publish-mobile-apk'] == true && 'true' || 'false' }}
 
 jobs:
+  plan:
+    name: Release preflight
+    runs-on: windows-latest
+    outputs:
+      include-mobile: ${{ steps.plan.outputs.include-mobile }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Validate tag, release mode and Android signing readiness
+        id: plan
+        env:
+          WINDOWS_CSC_LINK: ${{ secrets.WINDOWS_CSC_LINK }}
+          WINDOWS_CSC_KEY_PASSWORD: ${{ secrets.WINDOWS_CSC_KEY_PASSWORD }}
+          ANDROID_RELEASE_KEYSTORE_BASE64: ${{ secrets.ANDROID_RELEASE_KEYSTORE_BASE64 }}
+          ANDROID_RELEASE_STORE_PASSWORD: ${{ secrets.ANDROID_RELEASE_STORE_PASSWORD }}
+          ANDROID_RELEASE_KEY_ALIAS: ${{ secrets.ANDROID_RELEASE_KEY_ALIAS }}
+          ANDROID_RELEASE_KEY_PASSWORD: ${{ secrets.ANDROID_RELEASE_KEY_PASSWORD }}
+        run: node scripts/release-gate.cjs plan
+
   verify:
-    name: Verification gate
+    name: Full core and LAN verification
+    needs: plan
+    uses: ./.github/workflows/ci.yml
+
+  build-windows:
+    name: Build verified Windows artifacts
     runs-on: windows-latest
-
+    needs: [plan, verify]
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v6
         with:
           node-version: 24
           cache: npm
-
-      - name: Install root dependencies
-        run: npm ci
-
-      - name: Build desktop frontend
-        run: npm run build
-
-      - name: Verify remote identity
-        run: npm run verify:remote-mobile
-
-      - name: Verify remote settings
-        run: npm run verify:remote-settings
-
-      - name: Verify direct startup
-        run: npm run verify:startup
-
-      - name: Verify plugin registry
-        run: npm run verify:plugins
-
-      - name: Install mobile dependencies
-        working-directory: mobile
-        run: npm ci
-
-      - name: Mobile typecheck
-        working-directory: mobile
-        run: npm run typecheck
-
-  release:
-    runs-on: windows-latest
-    needs: verify
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 24
-          cache: npm
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Build
+      - run: npm ci
+      - name: Build installers, portable app and plugins
         env:
           ELECTRON_PUBLISH: never
+          CSC_LINK: ${{ secrets.WINDOWS_CSC_LINK }}
+          CSC_KEY_PASSWORD: ${{ secrets.WINDOWS_CSC_KEY_PASSWORD }}
         run: npm run dist:win
-
-      - name: Publish release assets
-        shell: pwsh
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          function Invoke-Gh {
-            & gh @args
-            if ($LASTEXITCODE -ne 0) {
-              throw "gh $($args -join ' ') failed"
-            }
-          }
-
-          if ("${{ github.ref_type }}" -ne "tag") {
-            throw "Release workflow must run from a tag. Current ref: ${{ github.ref }}"
-          }
-
-          $repository = "${{ github.repository }}"
-          $tag = "${{ github.ref_name }}"
-          $version = (node -p "require('./package.json').version").Trim()
-          $title = "Wallpaper Player $version"
-          $notesPath = Join-Path "release-notes" "$tag.md"
-          $notesArgs = if (Test-Path -LiteralPath $notesPath -PathType Leaf) {
-            @("--notes-file", $notesPath)
-          } else {
-            @("--notes", "Automated Windows release for $tag.")
-          }
-          $assetNames = @(
-            "Wallpaper-Player-Setup-$version.exe",
-            "Wallpaper-Player-Setup-$version.exe.blockmap",
-            "Wallpaper-Player-$version.exe",
-            "latest.yml"
-          )
-
-          $assetPaths = foreach ($assetName in $assetNames) {
-            $assetPath = Join-Path "release" $assetName
-            if (!(Test-Path -LiteralPath $assetPath -PathType Leaf)) {
-              throw "Missing release asset: $assetPath"
-            }
-            (Resolve-Path -LiteralPath $assetPath).Path
-          }
-          $pluginAssetPaths = @(Get-ChildItem -LiteralPath "release/plugins" -Filter "*.zip" -File | ForEach-Object { $_.FullName })
-          if ($pluginAssetPaths.Count -eq 0) {
-            throw "Missing release plugin assets: release/plugins/*.zip"
-          }
-          $assetPaths = @($assetPaths) + $pluginAssetPaths
-
-          gh release view $tag --repo $repository *> $null
-          if ($LASTEXITCODE -eq 0) {
-            Invoke-Gh release upload $tag @assetPaths --repo $repository --clobber
-            Invoke-Gh release edit $tag --repo $repository --title $title @notesArgs --draft=false --prerelease=false --latest
-          } else {
-            Invoke-Gh release create $tag @assetPaths --repo $repository --title $title @notesArgs --latest
-          }
+      - name: Verify versions, update hashes and plugin integrity
+        run: node scripts/release-gate.cjs windows .release/windows
+      - uses: actions/upload-artifact@v7
+        with:
+          name: release-windows
+          path: .release/windows/*
+          include-hidden-files: true
+          if-no-files-found: error
+          compression-level: 0
+          retention-days: 7
 
   build-mobile-apk:
-    name: Build and publish Android APK
+    name: Build verified signed Android artifact
     runs-on: windows-latest
-    needs: release
-    if: ${{ github.event.inputs.publish-mobile-apk == 'true' }}
-
+    needs: [plan, verify]
+    if: ${{ needs.plan.outputs.include-mobile == 'true' }}
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v6
         with:
           node-version: 24
           cache: npm
-
-      - name: Setup JDK 17
-        uses: actions/setup-java@v4
+          cache-dependency-path: |
+            package-lock.json
+            mobile/package-lock.json
+      - name: Setup JDK 21
+        uses: actions/setup-java@v5
         with:
           distribution: temurin
-          java-version: "17"
-
-      - name: Install mobile dependencies
+          java-version: "21"
+      - name: Install root build tooling and generate shared contracts
+        run: |
+          npm ci
+          if ($LASTEXITCODE -ne 0) { throw "Root dependency installation failed" }
+          npm run build:contracts
+          if ($LASTEXITCODE -ne 0) { throw "Shared contracts generation failed" }
+      - name: Install mobile dependencies and reviewed backports
         working-directory: mobile
         run: npm ci
-
+      - name: Verify SDK compatibility and dependency consumers
+        run: |
+          Push-Location mobile
+          try {
+            node ../scripts/run-verify.cjs node_modules/expo/bin/cli install --check
+            if ($LASTEXITCODE -ne 0) { throw "Expo SDK compatibility failed" }
+          } finally { Pop-Location }
+          npm run verify:dependency-security-mobile
+          if ($LASTEXITCODE -ne 0) { throw "Mobile dependency security failed" }
+      - name: Prepare required Android SDK
+        shell: pwsh
+        run: |
+          if ($env:GITHUB_WORKSPACE -match '[^\x20-\x7e]') { throw "Native build workspace must use an ASCII path" }
+          & "$env:ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager.bat" "platforms;android-37" "build-tools;37.0.0"
+          if ($LASTEXITCODE -ne 0) { throw "Android SDK preparation failed" }
       - name: Prebuild Android project
         working-directory: mobile
         env:
           CI: "1"
-        run: npx expo prebuild --platform android
-
-      - name: Build release APK
+        run: node ../scripts/run-verify.cjs node_modules/expo/bin/cli prebuild --platform android --no-install
+      - name: Build arm64 release APK
         working-directory: mobile/android
+        run: ./gradlew.bat :app:assembleRelease --no-daemon --max-workers=2 "-PreactNativeArchitectures=arm64-v8a"
+      - name: Sign using the reviewed release identity
         env:
-          ANDROID_HOME: 'C:\Program Files (x86)\Android\android-sdk'
-        run: ./gradlew assembleRelease --no-daemon
+          ANDROID_RELEASE_KEYSTORE_BASE64: ${{ secrets.ANDROID_RELEASE_KEYSTORE_BASE64 }}
+          ANDROID_RELEASE_STORE_PASSWORD: ${{ secrets.ANDROID_RELEASE_STORE_PASSWORD }}
+          ANDROID_RELEASE_KEY_ALIAS: ${{ secrets.ANDROID_RELEASE_KEY_ALIAS }}
+          ANDROID_RELEASE_KEY_PASSWORD: ${{ secrets.ANDROID_RELEASE_KEY_PASSWORD }}
+        run: node scripts/sign-release-apk.cjs
+      - name: Verify actual APK signature, application version and ABI
+        run: node scripts/release-gate.cjs android .release/android .release/signed/app-release.apk
+      - uses: actions/upload-artifact@v7
+        with:
+          name: release-android
+          path: .release/android/*
+          include-hidden-files: true
+          if-no-files-found: error
+          compression-level: 0
+          retention-days: 7
 
-      - name: Publish APK asset
-        shell: pwsh
+  publish:
+    name: Publish only the complete verified candidate
+    runs-on: windows-latest
+    needs: [plan, verify, build-windows, build-mobile-apk]
+    if: ${{ always() && !cancelled() && needs.plan.result == 'success' && needs.verify.result == 'success' && needs.build-windows.result == 'success' && (needs.plan.outputs.include-mobile == 'false' || needs.build-mobile-apk.result == 'success') }}
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          package-manager-cache: false
+      - uses: actions/download-artifact@v8
+        with:
+          name: release-windows
+          path: .release/windows
+          digest-mismatch: error
+      - uses: actions/download-artifact@v8
+        if: ${{ needs.plan.outputs.include-mobile == 'true' }}
+        with:
+          name: release-android
+          path: .release/android
+          digest-mismatch: error
+      - name: Recheck candidate, stage a draft and verify downloaded assets before publishing
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          $version = (node -p "require('./mobile/package.json').version").Trim()
-          $apk = Get-ChildItem -LiteralPath "mobile/android/app/build/outputs/apk/release" -Filter "*.apk" -File | Select-Object -First 1
-          if (-not $apk) {
-            throw "No release APK produced under mobile/android/app/build/outputs/apk/release"
-          }
-          $renamed = Join-Path $apk.DirectoryName "wallpaper-player-mobile-$version.apk"
-          Copy-Item -LiteralPath $apk.FullName -Destination $renamed -Force
-          $tag = "${{ github.ref_name }}"
-          & gh release upload $tag $renamed --repo "${{ github.repository }}" --clobber
-          if ($LASTEXITCODE -ne 0) {
-            throw "gh release upload failed for $renamed"
-          }
+          RELEASE_JOB_RESULTS: ${{ toJSON(needs) }}
+        run: node scripts/release-publish.cjs

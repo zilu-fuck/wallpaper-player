@@ -2,11 +2,15 @@ const path = require('path')
 const fs = require('fs')
 const fsp = require('fs/promises')
 const crypto = require('crypto')
+const { EventEmitter } = require('events')
 const { SCAN_CACHE_TTL } = require('./constants')
-const { pathKey, isPathInside, isVideoFile, isVideoContentFile } = require('./paths')
-const { getAllowedVideoDirectories, setDirectoryChangeHandler, isSessionAllowedFile, resolvePathForAccess } = require('./settings')
+const { pathKey, isPathInside, isVideoFile, isVideoContentFile, resolvePathForAccessAsync, resolvePathsForAccess } = require('./paths')
+const { setDirectoryChangeHandler, resolvePathForAccess } = require('./settings')
 const { getCachedVideoMetadata, warmVideoMetadataCache } = require('./video-metadata')
 const { getUserDataDir } = require('./user-data')
+const { createMediaAccessPolicyAsync } = require('./security/media-access')
+const { rememberVideos } = require('./remote/video-index')
+const { compareLibraryVideos } = require('../packages/domain')
 
 const SCAN_INDEX_VERSION = 2
 
@@ -19,11 +23,32 @@ const backgroundScanRefreshes = new Map()
 const workshopManifestCache = new Map()
 const R18_TAG = 'R18'
 const SCAN_METADATA_WARM_LIMIT = 24
+const scanEvents = new EventEmitter()
+const indexWrites = new Map()
+const scanGenerations = new Map()
+const generationFor = key => scanGenerations.get(key) || 0
+function assertScanGeneration(key, generation) {
+  if (generation !== undefined && generation !== generationFor(key)) throw Object.assign(new Error('目录正在变化，请重新读取'), {
+    code: 'scan_changed', status: 503, retryable: true
+  })
+}
+const canonicalVideoKeys = new WeakMap()
+function getScanCanonicalPathKey(video) { return canonicalVideoKeys.get(video) }
+async function filterAccessibleVideos(videos, access, root, check = () => {}) {
+  const paths = await resolvePathsForAccess(videos.map(video => video.fullPath), check)
+  const policy = await createMediaAccessPolicyAsync(access)
+  check()
+  policy.assertReadResolvedPath(root, { allowSessionFile: false })
+  return { policy, videos: videos.filter(video => {
+    const resolved = policy.resolveScanResolvedPath(paths.get(video.fullPath), root)
+    if (!resolved) return false
+    canonicalVideoKeys.set(video, pathKey(resolved)); return true
+  }) }
+}
+function onScanChanged(listener) { scanEvents.on('change', listener); return () => scanEvents.off('change', listener) }
 
 function getScanIndexDir() {
-  const dir = path.join(getUserDataDir(), 'scan-index')
-  if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true })
-  return dir
+  return path.join(getUserDataDir(), 'scan-index')
 }
 
 // 索引路径按 realpath 归一化：扫描入口（scanWithCache）会把目录
@@ -31,6 +56,10 @@ function getScanIndexDir() {
 // junction/大小写差异）会导致读写路径不一致、索引永不命中。
 function getScanIndexPath(dirPath) {
   const resolved = resolvePathForAccess(dirPath)
+  return getResolvedScanIndexPath(resolved)
+}
+
+function getResolvedScanIndexPath(resolved) {
   const digest = crypto
     .createHash('sha256')
     .update(pathKey(resolved))
@@ -40,8 +69,10 @@ function getScanIndexPath(dirPath) {
 
 async function loadScanIndex(dirPath) {
   try {
-    const parsed = JSON.parse(await fsp.readFile(getScanIndexPath(dirPath), 'utf-8'))
-    if (parsed?.version !== SCAN_INDEX_VERSION || !parsed.entries || typeof parsed.entries !== 'object') {
+    const resolved = await resolvePathForAccessAsync(dirPath)
+    const parsed = JSON.parse(await fsp.readFile(getResolvedScanIndexPath(resolved), 'utf-8'))
+    if (parsed?.version !== SCAN_INDEX_VERSION || pathKey(parsed.root || '') !== pathKey(resolved) ||
+        !parsed.entries || typeof parsed.entries !== 'object' || Array.isArray(parsed.entries)) {
       return { version: SCAN_INDEX_VERSION, entries: {} }
     }
     return parsed
@@ -51,9 +82,10 @@ async function loadScanIndex(dirPath) {
 }
 
 async function saveScanIndex(dirPath, videos) {
+  const resolved = await resolvePathForAccessAsync(dirPath)
   const entries = {}
   for (const video of Array.isArray(videos) ? videos : []) {
-    if (!video?.fullPath) continue
+    if (typeof video?.fullPath !== 'string' || !video.fullPath) continue
     entries[pathKey(video.fullPath)] = {
       size: Number(video.size) || 0,
       modified: Math.round(Number(video.fileModified || video.modified) || 0),
@@ -63,17 +95,34 @@ async function saveScanIndex(dirPath, videos) {
 
   const payload = {
     version: SCAN_INDEX_VERSION,
-    root: path.resolve(dirPath),
+    root: resolved,
     savedAt: Date.now(),
     entries
   }
-  const indexPath = getScanIndexPath(dirPath)
-  await fsp.mkdir(path.dirname(indexPath), { recursive: true })
-  await fsp.writeFile(indexPath, JSON.stringify(payload, null, 2), 'utf-8')
+  const indexPath = getResolvedScanIndexPath(resolved)
+  const previous = indexWrites.get(indexPath) || Promise.resolve()
+  const write = previous.catch(() => {}).then(async () => {
+    await fsp.mkdir(path.dirname(indexPath), { recursive: true })
+    const temporary = `${indexPath}.${crypto.randomBytes(8).toString('hex')}.tmp`
+    let handle
+    try {
+      handle = await fsp.open(temporary, 'wx')
+      await handle.writeFile(JSON.stringify(payload), 'utf-8')
+      await handle.sync(); await handle.close(); handle = null
+      await fsp.rename(temporary, indexPath)
+    } finally {
+      if (handle) await handle.close().catch(() => {})
+      await fsp.unlink(temporary).catch(() => {})
+    }
+  })
+  indexWrites.set(indexPath, write)
+  try { await write } finally { if (indexWrites.get(indexPath) === write) indexWrites.delete(indexPath) }
 }
 
 function invalidateScanCache(cacheKey) {
+  scanGenerations.set(cacheKey, generationFor(cacheKey) + 1)
   directoryScanCache.delete(cacheKey)
+  scanEvents.emit('change', { type: 'invalidated', cacheKey })
 }
 
 function watchDirectory(dirPath) {
@@ -162,12 +211,16 @@ setDirectoryChangeHandler((remainingDirectories) => {
 })
 
 // ─── 路径校验 ──────────────────────────────────────────
-async function resolveExistingPath(inputPath) {
+function checkAccessWork(options) { options.throwIfAborted?.(); if (options.signal?.aborted) throw options.signal.reason }
+async function resolveExistingPath(inputPath, options = {}) {
+  checkAccessWork(options)
   if (typeof inputPath !== 'string' || !inputPath.trim()) {
     throw new Error('路径无效')
   }
-  const resolved = resolvePathForAccess(inputPath)
+  const resolved = await fsp.realpath(path.resolve(inputPath))
+  checkAccessWork(options)
   await fsp.access(resolved)
+  checkAccessWork(options)
   return resolved
 }
 
@@ -180,20 +233,18 @@ async function assertAllowedDirectory(dirPath) {
   return resolved
 }
 
-async function assertAllowedVideoPath(filePath) {
-  const resolved = await resolveExistingPath(filePath)
+async function assertAllowedVideoPath(filePath, access = {}) {
+  checkAccessWork(access)
+  const resolved = await resolveExistingPath(filePath, access)
   const stats = await fsp.stat(resolved)
+  checkAccessWork(access)
   if (!stats.isFile() || !(await isVideoContentFile(resolved))) {
     throw new Error('路径不是支持的视频文件')
   }
 
-  const allowedDirs = getAllowedVideoDirectories()
-
-  if (!allowedDirs.some(dir => isPathInside(dir, resolved)) && !isSessionAllowedFile(resolved)) {
-    throw new Error('文件不在已添加的视频目录中')
-  }
-
-  return resolved
+  const policy = await createMediaAccessPolicyAsync(access)
+  checkAccessWork(access)
+  return policy.assertReadResolvedPath(resolved)
 }
 
 // ─── Wallpaper Engine 元数据 ───────────────────────────
@@ -212,7 +263,7 @@ async function readWallpaperMetadata(dirPath, workshopManifest = null) {
     const previewPath = typeof project.preview === 'string' && project.preview.trim()
       ? path.resolve(dirPath, project.preview)
       : null
-    const safePreviewPath = previewPath && isPathInside(wallpaperDir, previewPath) && fs.existsSync(previewPath)
+    const safePreviewPath = previewPath && isPathInside(wallpaperDir, previewPath) && await fsp.access(previewPath).then(() => true, () => false)
       ? previewPath
       : null
 
@@ -290,7 +341,7 @@ function isR18Value(value) {
 }
 
 // ─── 递归扫描目录 ──────────────────────────────────────
-function createVideoRecord({ fullPath, entryName, dirPath, baseDir, stats, metadata }) {
+function createVideoRecord({ fullPath, entryName, dirPath, baseDir, stats, metadata, canonicalPathKey }) {
   const relDir = path.relative(baseDir, dirPath)
   const group = relDir ? relDir.split(path.sep)[0] : path.basename(baseDir)
   const title = metadata?.title || path.basename(entryName, path.extname(entryName))
@@ -321,16 +372,16 @@ function createVideoRecord({ fullPath, entryName, dirPath, baseDir, stats, metad
     media: getCachedVideoMetadata(fullPath, {
       size: stats.size,
       mtimeMs: Math.round(stats.mtimeMs)
-    })
+    }, canonicalPathKey)
   }
 }
 
-function reuseIndexedVideo(index, fullPath, stats, metadata, entryName, dirPath, baseDir) {
+function reuseIndexedVideo(index, fullPath, stats, metadata, entryName, dirPath, baseDir, canonicalPathKey) {
   const indexed = index?.entries?.[pathKey(fullPath)]
   if (!indexed?.video) return null
   if (indexed.size !== stats.size || indexed.modified !== Math.round(stats.mtimeMs)) return null
 
-  const next = createVideoRecord({ fullPath, entryName, dirPath, baseDir, stats, metadata })
+  const next = createVideoRecord({ fullPath, entryName, dirPath, baseDir, stats, metadata, canonicalPathKey })
   return {
     ...indexed.video,
     ...next,
@@ -340,26 +391,33 @@ function reuseIndexedVideo(index, fullPath, stats, metadata, entryName, dirPath,
 
 function attachCachedMedia(videos) {
   return Array.isArray(videos)
-    ? videos.map(video => ({
+    ? videos.map(video => {
+      const item = {
         ...video,
         media: getCachedVideoMetadata(video.fullPath, {
           size: video.size,
           mtimeMs: Math.round(Number(video.fileModified || video.modified) || 0)
-        }) || video.media || null
-      }))
+        }, canonicalVideoKeys.get(video)) || video.media || null
+      }
+      if (canonicalVideoKeys.has(video)) canonicalVideoKeys.set(item, canonicalVideoKeys.get(video))
+      return item
+    })
     : []
 }
 
-async function getValidatedIndexedVideos(index, resolvedDir) {
+async function getValidatedIndexedVideos(index, resolvedDir, accessPolicy, limit = Infinity) {
   if (!index?.entries || typeof index.entries !== 'object') return []
-  const videos = []
+  const entries = Object.values(index.entries), videos = new Array(entries.length)
+  if (Number.isFinite(limit)) entries.sort((a, b) => compareLibraryVideos(a.video || {}, b.video || {}, 'name'))
   const root = path.resolve(resolvedDir)
-
-  for (const entry of Object.values(index.entries)) {
+  let next = 0, validated = 0
+  await Promise.all(Array.from({ length: Math.min(8, entries.length) }, async () => {
+   while (next < entries.length && validated < limit) {
+    const position = next++, entry = entries[position]
     const video = entry?.video
-    if (!video?.fullPath) continue
-    const fullPath = path.resolve(video.fullPath)
-    if (!isPathInside(root, fullPath) || !isVideoFile(fullPath)) continue
+    if (typeof video?.fullPath !== 'string' || !video.fullPath) continue
+    const fullPath = accessPolicy.resolveScanResolvedPath(await resolvePathForAccessAsync(video.fullPath), resolvedDir)
+    if (!fullPath || !isPathInside(root, fullPath) || !isVideoFile(fullPath)) continue
 
     try {
       const stats = await fsp.stat(fullPath)
@@ -367,32 +425,49 @@ async function getValidatedIndexedVideos(index, resolvedDir) {
       const indexedSize = Number(entry.size ?? video.size) || 0
       const indexedModified = Math.round(Number(entry.modified ?? video.modified) || 0)
       if (indexedSize !== stats.size || indexedModified !== Math.round(stats.mtimeMs)) continue
-      videos.push({
+      const current = {
         ...video,
         fullPath,
         size: stats.size,
         fileModified: stats.mtimeMs
-      })
+      }
+      canonicalVideoKeys.set(current, pathKey(fullPath)); videos[position] = current
+      validated++
     } catch {}
-  }
-
-  return videos
+   }
+  }))
+  return videos.filter(Boolean)
 }
 
 async function writeScanResult(resolvedDir, cacheKey, videos, options = {}) {
+  const check = () => { checkAccessWork(options.access || {}); assertScanGeneration(cacheKey, options.generation) }
   let dirMtime = null
   try { dirMtime = (await fsp.stat(resolvedDir)).mtimeMs } catch {}
-  const videosWithMedia = attachCachedMedia(videos)
+  check()
+  let filtered = await filterAccessibleVideos(videos, options.access, resolvedDir, check)
+  let policy = filtered.policy
+  let videosWithMedia = attachCachedMedia(filtered.videos)
+  if (!options.skipSave) {
+    await saveScanIndex(resolvedDir, videosWithMedia).catch(() => {})
+  }
+  check()
+  // 磁盘写入期间权限可能改变，返回与预热前再次使用最新策略。
+  if (!options.skipSave) {
+    filtered = await filterAccessibleVideos(videosWithMedia, options.access, resolvedDir, check)
+    policy = filtered.policy; videosWithMedia = filtered.videos
+  }
+  rememberVideos(videosWithMedia)
   directoryScanCache.set(cacheKey, {
     videos: videosWithMedia,
     scannedAt: Date.now(),
     dirMtime,
     indexed: Boolean(options.indexed),
-    refreshing: Boolean(options.refreshing)
+    refreshing: Boolean(options.refreshing),
+    partial: Boolean(options.partial),
+    policySignature: policy.scanResolvedSignature(resolvedDir)
   })
-  if (!options.skipSave) {
-    await saveScanIndex(resolvedDir, videosWithMedia).catch(() => {})
-  }
+  scanEvents.emit('change', { type: 'updated', cacheKey, directory: resolvedDir, videos: videosWithMedia,
+    indexed: Boolean(options.indexed), refreshing: Boolean(options.refreshing), partial: Boolean(options.partial), policySignature: policy.scanResolvedSignature(resolvedDir) })
   watchDirectory(resolvedDir)
   const warmPaths = videosWithMedia
     .filter(video => !video.media?.available)
@@ -404,18 +479,21 @@ async function writeScanResult(resolvedDir, cacheKey, videos, options = {}) {
   return videosWithMedia
 }
 
-function refreshScanIndexInBackground(resolvedDir, cacheKey, index) {
-  if (backgroundScanRefreshes.has(cacheKey)) return backgroundScanRefreshes.get(cacheKey)
+function refreshScanIndexInBackground(resolvedDir, cacheKey, index, access, generation = generationFor(cacheKey)) {
+  const previous = backgroundScanRefreshes.get(cacheKey)
+  if (previous?.generation === generation) return previous
   const refresh = (async () => {
     const workshopManifest = await loadWorkshopManifest(getWorkshopManifestPath(resolvedDir))
-    const videos = await scanDirectory(resolvedDir, resolvedDir, 0, null, index, workshopManifest)
-    await writeScanResult(resolvedDir, cacheKey, videos)
+    const policy = await createMediaAccessPolicyAsync(access)
+    const videos = await scanDirectory(resolvedDir, resolvedDir, 0, null, index, workshopManifest, policy)
+    await writeScanResult(resolvedDir, cacheKey, videos, { access, generation })
   })()
     .catch(() => {})
     .finally(() => {
-      backgroundScanRefreshes.delete(cacheKey)
+      if (backgroundScanRefreshes.get(cacheKey) === refresh) backgroundScanRefreshes.delete(cacheKey)
     })
   backgroundScanRefreshes.set(cacheKey, refresh)
+  refresh.generation = generation
   return refresh
 }
 
@@ -423,9 +501,12 @@ async function waitForBackgroundScanRefreshes() {
   await Promise.all([...backgroundScanRefreshes.values()])
 }
 
-async function scanDirectory(dirPath, baseDir, depth = 0, inheritedMetadata = null, index = null, workshopManifest = null) {
+async function scanDirectory(dirPath, baseDir, depth = 0, inheritedMetadata = null, index = null, workshopManifest = null, accessPolicy, resolvedRoot) {
   const results = []
   if (depth > 8) return results
+  accessPolicy ||= await createMediaAccessPolicyAsync()
+  resolvedRoot ||= await resolvePathForAccessAsync(baseDir)
+  if (!accessPolicy.resolveScanResolvedPath(await resolvePathForAccessAsync(dirPath), resolvedRoot)) return results
 
   const metadata = inheritedMetadata || await readWallpaperMetadata(dirPath, workshopManifest)
 
@@ -441,16 +522,18 @@ async function scanDirectory(dirPath, baseDir, depth = 0, inheritedMetadata = nu
 
     if (entry.isDirectory()) {
       if (!entry.name.startsWith('.') && entry.name !== 'node_modules') {
-        results.push(...await scanDirectory(fullPath, baseDir, depth + 1, metadata, index, workshopManifest))
+        results.push(...await scanDirectory(fullPath, baseDir, depth + 1, metadata, index, workshopManifest, accessPolicy, resolvedRoot))
       }
     } else if (entry.isFile() && isVideoFile(entry.name)) {
       try {
+        const canonical = await resolvePathForAccessAsync(fullPath)
+        if (!accessPolicy.resolveScanResolvedPath(canonical, resolvedRoot)) continue
         if (!(await isVideoContentFile(fullPath))) continue
         const stats = await fsp.stat(fullPath)
-        results.push(
-          reuseIndexedVideo(index, fullPath, stats, metadata, entry.name, dirPath, baseDir) ||
-          createVideoRecord({ fullPath, entryName: entry.name, dirPath, baseDir, stats, metadata })
-        )
+        const canonicalPathKey = pathKey(canonical)
+        const video = reuseIndexedVideo(index, fullPath, stats, metadata, entry.name, dirPath, baseDir, canonicalPathKey) ||
+          createVideoRecord({ fullPath, entryName: entry.name, dirPath, baseDir, stats, metadata, canonicalPathKey })
+        canonicalVideoKeys.set(video, pathKey(canonical)); results.push(video)
       } catch {
         // skip files with stat errors
       }
@@ -461,24 +544,31 @@ async function scanDirectory(dirPath, baseDir, depth = 0, inheritedMetadata = nu
 }
 
 // ─── 扫描入口（带缓存） ────────────────────────────────
-async function scanWithCache(dirPath, force = false) {
+async function scanWithCacheOnce(dirPath, force = false, access = {}) {
   const resolvedDir = await assertAllowedDirectory(dirPath)
-  const allowedDirs = getAllowedVideoDirectories()
+  const accessPolicy = await createMediaAccessPolicyAsync(access)
+  const allowedDirs = accessPolicy.allowedDirectories
+  accessPolicy.assertReadResolvedPath(resolvedDir, { allowSessionFile: false })
 
   if (allowedDirs.length > 0 && !allowedDirs.some(dir => isPathInside(dir, resolvedDir))) {
     return { error: `目录未添加到库中: ${dirPath}` }
   }
 
   const cacheKey = pathKey(resolvedDir)
+  const generation = generationFor(cacheKey)
 
   // 缓存命中：非强制 + 未过 TTL + 根目录 mtime 未变
   if (!force) {
     const cached = directoryScanCache.get(cacheKey)
-    if (cached && Date.now() - cached.scannedAt < SCAN_CACHE_TTL) {
+    if (cached && (!cached.partial || access.initialLimit) && cached.policySignature === accessPolicy.scanResolvedSignature(resolvedDir) &&
+        Date.now() - cached.scannedAt < SCAN_CACHE_TTL) {
       try {
         if ((await fsp.stat(resolvedDir)).mtimeMs === cached.dirMtime) {
-          const videos = attachCachedMedia(cached.videos)
-          directoryScanCache.set(cacheKey, { ...cached, videos })
+          assertScanGeneration(cacheKey, generation)
+          const check = () => { checkAccessWork(access); assertScanGeneration(cacheKey, generation) }
+          const filtered = await filterAccessibleVideos(cached.videos, access, resolvedDir, check)
+          const videos = attachCachedMedia(filtered.videos)
+          directoryScanCache.set(cacheKey, { ...cached, videos, policySignature: filtered.policy.scanResolvedSignature(resolvedDir) })
           if (cached.refreshing) {
             if (backgroundScanRefreshes.has(cacheKey)) {
               return {
@@ -502,31 +592,45 @@ async function scanWithCache(dirPath, force = false) {
   }
 
   const index = force ? null : await loadScanIndex(resolvedDir)
-  const indexedVideos = force ? [] : await getValidatedIndexedVideos(index, resolvedDir)
+  const initialLimit = access.audience === 'remote' ? Infinity : Math.max(100, Number(access.initialLimit) || Infinity)
+  const indexedVideos = force ? [] : await getValidatedIndexedVideos(index, resolvedDir, accessPolicy, initialLimit)
   if (!force && indexedVideos.length > 0) {
     const videos = await writeScanResult(resolvedDir, cacheKey, indexedVideos, {
       indexed: true,
       refreshing: true,
-      skipSave: true
+      partial: Number.isFinite(initialLimit) && indexedVideos.length < Object.keys(index.entries).length,
+      skipSave: true,
+      generation,
+      access
     })
-    refreshScanIndexInBackground(resolvedDir, cacheKey, index)
+    refreshScanIndexInBackground(resolvedDir, cacheKey, index, access, generation)
     return { videos, count: videos.length, cached: true, indexed: true, refreshing: true }
   }
 
   const workshopManifest = await loadWorkshopManifest(getWorkshopManifestPath(resolvedDir))
-  const videos = await scanDirectory(resolvedDir, resolvedDir, 0, null, index, workshopManifest)
-  const videosWithMedia = await writeScanResult(resolvedDir, cacheKey, videos)
+  const videos = await scanDirectory(resolvedDir, resolvedDir, 0, null, index, workshopManifest, accessPolicy)
+  const videosWithMedia = await writeScanResult(resolvedDir, cacheKey, videos, { access, generation })
   return { videos: videosWithMedia, count: videosWithMedia.length }
 }
 
+async function scanWithCache(dirPath, force = false, access = {}) {
+  for (let attempt = 0; ; attempt++) {
+    try { return await scanWithCacheOnce(dirPath, force, access) }
+    catch (error) { if (error.code !== 'scan_changed' || attempt >= 2) throw error }
+  }
+}
+
 module.exports = {
+  onScanChanged,
+  invalidateScanCache,
+  attachCachedMedia,
+  getScanCanonicalPathKey,
   directoryScanCache,
   directoryWatchers,
   backgroundScanRefreshes,
   getScanIndexPath,
   loadScanIndex,
   waitForBackgroundScanRefreshes,
-  invalidateScanCache,
   watchDirectory,
   unwatchDirectory,
   unwatchAllDirectories,

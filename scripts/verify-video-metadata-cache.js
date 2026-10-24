@@ -112,6 +112,8 @@ async function cleanup() {
     unwatchAllDirectories()
   } catch {}
   process.chdir(projectRoot)
+  assert.strictEqual(path.dirname(path.resolve(tempRoot)), path.resolve(os.tmpdir()))
+  assert.ok(path.basename(tempRoot).startsWith('wallpaper-player-metadata-'))
   fs.rmSync(tempRoot, { recursive: true, force: true })
 }
 

@@ -13,7 +13,7 @@ export default function PlayerAnalysisStatus({
             <strong>{analysisJob?.stage || '视频理解'}</strong>
             <span>{analysisJob?.message || '正在分析当前视频'}</span>
           </div>
-          <button type="button" onClick={onCancelAnalysis}>取消</button>
+          <button type="button" onClick={onCancelAnalysis} disabled={analysisJob?.canCancel === false}>取消本次分析</button>
         </div>
       ) : null}
 

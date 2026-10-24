@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024" role="img" aria-label="视频画廊">
+  <title>视频画廊 Wallpaper Player</title>
+  <defs>
+    <linearGradient id="bg-3" x1="0.14" y1="0" x2="0.86" y2="1">
+      <stop offset="0" stop-color="#1c2b47"/>
+      <stop offset="0.5" stop-color="#0c1424"/>
+      <stop offset="1" stop-color="#05080e"/>
+    </linearGradient>
+    <linearGradient id="ac-3" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#3ddcee"/>
+      <stop offset="1" stop-color="#8b8ef8"/>
+    </linearGradient>
+    <radialGradient id="am-3" cx="0.26" cy="0.02" r="0.95">
+      <stop offset="0" stop-color="#2dd4ea" stop-opacity="0.30"/>
+      <stop offset="0.55" stop-color="#2dd4ea" stop-opacity="0.05"/>
+      <stop offset="1" stop-color="#2dd4ea" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="sh-3" x1="0" y1="0" x2="0.6" y2="1">
+      <stop offset="0" stop-color="#ffffff" stop-opacity="0.10"/>
+      <stop offset="0.5" stop-color="#ffffff" stop-opacity="0.015"/>
+      <stop offset="1" stop-color="#ffffff" stop-opacity="0"/>
+    </linearGradient>
+
+  </defs>
+
+  <rect x="24" y="24" width="976" height="976" rx="232" fill="url(#bg-3)"/>
+  <rect x="24" y="24" width="976" height="976" rx="232" fill="url(#am-3)"/>
+  <rect x="24" y="24" width="976" height="976" rx="232" fill="url(#sh-3)"/>
+  <rect x="38" y="38" width="948" height="948" rx="220" fill="none" stroke="#ffffff" stroke-opacity="0.10" stroke-width="12"/>
+  <rect x="186" y="264" width="652" height="432" rx="86" fill="#ffffff" fill-opacity="0.05" stroke="url(#ac-3)" stroke-width="30"/>
+  <path d="M622 428 L454 480 L454 592 L622 480 Z" fill="none"/>
+  <path d="M638 402 L638 558 L776 480 Z" fill="url(#ac-3)" stroke="url(#ac-3)" stroke-width="34" stroke-linejoin="round"/>
+  <rect x="186" y="758" width="222" height="20" rx="10" fill="url(#ac-3)"/>
+  <rect x="430" y="758" width="408" height="20" rx="10" fill="#ffffff" fill-opacity="0.12"/>
+
+</svg>

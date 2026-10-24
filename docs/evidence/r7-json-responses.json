@@ -1,0 +1,262 @@
+{
+  "date": "2026-10-15T10:37:04.173Z",
+  "phase": "R7 batch 7: bounded asynchronous JSON compression and HTTP output",
+  "environment": {
+    "platform": "win32",
+    "node": "v24.14.0",
+    "cpu": "AMD Ryzen 7 5800X 8-Core Processor             ",
+    "memoryGb": 31.921031951904297,
+    "electronTestArgs": [
+      "--in-process-gpu",
+      "--no-sandbox"
+    ],
+    "productionAndCiDefaultsChanged": false,
+    "notes": "Local Windows fixtures and isolated profiles. Checks may share host CPU; no physical phone or media decoder acceptance."
+  },
+  "sourceSha256": {
+    "main/remote/json-responses.js": "ddc2bf73dad214f119a66389d200198fe10945634424e04d4a3d416e42ffc06f",
+    "main/remote/http-utils.js": "c5c18a64b48d77e7eae803d84834de38d3180385f779d5e6900fd1755b76dc94",
+    "main/remote/server.js": "45efac2ccbc3dc78affb122f5b4f612f37395155ed18ef8491214c6dd0f2a1af",
+    "main/remote/identity.js": "e370641785bdea5182858a8da5df61a3a7e69427d169982130b3513d710e2feb",
+    "main/remote/index.js": "d151c570dd9a1d1fc770b9f1eb72ed225da9d4154449c70e081a482dd9c7fddf",
+    "main/settings.js": "42f3b5a00fcab73dfd42aad0a8d88f59f6c1b69c419e4adfdb6d46f5c0e78bde",
+    "main/remote/handlers/library.js": "823733318ba097126d16a72d50795612cd29b321cb8fb822aa347de298b8daa2",
+    "main/remote/handlers/info.js": "9fdbe071460ebcb3815dcd8fde259952f7782c9835d1b479cd6802342db7684f",
+    "main/remote/handlers/transcode.js": "4396d138b92abf0b6bf7ced033f6dcb12869f53c95b980ca90ee7b2aa72d12d8",
+    "main/remote/handlers/desktop.js": "2505822080fab8c3041fd4a6f7bc27d0f26e0c580da0d4755a32474882b4c480",
+    "main/remote/handlers/tags.js": "4956dd8457ca3bc0ffb5c0b7d60231390bbccf2099d67a72c9128e80be64c797",
+    "main/remote/handlers/media.js": "775ca261ea4841ef70a6e22f0cd481bdbf909c99d5b4bc84fe00a1de274094ea",
+    "main/plugins/registry.js": "2978eef43c6b338e31d2d0e60ec0e7a4cd860a679889469f00a9b23e245ac9c3",
+    "main/plugins/video-analysis/remote-handlers.js": "55bb813b86a0fc96bfa8e31bdb308529e43d28083ee49c852915cd52a8afb1ec",
+    "scripts/verify-json-responses.js": "e14a99f85854e030977800cc91fafc4b657355881f9638c399ca964a20bc366e",
+    "scripts/verify-remote-server-lifecycle.js": "4b3b5465534b08d14dd94dc755cb77cb4b4d9b4fb147c74b5096d1cacb6906e7",
+    "scripts/verify-plugin-registry.js": "144353200f0da61595156261bc348b7aa0fe30e18a3b0795dbc074054de69c46",
+    "scripts/verify-packaged-contracts.js": "fa63395a7097b444de95ddef5ef2c81643aaf11875d6c40320e658df2fb8c623",
+    "scripts/verify-analysis-interests.js": "70a43fa0524506b3cc39e9503a631e2924e78dad5f1f6a3e5ad7ff543ead3e6a",
+    "scripts/verify-remote-library-flow.js": "8e2938838f3c0f5fac1686c6509894213c02dc8b2cb71035b84978d9552bf8bc",
+    "scripts/verify-library-performance.js": "d4761999c972e2f7ab1ff3586d95e1cfd83e07fa6279d79b646ab761dfb11fdb",
+    "scripts/probe-desktop-library-startup.js": "219bb6fac3ffa70b47277f231367be15af3ad2e7f63081690e7df75506734203"
+  },
+  "performanceSourceSha256": {
+    "main/remote/json-responses.js": "5b2668d1f09755de1efe2d7a094faa79bf9d29459cf08d63a335fa19449b56d8",
+    "main/remote/http-utils.js": "c5c18a64b48d77e7eae803d84834de38d3180385f779d5e6900fd1755b76dc94",
+    "main/remote/server.js": "45efac2ccbc3dc78affb122f5b4f612f37395155ed18ef8491214c6dd0f2a1af",
+    "main/remote/identity.js": "e370641785bdea5182858a8da5df61a3a7e69427d169982130b3513d710e2feb",
+    "main/remote/index.js": "d151c570dd9a1d1fc770b9f1eb72ed225da9d4154449c70e081a482dd9c7fddf",
+    "main/settings.js": "42f3b5a00fcab73dfd42aad0a8d88f59f6c1b69c419e4adfdb6d46f5c0e78bde"
+  },
+  "performanceSourceDifference": {
+    "file": "main/remote/json-responses.js",
+    "detail": "Full library performance completed before the last failure-path edit. cancel now sends sanitized failure.status instead of error.status || failure.status. Final JSON/socket, server lifecycle, transcode interests, plugins and bridge checks were rerun after that edit.",
+    "changedFiles": [
+      "main/remote/json-responses.js"
+    ]
+  },
+  "limits": {
+    "processResponses": 32,
+    "serverResponses": 16,
+    "nativeGzip": 2,
+    "responseUtf8Bytes": 33554432,
+    "retainedBufferBudgetBytes": 134217728,
+    "compressedReservation": "2 * inputBytes + 65536",
+    "deadlineMs": 15000,
+    "writeChunkBytes": 65536,
+    "maximumChunksBeforeYield": 4,
+    "scope": "Budgets cover admitted encoded input/output buffers; they do not bound all business objects, temporary contract/stringify heap, OS socket buffers or process RSS."
+  },
+  "compressionAndLegacy": {
+    "operations": 8,
+    "bytes": 1983396,
+    "before": {
+      "firstTurnMs": 117.93170000000009,
+      "totalMs": 117.94659999999999
+    },
+    "after": {
+      "firstTurnMs": 45.497100000000046,
+      "totalMs": 105.54470000000015
+    },
+    "legacyItems": 10000,
+    "gzipBytes": 180442,
+    "preparation": [
+      {
+        "encoding": "identity",
+        "synchronousPrepareMs": 46.97550000000001
+      },
+      {
+        "encoding": "gzip",
+        "synchronousPrepareMs": 36.47259999999983
+      }
+    ],
+    "conditions": "Node production compressor/transport with controlled completing writable; prebuilt JSON excludes schema validation/serialization and network. Legacy equivalence separately uses actual HTTP and schema.",
+    "sampledAt": "2026-10-15T10:34:30.950Z",
+    "interpretation": "One sample of eight prebuilt JSON compressions. Synchronous baseline uses real gzipSync only in verifier; production sample uses bounded async service, UTF-8 buffers and a controlled completing writable. Separate legacy HTTP checks use real production contract validation and 10000 generated DTOs. Timings are not throughput or decoder results."
+  },
+  "libraryPerformance": {
+    "date": "2026-10-15T10:27:19.506Z",
+    "platform": "win32",
+    "node": "v24.14.0",
+    "cpu": "AMD Ryzen 7 5800X 8-Core Processor             ",
+    "memoryGb": 31.921031951904297,
+    "results": [
+      {
+        "size": 5000,
+        "fixture": "24-byte MP4 headers on local disk; real scanner/settings/HTTP; no decoder or native UI",
+        "coldScanMs": 3433.1492,
+        "firstQueryMs": 293.5499999999993,
+        "queryP95Ms": 12.876900000000205,
+        "searchP95Ms": 10.87249999999949,
+        "responseP95Bytes": 137497,
+        "revisionMs": 1.5191999999997279,
+        "eventLoopP95Ms": 15.384575,
+        "snapshotBuilds": 1,
+        "hotIndexedFirstPageMs": 2098.2938000000004,
+        "count": 5000
+      },
+      {
+        "size": 10000,
+        "fixture": "24-byte MP4 headers on local disk; real scanner/settings/HTTP; no decoder or native UI",
+        "coldScanMs": 7709.097599999999,
+        "firstQueryMs": 571.1538,
+        "queryP95Ms": 12.410800000001473,
+        "searchP95Ms": 11.719900000000052,
+        "responseP95Bytes": 137598,
+        "revisionMs": 1.4945000000006985,
+        "eventLoopP95Ms": 17.776639,
+        "snapshotBuilds": 1,
+        "hotIndexedFirstPageMs": 4498.4703,
+        "count": 10000,
+        "desktopWarmupMs": 1616.179400000001,
+        "desktopInteractiveMs": 1424.743300000002,
+        "desktopSamples": [
+          {
+            "desktopInteractiveMs": 1424.743300000002,
+            "firstPageCards": 100,
+            "filteredCards": 1,
+            "searchHandled": true,
+            "progressiveScan": true,
+            "phases": {
+              "mainRequiredMs": 266.1445,
+              "nativeReadyMs": 313.6898,
+              "windowCreatedMs": 442.81410000000005,
+              "documentLoadedMs": 643.9056,
+              "scanStartMs": 706.986,
+              "scanEndMs": 854.9943,
+              "scanCount": 131,
+              "firstCardsMs": 980.8807
+            }
+          },
+          {
+            "desktopInteractiveMs": 1336.9871999999887,
+            "firstPageCards": 100,
+            "filteredCards": 1,
+            "searchHandled": true,
+            "progressiveScan": true,
+            "phases": {
+              "mainRequiredMs": 257.29760000000005,
+              "nativeReadyMs": 299.6959,
+              "windowCreatedMs": 421.8802,
+              "documentLoadedMs": 612.5138,
+              "scanStartMs": 696.637,
+              "scanEndMs": 828.2193,
+              "scanCount": 131,
+              "firstCardsMs": 940.0169999999998
+            }
+          },
+          {
+            "desktopInteractiveMs": 1317.403099999996,
+            "firstPageCards": 100,
+            "filteredCards": 1,
+            "searchHandled": true,
+            "progressiveScan": true,
+            "phases": {
+              "mainRequiredMs": 253.21770000000004,
+              "nativeReadyMs": 296.8171,
+              "windowCreatedMs": 414.80449999999996,
+              "documentLoadedMs": 597.4685,
+              "scanStartMs": 654.1277,
+              "scanEndMs": 799.6084,
+              "scanCount": 131,
+              "firstCardsMs": 921.1391
+            }
+          }
+        ]
+      }
+    ],
+    "pending": [
+      "native phone first screen and scroll frames",
+      "playback/thumb contention and PSS",
+      "installed/portable Windows device matrix"
+    ]
+  },
+  "libraryInterpretation": {
+    "fixture": "5000/10000 real local files containing only 24-byte MP4 headers; real production scanner/settings/HTTP. No media decoding.",
+    "desktop": "Actual production React/preload/main in hidden Electron; first 100 cards and interactive search under progressive scan. Each scored sample had indexed a prefix of 131 files when first interactive; not a full-library cold-scan completion metric.",
+    "samples": "One separately reported warmup plus three scored starts. Verifier P95 of three starts is their maximum, not a long-run percentile.",
+    "budgetMs": 2000,
+    "largerColdWork": "coldScanMs and hotIndexedFirstPageMs are separate measurements and remain multiple seconds; neither is represented by the progressive desktop first-page timing.",
+    "historicalEvidence": [
+      "docs/evidence/r7-startup-budget-observation.json",
+      "docs/evidence/r7-initialization-responsiveness.json"
+    ]
+  },
+  "finalChecks": [
+    {
+      "command": "npm run verify:json-responses",
+      "exitCode": 0,
+      "scope": "Encoding/HEAD/length, bounded admission and leases, duplicate/error replacement, absolute deadline, actual paused 31 MiB socket, controlled partial-write scope change, real production authenticated HTTP with revoke/rebind/privacy/self-unpair, direct isolated credential-file edit before headers, real HTTP 10000 legacy DTO equivalence."
+    },
+    {
+      "command": "npm run verify:remote-server-lifecycle",
+      "exitCode": 0,
+      "scope": "Actual main remote manager waits for held native gzip callback; listener restart/stop and bounded request body lifecycle."
+    },
+    {
+      "command": "npm run verify:transcode-interests",
+      "exitCode": 0,
+      "scope": "Real authenticated HTTP and phone API; shared task interests, stale cancellation and output/cache ownership."
+    },
+    {
+      "command": "npm run verify:plugins",
+      "exitCode": 0
+    },
+    {
+      "command": "npm run verify:electron-api",
+      "exitCode": 0,
+      "methods": 127,
+      "channels": 115
+    },
+    {
+      "command": "git diff --check",
+      "exitCode": 0
+    }
+  ],
+  "earlierPhaseChecks": {
+    "result": "passed; completed before evidence finalization",
+    "coverage": [
+      "Desktop build and mobile typecheck",
+      "Remote API, mobile/remote pairing and remote settings",
+      "Real remote library completion and stream/codec assertions",
+      "Media-access privacy snapshot rebuild race and media pressure",
+      "Shared contract boundaries, old/new clients and generated contracts",
+      "Actual Electron/ASAR async gzip and gunzip with crypto/source gate",
+      "Plugin remote routes; analysis interests, request and UI lifecycle",
+      "Two-phone API correctness with controlled player",
+      "Privacy password checks",
+      "Actual Electron IPC source checks across 106 channels",
+      "Shutdown persistence"
+    ]
+  },
+  "authorizationSemantics": {
+    "capture": "Directory signature established at first JSON preparation, preserving a library snapshot rebuilt after a policy change.",
+    "headers": "Actual credential file reread before headers; isolated direct edit without app notification is tested.",
+    "continuation": "App authorization generation plus current policy signature checked between output chunks. Stable transmission avoids per-chunk credential-file reads. External credential edits after headers without app notifications are not guaranteed to interrupt an already-started response.",
+    "commits": "Accepted own-unpair may acknowledge its intentional revocation. Sent bytes cannot be recalled; completed mutations are not rolled back on response failure."
+  },
+  "pending": [
+    "Synchronous contract validation and JSON.stringify, including higher-scale heap/latency profiling",
+    "Remaining synchronous filesystem/path/credential reads and cold-start robustness",
+    "Further feature decomposition, typed entrypoints and complete desktop/mobile responsive/accessibility matrix",
+    "R6 real decoder and playback/query/thumbnail contention; physical-phone rotations, first frame and long-session PSS",
+    "R8 remaining dependency upgrades, cross-file crash recovery, installed updates/signing/TLS and native delivery"
+  ]
+}

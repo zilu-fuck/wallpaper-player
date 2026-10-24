@@ -5,6 +5,7 @@ const path = require('path')
 
 const projectRoot = path.resolve(__dirname, '..')
 const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'wallpaper-player-plugin-registry-'))
+const deadline = setTimeout(() => { console.error('plugin registry verification timed out'); process.exit(1) }, 30000)
 process.chdir(tempRoot)
 
 const { createPluginRegistry } = require(path.join(projectRoot, 'main', 'plugins', 'registry'))
@@ -230,16 +231,17 @@ async function main() {
 }
 
 async function invokeRoute(match) {
-  const req = {
+  const { EventEmitter } = require('events')
+  const req = Object.assign(new EventEmitter(), {
     method: 'GET',
     headers: {},
-    on() {},
     setEncoding() {}
-  }
-  const res = {
-    writeHead() {},
-    end() {}
-  }
+  })
+  const res = Object.assign(new EventEmitter(), {
+    writeHead() { this.headersSent = true },
+    end() { this.writableEnded = this.writableFinished = true; this.emit('finish') },
+    destroy() { this.destroyed = true; this.emit('close') }
+  })
   await match.route.handler(req, res, {
     params: match.params,
     url: new URL('http://127.0.0.1/declarative/no-args')
@@ -248,7 +250,10 @@ async function invokeRoute(match) {
 
 main()
   .finally(() => {
+    clearTimeout(deadline)
     process.chdir(projectRoot)
+    assert.strictEqual(path.dirname(path.resolve(tempRoot)), path.resolve(os.tmpdir()))
+    assert.ok(path.basename(tempRoot).startsWith('wallpaper-player-plugin-registry-'))
     fs.rmSync(tempRoot, { recursive: true, force: true })
   })
   .catch((error) => {

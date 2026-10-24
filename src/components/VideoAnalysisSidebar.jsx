@@ -199,7 +199,7 @@ export default function VideoAnalysisSidebar({
         <section className="analysis-task-section">
           <div className="analysis-task-section-head">
             <span>当前进度</span>
-            <button type="button" onClick={onCancelRunning}>取消</button>
+            <button type="button" onClick={onCancelRunning} disabled={!runningTasks.some(task => task.canCancel !== false)}>取消本次分析</button>
           </div>
           {runningTasks.map(task => (
             <TaskCard

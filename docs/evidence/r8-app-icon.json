@@ -1,0 +1,761 @@
+{
+  "date": "2026-10-23T11:57:28.816Z",
+  "requested": "svg图标怎么没用上",
+  "selection": "User explicitly selected option 2: gradient four-tile gallery",
+  "cause": "The previous Astra task reviewed interface action icons and omitted build/icon-candidates. Those candidate application SVGs had no production reference.",
+  "review": {
+    "agent": "/root/astra_svg_review",
+    "model": "gpt-6-astra",
+    "file": ".tmp/refactor-tests/r8-app-icon/astra-review.md",
+    "conclusion": "Keep the selected geometry/colors; generate independent ICO sizes and platform-safe adaptive layers"
+  },
+  "implementation": {
+    "master": "src/assets/app-icon.svg",
+    "unchangedCandidate": "build/icon-candidates/2-solid-gradient.svg",
+    "desktop": [
+      "window title mark",
+      "sidebar brand",
+      "startup mark",
+      "favicon",
+      "BrowserWindow PNG",
+      "Windows PE/installer/uninstaller configuration"
+    ],
+    "generator": "scripts/generate-app-icons.cjs",
+    "command": "npm run icons:generate",
+    "dependenciesAdded": false,
+    "mobile": "Opaque square 1024px icon; full gradient adaptive background; independent 0.78-scale foreground and monochrome layer",
+    "preview": ".tmp/refactor-tests/r8-app-icon/preview.png"
+  },
+  "windows": {
+    "passed": true,
+    "directory": "E:\\wallpaper播放器\\release\\windows-1.5.1-bd1dc541-a098-45a4-8bad-1c0571325fed",
+    "version": "1.5.1",
+    "productionSourceChanges": [
+      "src/assets/app-icon.svg",
+      "build/icon.ico",
+      "build/icon.png",
+      "src/components/WindowChrome.jsx",
+      "src/components/Sidebar.jsx",
+      "src/styles/window-chrome.css",
+      "src/styles/sidebar.css",
+      "index.html",
+      "main/window.js",
+      "package.json",
+      "mobile/app.json",
+      "mobile/assets"
+    ],
+    "qaWrapperAbsent": true,
+    "archive": {
+      "file": "E:\\wallpaper播放器\\release\\windows-1.5.1-bd1dc541-a098-45a4-8bad-1c0571325fed\\win-unpacked\\resources\\app.asar",
+      "bytes": 16497285,
+      "sha256": "0be77b50cd7d7fc7571263ab867707c62cf71faa20bd5191839ebec4f8d0f38d",
+      "sha512": "eBzkkNAG0nylgo1L0BczT2TogsyC0uvwes68NNLDIYy54z066sW6H2nICN7hm3y67iHJenKX4LrPbWF5qW8XOg=="
+    },
+    "embedded": [
+      "main/application/confirm.js",
+      "main/application/download-service.js",
+      "main/application/download-tasks.js",
+      "main/application/extract-mpv.ps1",
+      "main/application/library-service.js",
+      "main/application/media-mutation-paths.js",
+      "main/application/media-mutations.js",
+      "main/application/media-work-service.js",
+      "main/application/mpv-installer.js",
+      "main/application/mpv-version-cache.js",
+      "main/application/player-service.js",
+      "main/application/resource-scheduler.js",
+      "main/application/settings-broadcast.js",
+      "main/application/settings-json-worker.js",
+      "main/application/settings-json.js",
+      "main/application/settings-startup.js",
+      "main/application/transcode-service.js",
+      "main/constants.js",
+      "main/download-manager.js",
+      "main/download-xunlei.js",
+      "main/exec.js",
+      "main/index.js",
+      "main/ip-utils.js",
+      "main/ipc/app-dialogs.js",
+      "main/ipc/downloads.js",
+      "main/ipc/files.js",
+      "main/ipc/media-data.js",
+      "main/ipc/media.js",
+      "main/ipc/network-resource-service.js",
+      "main/ipc/network-resources.js",
+      "main/ipc/player.js",
+      "main/ipc/plugins.js",
+      "main/ipc/privacy.js",
+      "main/ipc/remote.js",
+      "main/ipc/settings.js",
+      "main/ipc/updater.js",
+      "main/ipc/window-shell.js",
+      "main/ipc-channels.js",
+      "main/ipc.js",
+      "main/media-pressure.js",
+      "main/mpv-host.js",
+      "main/mpv-integration.js",
+      "main/mpv.js",
+      "main/network-resource-parser.js",
+      "main/paths.js",
+      "main/plugins/builtin.js",
+      "main/plugins/capabilities.js",
+      "main/plugins/core-api.js",
+      "main/plugins/index.js",
+      "main/plugins/loader.js",
+      "main/plugins/manifest.js",
+      "main/plugins/official.js",
+      "main/plugins/registry.js",
+      "main/portable-user-data.js",
+      "main/process-lifecycle.js",
+      "main/rate-limiter.js",
+      "main/remote/handlers/desktop.js",
+      "main/remote/handlers/info.js",
+      "main/remote/handlers/library.js",
+      "main/remote/handlers/media.js",
+      "main/remote/handlers/network-resources.js",
+      "main/remote/handlers/tags.js",
+      "main/remote/handlers/transcode.js",
+      "main/remote/http-utils.js",
+      "main/remote/identity.js",
+      "main/remote/index.js",
+      "main/remote/json-responses.js",
+      "main/remote/media-mutations.js",
+      "main/remote/network.js",
+      "main/remote/request-lifecycle.js",
+      "main/remote/server.js",
+      "main/remote/streaming.js",
+      "main/remote/transcode-cache.js",
+      "main/remote/transcode.js",
+      "main/remote/video-index.js",
+      "main/repositories/settings-file.js",
+      "main/repositories/tag-state.js",
+      "main/repositories/user-media.js",
+      "main/scanner.js",
+      "main/security/ipc-sender.js",
+      "main/security/ipc.js",
+      "main/security/media-access.js",
+      "main/security/privacy-password.js",
+      "main/settings.js",
+      "main/thumbnail.js",
+      "main/updater.js",
+      "main/user-data.js",
+      "main/video-metadata.js",
+      "main/window.js",
+      "main/ytdlp-service.js",
+      "dist/assets/AISearchPanel-eAXcLDNP.js",
+      "dist/assets/app-icon-CdBj8JsL.svg",
+      "dist/assets/DownloadCenter-RNEWSPkh.js",
+      "dist/assets/index-BTxTob3t.css",
+      "dist/assets/index-DADU6KJA.js",
+      "dist/assets/NetworkResourceLibrary-DNjEJdja.js",
+      "dist/assets/Settings-DTYC7XkB.js",
+      "dist/assets/useDownloadStateObserver-BJIXaHSY.js",
+      "dist/assets/VideoAnalysisSidebar-DPCOd4Qs.js",
+      "dist/index.html",
+      "packages/contracts/dist/index.js",
+      "packages/contracts/dist/schema.js",
+      "packages/contracts/dist/settings-feed.js",
+      "packages/contracts/package.json",
+      "packages/domain/dist/index.js",
+      "packages/domain/package.json",
+      "build/icon.png",
+      "main.js",
+      "preload.js"
+    ],
+    "vendor": [
+      "vendor/aria2/aria2c.exe",
+      "vendor/aria2/AUTHORS",
+      "vendor/aria2/ChangeLog",
+      "vendor/aria2/COPYING",
+      "vendor/aria2/LICENSE.OpenSSL",
+      "vendor/aria2/NEWS",
+      "vendor/aria2/README.html",
+      "vendor/aria2/README.mingw",
+      "vendor/ffmpeg/bin/ffmpeg.exe",
+      "vendor/ffmpeg/bin/ffplay.exe",
+      "vendor/ffmpeg/bin/ffprobe.exe",
+      "vendor/ffmpeg/LICENSE",
+      "vendor/ffmpeg/presets/libvpx-1080p.ffpreset",
+      "vendor/ffmpeg/presets/libvpx-1080p50_60.ffpreset",
+      "vendor/ffmpeg/presets/libvpx-360p.ffpreset",
+      "vendor/ffmpeg/presets/libvpx-720p.ffpreset",
+      "vendor/ffmpeg/presets/libvpx-720p50_60.ffpreset",
+      "vendor/ffmpeg/README.txt",
+      "vendor/mpv/mpv-register.bat",
+      "vendor/mpv/mpv-unregister.bat",
+      "vendor/mpv/mpv.com",
+      "vendor/mpv/mpv.exe",
+      "vendor/mpv/vulkan-1.dll",
+      "vendor/yt-dlp/yt-dlp.exe"
+    ],
+    "assets": [
+      {
+        "file": "Wallpaper-Player-Setup-1.5.1.exe",
+        "role": "installer",
+        "bytes": 232517158,
+        "sha256": "a85600d5dc1c086ad057e9bed8a45514b2ab7b0dfd76ad7a8234c34752b10cc0",
+        "sha512": "tllTmF/il+qlaGT6LUAs6038K8LwmVvwsVDl/pY606riu5/+3uAsyZbsmQ5GzBPctMNiq7BH26s0GiMt98tsug==",
+        "bootstrapArch": "ia32",
+        "productVersion": "1.5.1",
+        "signing": {
+          "status": "NotSigned",
+          "certificateSha256": null
+        }
+      },
+      {
+        "file": "Wallpaper-Player-1.5.1.exe",
+        "role": "portable",
+        "bytes": 232072654,
+        "sha256": "ac6a2f44733eabe51384a6326400cdd0eca284d8196d8d80043140202323890f",
+        "sha512": "rvAXvkOyJkVQiF6tTInP9liTe1Hf1ArwbwtNVgyXnF8zJBZ/Hets9fRMB0BM8ufIhophJXQO25kfL0TTXTPbxw==",
+        "bootstrapArch": "ia32",
+        "productVersion": "1.5.1",
+        "signing": {
+          "status": "NotSigned",
+          "certificateSha256": null
+        }
+      },
+      {
+        "file": "Wallpaper-Player-Setup-1.5.1.exe.blockmap",
+        "role": "blockmap",
+        "bytes": 243118,
+        "sha256": "88c14ae292324c58ff0240e713967ff7b25896b3be1256bb44b3c29f275cd6fd",
+        "sha512": "kgaqFpf0cwoNdTg3MG+E6KqLtpyr+dI4zlVWVstyYnkgEnPUS0ZOV8ws8Eoxf/5MWuzspM8iUDSI/qmoRbQJvg=="
+      },
+      {
+        "file": "latest.yml",
+        "role": "desktop-update-metadata",
+        "bytes": 361,
+        "sha256": "3a84db3d38a0d08b5193c48663b84a4c4a08f62f25aad2607ec590cc45937223",
+        "sha512": "e6RZ3F4ckdPsmaEp5JtomdZ41Upr1/lQ9mCagnRhMcAIIMoxJGl4E6QgW0TjHj4l+VGXxrdj21q2mNZC1nMpyg=="
+      },
+      {
+        "file": "Wallpaper-Player-Plugin-video-analysis-1.0.0.zip",
+        "source": "plugins/Wallpaper-Player-Plugin-video-analysis-1.0.0.zip",
+        "role": "plugin",
+        "pluginId": "video-analysis",
+        "version": "1.0.0",
+        "bytes": 570218532,
+        "sha256": "365c2f5ccbec6afe7df5ce4b5c5df1699728cac113884abd48898d8209a5502a",
+        "sha512": "5W7hIMUaK+frnE+0/87KhyfC6BKbFTT2R3GgW+TCtG7Z037HNRooT/RVGrJTOMq5eDFEBHKhlSiVZQ9vMI838w=="
+      },
+      {
+        "file": "Wallpaper-Player-Plugin-ai-search-0.1.0.zip",
+        "source": "plugins/Wallpaper-Player-Plugin-ai-search-0.1.0.zip",
+        "role": "plugin",
+        "pluginId": "ai-search",
+        "version": "0.1.0",
+        "bytes": 2955069,
+        "sha256": "464e129ebb9a4731fff800c26c6e4c94ddbe33fbd1699486c166d9e112a97fc8",
+        "sha512": "rKd4RQyHFHEIADm+H3KQddNRMuu2UbSuiK4OK+hkfrp3JV36mLcSdLA0UNlAPW+7L5X1xi5kiTVNPmq1lDzOKw=="
+      },
+      {
+        "file": "Wallpaper-Player-Plugin-agent-bridge-0.1.0.zip",
+        "source": "plugins/Wallpaper-Player-Plugin-agent-bridge-0.1.0.zip",
+        "role": "plugin",
+        "pluginId": "agent-bridge",
+        "version": "0.1.0",
+        "bytes": 1093,
+        "sha256": "9f499408c282a144ffe411648d476fd4e36bd010c6e8974be3b9fd16460bed1a",
+        "sha512": "W5qWvlCSHQT8RlE31UF1e06dN3162tSZVhs7nqyFBhFLJdcN7Z8rE2WDw6ZMjQIygO89K/Xbuev/TJY+ImfSqg=="
+      }
+    ],
+    "originalData": 42,
+    "historicalArtifacts": 8,
+    "oldQaArtifactsPreserved": true,
+    "releasePublished": false,
+    "signatures": [
+      {
+        "file": "E:\\wallpaper播放器\\release\\windows-1.5.1-bd1dc541-a098-45a4-8bad-1c0571325fed\\Wallpaper-Player-Setup-1.5.1.exe",
+        "status": "NotSigned"
+      },
+      {
+        "file": "E:\\wallpaper播放器\\release\\windows-1.5.1-bd1dc541-a098-45a4-8bad-1c0571325fed\\Wallpaper-Player-1.5.1.exe",
+        "status": "NotSigned"
+      },
+      {
+        "file": "E:\\wallpaper播放器\\release\\windows-1.5.1-bd1dc541-a098-45a4-8bad-1c0571325fed\\win-unpacked\\Wallpaper Player.exe",
+        "status": "NotSigned"
+      }
+    ],
+    "actualPeIconResources": [
+      {
+        "file": "E:\\wallpaper播放器\\release\\windows-1.5.1-bd1dc541-a098-45a4-8bad-1c0571325fed\\Wallpaper-Player-Setup-1.5.1.exe",
+        "frames": [
+          {
+            "size": 16,
+            "sha256": "8b2fec5328c9764c9e56b84d76582e390581256ce6a2491fce2b6f73a8606980"
+          },
+          {
+            "size": 20,
+            "sha256": "f95bf2ce507ec1aa40133921957369e7f5b1c4dde1a50c003daa880946abdfc1"
+          },
+          {
+            "size": 24,
+            "sha256": "4a634fb2c647ade6bb8bcb0373d659964ce0519304c9ca83a8c15350d53b52e1"
+          },
+          {
+            "size": 32,
+            "sha256": "9252020f4421ee293b16abee59f0bb81d526254b2eb059479affd3a15bdb40c6"
+          },
+          {
+            "size": 40,
+            "sha256": "9b53964074b4bc639ea5e41984d287ea2b1a84d288e2179979de9081ac4fbdcc"
+          },
+          {
+            "size": 48,
+            "sha256": "0022ae04e4d64a6f8d1c6e91df6f3dd825171f62d1ffda81e7cbb7a3bdf9731c"
+          },
+          {
+            "size": 64,
+            "sha256": "2c7d010a044ae080f114fc65ce9c966493a070cdf249f4850d88ff4a4b5a44f6"
+          },
+          {
+            "size": 128,
+            "sha256": "d8ee268842770de3b08f55732e3ab90186aeb2a3c49a8cb8675c1fddd74da95e"
+          },
+          {
+            "size": 256,
+            "sha256": "a4e5984edd8076ea85861e59327e8d7f22095b30370c54078c72dfd0ce69c2d8"
+          }
+        ]
+      },
+      {
+        "file": "E:\\wallpaper播放器\\release\\windows-1.5.1-bd1dc541-a098-45a4-8bad-1c0571325fed\\Wallpaper-Player-1.5.1.exe",
+        "frames": [
+          {
+            "size": 16,
+            "sha256": "8b2fec5328c9764c9e56b84d76582e390581256ce6a2491fce2b6f73a8606980"
+          },
+          {
+            "size": 20,
+            "sha256": "f95bf2ce507ec1aa40133921957369e7f5b1c4dde1a50c003daa880946abdfc1"
+          },
+          {
+            "size": 24,
+            "sha256": "4a634fb2c647ade6bb8bcb0373d659964ce0519304c9ca83a8c15350d53b52e1"
+          },
+          {
+            "size": 32,
+            "sha256": "9252020f4421ee293b16abee59f0bb81d526254b2eb059479affd3a15bdb40c6"
+          },
+          {
+            "size": 40,
+            "sha256": "9b53964074b4bc639ea5e41984d287ea2b1a84d288e2179979de9081ac4fbdcc"
+          },
+          {
+            "size": 48,
+            "sha256": "0022ae04e4d64a6f8d1c6e91df6f3dd825171f62d1ffda81e7cbb7a3bdf9731c"
+          },
+          {
+            "size": 64,
+            "sha256": "2c7d010a044ae080f114fc65ce9c966493a070cdf249f4850d88ff4a4b5a44f6"
+          },
+          {
+            "size": 128,
+            "sha256": "d8ee268842770de3b08f55732e3ab90186aeb2a3c49a8cb8675c1fddd74da95e"
+          },
+          {
+            "size": 256,
+            "sha256": "a4e5984edd8076ea85861e59327e8d7f22095b30370c54078c72dfd0ce69c2d8"
+          }
+        ]
+      },
+      {
+        "file": "E:\\wallpaper播放器\\release\\windows-1.5.1-bd1dc541-a098-45a4-8bad-1c0571325fed\\win-unpacked\\Wallpaper Player.exe",
+        "frames": [
+          {
+            "size": 16,
+            "sha256": "8b2fec5328c9764c9e56b84d76582e390581256ce6a2491fce2b6f73a8606980"
+          },
+          {
+            "size": 20,
+            "sha256": "f95bf2ce507ec1aa40133921957369e7f5b1c4dde1a50c003daa880946abdfc1"
+          },
+          {
+            "size": 24,
+            "sha256": "4a634fb2c647ade6bb8bcb0373d659964ce0519304c9ca83a8c15350d53b52e1"
+          },
+          {
+            "size": 32,
+            "sha256": "9252020f4421ee293b16abee59f0bb81d526254b2eb059479affd3a15bdb40c6"
+          },
+          {
+            "size": 40,
+            "sha256": "9b53964074b4bc639ea5e41984d287ea2b1a84d288e2179979de9081ac4fbdcc"
+          },
+          {
+            "size": 48,
+            "sha256": "0022ae04e4d64a6f8d1c6e91df6f3dd825171f62d1ffda81e7cbb7a3bdf9731c"
+          },
+          {
+            "size": 64,
+            "sha256": "2c7d010a044ae080f114fc65ce9c966493a070cdf249f4850d88ff4a4b5a44f6"
+          },
+          {
+            "size": 128,
+            "sha256": "d8ee268842770de3b08f55732e3ab90186aeb2a3c49a8cb8675c1fddd74da95e"
+          },
+          {
+            "size": 256,
+            "sha256": "a4e5984edd8076ea85861e59327e8d7f22095b30370c54078c72dfd0ce69c2d8"
+          }
+        ]
+      }
+    ],
+    "sizes": [
+      {
+        "size": 16,
+        "sha256": "8b2fec5328c9764c9e56b84d76582e390581256ce6a2491fce2b6f73a8606980"
+      },
+      {
+        "size": 20,
+        "sha256": "f95bf2ce507ec1aa40133921957369e7f5b1c4dde1a50c003daa880946abdfc1"
+      },
+      {
+        "size": 24,
+        "sha256": "4a634fb2c647ade6bb8bcb0373d659964ce0519304c9ca83a8c15350d53b52e1"
+      },
+      {
+        "size": 32,
+        "sha256": "9252020f4421ee293b16abee59f0bb81d526254b2eb059479affd3a15bdb40c6"
+      },
+      {
+        "size": 40,
+        "sha256": "9b53964074b4bc639ea5e41984d287ea2b1a84d288e2179979de9081ac4fbdcc"
+      },
+      {
+        "size": 48,
+        "sha256": "0022ae04e4d64a6f8d1c6e91df6f3dd825171f62d1ffda81e7cbb7a3bdf9731c"
+      },
+      {
+        "size": 64,
+        "sha256": "2c7d010a044ae080f114fc65ce9c966493a070cdf249f4850d88ff4a4b5a44f6"
+      },
+      {
+        "size": 128,
+        "sha256": "d8ee268842770de3b08f55732e3ab90186aeb2a3c49a8cb8675c1fddd74da95e"
+      },
+      {
+        "size": 256,
+        "sha256": "a4e5984edd8076ea85861e59327e8d7f22095b30370c54078c72dfd0ce69c2d8"
+      }
+    ],
+    "actualPackagedInterface": [
+      {
+        "selector": ".window-chrome-mark img",
+        "loaded": true,
+        "width": 20,
+        "height": 20,
+        "naturalWidth": 1024
+      },
+      {
+        "selector": ".sidebar-title img",
+        "loaded": true,
+        "width": 24,
+        "height": 24,
+        "naturalWidth": 1024
+      }
+    ],
+    "screenshot": ".tmp/refactor-tests/r8-app-icon/fixed-app-icons-dark.png",
+    "nativeEngineCases": 6,
+    "html5EngineCases": 6,
+    "defaultOcclusion": true,
+    "sourceCommit": null,
+    "published": false,
+    "productionInstallationReplaced": false
+  },
+  "mobile": {
+    "date": "2026-10-23T11:54:29.723Z",
+    "passed": true,
+    "appId": "com.wallpaperplayer.mobile.qa.camera",
+    "apkSha256": "50f2b52360280d153980a698542e919a1947cd8440d242e2aa0ad96d466877e7",
+    "productionIdentityUnchanged": true,
+    "nativeXml": "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<adaptive-icon xmlns:android=\"http://schemas.android.com/apk/res/android\">\n    <background android:drawable=\"@mipmap/ic_launcher_background\"/>\n    <foreground android:drawable=\"@mipmap/ic_launcher_foreground\"/>\n    <monochrome android:drawable=\"@mipmap/ic_launcher_monochrome\"/>\n</adaptive-icon>",
+    "screenshot": "E:\\wallpaper播放器\\.tmp\\refactor-tests\\r8-app-icon\\android-installed-icon.png",
+    "badging": "android-apk-badging.txt",
+    "scope": "Actual installed independent QA APK icon in Android system app details. Production application ID/version/signing are not replaced. iOS only has current Hermes export; native iOS not accepted.",
+    "iconAssets": [
+      {
+        "file": "E:\\wallpaper播放器\\mobile\\assets\\icon.png",
+        "sha256": "59402b424e9425684c446b8ef556c1b9b4332d500a8dbf2cce1b35aedf28630d",
+        "pixels": 1024
+      },
+      {
+        "file": "E:\\wallpaper播放器\\mobile\\assets\\adaptive-background.png",
+        "sha256": "6fb6099b05322b1a94b6199d3adcefaf0b21da2705e808c49f9e027866f7b604",
+        "pixels": 1024
+      },
+      {
+        "file": "E:\\wallpaper播放器\\mobile\\assets\\adaptive-foreground.png",
+        "sha256": "e96dc06c30da38b70031cefd3b61b50e1be3012d6cd024a49ae161cbf9d4011a",
+        "pixels": 1024
+      },
+      {
+        "file": "E:\\wallpaper播放器\\mobile\\assets\\adaptive-monochrome.png",
+        "sha256": "c671fd6849c2e7eb9f461e2259e74ca34b249ac40e8f8e5258061f05191234ea",
+        "pixels": 1024
+      }
+    ]
+  },
+  "checks": {
+    "layout": "24 actual Electron viewport/theme/zoom + 6 substituted-decoder layouts",
+    "splash": "11 clock cases and 3 actual Electron startup timing cases",
+    "rawLayout": "layout.log",
+    "rawSplash": "splash.log",
+    "camera": "docs/evidence/r7-camera-permission.json",
+    "protectedDataFiles": 42,
+    "historicalPublicArtifacts": 8,
+    "earlierQaAndFormalArtifactsPreserved": true
+  },
+  "openItems": [
+    "Formal Android identity/signing migration",
+    "Physical Android 60-minute PSS/FPS/real LAN and native iOS",
+    "Full desktop resource acceptance: see r6-player-visibility.json; interrupted idle run is not a full pass",
+    "Historical isolated theme anomaly, other Windows/display and production upgrade environments"
+  ],
+  "sourceHashes": [
+    {
+      "file": "src/assets/app-icon.svg",
+      "sha256": "eaa426754c16cc83fc1ccd5e55fc539522018ee6cdb08a142dd849887670e206"
+    },
+    {
+      "file": "scripts/generate-app-icons.cjs",
+      "sha256": "c9969e874830101b66b01e87e4e2998a373345ab7b7537863f75cf3b3f51129e"
+    },
+    {
+      "file": "build/icon.ico",
+      "sha256": "ef2463a2cd72b084c9f23616cd1b2063976a9cd93c70a9b93ee5b953b91ce7e6"
+    },
+    {
+      "file": "build/icon.png",
+      "sha256": "a4e5984edd8076ea85861e59327e8d7f22095b30370c54078c72dfd0ce69c2d8"
+    },
+    {
+      "file": "src/components/WindowChrome.jsx",
+      "sha256": "348e63d3644736310c3ca4f1b2347e2107cc449ecc3702e9978313738004c763"
+    },
+    {
+      "file": "src/components/Sidebar.jsx",
+      "sha256": "ea422b72ab9c55edb712c9b73626ce3a2fd4d23e3ce00b49c6f968adcea06e57"
+    },
+    {
+      "file": "src/styles/window-chrome.css",
+      "sha256": "b6c50067e571a6ba34cdd25c6979396ce4239a6f5a75f7cf6c9208a26a053235"
+    },
+    {
+      "file": "src/styles/sidebar.css",
+      "sha256": "6840f238d62c3d06cbb946a563bf1aab9799c7c793df78410abdf5ef24b34d27"
+    },
+    {
+      "file": "index.html",
+      "sha256": "c5eda38ba27e53abbd5127204201ce97fda6e91adbccecba19c606709edbc3d3"
+    },
+    {
+      "file": "main/window.js",
+      "sha256": "cc2cf9861a796c8c7d1309cfcc6bf08bbaff1baa17d6be4129813a662d2e0ed7"
+    },
+    {
+      "file": "package.json",
+      "sha256": "fc81bf8e27ca099a642f96c7c09f40bc0cb63ffa274da5c97fe398cb1d1ba183"
+    },
+    {
+      "file": "package-lock.json",
+      "sha256": "7366f3a5de4b9fbbafdea8a1febbc35828fa788fe006635b87727d559f4d149a"
+    },
+    {
+      "file": "mobile/app.json",
+      "sha256": "695eef89308bbe5249ad21c69102ff658ea569417fc091ec4f882943e2874d98"
+    },
+    {
+      "file": "mobile/assets/icon.png",
+      "sha256": "59402b424e9425684c446b8ef556c1b9b4332d500a8dbf2cce1b35aedf28630d"
+    },
+    {
+      "file": "mobile/assets/adaptive-background.png",
+      "sha256": "6fb6099b05322b1a94b6199d3adcefaf0b21da2705e808c49f9e027866f7b604"
+    },
+    {
+      "file": "mobile/assets/adaptive-foreground.png",
+      "sha256": "e96dc06c30da38b70031cefd3b61b50e1be3012d6cd024a49ae161cbf9d4011a"
+    },
+    {
+      "file": "mobile/assets/adaptive-monochrome.png",
+      "sha256": "c671fd6849c2e7eb9f461e2259e74ca34b249ac40e8f8e5258061f05191234ea"
+    }
+  ],
+  "raw": [
+    {
+      "file": ".tmp/refactor-tests/r8-app-icon/android-apk-badging.txt",
+      "sha256": "c24a23a77643b11a79a2f5016180b34f4b63fcecd9069a7cc0173dd131481665"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-app-icon/android-icon-result.json",
+      "sha256": "b32896059826212ef1198bb9c6ac6f972608dc3b5d8b063625817d3fa2618f49"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-app-icon/android-icon.log",
+      "sha256": "113d9ef0129642bbad691fbdaccc8ea1749012303e442172b4e3333abac0a615"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-app-icon/android-installed-icon.cjs",
+      "sha256": "6f8c0b83c810f7ee58820aeeba6cf7cc903254ede3a96aa80bd6030bf38f5995"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-app-icon/android-installed-icon.png",
+      "sha256": "2e48da087a40b72c5213c0ef475c6b9fe375d3a46a5e33b555e731cd2ee46f39"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-app-icon/android-installed-icon.xml",
+      "sha256": "9cfa145b549942037c5b8bf9260b19a0cd7d01507308d31c355a45d10902066f"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-app-icon/astra-review.md",
+      "sha256": "02044145ab91aef409ce051777682758166aef1c99e8ae0179a4b89ce88715c1"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-app-icon/baseline.json",
+      "sha256": "486a59c3ee1f54d9e7295f76b0da6f9cc17aabf44ceea85422ddff4236dfa8b5"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-app-icon/build-command.log",
+      "sha256": "24ab2cf2fb542c4bf3cffdb62c284aef42f4dc12623de958fff028a36d3a35e9"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-app-icon/build-ui.log",
+      "sha256": "1ad355e6f8df9931113f2eb2a67d97a9727f0d62f9d943afbeb8672398753303"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-app-icon/build-verification.json",
+      "sha256": "74112074a22f2cfd1bf82fca10de923b35239600d2965be6a8cad8fafd60340c"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-app-icon/build-verification.log",
+      "sha256": "cc6b6d1ec16ce1b6bea8cb98f13ff4594a136d8de953b689d33c25b8331c3ec6"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-app-icon/build.cjs",
+      "sha256": "5ee7483ff60ae2010423f9ae375fa9877dedc79a961b23cc9a691b1d6d5ea0b7"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-app-icon/build.json",
+      "sha256": "dc58497c359061a34d5f73bac8851eb3026c1b630abb15def8d7245ee60d1821"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-app-icon/builder.live.log",
+      "sha256": "98db062cfba2d514e70b0fbed06f112c180d8a8634337bdf43d734b1eb3abe1f"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-app-icon/builder.live.log.process.json",
+      "sha256": "7073070b16ed50a12f2528dd539b4f6dca30fdd1a09a76d8bfa57fa04d6151be"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-app-icon/finalize.cjs",
+      "sha256": "e69ef9667ffd4484b83c43a9c718786119e1093ed6b33bad8c7c0e1826e31345"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-app-icon/fixed-2-app-icons-dark.png",
+      "sha256": "42cd5a18eef65f2f695d713cc29103467a0035590dfa8b00f3f2c12c2d36999e"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-app-icon/fixed-2-process.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-app-icon/fixed-2-progress.json",
+      "sha256": "e66e3178322b00de433a404a43838f7bdeaf970269c99f8ecea4f27975bed961"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-app-icon/fixed-2-result.json",
+      "sha256": "531b8011df75d5b149fa727284676d8c5906f5abacb1f87d0dec6a63164660dd"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-app-icon/fixed-2-started.json",
+      "sha256": "0c717cb931d1b2d76a4a04f6c43783cb78960b3828c72dabac0a09ca4f28ee81"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-app-icon/fixed-app-icons-dark.png",
+      "sha256": "7b9dafae853c63499c53d05f7bdee4c9639fc69fbe1d00a17010257c69c916c1"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-app-icon/fixed-process.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-app-icon/fixed-progress.json",
+      "sha256": "76986617f9d0f23daafa28a02c8a555b0dd388edd8f4766cdd615c5e4fc1b28d"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-app-icon/fixed-result.json",
+      "sha256": "0c590d0772bc02fce3199013aed8bf39fdd0224ebebbf964bf505c1a8c70950f"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-app-icon/fixed-started.json",
+      "sha256": "7ec9c0ccc70ac188e98b3e369d734ca067514de36f66d54d183883a30e453aef"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-app-icon/icon-before.ico",
+      "sha256": "dcb20a157519c38478bb023c20805ff09660324ba08fbb939bc4b95009e24c77"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-app-icon/icons-verification.json",
+      "sha256": "344b93a29fd2230545c0678a76e6d866f74ef8efeb4fff1937b57e0414ed21e7"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-app-icon/icons-verification.log",
+      "sha256": "a34c48a55df2ed92adf189cd2d58db602059368e8c6c85e5cf5b190280d6c0e9"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-app-icon/layout.log",
+      "sha256": "c8f15a1603def90bc1eb519f8ce5d1e5070fcdc6d3b4c0ff4ea9b95624662b5b"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-app-icon/native-check.cjs",
+      "sha256": "4644a793a42b10346e6103030dea7787425d4256e6a2239d4d446bf872987527"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-app-icon/native-html5.log",
+      "sha256": "335ae9acf76092ee919019c1c1bc3832687995a941f8695c56da02df431ac5b0"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-app-icon/native-mpv.log",
+      "sha256": "5624bed6d27cf86e64a3b49a26414ef264e4a11e98f2bf01c135d35bc4062c39"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-app-icon/preview.cjs",
+      "sha256": "29f940796499bbd8d4e0838e7f81bbc95bc824c06952e0daef27b44a1cf6439b"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-app-icon/preview.html",
+      "sha256": "6bd8c789f586a1393c41f51e0a4a37fd5157e76a1b0bfb14608e92559cc4888b"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-app-icon/preview.png",
+      "sha256": "a9191497ba8bb9d89f4dcd07e1da84ce434d582ba38ae701459ec16e40924c66"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-app-icon/setup.json",
+      "sha256": "c1b9d64ac2bda151f1ce5823dc6295e637f46a072bb3c876064eaddb96d48899"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-app-icon/signatures.json",
+      "sha256": "81b7ef3bfe0966acfae099d8f85bb5c184ea59f4958103d7da9e1dcd973852d7"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-app-icon/source-inputs.json",
+      "sha256": "0be1e642b4ef9b190299cbec69e26cc42aa667f2b2c977681dad01c367276273"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-app-icon/splash.log",
+      "sha256": "cd6ae37be8b88db2ed2bb028ab81c111bd305569e376fd7cee2192582f37956d"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-app-icon/verify-build.cjs",
+      "sha256": "2bfeb43965df4997edd0d37a2844d933d70877e2d986b673acaee5309a3cfdb8"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-app-icon/verify-icons.cjs",
+      "sha256": "36fdc3a49063b9c3ffafe232d701c648e9533453127acd4a65203000c6b2bcff"
+    }
+  ]
+}

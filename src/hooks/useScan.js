@@ -1,4 +1,5 @@
 import { useState, useRef, useCallback } from 'react'
+import { scanDirectory } from '../api/media'
 
 // 扫描目录
 export function useScan({ setCurrentDir, setLoading }) {
@@ -26,7 +27,7 @@ export function useScan({ setCurrentDir, setLoading }) {
     setScanError('')
     setScanErrorDir('')
     try {
-      const result = await window.electronAPI.scanDirectory(dirPath, force)
+      const result = await scanDirectory(dirPath, force)
       if (requestId !== scanRequestRef.current) return
       if (result.error) {
         console.error('扫描失败:', result.error)
@@ -39,7 +40,7 @@ export function useScan({ setCurrentDir, setLoading }) {
 
       setVideos(result.videos)
       setCurrentDir(dirPath)
-      setScanning(false)
+      setScanning(Boolean(result.refreshing))
       setLoading(false) // 扫描完成后立即显示画廊
 
       if (result.refreshing) {
@@ -57,9 +58,10 @@ export function useScan({ setCurrentDir, setLoading }) {
       setScanError(err?.message || '扫描目录失败')
       setScanErrorDir(dirPath)
       setLoading(false)
+      setScanning(false)
     }
     if (requestId !== scanRequestRef.current) return
-    setScanning(false)
+    // A validated indexed prefix is usable while the remaining library refreshes.
   }
 
   return {

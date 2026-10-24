@@ -9,37 +9,38 @@
    ───────────────────────────────────────────────────────────── */
 
 :root {
-  /* ─── 深空底色（亮度阶梯） ─── */
-  --bg-primary: #05070d;
-  --bg-secondary: #090d17;
-  --bg-surface: #0d1322;
-  --bg-elevated: #121a2e;
-  --bg-hover: rgba(255, 255, 255, 0.045);
+  /* ─── 深空底色（中性偏冷，避免发紫） ─── */
+  --bg-primary: #070a11;
+  --bg-secondary: #0a0f18;
+  --bg-surface: #0e1522;
+  --bg-elevated: #141d2d;
+  --bg-hover: rgba(255, 255, 255, 0.05);
 
   /* ─── 玻璃面板 ─── */
-  --glass-bg: rgba(255, 255, 255, 0.04);
-  --glass-bg-strong: rgba(255, 255, 255, 0.065);
-  --glass-bg-soft: rgba(255, 255, 255, 0.025);
-  --glass-border: rgba(255, 255, 255, 0.08);
-  --glass-border-strong: rgba(255, 255, 255, 0.14);
-  --glass-highlight: rgba(255, 255, 255, 0.16);
-  --glass-blur: 22px;
-  --glass-saturate: 1.35;
+  --glass-bg: rgba(255, 255, 255, 0.045);
+  --glass-bg-strong: rgba(255, 255, 255, 0.075);
+  --glass-bg-soft: rgba(255, 255, 255, 0.028);
+  --glass-border: rgba(255, 255, 255, 0.085);
+  --glass-border-strong: rgba(255, 255, 255, 0.16);
+  --glass-highlight: rgba(255, 255, 255, 0.18);
+  --glass-blur: 20px;
+  --glass-saturate: 1.3;
 
   /* ─── 文字 ─── */
-  --text-primary: #f1f5fb;
-  --text-secondary: #a7b6cb;
-  --text-muted: #6a7c94;
+  --text-primary: #f3f6fb;
+  --text-secondary: #aebcd0;
+  --text-muted: #93a2b8;
 
   /* ─── 科技光（青 → 靛） ─── */
-  --accent: #22d3ee;
-  --accent-2: #818cf8;
-  --accent-grad: linear-gradient(135deg, #22d3ee 0%, #818cf8 100%);
-  --accent-hover: #4de3f7;
-  --accent-glow: rgba(34, 211, 238, 0.32);
-  --accent-glow-2: rgba(129, 140, 248, 0.28);
-  --accent-soft: rgba(34, 211, 238, 0.12);
-  --accent-soft-2: rgba(129, 140, 248, 0.14);
+  --accent: #2dd4ea;
+  --accent-2: #8b8ef8;
+  --accent-grad: linear-gradient(135deg, #2dd4ea 0%, #8b8ef8 100%);
+  --accent-hover: #5ce4f5;
+  --accent-glow: rgba(45, 212, 234, 0.3);
+  --accent-glow-2: rgba(139, 142, 248, 0.26);
+  --accent-soft: rgba(45, 212, 234, 0.11);
+  --accent-soft-2: rgba(139, 142, 248, 0.13);
+  --accent-contrast: #04141a;
 
   /* ─── 语义色 ─── */
   --success: #34d399;
@@ -84,44 +85,56 @@
   --sidebar-collapsed-width: 54px;
   --right-dock-open-width: 400px;
 
+  /* ─── 兼容别名：早期样式里引用过但从未定义的令牌 ─── */
+  --border-glow: rgba(45, 212, 234, 0.32);
+  --bg-glass: var(--glass-bg);
+  --font-mono: 'Cascadia Code', 'Fira Code', 'JetBrains Mono', Consolas, ui-monospace, monospace;
+  --shadow-light: rgba(0, 0, 0, 0.28);
+
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Microsoft YaHei',
     'PingFang SC', 'Noto Sans SC', sans-serif;
   color-scheme: dark;
+  -webkit-tap-highlight-color: transparent;
 }
 
 /* ─── 浅色主题（新体系浅色，后续可继续打磨） ─── */
 .app.theme-light {
   --bg-primary: #eef2f8;
-  --bg-secondary: #f7f9fd;
+  --bg-secondary: #f6f9fd;
   --bg-surface: #ffffff;
   --bg-elevated: #ffffff;
-  --bg-hover: rgba(15, 23, 42, 0.045);
+  --bg-hover: rgba(15, 23, 42, 0.05);
 
-  --glass-bg: rgba(255, 255, 255, 0.66);
-  --glass-bg-strong: rgba(255, 255, 255, 0.8);
-  --glass-bg-soft: rgba(255, 255, 255, 0.45);
-  --glass-border: rgba(15, 23, 42, 0.08);
-  --glass-border-strong: rgba(15, 23, 42, 0.16);
-  --glass-highlight: rgba(255, 255, 255, 0.9);
+  --glass-bg: rgba(255, 255, 255, 0.7);
+  --glass-bg-strong: rgba(255, 255, 255, 0.86);
+  --glass-bg-soft: rgba(255, 255, 255, 0.5);
+  --glass-border: rgba(15, 23, 42, 0.09);
+  --glass-border-strong: rgba(15, 23, 42, 0.18);
+  --glass-highlight: rgba(255, 255, 255, 0.92);
 
-  --text-primary: #101828;
-  --text-secondary: #475467;
-  --text-muted: #98a2b3;
+  --text-primary: #111a2b;
+  --text-secondary: #46566b;
+  --text-muted: #5d6c80;
 
   --accent: #0891b2;
   --accent-2: #6366f1;
   --accent-hover: #0ea5c4;
-  --accent-glow: rgba(8, 145, 178, 0.28);
-  --accent-glow-2: rgba(99, 102, 241, 0.24);
+  --accent-glow: rgba(8, 145, 178, 0.24);
+  --accent-glow-2: rgba(99, 102, 241, 0.2);
   --accent-soft: rgba(8, 145, 178, 0.1);
   --accent-soft-2: rgba(99, 102, 241, 0.1);
+  --accent-contrast: #ffffff;
+  /* 浅色主题主按钮底色更深（白字 5.1:1），渐变端点同步压深 */
+  --accent-grad: linear-gradient(135deg, #0e7490 0%, #4f46e5 100%);
 
   --border: rgba(15, 23, 42, 0.08);
   --border-strong: rgba(15, 23, 42, 0.14);
 
   --shadow-sm: 0 1px 2px rgba(16, 24, 40, 0.06);
-  --shadow-md: 0 12px 32px rgba(16, 24, 40, 0.08);
-  --shadow-lg: 0 24px 60px rgba(16, 24, 40, 0.12);
+  --shadow-md: 0 12px 32px rgba(16, 24, 40, 0.09);
+  --shadow-lg: 0 24px 60px rgba(16, 24, 40, 0.13);
+  --border-glow: rgba(8, 145, 178, 0.28);
+  --shadow-light: rgba(16, 24, 40, 0.11);
   color-scheme: light;
 }
 
@@ -147,7 +160,8 @@ body {
   text-rendering: optimizeLegibility;
 }
 
-/* ─── 深空环境背景：光晕 + 细网格 ─── */
+/* ─── 深空环境背景：光晕 + 细网格 ───
+   只画一层（合成为单个伪元素），避免多层大面积径向渐变拖慢玻璃面板合成。 */
 .app {
   height: 100%;
   display: flex;
@@ -164,24 +178,39 @@ body {
   inset: 0;
   z-index: -1;
   background:
-    radial-gradient(42% 38% at 12% -8%, rgba(34, 211, 238, 0.09), transparent 62%),
-    radial-gradient(46% 40% at 96% 4%, rgba(129, 140, 248, 0.08), transparent 60%),
-    radial-gradient(52% 46% at 50% 110%, rgba(34, 211, 238, 0.05), transparent 64%),
+    radial-gradient(46% 40% at 10% -10%, rgba(45, 212, 234, 0.10), transparent 64%),
+    radial-gradient(50% 44% at 98% 2%, rgba(139, 142, 248, 0.085), transparent 62%),
+    radial-gradient(60% 50% at 50% 112%, rgba(45, 212, 234, 0.05), transparent 68%),
     var(--bg-primary);
   pointer-events: none;
 }
 
+/* 网格纹理：与光晕分开，但仍然是静态层，只有一次性绘制成本。 */
 .app::after {
   content: '';
   position: absolute;
   inset: 0;
   z-index: -1;
   background-image:
-    linear-gradient(rgba(148, 163, 184, 0.035) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(148, 163, 184, 0.035) 1px, transparent 1px);
-  background-size: 42px 42px;
-  mask-image: radial-gradient(70% 60% at 50% 20%, rgba(0, 0, 0, 0.7), transparent 100%);
+    linear-gradient(rgba(148, 163, 184, 0.032) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(148, 163, 184, 0.032) 1px, transparent 1px);
+  background-size: 44px 44px;
+  mask-image: radial-gradient(72% 62% at 50% 16%, rgba(0, 0, 0, 0.75), transparent 100%);
+  -webkit-mask-image: radial-gradient(72% 62% at 50% 16%, rgba(0, 0, 0, 0.75), transparent 100%);
   pointer-events: none;
+}
+
+.app.theme-light::before {
+  background:
+    radial-gradient(46% 40% at 10% -10%, rgba(8, 145, 178, 0.10), transparent 64%),
+    radial-gradient(50% 44% at 98% 2%, rgba(99, 102, 241, 0.08), transparent 62%),
+    var(--bg-primary);
+}
+
+.app.theme-light::after {
+  background-image:
+    linear-gradient(rgba(15, 23, 42, 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(15, 23, 42, 0.035) 1px, transparent 1px);
 }
 
 /* ─── 滚动条（纤细 + 玻璃） ─── */
@@ -221,6 +250,7 @@ body {
 }
 
 /* ─── 加载 ─── */
+/* 运行中的加载态：与开屏同一套视觉语言（光晕 + 细环 + 字距），避免「闪一下换一套皮」。 */
 .app-loading {
   height: 100%;
   display: flex;
@@ -228,19 +258,30 @@ body {
   align-items: center;
   justify-content: center;
   gap: 18px;
-  color: var(--text-secondary);
-  background: var(--bg-primary);
+  color: var(--text-muted);
+  font-size: 13px;
+  letter-spacing: 0.06em;
+  background:
+    radial-gradient(46% 40% at 12% -8%, rgba(45, 212, 234, 0.09), transparent 62%),
+    radial-gradient(48% 42% at 88% 2%, rgba(139, 142, 248, 0.07), transparent 60%),
+    var(--bg-primary);
+}
+
+.app-loading h2 {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-primary);
 }
 
 .loading-spinner {
-  width: 44px;
-  height: 44px;
-  border: 2px solid rgba(148, 163, 184, 0.16);
+  width: 40px;
+  height: 40px;
+  border: 2px solid rgba(148, 163, 184, 0.14);
   border-top-color: var(--accent);
   border-right-color: var(--accent-2);
   border-radius: 50%;
-  animation: spin 0.9s var(--ease-out) infinite;
-  box-shadow: 0 0 24px var(--accent-glow);
+  animation: spin 0.85s linear infinite;
+  box-shadow: 0 0 22px var(--accent-glow);
 }
 
 .lazy-panel-fallback {
@@ -276,6 +317,17 @@ body {
   to { transform: rotate(360deg); }
 }
 
+/* 顶栏刷新按钮：扫描时让图标真的转起来，代替一串文字提示 */
+.btn-icon[disabled] svg.spin,
+.btn-icon svg.spin {
+  animation: spin 0.9s linear infinite;
+  transform-origin: 50% 50%;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .btn-icon svg.spin { animation: none; opacity: 0.6; }
+}
+
 /* ─── Skeleton ─── */
 .skeleton {
   background: linear-gradient(90deg, var(--glass-bg-soft) 25%, var(--glass-bg-strong) 50%, var(--glass-bg-soft) 75%);
@@ -296,30 +348,30 @@ body {
   align-items: center;
   gap: 14px;
   padding: 0 22px;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.055), rgba(255, 255, 255, 0.02));
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.018));
   backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
   -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
   border-bottom: 1px solid var(--glass-border);
   flex-shrink: 0;
-  -webkit-app-region: drag;
   position: relative;
   z-index: 10;
 }
 
+.app.theme-light .header {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.86), rgba(255, 255, 255, 0.62));
+}
+
+/* 顶栏底缘：只在中间一小段留一点光，避免整条金属高光感 */
 .header::after {
   content: '';
   position: absolute;
-  left: 0;
-  right: 0;
+  left: 18%;
+  right: 18%;
   bottom: 0;
   height: 1px;
-  background: linear-gradient(90deg, transparent, var(--accent-glow), transparent);
+  background: linear-gradient(90deg, transparent, var(--accent-glow) 50%, transparent);
   opacity: 0.5;
   pointer-events: none;
-}
-
-.header > * {
-  -webkit-app-region: no-drag;
 }
 
 .header-left {
@@ -590,7 +642,7 @@ body {
 
 .btn-primary {
   background: var(--accent-grad);
-  color: #04121a;
+  color: var(--accent-contrast);
   font-weight: 600;
   box-shadow: 0 4px 18px var(--accent-glow), inset 0 1px 0 rgba(255, 255, 255, 0.35);
   border: 1px solid rgba(255, 255, 255, 0.16);
@@ -599,7 +651,7 @@ body {
 .btn-primary:hover {
   filter: brightness(1.1);
   transform: translateY(-1px);
-  box-shadow: 0 8px 26px var(--accent-glow), 0 0 0 1px rgba(34, 211, 238, 0.3);
+  box-shadow: 0 8px 26px var(--accent-glow), 0 0 0 1px rgba(45, 212, 234, 0.3);
 }
 
 .btn-primary:active {
@@ -649,12 +701,12 @@ body {
 
 .btn-sm.btn-primary {
   background: var(--accent-grad);
-  color: #04121a;
+  color: var(--accent-contrast);
   border-color: rgba(255, 255, 255, 0.16);
 }
 
 .btn-sm.btn-primary:hover {
-  color: #04121a;
+  color: var(--accent-contrast);
   filter: brightness(1.1);
 }
 
@@ -782,19 +834,42 @@ body.download-dialog-open .main-content {
   min-height: 0;
 }
 
+.initialization-notice {
+  flex-shrink: 0;
+  margin: 12px 20px;
+  padding: 10px 14px;
+  max-width: calc(100% - 40px);
+  border: 1px solid var(--glass-border);
+  border-radius: 12px;
+  background: var(--glass-bg-strong);
+  color: var(--text-primary);
+}
+.initialization-notice > div { display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center; }
+.initialization-notice p { flex: 1; min-width: 180px; overflow-wrap: anywhere; font-size: 13px; }
+.initialization-notice [role=alert] { color: var(--danger, #ff6b6b); }
+
 /* ─── v2 浮动玻璃工作区 ─── */
 .main-workspace {
-  padding: 14px 66px 14px 14px;
+  padding: 14px 64px 14px 14px;
   position: relative;
 }
 
+/* 工作区主体：不再是「又一层模糊」，而是在已经画好的氛围上压一块更深的玻璃板。
+   少一层 backdrop-filter，滚动长列表时合成开销显著下降。 */
 .main-content {
   border: 1px solid var(--glass-border);
-  border-radius: 20px;
-  background: var(--glass-bg);
-  backdrop-filter: blur(14px) saturate(var(--glass-saturate));
-  -webkit-backdrop-filter: blur(14px) saturate(var(--glass-saturate));
+  border-radius: var(--radius-lg);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.035), rgba(255, 255, 255, 0.012)),
+    color-mix(in srgb, var(--bg-primary) 62%, transparent);
   box-shadow: inset 0 1px 0 var(--glass-highlight), var(--shadow-md);
+}
+
+.app.theme-light .main-content {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.94), rgba(255, 255, 255, 0.82)),
+    var(--bg-secondary);
+  box-shadow: inset 0 1px 0 #fff, var(--shadow-md);
 }
 
 /* 滚动条让出圆角区域，避免 thumb 滚到顶/底时突出圆角 */

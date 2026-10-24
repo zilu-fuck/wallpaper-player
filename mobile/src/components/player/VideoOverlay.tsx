@@ -1,4 +1,5 @@
-import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native'
+import { useCallback, useState } from 'react'
+import { ActivityIndicator, Pressable, StyleSheet, Text, View, useWindowDimensions } from 'react-native'
 import { ArrowLeft, Play } from 'lucide-react-native'
 import { colors } from '../../theme'
 import type { VideoItem } from '../../types'
@@ -20,6 +21,7 @@ type Props = {
   networkResource?: boolean
   status: 'loading' | 'ready' | 'buffering' | 'error'
   error: string
+  progressMessage?: string
   isPlaying: boolean
   currentTime: number
   duration: number
@@ -46,7 +48,7 @@ type Props = {
   onDesktopPlay: () => void
   onMore: () => void
   onFullscreen: () => void
-  onControlsInteract: () => void
+  onControlsInteract: (holding?: boolean) => void
   onTranscode: () => void
   onCancelTranscode: () => void
   onErrorDetails: () => void
@@ -60,6 +62,7 @@ export function VideoOverlay({
   networkResource = false,
   status,
   error,
+  progressMessage,
   isPlaying,
   currentTime,
   duration,
@@ -91,8 +94,11 @@ export function VideoOverlay({
   onCancelTranscode,
   onErrorDetails
 }: Props) {
-  const infoBottom = safeAreaInsets.bottom + (controlsVisible ? 88 : 50)
-  const actionsBottom = safeAreaInsets.bottom + (controlsVisible ? 104 : 64)
+  const [progressHeight, setProgressHeight] = useState(80)
+  const dimensions = useWindowDimensions()
+  const measureProgress = useCallback((height: number) => { if (height > 0) setProgressHeight(height) }, [])
+  const infoBottom = safeAreaInsets.bottom + 7 + progressHeight + 12
+  const actionsBottom = infoBottom + 12
   const progressBottom = safeAreaInsets.bottom + 7
 
   return (
@@ -158,12 +164,20 @@ export function VideoOverlay({
         </View>
       ) : null}
 
+      {progressMessage ? (
+        <View style={[styles.networkHint, { left: safeAreaInsets.left + 18,
+          right: safeAreaInsets.right + 18, top: safeAreaInsets.top + (networkSlow ? 102 : 66) }]} pointerEvents="none">
+          <Text accessibilityLiveRegion="polite" style={styles.networkHintText}>{progressMessage}</Text>
+        </View>
+      ) : null}
+
       {!landscapeMode ? (
         <VideoActionBar
           favorite={favorite}
           analysisLabel={analysisLabel}
           analysisActive={analysisActive}
           networkResource={networkResource}
+          compact={(dimensions.fontScale || 1) >= 1.5 || dimensions.height - safeAreaInsets.top - safeAreaInsets.bottom < 560}
           bottomOffset={actionsBottom}
           rightOffset={safeAreaInsets.right + 12}
           onFavorite={onFavorite}
@@ -191,7 +205,7 @@ export function VideoOverlay({
           bottom: progressBottom,
           left: safeAreaInsets.left + 12,
           right: safeAreaInsets.right + 12
-        }]} pointerEvents="box-none">
+        }]} pointerEvents="box-none" onLayout={event => measureProgress(event.nativeEvent.layout.height)}>
           <PlaybackProgress
             compact
             currentTime={currentTime}
@@ -208,20 +222,14 @@ export function VideoOverlay({
         currentTime={currentTime}
         duration={duration}
         fullscreenMode={landscapeMode}
-        favorite={favorite}
-        networkResource={networkResource}
         bottomOffset={safeAreaInsets.bottom + 7}
         safeAreaInsets={safeAreaInsets}
         onTogglePlayback={onTogglePlayback}
         onSeek={onSeek}
-        onFavorite={onFavorite}
-        onTags={onTags}
-        onAnalysis={onAnalysis}
-        onCache={onCache}
-        onDesktopPlay={onDesktopPlay}
         onMore={onMore}
         onFullscreen={onFullscreen}
         onInteract={onControlsInteract}
+        onProgressHeight={measureProgress}
       />
     </View>
   )
@@ -237,14 +245,14 @@ const styles = StyleSheet.create({
   },
   topOverlay: {
     position: 'absolute',
-    minHeight: 44,
+    minHeight: 48,
     flexDirection: 'row',
     alignItems: 'center'
   },
   backButton: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
+    width: 48,
+    height: 48,
+    borderRadius: 24,
     backgroundColor: 'rgba(0,0,0,0.38)',
     alignItems: 'center',
     justifyContent: 'center'

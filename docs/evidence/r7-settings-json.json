@@ -1,0 +1,1303 @@
+{
+  "date": "2026-10-19T06:55:02.614Z",
+  "stage": "R7 batch 15: reusable settings JSON snapshots and owned worker serialization",
+  "environment": {
+    "node": "24.14.0",
+    "v8": "13.6.233.17-node.41",
+    "platform": "win32",
+    "arch": "x64",
+    "osRelease": "10.0.26300",
+    "cpuModel": "AMD Ryzen 7 5800X 8-Core Processor             ",
+    "installedElectron": "35.7.5"
+  },
+  "sourceDigests": {
+    "main/settings.js": "833f61931bf8cd91ab0d655cff46677c1f2c735de62edbf9e75ad7310568200a",
+    "main/application/settings-json.js": "11b71e0f311c4b7c7bc6130bfe5ef0f6b79e02ccc1ed1ff3cc1cf7a6d3b6de62",
+    "main/application/settings-json-worker.js": "1afd2e1be0e24b36275c03ea4a074290c2cc0e2b103bdb09995448d59e0a9e50",
+    "main/application/media-mutations.js": "6d85a44305cd3b1c9ef700b3b57eb6d6cf29b49f9601041e1f2fea31e12c6cf7",
+    "main/remote/media-mutations.js": "76ea043d52a84d980b1b0ff683553cd304da1aa21c806c7d165b54beda11b2aa",
+    "main/index.js": "be93b5746f79b9a1e807e6f2b638d1ce36af41178360bc797dba27595646e330",
+    "scripts/verify-settings-json-cost.js": "bfb6c1834306da5a48fa550fae7c3b7b0c252ac4e0d96557f0aa730f90db303d",
+    "scripts/verify-settings-json-lifecycle.js": "cbc49b3db54f96012a2045be3571129c96a0a53dad824a12f57e8545d925dcf5",
+    "scripts/verify-packaged-contracts.js": "e14fbd9845f2b147f71f5bac5245e523c834b9993c3efbb2c61aca048092d019",
+    "scripts/verify-media-mutation-paths.js": "d8223c2b79326779d270ba77ba2d64a3ee4a1581001424a8bfdd16dd8e8b8835",
+    "scripts/verify-settings-patch-lifecycle.js": "1e3ccc31852d131e08a565fa0689b9f3c5803ca61682f5fbde7746ddf28354dd",
+    "scripts/verify-shutdown-persistence.js": "d05959e0d03ff7d137ee64a08a66bf86dcd2c55b471a37d376feef58af0d79b1",
+    "package.json": "05528ed39c68030e9fa6ce3a65aa213f855458bc3f1fa246246e3544405532b4",
+    ".github/workflows/ci.yml": "c3127982d490a5a3f1421c0fba0caf0a7b1a6505823d93934bc13aa9e09a62ab",
+    "docs/refactor-progress.md": "75480cef3c4ab5c2534127c009786fd49ee6e39c93214d0f9e3f4a7db92335d9",
+    "docs/desktop-mobile-review-and-refactor-plan.md": "0febbd15b1571df7aa267a88b873dfe0e5ed7bef6f795ca3440a27893cbf9d4b",
+    "docs/protocol-contracts.md": "2e6d07c390f9c1ea349927b1c0e7e0001a8a76e73470de1c17ddb16428211e6c"
+  },
+  "inputArtifacts": {
+    "initialBaseline": {
+      "file": ".tmp/refactor-tests/settings-json-cost-baseline.json",
+      "sha256": "0f618ba761788812cec66d774727b35bea0ed0c3a71a527bb1feda9bb788edb5"
+    },
+    "finalSeries": {
+      "file": ".tmp/refactor-tests/settings-json-series-final.json",
+      "sha256": "cfb567bf44994c4ee39ac3833538dd86df2f95a086282f82ebe8d9eb32d5e653"
+    },
+    "earlierParallelObservation": {
+      "file": ".tmp/refactor-tests/settings-json-under-parallel-checks.json",
+      "sha256": "f210b9b3c736cfdce4edf10567f217f9cbebf6870ef8e6ed9b0f7f778a90396b"
+    },
+    "finalCommandObservation": {
+      "file": ".tmp/refactor-tests/settings-json-cost-after.json",
+      "sha256": "1fe57e45d30969a5c67ad090be8b2eb70c37f59fcc5fa6781956bdffa6189ccb"
+    },
+    "lifecycle": {
+      "file": ".tmp/refactor-tests/settings-json-lifecycle.json",
+      "sha256": "86bc3224394a1f99c93327db518239164be1fafc34838b5d21a06f4e770fb953"
+    },
+    "patchLifecycle": {
+      "file": ".tmp/refactor-tests/settings-patch-lifecycle.json",
+      "sha256": "d813f289161e1536f324f391c0266326d7aa6ff6ea93b3d52a28256dd9a11383"
+    },
+    "largeMediaDiagnostic": {
+      "file": ".tmp/refactor-tests/media-mutation-paths-large.json",
+      "sha256": "849be045e5d011cf2783bb6dabd304cc232610b0be2574be01067f82294b3129"
+    },
+    "beforePathRebase": {
+      "file": ".tmp/refactor-tests/settings-json-before-path-rebase.json",
+      "sha256": "f210b9b3c736cfdce4edf10567f217f9cbebf6870ef8e6ed9b0f7f778a90396b"
+    },
+    "pathRebaseFailure": {
+      "file": ".tmp/refactor-tests/settings-json-path-rebase-reproduction.json",
+      "sha256": "cad902322280b10271ef4bd2ce813ee529e3faf8e4b11c58ac81f771e6e63dd2"
+    }
+  },
+  "capturedBaseline": {
+    "file": ".tmp\\refactor-tests\\settings-json-cost-u3tkj9\\settings-at-start.cjs",
+    "sha256": "a404d37e56329dc8a874ffd79c47ea32bd34ea96b6bedf544a7a91e491ab5052",
+    "productionSourceReplaced": false
+  },
+  "summary": {
+    "baseline": {
+      "operations": [
+        {
+          "name": "favorite patch",
+          "elapsedMedianMs": 56.61019999999999,
+          "elapsedRangeMs": [
+            56.1867,
+            62.26180000000002
+          ],
+          "largestObservedHeartbeatGapMs": 40.9299,
+          "mainFullStateStringifies": [
+            5,
+            5,
+            5
+          ],
+          "mainFullStateParses": [
+            4,
+            4,
+            4
+          ],
+          "workerMessages": [
+            0,
+            0,
+            0
+          ],
+          "fullSeeds": [
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "name": "theme patch",
+          "elapsedMedianMs": 55.74300000000002,
+          "elapsedRangeMs": [
+            53.98510000000002,
+            57.54999999999998
+          ],
+          "largestObservedHeartbeatGapMs": 34.55339999999998,
+          "mainFullStateStringifies": [
+            5,
+            5,
+            5
+          ],
+          "mainFullStateParses": [
+            4,
+            4,
+            4
+          ],
+          "workerMessages": [
+            0,
+            0,
+            0
+          ],
+          "fullSeeds": [
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "name": "whole tag map patch",
+          "elapsedMedianMs": 70.0195,
+          "elapsedRangeMs": [
+            69.31549999999999,
+            71.8911
+          ],
+          "largestObservedHeartbeatGapMs": 33.00959999999998,
+          "mainFullStateStringifies": [
+            5,
+            5,
+            5
+          ],
+          "mainFullStateParses": [
+            4,
+            4,
+            4
+          ],
+          "workerMessages": [
+            0,
+            0,
+            0
+          ],
+          "fullSeeds": [
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "name": "read-only snapshot",
+          "elapsedMedianMs": 19.1318,
+          "elapsedRangeMs": [
+            19.0077,
+            19.834599999999966
+          ],
+          "largestObservedHeartbeatGapMs": 19.804899999999975,
+          "mainFullStateStringifies": [
+            2,
+            2,
+            2
+          ],
+          "mainFullStateParses": [
+            2,
+            2,
+            2
+          ],
+          "workerMessages": [
+            0,
+            0,
+            0
+          ],
+          "fullSeeds": [
+            0,
+            0,
+            0
+          ]
+        }
+      ],
+      "memory": {
+        "beforeOperationsMedianRssBytes": 84467712,
+        "afterOperationsMedianRssBytes": 110940160
+      }
+    },
+    "current": {
+      "operations": [
+        {
+          "name": "favorite patch",
+          "elapsedMedianMs": 38.39070000000001,
+          "elapsedRangeMs": [
+            38.032700000000006,
+            43.58160000000001
+          ],
+          "largestObservedHeartbeatGapMs": 18.128899999999987,
+          "mainFullStateStringifies": [
+            0,
+            0,
+            0
+          ],
+          "mainFullStateParses": [
+            2,
+            2,
+            2
+          ],
+          "workerMessages": [
+            1,
+            1,
+            1
+          ],
+          "fullSeeds": [
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "name": "theme patch",
+          "elapsedMedianMs": 36.37289999999999,
+          "elapsedRangeMs": [
+            36.00810000000001,
+            37.11960000000002
+          ],
+          "largestObservedHeartbeatGapMs": 14.682799999999986,
+          "mainFullStateStringifies": [
+            0,
+            0,
+            0
+          ],
+          "mainFullStateParses": [
+            2,
+            2,
+            2
+          ],
+          "workerMessages": [
+            1,
+            1,
+            1
+          ],
+          "fullSeeds": [
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "name": "whole tag map patch",
+          "elapsedMedianMs": 71.41890000000001,
+          "elapsedRangeMs": [
+            70.42070000000001,
+            71.63839999999999
+          ],
+          "largestObservedHeartbeatGapMs": 19.02170000000001,
+          "mainFullStateStringifies": [
+            0,
+            0,
+            0
+          ],
+          "mainFullStateParses": [
+            2,
+            2,
+            2
+          ],
+          "workerMessages": [
+            1,
+            1,
+            1
+          ],
+          "fullSeeds": [
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "name": "read-only snapshot",
+          "elapsedMedianMs": 19.430999999999983,
+          "elapsedRangeMs": [
+            19.1096,
+            19.438199999999995
+          ],
+          "largestObservedHeartbeatGapMs": 19.156299999999987,
+          "mainFullStateStringifies": [
+            1,
+            1,
+            1
+          ],
+          "mainFullStateParses": [
+            2,
+            2,
+            2
+          ],
+          "workerMessages": [
+            0,
+            0,
+            0
+          ],
+          "fullSeeds": [
+            0,
+            0,
+            0
+          ]
+        }
+      ],
+      "memory": {
+        "beforeOperationsMedianRssBytes": 102457344,
+        "afterOperationsMedianRssBytes": 147816448
+      }
+    }
+  },
+  "observations": {
+    "initialBaseline": {
+      "date": "2026-10-18T15:56:21.652Z",
+      "fixture": ".tmp\\refactor-tests\\settings-json-cost-u3tkj9",
+      "baseline": true,
+      "sourceSha256": "a404d37e56329dc8a874ffd79c47ea32bd34ea96b6bedf544a7a91e491ab5052",
+      "tagEntries": 10000,
+      "results": [
+        {
+          "name": "favorite patch",
+          "milliseconds": 89.45310000000003,
+          "maxHeartbeatGapMs": 44.96100000000001,
+          "fullStateStringifies": 5,
+          "synchronousRealpaths": 0,
+          "unrelatedSectionNormalizations": 0
+        },
+        {
+          "name": "theme patch",
+          "milliseconds": 68.23520000000002,
+          "maxHeartbeatGapMs": 43.079499999999996,
+          "fullStateStringifies": 5,
+          "synchronousRealpaths": 0,
+          "unrelatedSectionNormalizations": 0
+        },
+        {
+          "name": "whole tag map patch",
+          "milliseconds": 77.9194,
+          "maxHeartbeatGapMs": 34.81420000000003,
+          "fullStateStringifies": 5,
+          "synchronousRealpaths": 0,
+          "unrelatedSectionNormalizations": 0
+        },
+        {
+          "name": "read-only snapshot",
+          "milliseconds": 23.364100000000008,
+          "maxHeartbeatGapMs": 23.332300000000032,
+          "fullStateStringifies": 2,
+          "synchronousRealpaths": 0,
+          "unrelatedSectionNormalizations": 0
+        }
+      ],
+      "conditions": "Production settings repository, one local directory, warmed 10000 generated tags, one listener and actual atomic writes. JSON stringify counts instrument the main thread only; worker serialization is separate. Individual observations, not P95, cold-start or native acceptance."
+    },
+    "finalSeries": {
+      "date": "2026-10-19T06:47:53.822Z",
+      "conditions": "Three alternating SHA-verified captured-baseline/current processes on final runtime source. No other verification deliberately ran concurrently. All six samples retained; medians and observed heartbeat maxima are not population P95.",
+      "samples": [
+        {
+          "date": "2026-10-19T06:47:49.399Z",
+          "fixture": ".tmp\\refactor-tests\\settings-json-cost-yTH5eR",
+          "baseline": true,
+          "sourceSha256": "a404d37e56329dc8a874ffd79c47ea32bd34ea96b6bedf544a7a91e491ab5052",
+          "sourceDigests": {
+            "main/settings.js": "a404d37e56329dc8a874ffd79c47ea32bd34ea96b6bedf544a7a91e491ab5052"
+          },
+          "tagEntries": 10000,
+          "results": [
+            {
+              "name": "favorite patch",
+              "milliseconds": 62.26180000000002,
+              "maxHeartbeatGapMs": 40.9299,
+              "fullStateStringifies": 5,
+              "fullStateParses": 4,
+              "synchronousRealpaths": 0,
+              "unrelatedSectionNormalizations": 0,
+              "workerMessages": 0,
+              "workerSeeds": 0
+            },
+            {
+              "name": "theme patch",
+              "milliseconds": 57.54999999999998,
+              "maxHeartbeatGapMs": 34.55339999999998,
+              "fullStateStringifies": 5,
+              "fullStateParses": 4,
+              "synchronousRealpaths": 0,
+              "unrelatedSectionNormalizations": 0,
+              "workerMessages": 0,
+              "workerSeeds": 0
+            },
+            {
+              "name": "whole tag map patch",
+              "milliseconds": 69.31549999999999,
+              "maxHeartbeatGapMs": 30.625099999999975,
+              "fullStateStringifies": 5,
+              "fullStateParses": 4,
+              "synchronousRealpaths": 0,
+              "unrelatedSectionNormalizations": 0,
+              "workerMessages": 0,
+              "workerSeeds": 0
+            },
+            {
+              "name": "read-only snapshot",
+              "milliseconds": 19.1318,
+              "maxHeartbeatGapMs": 19.099199999999996,
+              "fullStateStringifies": 2,
+              "fullStateParses": 2,
+              "synchronousRealpaths": 0,
+              "unrelatedSectionNormalizations": 0,
+              "workerMessages": 0,
+              "workerSeeds": 0
+            }
+          ],
+          "memory": {
+            "beforeSetup": {
+              "rss": 40067072,
+              "heapTotal": 7942144,
+              "heapUsed": 5566992,
+              "external": 2175129,
+              "arrayBuffers": 55413
+            },
+            "beforeOperations": {
+              "rss": 84373504,
+              "heapTotal": 59506688,
+              "heapUsed": 27102568,
+              "external": 4067546,
+              "arrayBuffers": 1942600
+            },
+            "afterOperations": {
+              "rss": 111370240,
+              "heapTotal": 105799680,
+              "heapUsed": 41709024,
+              "external": 4067614,
+              "arrayBuffers": 1943668
+            }
+          },
+          "baselineMode": "SHA-verified settings module captured before this batch; current dependency modules; production source is not replaced.",
+          "conditions": "Production settings repository, one local directory, warmed 10000 generated tags, one no-op listener and actual atomic writes. JSON stringify/parse counts instrument the main thread only; worker serialization is separate. RSS is a process observation including threads, not peak memory or mobile PSS. Individual observations exclude actual renderer/IPC preparation and are not P95, cold-start or native acceptance."
+        },
+        {
+          "date": "2026-10-19T06:47:50.263Z",
+          "fixture": ".tmp\\refactor-tests\\settings-json-cost-lEMB7K",
+          "baseline": false,
+          "sourceSha256": "833f61931bf8cd91ab0d655cff46677c1f2c735de62edbf9e75ad7310568200a",
+          "sourceDigests": {
+            "main/settings.js": "833f61931bf8cd91ab0d655cff46677c1f2c735de62edbf9e75ad7310568200a",
+            "main/application/settings-json.js": "11b71e0f311c4b7c7bc6130bfe5ef0f6b79e02ccc1ed1ff3cc1cf7a6d3b6de62",
+            "main/application/settings-json-worker.js": "1afd2e1be0e24b36275c03ea4a074290c2cc0e2b103bdb09995448d59e0a9e50"
+          },
+          "tagEntries": 10000,
+          "results": [
+            {
+              "name": "favorite patch",
+              "milliseconds": 43.58160000000001,
+              "maxHeartbeatGapMs": 12.005400000000009,
+              "fullStateStringifies": 0,
+              "fullStateParses": 2,
+              "synchronousRealpaths": 0,
+              "unrelatedSectionNormalizations": 0,
+              "workerMessages": 1,
+              "workerSeeds": 0
+            },
+            {
+              "name": "theme patch",
+              "milliseconds": 37.11960000000002,
+              "maxHeartbeatGapMs": 14.625599999999991,
+              "fullStateStringifies": 0,
+              "fullStateParses": 2,
+              "synchronousRealpaths": 0,
+              "unrelatedSectionNormalizations": 0,
+              "workerMessages": 1,
+              "workerSeeds": 0
+            },
+            {
+              "name": "whole tag map patch",
+              "milliseconds": 70.42070000000001,
+              "maxHeartbeatGapMs": 17.974800000000016,
+              "fullStateStringifies": 0,
+              "fullStateParses": 2,
+              "synchronousRealpaths": 0,
+              "unrelatedSectionNormalizations": 0,
+              "workerMessages": 1,
+              "workerSeeds": 0
+            },
+            {
+              "name": "read-only snapshot",
+              "milliseconds": 19.1096,
+              "maxHeartbeatGapMs": 18.831899999999962,
+              "fullStateStringifies": 1,
+              "fullStateParses": 2,
+              "synchronousRealpaths": 0,
+              "unrelatedSectionNormalizations": 0,
+              "workerMessages": 0,
+              "workerSeeds": 0
+            }
+          ],
+          "memory": {
+            "beforeSetup": {
+              "rss": 39649280,
+              "heapTotal": 7942144,
+              "heapUsed": 5553280,
+              "external": 2120344,
+              "arrayBuffers": 58396
+            },
+            "beforeOperations": {
+              "rss": 102637568,
+              "heapTotal": 36880384,
+              "heapUsed": 23218592,
+              "external": 4012761,
+              "arrayBuffers": 67952
+            },
+            "afterOperations": {
+              "rss": 148283392,
+              "heapTotal": 99307520,
+              "heapUsed": 34488544,
+              "external": 4015729,
+              "arrayBuffers": 70920
+            }
+          },
+          "conditions": "Production settings repository, one local directory, warmed 10000 generated tags, one no-op listener and actual atomic writes. JSON stringify/parse counts instrument the main thread only; worker serialization is separate. RSS is a process observation including threads, not peak memory or mobile PSS. Individual observations exclude actual renderer/IPC preparation and are not P95, cold-start or native acceptance."
+        },
+        {
+          "date": "2026-10-19T06:47:51.121Z",
+          "fixture": ".tmp\\refactor-tests\\settings-json-cost-AwnKFP",
+          "baseline": true,
+          "sourceSha256": "a404d37e56329dc8a874ffd79c47ea32bd34ea96b6bedf544a7a91e491ab5052",
+          "sourceDigests": {
+            "main/settings.js": "a404d37e56329dc8a874ffd79c47ea32bd34ea96b6bedf544a7a91e491ab5052"
+          },
+          "tagEntries": 10000,
+          "results": [
+            {
+              "name": "favorite patch",
+              "milliseconds": 56.61019999999999,
+              "maxHeartbeatGapMs": 34.541799999999995,
+              "fullStateStringifies": 5,
+              "fullStateParses": 4,
+              "synchronousRealpaths": 0,
+              "unrelatedSectionNormalizations": 0,
+              "workerMessages": 0,
+              "workerSeeds": 0
+            },
+            {
+              "name": "theme patch",
+              "milliseconds": 55.74300000000002,
+              "maxHeartbeatGapMs": 33.28019999999998,
+              "fullStateStringifies": 5,
+              "fullStateParses": 4,
+              "synchronousRealpaths": 0,
+              "unrelatedSectionNormalizations": 0,
+              "workerMessages": 0,
+              "workerSeeds": 0
+            },
+            {
+              "name": "whole tag map patch",
+              "milliseconds": 71.8911,
+              "maxHeartbeatGapMs": 33.00959999999998,
+              "fullStateStringifies": 5,
+              "fullStateParses": 4,
+              "synchronousRealpaths": 0,
+              "unrelatedSectionNormalizations": 0,
+              "workerMessages": 0,
+              "workerSeeds": 0
+            },
+            {
+              "name": "read-only snapshot",
+              "milliseconds": 19.834599999999966,
+              "maxHeartbeatGapMs": 19.804899999999975,
+              "fullStateStringifies": 2,
+              "fullStateParses": 2,
+              "synchronousRealpaths": 0,
+              "unrelatedSectionNormalizations": 0,
+              "workerMessages": 0,
+              "workerSeeds": 0
+            }
+          ],
+          "memory": {
+            "beforeSetup": {
+              "rss": 40116224,
+              "heapTotal": 7942144,
+              "heapUsed": 5566792,
+              "external": 2175129,
+              "arrayBuffers": 55413
+            },
+            "beforeOperations": {
+              "rss": 84467712,
+              "heapTotal": 59768832,
+              "heapUsed": 27101320,
+              "external": 4067546,
+              "arrayBuffers": 1942600
+            },
+            "afterOperations": {
+              "rss": 110743552,
+              "heapTotal": 105537536,
+              "heapUsed": 41713384,
+              "external": 4067614,
+              "arrayBuffers": 1943668
+            }
+          },
+          "baselineMode": "SHA-verified settings module captured before this batch; current dependency modules; production source is not replaced.",
+          "conditions": "Production settings repository, one local directory, warmed 10000 generated tags, one no-op listener and actual atomic writes. JSON stringify/parse counts instrument the main thread only; worker serialization is separate. RSS is a process observation including threads, not peak memory or mobile PSS. Individual observations exclude actual renderer/IPC preparation and are not P95, cold-start or native acceptance."
+        },
+        {
+          "date": "2026-10-19T06:47:51.979Z",
+          "fixture": ".tmp\\refactor-tests\\settings-json-cost-rNGlSy",
+          "baseline": false,
+          "sourceSha256": "833f61931bf8cd91ab0d655cff46677c1f2c735de62edbf9e75ad7310568200a",
+          "sourceDigests": {
+            "main/settings.js": "833f61931bf8cd91ab0d655cff46677c1f2c735de62edbf9e75ad7310568200a",
+            "main/application/settings-json.js": "11b71e0f311c4b7c7bc6130bfe5ef0f6b79e02ccc1ed1ff3cc1cf7a6d3b6de62",
+            "main/application/settings-json-worker.js": "1afd2e1be0e24b36275c03ea4a074290c2cc0e2b103bdb09995448d59e0a9e50"
+          },
+          "tagEntries": 10000,
+          "results": [
+            {
+              "name": "favorite patch",
+              "milliseconds": 38.032700000000006,
+              "maxHeartbeatGapMs": 18.128899999999987,
+              "fullStateStringifies": 0,
+              "fullStateParses": 2,
+              "synchronousRealpaths": 0,
+              "unrelatedSectionNormalizations": 0,
+              "workerMessages": 1,
+              "workerSeeds": 0
+            },
+            {
+              "name": "theme patch",
+              "milliseconds": 36.37289999999999,
+              "maxHeartbeatGapMs": 14.682799999999986,
+              "fullStateStringifies": 0,
+              "fullStateParses": 2,
+              "synchronousRealpaths": 0,
+              "unrelatedSectionNormalizations": 0,
+              "workerMessages": 1,
+              "workerSeeds": 0
+            },
+            {
+              "name": "whole tag map patch",
+              "milliseconds": 71.41890000000001,
+              "maxHeartbeatGapMs": 19.02170000000001,
+              "fullStateStringifies": 0,
+              "fullStateParses": 2,
+              "synchronousRealpaths": 0,
+              "unrelatedSectionNormalizations": 0,
+              "workerMessages": 1,
+              "workerSeeds": 0
+            },
+            {
+              "name": "read-only snapshot",
+              "milliseconds": 19.438199999999995,
+              "maxHeartbeatGapMs": 19.156299999999987,
+              "fullStateStringifies": 1,
+              "fullStateParses": 2,
+              "synchronousRealpaths": 0,
+              "unrelatedSectionNormalizations": 0,
+              "workerMessages": 0,
+              "workerSeeds": 0
+            }
+          ],
+          "memory": {
+            "beforeSetup": {
+              "rss": 39727104,
+              "heapTotal": 7942144,
+              "heapUsed": 5552488,
+              "external": 2120344,
+              "arrayBuffers": 58396
+            },
+            "beforeOperations": {
+              "rss": 102457344,
+              "heapTotal": 37142528,
+              "heapUsed": 23244936,
+              "external": 4012761,
+              "arrayBuffers": 67952
+            },
+            "afterOperations": {
+              "rss": 147816448,
+              "heapTotal": 99045376,
+              "heapUsed": 34498120,
+              "external": 4015729,
+              "arrayBuffers": 70920
+            }
+          },
+          "conditions": "Production settings repository, one local directory, warmed 10000 generated tags, one no-op listener and actual atomic writes. JSON stringify/parse counts instrument the main thread only; worker serialization is separate. RSS is a process observation including threads, not peak memory or mobile PSS. Individual observations exclude actual renderer/IPC preparation and are not P95, cold-start or native acceptance."
+        },
+        {
+          "date": "2026-10-19T06:47:52.830Z",
+          "fixture": ".tmp\\refactor-tests\\settings-json-cost-vuMIyt",
+          "baseline": true,
+          "sourceSha256": "a404d37e56329dc8a874ffd79c47ea32bd34ea96b6bedf544a7a91e491ab5052",
+          "sourceDigests": {
+            "main/settings.js": "a404d37e56329dc8a874ffd79c47ea32bd34ea96b6bedf544a7a91e491ab5052"
+          },
+          "tagEntries": 10000,
+          "results": [
+            {
+              "name": "favorite patch",
+              "milliseconds": 56.1867,
+              "maxHeartbeatGapMs": 34.788100000000014,
+              "fullStateStringifies": 5,
+              "fullStateParses": 4,
+              "synchronousRealpaths": 0,
+              "unrelatedSectionNormalizations": 0,
+              "workerMessages": 0,
+              "workerSeeds": 0
+            },
+            {
+              "name": "theme patch",
+              "milliseconds": 53.98510000000002,
+              "maxHeartbeatGapMs": 32.24710000000002,
+              "fullStateStringifies": 5,
+              "fullStateParses": 4,
+              "synchronousRealpaths": 0,
+              "unrelatedSectionNormalizations": 0,
+              "workerMessages": 0,
+              "workerSeeds": 0
+            },
+            {
+              "name": "whole tag map patch",
+              "milliseconds": 70.0195,
+              "maxHeartbeatGapMs": 31.289199999999994,
+              "fullStateStringifies": 5,
+              "fullStateParses": 4,
+              "synchronousRealpaths": 0,
+              "unrelatedSectionNormalizations": 0,
+              "workerMessages": 0,
+              "workerSeeds": 0
+            },
+            {
+              "name": "read-only snapshot",
+              "milliseconds": 19.0077,
+              "maxHeartbeatGapMs": 18.978999999999985,
+              "fullStateStringifies": 2,
+              "fullStateParses": 2,
+              "synchronousRealpaths": 0,
+              "unrelatedSectionNormalizations": 0,
+              "workerMessages": 0,
+              "workerSeeds": 0
+            }
+          ],
+          "memory": {
+            "beforeSetup": {
+              "rss": 40067072,
+              "heapTotal": 7942144,
+              "heapUsed": 5567736,
+              "external": 2175129,
+              "arrayBuffers": 55413
+            },
+            "beforeOperations": {
+              "rss": 84824064,
+              "heapTotal": 59768832,
+              "heapUsed": 27101432,
+              "external": 4067546,
+              "arrayBuffers": 1942600
+            },
+            "afterOperations": {
+              "rss": 110940160,
+              "heapTotal": 105275392,
+              "heapUsed": 41708840,
+              "external": 4067614,
+              "arrayBuffers": 1943668
+            }
+          },
+          "baselineMode": "SHA-verified settings module captured before this batch; current dependency modules; production source is not replaced.",
+          "conditions": "Production settings repository, one local directory, warmed 10000 generated tags, one no-op listener and actual atomic writes. JSON stringify/parse counts instrument the main thread only; worker serialization is separate. RSS is a process observation including threads, not peak memory or mobile PSS. Individual observations exclude actual renderer/IPC preparation and are not P95, cold-start or native acceptance."
+        },
+        {
+          "date": "2026-10-19T06:47:53.691Z",
+          "fixture": ".tmp\\refactor-tests\\settings-json-cost-8wUOP3",
+          "baseline": false,
+          "sourceSha256": "833f61931bf8cd91ab0d655cff46677c1f2c735de62edbf9e75ad7310568200a",
+          "sourceDigests": {
+            "main/settings.js": "833f61931bf8cd91ab0d655cff46677c1f2c735de62edbf9e75ad7310568200a",
+            "main/application/settings-json.js": "11b71e0f311c4b7c7bc6130bfe5ef0f6b79e02ccc1ed1ff3cc1cf7a6d3b6de62",
+            "main/application/settings-json-worker.js": "1afd2e1be0e24b36275c03ea4a074290c2cc0e2b103bdb09995448d59e0a9e50"
+          },
+          "tagEntries": 10000,
+          "results": [
+            {
+              "name": "favorite patch",
+              "milliseconds": 38.39070000000001,
+              "maxHeartbeatGapMs": 14.997299999999996,
+              "fullStateStringifies": 0,
+              "fullStateParses": 2,
+              "synchronousRealpaths": 0,
+              "unrelatedSectionNormalizations": 0,
+              "workerMessages": 1,
+              "workerSeeds": 0
+            },
+            {
+              "name": "theme patch",
+              "milliseconds": 36.00810000000001,
+              "maxHeartbeatGapMs": 13.747800000000012,
+              "fullStateStringifies": 0,
+              "fullStateParses": 2,
+              "synchronousRealpaths": 0,
+              "unrelatedSectionNormalizations": 0,
+              "workerMessages": 1,
+              "workerSeeds": 0
+            },
+            {
+              "name": "whole tag map patch",
+              "milliseconds": 71.63839999999999,
+              "maxHeartbeatGapMs": 15.60609999999997,
+              "fullStateStringifies": 0,
+              "fullStateParses": 2,
+              "synchronousRealpaths": 0,
+              "unrelatedSectionNormalizations": 0,
+              "workerMessages": 1,
+              "workerSeeds": 0
+            },
+            {
+              "name": "read-only snapshot",
+              "milliseconds": 19.430999999999983,
+              "maxHeartbeatGapMs": 19.148500000000013,
+              "fullStateStringifies": 1,
+              "fullStateParses": 2,
+              "synchronousRealpaths": 0,
+              "unrelatedSectionNormalizations": 0,
+              "workerMessages": 0,
+              "workerSeeds": 0
+            }
+          ],
+          "memory": {
+            "beforeSetup": {
+              "rss": 39821312,
+              "heapTotal": 7942144,
+              "heapUsed": 5552488,
+              "external": 2120344,
+              "arrayBuffers": 58396
+            },
+            "beforeOperations": {
+              "rss": 102187008,
+              "heapTotal": 37142528,
+              "heapUsed": 23245144,
+              "external": 4012761,
+              "arrayBuffers": 67952
+            },
+            "afterOperations": {
+              "rss": 147603456,
+              "heapTotal": 99569664,
+              "heapUsed": 34478192,
+              "external": 4015729,
+              "arrayBuffers": 70920
+            }
+          },
+          "conditions": "Production settings repository, one local directory, warmed 10000 generated tags, one no-op listener and actual atomic writes. JSON stringify/parse counts instrument the main thread only; worker serialization is separate. RSS is a process observation including threads, not peak memory or mobile PSS. Individual observations exclude actual renderer/IPC preparation and are not P95, cold-start or native acceptance."
+        }
+      ]
+    },
+    "earlierParallelObservation": {
+      "date": "2026-10-19T06:42:20.860Z",
+      "fixture": ".tmp\\refactor-tests\\settings-json-cost-KbOiWk",
+      "baseline": false,
+      "sourceSha256": "6a4854f141ecb51daaee086a1035f73ada41754b87b8aecf415f38c6ef94aa78",
+      "sourceDigests": {
+        "main/settings.js": "6a4854f141ecb51daaee086a1035f73ada41754b87b8aecf415f38c6ef94aa78",
+        "main/application/settings-json.js": "11b71e0f311c4b7c7bc6130bfe5ef0f6b79e02ccc1ed1ff3cc1cf7a6d3b6de62",
+        "main/application/settings-json-worker.js": "1afd2e1be0e24b36275c03ea4a074290c2cc0e2b103bdb09995448d59e0a9e50"
+      },
+      "tagEntries": 10000,
+      "results": [
+        {
+          "name": "favorite patch",
+          "milliseconds": 84.07530000000003,
+          "maxHeartbeatGapMs": 22.76370000000003,
+          "fullStateStringifies": 0,
+          "fullStateParses": 2,
+          "synchronousRealpaths": 0,
+          "unrelatedSectionNormalizations": 0,
+          "workerMessages": 1,
+          "workerSeeds": 1
+        },
+        {
+          "name": "theme patch",
+          "milliseconds": 61.464399999999955,
+          "maxHeartbeatGapMs": 19.210900000000038,
+          "fullStateStringifies": 0,
+          "fullStateParses": 2,
+          "synchronousRealpaths": 0,
+          "unrelatedSectionNormalizations": 0,
+          "workerMessages": 1,
+          "workerSeeds": 0
+        },
+        {
+          "name": "whole tag map patch",
+          "milliseconds": 133.27220000000005,
+          "maxHeartbeatGapMs": 26.233400000000074,
+          "fullStateStringifies": 0,
+          "fullStateParses": 2,
+          "synchronousRealpaths": 0,
+          "unrelatedSectionNormalizations": 0,
+          "workerMessages": 1,
+          "workerSeeds": 0
+        },
+        {
+          "name": "read-only snapshot",
+          "milliseconds": 28.333200000000033,
+          "maxHeartbeatGapMs": 28.166600000000017,
+          "fullStateStringifies": 1,
+          "fullStateParses": 2,
+          "synchronousRealpaths": 0,
+          "unrelatedSectionNormalizations": 0,
+          "workerMessages": 0,
+          "workerSeeds": 0
+        }
+      ],
+      "memory": {
+        "beforeSetup": {
+          "rss": 45850624,
+          "heapTotal": 7942144,
+          "heapUsed": 5553288,
+          "external": 2120156,
+          "arrayBuffers": 58208
+        },
+        "beforeOperations": {
+          "rss": 110268416,
+          "heapTotal": 59768832,
+          "heapUsed": 27129672,
+          "external": 4012573,
+          "arrayBuffers": 66564
+        },
+        "afterOperations": {
+          "rss": 155836416,
+          "heapTotal": 104902656,
+          "heapUsed": 44240160,
+          "external": 5895440,
+          "arrayBuffers": 71932
+        }
+      },
+      "conditions": "Production settings repository, one local directory, warmed 10000 generated tags, one no-op listener and actual atomic writes. JSON stringify/parse counts instrument the main thread only; worker serialization is separate. RSS is a process observation including threads, not peak memory or mobile PSS. Individual observations exclude actual renderer/IPC preparation and are not P95, cold-start or native acceptance."
+    },
+    "finalCommandObservation": {
+      "date": "2026-10-19T06:51:35.517Z",
+      "fixture": ".tmp\\refactor-tests\\settings-json-cost-xSMl9c",
+      "baseline": false,
+      "sourceSha256": "833f61931bf8cd91ab0d655cff46677c1f2c735de62edbf9e75ad7310568200a",
+      "sourceDigests": {
+        "main/settings.js": "833f61931bf8cd91ab0d655cff46677c1f2c735de62edbf9e75ad7310568200a",
+        "main/application/settings-json.js": "11b71e0f311c4b7c7bc6130bfe5ef0f6b79e02ccc1ed1ff3cc1cf7a6d3b6de62",
+        "main/application/settings-json-worker.js": "1afd2e1be0e24b36275c03ea4a074290c2cc0e2b103bdb09995448d59e0a9e50"
+      },
+      "tagEntries": 10000,
+      "results": [
+        {
+          "name": "favorite patch",
+          "milliseconds": 37.89160000000001,
+          "maxHeartbeatGapMs": 16.83960000000002,
+          "fullStateStringifies": 0,
+          "fullStateParses": 2,
+          "synchronousRealpaths": 0,
+          "unrelatedSectionNormalizations": 0,
+          "workerMessages": 1,
+          "workerSeeds": 0
+        },
+        {
+          "name": "theme patch",
+          "milliseconds": 36.79769999999999,
+          "maxHeartbeatGapMs": 15.412599999999998,
+          "fullStateStringifies": 0,
+          "fullStateParses": 2,
+          "synchronousRealpaths": 0,
+          "unrelatedSectionNormalizations": 0,
+          "workerMessages": 1,
+          "workerSeeds": 0
+        },
+        {
+          "name": "whole tag map patch",
+          "milliseconds": 72.25120000000004,
+          "maxHeartbeatGapMs": 20.63560000000001,
+          "fullStateStringifies": 0,
+          "fullStateParses": 2,
+          "synchronousRealpaths": 0,
+          "unrelatedSectionNormalizations": 0,
+          "workerMessages": 1,
+          "workerSeeds": 0
+        },
+        {
+          "name": "read-only snapshot",
+          "milliseconds": 20.099400000000003,
+          "maxHeartbeatGapMs": 19.802200000000028,
+          "fullStateStringifies": 1,
+          "fullStateParses": 2,
+          "synchronousRealpaths": 0,
+          "unrelatedSectionNormalizations": 0,
+          "workerMessages": 0,
+          "workerSeeds": 0
+        }
+      ],
+      "memory": {
+        "beforeSetup": {
+          "rss": 45821952,
+          "heapTotal": 7942144,
+          "heapUsed": 5553288,
+          "external": 2120344,
+          "arrayBuffers": 58396
+        },
+        "beforeOperations": {
+          "rss": 103563264,
+          "heapTotal": 36880384,
+          "heapUsed": 23222312,
+          "external": 4012761,
+          "arrayBuffers": 67952
+        },
+        "afterOperations": {
+          "rss": 149577728,
+          "heapTotal": 99045376,
+          "heapUsed": 34519184,
+          "external": 4015729,
+          "arrayBuffers": 70920
+        }
+      },
+      "conditions": "Production settings repository, one local directory, warmed 10000 generated tags, one no-op listener and actual atomic writes. JSON stringify/parse counts instrument the main thread only; worker serialization is separate. RSS is a process observation including threads, not peak memory or mobile PSS. Individual observations exclude actual renderer/IPC preparation and are not P95, cold-start or native acceptance."
+    },
+    "lifecycle": {
+      "date": "2026-10-19T06:51:37.351Z",
+      "fixture": ".tmp\\refactor-tests\\settings-json-lifecycle-f50qwb",
+      "passed": [
+        "worker snapshot and returned fields have separate ownership",
+        "seed mismatch, JSON canonical semantics and serialization error recovery",
+        "configured byte budget rejects before publication and recovers",
+        "single active job and graceful close wait for actual worker completion",
+        "forced close terminates only the owned thread before releasing the job",
+        "unexpected thread exit and malformed response recover after thread exit",
+        "deadline terminates a live blocked worker and later requests recover",
+        "idle worker does not keep an otherwise completed Node process alive",
+        "idle retirement releases the owned thread and later reseeds from current state",
+        "ordinary production patch sends changed fields and preserves input/result/cache ownership",
+        "value-only result and worker failure never publish or replace the durable file",
+        "synchronous changes during worker preparation rebase and flush together",
+        "custom property-key JSON, special keys and directory callback ownership stay compatible",
+        "path rebase compares the encoded durable snapshot before scheduling a follow-up write"
+      ],
+      "sourceDigests": {
+        "main/settings.js": "833f61931bf8cd91ab0d655cff46677c1f2c735de62edbf9e75ad7310568200a",
+        "main/application/settings-json.js": "11b71e0f311c4b7c7bc6130bfe5ef0f6b79e02ccc1ed1ff3cc1cf7a6d3b6de62",
+        "main/application/settings-json-worker.js": "1afd2e1be0e24b36275c03ea4a074290c2cc0e2b103bdb09995448d59e0a9e50",
+        "main/application/media-mutations.js": "6d85a44305cd3b1c9ef700b3b57eb6d6cf29b49f9601041e1f2fea31e12c6cf7",
+        "main/remote/media-mutations.js": "76ea043d52a84d980b1b0ff683553cd304da1aa21c806c7d165b54beda11b2aa",
+        "main/index.js": "be93b5746f79b9a1e807e6f2b638d1ce36af41178360bc797dba27595646e330"
+      },
+      "conditions": "Actual Node worker threads, actual production settings and atomic filesystem. Controlled shared-memory gate, thread exit/timeout, configurable test byte limit, process exit and message fault injection. No native-device, cold-start or power-loss acceptance."
+    },
+    "patchLifecycle": {
+      "date": "2026-10-19T06:44:08.653Z",
+      "fixture": ".tmp\\refactor-tests\\settings-patch-lifecycle-1BBXzv",
+      "passed": [
+        "detached initial/provider defaults",
+        "patch-only intent",
+        "cache unchanged before rename",
+        "sync field/plugin rebase",
+        "observer/result/callback/input isolation after commit",
+        "in-flight input cannot change durable intent",
+        "queued input captured at call",
+        "snapshot stamps",
+        "failed custom merge does not mutate cache or notify",
+        "explicit undefined reset",
+        "unrelated patch preserves path config",
+        "actual policy re-resolves retargeted root",
+        "explicit path patch normalizes current root"
+      ],
+      "conditions": "Production settings and media policy, actual atomic file writes and real directory junction/symlink. Rename delay/failure controlled; no renderer/native performance claim."
+    },
+    "largeMediaDiagnostic": {
+      "date": "2026-10-19T06:47:57.305Z",
+      "fixture": ".tmp\\refactor-tests\\media-mutation-paths-w1tVIA",
+      "baseline": false,
+      "sourceDigests": {
+        "main/application/media-mutations.js": "6d85a44305cd3b1c9ef700b3b57eb6d6cf29b49f9601041e1f2fea31e12c6cf7",
+        "main/application/media-mutation-paths.js": "aadf4ee7550a6d0335a63dae337e62fb641a8780645eb9399f18a205ff994666",
+        "main/settings.js": "833f61931bf8cd91ab0d655cff46677c1f2c735de62edbf9e75ad7310568200a",
+        "main/repositories/tag-state.js": "046376c6bb56d3251c6f4a1d80c8e0273eeeac247b5d8031209787ace1852065",
+        "main/ipc/media-data.js": "fbcf14db2be08e8b3e9b5b7fe67ac5ea8b4f2d59d0e8c5050a3241ab05b890a9",
+        "main/remote/media-mutations.js": "76ea043d52a84d980b1b0ff683553cd304da1aa21c806c7d165b54beda11b2aa"
+      },
+      "files": 1280,
+      "legacyKeys": 10240,
+      "aliases": 8,
+      "results": [
+        {
+          "name": "read legacy tags",
+          "milliseconds": 524.008,
+          "maxHeartbeatGapMs": 21.575800000000072,
+          "synchronousRealpathCalls": 0,
+          "mediaSynchronousRealpathCalls": 0
+        },
+        {
+          "name": "replace tags",
+          "milliseconds": 561.0499000000002,
+          "maxHeartbeatGapMs": 25.89940000000024,
+          "synchronousRealpathCalls": 0,
+          "mediaSynchronousRealpathCalls": 0
+        },
+        {
+          "name": "append eight targets",
+          "milliseconds": 552.2204999999999,
+          "maxHeartbeatGapMs": 29.00460000000021,
+          "synchronousRealpathCalls": 0,
+          "mediaSynchronousRealpathCalls": 0
+        },
+        {
+          "name": "clear alias favorites",
+          "milliseconds": 41.005499999999756,
+          "maxHeartbeatGapMs": 15.82109999999966,
+          "synchronousRealpathCalls": 0,
+          "mediaSynchronousRealpathCalls": 0
+        }
+      ],
+      "conditions": "Production media service/settings/scanner, actual Windows junctions (directory symlinks on other platforms) and generated MP4 file headers. Not decoding or physical mobile performance. Explicit path-setting normalization, legacy identity bridges and renderer/IPC preparation are outside this diagnostic; media/legacy realpath counts are scoped to .mp4 paths."
+    },
+    "beforePathRebase": {
+      "date": "2026-10-19T06:42:20.860Z",
+      "fixture": ".tmp\\refactor-tests\\settings-json-cost-KbOiWk",
+      "baseline": false,
+      "sourceSha256": "6a4854f141ecb51daaee086a1035f73ada41754b87b8aecf415f38c6ef94aa78",
+      "sourceDigests": {
+        "main/settings.js": "6a4854f141ecb51daaee086a1035f73ada41754b87b8aecf415f38c6ef94aa78",
+        "main/application/settings-json.js": "11b71e0f311c4b7c7bc6130bfe5ef0f6b79e02ccc1ed1ff3cc1cf7a6d3b6de62",
+        "main/application/settings-json-worker.js": "1afd2e1be0e24b36275c03ea4a074290c2cc0e2b103bdb09995448d59e0a9e50"
+      },
+      "tagEntries": 10000,
+      "results": [
+        {
+          "name": "favorite patch",
+          "milliseconds": 84.07530000000003,
+          "maxHeartbeatGapMs": 22.76370000000003,
+          "fullStateStringifies": 0,
+          "fullStateParses": 2,
+          "synchronousRealpaths": 0,
+          "unrelatedSectionNormalizations": 0,
+          "workerMessages": 1,
+          "workerSeeds": 1
+        },
+        {
+          "name": "theme patch",
+          "milliseconds": 61.464399999999955,
+          "maxHeartbeatGapMs": 19.210900000000038,
+          "fullStateStringifies": 0,
+          "fullStateParses": 2,
+          "synchronousRealpaths": 0,
+          "unrelatedSectionNormalizations": 0,
+          "workerMessages": 1,
+          "workerSeeds": 0
+        },
+        {
+          "name": "whole tag map patch",
+          "milliseconds": 133.27220000000005,
+          "maxHeartbeatGapMs": 26.233400000000074,
+          "fullStateStringifies": 0,
+          "fullStateParses": 2,
+          "synchronousRealpaths": 0,
+          "unrelatedSectionNormalizations": 0,
+          "workerMessages": 1,
+          "workerSeeds": 0
+        },
+        {
+          "name": "read-only snapshot",
+          "milliseconds": 28.333200000000033,
+          "maxHeartbeatGapMs": 28.166600000000017,
+          "fullStateStringifies": 1,
+          "fullStateParses": 2,
+          "synchronousRealpaths": 0,
+          "unrelatedSectionNormalizations": 0,
+          "workerMessages": 0,
+          "workerSeeds": 0
+        }
+      ],
+      "memory": {
+        "beforeSetup": {
+          "rss": 45850624,
+          "heapTotal": 7942144,
+          "heapUsed": 5553288,
+          "external": 2120156,
+          "arrayBuffers": 58208
+        },
+        "beforeOperations": {
+          "rss": 110268416,
+          "heapTotal": 59768832,
+          "heapUsed": 27129672,
+          "external": 4012573,
+          "arrayBuffers": 66564
+        },
+        "afterOperations": {
+          "rss": 155836416,
+          "heapTotal": 104902656,
+          "heapUsed": 44240160,
+          "external": 5895440,
+          "arrayBuffers": 71932
+        }
+      },
+      "conditions": "Production settings repository, one local directory, warmed 10000 generated tags, one no-op listener and actual atomic writes. JSON stringify/parse counts instrument the main thread only; worker serialization is separate. RSS is a process observation including threads, not peak memory or mobile PSS. Individual observations exclude actual renderer/IPC preparation and are not P95, cold-start or native acceptance."
+    },
+    "pathRebaseFailure": {
+      "sourceSha256": "6a4854f141ecb51daaee086a1035f73ada41754b87b8aecf415f38c6ef94aa78",
+      "capturedSourceRecord": ".tmp/refactor-tests/settings-json-before-path-rebase.json",
+      "verifier": "scripts/verify-settings-json-lifecycle.js",
+      "mode": "SHA-verified captured settings module compiled under its original filename; current worker dependencies; production source not replaced",
+      "observedExitCode": 1,
+      "assertion": "providerPathFixture stamp on disk remained 1 while the expected rebased durable value was 2",
+      "fix": "Compare the committed path rebase against the encoded durable text and schedule a follow-up when different"
+    }
+  },
+  "finalChecks": [
+    {
+      "command": "npm run verify:settings-json",
+      "status": "passed",
+      "scope": "Final runtime, main-thread JSON counters, worker-message counters and 14 actual worker/settings lifecycle cases. The later command observation is kept separately from the six-sample alternating series."
+    },
+    {
+      "command": "node scripts/verify-settings-patch-lifecycle.js",
+      "status": "passed",
+      "scope": "13 existing atomic-file, ownership, concurrent rebase, failure, version and path-policy cases."
+    },
+    {
+      "command": "npm run verify:packaged-contracts -- --in-process-gpu --no-sandbox",
+      "status": "passed",
+      "scope": "Actual Windows Electron/ASAR loads the worker entry and commits settings, then explicitly disposes the thread; local verification flags only."
+    },
+    {
+      "command": "npm run verify:settings-snapshots",
+      "status": "passed",
+      "scope": "Production snapshot/client ordering plus actual Electron App/preload/guarded IPC, disk failure, visible rollback and retry."
+    },
+    {
+      "command": "npm run verify:settings-panels",
+      "status": "passed",
+      "scope": "Production remote/plugin controllers and actual Electron settings UI/IPC."
+    },
+    {
+      "command": "npm run verify:media-mutation-paths",
+      "status": "passed",
+      "scope": "Production scanner/service/settings, current policy, retries, CAS, junction/subst and actual HTTP control request."
+    },
+    {
+      "command": "npm run verify:media-access",
+      "status": "passed"
+    },
+    {
+      "command": "npm run verify:analysis-settings",
+      "status": "passed"
+    },
+    {
+      "command": "npm run verify:analysis-config",
+      "status": "passed"
+    },
+    {
+      "command": "npm run verify:shutdown-persistence",
+      "status": "passed",
+      "scope": "Actual main/index lifecycle with settings persistence and serializer disposal, including the five-second forced branch."
+    },
+    {
+      "command": "node scripts/verify-media-mutation-paths.js --large",
+      "status": "passed",
+      "scope": "1280 file headers/10240 legacy keys; no decoding or renderer overhead included."
+    },
+    {
+      "command": "CI YAML/package command parse and node --check",
+      "status": "passed",
+      "scope": "New workflow step and script matched; 10 changed runtime/verifier files checked."
+    }
+  ],
+  "earlierBatchChecks": {
+    "qualification": "Passed before the final exceptional-path comparison fix; the final core path/patch/UI tests above were repeated afterward. Mobile/native source and schemas did not change.",
+    "checks": [
+      "media mutations",
+      "settings persistence",
+      "mobile correctness with actual two-phone HTTP identities",
+      "shared contracts/adapters and compatibility matrix",
+      "tag conflicts",
+      "original settings-commit command"
+    ]
+  },
+  "implementation": {
+    "ownership": "Private root holds canonical text. Worker fields reconstruct a private canonical root; reads/results/notifications stay detached. Synchronous callbacks receive no private borrowed cache.",
+    "transfer": "One lazy worker, one active encoder job. Reuse its last baseline for changed-field messages; reseed after mismatch, synchronous publication, failed candidates or thread retirement.",
+    "lifecycle": "Default 30-second job deadline and 60-second idle retirement. Active jobs retain the thread until result or actual exit; normal app shutdown flushes before disposal, forced shutdown requests termination.",
+    "memoryPolicy": "Production maxBytes defaults to Infinity and does not impose a new settings-file size limit. Configurable limits are tested only on independent encoder instances. This is not a bound on total settings memory.",
+    "compatibility": "JSON file, atomic replace and queue remain. Desktop settings responses remain complete; only explicit returnSettings:false omits a snapshot, used by phone HTTP media services. Custom serializers keep their property key."
+  },
+  "limitations": [
+    "Three alternating local samples are not P95 or sustained playback/query/thumbnail responsiveness acceptance. One no-op listener excludes actual renderer/IPC preparation.",
+    "Only main-thread JSON calls are counted. Worker still stringifies/parses; main still parses snapshots and clones changed payloads for postMessage. Ordinary writes have two main parses, not zero copies.",
+    "Whole-tag total median did not improve (70.0195 to 71.4189 ms), and read-only did not improve (19.1318 to 19.431 ms).",
+    "Process RSS including threads increased: median before operations 80.5546875 to 97.7109375 MiB, after operations 105.80078125 to 140.96875 MiB. These are point observations affected by allocation/GC, not peaks, fixed per-thread cost, mobile PSS or long-term stability.",
+    "Earlier parallel observations, the initial baseline and the later command sample remain separately retained; source digests for earlier checkpoints are intentionally historical.",
+    "The media diagnostic is a different workload and includes prior identity/path changes; it cannot establish this batch alone caused all its improvement.",
+    "Explicit paths, custom serializers, synchronous saves, first load/extension registration and emergency synchronous exit may still serialize on the main thread. Reads/broadcast/renderer preparation and logical store separation remain work.",
+    "Atomic replacement and recovery tests do not establish fsync/power-loss durability or cross-file crash recovery.",
+    "R6 physical decoding/contention/rotation/PSS, remaining R7 startup/type/feature/UI work and R8 dependencies/migrations/signing/update/TLS remain incomplete."
+  ]
+}

@@ -1,0 +1,383 @@
+{
+  "date": "2026-10-17T17:30:32.471Z",
+  "stage": "R7 batch 10: mobile device/pairing and playback input",
+  "sourceDigests": {
+    "mobile/src/components/DeviceCard.tsx": "bc313ccc5608ef747bd37f1dd9c2ed50881f7617cb940cf4c89d23d824319efa",
+    "mobile/src/screens/DeviceListScreen.tsx": "29365f0f1f76450baadd42e7381dd9f8c21cf8fe9c8159f467443eaadadb390b",
+    "mobile/src/screens/PairDeviceScreen.tsx": "a650b766de43696aac20c4a96cb7211a1d9dbaa2cf9afb4fbe8e5644443f3e6d",
+    "mobile/src/components/player/PlaybackProgress.tsx": "23f42929df31c7404922728b780c909824ca5031d744b32f8cb6c72a3e798161",
+    "mobile/src/components/player/PlayerControls.tsx": "f098bf6740d23471978c0f08fdfb23be186483917cb293ce1d7dc2be86cbaf3e",
+    "mobile/src/components/player/VideoOverlay.tsx": "148697c58f418792d6aa64ecd754b2421a280dcd1fd97aaea0e05508c8286a81",
+    "mobile/src/screens/PlayerScreen.tsx": "007bf66af83d75f6ec27475a10a84c6b70f96f1be58e86799f3d5588f96c34af",
+    "mobile/src/hooks/useAccessibilityPreferences.ts": "9ecef850963d7728949e5f407cf9541c6e33a6152218deaaa642a49610d0f522",
+    "mobile/App.tsx": "d69e3d903c2a560e4b558d2f389a48e5f48f88d66a022ce7b68e23bb8966fd8a",
+    "scripts/verify-mobile-input-accessibility.js": "0d34b225284dd6748f698d5bda6def5fbda48db30ed76d1fab591a749a8a225a",
+    "scripts/verify-mobile-accessibility.js": "6c5cf1d7dba834befc3e6ad4581d012128a3c8d433e34f79d2cf7dd1da4b476f",
+    "scripts/verify-mobile-player-behavior.js": "a705f0087c59c0097aed936daca89eab2dda1eaa100d31b9fdfbabd748a029e8",
+    "scripts/verify-mobile-player-structure.js": "3034e7cc28ad4b6bc11ed96d7062859e06edc4de172139216a9ddf317b0f9e30",
+    "scripts/verify-mobile-bundles.js": "c03a04a39fc0e3d282f5a66268f363582de389e42e08a5ad1215b79f8e3938a4",
+    "scripts/mobile-module-harness.js": "2f10c0fc81e3e0cb2246768cccbbd72be0e5da9b22225c722d0beecfaecca58d",
+    "package.json": "14ca9e68b8bf45bc9a3be1bef374b66198a211d211e59b831a905165931f4089",
+    ".github/workflows/ci.yml": "b55f35f38b7541250f34050e5f6d15e39a320a16271b5321cdbb64611b2aa55d",
+    "docs/refactor-progress.md": "cf52ff0377f7cc49b06ef30634bf8d45e2067ba70dd938432603ef9103798ba4",
+    "docs/desktop-mobile-review-and-refactor-plan.md": "163367dd83ad9ea2bc951e486c1da1499130fd7573b8955c2e8bfbe6008f39de",
+    "docs/mobile-real-device-qa.md": "534c802793b957f7b69417b579ca9bacab5a3874ed97f8c84d58aac0b9f11dfd"
+  },
+  "baseline": {
+    "capturedAt": "2026-10-17T16:56:54.907Z",
+    "sourceDigests": {
+      "mobile/src/components/DeviceCard.tsx": "9baec8fb89be2f899167be72d0b1d27811481254c92b8d9da300a6108603757c",
+      "mobile/src/screens/DeviceListScreen.tsx": "a33c20887336b0a019445a52c89369ef60d4d08ed951744fe95bf05fa624857f",
+      "mobile/src/screens/PairDeviceScreen.tsx": "121814f9be5dd01c14448307383c918f9ccd61f011ae25e2eb9a8a307c3e0f8d",
+      "mobile/src/components/player/PlaybackProgress.tsx": "4dbdcf89b6cc34c06c9de0d88c2d37801585f5c16612af3bed2c42179d0e525f",
+      "mobile/src/components/player/PlayerControls.tsx": "6b2514120ba46c1bac073be648344f2e679a7ac8b27862f782c209bdf4b79181",
+      "mobile/src/components/player/VideoOverlay.tsx": "046a73a2ea3fdee1cb0154fc6a78aca0e7cd44d1ec32688782d904e43acd1d8d",
+      "mobile/src/screens/PlayerScreen.tsx": "e2f1e939c98ae7fbae8b580b24bee919a9a9231c7395b4db2f4c518ba723726f"
+    }
+  },
+  "scrubBeforeAfter": {
+    "date": "2026-10-17T17:07:00.828Z",
+    "conditions": "Production PlaybackProgress before and after; controlled native host; duration=100, measured width=200, grant x=40, move x=150, release before another React commit. Not a native rendering measurement.",
+    "before": {
+      "seek": [
+        0
+      ],
+      "held": [
+        true,
+        true,
+        false
+      ],
+      "expectedPosition": 75,
+      "sha256": "4dbdcf89b6cc34c06c9de0d88c2d37801585f5c16612af3bed2c42179d0e525f"
+    },
+    "after": {
+      "seek": [
+        75
+      ],
+      "held": [
+        true,
+        false
+      ],
+      "expectedPosition": 75,
+      "sha256": "23f42929df31c7404922728b780c909824ca5031d744b32f8cb6c72a3e798161"
+    }
+  },
+  "inputBehavior": {
+    "date": "2026-10-17T17:22:44.559Z",
+    "passed": [
+      "independent device open/remove",
+      "heading scroll ownership",
+      "cancelled permission/clipboard and late barcode",
+      "clipboard rejection alert",
+      "aborted pairing not saved; valid result saved once",
+      "unmounted camera permission and back listener cleanup",
+      "scrub release before React commit; duplicate release; responder termination",
+      "adjustable seek and disabled state",
+      "live reader/motion changes supersede initial queries; stale event ignored after unmount"
+    ],
+    "conditions": "Production screens/hooks/components; controlled native host, permission, clipboard and persistence. Not native Yoga, TalkBack/VoiceOver or physical camera evidence."
+  },
+  "checks": [
+    {
+      "command": "npm run typecheck --prefix mobile",
+      "exitCode": 0
+    },
+    {
+      "command": "npm run verify:mobile-input-accessibility",
+      "exitCode": 0
+    },
+    {
+      "command": "npm run verify:mobile-accessibility",
+      "exitCode": 0
+    },
+    {
+      "command": "npm run verify:mobile-navigation",
+      "exitCode": 0
+    },
+    {
+      "command": "npm run verify:mobile-correctness",
+      "exitCode": 0,
+      "conditions": "Actual two synthetic phone identities through production HTTP plus controlled production player/native host; includes reader/hold control-hide behavior."
+    },
+    {
+      "command": "npm run verify:player-resources",
+      "exitCode": 0,
+      "conditions": "30 controlled production screen cycles, not 30 physical-device cycles."
+    },
+    {
+      "command": "npm run verify:mobile-player",
+      "exitCode": 0,
+      "conditions": "Includes existing production transcode-cache behavior verification instead of the obsolete mtime-expression assertion."
+    },
+    {
+      "command": "npm run verify:mobile-bundles",
+      "exitCode": 0
+    },
+    {
+      "command": "node scripts/verify-mobile-bundles.js --inspect-only",
+      "exitCode": 0
+    },
+    {
+      "command": "git diff --check",
+      "exitCode": 0
+    }
+  ],
+  "bundles": [
+    {
+      "platform": "android",
+      "bytes": 3097156,
+      "modules": 2510,
+      "reactVersion": "19.2.3",
+      "sharedContracts": true
+    },
+    {
+      "platform": "ios",
+      "bytes": 3093640,
+      "modules": 2514,
+      "reactVersion": "19.2.3",
+      "sharedContracts": true
+    }
+  ],
+  "bundleArtifacts": {
+    "android": {
+      "bytes": 3097156,
+      "sha256": "42d693c7fa92835e86f35e7247d2ba82ad6e4333747e1566d47e9d60706bca2a",
+      "sourceMapSha256": "468645cd0dd8de6d14b92f8d391be48eae4f114b0cf1bb783e7e45a9c7d0cc5b"
+    },
+    "ios": {
+      "bytes": 3093640,
+      "sha256": "01ec14f808061bca0bb6c19635aa0991bb30308e2ed5d4d394134fa16e578127",
+      "sourceMapSha256": "0fc96f708d0bd242beaaeaeeb27a8b879f433d217464650db946098968ff2b7a"
+    }
+  },
+  "native": {
+    "date": "2026-10-17T17:26:45.206Z",
+    "serial": "emulator-5580",
+    "avd": "CodexR7Native",
+    "api": 36,
+    "abi": "x86_64",
+    "density": 440,
+    "pixels": [
+      880,
+      1760
+    ],
+    "logicalWidth": 320,
+    "fontScales": [
+      1,
+      2.5
+    ],
+    "submitBounds": {
+      "left": 66,
+      "top": 1028,
+      "right": 623,
+      "bottom": 1241,
+      "width": 557,
+      "height": 213
+    },
+    "removeBounds": {
+      "left": 690,
+      "top": 1307,
+      "right": 822,
+      "bottom": 1439,
+      "width": 132,
+      "height": 132
+    },
+    "conditions": "Actual debug app and production source in an owned Android emulator, native UIAutomator bounds and screenshots. Binding stores a synthetic offline device for layout checks; no desktop service/auth/network verification or real camera/reader/decoder/PSS claim.",
+    "removeAction": {
+      "confirmationOpened": true,
+      "cancelReturnsToDeviceList": true,
+      "hardwareBackDismissed": false,
+      "confirmedRemoval": false
+    },
+    "offlineProductionBytecodeBoot": true,
+    "developmentServerRunning": false,
+    "artifact": {
+      "date": "2026-10-17T17:26:15.999Z",
+      "apk": {
+        "path": "E:\\wp-native-qa-lRJFHV\\mobile\\android\\app\\build\\outputs\\apk\\debug\\app-debug.apk",
+        "bytes": 67943257,
+        "sha256": "3d20d7f0097890f1a638269ff909bfdf6e939ffb4a0c28ffbf3f071b4cf1e593",
+        "abis": [
+          "x86_64"
+        ],
+        "buildType": "debug",
+        "productionSigningVerified": false
+      },
+      "hermes": {
+        "bytes": 3097156,
+        "sha256": "42d693c7fa92835e86f35e7247d2ba82ad6e4333747e1566d47e9d60706bca2a",
+        "matchesCurrentVerifiedExport": true
+      },
+      "conditions": "Owned ASCII staging project; default Expo native host; manually embedded current production Hermes export into debug assets for offline UI QA. Default development-server startup failed. This is not a release/signed installation or physical-device acceptance."
+    },
+    "initialObservation": {
+      "date": "2026-10-17T17:21:14.975Z",
+      "serial": "emulator-5580",
+      "avd": "CodexR7Native",
+      "api": 36,
+      "abi": "x86_64",
+      "density": 440,
+      "pixels": [
+        880,
+        1760
+      ],
+      "logicalWidth": 320,
+      "fontScales": [
+        1,
+        2.5
+      ],
+      "submitBounds": {
+        "left": 454,
+        "top": 775,
+        "right": 814,
+        "bottom": 1270,
+        "width": 360,
+        "height": 495
+      },
+      "removeBounds": {
+        "left": 690,
+        "top": 1307,
+        "right": 822,
+        "bottom": 1439,
+        "width": 132,
+        "height": 132
+      },
+      "conditions": "Actual debug app and production source in an owned Android emulator, native UIAutomator bounds and screenshots. Binding stores a synthetic offline device for layout checks; no desktop service/auth/network verification or real camera/reader/decoder/PSS claim."
+    },
+    "rawFiles": [
+      {
+        "file": "docs/evidence/r7-mobile-input/pair-320-font1.png",
+        "bytes": 117158,
+        "sha256": "90f4c5c51dd4103c5839432e19d57e7f9e1f6c3ef4337e9962430e3b7f83212b",
+        "width": 880,
+        "height": 1760
+      },
+      {
+        "file": "docs/evidence/r7-mobile-input/pair-320-font1.xml",
+        "bytes": 15951,
+        "sha256": "b7972d4265efd6e67282090ec28e8a456eb3e45342e1a3be00fd9daced9803f1"
+      },
+      {
+        "file": "docs/evidence/r7-mobile-input/pair-320-font2_5-top.png",
+        "bytes": 104439,
+        "sha256": "8cfc6b4d022235ac9ee5900acf232d60189d67efa0433e4695df645f63433bbf",
+        "width": 880,
+        "height": 1760
+      },
+      {
+        "file": "docs/evidence/r7-mobile-input/pair-320-font2_5-top.xml",
+        "bytes": 10353,
+        "sha256": "788dfdef1a1692827106d4328b2380d718f6229911a387679de84c197441d9c1"
+      },
+      {
+        "file": "docs/evidence/r7-mobile-input/pair-320-font2_5-submit.png",
+        "bytes": 121662,
+        "sha256": "38246e443559957fce62fa50a9eaee5b800fef2692d82667d6b6ea65382ad247",
+        "width": 880,
+        "height": 1760
+      },
+      {
+        "file": "docs/evidence/r7-mobile-input/pair-320-font2_5-submit.xml",
+        "bytes": 10092,
+        "sha256": "2d39d2381c132efbfed4386cff459753cc52e459369ed7f7f868f68e6d96804d"
+      },
+      {
+        "file": "docs/evidence/r7-mobile-input/pair-invalid-error.png",
+        "bytes": 97573,
+        "sha256": "28b95caaf7f97f0492e83972f2861f35383f17c26bb5e997a03755d2fa5a6102",
+        "width": 880,
+        "height": 1760
+      },
+      {
+        "file": "docs/evidence/r7-mobile-input/pair-invalid-error.xml",
+        "bytes": 13108,
+        "sha256": "029a673934ee8b05a030a988a12e6cc87e54b01ebd42c93931f1f1ce672cf014"
+      },
+      {
+        "file": "docs/evidence/r7-mobile-input/devices-320-font1.png",
+        "bytes": 140928,
+        "sha256": "fbe39c9ad9a9fbb03726fb277350b557657d81725d3be8d0ac08c7641ba08750",
+        "width": 880,
+        "height": 1760
+      },
+      {
+        "file": "docs/evidence/r7-mobile-input/devices-320-font1.xml",
+        "bytes": 16169,
+        "sha256": "8b29a9acb79a7704065a55ed0280624f610961757a497844686328969bdcbfd4"
+      },
+      {
+        "file": "docs/evidence/r7-mobile-input/devices-320-font2_5.png",
+        "bytes": 110232,
+        "sha256": "49c1b4fb8c3e693a889990a673509c31d9b3c0e1233865a35899bd3e90ba0c7c",
+        "width": 880,
+        "height": 1760
+      },
+      {
+        "file": "docs/evidence/r7-mobile-input/devices-320-font2_5.xml",
+        "bytes": 9555,
+        "sha256": "fb9007b5148dd8c2d6cd084927cc2e5ec2503ccf9b07f2db160aeae53fb592a1"
+      },
+      {
+        "file": "docs/evidence/r7-mobile-input/devices-remove-confirm.png",
+        "bytes": 151370,
+        "sha256": "bb852800212718876a96d2f560aefd2cedc7672c5c8216a92aab64e767f5524d",
+        "width": 880,
+        "height": 1760
+      },
+      {
+        "file": "docs/evidence/r7-mobile-input/devices-remove-confirm.xml",
+        "bytes": 7154,
+        "sha256": "f1d7259b6fbbe5abcf3f940c43c47e5ee22fd1922199b55055334a87723b8752"
+      },
+      {
+        "file": "docs/evidence/r7-mobile-input/first-observation-pair-320-font2_5-submit.png",
+        "bytes": 114009,
+        "sha256": "f5f17097de6462bf442fab293207e251a915021964fcd3effb0b33dfc46f41cb",
+        "scope": "First native layout observation after initial implementation; not the original pre-refactor baseline."
+      },
+      {
+        "file": "docs/evidence/r7-mobile-input/first-observation-pair-320-font2_5-submit.xml",
+        "bytes": 10091,
+        "sha256": "cec497ec0651aaad63374853ce030802e43078aad33e09dad53379fd073c83bb",
+        "scope": "First native layout observation after initial implementation; not the original pre-refactor baseline."
+      },
+      {
+        "file": "docs/evidence/r7-mobile-input/first-observation-devices-320-font2_5.png",
+        "bytes": 104342,
+        "sha256": "b2ccccff09e7f87b73c2be31ae243bea2eec95217162c0448acd2855090fbdef",
+        "scope": "First native layout observation after initial implementation; not the original pre-refactor baseline."
+      },
+      {
+        "file": "docs/evidence/r7-mobile-input/first-observation-devices-320-font2_5.xml",
+        "bytes": 11723,
+        "sha256": "f2e0dd6fd5f4e90bcaa395a73587e39a0660fee61e1ca8d129b1c1ebe4f85675",
+        "scope": "First native layout observation after initial implementation; not the original pre-refactor baseline."
+      }
+    ],
+    "stagedAppModulesMatch": true,
+    "originalMobileAppPackageLockUnchanged": true,
+    "qaRunner": {
+      "path": ".tmp/refactor-tests/r7-native-R1NO7E/native-ui.cjs",
+      "sha256": "863117699eeb949e0a28b8dc6dbd756a1705e47b39dc696f0b458e63a03c5582"
+    },
+    "setupFindings": [
+      "Original-directory prebuild failed to locate MainApplication; ASCII staging prebuild succeeded; unique cause not established.",
+      "Gradle wrapper download timed out; reused locally installed 9.3.1. Google Maven direct timed out and configured proxy returned HTTP 200; deliberately stopped unproxied build and rebuilt with explicit proxy and certificate checks retained.",
+      "Default development-server launch did not load the JS bundle. Used current verified production Hermes bytecode embedded in default debug assets; native host unchanged; final UI run had no development server."
+    ],
+    "remaining": [
+      "Device removal system Alert did not dismiss on hardware back; explicit Cancel returned to device list.",
+      "Full native camera/keyboard/safe-area and media-library anchor matrix; TalkBack/VoiceOver; actual desktop authorization/network; iOS native build; physical-device decode/rotation/PSS."
+    ],
+    "cleanup": {
+      "nativeUiPassedForScope": true,
+      "metroStopped": true,
+      "ownedEmulatorShutdownRequested": true,
+      "fontScaleRestored": 1,
+      "windowSizeRestored": true,
+      "retained": "Owned stage/SDK/AVD/build artifacts retained for reproducible subsequent QA. Original mobile app/package/lock unchanged. No production install/publish.",
+      "ownedEmulatorStopped": true
+    }
+  },
+  "scope": "Desktop source unchanged in this batch; previous desktop window/zoom evidence remains historical. Native evidence covers the described synthetic offline-device Android layout flow only. Full R6/R7/R8 and the overall goal remain in progress."
+}

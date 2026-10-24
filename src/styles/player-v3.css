@@ -1,0 +1,809 @@
+
+/* ═══════════════════════════════════════════════════════════════
+   v3 · 播放页视觉重制
+   ───────────────────────────────────────────────────────────────
+   只覆盖视觉，不改结构：所有类名与 DOM 层级保持原样，
+   verify-desktop-player-* / verify-player-* 依赖的选择器全部可用。
+   设计语言：影院感的深色舞台 + 浮动玻璃控制岛 + 青靛点缀。
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ─── 遮罩：径向暗角，而不是一块死黑 ─── */
+.player-overlay {
+  padding: 28px 2.4vw;
+  background:
+    radial-gradient(120% 90% at 50% 0%, rgba(18, 28, 44, 0.72), transparent 62%),
+    radial-gradient(140% 120% at 50% 108%, rgba(8, 12, 20, 0.94), transparent 70%),
+    rgba(3, 5, 9, 0.93);
+  backdrop-filter: blur(10px) saturate(1.05);
+  -webkit-backdrop-filter: blur(10px) saturate(1.05);
+}
+
+/* ─── 外壳：圆角 + 细边 + 大投影 ─── */
+.player-shell {
+  max-height: 100%;
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  background: #000;
+  box-shadow:
+    0 40px 120px rgba(0, 0, 0, 0.72),
+    0 0 0 1px rgba(255, 255, 255, 0.03),
+    0 0 80px rgba(45, 212, 234, 0.07);
+  animation: player-shell-in 0.34s var(--ease-out);
+}
+
+@keyframes player-shell-in {
+  from { opacity: 0; transform: translateY(14px) scale(0.985); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.player-shell.web-fullscreen,
+.player-shell:fullscreen {
+  width: 100vw;
+  height: 100vh;
+  max-height: none;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.player-overlay-web-fullscreen {
+  padding: 0;
+}
+
+/* The native video window cannot be clipped or covered by DOM chrome. */
+.player-shell.mpv-shell:not(.web-fullscreen) {
+  width: min(100%, 1440px);
+  height: 100%;
+}
+
+.player-shell.mpv-shell {
+  animation: none;
+}
+
+.mpv-shell .player-stage,
+.mpv-shell .player-video-surface {
+  border-radius: 0;
+}
+
+.mpv-shell:not(.web-fullscreen) .player-video-surface {
+  aspect-ratio: auto;
+}
+
+.mpv-shell .player-topbar {
+  position: relative;
+  flex: 0 0 auto;
+  background: #080c13;
+}
+
+.mpv-shell.controls-hidden .player-topbar,
+.mpv-shell.controls-hidden .player-toolbar {
+  opacity: 1;
+  transform: none;
+  pointer-events: auto;
+}
+
+.mpv-shell.controls-hidden .player-topbar * {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.player-native-menu-panel {
+  flex: 0 0 clamp(150px, 25%, 280px);
+  min-width: 0;
+  max-width: 50%;
+  padding: 12px;
+  overflow: auto;
+  background: #0c121c;
+  border-left: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.mpv-shell .player-native-menu-panel .player-menu {
+  position: static;
+  width: 100%;
+  min-width: 0;
+  max-width: none;
+  max-height: none;
+  animation: none;
+  box-shadow: none;
+}
+
+.player-video-surface {
+  border-radius: 20px 20px 0 0;
+  background: #000;
+}
+
+.player-shell.web-fullscreen .player-video-surface,
+.player-shell:fullscreen .player-video-surface {
+  aspect-ratio: auto;
+  border-radius: 0;
+}
+
+/* ─── 顶栏：悬浮玻璃条，不用整条渐变糊住画面 ─── */
+.player-topbar {
+  gap: 14px;
+  min-height: 60px;
+  padding: 12px 16px;
+  background: linear-gradient(180deg, rgba(3, 6, 11, 0.82) 0%, rgba(3, 6, 11, 0.42) 62%, transparent 100%);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+.player-close {
+  width: 36px;
+  height: 36px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  background: rgba(10, 14, 22, 0.62);
+  color: rgba(255, 255, 255, 0.88);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.3);
+}
+
+.player-close:hover {
+  background: rgba(229, 72, 77, 0.9);
+  border-color: rgba(229, 72, 77, 0.9);
+  color: #fff;
+  transform: none;
+}
+
+.player-header-text {
+  gap: 4px;
+  padding-right: 8px;
+}
+
+.player-title {
+  font-size: 14px;
+  font-weight: 650;
+  letter-spacing: 0.01em;
+  color: #fff;
+  text-shadow: 0 1px 12px rgba(0, 0, 0, 0.65);
+}
+
+.player-meta {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.52);
+  letter-spacing: 0.04em;
+}
+
+.player-topbar-tools {
+  gap: 2px;
+  padding: 3px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(10, 14, 22, 0.55);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+
+.player-topbar-tools .player-control-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 999px;
+  color: rgba(255, 255, 255, 0.78);
+}
+
+.player-topbar-tools .player-control-btn:hover {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.player-topbar-tools .player-control-btn.active {
+  color: var(--accent);
+  background: rgba(45, 212, 234, 0.16);
+}
+
+/* ─── 中央播放键 ─── */
+.player-center-play {
+  width: 78px;
+  height: 78px;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  background: rgba(8, 12, 19, 0.5);
+  box-shadow: 0 18px 46px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.player-center-play:hover {
+  background: var(--accent-grad);
+  border-color: transparent;
+  color: #061019;
+  box-shadow: 0 20px 52px rgba(0, 0, 0, 0.45), 0 0 42px var(--accent-glow);
+}
+
+.player-center-play svg {
+  width: 30px;
+  height: 30px;
+}
+
+/* ─── 底部控制岛 ─── */
+.player-toolbar {
+  gap: 10px;
+  min-height: 0;
+  padding: 14px 18px 16px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 0 0 20px 20px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.045), rgba(255, 255, 255, 0.012)),
+    #080c13;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  color: rgba(255, 255, 255, 0.9);
+}
+
+/* 进度行：时间做成等宽数字，轨道加粗、渐变填充 */
+.player-progress-row {
+  gap: 14px;
+  padding: 2px 2px 8px;
+}
+
+.player-time-current,
+.player-time-total {
+  min-width: 52px;
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: rgba(255, 255, 255, 0.86);
+}
+
+.player-time-total {
+  color: rgba(255, 255, 255, 0.38);
+}
+
+.player-progress-range::-webkit-slider-runnable-track {
+  height: 4px;
+  border-radius: 999px;
+  background: linear-gradient(
+    90deg,
+    var(--accent) 0%,
+    var(--accent-2) var(--player-progress, 0%),
+    rgba(255, 255, 255, 0.16) var(--player-progress, 0%),
+    rgba(255, 255, 255, 0.16) 100%
+  );
+}
+
+.player-progress-range:hover::-webkit-slider-runnable-track {
+  height: 6px;
+}
+
+.player-range::-webkit-slider-thumb {
+  width: 13px;
+  height: 13px;
+  margin-top: -4.5px;
+  background: #fff;
+  box-shadow: 0 0 0 3px rgba(45, 212, 234, 0.28), 0 2px 8px rgba(0, 0, 0, 0.45);
+  opacity: 0;
+  transition: opacity 0.14s ease;
+}
+
+.player-progress-wrap:hover .player-range::-webkit-slider-thumb,
+.player-progress-wrap:focus-within .player-range::-webkit-slider-thumb,
+.player-volume-control:hover .player-range::-webkit-slider-thumb {
+  opacity: 1;
+}
+
+.player-volume-range::-webkit-slider-runnable-track {
+  height: 4px;
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.92) 0%,
+    rgba(255, 255, 255, 0.92) var(--player-volume, 100%),
+    rgba(255, 255, 255, 0.18) var(--player-volume, 100%),
+    rgba(255, 255, 255, 0.18) 100%
+  );
+}
+
+/* 控制行：左侧传输键做成一枚主按钮 + 三枚次按钮 */
+.player-controls-row {
+  flex-wrap: wrap;
+  gap: 14px;
+  padding: 2px 0 0;
+}
+
+.player-right-controls {
+  max-width: 100%;
+  flex-wrap: wrap;
+  row-gap: 8px;
+}
+
+.player-left-controls {
+  gap: 2px;
+}
+
+.player-control-btn {
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  color: rgba(255, 255, 255, 0.72);
+  transition: background var(--transition-fast), color var(--transition-fast);
+}
+
+.player-control-btn svg {
+  width: 17px;
+  height: 17px;
+}
+
+.player-control-btn:hover {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.player-control-btn:disabled {
+  opacity: 0.26;
+}
+
+.player-play-toggle {
+  width: 42px;
+  height: 42px;
+  margin: 0 6px;
+  border-radius: 999px;
+  background: var(--accent-grad);
+  color: #061019;
+  box-shadow: 0 8px 22px rgba(45, 212, 234, 0.26), inset 0 1px 0 rgba(255, 255, 255, 0.4);
+}
+
+.player-play-toggle:hover {
+  background: var(--accent-grad);
+  color: #061019;
+  filter: brightness(1.08);
+  box-shadow: 0 10px 28px rgba(45, 212, 234, 0.34), inset 0 1px 0 rgba(255, 255, 255, 0.45);
+}
+
+.player-play-toggle svg {
+  width: 18px;
+  height: 18px;
+}
+
+/* 右侧工具：文字按钮做成胶囊，音量靠右收齐 */
+.player-right-controls {
+  gap: 4px;
+}
+
+.player-text-button {
+  min-height: 30px;
+  padding: 0 11px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.045);
+  color: rgba(255, 255, 255, 0.82);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  transition: background var(--transition-fast), border-color var(--transition-fast), color var(--transition-fast);
+}
+
+.player-text-button:hover {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.11);
+  border-color: rgba(255, 255, 255, 0.18);
+}
+
+.player-volume-control {
+  width: 128px;
+  min-width: 128px;
+  flex-basis: 128px;
+  gap: 4px;
+  padding-left: 6px;
+}
+
+.player-volume-range {
+  width: 88px;
+  min-width: 88px;
+  opacity: 0.5;
+  transform: none;
+}
+
+.player-volume-control:hover .player-volume-range {
+  opacity: 1;
+  transform: none;
+}
+
+/* ─── 弹出菜单：实底 + 圆角 + 快速浮现 ─── */
+.player-menu {
+  min-width: 148px;
+  gap: 3px;
+  padding: 7px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 14px;
+  background: #0d141f;
+  box-shadow: 0 22px 54px rgba(0, 0, 0, 0.62), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  animation: player-menu-in 0.14s var(--ease-out);
+  transform-origin: bottom right;
+}
+
+@keyframes player-menu-in {
+  from { opacity: 0; transform: translateY(6px) scale(0.97); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.player-menu button {
+  min-height: 32px;
+  padding: 0 11px;
+  border-radius: 9px;
+  color: rgba(255, 255, 255, 0.78);
+  font-size: 12.5px;
+}
+
+.player-menu button:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
+}
+
+.player-menu button.active {
+  background: rgba(45, 212, 234, 0.16);
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.player-menu-title {
+  color: rgba(255, 255, 255, 0.42);
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 8px 11px 4px;
+}
+
+.player-menu-note {
+  color: rgba(255, 255, 255, 0.4);
+  font-size: 11px;
+}
+
+/* ─── 进度预览：更轻的浮层 ─── */
+.player-progress-preview {
+  width: min(176px, calc(100vw - 36px));
+  padding: 7px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 12px;
+  background: #0c121c;
+  box-shadow: 0 18px 44px rgba(0, 0, 0, 0.55);
+}
+
+.player-progress-preview::after {
+  background: #0c121c;
+  border-left-color: rgba(255, 255, 255, 0.14);
+  border-top-color: rgba(255, 255, 255, 0.14);
+}
+
+.player-progress-preview-image {
+  border-radius: 7px;
+  background: #131c29;
+}
+
+.player-progress-preview-time {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: rgba(255, 255, 255, 0.92);
+}
+
+/* ─── 播放列表：右侧玻璃抽屉 ─── */
+.player-playlist-rail {
+  width: 56px;
+  flex-basis: 56px;
+  border-left: 1px solid rgba(255, 255, 255, 0.07);
+  background: linear-gradient(180deg, rgba(11, 16, 25, 0.9), rgba(7, 10, 16, 0.96));
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+.player-playlist-handle {
+  width: 36px;
+  height: 84px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.05);
+  color: rgba(255, 255, 255, 0.78);
+  box-shadow: none;
+}
+
+.player-playlist-handle:hover,
+.player-playlist-handle.active {
+  border-color: rgba(45, 212, 234, 0.55);
+  background: rgba(45, 212, 234, 0.14);
+  color: var(--accent);
+}
+
+.player-playlist-sidecar {
+  width: min(330px, 27vw);
+  min-width: 288px;
+  flex: 0 0 min(330px, 27vw);
+  border-left: 1px solid rgba(255, 255, 255, 0.08);
+  background: linear-gradient(180deg, #0b111a 0%, #070b12 100%);
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.player-playlist-header {
+  padding: 16px 16px 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+.player-playlist-header p {
+  font-size: 13px;
+  font-weight: 650;
+  letter-spacing: 0.02em;
+  color: #fff;
+}
+
+.player-playlist-header span {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.38);
+}
+
+.player-playlist-list {
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.player-playlist-item {
+  min-height: 50px;
+  grid-template-columns: 24px minmax(0, 1fr) auto;
+  gap: 10px;
+  padding: 7px 9px;
+  border-radius: 12px;
+  color: rgba(255, 255, 255, 0.74);
+}
+
+.player-playlist-item::before {
+  width: 2.5px;
+  height: 56%;
+  border-radius: 999px;
+  background: var(--accent);
+  box-shadow: 0 0 10px var(--accent-glow);
+}
+
+.player-playlist-item:hover {
+  background: rgba(255, 255, 255, 0.05);
+  transform: none;
+}
+
+.player-playlist-item.active {
+  background: linear-gradient(90deg, rgba(45, 212, 234, 0.14), rgba(45, 212, 234, 0.03));
+  box-shadow: none;
+}
+
+.player-playlist-index {
+  width: 22px;
+  height: 22px;
+  border: 0;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.32);
+  font-size: 10.5px;
+}
+
+.player-playlist-item.active .player-playlist-index {
+  background: var(--accent-grad);
+  color: #061019;
+  font-weight: 700;
+  box-shadow: 0 0 10px var(--accent-glow);
+}
+
+.player-playlist-name {
+  font-size: 12.5px;
+  color: rgba(255, 255, 255, 0.78);
+}
+
+.player-playlist-item.active .player-playlist-name {
+  color: #fff;
+  font-weight: 600;
+}
+
+.player-playlist-meta {
+  font-size: 10.5px;
+  color: rgba(255, 255, 255, 0.32);
+}
+
+.player-playlist-now {
+  height: 19px;
+  padding: 0 7px;
+  border: 0;
+  background: rgba(45, 212, 234, 0.16);
+  color: var(--accent);
+  font-size: 9.5px;
+  letter-spacing: 0.06em;
+  box-shadow: none;
+}
+
+/* ─── 分析面板：同一套玻璃语言 ─── */
+.player-analysis-sidecar {
+  border-left: 1px solid rgba(255, 255, 255, 0.08);
+  background: linear-gradient(180deg, #0b111a 0%, #070b12 100%);
+}
+
+.player-analysis-sidecar .player-analysis-panel {
+  background: transparent;
+  color: rgba(255, 255, 255, 0.86);
+}
+
+.player-analysis-panel {
+  background: #0c121c;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 14px;
+  box-shadow: 0 22px 54px rgba(0, 0, 0, 0.55);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+.player-analysis-head h3 {
+  font-size: 13.5px;
+  font-weight: 650;
+  letter-spacing: 0.01em;
+}
+
+.player-analysis-kicker {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.38);
+}
+
+.player-analysis-meta span {
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.04);
+  color: rgba(255, 255, 255, 0.6);
+  border-radius: 999px;
+}
+
+.player-analysis-tags span {
+  border-color: rgba(45, 212, 234, 0.26);
+  background: rgba(45, 212, 234, 0.12);
+  color: var(--accent);
+}
+
+/* ─── 加载 / 错误 / 提示 ─── */
+.player-alert {
+  left: 18px;
+  right: 18px;
+  bottom: 18px;
+  padding: 11px 14px;
+  border: 1px solid rgba(251, 191, 36, 0.28);
+  border-radius: 12px;
+  background: rgba(28, 22, 10, 0.92);
+  color: rgba(255, 240, 200, 0.92);
+  font-size: 12px;
+}
+
+.player-stage-card {
+  gap: 18px;
+  padding: 34px 28px;
+}
+
+.player-stage-icon {
+  width: 64px;
+  height: 64px;
+  background: rgba(45, 212, 234, 0.1);
+  color: var(--accent);
+  border: 1px solid rgba(45, 212, 234, 0.22);
+}
+
+.player-stage-title {
+  font-size: 15px;
+  font-weight: 650;
+  color: #fff;
+}
+
+.player-stage-copy {
+  margin-top: 5px;
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+/* ─── 网页模式顶栏 ─── */
+.player-webview-bar {
+  height: 52px;
+  padding: 0 14px 0 18px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  background: #0b1018;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.player-webview-title strong {
+  font-size: 13px;
+  font-weight: 650;
+}
+
+.player-webview-title span:not(.player-webview-dot) {
+  color: rgba(255, 255, 255, 0.42);
+  font-size: 11.5px;
+}
+
+.player-webview-dot {
+  width: 7px;
+  height: 7px;
+  background: var(--success);
+  box-shadow: 0 0 10px rgba(52, 211, 153, 0.5);
+}
+
+.player-webview-tool,
+.player-webview-close {
+  width: 34px;
+  height: 34px;
+  border-radius: 999px;
+  border-color: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+/* ─── 响应式：窄窗口把控制岛压扁，但不牺牲可点区域 ─── */
+@media (max-width: 1080px) {
+  .player-overlay {
+    padding: 20px 12px;
+  }
+
+  .player-overlay-web-fullscreen {
+    padding: 0;
+  }
+
+  .player-toolbar {
+    padding: 12px 14px 14px;
+  }
+
+  .player-volume-control {
+    width: 108px;
+    min-width: 108px;
+    flex-basis: 108px;
+  }
+
+  .player-volume-range {
+    width: 70px;
+    min-width: 70px;
+  }
+}
+
+@media (max-width: 820px) {
+  .player-progress-row {
+    gap: 10px;
+  }
+
+  .player-time-current,
+  .player-time-total {
+    min-width: 44px;
+    font-size: 11px;
+  }
+
+  .player-text-button {
+    padding: 0 8px;
+    font-size: 11.5px;
+  }
+}
+
+/* 减少动态：入场动画关掉，只保留状态切换 */
+@media (prefers-reduced-motion: reduce) {
+  .player-shell,
+  .player-menu {
+    animation: none !important;
+  }
+}
+
+/* ─── 浅色主题：播放页始终是影院暗场 ───
+   settings.css 里旧的 .app.theme-light 覆盖会把播放器改成浅色玻璃，
+   这里以同等特异度重新声明，让播放页在两种主题下都保持暗场。 */
+.app.theme-light .player-close {
+  border-color: rgba(255, 255, 255, 0.16);
+  background: rgba(10, 14, 22, 0.62);
+  color: rgba(255, 255, 255, 0.88);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.3);
+}
+
+.app.theme-light .player-close:hover {
+  background: #e5484d;
+  border-color: #e5484d;
+  color: #fff;
+}
+
+.app.theme-light .player-toolbar {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.045), rgba(255, 255, 255, 0.012)),
+    #080c13;
+  color: rgba(255, 255, 255, 0.9);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+
+.app.theme-light .player-video {
+  box-shadow: none;
+}
+
+.app.theme-light .player-overlay {
+  backdrop-filter: blur(10px) saturate(1.05);
+  -webkit-backdrop-filter: blur(10px) saturate(1.05);
+}

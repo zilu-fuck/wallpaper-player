@@ -1,0 +1,1967 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-10-23T08:43:19.585Z",
+  "phase": "R7 desktop splash clock consistency and bounded visibility",
+  "previousEvidence": "docs/evidence/r8-windows-delivery.json",
+  "previousGoalTurn": "progress",
+  "goalStatus": "active",
+  "problem": {
+    "confirmedBy": ".tmp/refactor-tests/r8-windows-delivery/splash-clock-observation.json",
+    "before": "Boot used performance.now while remaining duration used Date.now; a 100ms startup queued 0ms instead of 540ms"
+  },
+  "implementation": {
+    "sourceFiles": [
+      "src/services/splash.js",
+      "src/splash-boot.js"
+    ],
+    "clock": "Boot records the chosen performance/date clock; dismissal uses the same clock",
+    "zeroTimestampAccepted": true,
+    "wallClockChangesDoNotAffectMonotonicTiming": true,
+    "minimumVisibleMs": 640,
+    "fadeMs": 320,
+    "fallbackAfterMs": 1600,
+    "repeatedWatchOrDismissIsIdempotent": true,
+    "absentDomReleasesDeadline": true,
+    "backwardsFallbackClockBoundedToOneMinimum": true,
+    "hardDeadlineOverridesBackwardsDateClock": true,
+    "themeAndStyleChanges": false,
+    "mobileChanges": false,
+    "dependencyChanges": false
+  },
+  "verification": {
+    "beforeRegressionFailed": true,
+    "beforeLog": ".tmp/refactor-tests/r7-splash-clock/before.log",
+    "deterministicCases": 11,
+    "command": "npm run verify:splash-clock",
+    "native": {
+      "passed": true,
+      "cases": [
+        {
+          "scenario": "fast",
+          "errors": [],
+          "clock": "performance",
+          "start": 37.399999998509884,
+          "leave": 654,
+          "primaryUi": true,
+          "removed": 974.7000000029802
+        },
+        {
+          "scenario": "wall-clock-jump",
+          "errors": [],
+          "clock": "performance",
+          "start": 38.899999998509884,
+          "leave": 642.6000000014901,
+          "primaryUi": true,
+          "removed": 970.7999999970198
+        },
+        {
+          "scenario": "raf-and-settings-held",
+          "errors": [],
+          "clock": "performance",
+          "start": 31.700000002980232,
+          "leave": 1610.8999999985099,
+          "primaryUi": false,
+          "removed": 1931.5999999940395
+        }
+      ],
+      "electron": "44.9.0",
+      "scope": "Current production dist/App/preload and guarded settings IPC in actual Electron; optional plugin/media status probes are controlled fixtures, no full application main or installer acceptance"
+    },
+    "actualInitializationRecoveryPassed": true,
+    "actualResponsiveCases": 24,
+    "layoutBehavior": {
+      "navigation": {
+        "focusWrap": true,
+        "backgroundInert": true,
+        "escapeAndFocusReturn": true,
+        "directoryHitTest": true
+      },
+      "preferencePreserved": true,
+      "settings": [
+        {
+          "page": "基础设置",
+          "withinViewport": true,
+          "overflow": false
+        },
+        {
+          "page": "手机访问",
+          "withinViewport": true,
+          "overflow": false
+        },
+        {
+          "page": "插件管理",
+          "withinViewport": true,
+          "overflow": false
+        },
+        {
+          "page": "系统状态",
+          "withinViewport": true,
+          "overflow": false
+        }
+      ],
+      "dock": {
+        "width": 376,
+        "withinViewport": true,
+        "overflow": false,
+        "backgroundInert": true
+      },
+      "reducedMotion": {
+        "matches": true,
+        "transition": "1e-05s",
+        "animation": "1e-05s"
+      }
+    },
+    "actionlint": {
+      "version": "1.7.12",
+      "exitCode": 0
+    },
+    "powershell": {
+      "scripts": 113,
+      "failures": []
+    },
+    "cloudCiTriggered": false,
+    "retainedNativeHarnessFailures": [
+      "native-ui.log",
+      "native-ui-traced.log"
+    ],
+    "nativeHarnessCorrection": "Load a blank page to create a renderer before awaiting CDP Page.enable; then install the observation before navigating to production dist",
+    "nativeScope": "Current built production renderer, actual preload and guarded settings IPC in Electron44. Optional media/plugin probes are fixtures; this is not a new installed NSIS/portable acceptance"
+  },
+  "packaging": {
+    "newWindowsDistributionBuilt": false,
+    "previousWindowsQaInputsAndArtifactsRetained": true,
+    "retainedQa": [
+      {
+        "file": "E:\\wallpaper播放器\\.tmp\\refactor-tests\\r8-windows-delivery\\中文交付 QA' & $workspace\\release\\windows-9.9.0-61373658-ea43-4520-8bed-87db7f536e2d\\win-unpacked\\resources\\app.asar",
+        "sha256": "427351fb6c16371385e2195b04f5fb400d2c40d7667237af9cea95e1ab1d4027"
+      },
+      {
+        "file": "E:\\wallpaper播放器\\.tmp\\refactor-tests\\r8-windows-delivery\\中文交付 QA' & $workspace\\release\\windows-9.9.0-61373658-ea43-4520-8bed-87db7f536e2d\\Wallpaper-Player-Setup-9.9.0.exe",
+        "sha256": "c7238a04247d708e7136d2f1656602f7e1474fcb8a78536b73644ad453481447"
+      },
+      {
+        "file": "E:\\wallpaper播放器\\.tmp\\refactor-tests\\r8-windows-delivery\\中文交付 QA' & $workspace\\release\\windows-9.9.0-61373658-ea43-4520-8bed-87db7f536e2d\\Wallpaper-Player-9.9.0.exe",
+        "sha256": "d647127d493ecabfb1236d53bfe86fa69953dd72a06fad2c69800d6c8c00b83b"
+      },
+      {
+        "file": "E:\\wallpaper播放器\\.tmp\\refactor-tests\\r8-windows-delivery\\中文交付 QA' & $workspace\\release\\windows-9.9.0-61373658-ea43-4520-8bed-87db7f536e2d\\Wallpaper-Player-Setup-9.9.0.exe.blockmap",
+        "sha256": "9ade0b7c8e1a58aa0992c90bb102bf7a51b2013151fb6cdfad92936902c8fb27"
+      },
+      {
+        "file": "E:\\wallpaper播放器\\.tmp\\refactor-tests\\r8-windows-delivery\\中文交付 QA' & $workspace\\release\\windows-9.9.0-61373658-ea43-4520-8bed-87db7f536e2d\\latest.yml",
+        "sha256": "87dde4a0150d4493806e27e9129f39c1e35bad9751977c3fac5d7ee3441dc458"
+      },
+      {
+        "file": "E:\\wallpaper播放器\\.tmp\\refactor-tests\\r8-windows-delivery\\中文交付 QA' & $workspace\\release\\windows-9.9.0-61373658-ea43-4520-8bed-87db7f536e2d\\plugins\\Wallpaper-Player-Plugin-video-analysis-1.0.0.zip",
+        "sha256": "643e43176233506fba5051729521bd19ea2a72d12553cc9408ff4881b6c1fe99"
+      },
+      {
+        "file": "E:\\wallpaper播放器\\.tmp\\refactor-tests\\r8-windows-delivery\\中文交付 QA' & $workspace\\release\\windows-9.9.0-61373658-ea43-4520-8bed-87db7f536e2d\\plugins\\Wallpaper-Player-Plugin-ai-search-0.1.0.zip",
+        "sha256": "464e129ebb9a4731fff800c26c6e4c94ddbe33fbd1699486c166d9e112a97fc8"
+      },
+      {
+        "file": "E:\\wallpaper播放器\\.tmp\\refactor-tests\\r8-windows-delivery\\中文交付 QA' & $workspace\\release\\windows-9.9.0-61373658-ea43-4520-8bed-87db7f536e2d\\plugins\\Wallpaper-Player-Plugin-agent-bridge-0.1.0.zip",
+        "sha256": "9f499408c282a144ffe411648d476fd4e36bd010c6e8974be3b9fd16460bed1a"
+      },
+      {
+        "file": "E:\\wallpaper播放器\\.tmp\\refactor-tests\\r8-windows-delivery\\中文交付 QA' & $workspace\\release\\windows-9.9.1-10620f4d-1401-4182-aa75-0de284854712\\win-unpacked\\resources\\app.asar",
+        "sha256": "8c0a744d4d96017039e0cb5b8d08f5a7f01e7940c375403ba211a1ee68f143d5"
+      },
+      {
+        "file": "E:\\wallpaper播放器\\.tmp\\refactor-tests\\r8-windows-delivery\\中文交付 QA' & $workspace\\release\\windows-9.9.1-10620f4d-1401-4182-aa75-0de284854712\\Wallpaper-Player-Setup-9.9.1.exe",
+        "sha256": "0c0e287be61175bd1eecfcd6ebd49d1aab1e101524b89a9c34d5a5659caa4a14"
+      },
+      {
+        "file": "E:\\wallpaper播放器\\.tmp\\refactor-tests\\r8-windows-delivery\\中文交付 QA' & $workspace\\release\\windows-9.9.1-10620f4d-1401-4182-aa75-0de284854712\\Wallpaper-Player-9.9.1.exe",
+        "sha256": "c30925a0bcd135180702d6ecde1f81bdd1107ca8ac5755a43506670d81d8933f"
+      },
+      {
+        "file": "E:\\wallpaper播放器\\.tmp\\refactor-tests\\r8-windows-delivery\\中文交付 QA' & $workspace\\release\\windows-9.9.1-10620f4d-1401-4182-aa75-0de284854712\\Wallpaper-Player-Setup-9.9.1.exe.blockmap",
+        "sha256": "8d9c6ced517b1767d9d56bc493b5f7174a3ce772e60ed1363a40513855e40156"
+      },
+      {
+        "file": "E:\\wallpaper播放器\\.tmp\\refactor-tests\\r8-windows-delivery\\中文交付 QA' & $workspace\\release\\windows-9.9.1-10620f4d-1401-4182-aa75-0de284854712\\latest.yml",
+        "sha256": "c239727c8585a197b63bbfa1f360fa334cece173f86c965569596ae34ecd50bd"
+      },
+      {
+        "file": "E:\\wallpaper播放器\\.tmp\\refactor-tests\\r8-windows-delivery\\中文交付 QA' & $workspace\\release\\windows-9.9.1-10620f4d-1401-4182-aa75-0de284854712\\plugins\\Wallpaper-Player-Plugin-video-analysis-1.0.0.zip",
+        "sha256": "643e43176233506fba5051729521bd19ea2a72d12553cc9408ff4881b6c1fe99"
+      },
+      {
+        "file": "E:\\wallpaper播放器\\.tmp\\refactor-tests\\r8-windows-delivery\\中文交付 QA' & $workspace\\release\\windows-9.9.1-10620f4d-1401-4182-aa75-0de284854712\\plugins\\Wallpaper-Player-Plugin-ai-search-0.1.0.zip",
+        "sha256": "464e129ebb9a4731fff800c26c6e4c94ddbe33fbd1699486c166d9e112a97fc8"
+      },
+      {
+        "file": "E:\\wallpaper播放器\\.tmp\\refactor-tests\\r8-windows-delivery\\中文交付 QA' & $workspace\\release\\windows-9.9.1-10620f4d-1401-4182-aa75-0de284854712\\plugins\\Wallpaper-Player-Plugin-agent-bridge-0.1.0.zip",
+        "sha256": "9f499408c282a144ffe411648d476fd4e36bd010c6e8974be3b9fd16460bed1a"
+      }
+    ],
+    "currentDistVerifiedByNativeUi": true
+  },
+  "preservation": {
+    "originalFallbackFiles": [
+      {
+        "file": ".tmp-wallpaper-player/analysis-results/G086 Bronya分析结果2026-06-22_20-00-44.json",
+        "bytes": 3873,
+        "sha256": "01db5f778601802471791e416b40c3ac8f96248e4542b78a867eaee77dd265e4",
+        "sha512": "iyw4/Gr6XPWtLoQ9c+6Y4MfSAkwIJ5GEXlylTSgcauA7JdITUqkvviqngOcXtmt0/acatShPvnKSYPYQS4i7Gw=="
+      },
+      {
+        "file": ".tmp-wallpaper-player/downloads/aria2.session",
+        "bytes": 2428,
+        "sha256": "bbe9d72e7e5001c01f3a012fa73e5d35b6d53b9e76e08190bba58973ce1ba9bc",
+        "sha512": "kUeLdSNzgAIPCflk0SjGHwcnPI0onGBAaWNfOWR5mIirAx8P8X5NsaKcuLcanGTkbao6rDlYwv7IkTgAO9IDSw=="
+      },
+      {
+        "file": ".tmp-wallpaper-player/llama-server-err.log",
+        "bytes": 87774,
+        "sha256": "5744b9bb378569a3a4f664b62aad9a4b0025cd7d419cba73b793fb62cb737f42",
+        "sha512": "ZnN0RcBburL6Ar6DvnUg0DSfCPYsKYjnYEas3nHGA5qdG7eXIh4U5vUPxKG8YLizNa7WQQb5kQV0lv/WGbknvw=="
+      },
+      {
+        "file": ".tmp-wallpaper-player/llama-server-out.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "sha512": "z4PhNX7vuL3xVChQ1m2AB9Yg5AULVxXcg/SpIdNs6c5H0NE8XYXysP+DGNKHfuwvY7kxvUdBeoGlODJ6+SfaPg=="
+      },
+      {
+        "file": ".tmp-wallpaper-player/remote-identity.json",
+        "bytes": 566,
+        "sha256": "0abcd8df9c1443a348b050b5abe28ac419ecef717ddf31a0daa680f153061324",
+        "sha512": "XvbFfKC+cCrSnQH/oJMKUFaEalXRT7nfaUR+/x5+PU2zpJAupUIQXIA1l82Fqgb/FrOSVKPPBcZqrkF6ns7qWw=="
+      },
+      {
+        "file": ".tmp-wallpaper-player/scan-index/029fa92465c3409cba74ce3db6b927dfec0d4f581b12122975041a32ab324e8a.json",
+        "bytes": 3642,
+        "sha256": "33b1310886821b4f01322041a561c8a6b4ed10aa351772effb396e7b1b547cfd",
+        "sha512": "5EiJNPPQONupaa7Sh+Sg71Y+rVxn0lfb60Yh9efMOD3utOoQoj49EeQxjkdAHBfMporaGhtWpL7/E58686/zew=="
+      },
+      {
+        "file": ".tmp-wallpaper-player/scan-index/06cf5926d93db3cc7b30882ee7dbecb69d51ce4e00de7901de3d48b866f9afc3.json",
+        "bytes": 2804,
+        "sha256": "274848604327a2f96f0d152b9f23a7b4e5470fdd67c744e1c181e86c2d284059",
+        "sha512": "SfqtOuo1zybHY9rNSzVPEY8GX8ze3//TDKguB+bnjwnkeuVpuQVj2Vty2ylkDHPMjPXmp0jUt68R9zoI+4GX0w=="
+      },
+      {
+        "file": ".tmp-wallpaper-player/scan-index/0e65747e6e0fc76a1e0c86e951c35d6c7392c184ba6cb43724d7d58856ff212a.json",
+        "bytes": 3544,
+        "sha256": "3ac45a0678e6ed4554fe1f315f923d999b0311096acd3c9394e3d85826d37db9",
+        "sha512": "JgrxWZh+aE0Nin+UuLG8ox8+HknyXbJTVUwtv1hCfiFDKIt6NGjqeAY2VvlkIwFriM2ckV6ivxe3Y/gML3K55Q=="
+      },
+      {
+        "file": ".tmp-wallpaper-player/scan-index/114890f3437dd45b34313ba38d9d3c36a09701d5d672bf8abd7af8c922db61af.json",
+        "bytes": 2804,
+        "sha256": "3796d21463d2b2418c485565780e9628a50ab4f1a69d8faeadec1eb70a9af290",
+        "sha512": "HhTKLIOn4KVc35dqiq1C8/vgYqjsy283HCb5hf059Oxtbv5JDDvFX04oTo2bELF3+lKXVphJ6unFDntwFAZ2mQ=="
+      },
+      {
+        "file": ".tmp-wallpaper-player/scan-index/1465f8e823323fe9c4383abb5a38c9e17fc550dd44cd2f14fd7f7242bc309e12.json",
+        "bytes": 3644,
+        "sha256": "1be5fefdb59d8af06de2a6be0eeb0025a96253d719de1e0daced6f1fe35cdde0",
+        "sha512": "CpOFNP0GX5osz0op032Dd7FLmQAOzPuyE93/eojg+9ByVjB+EYnL+lRCNtYYpHKtgUDa70CsKgqsKmj9zrvYjw=="
+      },
+      {
+        "file": ".tmp-wallpaper-player/scan-index/153bae098b5d3524553fcf4d8cbb1eacef2471314948819d043b26cebe199e14.json",
+        "bytes": 3542,
+        "sha256": "689305d629290f70b40c5ea8454db685486f87be218b38da7aa4f0594a1d1cb8",
+        "sha512": "8kerKuwc+cRXh4AudNWIRGsiyRbNQ8/zxsYjznmUe+rNeNL/WnHBot6q/4Vuw2UNi4TyHXw8m0V0MBn46xYkSA=="
+      },
+      {
+        "file": ".tmp-wallpaper-player/scan-index/165f4a9a9309a7ac323647e9acefd754a66c6295cab7db6bdb50830914bf0d68.json",
+        "bytes": 3648,
+        "sha256": "5b0738883aee24ac7e17fc108a221e395380d2bae6a32f3ba3f70606e4b27ebe",
+        "sha512": "GZ7tj7mlwK/O89WI8ML7AjmqLVxdj5e7mYbY14b0R/bjfpE9QZCEPFWI7PzE1Qgd0cUausDqYOydvmZlpzZGEg=="
+      },
+      {
+        "file": ".tmp-wallpaper-player/scan-index/1db67e5d68a60a19388b0338ed1ee18c2a2bcd0025ab168a1d69920c929bd647.json",
+        "bytes": 3648,
+        "sha256": "b19f9d1c96db4b9106b2a28058ab1c33f4d3edc45fa693126cad0efe48cd44dd",
+        "sha512": "vrUy+UuWCJRS4x5JPcvCK5+TjuF5mjdMCEjabdWa9LC7tHyQxtzDHRZml+sMMTD97TLeiKrAoJXOZD0Nis7/PA=="
+      },
+      {
+        "file": ".tmp-wallpaper-player/scan-index/3032598f9f4655037a67986db404cfbf60011a2ca84a1e6edcec794c7deab956.json",
+        "bytes": 2806,
+        "sha256": "db1c59c38bb8ba2122afad18a73d956ec55d4580f4cad17f365b37b71d7e3db8",
+        "sha512": "HVNYzoort16/Ncksp7jBnqk5WCQZJa4KO8eaE0ahR40LJw5m05O/JyT4YGKP1eQfiLxzahH9JX78x69NcGb/jg=="
+      },
+      {
+        "file": ".tmp-wallpaper-player/scan-index/358da0698a4692a8052707f22ba2b9c94b5c4e73080d12c721e622b66a80614c.json",
+        "bytes": 2804,
+        "sha256": "f1fb6fbd25b3d96027a86d6c797b162a74c95544c04f64470ed733ddbc8983ee",
+        "sha512": "rysp1c9kbIPLesxhSgtiIrnJ83hfhytNyyNk0uH6e7GdN/vMbOiHlE642t1ZXqJTauM2hfzPz2e8rL/nP2JdRQ=="
+      },
+      {
+        "file": ".tmp-wallpaper-player/scan-index/5eb5da5dcf86cb8c66f674df75935c030f8e12d86b6373ebcdaa3d7aba7eb672.json",
+        "bytes": 2804,
+        "sha256": "489328dc3fa24223d6db18869658db5d01f915838ba97532de8193f8bedc6f93",
+        "sha512": "T8qvhLmNGsRKWXxfl4Gtw8GwUFVG5yADJG77jBAw7k4f2VWaKPNrLLpNloWUbAjc07irh5+8XbgOBV9XZftm0A=="
+      },
+      {
+        "file": ".tmp-wallpaper-player/scan-index/5f59f687750abe3eb7d55cdb1aa86cb802bf22f3b00e3bb369f77a7ef2584d06.json",
+        "bytes": 3308,
+        "sha256": "ae2763e5e5553a4eb759576c8f26efcffc9ef5aa741ddd6aad78b2e33716a719",
+        "sha512": "0g+ToYRbljDXBhGZZKZcofBZ+hEyEgd0rmuhucc707de8aCvJ5oNX0d74t8MZbS9EKgJ0tRmDrbYpkPcLjoGLg=="
+      },
+      {
+        "file": ".tmp-wallpaper-player/scan-index/602ae02092dd5e362dec6b88bd5afb39f14c218b3e0f0fbd52e5a8d09eddeb0d.json",
+        "bytes": 2804,
+        "sha256": "cd75909f0b53f3d449d479531d62f3ff1bb3144eb918086cc7a25d05816c2a7d",
+        "sha512": "/4Odv2/hdYwttrHPlYyGSedfSREkrg8GsABmSmYCLRSdfMf1X5p3/0ojSEOGXzX8ZeJNvo706Z1EIe+7zwq35g=="
+      },
+      {
+        "file": ".tmp-wallpaper-player/scan-index/664a4a47b45908fdfdf2d6bb5ec7024e41699d7dd2af4110f2889d4eac6dd2d7.json",
+        "bytes": 3644,
+        "sha256": "64835ce867a827d40088ce1b9c8e4e19cb996d0df4c2e676cbb215cf38868556",
+        "sha512": "NVP/GLwJxIW5cfXNSvpnzFyWtmDeu4DzE63wNyLSWFA1nfhwqkcYqVc0+SIKigFFGQqzLt+tHGpUA6eRZPGgkw=="
+      },
+      {
+        "file": ".tmp-wallpaper-player/scan-index/6a4b7a95d1ae5d67f63cc87a4f3486c0a22c35af457355ae63f4303d7bdbcaa1.json",
+        "bytes": 3644,
+        "sha256": "7ab98d842e31b5da1227cf6e00d98e3e32287c53b0965f3e8a964dbc9e982b20",
+        "sha512": "NyiKXbyq1oe6J2npG624E+HF+rCXCdRYs6Il4Ef0gzTtslMoRsfE+DLoPapLYHQSW6U8ExbHQTcwAnDM0U9wqQ=="
+      },
+      {
+        "file": ".tmp-wallpaper-player/scan-index/6c2bfaa6b9f2b41ef00e065bab2a6d71c599e2ce76cc3f5939228ecc7b8be650.json",
+        "bytes": 2804,
+        "sha256": "33dd4002ba26ea91ef1c97f264ef0337dd78b37d06f03a538f514ee0809c5107",
+        "sha512": "F+Ey+/oGXuwgd17lgc1XOAv8Z72NWNqPxumGRLqvou3fyWyHxy2LmBHssjF4dOjZtkNQn//W6Cw/iqQaDi1mOQ=="
+      },
+      {
+        "file": ".tmp-wallpaper-player/scan-index/703cb3b91afdc3a4a39fb95f9d0c0289fe6dcdab34f10425d71858a05164ce3b.json",
+        "bytes": 3648,
+        "sha256": "217ca6aa5c2c3b721795e93c7cb5d819317fa55546fee842c81420f84c353fe8",
+        "sha512": "IUU53piv+yx2nQR68jiDyzrLOW1IAUZbbp7T+GWa1ccecbCAnTooc+xE5NS8IcdbmoCyoaJTQ/obZvI8F3u1ug=="
+      },
+      {
+        "file": ".tmp-wallpaper-player/scan-index/85bd705cb26d94f80943f15877c1c71cc9f9a665c0bf24f8ab568b0b6bacf550.json",
+        "bytes": 2806,
+        "sha256": "d4bb5033f4315903b0083789b87e09f4e06cb294a17313439f21987dd0b3a527",
+        "sha512": "NrfeVgZKaLZ30q5dyBAvCcDZkgicLHIvehVasAO2XXOZZTCWIIRy3nHfXkQmhANQK3YKmTpqnaKrs4GBI6h5nA=="
+      },
+      {
+        "file": ".tmp-wallpaper-player/scan-index/87720e2b63644af82253d5ec9ace977d27e42c03a6033c6811af6c6094928e09.json",
+        "bytes": 2802,
+        "sha256": "2b01b9760b6e8f5605fd9bb0cbc74e6f248c0bec7428982ce0dbb848c1f6e589",
+        "sha512": "iCCi1mNzPOVPyR1cbkBM7AxK/MkwbFER9KR2S0aBAAndRi0T+hVSA0cZ9M9vmDPyjWHgrfGjXb+btYMs44Cd1Q=="
+      },
+      {
+        "file": ".tmp-wallpaper-player/scan-index/959e88efa835995e2afff87fc4257966a41b7f45da19d44dc3369ba0d88599c9.json",
+        "bytes": 3542,
+        "sha256": "bec93346f2dfbf0938b593658fd80e43a9be33b0bd4a0f7bcbf9a8997198ba9e",
+        "sha512": "dQAtg3U7P2g5MYh7BExWdhxBNOsAzhiI/T8QULgKXtsXMNOS6Wz8FFuvvbDEsYEVfidJyTx7XDcM1TNba/snpw=="
+      },
+      {
+        "file": ".tmp-wallpaper-player/scan-index/9d7bcef01cadb37f1a59d31b708084c192007deea8564d134dcc473b0605201c.json",
+        "bytes": 3646,
+        "sha256": "04d6bfae12cdb3e73f828813477825cd39dc803c37893be82455ecebe7734312",
+        "sha512": "mmyVIHPDUxg0J1fw4absJBT8pxXVxGydWULDVqoGgZ/T6n2K+HT+MPsDPC4Q4fzt42I9w93/WkKClNUeKsQBEg=="
+      },
+      {
+        "file": ".tmp-wallpaper-player/scan-index/a02253e6f623d27dfaa6674be31d9b43fc3d9b2c6bcda125418f1c3dd2a25709.json",
+        "bytes": 3646,
+        "sha256": "90f629426a02dbbe9d60c7ad0c28090bd77a96693fcd1187b5215eda49184b86",
+        "sha512": "fG5aIsYjKTh7Jkzn4jXeCKXo7MkJ1MI81w7aVbEp0wp6+hDwsZxg1sDGGEVFKjyaLFL03yzuCSwzSWpm0RaOdg=="
+      },
+      {
+        "file": ".tmp-wallpaper-player/scan-index/a17738a5c4b4bc1ce4358ecff69b8e44a1e1a33a7511d9a11eddecd94b9e58cd.json",
+        "bytes": 3648,
+        "sha256": "a1fd92c4c4c8b9bbfeb105da251cc5230f16f1f68edf7cf909a468da0c242d99",
+        "sha512": "F5HdrOrZUO8fIHS1o89eF7h/7ML40JlbFL20LjQjJ6QyZV1sM7mgbHMrrhmwBmPW7jD9SSG9DJU8RixzIRb4pA=="
+      },
+      {
+        "file": ".tmp-wallpaper-player/scan-index/c53e2ac468d9387f39255a1ee9893eba1abe325ab086dea0025a18d1ef67e75f.json",
+        "bytes": 2804,
+        "sha256": "2042c353b3e1c29eb236d1a1dfce79afdb85839f40f02f0b70d521eff607e6bb",
+        "sha512": "q+AwWtox8bz3pRPCOQJbIhLMae2jHK2MpFgVQOOFSbY2eK9wXc+JsZVZhcuZriT9T6O3virpdZjldWTted0Www=="
+      },
+      {
+        "file": ".tmp-wallpaper-player/scan-index/cb702390842effe5e6e22e77acbda7b2bbea77ed51a5c07e66c3c5d8d0bc15bf.json",
+        "bytes": 3648,
+        "sha256": "718b65c8b9b80caa3c5d34bc3244f750cd8243dc4b8743f637c3b12dbbbbda4a",
+        "sha512": "VwI5kOJHT0HBNfNf53S8wPNjIKD0E1xyayfBFLo7R9GrCm+JAChnXDUD6GVWERfnX/o+g8v1KUXIc6RYwVmZSg=="
+      },
+      {
+        "file": ".tmp-wallpaper-player/scan-index/cbf568b1144651ce061c2dc94a347128724334dd45ac2dd4ebf6890d74c66251.json",
+        "bytes": 2806,
+        "sha256": "e22fd608a0197ea15fdbd8e3320b49d60e518bb4054b74ffb7504cd8e6035134",
+        "sha512": "R+e155qYNIEMMkhu21Nr6saous6xPVus16OS660Z33iA457ArcVOPLhrvG4WJ0zuO30PXvrIgNBH1K82vrgnDQ=="
+      },
+      {
+        "file": ".tmp-wallpaper-player/scan-index/d6cd75e4bc356e88ed2b4c2272c32263e568d67a07b4017d73b22e09c23e8306.json",
+        "bytes": 2804,
+        "sha256": "d3ccf77f170934b4987c22301d34abbb8b7646d45af03f575057804e4c892629",
+        "sha512": "RqfvOli86TmrbwzJg6/0qmhbU+xZfSXhyRoUE3CglspacMmAObLy0iVsbsLa6XNu3LmUWLcwPLHb+u8dPh4DkQ=="
+      },
+      {
+        "file": ".tmp-wallpaper-player/scan-index/db34a207b303445fed1e9654c8e68883c93c5123070913181f89844225e4636a.json",
+        "bytes": 3648,
+        "sha256": "81149ad6956bdb73b468e88036ef043043faecd14d34901ba5eaa49b775d3a72",
+        "sha512": "XX9oIcBnulsAfGyi3UgTmRmy0XKAlHrsFNcW2LUSpKGIpLXeRcNfUij50lShTYa6Ng+LTQMCVKrjrmH8GYlMAg=="
+      },
+      {
+        "file": ".tmp-wallpaper-player/scan-index/de13066bd94cc789543a5fa9e6100f3297df42c5dd715cccf10b11383b6f1d68.json",
+        "bytes": 3648,
+        "sha256": "d2ac7243b636179c0e35727cb899a4f608b7c044d759e6b6a52c8f501a3a6945",
+        "sha512": "/iBjVcHVkmDBH0UfuUv7GFI7zmWhQwiurz/Q5x8id5LLqaDcLdWEjCcgyR6lyob3aW56aY/2hxTjNHPUh1Z0kg=="
+      },
+      {
+        "file": ".tmp-wallpaper-player/scan-index/eba7ad116c30f43341d30f06e5f9efe510565b2a31a16c0eccab8fc4c303e6bc.json",
+        "bytes": 3646,
+        "sha256": "636392edc5a9f41da4b70492833939eac890636623ab957400a7118bba472fc7",
+        "sha512": "+ZUzFXtHhbC1NoZ6p6668vkdiHbZam7+MUDiSkmJY7VPe8u4nXV1DyhmCatQr+7PKNKljbBUXV0KJua57UUx/A=="
+      },
+      {
+        "file": ".tmp-wallpaper-player/scan-index/f16070f230607bf79853b98a8c462b8e7b854deeb16fe246ba6c9d783c9b2832.json",
+        "bytes": 3644,
+        "sha256": "becff49c6c81b5dfd4688bbb272be352a8821ce42120b45282ea86c65f6378c2",
+        "sha512": "551Jsgf2K8+PezP3FuKxD517yMnQKj+S9Ao6VIZ3gkkvhsbABUL8u2lnMgM7bxHhRlv7bUILXp9nQ2ku2Wj9BQ=="
+      },
+      {
+        "file": ".tmp-wallpaper-player/scan-index/f408135604349a60c1b7caa1d60757de692af100c4518e5588f38b619995f186.json",
+        "bytes": 3646,
+        "sha256": "b894250b5d420a09b89350f33103a5d08edb5fc3d20f3cddf7604ed1fcb9df3a",
+        "sha512": "xheXBso55dwHEgykAvfDZf4n/26SCAP7fAyW0+BzsBmCJ+kcBgURcjEGCeYNaqTQqihKydkgsGs46ew8DHyERg=="
+      },
+      {
+        "file": ".tmp-wallpaper-player/scan-index/f7b0c1004febecbe36453be10ef2ddc2523e5b92f4af5f318ce1049990e93053.json",
+        "bytes": 3646,
+        "sha256": "77f2b4ded7202b828e8a6e281d549eecd1e79aea4030dfb2a7d918202ab090c5",
+        "sha512": "l/iSSuhoNjz2tFcSPobHYiXReYIlJaCmkLixky5HUeo+x272kifGGRjKSUukapRVTnvVQybUWX45ju2TN7gcew=="
+      },
+      {
+        "file": ".tmp-wallpaper-player/scan-index/f892c389d585d65dff3d06f6c86d3355dc90100c808a4f80da22b2f7e81865ba.json",
+        "bytes": 3644,
+        "sha256": "b0f007ba8b4249849d726eee7a9fec6cf5926742e62d3cb833bd464423af520e",
+        "sha512": "Fs2lK+N0GU/ztNoqj/OAFg2rQzejqj+cdVpT5Q1w52Tp4KZKJNwMi4VyEKTGTbDwOTj/opUURVbIaFzdTeVJpg=="
+      },
+      {
+        "file": ".tmp-wallpaper-player/scan-index/fc41c7e68e94b6f115983997d8498353a4f8f41b61fc91662dd84affe70fc9fb.json",
+        "bytes": 3646,
+        "sha256": "fa79531cd58ae0323d29102813386358d2e599ecb63902231ed73e264196abdc",
+        "sha512": "snnACJ0NqnrAILRdOeWbzApt189/MsfL+hNou4uzRTPDa2NELP3D44teP3+gIe3arlc7mcdslaPIlyO8XtDHSg=="
+      },
+      {
+        "file": ".tmp-wallpaper-player/settings.json",
+        "bytes": 22291,
+        "sha256": "6fb990f7edfe0707bb48b8bed65455cc2a521d33e028b45ce77f98b6a466a0d5",
+        "sha512": "5ZkzZzpz3QlA05Qeu4IOhPuUYVIAuCnMfvzvH0loMSNBo58NFt578k3Q+wWhPLsHh5hjfxeh1Db0boZ00WSsaA=="
+      },
+      {
+        "file": ".tmp-wallpaper-player/video-metadata-cache.json",
+        "bytes": 39687,
+        "sha256": "616205b2e97a75ea8842d3b4f6f3de778fc545493659d45e5c0139c6d7087f47",
+        "sha512": "vImCz/hAu8kdmXwFXl6Atw2rREaBoO44lHfPhdDlXBJrHxMC0PIO7KzRlV7WM5IaAfPT3aE7Dgtvr2NmHiUT4Q=="
+      }
+    ],
+    "retainedPublicArtifacts": [
+      {
+        "file": "release/Wallpaper-Player-Setup-1.4.0.exe",
+        "bytes": 204165215,
+        "sha256": "ebea8ed1eda6529d98edf8937645236826e1120cffd5e79ad3ffea50da1351c8",
+        "sha512": "+1/EwHV0Iu01FqWY7JOXtJ7aRDavagF0wIz0aEoA4ZnULIxkWi68Ys9pXK/8xjrsr6OGIivw5hj7NW58ql/Wrw=="
+      },
+      {
+        "file": "release/Wallpaper-Player-1.4.0.exe",
+        "bytes": 203941071,
+        "sha256": "23fcd04385d3b895259711f00983c7fec5fefce1834fce2cc8e2c469fdcd6f14",
+        "sha512": "bRFR1d7pmRUeRVtX7FToivqxdNaac16ot4NbB/uMOMj9VNnhHnEbVLXG1RUR5N8DJXy12/6aUYZwpnakGyxGxA=="
+      },
+      {
+        "file": "release/Wallpaper-Player-Setup-1.4.0.exe.blockmap",
+        "bytes": 212662,
+        "sha256": "725f928d1ff169d97633f85175878ecab838d0707864a35be60634ba9e2abd7e",
+        "sha512": "hlfYqOfkaDWX0+sorrDPuJH4QHRibVyuDhBeokDrfe1w78XM1Vh2UjsMRVmtGv4t2aRg3uh781h+TQ6RfJW9FA=="
+      },
+      {
+        "file": "release/latest.yml",
+        "bytes": 361,
+        "sha256": "4f5c80d6597d12f99f6b9aa2f6b64ad6b89b84b43b49cfc6204dd8651ed1edb9",
+        "sha512": "F/zeGav7F4QoOW6ZDET2h/9JHcnPf4ZMD2QmkQqM2BF4ZNUAFUetG2ncaDAAUx1kFzPNHXaD2bv3oGIb5Uq07w=="
+      },
+      {
+        "file": "release/plugins/Wallpaper-Player-Plugin-video-analysis-1.0.0.zip",
+        "bytes": 570209084,
+        "sha256": "552847152007d463424d43971778f40545b95139830dd15cc76957de59b4baa1",
+        "sha512": "LVbf4akQEqnAWSanp4f4obrc1ZY+td2XHD8b/IDoRZ28IbVLWP2nGuMOgafC2jaOziVa31WuyZYAAEfbmH912Q=="
+      },
+      {
+        "file": "release/plugins/Wallpaper-Player-Plugin-ai-search-0.1.0.zip",
+        "bytes": 2955538,
+        "sha256": "83f0949f361f03a78f78496c9b15510b0c6f8fb0581cea9bf8b94724faa7d781",
+        "sha512": "tyJjoVTN9JitDPVFx2+Lv01fzo5Bik3ELcl64iyxz5QBl7YSmTvJXT3MGyyVlkD1I+BO8tPtbHqtpQ8koXuatw=="
+      },
+      {
+        "file": "release/plugins/Wallpaper-Player-Plugin-agent-bridge-0.1.0.zip",
+        "bytes": 1093,
+        "sha256": "9f499408c282a144ffe411648d476fd4e36bd010c6e8974be3b9fd16460bed1a",
+        "sha512": "W5qWvlCSHQT8RlE31UF1e06dN3162tSZVhs7nqyFBhFLJdcN7Z8rE2WDw6ZMjQIygO89K/Xbuev/TJY+ImfSqg=="
+      },
+      {
+        "file": "mobile/dist/wallpaper-player-mobile-0.1.4-arm64-release.apk",
+        "bytes": 40710234,
+        "sha256": "f7e46638aa17f66ce68c9c96484909667af7e720bcc63fdc4f46ced39cbaec22",
+        "sha512": "TVvLeuH/1CXDXpspYbDHt8xwcX76SAe134l24lPwQkAGhg2FGJgUWumA2KeVmQ2sCePdONcklROdfjANnJ7lKg=="
+      }
+    ],
+    "originalCount": 42,
+    "historicalArtifacts": 8,
+    "otherFrontendFilesUnchanged": 142,
+    "packageLockUnchanged": true,
+    "mainEntryAndIndexHtmlUnchanged": true
+  },
+  "sources": [
+    {
+      "file": "src/splash-boot.js",
+      "sha256": "23385eef8ebc1a1bd6c2c710293010cfca3c9d616e3c08539399ec91409a3125"
+    },
+    {
+      "file": "src/services/splash.js",
+      "sha256": "1cce43d37eb6af739c0b446dba40e91b4b3b53faea5c041d9f41d64dd0e7bf4b"
+    },
+    {
+      "file": "src/main.jsx",
+      "sha256": "c05158e22a401977e571d0f3bde48613b4665873b41913e853c806b485d27098"
+    },
+    {
+      "file": "index.html",
+      "sha256": "1657deac2d11df32ee05cc04963820f95bf5e9a046e17cfa8464a636cce257c4"
+    },
+    {
+      "file": "scripts/verify-splash-clock.js",
+      "sha256": "75d9e940af0361ce8ec4d2d4e02ac512875436a98333cbaace9624416821b32e"
+    },
+    {
+      "file": "scripts/verify-splash-ui.js",
+      "sha256": "1bdaeb67e5f9538eb064cc43d4132016a84bfbf118fdf2cc25c12542ada6595e"
+    },
+    {
+      "file": "package.json",
+      "sha256": "fcd512143632ffa8df2b4cd48f7a9de27dd19e7fdfd687fd9abbed9ae46ef1a4"
+    },
+    {
+      "file": "package-lock.json",
+      "sha256": "7366f3a5de4b9fbbafdea8a1febbc35828fa788fe006635b87727d559f4d149a"
+    },
+    {
+      "file": ".github/workflows/ci.yml",
+      "sha256": "191250ab284685142f3767f9fba317e889f038c68f68c4eb9f62e7738440461a"
+    }
+  ],
+  "dist": [
+    {
+      "file": "dist/assets/AISearchPanel-CCF-T9RT.js",
+      "sha256": "89eb897aebb7ca41ee2f1181feefd0a0b2b30cd28dfc7b7633c871701fe13e6c"
+    },
+    {
+      "file": "dist/assets/DownloadCenter-DB2WIRzg.js",
+      "sha256": "987de2913c32e40ca82d1d3a9dd26cee4b8ca20dbc47a2f9308fb3787b42b236"
+    },
+    {
+      "file": "dist/assets/index-BVR_swH7.js",
+      "sha256": "cea68f5fc406b1d88592ebb3e9742a8001067c70b91c2ef344d158acc2ab7adc"
+    },
+    {
+      "file": "dist/assets/index-D3ud8mIE.css",
+      "sha256": "b9c1a73ac887ab83201f054e4698ba3f50e4217f1e1499f1fcb0e6b23131f88b"
+    },
+    {
+      "file": "dist/assets/NetworkResourceLibrary-ClU5UPaA.js",
+      "sha256": "8b38281db46350b6e32f8514d1c7ce3036f2f3e720863daf4df907df5420d15a"
+    },
+    {
+      "file": "dist/assets/Settings-D0_LgHOD.js",
+      "sha256": "ce20ec331dee755693bca6a35babc5fc52e3f1244ce61ee558aad927dfbcd8f8"
+    },
+    {
+      "file": "dist/assets/useDownloadStateObserver-C1C4Z8S3.js",
+      "sha256": "11c0785f1d37f163a644b46765df5a2e146fe759e7bce8c5138a0e1546b55826"
+    },
+    {
+      "file": "dist/assets/VideoAnalysisSidebar-CufdLX3F.js",
+      "sha256": "6736ae86804f145b2c6c604e45e1dec2a0d6d5722b0543addb7748bf3df28056"
+    },
+    {
+      "file": "dist/index.html",
+      "sha256": "deef168a4384b8b395dbfabcee85e1619fb6d97ab7271a48e1d58eba404759f1"
+    }
+  ],
+  "rawEvidence": [
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/0-splash-boot.js.before",
+      "sha256": "43d2ec5291b1cf909b9055d3a729c4f762fc1ffdede30c7904c14216cbe0abe7"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/1-splash.js.before",
+      "sha256": "0115043e5b0d6a724efcfac78164c2ed9f98ab6231b2966d3930dba9315d0291"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/2-main.jsx.before",
+      "sha256": "c05158e22a401977e571d0f3bde48613b4665873b41913e853c806b485d27098"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/3-index.html.before",
+      "sha256": "1657deac2d11df32ee05cc04963820f95bf5e9a046e17cfa8464a636cce257c4"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/4-package.json.before",
+      "sha256": "01de51132f469116b485fbb2b283b8880606c6fd5b6c2379b8afbe34af40b48f"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/5-package-lock.json.before",
+      "sha256": "7366f3a5de4b9fbbafdea8a1febbc35828fa788fe006635b87727d559f4d149a"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/6-ci.yml.before",
+      "sha256": "1e599be8abef735b842757322bc06c2073825ac0cbae33988ad7c0086c6f3727"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/actionlint.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/after.log",
+      "sha256": "513ddbb340c2b15d8c056d8af45b59427fdde0d1b7ebdefbfe9f3196847c90b3"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/baseline.json",
+      "sha256": "53fbcc426f28328d12dff441f888f23a2cd03b62c5bcd0f4d1e47068cf746f39"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/before.log",
+      "sha256": "625b5cd5fd31314fcdb8502efb5844304a83103dfea8ac10d5b58b4b03618b87"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/build-final.log",
+      "sha256": "a3755fcb36e37eb9244b1d902632e7f626ae90a379af4992cd3cb0087d061936"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/build.log",
+      "sha256": "f60b02c62418f8a3345aa37410313cc68a1dae7e2cea4a0ac741092b85c7bb69"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/command/splash-ui-kG0vX1/Code Cache/electron-preload/C3C57ACC93088FE6406873B2783B9540F9428BEDA0ECCBC3D5205C5A8521AB86-046EE14B76106E2E39DCF4D74A8AEE393DEDA01000D21673491EB8D652BB29D2.cache",
+      "sha256": "8f038be142cebe879b5cc9b2aea5d00c4b6ff4ea8c6e8606ce8e22ee58f52635"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/command/splash-ui-kG0vX1/Code Cache/electron-preload/C3C57ACC93088FE6406873B2783B9540F9428BEDA0ECCBC3D5205C5A8521AB86-98C745F2F8511D66BBE9B340111CDCF6D2813962A4349795C8B6E56DDEE5F15C.cache",
+      "sha256": "b72b5f428d7da549e2143893c6e02b7bee723b6ecbbb7593a6e0c29eb9492933"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/command/splash-ui-kG0vX1/Code Cache/js/index",
+      "sha256": "fbcfe23a2ecb82b7100c50811691dde0a33aa3da8d176be9882a9db485dc0f2d"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/command/splash-ui-kG0vX1/Code Cache/js/index-dir/the-real-index",
+      "sha256": "3a8c8f5e0e5ac6e2cf743ba17e06a328e79b65b6d0010c7d4dbbcb1ebe6e6d57"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/command/splash-ui-kG0vX1/Code Cache/wasm/index",
+      "sha256": "fbcfe23a2ecb82b7100c50811691dde0a33aa3da8d176be9882a9db485dc0f2d"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/command/splash-ui-kG0vX1/Code Cache/wasm/index-dir/the-real-index",
+      "sha256": "2bffe335ce1353a6f3c5b6efafe62438cf5a5bed354029388733a68b480bde6c"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/command/splash-ui-kG0vX1/DawnGraphiteCache/data_0",
+      "sha256": "d6a5fe39cd672781b256e0e3102f7022635f1d4bb7cfcc90a80fffe4d0f3877e"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/command/splash-ui-kG0vX1/DawnGraphiteCache/data_1",
+      "sha256": "b1e963d702392fb7224786e7d56d43973e9b9efd1b89c17814d7c558ffc0cdec"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/command/splash-ui-kG0vX1/DawnGraphiteCache/data_2",
+      "sha256": "ec1702806f4cc7c42a82fc2b38e89835fde7c64bb32060e0823c9077ca92efb7"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/command/splash-ui-kG0vX1/DawnGraphiteCache/data_3",
+      "sha256": "e09f42c398d688dce168570291f1f92d079987deda3099a34adb9e8c0522b30c"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/command/splash-ui-kG0vX1/DawnGraphiteCache/index",
+      "sha256": "57d974f519676b640d9b8f589580b4cb696613f54b0d084d0b14b050b953c580"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/command/splash-ui-kG0vX1/DawnWebGPUCache/data_0",
+      "sha256": "d6a5fe39cd672781b256e0e3102f7022635f1d4bb7cfcc90a80fffe4d0f3877e"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/command/splash-ui-kG0vX1/DawnWebGPUCache/data_1",
+      "sha256": "b1e963d702392fb7224786e7d56d43973e9b9efd1b89c17814d7c558ffc0cdec"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/command/splash-ui-kG0vX1/DawnWebGPUCache/data_2",
+      "sha256": "ec1702806f4cc7c42a82fc2b38e89835fde7c64bb32060e0823c9077ca92efb7"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/command/splash-ui-kG0vX1/DawnWebGPUCache/data_3",
+      "sha256": "e09f42c398d688dce168570291f1f92d079987deda3099a34adb9e8c0522b30c"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/command/splash-ui-kG0vX1/DawnWebGPUCache/index",
+      "sha256": "03dc6b60f95a3ce9196cb924569ff57b4436a20fe4af4ceaf5b248d7d77c0256"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/command/splash-ui-kG0vX1/declarative_performance_observer.db",
+      "sha256": "6b77b54313df8d759334819fdad7d879f15dce045017bd11bb557dd94ce52f66"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/command/splash-ui-kG0vX1/declarative_performance_observer.db-journal",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/command/splash-ui-kG0vX1/DIPS",
+      "sha256": "ae0d0b9105611911efcbc4a60bf9e6b5ad1d6173ab84b6e3cf3e0768eced5a63"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/command/splash-ui-kG0vX1/electron.log",
+      "sha256": "bddbefd20cd342efe431026428834ba26e9a6b8de64128ba294b63cb239a83e6"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/command/splash-ui-kG0vX1/GPUCache/data_0",
+      "sha256": "74d70545841058d9f5868235bcc30da83264303a06a4b1cd0b0fea5efc601305"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/command/splash-ui-kG0vX1/GPUCache/data_1",
+      "sha256": "b4395816564b91e4507a279cb867fc4465d30190b1e6220daaf1473b0c1f59a8"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/command/splash-ui-kG0vX1/GPUCache/data_2",
+      "sha256": "849cebb5c15fbfb056fbc7dab2f683c423b7f18b270a845819e91f0ef49bdb4a"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/command/splash-ui-kG0vX1/GPUCache/data_3",
+      "sha256": "e09f42c398d688dce168570291f1f92d079987deda3099a34adb9e8c0522b30c"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/command/splash-ui-kG0vX1/GPUCache/index",
+      "sha256": "b393c1dc5c802c20b8817d32654d2c2a745944d7615ab332169f891077ce7cdf"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/command/splash-ui-kG0vX1/GPUPersistentCache/DawnGraphiteCache/2JA7WVZEGNYATM3CW7DYXTRCBKZ7YEUP/cache.db",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/command/splash-ui-kG0vX1/GPUPersistentCache/DawnGraphiteCache/2JA7WVZEGNYATM3CW7DYXTRCBKZ7YEUP/cache.db-wal",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/command/splash-ui-kG0vX1/GPUPersistentCache/DawnGraphiteCache/2JA7WVZEGNYATM3CW7DYXTRCBKZ7YEUP/cache.journal",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/command/splash-ui-kG0vX1/GrShaderCache/data_0",
+      "sha256": "8351f08580cc3acbbcb623ba7282996b3329d496943f457d08f197db389dfbda"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/command/splash-ui-kG0vX1/GrShaderCache/data_1",
+      "sha256": "ec20b2c072a5646f578dc1ed07a9cd1ba1c3bdff5af4ff19e36f60e6cd99e422"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/command/splash-ui-kG0vX1/GrShaderCache/data_2",
+      "sha256": "ec1702806f4cc7c42a82fc2b38e89835fde7c64bb32060e0823c9077ca92efb7"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/command/splash-ui-kG0vX1/GrShaderCache/data_3",
+      "sha256": "fbe9244de5da738ece7b66fd7862cf11ed0c2e7a786b029fba9f646e6eb861dd"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/command/splash-ui-kG0vX1/GrShaderCache/f_000001",
+      "sha256": "ef6a1e9b10b41568fce59854a1f16c8eda81e4bf991279d0725085f91530fd0d"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/command/splash-ui-kG0vX1/GrShaderCache/f_000002",
+      "sha256": "66e12295d2729180690bd38a7eb23f824841d467cb8c0da460bcc2574f78f282"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/command/splash-ui-kG0vX1/GrShaderCache/f_000003",
+      "sha256": "746742dbe61de03ffab75838226dc405bddbbc0c57ad85dc9292308709324f30"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/command/splash-ui-kG0vX1/GrShaderCache/f_000004",
+      "sha256": "6477253f24c542170ba67fe7244613700537d308e4ad9abc81c86435adc5499c"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/command/splash-ui-kG0vX1/GrShaderCache/index",
+      "sha256": "bad717b84d2633163a1074d1f738f5507186482d95c72dba3ee07f2b14c4eb93"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/command/splash-ui-kG0vX1/Local State",
+      "sha256": "6eaa51ea03382e847636079965c2cfaa109ca2a534e86e9ee8c2465c20e6c7d9"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/command/splash-ui-kG0vX1/Local Storage/leveldb/000003.log",
+      "sha256": "048e5537ccd9bb3785cea87945998a8bddf94bf12d04351161eef0f5d98d9ad6"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/command/splash-ui-kG0vX1/Local Storage/leveldb/CURRENT",
+      "sha256": "0f1bad70c7bd1e0a69562853ec529355462fcd0423263a3d39d6d0d70b780443"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/command/splash-ui-kG0vX1/Local Storage/leveldb/LOCK",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/command/splash-ui-kG0vX1/Local Storage/leveldb/LOG",
+      "sha256": "91668acc6078b93b4026a6653ac9a1ba6ce894a3a205f03d6555f1b2d06be31e"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/command/splash-ui-kG0vX1/Local Storage/leveldb/MANIFEST-000001",
+      "sha256": "f9d31b278e215eb0d0e9cd709edfa037e828f36214ab7906f612160fead4b2b4"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/command/splash-ui-kG0vX1/Network/Network Persistent State",
+      "sha256": "5dfc321417fc31359f23320ea68014ebfd793c5bbed55f77dab4180bbd4a2026"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/command/splash-ui-kG0vX1/Network/NetworkDataMigrated",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/command/splash-ui-kG0vX1/Network/Trust Tokens",
+      "sha256": "48dc8b9acbedb0b7de6579f89e873e9434ca389b8c6ed986f705c86fd2819599"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/command/splash-ui-kG0vX1/Network/Trust Tokens-journal",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/command/splash-ui-kG0vX1/Preferences",
+      "sha256": "be4b8924ab38e8acf350e6e3b9f1f63a1a94952d8002759acd6946c4d5d0b5de"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/command/splash-ui-kG0vX1/progress.log",
+      "sha256": "e5c9d9e309d916c469a923e4ddbf6ff31e09b7361aa96526a237a274ab2c5894"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/command/splash-ui-kG0vX1/Session Storage/000003.log",
+      "sha256": "4d7a760b35105bcacd2adef01d3f8080d1cebcf017b27603c32bf4fda6321b47"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/command/splash-ui-kG0vX1/Session Storage/CURRENT",
+      "sha256": "0f1bad70c7bd1e0a69562853ec529355462fcd0423263a3d39d6d0d70b780443"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/command/splash-ui-kG0vX1/Session Storage/LOCK",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/command/splash-ui-kG0vX1/Session Storage/LOG",
+      "sha256": "435fb25e3bc35fa943a9e6616bbde3d758ea6700abcc83344850e411076fdbd0"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/command/splash-ui-kG0vX1/Session Storage/MANIFEST-000001",
+      "sha256": "f9d31b278e215eb0d0e9cd709edfa037e828f36214ab7906f612160fead4b2b4"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/command/splash-ui-kG0vX1/settings.json",
+      "sha256": "ecd24d9d1f6c516571fd8323074c95573a491921143b7baf8bc0fd89342f1edc"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/command/splash-ui-kG0vX1/settings.v1.backup.json",
+      "sha256": "ecd24d9d1f6c516571fd8323074c95573a491921143b7baf8bc0fd89342f1edc"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/command/splash-ui-kG0vX1/ShaderCache/data_0",
+      "sha256": "d6a5fe39cd672781b256e0e3102f7022635f1d4bb7cfcc90a80fffe4d0f3877e"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/command/splash-ui-kG0vX1/ShaderCache/data_1",
+      "sha256": "b1e963d702392fb7224786e7d56d43973e9b9efd1b89c17814d7c558ffc0cdec"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/command/splash-ui-kG0vX1/ShaderCache/data_2",
+      "sha256": "ec1702806f4cc7c42a82fc2b38e89835fde7c64bb32060e0823c9077ca92efb7"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/command/splash-ui-kG0vX1/ShaderCache/data_3",
+      "sha256": "e09f42c398d688dce168570291f1f92d079987deda3099a34adb9e8c0522b30c"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/command/splash-ui-kG0vX1/ShaderCache/index",
+      "sha256": "13c2a626dba07e797c5dc524db673d6b4c15924002c601a8139f0294ac5548f0"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/command/splash-ui-kG0vX1/Shared Dictionary/cache/index",
+      "sha256": "fbcfe23a2ecb82b7100c50811691dde0a33aa3da8d176be9882a9db485dc0f2d"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/command/splash-ui-kG0vX1/Shared Dictionary/cache/index-dir/the-real-index",
+      "sha256": "06a11182fc8d7558ebdbfd67d38152d0fd2f93a9380d993ed37786d8319ec1ce"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/command/splash-ui-kG0vX1/Shared Dictionary/db",
+      "sha256": "db9734c1e3001f7abd08bcc472a7b4f5daf8076eaee708f04ba98b11bd70131d"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/command/splash-ui-kG0vX1/Shared Dictionary/db-journal",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/command/splash-ui-kG0vX1/splash-result.json",
+      "sha256": "7f7c905283d62db443f5506d98a330ea899abea171366685b824d647f6b896dc"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/command-final/splash-ui-ZtDG6j/Code Cache/electron-preload/C3C57ACC93088FE6406873B2783B9540F9428BEDA0ECCBC3D5205C5A8521AB86-046EE14B76106E2E39DCF4D74A8AEE393DEDA01000D21673491EB8D652BB29D2.cache",
+      "sha256": "8f038be142cebe879b5cc9b2aea5d00c4b6ff4ea8c6e8606ce8e22ee58f52635"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/command-final/splash-ui-ZtDG6j/Code Cache/electron-preload/C3C57ACC93088FE6406873B2783B9540F9428BEDA0ECCBC3D5205C5A8521AB86-98C745F2F8511D66BBE9B340111CDCF6D2813962A4349795C8B6E56DDEE5F15C.cache",
+      "sha256": "b72b5f428d7da549e2143893c6e02b7bee723b6ecbbb7593a6e0c29eb9492933"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/command-final/splash-ui-ZtDG6j/Code Cache/js/index",
+      "sha256": "fbcfe23a2ecb82b7100c50811691dde0a33aa3da8d176be9882a9db485dc0f2d"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/command-final/splash-ui-ZtDG6j/Code Cache/js/index-dir/the-real-index",
+      "sha256": "2b157644aac5805136c8807d032e39cc75982efd083d0e7346e3690712012320"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/command-final/splash-ui-ZtDG6j/Code Cache/wasm/index",
+      "sha256": "fbcfe23a2ecb82b7100c50811691dde0a33aa3da8d176be9882a9db485dc0f2d"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/command-final/splash-ui-ZtDG6j/Code Cache/wasm/index-dir/the-real-index",
+      "sha256": "2b157644aac5805136c8807d032e39cc75982efd083d0e7346e3690712012320"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/command-final/splash-ui-ZtDG6j/DawnGraphiteCache/data_0",
+      "sha256": "d6a5fe39cd672781b256e0e3102f7022635f1d4bb7cfcc90a80fffe4d0f3877e"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/command-final/splash-ui-ZtDG6j/DawnGraphiteCache/data_1",
+      "sha256": "b1e963d702392fb7224786e7d56d43973e9b9efd1b89c17814d7c558ffc0cdec"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/command-final/splash-ui-ZtDG6j/DawnGraphiteCache/data_2",
+      "sha256": "ec1702806f4cc7c42a82fc2b38e89835fde7c64bb32060e0823c9077ca92efb7"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/command-final/splash-ui-ZtDG6j/DawnGraphiteCache/data_3",
+      "sha256": "e09f42c398d688dce168570291f1f92d079987deda3099a34adb9e8c0522b30c"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/command-final/splash-ui-ZtDG6j/DawnGraphiteCache/index",
+      "sha256": "48140b65dc680142d7959dd9306cd996d75ebf3ec7913684dc45669cb400974a"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/command-final/splash-ui-ZtDG6j/DawnWebGPUCache/data_0",
+      "sha256": "d6a5fe39cd672781b256e0e3102f7022635f1d4bb7cfcc90a80fffe4d0f3877e"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/command-final/splash-ui-ZtDG6j/DawnWebGPUCache/data_1",
+      "sha256": "b1e963d702392fb7224786e7d56d43973e9b9efd1b89c17814d7c558ffc0cdec"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/command-final/splash-ui-ZtDG6j/DawnWebGPUCache/data_2",
+      "sha256": "ec1702806f4cc7c42a82fc2b38e89835fde7c64bb32060e0823c9077ca92efb7"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/command-final/splash-ui-ZtDG6j/DawnWebGPUCache/data_3",
+      "sha256": "e09f42c398d688dce168570291f1f92d079987deda3099a34adb9e8c0522b30c"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/command-final/splash-ui-ZtDG6j/DawnWebGPUCache/index",
+      "sha256": "0d71c4ee83233173574f5e90e6db1330e0043016feef1f59f486feb1b0ad5de3"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/command-final/splash-ui-ZtDG6j/declarative_performance_observer.db",
+      "sha256": "6b77b54313df8d759334819fdad7d879f15dce045017bd11bb557dd94ce52f66"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/command-final/splash-ui-ZtDG6j/declarative_performance_observer.db-journal",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/command-final/splash-ui-ZtDG6j/DIPS",
+      "sha256": "d22df1b7e995538a4bfa61e1fe4df45fceaada34a1597cb364823f95e63a58fb"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/command-final/splash-ui-ZtDG6j/electron.log",
+      "sha256": "f438cf0eb9e34861c89fb60d027eda6d80594e899ce1e28f0c8aa48f2150478d"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/command-final/splash-ui-ZtDG6j/GPUCache/data_0",
+      "sha256": "dbb7ecbb9b9223e541d577f20e9c528b9c46a244c37bd4d385fc0043ac6056db"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/command-final/splash-ui-ZtDG6j/GPUCache/data_1",
+      "sha256": "b3e6a2491deee8f030ad84dbd07287ed647cb8b3b387b5ff63f36725c623f85e"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/command-final/splash-ui-ZtDG6j/GPUCache/data_2",
+      "sha256": "849cebb5c15fbfb056fbc7dab2f683c423b7f18b270a845819e91f0ef49bdb4a"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/command-final/splash-ui-ZtDG6j/GPUCache/data_3",
+      "sha256": "e09f42c398d688dce168570291f1f92d079987deda3099a34adb9e8c0522b30c"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/command-final/splash-ui-ZtDG6j/GPUCache/index",
+      "sha256": "8177b0cbd4227d5a94f1fb1bd10e2f0d55f592aa60c2b9b08f4fb96eb08ff025"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/command-final/splash-ui-ZtDG6j/GPUPersistentCache/DawnGraphiteCache/2JA7WVZEGNYATM3CW7DYXTRCBKZ7YEUP/cache.db",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/command-final/splash-ui-ZtDG6j/GPUPersistentCache/DawnGraphiteCache/2JA7WVZEGNYATM3CW7DYXTRCBKZ7YEUP/cache.db-wal",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/command-final/splash-ui-ZtDG6j/GPUPersistentCache/DawnGraphiteCache/2JA7WVZEGNYATM3CW7DYXTRCBKZ7YEUP/cache.journal",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/command-final/splash-ui-ZtDG6j/GrShaderCache/data_0",
+      "sha256": "0045c52288000ebee6dcf0189ee31887ca6d1a24504e9f7b5f672b346c219765"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/command-final/splash-ui-ZtDG6j/GrShaderCache/data_1",
+      "sha256": "c1af81574a2c3019df0a7cdc9675d3d66ade1c1a30352941886618edcb7b3485"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/command-final/splash-ui-ZtDG6j/GrShaderCache/data_2",
+      "sha256": "ec1702806f4cc7c42a82fc2b38e89835fde7c64bb32060e0823c9077ca92efb7"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/command-final/splash-ui-ZtDG6j/GrShaderCache/data_3",
+      "sha256": "fbe9244de5da738ece7b66fd7862cf11ed0c2e7a786b029fba9f646e6eb861dd"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/command-final/splash-ui-ZtDG6j/GrShaderCache/f_000001",
+      "sha256": "ef6a1e9b10b41568fce59854a1f16c8eda81e4bf991279d0725085f91530fd0d"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/command-final/splash-ui-ZtDG6j/GrShaderCache/f_000002",
+      "sha256": "66e12295d2729180690bd38a7eb23f824841d467cb8c0da460bcc2574f78f282"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/command-final/splash-ui-ZtDG6j/GrShaderCache/f_000003",
+      "sha256": "746742dbe61de03ffab75838226dc405bddbbc0c57ad85dc9292308709324f30"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/command-final/splash-ui-ZtDG6j/GrShaderCache/f_000004",
+      "sha256": "6477253f24c542170ba67fe7244613700537d308e4ad9abc81c86435adc5499c"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/command-final/splash-ui-ZtDG6j/GrShaderCache/index",
+      "sha256": "db1baf513c38f1cd3d310352aa1ca3d267acef39e14512b5855957d5ad8dd957"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/command-final/splash-ui-ZtDG6j/Local State",
+      "sha256": "ce7dcf1701d24c19ee35b684556df2234d59db34932e6833f2af0eed6d6860c1"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/command-final/splash-ui-ZtDG6j/Local Storage/leveldb/000003.log",
+      "sha256": "6b516654a09e27aa231b7df3393abb766a47c55882507d831bbec930d63c0efc"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/command-final/splash-ui-ZtDG6j/Local Storage/leveldb/CURRENT",
+      "sha256": "0f1bad70c7bd1e0a69562853ec529355462fcd0423263a3d39d6d0d70b780443"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/command-final/splash-ui-ZtDG6j/Local Storage/leveldb/LOCK",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/command-final/splash-ui-ZtDG6j/Local Storage/leveldb/LOG",
+      "sha256": "209ebc432e9233d23df8ac39264eabe296da42529e06949e88767a4e78db0169"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/command-final/splash-ui-ZtDG6j/Local Storage/leveldb/MANIFEST-000001",
+      "sha256": "f9d31b278e215eb0d0e9cd709edfa037e828f36214ab7906f612160fead4b2b4"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/command-final/splash-ui-ZtDG6j/Network/Network Persistent State",
+      "sha256": "5dfc321417fc31359f23320ea68014ebfd793c5bbed55f77dab4180bbd4a2026"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/command-final/splash-ui-ZtDG6j/Network/NetworkDataMigrated",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/command-final/splash-ui-ZtDG6j/Network/Trust Tokens",
+      "sha256": "48dc8b9acbedb0b7de6579f89e873e9434ca389b8c6ed986f705c86fd2819599"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/command-final/splash-ui-ZtDG6j/Network/Trust Tokens-journal",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/command-final/splash-ui-ZtDG6j/Preferences",
+      "sha256": "be4b8924ab38e8acf350e6e3b9f1f63a1a94952d8002759acd6946c4d5d0b5de"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/command-final/splash-ui-ZtDG6j/progress.log",
+      "sha256": "562bab9932a49e43fa3d09a95379ed598d59c40563dbfd5f8dab61d6e2eb48bd"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/command-final/splash-ui-ZtDG6j/Session Storage/000003.log",
+      "sha256": "4d7a760b35105bcacd2adef01d3f8080d1cebcf017b27603c32bf4fda6321b47"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/command-final/splash-ui-ZtDG6j/Session Storage/CURRENT",
+      "sha256": "0f1bad70c7bd1e0a69562853ec529355462fcd0423263a3d39d6d0d70b780443"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/command-final/splash-ui-ZtDG6j/Session Storage/LOCK",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/command-final/splash-ui-ZtDG6j/Session Storage/LOG",
+      "sha256": "879c24a8b0772fbfe97452ce7d38b5ac06ac1ac1bab3b10e984b5bee0b6630c7"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/command-final/splash-ui-ZtDG6j/Session Storage/MANIFEST-000001",
+      "sha256": "f9d31b278e215eb0d0e9cd709edfa037e828f36214ab7906f612160fead4b2b4"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/command-final/splash-ui-ZtDG6j/settings.json",
+      "sha256": "ecd24d9d1f6c516571fd8323074c95573a491921143b7baf8bc0fd89342f1edc"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/command-final/splash-ui-ZtDG6j/settings.v1.backup.json",
+      "sha256": "ecd24d9d1f6c516571fd8323074c95573a491921143b7baf8bc0fd89342f1edc"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/command-final/splash-ui-ZtDG6j/ShaderCache/data_0",
+      "sha256": "d6a5fe39cd672781b256e0e3102f7022635f1d4bb7cfcc90a80fffe4d0f3877e"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/command-final/splash-ui-ZtDG6j/ShaderCache/data_1",
+      "sha256": "b1e963d702392fb7224786e7d56d43973e9b9efd1b89c17814d7c558ffc0cdec"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/command-final/splash-ui-ZtDG6j/ShaderCache/data_2",
+      "sha256": "ec1702806f4cc7c42a82fc2b38e89835fde7c64bb32060e0823c9077ca92efb7"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/command-final/splash-ui-ZtDG6j/ShaderCache/data_3",
+      "sha256": "e09f42c398d688dce168570291f1f92d079987deda3099a34adb9e8c0522b30c"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/command-final/splash-ui-ZtDG6j/ShaderCache/index",
+      "sha256": "ed1aee47cb96d38c16aeec29f481f2ccbf70b54eeb802a0f651eeb6b28b6d599"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/command-final/splash-ui-ZtDG6j/Shared Dictionary/cache/index",
+      "sha256": "fbcfe23a2ecb82b7100c50811691dde0a33aa3da8d176be9882a9db485dc0f2d"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/command-final/splash-ui-ZtDG6j/Shared Dictionary/cache/index-dir/the-real-index",
+      "sha256": "e665383e5ec087261e0b5eff0da1546cc1f1347b6dc37de49c895990297e2f67"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/command-final/splash-ui-ZtDG6j/Shared Dictionary/db",
+      "sha256": "db9734c1e3001f7abd08bcc472a7b4f5daf8076eaee708f04ba98b11bd70131d"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/command-final/splash-ui-ZtDG6j/Shared Dictionary/db-journal",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/command-final/splash-ui-ZtDG6j/splash-result.json",
+      "sha256": "80f4195bc0c4ffb4f8735cc75665b683daee7e6097a5b6a68d978189183d50d7"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/command-final.log",
+      "sha256": "25586455f7172bb7671121f9a9b16f951f5a6138eb96cbde83b847dc50108d99"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/command.log",
+      "sha256": "1f2c2d734a1e7594daeec912b618af18f08ad1ac9f6489621266a2b60618df2d"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/desktop-layout/desktop-after-dark-1024-200.png",
+      "sha256": "1108a9e8dec0569862af3db1b305b10d169067e40429048dce6b9df30cc892ff"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/desktop-layout/desktop-after-dock-1024-200.png",
+      "sha256": "806e47fd54bd947fb5703c431ac3c58aef5ce12ac5618abd1bba996947774b91"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/desktop-layout/desktop-after-light-1024-200.png",
+      "sha256": "fe37ba5ededddec6d67f3fbd4c9025427b69779f565080e33bea5119f4dd77f2"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/desktop-layout/desktop-after-navigation-1024-200.png",
+      "sha256": "b3f89e77cd66b3601c6e2f1d4d4c62fb1a941eafb2f69ec8ffd6283f6633da53"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/desktop-layout/desktop-layout-after.json",
+      "sha256": "a1f2efb5472740682a0d728a7f85d9fcd68a471e657042f47c63eace7af91717"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/desktop-layout-final/desktop-after-dark-1024-200.png",
+      "sha256": "1108a9e8dec0569862af3db1b305b10d169067e40429048dce6b9df30cc892ff"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/desktop-layout-final/desktop-after-dock-1024-200.png",
+      "sha256": "806e47fd54bd947fb5703c431ac3c58aef5ce12ac5618abd1bba996947774b91"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/desktop-layout-final/desktop-after-light-1024-200.png",
+      "sha256": "fe37ba5ededddec6d67f3fbd4c9025427b69779f565080e33bea5119f4dd77f2"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/desktop-layout-final/desktop-after-navigation-1024-200.png",
+      "sha256": "b3f89e77cd66b3601c6e2f1d4d4c62fb1a941eafb2f69ec8ffd6283f6633da53"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/desktop-layout-final/desktop-layout-after.json",
+      "sha256": "a899bc12e57b330187db3673a609245b2bf33035f1aa7ccbf7da0e727a1b6bc5"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/finalize.cjs",
+      "sha256": "fa49c0d5a9c3b946ba32b42ead9af69e8e209627a019f3831e1fba4f569bdb38"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/initialization.log",
+      "sha256": "4eb7387b6b83799cbb804cb8dec4150adc9c83032933c64017ddce404d04ef0b"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/native-ui-final.log",
+      "sha256": "f4cfa22cbc041c0c13ddd2600151ae24c3fc98805da874f970a0d6ca991fb2cf"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/native-ui-traced.log",
+      "sha256": "3f2971ef6feb7708a236b7e88dcb019f7bed32b982de80a53fec268beb8c1e0a"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/native-ui.log",
+      "sha256": "9944a57620c6d91e91e23c23a2872a080a479a33256912209fa0ab2a240868f1"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/powershell-parse.json",
+      "sha256": "c779c83457c4917402865c29c5518e80794a99900843349fadb668d5c5aef822"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/prepare.cjs",
+      "sha256": "e39dd6682531328ecb681c60eefab3e95d17b9837673c0c56e82c3b3c028d090"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/responsive-final.log",
+      "sha256": "b597febf85fca081a88865b7fac8f8819a3352dd4ef50c291f0ae7531bfbc44f"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/responsive.log",
+      "sha256": "b597febf85fca081a88865b7fac8f8819a3352dd4ef50c291f0ae7531bfbc44f"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/splash-ui-ar2zcc/Code Cache/js/index",
+      "sha256": "fbcfe23a2ecb82b7100c50811691dde0a33aa3da8d176be9882a9db485dc0f2d"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/splash-ui-ar2zcc/Code Cache/js/index-dir/the-real-index",
+      "sha256": "1387ff710ef1d7b78834628519dfc79028466c3dd8c5ad4d7618454cd14aa081"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/splash-ui-ar2zcc/Code Cache/wasm/index",
+      "sha256": "fbcfe23a2ecb82b7100c50811691dde0a33aa3da8d176be9882a9db485dc0f2d"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/splash-ui-ar2zcc/Code Cache/wasm/index-dir/the-real-index",
+      "sha256": "1387ff710ef1d7b78834628519dfc79028466c3dd8c5ad4d7618454cd14aa081"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/splash-ui-ar2zcc/DawnGraphiteCache/data_0",
+      "sha256": "d6a5fe39cd672781b256e0e3102f7022635f1d4bb7cfcc90a80fffe4d0f3877e"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/splash-ui-ar2zcc/DawnGraphiteCache/data_1",
+      "sha256": "bf377c8b9cec7974a65408227619606b0394e2ca1b334f4439c39c8e3965089e"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/splash-ui-ar2zcc/DawnGraphiteCache/data_2",
+      "sha256": "ec1702806f4cc7c42a82fc2b38e89835fde7c64bb32060e0823c9077ca92efb7"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/splash-ui-ar2zcc/DawnGraphiteCache/data_3",
+      "sha256": "e09f42c398d688dce168570291f1f92d079987deda3099a34adb9e8c0522b30c"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/splash-ui-ar2zcc/DawnGraphiteCache/index",
+      "sha256": "625a40108113a071ea15bffb1d9c8a96f3927bf8ace521e088186b74b4adaf60"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/splash-ui-ar2zcc/DawnWebGPUCache/data_0",
+      "sha256": "d6a5fe39cd672781b256e0e3102f7022635f1d4bb7cfcc90a80fffe4d0f3877e"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/splash-ui-ar2zcc/DawnWebGPUCache/data_1",
+      "sha256": "7b532806b60ddf1c96ce371a44ae60b8f32cc21b67b3eb7251a09aab2b7b3e60"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/splash-ui-ar2zcc/DawnWebGPUCache/data_2",
+      "sha256": "ec1702806f4cc7c42a82fc2b38e89835fde7c64bb32060e0823c9077ca92efb7"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/splash-ui-ar2zcc/DawnWebGPUCache/data_3",
+      "sha256": "e09f42c398d688dce168570291f1f92d079987deda3099a34adb9e8c0522b30c"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/splash-ui-ar2zcc/DawnWebGPUCache/index",
+      "sha256": "d0bda0b853226de8ccd7c767a588c976f643ec464368dfd6621215bba9d137bc"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/splash-ui-ar2zcc/declarative_performance_observer.db",
+      "sha256": "6b77b54313df8d759334819fdad7d879f15dce045017bd11bb557dd94ce52f66"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/splash-ui-ar2zcc/declarative_performance_observer.db-journal",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/splash-ui-ar2zcc/DIPS",
+      "sha256": "3b27340ff40f02d3d99b4629bf5d0654d46184dc933d4c9465f179d3ce507280"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/splash-ui-ar2zcc/electron.log",
+      "sha256": "794dd6a1d41a49346490f9e3ddcbf34cec659c5be54320f81a57e3b635b7461f"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/splash-ui-ar2zcc/GPUCache/data_0",
+      "sha256": "d6a5fe39cd672781b256e0e3102f7022635f1d4bb7cfcc90a80fffe4d0f3877e"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/splash-ui-ar2zcc/GPUCache/data_1",
+      "sha256": "26a5c2a7f8467f6f17ef2e8f1fb0684c8b958210cb7e6c746bbfbd262a9a393e"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/splash-ui-ar2zcc/GPUCache/data_2",
+      "sha256": "ec1702806f4cc7c42a82fc2b38e89835fde7c64bb32060e0823c9077ca92efb7"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/splash-ui-ar2zcc/GPUCache/data_3",
+      "sha256": "e09f42c398d688dce168570291f1f92d079987deda3099a34adb9e8c0522b30c"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/splash-ui-ar2zcc/GPUCache/index",
+      "sha256": "5960724ebfe636bb5145040b92690b7b2babf1f148fac7d32a018d3cfaae821e"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/splash-ui-ar2zcc/GPUPersistentCache/DawnGraphiteCache/2JA7WVZEGNYATM3CW7DYXTRCBKZ7YEUP/cache.db",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/splash-ui-ar2zcc/GPUPersistentCache/DawnGraphiteCache/2JA7WVZEGNYATM3CW7DYXTRCBKZ7YEUP/cache.db-wal",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/splash-ui-ar2zcc/GPUPersistentCache/DawnGraphiteCache/2JA7WVZEGNYATM3CW7DYXTRCBKZ7YEUP/cache.journal",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/splash-ui-ar2zcc/GrShaderCache/data_0",
+      "sha256": "aadeb17b8c3b6d4dc2b174a40a225b02fb8b99de3ef12f2e725e1a9e3a56b31e"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/splash-ui-ar2zcc/GrShaderCache/data_1",
+      "sha256": "5a2996a8664da8afea79677f7987c6d69b99735803ab1ca1b5528fc27121ce3d"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/splash-ui-ar2zcc/GrShaderCache/data_2",
+      "sha256": "ec1702806f4cc7c42a82fc2b38e89835fde7c64bb32060e0823c9077ca92efb7"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/splash-ui-ar2zcc/GrShaderCache/data_3",
+      "sha256": "66b0b79e6e13b78be1568190252ddbba445e08ab06d947dced8bdbc8fd966219"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/splash-ui-ar2zcc/GrShaderCache/index",
+      "sha256": "1eb23697030a3b9f6fe0c86201ba52cdf73133c6d7588bb96246e55f317dee8b"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/splash-ui-ar2zcc/Local State",
+      "sha256": "274587676effbe3c4d251dee4f80e8d40f2307c3406b57b976cf9202f2ca6dfd"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/splash-ui-ar2zcc/Local Storage/leveldb/000003.log",
+      "sha256": "8bd2ea70a0b70c91de138a5b87c7936c6a6fa7c4275c54b97f4ef0ccc5b79bb4"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/splash-ui-ar2zcc/Local Storage/leveldb/CURRENT",
+      "sha256": "0f1bad70c7bd1e0a69562853ec529355462fcd0423263a3d39d6d0d70b780443"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/splash-ui-ar2zcc/Local Storage/leveldb/LOCK",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/splash-ui-ar2zcc/Local Storage/leveldb/LOG",
+      "sha256": "8d8fb276d6f5c644ce4ad3094bb832df8734d8eaa96de0685ef86ee66b536c8e"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/splash-ui-ar2zcc/Local Storage/leveldb/MANIFEST-000001",
+      "sha256": "f9d31b278e215eb0d0e9cd709edfa037e828f36214ab7906f612160fead4b2b4"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/splash-ui-ar2zcc/Network/Network Persistent State",
+      "sha256": "5dfc321417fc31359f23320ea68014ebfd793c5bbed55f77dab4180bbd4a2026"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/splash-ui-ar2zcc/Network/NetworkDataMigrated",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/splash-ui-ar2zcc/Network/Trust Tokens",
+      "sha256": "48dc8b9acbedb0b7de6579f89e873e9434ca389b8c6ed986f705c86fd2819599"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/splash-ui-ar2zcc/Network/Trust Tokens-journal",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/splash-ui-ar2zcc/Preferences",
+      "sha256": "be4b8924ab38e8acf350e6e3b9f1f63a1a94952d8002759acd6946c4d5d0b5de"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/splash-ui-ar2zcc/settings.json",
+      "sha256": "ecd24d9d1f6c516571fd8323074c95573a491921143b7baf8bc0fd89342f1edc"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/splash-ui-ar2zcc/settings.v1.backup.json",
+      "sha256": "ecd24d9d1f6c516571fd8323074c95573a491921143b7baf8bc0fd89342f1edc"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/splash-ui-ar2zcc/ShaderCache/data_0",
+      "sha256": "d6a5fe39cd672781b256e0e3102f7022635f1d4bb7cfcc90a80fffe4d0f3877e"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/splash-ui-ar2zcc/ShaderCache/data_1",
+      "sha256": "145ea67bfc6b05adf151d9511414a5275b4eadc3cb8ebf57026cb0c110ec0eeb"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/splash-ui-ar2zcc/ShaderCache/data_2",
+      "sha256": "ec1702806f4cc7c42a82fc2b38e89835fde7c64bb32060e0823c9077ca92efb7"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/splash-ui-ar2zcc/ShaderCache/data_3",
+      "sha256": "e09f42c398d688dce168570291f1f92d079987deda3099a34adb9e8c0522b30c"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/splash-ui-ar2zcc/ShaderCache/index",
+      "sha256": "e399704cd61e0ec4157cde189208466db90c295d911485f5dae67587060036cc"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/splash-ui-ar2zcc/Shared Dictionary/cache/index",
+      "sha256": "fbcfe23a2ecb82b7100c50811691dde0a33aa3da8d176be9882a9db485dc0f2d"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/splash-ui-ar2zcc/Shared Dictionary/cache/index-dir/the-real-index",
+      "sha256": "a9d3f15bd126b78370066732de1b4356c9a7097ff93a7f6898c9897ee18a95e6"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/splash-ui-ar2zcc/Shared Dictionary/db",
+      "sha256": "db9734c1e3001f7abd08bcc472a7b4f5daf8076eaee708f04ba98b11bd70131d"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/splash-ui-ar2zcc/Shared Dictionary/db-journal",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/splash-ui-g9rckG/Code Cache/electron-preload/C3C57ACC93088FE6406873B2783B9540F9428BEDA0ECCBC3D5205C5A8521AB86-046EE14B76106E2E39DCF4D74A8AEE393DEDA01000D21673491EB8D652BB29D2.cache",
+      "sha256": "8f038be142cebe879b5cc9b2aea5d00c4b6ff4ea8c6e8606ce8e22ee58f52635"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/splash-ui-g9rckG/Code Cache/electron-preload/C3C57ACC93088FE6406873B2783B9540F9428BEDA0ECCBC3D5205C5A8521AB86-98C745F2F8511D66BBE9B340111CDCF6D2813962A4349795C8B6E56DDEE5F15C.cache",
+      "sha256": "b72b5f428d7da549e2143893c6e02b7bee723b6ecbbb7593a6e0c29eb9492933"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/splash-ui-g9rckG/Code Cache/js/index",
+      "sha256": "fbcfe23a2ecb82b7100c50811691dde0a33aa3da8d176be9882a9db485dc0f2d"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/splash-ui-g9rckG/Code Cache/js/index-dir/the-real-index",
+      "sha256": "9f6dbb7e7ab8cc241a6305598be9e5a875cf9383f383eafdc7fb1a89c284dbe0"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/splash-ui-g9rckG/Code Cache/wasm/index",
+      "sha256": "fbcfe23a2ecb82b7100c50811691dde0a33aa3da8d176be9882a9db485dc0f2d"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/splash-ui-g9rckG/Code Cache/wasm/index-dir/the-real-index",
+      "sha256": "9f6dbb7e7ab8cc241a6305598be9e5a875cf9383f383eafdc7fb1a89c284dbe0"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/splash-ui-g9rckG/DawnGraphiteCache/data_0",
+      "sha256": "d6a5fe39cd672781b256e0e3102f7022635f1d4bb7cfcc90a80fffe4d0f3877e"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/splash-ui-g9rckG/DawnGraphiteCache/data_1",
+      "sha256": "b1e963d702392fb7224786e7d56d43973e9b9efd1b89c17814d7c558ffc0cdec"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/splash-ui-g9rckG/DawnGraphiteCache/data_2",
+      "sha256": "ec1702806f4cc7c42a82fc2b38e89835fde7c64bb32060e0823c9077ca92efb7"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/splash-ui-g9rckG/DawnGraphiteCache/data_3",
+      "sha256": "e09f42c398d688dce168570291f1f92d079987deda3099a34adb9e8c0522b30c"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/splash-ui-g9rckG/DawnGraphiteCache/index",
+      "sha256": "9297783dd264edeb938ddce8e2976212779c19f7a114f6b8d313669d14521663"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/splash-ui-g9rckG/DawnWebGPUCache/data_0",
+      "sha256": "d6a5fe39cd672781b256e0e3102f7022635f1d4bb7cfcc90a80fffe4d0f3877e"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/splash-ui-g9rckG/DawnWebGPUCache/data_1",
+      "sha256": "b1e963d702392fb7224786e7d56d43973e9b9efd1b89c17814d7c558ffc0cdec"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/splash-ui-g9rckG/DawnWebGPUCache/data_2",
+      "sha256": "ec1702806f4cc7c42a82fc2b38e89835fde7c64bb32060e0823c9077ca92efb7"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/splash-ui-g9rckG/DawnWebGPUCache/data_3",
+      "sha256": "e09f42c398d688dce168570291f1f92d079987deda3099a34adb9e8c0522b30c"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/splash-ui-g9rckG/DawnWebGPUCache/index",
+      "sha256": "86e0bcb9c6b43dbc392b2a8782736e0681b9f67c92e5f82dd266da51e7fcc81d"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/splash-ui-g9rckG/declarative_performance_observer.db",
+      "sha256": "6b77b54313df8d759334819fdad7d879f15dce045017bd11bb557dd94ce52f66"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/splash-ui-g9rckG/declarative_performance_observer.db-journal",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/splash-ui-g9rckG/DIPS",
+      "sha256": "6f3075a0fbdc959bb87b749da269e2adbee124f1482de14436202f37fc9e68b8"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/splash-ui-g9rckG/electron.log",
+      "sha256": "2ed0dcf138701ba1d644a666f44993eb42d6448f4d2bd6ecac49eddd52e7a473"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/splash-ui-g9rckG/GPUCache/data_0",
+      "sha256": "7af9264b697a822128399a3330f35c9852a661464aafc5c874d9c3eacae6bc62"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/splash-ui-g9rckG/GPUCache/data_1",
+      "sha256": "0eb9cfbbaa5db3a9f02738590f00dda717b1a1c0529ba227ac16b10d73ab86c6"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/splash-ui-g9rckG/GPUCache/data_2",
+      "sha256": "849cebb5c15fbfb056fbc7dab2f683c423b7f18b270a845819e91f0ef49bdb4a"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/splash-ui-g9rckG/GPUCache/data_3",
+      "sha256": "e09f42c398d688dce168570291f1f92d079987deda3099a34adb9e8c0522b30c"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/splash-ui-g9rckG/GPUCache/index",
+      "sha256": "dbfab0975f7900056544b9a1d5694eb9f22e5edac2d1ecd60cae963489ab12bb"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/splash-ui-g9rckG/GPUPersistentCache/DawnGraphiteCache/2JA7WVZEGNYATM3CW7DYXTRCBKZ7YEUP/cache.db",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/splash-ui-g9rckG/GPUPersistentCache/DawnGraphiteCache/2JA7WVZEGNYATM3CW7DYXTRCBKZ7YEUP/cache.db-wal",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/splash-ui-g9rckG/GPUPersistentCache/DawnGraphiteCache/2JA7WVZEGNYATM3CW7DYXTRCBKZ7YEUP/cache.journal",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/splash-ui-g9rckG/GrShaderCache/data_0",
+      "sha256": "5446ec8b44785749b3a2af71e3abd89f8ab61553e254f81b5d12d0dedd6194dd"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/splash-ui-g9rckG/GrShaderCache/data_1",
+      "sha256": "37c0e9d454c61a01560496e6ec2f1b5e74aeecac5eac2339671cef343de9d8a4"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/splash-ui-g9rckG/GrShaderCache/data_2",
+      "sha256": "ec1702806f4cc7c42a82fc2b38e89835fde7c64bb32060e0823c9077ca92efb7"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/splash-ui-g9rckG/GrShaderCache/data_3",
+      "sha256": "fbe9244de5da738ece7b66fd7862cf11ed0c2e7a786b029fba9f646e6eb861dd"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/splash-ui-g9rckG/GrShaderCache/f_000001",
+      "sha256": "ef6a1e9b10b41568fce59854a1f16c8eda81e4bf991279d0725085f91530fd0d"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/splash-ui-g9rckG/GrShaderCache/f_000002",
+      "sha256": "66e12295d2729180690bd38a7eb23f824841d467cb8c0da460bcc2574f78f282"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/splash-ui-g9rckG/GrShaderCache/f_000003",
+      "sha256": "746742dbe61de03ffab75838226dc405bddbbc0c57ad85dc9292308709324f30"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/splash-ui-g9rckG/GrShaderCache/f_000004",
+      "sha256": "6477253f24c542170ba67fe7244613700537d308e4ad9abc81c86435adc5499c"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/splash-ui-g9rckG/GrShaderCache/index",
+      "sha256": "34f020c82a7913112c04f112cb617d30e6fc64ce825de1b149420fea387c6250"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/splash-ui-g9rckG/Local State",
+      "sha256": "74b1cbae3fd4d95c6d7ba9b9bce763fea0884a252bf9e6332f9fb16112335517"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/splash-ui-g9rckG/Local Storage/leveldb/000003.log",
+      "sha256": "bfeb3d4298a4821dccdd8a3cc1b1dbb1f20050594f7b146e6a21620bc57e62ed"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/splash-ui-g9rckG/Local Storage/leveldb/CURRENT",
+      "sha256": "0f1bad70c7bd1e0a69562853ec529355462fcd0423263a3d39d6d0d70b780443"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/splash-ui-g9rckG/Local Storage/leveldb/LOCK",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/splash-ui-g9rckG/Local Storage/leveldb/LOG",
+      "sha256": "1aac69fbc73c3f7eb17e3d457b7f47ea5b651f00065f9bc1a404378982cce063"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/splash-ui-g9rckG/Local Storage/leveldb/MANIFEST-000001",
+      "sha256": "f9d31b278e215eb0d0e9cd709edfa037e828f36214ab7906f612160fead4b2b4"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/splash-ui-g9rckG/Network/Network Persistent State",
+      "sha256": "5dfc321417fc31359f23320ea68014ebfd793c5bbed55f77dab4180bbd4a2026"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/splash-ui-g9rckG/Network/NetworkDataMigrated",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/splash-ui-g9rckG/Network/Trust Tokens",
+      "sha256": "48dc8b9acbedb0b7de6579f89e873e9434ca389b8c6ed986f705c86fd2819599"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/splash-ui-g9rckG/Network/Trust Tokens-journal",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/splash-ui-g9rckG/Preferences",
+      "sha256": "be4b8924ab38e8acf350e6e3b9f1f63a1a94952d8002759acd6946c4d5d0b5de"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/splash-ui-g9rckG/progress.log",
+      "sha256": "c55ea46241d54e32f228adcc3d1d704c0634498d82a7804ef9d95a62c016b8e7"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/splash-ui-g9rckG/Session Storage/000003.log",
+      "sha256": "4d7a760b35105bcacd2adef01d3f8080d1cebcf017b27603c32bf4fda6321b47"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/splash-ui-g9rckG/Session Storage/CURRENT",
+      "sha256": "0f1bad70c7bd1e0a69562853ec529355462fcd0423263a3d39d6d0d70b780443"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/splash-ui-g9rckG/Session Storage/LOCK",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/splash-ui-g9rckG/Session Storage/LOG",
+      "sha256": "95612b22e29e5d6d12fcdc2fef2a8150e4154181e15719004ce50a9fb2721f3f"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/splash-ui-g9rckG/Session Storage/MANIFEST-000001",
+      "sha256": "f9d31b278e215eb0d0e9cd709edfa037e828f36214ab7906f612160fead4b2b4"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/splash-ui-g9rckG/settings.json",
+      "sha256": "ecd24d9d1f6c516571fd8323074c95573a491921143b7baf8bc0fd89342f1edc"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/splash-ui-g9rckG/settings.v1.backup.json",
+      "sha256": "ecd24d9d1f6c516571fd8323074c95573a491921143b7baf8bc0fd89342f1edc"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/splash-ui-g9rckG/ShaderCache/data_0",
+      "sha256": "d6a5fe39cd672781b256e0e3102f7022635f1d4bb7cfcc90a80fffe4d0f3877e"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/splash-ui-g9rckG/ShaderCache/data_1",
+      "sha256": "b1e963d702392fb7224786e7d56d43973e9b9efd1b89c17814d7c558ffc0cdec"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/splash-ui-g9rckG/ShaderCache/data_2",
+      "sha256": "ec1702806f4cc7c42a82fc2b38e89835fde7c64bb32060e0823c9077ca92efb7"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/splash-ui-g9rckG/ShaderCache/data_3",
+      "sha256": "e09f42c398d688dce168570291f1f92d079987deda3099a34adb9e8c0522b30c"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/splash-ui-g9rckG/ShaderCache/index",
+      "sha256": "b24286f7482522f291122981555559b089ab4e43756e6fbd27d29956bedb100f"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/splash-ui-g9rckG/Shared Dictionary/cache/index",
+      "sha256": "fbcfe23a2ecb82b7100c50811691dde0a33aa3da8d176be9882a9db485dc0f2d"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/splash-ui-g9rckG/Shared Dictionary/cache/index-dir/the-real-index",
+      "sha256": "3e06683cf4e14a0516d7268fdade3d9931e14a41f381c014a57e27e01fbcb94b"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/splash-ui-g9rckG/Shared Dictionary/db",
+      "sha256": "db9734c1e3001f7abd08bcc472a7b4f5daf8076eaee708f04ba98b11bd70131d"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/splash-ui-g9rckG/Shared Dictionary/db-journal",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/splash-ui-g9rckG/splash-result.json",
+      "sha256": "f210c381cee29e1bddc521c896cfc9f1938c01d9b97464e3dec669927f8c1ddb"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/splash-ui-XjwYbO/Code Cache/js/index",
+      "sha256": "fbcfe23a2ecb82b7100c50811691dde0a33aa3da8d176be9882a9db485dc0f2d"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/splash-ui-XjwYbO/Code Cache/js/index-dir/the-real-index",
+      "sha256": "25c86c5929afd9ecc2102a8e1e080a1608f2163e80b65d42987042d1937dcc66"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/splash-ui-XjwYbO/Code Cache/wasm/index",
+      "sha256": "fbcfe23a2ecb82b7100c50811691dde0a33aa3da8d176be9882a9db485dc0f2d"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/splash-ui-XjwYbO/Code Cache/wasm/index-dir/the-real-index",
+      "sha256": "c996e367fab65d59d8592d820dd594218febdf75cbfb7c31670286fd7206ae6a"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/splash-ui-XjwYbO/DawnGraphiteCache/data_0",
+      "sha256": "d6a5fe39cd672781b256e0e3102f7022635f1d4bb7cfcc90a80fffe4d0f3877e"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/splash-ui-XjwYbO/DawnGraphiteCache/data_1",
+      "sha256": "c89278ea2c16387feec3782a4ce07d9fe890deafc88c168934c1bd1277b81317"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/splash-ui-XjwYbO/DawnGraphiteCache/data_2",
+      "sha256": "ec1702806f4cc7c42a82fc2b38e89835fde7c64bb32060e0823c9077ca92efb7"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/splash-ui-XjwYbO/DawnGraphiteCache/data_3",
+      "sha256": "e09f42c398d688dce168570291f1f92d079987deda3099a34adb9e8c0522b30c"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/splash-ui-XjwYbO/DawnGraphiteCache/index",
+      "sha256": "16774f3a801799c2977cd7446d63578f5009324f7ee1395288d3fd2348828d1c"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/splash-ui-XjwYbO/DawnWebGPUCache/data_0",
+      "sha256": "d6a5fe39cd672781b256e0e3102f7022635f1d4bb7cfcc90a80fffe4d0f3877e"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/splash-ui-XjwYbO/DawnWebGPUCache/data_1",
+      "sha256": "de03db918d36cf6911c33afec9ccfcbe11b5f1f962a0285d12c696d8cbd8d270"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/splash-ui-XjwYbO/DawnWebGPUCache/data_2",
+      "sha256": "ec1702806f4cc7c42a82fc2b38e89835fde7c64bb32060e0823c9077ca92efb7"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/splash-ui-XjwYbO/DawnWebGPUCache/data_3",
+      "sha256": "e09f42c398d688dce168570291f1f92d079987deda3099a34adb9e8c0522b30c"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/splash-ui-XjwYbO/DawnWebGPUCache/index",
+      "sha256": "4b282b76be5de8fb04bf5c60f19e6e00e5bd638ad301c8c918ff3ea4e79dc4fc"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/splash-ui-XjwYbO/declarative_performance_observer.db",
+      "sha256": "6b77b54313df8d759334819fdad7d879f15dce045017bd11bb557dd94ce52f66"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/splash-ui-XjwYbO/declarative_performance_observer.db-journal",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/splash-ui-XjwYbO/DIPS",
+      "sha256": "dbb48d1395cfce890e8da99bcbb5e558af8e8c9347d3d6d4a95af5757cb1d8a8"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/splash-ui-XjwYbO/electron.log",
+      "sha256": "8125cb7b943c396f2ef8066a868af6169168e6aa66093915788c25402d9d2de1"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/splash-ui-XjwYbO/GPUCache/data_0",
+      "sha256": "d6a5fe39cd672781b256e0e3102f7022635f1d4bb7cfcc90a80fffe4d0f3877e"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/splash-ui-XjwYbO/GPUCache/data_1",
+      "sha256": "99a7fb5812b2551782f9c8f6b376ec6a7d96f4f143de41e2d8f5515d486386ca"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/splash-ui-XjwYbO/GPUCache/data_2",
+      "sha256": "ec1702806f4cc7c42a82fc2b38e89835fde7c64bb32060e0823c9077ca92efb7"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/splash-ui-XjwYbO/GPUCache/data_3",
+      "sha256": "e09f42c398d688dce168570291f1f92d079987deda3099a34adb9e8c0522b30c"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/splash-ui-XjwYbO/GPUCache/index",
+      "sha256": "cd3e9c48858314b0a0c717075c77cf3cd39e73e2f171f054a9bdd6b36b04964f"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/splash-ui-XjwYbO/GPUPersistentCache/DawnGraphiteCache/2JA7WVZEGNYATM3CW7DYXTRCBKZ7YEUP/cache.db",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/splash-ui-XjwYbO/GPUPersistentCache/DawnGraphiteCache/2JA7WVZEGNYATM3CW7DYXTRCBKZ7YEUP/cache.db-wal",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/splash-ui-XjwYbO/GPUPersistentCache/DawnGraphiteCache/2JA7WVZEGNYATM3CW7DYXTRCBKZ7YEUP/cache.journal",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/splash-ui-XjwYbO/GrShaderCache/data_0",
+      "sha256": "d179d72c3637cccb7e3ec3eb90defae2d815c816ed10eb9e892893a754e88731"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/splash-ui-XjwYbO/GrShaderCache/data_1",
+      "sha256": "bd705c0831bfdc65a6bbf1184770c2d71e79896d6b995168b4964a3f8e24c0a0"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/splash-ui-XjwYbO/GrShaderCache/data_2",
+      "sha256": "ec1702806f4cc7c42a82fc2b38e89835fde7c64bb32060e0823c9077ca92efb7"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/splash-ui-XjwYbO/GrShaderCache/data_3",
+      "sha256": "66b0b79e6e13b78be1568190252ddbba445e08ab06d947dced8bdbc8fd966219"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/splash-ui-XjwYbO/GrShaderCache/index",
+      "sha256": "f3336cca36e3adcff5ebd4d161e847ad012b9793b968666a50b5cc759e316617"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/splash-ui-XjwYbO/Local State",
+      "sha256": "db2fc737043064df439efa63a199efd3a6014669f2ca53a92b2b008d7d9448d3"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/splash-ui-XjwYbO/Local Storage/leveldb/000003.log",
+      "sha256": "8bd2ea70a0b70c91de138a5b87c7936c6a6fa7c4275c54b97f4ef0ccc5b79bb4"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/splash-ui-XjwYbO/Local Storage/leveldb/CURRENT",
+      "sha256": "0f1bad70c7bd1e0a69562853ec529355462fcd0423263a3d39d6d0d70b780443"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/splash-ui-XjwYbO/Local Storage/leveldb/LOCK",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/splash-ui-XjwYbO/Local Storage/leveldb/LOG",
+      "sha256": "fb58281fd4175c9372dddcc574765d962c5e39b660b19036294414e69d28fd7a"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/splash-ui-XjwYbO/Local Storage/leveldb/MANIFEST-000001",
+      "sha256": "f9d31b278e215eb0d0e9cd709edfa037e828f36214ab7906f612160fead4b2b4"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/splash-ui-XjwYbO/Network/Network Persistent State",
+      "sha256": "5dfc321417fc31359f23320ea68014ebfd793c5bbed55f77dab4180bbd4a2026"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/splash-ui-XjwYbO/Network/NetworkDataMigrated",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/splash-ui-XjwYbO/Network/Trust Tokens",
+      "sha256": "48dc8b9acbedb0b7de6579f89e873e9434ca389b8c6ed986f705c86fd2819599"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/splash-ui-XjwYbO/Network/Trust Tokens-journal",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/splash-ui-XjwYbO/Preferences",
+      "sha256": "be4b8924ab38e8acf350e6e3b9f1f63a1a94952d8002759acd6946c4d5d0b5de"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/splash-ui-XjwYbO/progress.log",
+      "sha256": "2efe66a0f4f2503813f78d42f003027edd238a942839a1843bb3b8e52c5e1a1d"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/splash-ui-XjwYbO/settings.json",
+      "sha256": "ecd24d9d1f6c516571fd8323074c95573a491921143b7baf8bc0fd89342f1edc"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/splash-ui-XjwYbO/settings.v1.backup.json",
+      "sha256": "ecd24d9d1f6c516571fd8323074c95573a491921143b7baf8bc0fd89342f1edc"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/splash-ui-XjwYbO/ShaderCache/data_0",
+      "sha256": "d6a5fe39cd672781b256e0e3102f7022635f1d4bb7cfcc90a80fffe4d0f3877e"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/splash-ui-XjwYbO/ShaderCache/data_1",
+      "sha256": "91112abd4afebca1b1219a388c59dcb5eb3925b93c2caffe7e82a14effdc7c9a"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/splash-ui-XjwYbO/ShaderCache/data_2",
+      "sha256": "ec1702806f4cc7c42a82fc2b38e89835fde7c64bb32060e0823c9077ca92efb7"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/splash-ui-XjwYbO/ShaderCache/data_3",
+      "sha256": "e09f42c398d688dce168570291f1f92d079987deda3099a34adb9e8c0522b30c"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/splash-ui-XjwYbO/ShaderCache/index",
+      "sha256": "ddd703f03444917c7bb3d36a421dfca9651112e50be4a3d1277e1850b51582af"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/splash-ui-XjwYbO/Shared Dictionary/cache/index",
+      "sha256": "fbcfe23a2ecb82b7100c50811691dde0a33aa3da8d176be9882a9db485dc0f2d"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/splash-ui-XjwYbO/Shared Dictionary/cache/index-dir/the-real-index",
+      "sha256": "2f6b7b390747e63d802c31335feebbb12adeb520f7a56f8c1483660c5086b6c6"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/splash-ui-XjwYbO/Shared Dictionary/db",
+      "sha256": "db9734c1e3001f7abd08bcc472a7b4f5daf8076eaee708f04ba98b11bd70131d"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/splash-ui-XjwYbO/Shared Dictionary/db-journal",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/workflow-scripts.cjs",
+      "sha256": "dc18f14d0736587af7aa26c57b97d7444c39c427eca14615f0dc2727717d5d1d"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-splash-clock/workflow-scripts.json",
+      "sha256": "a43bbd9c8c31db957f9ec13cb5bbab199a0c5a2fc6b2e39bae4fe7b20f0debc1"
+    }
+  ],
+  "previousThemeAnomaly": {
+    "status": "open",
+    "source": "docs/evidence/r8-windows-delivery.json",
+    "causeDetermined": false,
+    "themeFixClaimed": false
+  },
+  "published": false,
+  "remaining": [
+    "Trace the isolated theme drift before the first settings load and vary first-interaction timing",
+    "Fold final frontend fixes into complete current Windows distribution acceptance",
+    "Windows10/other Windows11, interactive wizard/shortcut and native fallback UI",
+    "Production signing/Android identity migration, physical Android, native iOS, LAN and long-run/R6/R7/R8 acceptance"
+  ]
+}

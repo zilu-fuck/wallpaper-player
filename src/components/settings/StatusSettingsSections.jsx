@@ -25,6 +25,7 @@ export function MpvStatusSection({
   downloadProgress,
   mpvDownloadError,
   onDownloadMpv,
+  onCancelDownloadMpv,
   onSelectMpvPath
 }) {
   return (
@@ -57,10 +58,11 @@ export function MpvStatusSection({
                 type="button"
               >
                 {downloading
-                  ? `下载中... ${downloadProgress ? downloadProgress.percent + '%' : ''}`
+                  ? downloadProgress?.stage === 'extract' ? '正在解压并验证...' : `下载中... ${downloadProgress ? downloadProgress.percent + '%' : ''}`
                   : '自动下载 mpv'
                 }
               </button>
+              {downloading && <button className="btn btn-sm" onClick={onCancelDownloadMpv} type="button">取消安装</button>}
               <button
                 className="btn btn-sm"
                 onClick={onSelectMpvPath}

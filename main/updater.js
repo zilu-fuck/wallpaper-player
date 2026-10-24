@@ -1,5 +1,4 @@
 const { app } = require('electron')
-const { autoUpdater } = require('electron-updater')
 const log = require('electron-log')
 const { EVENT } = require('./ipc-channels')
 const { isPortableApp } = require('./paths')
@@ -7,6 +6,10 @@ const { getMainWindow } = require('./window')
 const RELEASES_URL = 'https://github.com/zilu-fuck/wallpaper-player/releases/latest'
 
 let updateCheckTimer = null
+let updateStartTimer = null
+let autoUpdater = null
+let updaterConfigured = false
+function getAutoUpdater() { return autoUpdater ||= require('electron-updater').autoUpdater }
 let updateState = {
   status: 'idle',
   currentVersion: app.getVersion()
@@ -74,7 +77,7 @@ function getUpdateState() {
 function checkForUpdates() {
   if (updateCheckPromise) return updateCheckPromise
 
-  updateCheckPromise = autoUpdater.checkForUpdates()
+  updateCheckPromise = Promise.resolve().then(() => getAutoUpdater().checkForUpdates())
     .finally(() => {
       updateCheckPromise = null
     })
@@ -98,6 +101,10 @@ function setupAutoUpdater() {
     setUpdateState('disabled', getUpdaterDisabledState())
     return
   }
+
+  if (updaterConfigured) { scheduleUpdateChecks(); return }
+  const autoUpdater = getAutoUpdater()
+  updaterConfigured = true
 
   autoUpdater.logger = log
   log.transports.file.level = 'info'
@@ -164,7 +171,13 @@ function setupAutoUpdater() {
     })
   })
 
-  setTimeout(() => {
+  scheduleUpdateChecks()
+}
+
+function scheduleUpdateChecks() {
+  if (updateCheckTimer || updateStartTimer) return
+  updateStartTimer = setTimeout(() => {
+    updateStartTimer = null
     checkForUpdates().catch((error) => {
       log.error('[updater] 检查更新失败:', error)
     })
@@ -178,6 +191,8 @@ function setupAutoUpdater() {
 }
 
 function disposeUpdater() {
+  clearTimeout(updateStartTimer)
+  updateStartTimer = null
   if (updateCheckTimer) {
     clearInterval(updateCheckTimer)
     updateCheckTimer = null
@@ -198,7 +213,7 @@ function downloadUpdate() {
     error: ''
   })
 
-  updateDownloadPromise = autoUpdater.downloadUpdate()
+  updateDownloadPromise = Promise.resolve().then(() => getAutoUpdater().downloadUpdate())
     .finally(() => {
       updateDownloadPromise = null
     })
@@ -210,7 +225,7 @@ function installUpdate() {
     return { success: false, error: '更新尚未下载完成' }
   }
 
-  autoUpdater.quitAndInstall(false, true)
+  getAutoUpdater().quitAndInstall(false, true)
   return { success: true }
 }
 

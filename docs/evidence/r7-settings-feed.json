@@ -1,0 +1,1431 @@
+{
+  "date": "2026-10-19T07:40:45.111Z",
+  "stage": "R7 batch 16: incremental settings feed, entity changes and selective internal reads",
+  "environment": {
+    "node": "24.14.0",
+    "v8": "13.6.233.17-node.41",
+    "platform": "win32",
+    "arch": "x64",
+    "osRelease": "10.0.26300",
+    "cpuModel": "AMD Ryzen 7 5800X 8-Core Processor             ",
+    "installedElectron": "35.7.5"
+  },
+  "sourceDigests": {
+    "main/settings.js": "f63c39a704827255c83d248bbebcf9dd5f0a664e66b918781de7cb85f5515a80",
+    "main/application/settings-broadcast.js": "f7137590c14a6e3c4fa4217fe318f90d5072942b1d206c2d5d50e4a97e38281e",
+    "main/application/settings-json.js": "b051646df7c453b943e1c51f0e58a23caaea1c06b8d4fe243c476e86bfeb60ba",
+    "main/application/settings-json-worker.js": "13bb2ffad8358b1a0f57f819d7a3b2bfc9cf6d942cb82d9be4408db424a481ec",
+    "main/application/library-service.js": "110b46f24e4b433b1bd74402f0a403cd6f086264915efccf9d7d968429fffef9",
+    "main/application/media-mutations.js": "8457b641457e7f18c131a6560361aa48ad643571b1fe5b64b5c6216ba07af447",
+    "main/plugins/video-analysis/index.js": "a1cde38c6dd7f69be33a10681080bf63686c4d6a34ea41552bffaee49d929f37",
+    "main/remote/handlers/tags.js": "1422546a6e4e1db62d8e7e238dfe3cec725b40c1732e567ed484eda38024512f",
+    "main/index.js": "81a0f85e42439421d6d976012f4b5ff01ccb21aa8155487541cf9bd35e0701dc",
+    "main/ipc-channels.js": "0f331e70e6b1ee6bf9f3d815bffb406e459e60f8b759100eb78fafaa97f0ddca",
+    "main/ipc/settings.js": "0795511bfc94bd813d99012f8373bcfb12dfa520204d3ae24dc82524d7f8eecc",
+    "main/security/ipc-sender.js": "da80398dd786f6a7b6c737fbd2e3f0de9b581584fb5c3f81a16b44a12e570b1a",
+    "main/security/ipc.js": "3727a72b5bbf2ef320d3e04ed436ff41db04d2ece150e7c22ce21dbca177cb5d",
+    "main/user-data.js": "940161537bcad84992d24516497606bcb79bbf551d01521f73337a69d700303a",
+    "preload.js": "b9f1d33fd75e94cc9a80a9d85d9f30c552a59847bef812b975e89c13b920c271",
+    "src/electronAPI.d.ts": "052d6a9530b8676bf0ad12ddfbb566ff0674c0172d8068ea758b9b6eb9d4f6d5",
+    "src/services/settings-client.js": "cafd005db99d35d5387bc7ce06947b6674d4b4d1c76313ef0d9672442ad704ca",
+    "src/hooks/useAppState.js": "880de6d4f4cf3fa969ffc7fe98cd29f0482a0a1ac93e950151915f2b82a35bff",
+    "src/utils/share-json.js": "91392d99af0dbc903522f41b35b1f7a4beb2bd8947251fb95f9c7873523b52a4",
+    "packages/contracts/src/settings-feed.ts": "fb60e20d845678b672dd660b7ced31c9c5d90b135542dc8dba15e8a41ae51650",
+    "packages/contracts/src/index.ts": "ac086150d28e328ef2d20784ca40d9861c684473ef920b4507d279b172be7452",
+    "packages/contracts/dist/settings-feed.js": "b1eb728b57f452349a7ed2ed1048d311f18ae5d902da33190973b49ccf320775",
+    "packages/contracts/dist/settings-feed.d.ts": "b3f3ac34aea8f6f5e21d227592a633f206de4966634b3803daec2c3bc827f458",
+    "packages/contracts/dist/index.js": "af0dcae196c9679e3e3eb503e909262364f1818bbfb6c8831ec09749bc4994e3",
+    "packages/contracts/dist/index.d.ts": "3d19875ce3885f271d3f9adbe7609b67572771dedcbd9935c6a0780dff92f532",
+    "scripts/verify-settings-feed.js": "6695ff2822f937790e126180764085e36abd02f4018adcfebe6bea462e96e923",
+    "scripts/verify-settings-feed-ui.js": "6eead0a8464ea36f9934e8d0b736facb97ef259b4d0ad7c7666e83f642bc4103",
+    "scripts/verify-settings-feed-electron.js": "7efeaf642300cb3eb13b233a1b84304c117cb0af730ec6088bb793e8870c073a",
+    "scripts/verify-settings-broadcast-cost.js": "82127b4bf6b351871e84f738be7842345a53d5d49fccf7f2524f0928257f0e37",
+    "scripts/verify-settings-snapshots-electron.js": "c0c0fd66b634c443d356425de6b34b6a0f6d0a2efb9bcfd6e7c0d5d638e6e385",
+    "scripts/verify-app-initialization-electron.js": "70b4fe6d74c9c268a490d0188b25a95548b7462edb48d237b56c000748d51def",
+    "scripts/verify-shutdown-persistence.js": "a802ebc9d2390b10435b62a872fa40935e602a4c9675bdf51aec4c6837159a09",
+    "scripts/verify-packaged-contracts.js": "c387118a44dfa568a4a1c47e8bf1b13e4bf303bc64332c2018a7d77286bf739f",
+    "scripts/verify-mobile-bundles.js": "019ed797b1afd0b69494e55744e1f68fa43d96bfa735bca2cd24148cd122d098",
+    "package.json": "3535d982f2628d675a2751556e94689a1796b86fcf44789a28c6fe53d16575e8",
+    ".github/workflows/ci.yml": "24ba71097dd4f261d8d237cfdebc3a9ef381587ca249de50f6d179029d0c3b52",
+    "docs/refactor-progress.md": "e6c26b385e9fdf8f9a42f8f733bf6f3cc1fd8225d8d0f9e6699e138b52671071",
+    "docs/desktop-mobile-review-and-refactor-plan.md": "de866517f17282a96e32079bab28876c355eb3238c46eb5e617d8bd36cb48256",
+    "docs/protocol-contracts.md": "3e489104e3833728880b02805fd8174168bbe5a622e05c931df5d7c1ecf163c1"
+  },
+  "inputArtifacts": {
+    "baseline": {
+      "file": ".tmp/refactor-tests/settings-broadcast-cost-baseline.json",
+      "sha256": "f3e1084763aec8eb65d14a81a5641ccfbf21854445cb6b0218156ae717312c1f"
+    },
+    "series": {
+      "file": ".tmp/refactor-tests/settings-broadcast-series-final.json",
+      "sha256": "bb0d79db6d609a37d53045c40a88d81f0e50f9654eff0136d811a3ccebba70ec"
+    },
+    "nodeLifecycle": {
+      "file": ".tmp/refactor-tests/settings-feed-lifecycle.json",
+      "sha256": "d3146035cf712709fcec3bcf477ac90aeb5bd8329f65aff3b801c0d59b737997"
+    },
+    "nativeLifecycle": {
+      "file": ".tmp/refactor-tests/settings-feed-electron.json",
+      "sha256": "e454714e90f8e15e3f31a2f0cc1740c2f87b8effc463fbc0ac3020be1f567f23"
+    },
+    "workerLifecycle": {
+      "file": ".tmp/refactor-tests/settings-json-lifecycle.json",
+      "sha256": "ed585a1f43ae52db62b550874b548ff308f7318eb471e4074b33e99a28f4d356"
+    },
+    "patchLifecycle": {
+      "file": ".tmp/refactor-tests/settings-patch-lifecycle.json",
+      "sha256": "81c944a9850ea40d7649a66fe03e1cc6569e2da7d1da6542962eb997f35c4198"
+    },
+    "isolationIncident": {
+      "file": ".tmp/refactor-tests/settings-feed-isolation-incident.json",
+      "sha256": "198be677d355eeedaa5b74eebf290ed95165bbd075b1829b9d4a4a8aa25911b7"
+    },
+    "mobileBundles": {
+      "file": ".tmp/refactor-tests/contracts-bundles-evidence.json",
+      "sha256": "adce2af411ffdd43b0063906a8fc5257c50563ffcd159fa35ca7c50860a4a8d4"
+    }
+  },
+  "buildArtifacts": {
+    "dist/index.html": "2b9c0e08583e6d3d6a0c3cba8b6d73833035ff9ea9da0d45488e410738b266f3",
+    "dist/assets/index-B6flzh3l.js": "b45a0665bd5fceb1a151b113264ed976f65d2a529e12d3d6678255a9035434a3"
+  },
+  "capturedBaseline": {
+    "fixture": ".tmp\\refactor-tests\\settings-broadcast-cost-iKaFih",
+    "sourceDigests": {
+      "main/settings.js": "833f61931bf8cd91ab0d655cff46677c1f2c735de62edbf9e75ad7310568200a",
+      "main/index.js": "be93b5746f79b9a1e807e6f2b638d1ce36af41178360bc797dba27595646e330",
+      "main/ipc/settings.js": "63c5a0f5162508c3eb20ede7af722682eaa08ff95e128fc97104b0f143b07ab8",
+      "preload.js": "aba5a89a7389a9e6ed8da2f362b5f2883aa997cf32d0ff1e9f81aec9bd246394"
+    },
+    "replay": "Captured settings module compiled at its production path and AST-extracted production setupSettingsSync registration; all captured source hashes verified. Production files were not swapped. Current compatible dependencies remain in use; the worker map delta option defaults to false for the old caller. Captured IPC/preload files identify the source checkpoint but are not executed in the Node timing model."
+  },
+  "scope": [
+    "Owned commit metadata, lazy full/field copies and selective playback/network/password reads",
+    "Worker opt-in JSON-equivalent entity deltas retain unchanged private references; complete durable JSON format unchanged",
+    "Shared feed/event/map schemas, frame-bound negotiation, stable token and explicit legacy subscription sequence",
+    "Renderer atomic versioned deltas, coalesced/bounded recovery, optimistic intent and retired owner fencing",
+    "Node lifecycle, actual hidden Electron production sandbox preload/guarded IPC and full App regression after rebuild"
+  ],
+  "metrics": [
+    {
+      "operation": "theme broadcast",
+      "before": {
+        "millisecondsMedian": 49.937400000000025,
+        "millisecondsMax": 63.58220000000006,
+        "maxHeartbeatGapMs": 28.53989999999999,
+        "payloadJsonBytes": [
+          1518384,
+          1518385
+        ],
+        "fullStateParses": [
+          2
+        ],
+        "messages": [
+          1
+        ]
+      },
+      "after": {
+        "millisecondsMedian": 31.822900000000004,
+        "millisecondsMax": 36.358299999999986,
+        "maxHeartbeatGapMs": 16.48720000000003,
+        "payloadJsonBytes": [
+          270,
+          271
+        ],
+        "fullStateParses": [
+          1
+        ],
+        "messages": [
+          1
+        ]
+      }
+    },
+    {
+      "operation": "playback broadcast",
+      "before": {
+        "millisecondsMedian": 48.8196999999999,
+        "millisecondsMax": 66.07209999999998,
+        "maxHeartbeatGapMs": 17.251500000000078,
+        "payloadJsonBytes": [
+          1518613,
+          1518614
+        ],
+        "fullStateParses": [
+          2
+        ],
+        "messages": [
+          1
+        ]
+      },
+      "after": {
+        "millisecondsMedian": 30.97530000000006,
+        "millisecondsMax": 38.82690000000002,
+        "maxHeartbeatGapMs": 16.245499999999993,
+        "payloadJsonBytes": [
+          524,
+          526
+        ],
+        "fullStateParses": [
+          1
+        ],
+        "messages": [
+          1
+        ]
+      }
+    },
+    {
+      "operation": "one video tag broadcast",
+      "before": {
+        "millisecondsMedian": 79.68730000000005,
+        "millisecondsMax": 95.12739999999985,
+        "maxHeartbeatGapMs": 25.03359999999998,
+        "payloadJsonBytes": [
+          1518606,
+          1518606
+        ],
+        "fullStateParses": [
+          2
+        ],
+        "messages": [
+          1
+        ]
+      },
+      "after": {
+        "millisecondsMedian": 80.64229999999998,
+        "millisecondsMax": 85.00469999999996,
+        "maxHeartbeatGapMs": 21.092399999999998,
+        "payloadJsonBytes": [
+          430,
+          430
+        ],
+        "fullStateParses": [
+          1
+        ],
+        "messages": [
+          1
+        ]
+      }
+    }
+  ],
+  "costSeries": {
+    "date": "2026-10-19T07:35:19.181Z",
+    "conditions": "Three alternating captured-before/current process pairs run sequentially after affected verification completed. Node structuredClone sender model; no simultaneous verification launched by this task. Five observations per operation per process. Not renderer latency, IPC wire bytes, cold startup or long-run P95.",
+    "runs": [
+      {
+        "date": "2026-10-19T07:35:10.160Z",
+        "fixture": ".tmp\\refactor-tests\\settings-broadcast-cost-QC3iGx",
+        "baseline": true,
+        "sourceDigests": {
+          "main/settings.js": "833f61931bf8cd91ab0d655cff46677c1f2c735de62edbf9e75ad7310568200a",
+          "main/index.js": "be93b5746f79b9a1e807e6f2b638d1ce36af41178360bc797dba27595646e330",
+          "main/ipc/settings.js": "63c5a0f5162508c3eb20ede7af722682eaa08ff95e128fc97104b0f143b07ab8",
+          "preload.js": "aba5a89a7389a9e6ed8da2f362b5f2883aa997cf32d0ff1e9f81aec9bd246394"
+        },
+        "tagEntries": 10000,
+        "results": [
+          {
+            "name": "theme broadcast",
+            "observations": [
+              {
+                "milliseconds": 46.764999999999986,
+                "maxHeartbeatGapMs": 19.77950000000004,
+                "payloadJsonBytes": 1518385,
+                "fullStateParses": 2,
+                "messages": 1,
+                "channel": "settings-changed"
+              },
+              {
+                "milliseconds": 46.27589999999992,
+                "maxHeartbeatGapMs": 20.990599999999972,
+                "payloadJsonBytes": 1518384,
+                "fullStateParses": 2,
+                "messages": 1,
+                "channel": "settings-changed"
+              },
+              {
+                "milliseconds": 47.33140000000003,
+                "maxHeartbeatGapMs": 21.192399999999907,
+                "payloadJsonBytes": 1518385,
+                "fullStateParses": 2,
+                "messages": 1,
+                "channel": "settings-changed"
+              },
+              {
+                "milliseconds": 47.40949999999998,
+                "maxHeartbeatGapMs": 21.725000000000023,
+                "payloadJsonBytes": 1518384,
+                "fullStateParses": 2,
+                "messages": 1,
+                "channel": "settings-changed"
+              },
+              {
+                "milliseconds": 54.21460000000002,
+                "maxHeartbeatGapMs": 23.76389999999992,
+                "payloadJsonBytes": 1518385,
+                "fullStateParses": 2,
+                "messages": 1,
+                "channel": "settings-changed"
+              }
+            ]
+          },
+          {
+            "name": "playback broadcast",
+            "observations": [
+              {
+                "milliseconds": 51.49389999999994,
+                "maxHeartbeatGapMs": 16.19730000000004,
+                "payloadJsonBytes": 1518613,
+                "fullStateParses": 2,
+                "messages": 1,
+                "channel": "settings-changed"
+              },
+              {
+                "milliseconds": 47.847999999999956,
+                "maxHeartbeatGapMs": 15.250699999999938,
+                "payloadJsonBytes": 1518614,
+                "fullStateParses": 2,
+                "messages": 1,
+                "channel": "settings-changed"
+              },
+              {
+                "milliseconds": 46.13339999999994,
+                "maxHeartbeatGapMs": 14.96390000000008,
+                "payloadJsonBytes": 1518614,
+                "fullStateParses": 2,
+                "messages": 1,
+                "channel": "settings-changed"
+              },
+              {
+                "milliseconds": 48.92049999999995,
+                "maxHeartbeatGapMs": 15.63779999999997,
+                "payloadJsonBytes": 1518614,
+                "fullStateParses": 2,
+                "messages": 1,
+                "channel": "settings-changed"
+              },
+              {
+                "milliseconds": 47.11850000000004,
+                "maxHeartbeatGapMs": 15.47700000000009,
+                "payloadJsonBytes": 1518614,
+                "fullStateParses": 2,
+                "messages": 1,
+                "channel": "settings-changed"
+              }
+            ]
+          },
+          {
+            "name": "one video tag broadcast",
+            "observations": [
+              {
+                "milliseconds": 78.81839999999988,
+                "maxHeartbeatGapMs": 22.07899999999995,
+                "payloadJsonBytes": 1518606,
+                "fullStateParses": 2,
+                "messages": 1,
+                "channel": "settings-changed"
+              },
+              {
+                "milliseconds": 83.15329999999994,
+                "maxHeartbeatGapMs": 22.922800000000052,
+                "payloadJsonBytes": 1518606,
+                "fullStateParses": 2,
+                "messages": 1,
+                "channel": "settings-changed"
+              },
+              {
+                "milliseconds": 69.01569999999992,
+                "maxHeartbeatGapMs": 16.653999999999996,
+                "payloadJsonBytes": 1518606,
+                "fullStateParses": 2,
+                "messages": 1,
+                "channel": "settings-changed"
+              },
+              {
+                "milliseconds": 83.37760000000003,
+                "maxHeartbeatGapMs": 18.569300000000112,
+                "payloadJsonBytes": 1518606,
+                "fullStateParses": 2,
+                "messages": 1,
+                "channel": "settings-changed"
+              },
+              {
+                "milliseconds": 75.68319999999994,
+                "maxHeartbeatGapMs": 17.375999999999976,
+                "payloadJsonBytes": 1518606,
+                "fullStateParses": 2,
+                "messages": 1,
+                "channel": "settings-changed"
+              }
+            ]
+          }
+        ],
+        "conditions": "Actual settings repository and AST-extracted production setupSettingsSync; sender uses Node structuredClone, not Electron transport. Payload JSON byte counting is outside timed operations. Five sequential observations per operation, not IPC wire bytes, renderer latency or P95."
+      },
+      {
+        "date": "2026-10-19T07:35:11.839Z",
+        "fixture": ".tmp\\refactor-tests\\settings-broadcast-cost-X7RSVW",
+        "baseline": false,
+        "sourceDigests": {
+          "main/settings.js": "f63c39a704827255c83d248bbebcf9dd5f0a664e66b918781de7cb85f5515a80",
+          "main/index.js": "81a0f85e42439421d6d976012f4b5ff01ccb21aa8155487541cf9bd35e0701dc",
+          "main/ipc/settings.js": "0795511bfc94bd813d99012f8373bcfb12dfa520204d3ae24dc82524d7f8eecc",
+          "preload.js": "b9f1d33fd75e94cc9a80a9d85d9f30c552a59847bef812b975e89c13b920c271"
+        },
+        "tagEntries": 10000,
+        "results": [
+          {
+            "name": "theme broadcast",
+            "observations": [
+              {
+                "milliseconds": 31.236400000000003,
+                "maxHeartbeatGapMs": 15.038800000000037,
+                "payloadJsonBytes": 271,
+                "fullStateParses": 1,
+                "messages": 1,
+                "channel": "settings-patched"
+              },
+              {
+                "milliseconds": 33.23139999999995,
+                "maxHeartbeatGapMs": 15.144399999999962,
+                "payloadJsonBytes": 270,
+                "fullStateParses": 1,
+                "messages": 1,
+                "channel": "settings-patched"
+              },
+              {
+                "milliseconds": 31.822900000000004,
+                "maxHeartbeatGapMs": 16.01679999999999,
+                "payloadJsonBytes": 271,
+                "fullStateParses": 1,
+                "messages": 1,
+                "channel": "settings-patched"
+              },
+              {
+                "milliseconds": 35.904199999999946,
+                "maxHeartbeatGapMs": 15.134599999999978,
+                "payloadJsonBytes": 270,
+                "fullStateParses": 1,
+                "messages": 1,
+                "channel": "settings-patched"
+              },
+              {
+                "milliseconds": 31.045900000000074,
+                "maxHeartbeatGapMs": 14.487799999999993,
+                "payloadJsonBytes": 271,
+                "fullStateParses": 1,
+                "messages": 1,
+                "channel": "settings-patched"
+              }
+            ]
+          },
+          {
+            "name": "playback broadcast",
+            "observations": [
+              {
+                "milliseconds": 35.50229999999999,
+                "maxHeartbeatGapMs": 16.036699999999996,
+                "payloadJsonBytes": 524,
+                "fullStateParses": 1,
+                "messages": 1,
+                "channel": "settings-patched"
+              },
+              {
+                "milliseconds": 38.82690000000002,
+                "maxHeartbeatGapMs": 16.096400000000017,
+                "payloadJsonBytes": 525,
+                "fullStateParses": 1,
+                "messages": 1,
+                "channel": "settings-patched"
+              },
+              {
+                "milliseconds": 31.03830000000005,
+                "maxHeartbeatGapMs": 12.688200000000052,
+                "payloadJsonBytes": 526,
+                "fullStateParses": 1,
+                "messages": 1,
+                "channel": "settings-patched"
+              },
+              {
+                "milliseconds": 30.97530000000006,
+                "maxHeartbeatGapMs": 13.298199999999952,
+                "payloadJsonBytes": 526,
+                "fullStateParses": 1,
+                "messages": 1,
+                "channel": "settings-patched"
+              },
+              {
+                "milliseconds": 30.86259999999993,
+                "maxHeartbeatGapMs": 14.550600000000031,
+                "payloadJsonBytes": 526,
+                "fullStateParses": 1,
+                "messages": 1,
+                "channel": "settings-patched"
+              }
+            ]
+          },
+          {
+            "name": "one video tag broadcast",
+            "observations": [
+              {
+                "milliseconds": 85.00469999999996,
+                "maxHeartbeatGapMs": 18.70010000000002,
+                "payloadJsonBytes": 430,
+                "fullStateParses": 1,
+                "messages": 1,
+                "channel": "settings-patched"
+              },
+              {
+                "milliseconds": 80.64229999999998,
+                "maxHeartbeatGapMs": 19.99649999999997,
+                "payloadJsonBytes": 430,
+                "fullStateParses": 1,
+                "messages": 1,
+                "channel": "settings-patched"
+              },
+              {
+                "milliseconds": 84.31819999999993,
+                "maxHeartbeatGapMs": 18.94500000000005,
+                "payloadJsonBytes": 430,
+                "fullStateParses": 1,
+                "messages": 1,
+                "channel": "settings-patched"
+              },
+              {
+                "milliseconds": 84.22180000000003,
+                "maxHeartbeatGapMs": 21.028600000000097,
+                "payloadJsonBytes": 430,
+                "fullStateParses": 1,
+                "messages": 1,
+                "channel": "settings-patched"
+              },
+              {
+                "milliseconds": 74.70350000000008,
+                "maxHeartbeatGapMs": 20.271900000000187,
+                "payloadJsonBytes": 430,
+                "fullStateParses": 1,
+                "messages": 1,
+                "channel": "settings-patched"
+              }
+            ]
+          }
+        ],
+        "conditions": "Actual settings repository and AST-extracted production setupSettingsSync; sender uses Node structuredClone, not Electron transport. Payload JSON byte counting is outside timed operations. Five sequential observations per operation, not IPC wire bytes, renderer latency or P95."
+      },
+      {
+        "date": "2026-10-19T07:35:13.818Z",
+        "fixture": ".tmp\\refactor-tests\\settings-broadcast-cost-OgQsUL",
+        "baseline": true,
+        "sourceDigests": {
+          "main/settings.js": "833f61931bf8cd91ab0d655cff46677c1f2c735de62edbf9e75ad7310568200a",
+          "main/index.js": "be93b5746f79b9a1e807e6f2b638d1ce36af41178360bc797dba27595646e330",
+          "main/ipc/settings.js": "63c5a0f5162508c3eb20ede7af722682eaa08ff95e128fc97104b0f143b07ab8",
+          "preload.js": "aba5a89a7389a9e6ed8da2f362b5f2883aa997cf32d0ff1e9f81aec9bd246394"
+        },
+        "tagEntries": 10000,
+        "results": [
+          {
+            "name": "theme broadcast",
+            "observations": [
+              {
+                "milliseconds": 50.57650000000001,
+                "maxHeartbeatGapMs": 22.852599999999995,
+                "payloadJsonBytes": 1518385,
+                "fullStateParses": 2,
+                "messages": 1,
+                "channel": "settings-changed"
+              },
+              {
+                "milliseconds": 49.69480000000004,
+                "maxHeartbeatGapMs": 23.267999999999972,
+                "payloadJsonBytes": 1518384,
+                "fullStateParses": 2,
+                "messages": 1,
+                "channel": "settings-changed"
+              },
+              {
+                "milliseconds": 52.802599999999984,
+                "maxHeartbeatGapMs": 23.527799999999957,
+                "payloadJsonBytes": 1518385,
+                "fullStateParses": 2,
+                "messages": 1,
+                "channel": "settings-changed"
+              },
+              {
+                "milliseconds": 49.937400000000025,
+                "maxHeartbeatGapMs": 24.158000000000015,
+                "payloadJsonBytes": 1518384,
+                "fullStateParses": 2,
+                "messages": 1,
+                "channel": "settings-changed"
+              },
+              {
+                "milliseconds": 49.95519999999999,
+                "maxHeartbeatGapMs": 21.418199999999956,
+                "payloadJsonBytes": 1518385,
+                "fullStateParses": 2,
+                "messages": 1,
+                "channel": "settings-changed"
+              }
+            ]
+          },
+          {
+            "name": "playback broadcast",
+            "observations": [
+              {
+                "milliseconds": 66.07209999999998,
+                "maxHeartbeatGapMs": 16.61099999999999,
+                "payloadJsonBytes": 1518613,
+                "fullStateParses": 2,
+                "messages": 1,
+                "channel": "settings-changed"
+              },
+              {
+                "milliseconds": 49.11349999999993,
+                "maxHeartbeatGapMs": 15.466599999999971,
+                "payloadJsonBytes": 1518614,
+                "fullStateParses": 2,
+                "messages": 1,
+                "channel": "settings-changed"
+              },
+              {
+                "milliseconds": 48.026700000000005,
+                "maxHeartbeatGapMs": 15.614100000000008,
+                "payloadJsonBytes": 1518614,
+                "fullStateParses": 2,
+                "messages": 1,
+                "channel": "settings-changed"
+              },
+              {
+                "milliseconds": 50.23440000000005,
+                "maxHeartbeatGapMs": 17.251500000000078,
+                "payloadJsonBytes": 1518614,
+                "fullStateParses": 2,
+                "messages": 1,
+                "channel": "settings-changed"
+              },
+              {
+                "milliseconds": 46.58590000000004,
+                "maxHeartbeatGapMs": 15.619299999999953,
+                "payloadJsonBytes": 1518614,
+                "fullStateParses": 2,
+                "messages": 1,
+                "channel": "settings-changed"
+              }
+            ]
+          },
+          {
+            "name": "one video tag broadcast",
+            "observations": [
+              {
+                "milliseconds": 81.47779999999989,
+                "maxHeartbeatGapMs": 25.03359999999998,
+                "payloadJsonBytes": 1518606,
+                "fullStateParses": 2,
+                "messages": 1,
+                "channel": "settings-changed"
+              },
+              {
+                "milliseconds": 95.12739999999985,
+                "maxHeartbeatGapMs": 24.410499999999956,
+                "payloadJsonBytes": 1518606,
+                "fullStateParses": 2,
+                "messages": 1,
+                "channel": "settings-changed"
+              },
+              {
+                "milliseconds": 76.5610999999999,
+                "maxHeartbeatGapMs": 18.470599999999877,
+                "payloadJsonBytes": 1518606,
+                "fullStateParses": 2,
+                "messages": 1,
+                "channel": "settings-changed"
+              },
+              {
+                "milliseconds": 79.68730000000005,
+                "maxHeartbeatGapMs": 20.270700000000033,
+                "payloadJsonBytes": 1518606,
+                "fullStateParses": 2,
+                "messages": 1,
+                "channel": "settings-changed"
+              },
+              {
+                "milliseconds": 74.86529999999993,
+                "maxHeartbeatGapMs": 16.0782999999999,
+                "payloadJsonBytes": 1518606,
+                "fullStateParses": 2,
+                "messages": 1,
+                "channel": "settings-changed"
+              }
+            ]
+          }
+        ],
+        "conditions": "Actual settings repository and AST-extracted production setupSettingsSync; sender uses Node structuredClone, not Electron transport. Payload JSON byte counting is outside timed operations. Five sequential observations per operation, not IPC wire bytes, renderer latency or P95."
+      },
+      {
+        "date": "2026-10-19T07:35:15.477Z",
+        "fixture": ".tmp\\refactor-tests\\settings-broadcast-cost-Qaqk3W",
+        "baseline": false,
+        "sourceDigests": {
+          "main/settings.js": "f63c39a704827255c83d248bbebcf9dd5f0a664e66b918781de7cb85f5515a80",
+          "main/index.js": "81a0f85e42439421d6d976012f4b5ff01ccb21aa8155487541cf9bd35e0701dc",
+          "main/ipc/settings.js": "0795511bfc94bd813d99012f8373bcfb12dfa520204d3ae24dc82524d7f8eecc",
+          "preload.js": "b9f1d33fd75e94cc9a80a9d85d9f30c552a59847bef812b975e89c13b920c271"
+        },
+        "tagEntries": 10000,
+        "results": [
+          {
+            "name": "theme broadcast",
+            "observations": [
+              {
+                "milliseconds": 29.875,
+                "maxHeartbeatGapMs": 10.763800000000003,
+                "payloadJsonBytes": 271,
+                "fullStateParses": 1,
+                "messages": 1,
+                "channel": "settings-patched"
+              },
+              {
+                "milliseconds": 31.638300000000015,
+                "maxHeartbeatGapMs": 11.918199999999956,
+                "payloadJsonBytes": 270,
+                "fullStateParses": 1,
+                "messages": 1,
+                "channel": "settings-patched"
+              },
+              {
+                "milliseconds": 30.725099999999998,
+                "maxHeartbeatGapMs": 11.194299999999998,
+                "payloadJsonBytes": 271,
+                "fullStateParses": 1,
+                "messages": 1,
+                "channel": "settings-patched"
+              },
+              {
+                "milliseconds": 36.358299999999986,
+                "maxHeartbeatGapMs": 15.588399999999979,
+                "payloadJsonBytes": 270,
+                "fullStateParses": 1,
+                "messages": 1,
+                "channel": "settings-patched"
+              },
+              {
+                "milliseconds": 30.57770000000005,
+                "maxHeartbeatGapMs": 15.614500000000021,
+                "payloadJsonBytes": 271,
+                "fullStateParses": 1,
+                "messages": 1,
+                "channel": "settings-patched"
+              }
+            ]
+          },
+          {
+            "name": "playback broadcast",
+            "observations": [
+              {
+                "milliseconds": 31.75260000000003,
+                "maxHeartbeatGapMs": 16.08330000000001,
+                "payloadJsonBytes": 524,
+                "fullStateParses": 1,
+                "messages": 1,
+                "channel": "settings-patched"
+              },
+              {
+                "milliseconds": 31.743099999999913,
+                "maxHeartbeatGapMs": 15.257000000000062,
+                "payloadJsonBytes": 525,
+                "fullStateParses": 1,
+                "messages": 1,
+                "channel": "settings-patched"
+              },
+              {
+                "milliseconds": 30.277000000000044,
+                "maxHeartbeatGapMs": 13.274400000000014,
+                "payloadJsonBytes": 526,
+                "fullStateParses": 1,
+                "messages": 1,
+                "channel": "settings-patched"
+              },
+              {
+                "milliseconds": 30.510099999999966,
+                "maxHeartbeatGapMs": 15.443399999999997,
+                "payloadJsonBytes": 526,
+                "fullStateParses": 1,
+                "messages": 1,
+                "channel": "settings-patched"
+              },
+              {
+                "milliseconds": 29.9923,
+                "maxHeartbeatGapMs": 15.451800000000048,
+                "payloadJsonBytes": 526,
+                "fullStateParses": 1,
+                "messages": 1,
+                "channel": "settings-patched"
+              }
+            ]
+          },
+          {
+            "name": "one video tag broadcast",
+            "observations": [
+              {
+                "milliseconds": 79.24519999999995,
+                "maxHeartbeatGapMs": 18.48320000000001,
+                "payloadJsonBytes": 430,
+                "fullStateParses": 1,
+                "messages": 1,
+                "channel": "settings-patched"
+              },
+              {
+                "milliseconds": 73.27269999999999,
+                "maxHeartbeatGapMs": 17.844999999999914,
+                "payloadJsonBytes": 430,
+                "fullStateParses": 1,
+                "messages": 1,
+                "channel": "settings-patched"
+              },
+              {
+                "milliseconds": 80.75689999999997,
+                "maxHeartbeatGapMs": 17.023199999999974,
+                "payloadJsonBytes": 430,
+                "fullStateParses": 1,
+                "messages": 1,
+                "channel": "settings-patched"
+              },
+              {
+                "milliseconds": 81.40659999999991,
+                "maxHeartbeatGapMs": 19.38009999999997,
+                "payloadJsonBytes": 430,
+                "fullStateParses": 1,
+                "messages": 1,
+                "channel": "settings-patched"
+              },
+              {
+                "milliseconds": 75.79870000000005,
+                "maxHeartbeatGapMs": 17.704500000000053,
+                "payloadJsonBytes": 430,
+                "fullStateParses": 1,
+                "messages": 1,
+                "channel": "settings-patched"
+              }
+            ]
+          }
+        ],
+        "conditions": "Actual settings repository and AST-extracted production setupSettingsSync; sender uses Node structuredClone, not Electron transport. Payload JSON byte counting is outside timed operations. Five sequential observations per operation, not IPC wire bytes, renderer latency or P95."
+      },
+      {
+        "date": "2026-10-19T07:35:17.389Z",
+        "fixture": ".tmp\\refactor-tests\\settings-broadcast-cost-kEfEJ2",
+        "baseline": true,
+        "sourceDigests": {
+          "main/settings.js": "833f61931bf8cd91ab0d655cff46677c1f2c735de62edbf9e75ad7310568200a",
+          "main/index.js": "be93b5746f79b9a1e807e6f2b638d1ce36af41178360bc797dba27595646e330",
+          "main/ipc/settings.js": "63c5a0f5162508c3eb20ede7af722682eaa08ff95e128fc97104b0f143b07ab8",
+          "preload.js": "aba5a89a7389a9e6ed8da2f362b5f2883aa997cf32d0ff1e9f81aec9bd246394"
+        },
+        "tagEntries": 10000,
+        "results": [
+          {
+            "name": "theme broadcast",
+            "observations": [
+              {
+                "milliseconds": 49.689400000000035,
+                "maxHeartbeatGapMs": 22.471599999999967,
+                "payloadJsonBytes": 1518385,
+                "fullStateParses": 2,
+                "messages": 1,
+                "channel": "settings-changed"
+              },
+              {
+                "milliseconds": 52.83499999999992,
+                "maxHeartbeatGapMs": 27.900800000000004,
+                "payloadJsonBytes": 1518384,
+                "fullStateParses": 2,
+                "messages": 1,
+                "channel": "settings-changed"
+              },
+              {
+                "milliseconds": 63.58220000000006,
+                "maxHeartbeatGapMs": 28.53989999999999,
+                "payloadJsonBytes": 1518385,
+                "fullStateParses": 2,
+                "messages": 1,
+                "channel": "settings-changed"
+              },
+              {
+                "milliseconds": 47.96259999999995,
+                "maxHeartbeatGapMs": 21.46620000000007,
+                "payloadJsonBytes": 1518384,
+                "fullStateParses": 2,
+                "messages": 1,
+                "channel": "settings-changed"
+              },
+              {
+                "milliseconds": 56.413599999999974,
+                "maxHeartbeatGapMs": 25.440399999999954,
+                "payloadJsonBytes": 1518385,
+                "fullStateParses": 2,
+                "messages": 1,
+                "channel": "settings-changed"
+              }
+            ]
+          },
+          {
+            "name": "playback broadcast",
+            "observations": [
+              {
+                "milliseconds": 48.94970000000001,
+                "maxHeartbeatGapMs": 17.232200000000034,
+                "payloadJsonBytes": 1518613,
+                "fullStateParses": 2,
+                "messages": 1,
+                "channel": "settings-changed"
+              },
+              {
+                "milliseconds": 47.40510000000006,
+                "maxHeartbeatGapMs": 15.513400000000047,
+                "payloadJsonBytes": 1518614,
+                "fullStateParses": 2,
+                "messages": 1,
+                "channel": "settings-changed"
+              },
+              {
+                "milliseconds": 47.83240000000001,
+                "maxHeartbeatGapMs": 16.702499999999986,
+                "payloadJsonBytes": 1518614,
+                "fullStateParses": 2,
+                "messages": 1,
+                "channel": "settings-changed"
+              },
+              {
+                "milliseconds": 50.84609999999998,
+                "maxHeartbeatGapMs": 15.669499999999971,
+                "payloadJsonBytes": 1518614,
+                "fullStateParses": 2,
+                "messages": 1,
+                "channel": "settings-changed"
+              },
+              {
+                "milliseconds": 48.8196999999999,
+                "maxHeartbeatGapMs": 15.27189999999996,
+                "payloadJsonBytes": 1518614,
+                "fullStateParses": 2,
+                "messages": 1,
+                "channel": "settings-changed"
+              }
+            ]
+          },
+          {
+            "name": "one video tag broadcast",
+            "observations": [
+              {
+                "milliseconds": 84.05689999999993,
+                "maxHeartbeatGapMs": 23.26139999999998,
+                "payloadJsonBytes": 1518606,
+                "fullStateParses": 2,
+                "messages": 1,
+                "channel": "settings-changed"
+              },
+              {
+                "milliseconds": 87.12020000000007,
+                "maxHeartbeatGapMs": 22.2654,
+                "payloadJsonBytes": 1518606,
+                "fullStateParses": 2,
+                "messages": 1,
+                "channel": "settings-changed"
+              },
+              {
+                "milliseconds": 71.41280000000006,
+                "maxHeartbeatGapMs": 16.82450000000017,
+                "payloadJsonBytes": 1518606,
+                "fullStateParses": 2,
+                "messages": 1,
+                "channel": "settings-changed"
+              },
+              {
+                "milliseconds": 81.24500000000012,
+                "maxHeartbeatGapMs": 21.114900000000034,
+                "payloadJsonBytes": 1518606,
+                "fullStateParses": 2,
+                "messages": 1,
+                "channel": "settings-changed"
+              },
+              {
+                "milliseconds": 75.75659999999993,
+                "maxHeartbeatGapMs": 16.246599999999944,
+                "payloadJsonBytes": 1518606,
+                "fullStateParses": 2,
+                "messages": 1,
+                "channel": "settings-changed"
+              }
+            ]
+          }
+        ],
+        "conditions": "Actual settings repository and AST-extracted production setupSettingsSync; sender uses Node structuredClone, not Electron transport. Payload JSON byte counting is outside timed operations. Five sequential observations per operation, not IPC wire bytes, renderer latency or P95."
+      },
+      {
+        "date": "2026-10-19T07:35:19.066Z",
+        "fixture": ".tmp\\refactor-tests\\settings-broadcast-cost-ptHHSQ",
+        "baseline": false,
+        "sourceDigests": {
+          "main/settings.js": "f63c39a704827255c83d248bbebcf9dd5f0a664e66b918781de7cb85f5515a80",
+          "main/index.js": "81a0f85e42439421d6d976012f4b5ff01ccb21aa8155487541cf9bd35e0701dc",
+          "main/ipc/settings.js": "0795511bfc94bd813d99012f8373bcfb12dfa520204d3ae24dc82524d7f8eecc",
+          "preload.js": "b9f1d33fd75e94cc9a80a9d85d9f30c552a59847bef812b975e89c13b920c271"
+        },
+        "tagEntries": 10000,
+        "results": [
+          {
+            "name": "theme broadcast",
+            "observations": [
+              {
+                "milliseconds": 30.287599999999998,
+                "maxHeartbeatGapMs": 15.542499999999961,
+                "payloadJsonBytes": 271,
+                "fullStateParses": 1,
+                "messages": 1,
+                "channel": "settings-patched"
+              },
+              {
+                "milliseconds": 32.59019999999998,
+                "maxHeartbeatGapMs": 16.48720000000003,
+                "payloadJsonBytes": 270,
+                "fullStateParses": 1,
+                "messages": 1,
+                "channel": "settings-patched"
+              },
+              {
+                "milliseconds": 34.49930000000006,
+                "maxHeartbeatGapMs": 16.081099999999992,
+                "payloadJsonBytes": 271,
+                "fullStateParses": 1,
+                "messages": 1,
+                "channel": "settings-patched"
+              },
+              {
+                "milliseconds": 33.88040000000001,
+                "maxHeartbeatGapMs": 12.810600000000022,
+                "payloadJsonBytes": 270,
+                "fullStateParses": 1,
+                "messages": 1,
+                "channel": "settings-patched"
+              },
+              {
+                "milliseconds": 33.13739999999996,
+                "maxHeartbeatGapMs": 12.555299999999988,
+                "payloadJsonBytes": 271,
+                "fullStateParses": 1,
+                "messages": 1,
+                "channel": "settings-patched"
+              }
+            ]
+          },
+          {
+            "name": "playback broadcast",
+            "observations": [
+              {
+                "milliseconds": 34.59759999999994,
+                "maxHeartbeatGapMs": 15.104600000000005,
+                "payloadJsonBytes": 524,
+                "fullStateParses": 1,
+                "messages": 1,
+                "channel": "settings-patched"
+              },
+              {
+                "milliseconds": 31.636300000000006,
+                "maxHeartbeatGapMs": 14.85349999999994,
+                "payloadJsonBytes": 525,
+                "fullStateParses": 1,
+                "messages": 1,
+                "channel": "settings-patched"
+              },
+              {
+                "milliseconds": 30.713799999999992,
+                "maxHeartbeatGapMs": 14.331500000000005,
+                "payloadJsonBytes": 526,
+                "fullStateParses": 1,
+                "messages": 1,
+                "channel": "settings-patched"
+              },
+              {
+                "milliseconds": 28.96309999999994,
+                "maxHeartbeatGapMs": 15.253900000000044,
+                "payloadJsonBytes": 526,
+                "fullStateParses": 1,
+                "messages": 1,
+                "channel": "settings-patched"
+              },
+              {
+                "milliseconds": 29.08510000000001,
+                "maxHeartbeatGapMs": 16.245499999999993,
+                "payloadJsonBytes": 526,
+                "fullStateParses": 1,
+                "messages": 1,
+                "channel": "settings-patched"
+              }
+            ]
+          },
+          {
+            "name": "one video tag broadcast",
+            "observations": [
+              {
+                "milliseconds": 80.81730000000005,
+                "maxHeartbeatGapMs": 21.092399999999998,
+                "payloadJsonBytes": 430,
+                "fullStateParses": 1,
+                "messages": 1,
+                "channel": "settings-patched"
+              },
+              {
+                "milliseconds": 74.27459999999996,
+                "maxHeartbeatGapMs": 17.500999999999976,
+                "payloadJsonBytes": 430,
+                "fullStateParses": 1,
+                "messages": 1,
+                "channel": "settings-patched"
+              },
+              {
+                "milliseconds": 77.80079999999998,
+                "maxHeartbeatGapMs": 16.023000000000025,
+                "payloadJsonBytes": 430,
+                "fullStateParses": 1,
+                "messages": 1,
+                "channel": "settings-patched"
+              },
+              {
+                "milliseconds": 79.70129999999995,
+                "maxHeartbeatGapMs": 18.760500000000093,
+                "payloadJsonBytes": 430,
+                "fullStateParses": 1,
+                "messages": 1,
+                "channel": "settings-patched"
+              },
+              {
+                "milliseconds": 80.92820000000006,
+                "maxHeartbeatGapMs": 19.35889999999995,
+                "payloadJsonBytes": 430,
+                "fullStateParses": 1,
+                "messages": 1,
+                "channel": "settings-patched"
+              }
+            ]
+          }
+        ],
+        "conditions": "Actual settings repository and AST-extracted production setupSettingsSync; sender uses Node structuredClone, not Electron transport. Payload JSON byte counting is outside timed operations. Five sequential observations per operation, not IPC wire bytes, renderer latency or P95."
+      }
+    ]
+  },
+  "costInterpretation": {
+    "sampleCount": "3 alternating before/current process pairs; 5 observations per operation per process, pooled 15 observations per version/operation",
+    "model": "Actual warmed settings repository plus real production registration and Node structuredClone sender. Includes persistence and full theme RPC-style returned snapshot. No decoder/native mobile/network workload. JSON byte counting outside timing.",
+    "observed": "Theme and progress total median and payload size fell. One-video tags total median did not improve. Main full-state parse count fell from 2 to 1 per ordinary publication in this fixture.",
+    "notEstablished": "Native IPC wire bytes, renderer latency, cold startup, long-run P95, peak/PSS/steady memory or decoding contention budgets"
+  },
+  "nodeLifecycle": {
+    "date": "2026-10-19T07:34:15.542Z",
+    "fixture": ".tmp\\refactor-tests\\settings-feed-U3EpJI",
+    "passed": [
+      "shared schema protects metadata, special keys and map ordering",
+      "initial feed reads coalesce and a pre-reply event triggers one fresh baseline",
+      "entity changes preserve unchanged references and optimistic intent rejects stale full acknowledgments",
+      "lost/out-of-order messages coalesce recovery and fresh baselines bound invalid-clock retries",
+      "private fields and malformed map order cannot partially mutate confirmed settings",
+      "retired reads do not publish after disposal and current recovery failures stay visible",
+      "negotiated broadcasts carry one entity and keep a stable feed for multiple readers",
+      "field and playback reads avoid full snapshots while keeping detached values",
+      "legacy listeners coexist and stale unsubscribe messages cannot disable newer listeners",
+      "unannounced version changes recover with a full snapshot and privacy changes stay redacted",
+      "failed commits and retired frame scopes cannot emit state"
+    ],
+    "sourceDigests": {
+      "main/settings.js": "f63c39a704827255c83d248bbebcf9dd5f0a664e66b918781de7cb85f5515a80",
+      "main/application/settings-broadcast.js": "f7137590c14a6e3c4fa4217fe318f90d5072942b1d206c2d5d50e4a97e38281e",
+      "main/application/settings-json.js": "b051646df7c453b943e1c51f0e58a23caaea1c06b8d4fe243c476e86bfeb60ba",
+      "main/application/settings-json-worker.js": "13bb2ffad8358b1a0f57f819d7a3b2bfc9cf6d942cb82d9be4408db424a481ec",
+      "src/services/settings-client.js": "cafd005db99d35d5387bc7ce06947b6674d4b4d1c76313ef0d9672442ad704ca",
+      "src/hooks/useAppState.js": "880de6d4f4cf3fa969ffc7fe98cd29f0482a0a1ac93e950151915f2b82a35bff",
+      "src/utils/share-json.js": "91392d99af0dbc903522f41b35b1f7a4beb2bd8947251fb95f9c7873523b52a4",
+      "preload.js": "b9f1d33fd75e94cc9a80a9d85d9f30c552a59847bef812b975e89c13b920c271",
+      "packages/contracts/src/settings-feed.ts": "fb60e20d845678b672dd660b7ced31c9c5d90b135542dc8dba15e8a41ae51650"
+    },
+    "conditions": "Actual production settings, worker, publisher and renderer SettingsClient. Renderer hooks loaded through controlled harness and main-frame scope injected here; actual Electron frame/preload verification is separate."
+  },
+  "actualElectron": {
+    "date": "2026-10-19T07:34:17.534Z",
+    "fixture": ".tmp\\refactor-tests\\settings-feed-ui-EGSVdX",
+    "passed": [
+      "production sandbox preload and SettingsClient receive only narrow actual Electron events",
+      "legacy full subscriptions coexist and unsubscribe without changing current consumers",
+      "a lost native event produces one authoritative full resync",
+      "foreign navigation cannot read or receive settings and an authorized reload gets a fresh feed"
+    ],
+    "ordinary": [
+      {
+        "channel": "settings-patched",
+        "kind": "settings-patch-v1",
+        "bytes": 271,
+        "feedId": "8b575fff-4242-460e-85f2-19ed5600a1e5",
+        "mapKeys": {}
+      },
+      {
+        "channel": "settings-patched",
+        "kind": "settings-patch-v1",
+        "bytes": 525,
+        "feedId": "8b575fff-4242-460e-85f2-19ed5600a1e5",
+        "mapKeys": {
+          "playbackStates": [
+            "fixture-video"
+          ]
+        }
+      },
+      {
+        "channel": "settings-patched",
+        "kind": "settings-patch-v1",
+        "bytes": 312,
+        "feedId": "8b575fff-4242-460e-85f2-19ed5600a1e5",
+        "mapKeys": {
+          "customTags": [
+            "file-7"
+          ]
+        }
+      }
+    ],
+    "sourceDigests": {
+      "main/settings.js": "f63c39a704827255c83d248bbebcf9dd5f0a664e66b918781de7cb85f5515a80",
+      "main/application/settings-broadcast.js": "f7137590c14a6e3c4fa4217fe318f90d5072942b1d206c2d5d50e4a97e38281e",
+      "main/ipc/settings.js": "0795511bfc94bd813d99012f8373bcfb12dfa520204d3ae24dc82524d7f8eecc",
+      "main/security/ipc-sender.js": "da80398dd786f6a7b6c737fbd2e3f0de9b581584fb5c3f81a16b44a12e570b1a",
+      "preload.js": "b9f1d33fd75e94cc9a80a9d85d9f30c552a59847bef812b975e89c13b920c271",
+      "src/services/settings-client.js": "cafd005db99d35d5387bc7ce06947b6674d4b4d1c76313ef0d9672442ad704ca",
+      "src/utils/share-json.js": "91392d99af0dbc903522f41b35b1f7a4beb2bd8947251fb95f9c7873523b52a4",
+      "packages/contracts/dist/settings-feed.js": "b1eb728b57f452349a7ed2ed1048d311f18ae5d902da33190973b49ccf320775"
+    },
+    "conditions": "Actual hidden Electron, production sandbox preload, guarded IPC and freshly bundled SettingsClient. 10000 generated tags, no decoder. JSON payload size is not IPC wire size or native latency/P95."
+  },
+  "mobileBundles": {
+    "results": [
+      {
+        "platform": "android",
+        "bytes": 3104272,
+        "modules": 2514,
+        "reactVersion": "19.2.3",
+        "sharedContracts": true
+      },
+      {
+        "platform": "ios",
+        "bytes": 3100660,
+        "modules": 2518,
+        "reactVersion": "19.2.3",
+        "sharedContracts": true
+      }
+    ],
+    "conditions": "Fresh Android/iOS production Hermes exports. Source maps verify current contracts index/schema/settings-feed and domain modules plus production phone sources; one pinned mobile React. No physical device, APK/IPA or native decode acceptance.",
+    "artifacts": {
+      "android": {
+        "metadata": {
+          "file": ".tmp/refactor-tests/contracts-android-bundle/metadata.json",
+          "sha256": "3748b882ad8f415f0d04e29747c25e2b83df31c9cc7d4392e5a7fc41ec15ac00"
+        },
+        "bundle": {
+          "file": ".tmp/refactor-tests/contracts-android-bundle/_expo/static/js/android/AppEntry-beb8a9b161dc00b23bcea7cb8dd851ed.hbc",
+          "sha256": "7ac852d294b003494fe563cb13e86119a9b188b50f4ab2fa658b11354502527b"
+        },
+        "sourceMap": {
+          "file": ".tmp/refactor-tests/contracts-android-bundle/_expo/static/js/android/AppEntry-beb8a9b161dc00b23bcea7cb8dd851ed.hbc.map",
+          "sha256": "ab17087428e09f6e7d4cc68c2d236861c9cfb87e7a41f5a4b2506306e8be70fc"
+        }
+      },
+      "ios": {
+        "metadata": {
+          "file": ".tmp/refactor-tests/contracts-ios-bundle/metadata.json",
+          "sha256": "c9d079f87aae5f44f32d56aecf9ef99843423cb1a0e9a15ec5bef302bc4b96c4"
+        },
+        "bundle": {
+          "file": ".tmp/refactor-tests/contracts-ios-bundle/_expo/static/js/ios/AppEntry-5c377e330d4482342d9514fd79ea6c13.hbc",
+          "sha256": "ddf31b29bffa9ea3ef2700696f40d6abba64cb348851dd204020e5641d008b5e"
+        },
+        "sourceMap": {
+          "file": ".tmp/refactor-tests/contracts-ios-bundle/_expo/static/js/ios/AppEntry-5c377e330d4482342d9514fd79ea6c13.hbc.map",
+          "sha256": "dac76f84b0cc828b073e438f58906897379c0a887d954addb4261b800be85dc9"
+        }
+      }
+    }
+  },
+  "selectiveReadAssertion": "Verifier counts JSON.parse results with full-state fields; reading privacy/networkResources and one missing playback record causes zero full-state parses and returned fields cannot mutate cache. This does not eliminate first-load or selected-field JSON work.",
+  "workerRegression": {
+    "date": "2026-10-19T07:34:44.594Z",
+    "fixture": ".tmp\\refactor-tests\\settings-json-lifecycle-ngNduE",
+    "passed": [
+      "worker snapshot and returned fields have separate ownership",
+      "seed mismatch, JSON canonical semantics and serialization error recovery",
+      "configured byte budget rejects before publication and recovers",
+      "single active job and graceful close wait for actual worker completion",
+      "forced close terminates only the owned thread before releasing the job",
+      "unexpected thread exit and malformed response recover after thread exit",
+      "deadline terminates a live blocked worker and later requests recover",
+      "idle worker does not keep an otherwise completed Node process alive",
+      "idle retirement releases the owned thread and later reseeds from current state",
+      "ordinary production patch sends changed fields and preserves input/result/cache ownership",
+      "value-only result and worker failure never publish or replace the durable file",
+      "synchronous changes during worker preparation rebase and flush together",
+      "custom property-key JSON, special keys and directory callback ownership stay compatible",
+      "path rebase compares the encoded durable snapshot before scheduling a follow-up write"
+    ],
+    "sourceDigests": {
+      "main/settings.js": "f63c39a704827255c83d248bbebcf9dd5f0a664e66b918781de7cb85f5515a80",
+      "main/application/settings-json.js": "b051646df7c453b943e1c51f0e58a23caaea1c06b8d4fe243c476e86bfeb60ba",
+      "main/application/settings-json-worker.js": "13bb2ffad8358b1a0f57f819d7a3b2bfc9cf6d942cb82d9be4408db424a481ec",
+      "main/application/media-mutations.js": "8457b641457e7f18c131a6560361aa48ad643571b1fe5b64b5c6216ba07af447",
+      "main/remote/media-mutations.js": "76ea043d52a84d980b1b0ff683553cd304da1aa21c806c7d165b54beda11b2aa",
+      "main/index.js": "81a0f85e42439421d6d976012f4b5ff01ccb21aa8155487541cf9bd35e0701dc"
+    }
+  },
+  "patchRegression": {
+    "date": "2026-10-19T07:34:44.804Z",
+    "fixture": ".tmp\\refactor-tests\\settings-patch-lifecycle-D1gSfk",
+    "passed": [
+      "detached initial/provider defaults",
+      "patch-only intent",
+      "cache unchanged before rename",
+      "sync field/plugin rebase",
+      "observer/result/callback/input isolation after commit",
+      "in-flight input cannot change durable intent",
+      "queued input captured at call",
+      "snapshot stamps",
+      "failed custom merge does not mutate cache or notify",
+      "explicit undefined reset",
+      "unrelated patch preserves path config",
+      "actual policy re-resolves retargeted root",
+      "explicit path patch normalizes current root"
+    ],
+    "conditions": "Production settings and media policy, actual atomic file writes and real directory junction/symlink. Rename delay/failure controlled; no renderer/native performance claim."
+  },
+  "verification": [
+    {
+      "command": "npm run build",
+      "exitCode": 0,
+      "scope": "Local targeted verification. No physical-device or release acceptance."
+    },
+    {
+      "command": "npm run verify:settings-feed",
+      "exitCode": 0,
+      "scope": "Local targeted verification. No physical-device or release acceptance."
+    },
+    {
+      "command": "npm run verify:settings-snapshots",
+      "exitCode": 0,
+      "scope": "Local targeted verification. No physical-device or release acceptance."
+    },
+    {
+      "command": "npm run verify:settings-panels",
+      "exitCode": 0,
+      "scope": "Local targeted verification. No physical-device or release acceptance."
+    },
+    {
+      "command": "npm run verify:app-initialization",
+      "exitCode": 0,
+      "scope": "Local targeted verification. No physical-device or release acceptance."
+    },
+    {
+      "command": "npm run verify:app-state",
+      "exitCode": 0,
+      "scope": "Local targeted verification. No physical-device or release acceptance."
+    },
+    {
+      "command": "node scripts/verify-settings-json-lifecycle.js",
+      "exitCode": 0,
+      "scope": "Local targeted verification. No physical-device or release acceptance."
+    },
+    {
+      "command": "node scripts/verify-settings-patch-lifecycle.js",
+      "exitCode": 0,
+      "scope": "Local targeted verification. No physical-device or release acceptance."
+    },
+    {
+      "command": "npm run verify:media-mutations",
+      "exitCode": 0,
+      "scope": "Local targeted verification. No physical-device or release acceptance."
+    },
+    {
+      "command": "npm run verify:library-invalidation",
+      "exitCode": 0,
+      "scope": "Local targeted verification. No physical-device or release acceptance."
+    },
+    {
+      "command": "npm run verify:analysis-interests",
+      "exitCode": 0,
+      "scope": "Local targeted verification. No physical-device or release acceptance."
+    },
+    {
+      "command": "npm run verify:shutdown-persistence",
+      "exitCode": 0,
+      "scope": "Local targeted verification. No physical-device or release acceptance."
+    },
+    {
+      "command": "npm run verify:mobile-correctness",
+      "exitCode": 0,
+      "scope": "Local targeted verification. No physical-device or release acceptance."
+    },
+    {
+      "command": "npm run verify:remote-settings",
+      "exitCode": 0,
+      "scope": "Local targeted verification. No physical-device or release acceptance."
+    },
+    {
+      "command": "npm run verify:contracts",
+      "exitCode": 0,
+      "scope": "Local targeted verification. No physical-device or release acceptance."
+    },
+    {
+      "command": "npm run verify:electron-api",
+      "exitCode": 0,
+      "scope": "Local targeted verification. No physical-device or release acceptance."
+    },
+    {
+      "command": "npm run verify:packaged-contracts -- --in-process-gpu --no-sandbox",
+      "exitCode": 0,
+      "scope": "Local targeted verification. No physical-device or release acceptance."
+    },
+    {
+      "command": "npm run verify:mobile-bundles",
+      "exitCode": 0,
+      "scope": "Local targeted verification. No physical-device or release acceptance."
+    },
+    {
+      "command": "JavaScript syntax / CI YAML and verify:settings-feed gate",
+      "exitCode": 0,
+      "scope": "Local targeted verification. No physical-device or release acceptance."
+    },
+    {
+      "command": "git diff --check with core.whitespace CRLF handling",
+      "exitCode": 0,
+      "scope": "Local targeted verification. No physical-device or release acceptance."
+    }
+  ],
+  "regressionNotes": [
+    "Order-only mapping change is covered by the renderer lifecycle; shareJson now compares key order and retains unchanged entity references.",
+    "App snapshot UI explicitly asserts settings-feed-v1; prior stale-dist runs are excluded from this acceptance.",
+    "Lost native event is deliberately dropped in the Electron verifier; next event causes exactly one authoritative full feed read.",
+    "ASAR is verified with explicit local GPU/sandbox flags only; production startup options unchanged."
+  ],
+  "isolationIncident": {
+    "date": "2026-10-19",
+    "file": ".tmp-wallpaper-player/settings.json",
+    "observedSha256": "d50a7b59c1c5a3b8424e24202d4dc001c783d1a4cb70507f21add47ace61e59a",
+    "cause": "The test imported the broadcast singleton before changing cwd; its eager settings dependency fixed the Node-only fallback directory at the project root.",
+    "observedContent": "10000 generated test tags and a library path within .tmp/refactor-tests/settings-feed-RNKrwv; synthetic privacy setup from the verifier.",
+    "scope": "Project Node fallback settings file. The ordinary Electron runtime uses app.getPath('userData'); no writes to that path were issued by this verifier.",
+    "priorFileContent": "Not captured before the unintended test write; no reliable original backup was found in the fallback directory.",
+    "action": "Kept the file in place. Changed broadcast repository loading to lazy initialization and added an explicit per-fixture user-data path assertion before any test write.",
+    "rerun": "Passed with user data rooted inside .tmp/refactor-tests/settings-feed-Q02dcP. No speculative restoration or deletion performed.",
+    "finalObservedSha256": "d50a7b59c1c5a3b8424e24202d4dc001c783d1a4cb70507f21add47ace61e59a",
+    "guards": "Broadcast repository is lazy. Node verifier asserts fixture user data before any setting write. Native verifier sets and asserts Electron userData. UI/cost wrappers compare project fallback hash before and after. Successful corrected regressions and the three final cost pairs retained the documented project fallback content."
+  },
+  "limits": [
+    "Initial/full recovery/legacy event and desktop mutation reply paths can still copy full settings; no new public HTTP payload or mobile capability is required.",
+    "Top-level arrays remain complete fields; map reordering may carry the full key order. Huge single-entity data is not a narrow payload guarantee.",
+    "Main callback clone, normalization, event map scan, postMessage clone and selected-field serialization still cost CPU/memory; tag total time did not improve.",
+    "Compatibility sync paths and rebases intentionally fall back to full snapshots. Legacy listeners keep their old complete snapshot contract.",
+    "The Node model and isolated Electron feed test have different path/key lengths and cannot be compared as native before/after latency.",
+    "No original fallback-settings content was captured before the accidental test overwrite. File retained, no speculative restore or delete.",
+    "R6 physical decode/contention/rotation/PSS, R7 remaining full read/type/feature/cold-start work, R8 dependency/migration/recovery/signing/update/TLS remain open."
+  ]
+}

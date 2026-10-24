@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from 'react'
+import { useCallback, useMemo, useRef, useState } from 'react'
 import { PanResponder, StyleSheet, Text, View } from 'react-native'
 import type { AccessibilityActionEvent, GestureResponderEvent, LayoutChangeEvent } from 'react-native'
 import { colors } from '../../theme'
@@ -24,6 +24,7 @@ export function PlaybackProgress({
   const [width, setWidth] = useState(0)
   const [scrubbing, setScrubbing] = useState(false)
   const [scrubTime, setScrubTime] = useState(0)
+  const scrubRef = useRef({ active: false, time: 0 })
   const displayTime = scrubbing ? scrubTime : currentTime
   const progress = duration > 0 ? clamp(displayTime / duration, 0, 1) : 0
 
@@ -34,20 +35,30 @@ export function PlaybackProgress({
   const setScrubFromLocation = useCallback((locationX: number) => {
     if (duration <= 0 || width <= 0) return
     const nextTime = clamp(locationX / width, 0, 1) * duration
+    const wasActive = scrubRef.current.active
+    scrubRef.current = { active: true, time: nextTime }
     setScrubTime(nextTime)
-    if (!scrubbing) {
+    if (!wasActive) {
       setScrubbing(true)
       onScrubChange?.(true)
     }
-  }, [duration, onScrubChange, scrubbing, width])
+  }, [duration, onScrubChange, width])
 
   const commitScrub = useCallback(() => {
-    if (duration > 0) {
-      onSeek(clamp(scrubTime, 0, duration))
-    }
+    if (!scrubRef.current.active) return
+    const time = scrubRef.current.time
+    scrubRef.current.active = false
+    setScrubbing(false)
+    if (duration > 0) onSeek(clamp(time, 0, duration))
+    onScrubChange?.(false)
+  }, [duration, onScrubChange, onSeek])
+
+  const cancelScrub = useCallback(() => {
+    if (!scrubRef.current.active) return
+    scrubRef.current.active = false
     setScrubbing(false)
     onScrubChange?.(false)
-  }, [duration, onScrubChange, onSeek, scrubTime])
+  }, [onScrubChange])
 
   const responder = useMemo(() => PanResponder.create({
     onStartShouldSetPanResponder: () => duration > 0,
@@ -59,8 +70,8 @@ export function PlaybackProgress({
       setScrubFromLocation(event.nativeEvent.locationX)
     },
     onPanResponderRelease: commitScrub,
-    onPanResponderTerminate: commitScrub
-  }), [commitScrub, duration, setScrubFromLocation])
+    onPanResponderTerminate: cancelScrub
+  }), [cancelScrub, commitScrub, duration, setScrubFromLocation])
 
   const previewLeft = width > 0 && duration > 0
     ? clamp(progress * width - 28, 0, Math.max(0, width - 56))
@@ -96,7 +107,7 @@ export function PlaybackProgress({
         accessibilityValue={{
           min: 0,
           max: Math.max(0, Math.round(duration)),
-          now: Math.max(0, Math.round(displayTime)),
+          now: Math.max(0, Math.min(Math.round(duration), Math.round(displayTime))),
           text: `${formatTime(displayTime)} / ${duration > 0 ? formatTime(duration) : '--:--'}`
         }}
         accessibilityActions={[
@@ -126,10 +137,16 @@ const styles = StyleSheet.create({
   times: {
     marginBottom: 3,
     flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
     justifyContent: 'space-between'
   },
   timeText: {
-    color: 'rgba(255,255,255,0.62)',
+    color: 'rgba(255,255,255,0.9)',
+    backgroundColor: 'rgba(0,0,0,0.65)',
+    paddingHorizontal: 4,
+    paddingVertical: 2,
+    borderRadius: 4,
     fontSize: 10,
     fontWeight: '700',
     textShadowColor: 'rgba(0,0,0,0.5)',
@@ -137,7 +154,7 @@ const styles = StyleSheet.create({
     textShadowOffset: { width: 0, height: 1 }
   },
   touch: {
-    height: 24,
+    height: 48,
     justifyContent: 'center'
   },
   track: {

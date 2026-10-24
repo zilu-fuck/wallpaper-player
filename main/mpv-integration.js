@@ -1,11 +1,11 @@
 const fs = require('fs')
 const path = require('path')
-const { execFileSync } = require('child_process')
 const log = require('electron-log')
 const MpvManager = require('./mpv')
 const { EVENT } = require('./ipc-channels')
 const { isMpvExecutablePath, isExistingFile } = require('./paths')
-const { loadSettings, saveSettings, upsertPlaybackState } = require('./settings')
+const { loadSettingsFields } = require('./settings')
+const { savePlaybackRecord } = require('./application/media-mutations')
 const { getMainWindow } = require('./window')
 const { setMediaPlaybackActive } = require('./thumbnail')
 
@@ -21,7 +21,7 @@ function snapshotPlaybackState(state) {
   return {
     filePath: state.filePath,
     position: state.eofReached ? 0 : Math.max(0, Number(state.timePos) || 0),
-    volume: Math.max(0, Math.min(100, Number(state.volume) || 100)),
+    volume: Math.max(0, Math.min(100, state.volume != null && Number.isFinite(Number(state.volume)) ? Number(state.volume) : 100)),
     speed: Math.max(0.1, Number(state.speed) || 1),
     muted: Boolean(state.muted),
     audioId: state.audioId == null ? null : Number(state.audioId),
@@ -36,12 +36,10 @@ function snapshotPlaybackState(state) {
   }
 }
 
-function flushPlaybackState(snapshot = pendingPlaybackSnapshot) {
+async function flushPlaybackState(snapshot = pendingPlaybackSnapshot) {
   if (!snapshot) return
 
-  const settings = loadSettings()
-  const playbackStates = upsertPlaybackState(settings.playbackStates, snapshot.filePath, snapshot)
-  saveSettings({ playbackStates })
+  await savePlaybackRecord(snapshot.filePath, snapshot)
   if (pendingPlaybackSnapshot === snapshot) {
     pendingPlaybackSnapshot = null
   }
@@ -58,37 +56,43 @@ function persistPlaybackState(state, immediate = false) {
       clearTimeout(playbackSaveTimer)
       playbackSaveTimer = null
     }
-    flushPlaybackState(snapshot)
+    flushPlaybackState(snapshot).catch(error => log.error('[playback] save failed:', error))
     return
   }
 
   if (playbackSaveTimer) return
   playbackSaveTimer = setTimeout(() => {
     playbackSaveTimer = null
-    flushPlaybackState()
+    flushPlaybackState().catch(error => log.error('[playback] save failed:', error))
   }, PLAYBACK_SAVE_DELAY_MS)
 }
 
-async function resolveMpvPath() {
-  const settings = loadSettings()
+async function resolveMpvPath(options = {}) {
+  const check = () => { if (options.signal?.aborted) throw options.signal.reason }
+  check()
+  const settings = loadSettingsFields(['mpvPath'])
   if (settings.mpvPath) {
     const customPath = path.resolve(settings.mpvPath)
-    if (isMpvExecutablePath(customPath) && fs.existsSync(customPath)) {
-      mpvManager.setMpvPath(customPath)
-      return customPath
+    const exists = isMpvExecutablePath(customPath) && await fs.promises.stat(customPath).then(stat => stat.isFile(), () => false)
+    check()
+    if (exists) {
+      const canonical = await fs.promises.realpath(customPath); check()
+      return mpvManager.setMpvPath(canonical, options)
     }
-    mpvManager.setMpvPath(null)
+    await mpvManager.setMpvPath(null, options)
   }
 
   const current = mpvManager.getMpvPath()
   if (current) {
-    if (isMpvExecutablePath(current) && (current === 'mpv' || current === 'mpv.exe' || fs.existsSync(current))) {
+    const exists = current === 'mpv' || current === 'mpv.exe' || await fs.promises.stat(current).then(stat => stat.isFile(), () => false)
+    check()
+    if (isMpvExecutablePath(current) && exists) {
       return current
     }
-    mpvManager.setMpvPath(null)
+    await mpvManager.setMpvPath(null, options)
   }
 
-  return mpvManager.findMpv(null)
+  return mpvManager.findMpv(null, options)
 }
 
 async function initMpv() {
@@ -126,14 +130,17 @@ async function initMpv() {
   })
 }
 
-function destroyMpv() {
+async function destroyMpv() {
   if (playbackSaveTimer) {
     clearTimeout(playbackSaveTimer)
     playbackSaveTimer = null
   }
-  flushPlaybackState()
-  setMediaPlaybackActive(false)
-  mpvManager.destroy()
+  try {
+    await flushPlaybackState()
+  } finally {
+    setMediaPlaybackActive(false)
+    await mpvManager.destroy()
+  }
 }
 
 module.exports = {

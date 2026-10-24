@@ -5,7 +5,7 @@ const { isPathInside, pathKey } = require('../paths')
 const { assertPublicHttpUrl, assertResolvedTargetPublic } = require('../ip-utils')
 const {
   getAllowedDownloadDirectories,
-  loadSettings,
+  loadSettingsFields,
   resolvePathForAccess
 } = require('../settings')
 const { resolveExistingPath } = require('../scanner')
@@ -61,9 +61,11 @@ function normalizeNetworkResourceInput(input = {}) {
   }
 }
 
-async function enrichNetworkResource(resource) {
+async function enrichNetworkResource(resource, options = {}) {
+  if (options.signal?.aborted) throw options.signal.reason
   if (resource.kind !== 'webpage') return resource
-  const parsed = await parseNetworkResourcePage(resource.url)
+  const parsed = await parseNetworkResourcePage(resource.url, options)
+  if (options.signal?.aborted) throw options.signal.reason
   // 解析结果来自不可信远端页面：公网网页解析出内网地址 → SSRF 风险，拒绝持久化。
   // 用户显式添加的局域网网页（resource.url 本身是内网）允许解析内网地址（NAS 场景）。
   assertResolvedTargetPublic(
@@ -121,7 +123,7 @@ function normalizeStoredHttpHeaders(headers) {
   }
 }
 
-function getKnownNetworkResource(url, settings = loadSettings()) {
+function getKnownNetworkResource(url, settings = loadSettingsFields(['networkResources'])) {
   const target = normalizeNetworkResourceUrl(url).toLowerCase()
   if (!target) return null
   const resource = Array.isArray(settings.networkResources)
@@ -173,19 +175,24 @@ async function resolveNetworkResourcePlayback(resourceOrUrl, options = {}) {
     kind: 'webpage',
     playbackUrl: '',
     parser: resource.parser || parser?.id || ''
-  })
+  }, options)
 }
 
 async function resolveKnownNetworkResourcePlayback(resourceOrUrl, options = {}) {
   const requested = typeof resourceOrUrl === 'string'
     ? normalizeNetworkResourceInput({ url: resourceOrUrl, title: options?.title })
     : normalizeNetworkResourceInput(resourceOrUrl)
-  const settings = options.settings || loadSettings()
+  const settings = options.settings || loadSettingsFields(['networkResources'])
   const knownResource = getKnownNetworkResource(requested.url, settings)
   if (!knownResource) {
     throw new Error('网络资源未添加到库中')
   }
-  return resolveNetworkResourcePlayback(knownResource, { refresh: true })
+  const resolved = await resolveNetworkResourcePlayback(knownResource, { ...options, refresh: true })
+  if (options.signal?.aborted) throw options.signal.reason
+  const current = getKnownNetworkResource(requested.url, loadSettingsFields(['networkResources']))
+  const identity = resource => JSON.stringify([resource?.id, resource?.url, resource?.kind, normalizeStoredHttpHeaders(resource?.httpHeaders)])
+  if (!current || identity(current) !== identity(knownResource)) throw Object.assign(new Error('网络资源已移除或改变，请重新选择'), { code: 'stale_network_resource', status: 404 })
+  return resolved
 }
 
 function assertNetworkResourceDownloadable(url) {
@@ -202,7 +209,7 @@ function assertNetworkResourceDownloadable(url) {
   assertPublicHttpUrl(parsed.toString(), '为安全起见，下载中心不支持下载本地或内网地址')
 }
 
-function isKnownNetworkResource(url, settings = loadSettings()) {
+function isKnownNetworkResource(url, settings = loadSettingsFields(['networkResources'])) {
   return Boolean(getKnownNetworkResource(url, settings))
 }
 
@@ -223,7 +230,7 @@ async function assertAllowedDownloadDirectory(dirPath) {
   return resolvedPath
 }
 
-function isPersistentLibraryDirectory(dirPath, settings = loadSettings()) {
+function isPersistentLibraryDirectory(dirPath, settings = loadSettingsFields(['directories'])) {
   const resolvedPath = resolvePathForAccess(dirPath)
   return (settings.directories || []).some(dir => isPathInside(resolvePathForAccess(dir), resolvedPath))
 }

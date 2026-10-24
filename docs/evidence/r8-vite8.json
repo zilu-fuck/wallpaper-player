@@ -1,0 +1,2031 @@
+{
+  "date": "2026-10-19T10:23:02.433Z",
+  "stage": "R8 Vite 8 / React plugin 6 with shared CommonJS development imports",
+  "environment": {
+    "node": "v24.14.0",
+    "platform": "win32",
+    "arch": "x64",
+    "os": "10.0.26300",
+    "cpu": "AMD Ryzen 7 5800X 8-Core Processor             "
+  },
+  "versions": {
+    "vite": [
+      "6.4.3",
+      "8.3.4"
+    ],
+    "reactPlugin": [
+      "4.7.0",
+      "6.1.2"
+    ],
+    "babel": {
+      "version": "7.29.7",
+      "role": "explicit verifier AST/profiling devDependency; same version as previous transitive installation"
+    },
+    "react": "19.2.7",
+    "reactDOM": "19.2.7",
+    "electron": "44.9.0",
+    "reactCompilerEnabled": false
+  },
+  "packageChanges": [
+    {
+      "path": "node_modules/@babel/generator",
+      "before": "7.29.7",
+      "after": "7.29.8",
+      "integrity": "sha512-gZbepsdh3WDtgZKWL+vTPh71LSBrm/Y4/QDZBVCcYfmeTEEuoOYwlSy+G1StfJg+/Zy550u/3TATbm7qDbbMtg=="
+    },
+    {
+      "path": "node_modules/@babel/helper-plugin-utils",
+      "before": "7.29.7",
+      "after": null,
+      "integrity": null
+    },
+    {
+      "path": "node_modules/@babel/helpers",
+      "before": "7.29.7",
+      "after": "7.29.10",
+      "integrity": "sha512-EMCx3AGZ3WfAl6ht7AyQoPm2Lh+BGYEMdc4Q6Hf7uSCDOZFuLq44qNwL+iaim8VlyYhRAo4X43+weadK8ZB4Yg=="
+    },
+    {
+      "path": "node_modules/@babel/parser",
+      "before": "7.29.7",
+      "after": "7.29.9",
+      "integrity": "sha512-CjXrNHTnvqBVqHgdBysY3vk2T8tpJHb5/RMeHJBTyVa9xgugCB0CJTx/3oO8RV2QRQP391RWpB7D6hLjm8V9uA=="
+    },
+    {
+      "path": "node_modules/@babel/plugin-transform-react-jsx-self",
+      "before": "7.29.7",
+      "after": null,
+      "integrity": null
+    },
+    {
+      "path": "node_modules/@babel/plugin-transform-react-jsx-source",
+      "before": "7.29.7",
+      "after": null,
+      "integrity": null
+    },
+    {
+      "path": "node_modules/@babel/traverse",
+      "before": "7.29.7",
+      "after": "7.29.10",
+      "integrity": "sha512-B3lYAs2nkKskbgQ1nfy8Ma9ao9Q1rntTAQHrzzyDuj+TSO+X3le6PfWwqDvodsb+OumE10eMFfuMCTQSQ5iuIQ=="
+    },
+    {
+      "path": "node_modules/@babel/types",
+      "before": "7.29.7",
+      "after": "7.29.8",
+      "integrity": "sha512-Vj1jF3cPfxg7OAfoI7QnVKLoILlm2JF9pnVHrX8qx7AHMiYWT+NDAA7jChlNgRS4WTLc/fD1lXLmPixluj+3Gg=="
+    },
+    {
+      "path": "node_modules/@esbuild/aix-ppc64",
+      "before": "0.25.12",
+      "after": null,
+      "integrity": null
+    },
+    {
+      "path": "node_modules/@esbuild/android-arm",
+      "before": "0.25.12",
+      "after": null,
+      "integrity": null
+    },
+    {
+      "path": "node_modules/@esbuild/android-arm64",
+      "before": "0.25.12",
+      "after": null,
+      "integrity": null
+    },
+    {
+      "path": "node_modules/@esbuild/android-x64",
+      "before": "0.25.12",
+      "after": null,
+      "integrity": null
+    },
+    {
+      "path": "node_modules/@esbuild/darwin-arm64",
+      "before": "0.25.12",
+      "after": null,
+      "integrity": null
+    },
+    {
+      "path": "node_modules/@esbuild/darwin-x64",
+      "before": "0.25.12",
+      "after": null,
+      "integrity": null
+    },
+    {
+      "path": "node_modules/@esbuild/freebsd-arm64",
+      "before": "0.25.12",
+      "after": null,
+      "integrity": null
+    },
+    {
+      "path": "node_modules/@esbuild/freebsd-x64",
+      "before": "0.25.12",
+      "after": null,
+      "integrity": null
+    },
+    {
+      "path": "node_modules/@esbuild/linux-arm",
+      "before": "0.25.12",
+      "after": null,
+      "integrity": null
+    },
+    {
+      "path": "node_modules/@esbuild/linux-arm64",
+      "before": "0.25.12",
+      "after": null,
+      "integrity": null
+    },
+    {
+      "path": "node_modules/@esbuild/linux-ia32",
+      "before": "0.25.12",
+      "after": null,
+      "integrity": null
+    },
+    {
+      "path": "node_modules/@esbuild/linux-loong64",
+      "before": "0.25.12",
+      "after": null,
+      "integrity": null
+    },
+    {
+      "path": "node_modules/@esbuild/linux-mips64el",
+      "before": "0.25.12",
+      "after": null,
+      "integrity": null
+    },
+    {
+      "path": "node_modules/@esbuild/linux-ppc64",
+      "before": "0.25.12",
+      "after": null,
+      "integrity": null
+    },
+    {
+      "path": "node_modules/@esbuild/linux-riscv64",
+      "before": "0.25.12",
+      "after": null,
+      "integrity": null
+    },
+    {
+      "path": "node_modules/@esbuild/linux-s390x",
+      "before": "0.25.12",
+      "after": null,
+      "integrity": null
+    },
+    {
+      "path": "node_modules/@esbuild/linux-x64",
+      "before": "0.25.12",
+      "after": null,
+      "integrity": null
+    },
+    {
+      "path": "node_modules/@esbuild/netbsd-arm64",
+      "before": "0.25.12",
+      "after": null,
+      "integrity": null
+    },
+    {
+      "path": "node_modules/@esbuild/netbsd-x64",
+      "before": "0.25.12",
+      "after": null,
+      "integrity": null
+    },
+    {
+      "path": "node_modules/@esbuild/openbsd-arm64",
+      "before": "0.25.12",
+      "after": null,
+      "integrity": null
+    },
+    {
+      "path": "node_modules/@esbuild/openbsd-x64",
+      "before": "0.25.12",
+      "after": null,
+      "integrity": null
+    },
+    {
+      "path": "node_modules/@esbuild/openharmony-arm64",
+      "before": "0.25.12",
+      "after": null,
+      "integrity": null
+    },
+    {
+      "path": "node_modules/@esbuild/sunos-x64",
+      "before": "0.25.12",
+      "after": null,
+      "integrity": null
+    },
+    {
+      "path": "node_modules/@esbuild/win32-arm64",
+      "before": "0.25.12",
+      "after": null,
+      "integrity": null
+    },
+    {
+      "path": "node_modules/@esbuild/win32-ia32",
+      "before": "0.25.12",
+      "after": null,
+      "integrity": null
+    },
+    {
+      "path": "node_modules/@esbuild/win32-x64",
+      "before": "0.25.12",
+      "after": null,
+      "integrity": null
+    },
+    {
+      "path": "node_modules/@jridgewell/sourcemap-codec",
+      "before": "1.5.5",
+      "after": "1.6.0",
+      "integrity": "sha512-T7jf+5zgsZHwNJ4lvQ7/aezbyk0nNX+zJVWpmHA7VYsEx7a7qr5Rg5IbtJFqkgze5Y2sruq1RUY8Q837Od7iFw=="
+    },
+    {
+      "path": "node_modules/@rolldown/pluginutils",
+      "before": "1.0.0-beta.27",
+      "after": "1.0.1",
+      "integrity": "sha512-2j9bGt5Jh8hj+vPtgzPtl72j0yRxHAyumoo6TNfAjsLB04UtpSvPbPcDcBMxz7n+9CYB0c1GxQFxYRg2jimqGw=="
+    },
+    {
+      "path": "node_modules/@rollup/rollup-android-arm-eabi",
+      "before": "4.62.0",
+      "after": null,
+      "integrity": null
+    },
+    {
+      "path": "node_modules/@rollup/rollup-android-arm64",
+      "before": "4.62.0",
+      "after": null,
+      "integrity": null
+    },
+    {
+      "path": "node_modules/@rollup/rollup-darwin-arm64",
+      "before": "4.62.0",
+      "after": null,
+      "integrity": null
+    },
+    {
+      "path": "node_modules/@rollup/rollup-darwin-x64",
+      "before": "4.62.0",
+      "after": null,
+      "integrity": null
+    },
+    {
+      "path": "node_modules/@rollup/rollup-freebsd-arm64",
+      "before": "4.62.0",
+      "after": null,
+      "integrity": null
+    },
+    {
+      "path": "node_modules/@rollup/rollup-freebsd-x64",
+      "before": "4.62.0",
+      "after": null,
+      "integrity": null
+    },
+    {
+      "path": "node_modules/@rollup/rollup-linux-arm-gnueabihf",
+      "before": "4.62.0",
+      "after": null,
+      "integrity": null
+    },
+    {
+      "path": "node_modules/@rollup/rollup-linux-arm-musleabihf",
+      "before": "4.62.0",
+      "after": null,
+      "integrity": null
+    },
+    {
+      "path": "node_modules/@rollup/rollup-linux-arm64-gnu",
+      "before": "4.62.0",
+      "after": null,
+      "integrity": null
+    },
+    {
+      "path": "node_modules/@rollup/rollup-linux-arm64-musl",
+      "before": "4.62.0",
+      "after": null,
+      "integrity": null
+    },
+    {
+      "path": "node_modules/@rollup/rollup-linux-loong64-gnu",
+      "before": "4.62.0",
+      "after": null,
+      "integrity": null
+    },
+    {
+      "path": "node_modules/@rollup/rollup-linux-loong64-musl",
+      "before": "4.62.0",
+      "after": null,
+      "integrity": null
+    },
+    {
+      "path": "node_modules/@rollup/rollup-linux-ppc64-gnu",
+      "before": "4.62.0",
+      "after": null,
+      "integrity": null
+    },
+    {
+      "path": "node_modules/@rollup/rollup-linux-ppc64-musl",
+      "before": "4.62.0",
+      "after": null,
+      "integrity": null
+    },
+    {
+      "path": "node_modules/@rollup/rollup-linux-riscv64-gnu",
+      "before": "4.62.0",
+      "after": null,
+      "integrity": null
+    },
+    {
+      "path": "node_modules/@rollup/rollup-linux-riscv64-musl",
+      "before": "4.62.0",
+      "after": null,
+      "integrity": null
+    },
+    {
+      "path": "node_modules/@rollup/rollup-linux-s390x-gnu",
+      "before": "4.62.0",
+      "after": null,
+      "integrity": null
+    },
+    {
+      "path": "node_modules/@rollup/rollup-linux-x64-gnu",
+      "before": "4.62.0",
+      "after": null,
+      "integrity": null
+    },
+    {
+      "path": "node_modules/@rollup/rollup-linux-x64-musl",
+      "before": "4.62.0",
+      "after": null,
+      "integrity": null
+    },
+    {
+      "path": "node_modules/@rollup/rollup-openbsd-x64",
+      "before": "4.62.0",
+      "after": null,
+      "integrity": null
+    },
+    {
+      "path": "node_modules/@rollup/rollup-openharmony-arm64",
+      "before": "4.62.0",
+      "after": null,
+      "integrity": null
+    },
+    {
+      "path": "node_modules/@rollup/rollup-win32-arm64-msvc",
+      "before": "4.62.0",
+      "after": null,
+      "integrity": null
+    },
+    {
+      "path": "node_modules/@rollup/rollup-win32-ia32-msvc",
+      "before": "4.62.0",
+      "after": null,
+      "integrity": null
+    },
+    {
+      "path": "node_modules/@rollup/rollup-win32-x64-gnu",
+      "before": "4.62.0",
+      "after": null,
+      "integrity": null
+    },
+    {
+      "path": "node_modules/@rollup/rollup-win32-x64-msvc",
+      "before": "4.62.0",
+      "after": null,
+      "integrity": null
+    },
+    {
+      "path": "node_modules/@types/babel__core",
+      "before": "7.20.5",
+      "after": null,
+      "integrity": null
+    },
+    {
+      "path": "node_modules/@types/babel__generator",
+      "before": "7.27.0",
+      "after": null,
+      "integrity": null
+    },
+    {
+      "path": "node_modules/@types/babel__template",
+      "before": "7.4.4",
+      "after": null,
+      "integrity": null
+    },
+    {
+      "path": "node_modules/@types/babel__traverse",
+      "before": "7.28.0",
+      "after": null,
+      "integrity": null
+    },
+    {
+      "path": "node_modules/@types/estree",
+      "before": "1.0.9",
+      "after": null,
+      "integrity": null
+    },
+    {
+      "path": "node_modules/@vitejs/plugin-react",
+      "before": "4.7.0",
+      "after": "6.1.2",
+      "integrity": "sha512-fhJNGUdscQa4HkI0xFxwonWyhnVReCPDbXI7FH7jmzpnVCrFQI7PRrhWecO263610vOrs9tr2Y4xcf8uAdFxbw=="
+    },
+    {
+      "path": "node_modules/esbuild",
+      "before": "0.25.12",
+      "after": null,
+      "integrity": null
+    },
+    {
+      "path": "node_modules/picomatch",
+      "before": "4.0.4",
+      "after": "4.0.7",
+      "integrity": "sha512-qcJu88Q2IWqJsDD529JKMdwGm/dvInW4HvQnRwiH9JtihJvzGOscDtHE3x1pBKeUOTysQ8kVmLnJ2kJu7yhcGA=="
+    },
+    {
+      "path": "node_modules/react-refresh",
+      "before": "0.17.0",
+      "after": null,
+      "integrity": null
+    },
+    {
+      "path": "node_modules/rollup",
+      "before": "4.62.0",
+      "after": null,
+      "integrity": null
+    },
+    {
+      "path": "node_modules/vite",
+      "before": "6.4.3",
+      "after": "8.3.4",
+      "integrity": "sha512-IftLE8phJhdNRIGNEV4JCCvfNScoZQVfcXaN8TQropWGJtOHcu+iAB9pHcuGvmEb/kddw0LBe/jS8ztdC6xdiQ=="
+    },
+    {
+      "path": "node_modules/@oxc-project/types",
+      "before": null,
+      "after": "0.154.0",
+      "integrity": "sha512-KYOUGQFlLWR+s4QMV2Q9ko38TZm7EdO87Qm7rvZLqk/webse/cDjtyxKhg/47l0byCbs/k46LT8qc4PKjAikzA=="
+    },
+    {
+      "path": "node_modules/@rolldown/binding-android-arm-eabi",
+      "before": null,
+      "after": "1.2.14",
+      "integrity": "sha512-aWR+XKH9+rW7m5fWq/5360J3mHycrx/o6xZM2DQFdJnTMdyP7/WzxPjhtLbVWdKo2y612/4U1bWqb3HQhiF7vg=="
+    },
+    {
+      "path": "node_modules/@rolldown/binding-android-arm64",
+      "before": null,
+      "after": "1.2.14",
+      "integrity": "sha512-QiVxHofl6A8lQU7WAtOUY4QMVZXohxwz7WJJoeh8NBEUyKfIkMRKhYyq8az/1RypNiIXzNTtiS6KwHz0erxYRQ=="
+    },
+    {
+      "path": "node_modules/@rolldown/binding-darwin-arm64",
+      "before": null,
+      "after": "1.2.14",
+      "integrity": "sha512-lTQOzHuBIooh3jIr5XINQkjPGEuGy+Dsy0meXDr6Sjty0b99kYgGh4uBC/8mJX1T0kC8d6S0aPP1Y+bHkh6aBw=="
+    },
+    {
+      "path": "node_modules/@rolldown/binding-darwin-x64",
+      "before": null,
+      "after": "1.2.14",
+      "integrity": "sha512-hyMKEGatjmBYCs/Q4sbIcL/GqpFEqsX3wc+HYVQ/85A4rxc1o7rPm4DUI4GV4k/h0ITddwFSGpqQunI14GXjTA=="
+    },
+    {
+      "path": "node_modules/@rolldown/binding-freebsd-x64",
+      "before": null,
+      "after": "1.2.14",
+      "integrity": "sha512-u371GbXoVXrEgP20PwzoGNOdAOqAMhzo19JzzY+V4YmmnC+DTOoqdbMu+O+54emM59Mik/UdrtWgcuEDKWRPKA=="
+    },
+    {
+      "path": "node_modules/@rolldown/binding-linux-arm-gnueabihf",
+      "before": null,
+      "after": "1.2.14",
+      "integrity": "sha512-BqwKsdZQf6EqVWr8fv2MrDYzAvOZ7+NYFSJESRGs87fkseEhs0TU9TXgRJTkZoRRkxTizyEg1LKUXfU3/78uqg=="
+    },
+    {
+      "path": "node_modules/@rolldown/binding-linux-arm64-gnu",
+      "before": null,
+      "after": "1.2.14",
+      "integrity": "sha512-SD9kY8M009x/7s57Z1dgUVlP5+uYBgKQK0Tkr1WIWngrtUJmRCW1RJFMY7QDla2khXhmg2i5Io7MUjcmZNZ/KQ=="
+    },
+    {
+      "path": "node_modules/@rolldown/binding-linux-arm64-musl",
+      "before": null,
+      "after": "1.2.14",
+      "integrity": "sha512-BJ2CL19M6uuWesMgnqJzgxoI+N+eV7b0A9O9vLV42y+gitC41fNa8KElau1tHVzuLWX5GzEuxMPhAO0tQXQMkg=="
+    },
+    {
+      "path": "node_modules/@rolldown/binding-linux-ppc64-gnu",
+      "before": null,
+      "after": "1.2.14",
+      "integrity": "sha512-4+Kl8daPV8NDHaD7mfCcc1pRM+Qg7ab8DyMm5FG5WoZgv4h2i3KFN1CybYBNbQqmuYm7ftJLvmMI1eHYJ22S/Q=="
+    },
+    {
+      "path": "node_modules/@rolldown/binding-linux-s390x-gnu",
+      "before": null,
+      "after": "1.2.14",
+      "integrity": "sha512-V/h8ePq1fKDrmtFMz6xcCN3DKvuvMRrwwD1q0PkBeeo4DpK64biaKvqWGVxqCeYKqeRk7gE7/iKPxLCn08O97A=="
+    },
+    {
+      "path": "node_modules/@rolldown/binding-linux-x64-gnu",
+      "before": null,
+      "after": "1.2.14",
+      "integrity": "sha512-WxalXzgrLVpKC93xfpaJ3gCXUWzeCr+FRCbDVD2mUAy4L6Vo3lNVz0epUEUpxPWJkLNYUwM4OSIikv36OJ9mLg=="
+    },
+    {
+      "path": "node_modules/@rolldown/binding-linux-x64-musl",
+      "before": null,
+      "after": "1.2.14",
+      "integrity": "sha512-3G3tnAmTpdk9jO3GQtyHXqeFD2SlecfTws/Y3M2mmj9nMBwwuLT4kur8sZKeu7ENUHSpVO3cIsm5A52LEWWwlg=="
+    },
+    {
+      "path": "node_modules/@rolldown/binding-openharmony-arm64",
+      "before": null,
+      "after": "1.2.14",
+      "integrity": "sha512-qyr5XiNGxm2ytx17vvtcJ9nXn6v1gENETi503bJx3OGwZ1tSonj7BosxbMa/xeAfSl5iS9X6KjEWYXLu6v1L7Q=="
+    },
+    {
+      "path": "node_modules/@rolldown/binding-win32-arm64-msvc",
+      "before": null,
+      "after": "1.2.14",
+      "integrity": "sha512-oA4o5o0S2yB199YyYXDzKUv1Z56Rc+mgOjwm7Z/vJ9Z8igiDPYvoOuDyo6g7AK/ZaF09nPhDKVnGBcYHO11GXA=="
+    },
+    {
+      "path": "node_modules/@rolldown/binding-win32-x64-msvc",
+      "before": null,
+      "after": "1.2.14",
+      "integrity": "sha512-9mE94bf2GZUaR/fUSXCMpBoWkctu421Mi0ORpm4zqfbkjKep7RxzPFa5etcGs5h+2KApoWBOA/hAJa/7saGgEQ=="
+    },
+    {
+      "path": "node_modules/detect-libc",
+      "before": null,
+      "after": "2.1.2",
+      "integrity": "sha512-Btj2BOOO83o3WyH59e8MgXsxEQVcarkUOpEYrubB0urwnN10yQ364rsiByU11nZlqWYZm05i/of7io4mzihBtQ=="
+    },
+    {
+      "path": "node_modules/lightningcss",
+      "before": null,
+      "after": "1.33.0",
+      "integrity": "sha512-WkUDrojuJs0xkgGf2udWxa3yGBRxPtxUkB79i6aCZLRgc7PM8fZe9TosfPDcvEpQZbuFASnHYmRLBLUbmLOIIA=="
+    },
+    {
+      "path": "node_modules/lightningcss-android-arm64",
+      "before": null,
+      "after": "1.33.0",
+      "integrity": "sha512-gEpRTalKdosp4Bb8qWtc2iOgE5SeIHlpS1up9bFq2wAyYhl1UdTObYiHe98zEM9SQvSoqQZ1IQD0JNpg3Ml5pg=="
+    },
+    {
+      "path": "node_modules/lightningcss-darwin-arm64",
+      "before": null,
+      "after": "1.33.0",
+      "integrity": "sha512-Sciaz8eenNTKn9b3t7+xr0ipTp9YxKQY4npwQ3mrRuL0BAVHBLyZxofhaKBAVtzmtRZ/zTyo0/to4B1uWG/Djg=="
+    },
+    {
+      "path": "node_modules/lightningcss-darwin-x64",
+      "before": null,
+      "after": "1.33.0",
+      "integrity": "sha512-Z5UPAxzrjlWNNyGy6i65cJzzvgJ5D3T6wMvs+gWpY9d7qRhANrxqAp6LhxIgZhWEw18RfJTGcRxjuLIBr+m8XQ=="
+    },
+    {
+      "path": "node_modules/lightningcss-freebsd-x64",
+      "before": null,
+      "after": "1.33.0",
+      "integrity": "sha512-QQM/Ti/hQajJwCY+RiWuCZ9sdtI/XQk7nDK5vC8kkdwixezOlDgvDx7+RT+QjK6FcFT4MpsuoBnHIo/O3StRRg=="
+    },
+    {
+      "path": "node_modules/lightningcss-linux-arm-gnueabihf",
+      "before": null,
+      "after": "1.33.0",
+      "integrity": "sha512-N7FVBe6iS24MlM6R/4RBTxGhQheZGs7tiQ9U32UtF75NzP5Q7xWPRqLBCKxlRQRk3rY1jCIPLzx7WzOhuUIRLQ=="
+    },
+    {
+      "path": "node_modules/lightningcss-linux-arm64-gnu",
+      "before": null,
+      "after": "1.33.0",
+      "integrity": "sha512-j2v/itmy4HlNxlc6voKXYgBqNi0Ng2LShg4z7GufpEgs05P+2suBVyi9I6YHq5uoVFx9ETin3eCEhLVyXGQnKg=="
+    },
+    {
+      "path": "node_modules/lightningcss-linux-arm64-musl",
+      "before": null,
+      "after": "1.33.0",
+      "integrity": "sha512-yiO5ROMuYQgXbC60yjZU5CYSFZGKXL0HFATXt9mHJn1+zW55oCtMI9NfcVhYLMFDL7gV7oBPon/EmMMGg2OvtQ=="
+    },
+    {
+      "path": "node_modules/lightningcss-linux-x64-gnu",
+      "before": null,
+      "after": "1.33.0",
+      "integrity": "sha512-ar+Ju7LmcN0Jo4FpL4hpFybwNG9/3A/Br5KW2n2jyODg3MEZXaDYADdemoNS+BDNfMgKvylJLj4S5tyRActuAg=="
+    },
+    {
+      "path": "node_modules/lightningcss-linux-x64-musl",
+      "before": null,
+      "after": "1.33.0",
+      "integrity": "sha512-RYiYbkokw0trfKqqzfF55lginwEPrD3OJDfTuJzFs1MK6iFnDenaz1fqLLtX4ITG3OktJQXOeTaw1awrBAlZPw=="
+    },
+    {
+      "path": "node_modules/lightningcss-win32-arm64-msvc",
+      "before": null,
+      "after": "1.33.0",
+      "integrity": "sha512-1K+MPfLSFVpphzpdbfkhlWk6wBrTObBzS2T6db10PNOZgR9GoVsAWzwNyuhUYYbTp23j+4RrncfujZ4uAzXvwA=="
+    },
+    {
+      "path": "node_modules/lightningcss-win32-x64-msvc",
+      "before": null,
+      "after": "1.33.0",
+      "integrity": "sha512-OlEICDx/Xl0FqSp4bry8zFnCvGpig3Gl4gCquvYwHuqJKEC1+n9NgDniFvqHGmMv1ZkqDJrDqKKSykTDX+ehuA=="
+    },
+    {
+      "path": "node_modules/rolldown",
+      "before": null,
+      "after": "1.2.14",
+      "integrity": "sha512-eTBTTqMR6uHKLgcUqpJP8ntzDI6V4LYA8negAMBEI7gkgVvOdrx6VsvS2Ym+83KhOPdLCHWJu0w7UQFJZhHKNw=="
+    }
+  ],
+  "sourceDigests": {
+    "package.json": "077ed2bb7cd2ba6583fd74dfa83c23cc1efc5a22b3df3e23d9c5186f36270054",
+    "package-lock.json": "7366f3a5de4b9fbbafdea8a1febbc35828fa788fe006635b87727d559f4d149a",
+    "vite.config.js": "7980418d64c0e68ee26c0fdddf506672650b447f7ba80b02b726dbc7cbc5c6d9",
+    "tsconfig.shared-aliases.json": "57b14d35ded26bfeb716b3719a136e63ebe86479d373cace6d7e9298c7b05e5c",
+    "tsconfig.adapters.json": "24d7fba8ef07ea7c09045d237f31bcb4e4844548e821a0b212345f132345611a",
+    "tsconfig.electronapi.json": "d34b07a663f01216315da76e63e043b5bea7ba340561e5aef92007dbcfc5b84f",
+    "scripts/shared-aliases.cjs": "136f4a687557c2594f7e9f8cf9ae8b7302547ba32e8e702690b48ecaf4502da5",
+    "scripts/mobile-module-harness.js": "36eb91e93164e005da29bc22cf4377867001a2df4142481c6de7755902dae760",
+    "scripts/verify-app-state.js": "2cd5813cfb8f1a79a08beb52915afb61fc86109658662f1d389b4ff8822d7b98",
+    "scripts/verify-settings-feed-ui.js": "e243648ab8e1d8c93ce8ccd367fbeec433099a18d82a9ed0ca71feb40f32c4df",
+    "scripts/verify-vite-dev.js": "9aba549fdc2a26ee244abca287ad9a3fe0284878fa11c501f9f7028e4aab1157",
+    "scripts/verify-vite-dev-electron.js": "b7716aa03ac9a72a51314ed476b4a5d3b2d1ff8ead374aa0f1f4541d8f9484a4",
+    "scripts/verify-electron-runtime-electron.js": "9159780d12c4420651e961f933712e610aead4f5e6ec29bac570fd899329d0d3",
+    "src/api/media.ts": "3c717e32598a2fc6f4ce0ceaa70b52d3f773e409c7e45fd4053ce91916ab51ab",
+    "src/api/player.ts": "d8adf14cfbce2c0cdb7d7fe58af5c2b6902c714e15a4101cc5ebac864a049df9",
+    "src/services/settings-client.js": "179da3cde8b857cb5a0bdbfbd839e62b6bc7ba9b1db2906444ea027a08d11a74",
+    "src/hooks/useVideoFilter.js": "ea3df12a643f9c2e46463886ea9cea16bccbedeb405b2e0d64016551c517ae34",
+    ".github/workflows/ci.yml": "36e4682262968549b6ccb249e9795a42956b8c70fa1683f46182ff811fc2d6da",
+    ".github/workflows/release.yml": "5174384cd084af661dceeee7dbc8bacd7c5e27b8d868ca09f52e15046545783f",
+    "README.md": "77710ad80760a573b4fe452fbfb65544441b426f1b20eb65f4ee5d1e9a5c9f16",
+    "docs/dependency-governance.md": "65464a070d7efb2f71d5d0458aa43987abd5cca40d414012ad81be5ab92250f1",
+    "docs/refactor-progress.md": "a8534a1ed33ed2800aca676e4f38945ae9f42e31f5688809da33ee499b8f001f",
+    "docs/desktop-mobile-review-and-refactor-plan.md": "c3850487b52e04031d73704a9e2cfeabaf580c6c656c4c3a8b20951f00236c26"
+  },
+  "unchangedMobileLock": {
+    "file": "mobile/package-lock.json",
+    "bytes": 249101,
+    "sha256": "090e4ecafb937f490a2caac87f81bb4ed54b306cd149d54b1f122afeaffb7ecf"
+  },
+  "unchangedGeneratedSharedDigests": {
+    "packages/contracts/dist/index.js": "6fd89ec15d078d06f85781f98d2c8e9dd4815586539ec255cd40662f23c99ef3",
+    "packages/contracts/dist/schema.js": "6b889492fa4260b6ef309bd8823813802ddb38b71dbc162c0359441819dfc91b",
+    "packages/contracts/dist/settings-feed.js": "d3de55971030b50e35ee4f8e70ebdd1c65a3353553f211aea31e6bf58e98424c",
+    "packages/domain/dist/index.js": "e16a487dbda471e000a1d37a362583167d20f8020c5a017ca81fadfad36a4bdb"
+  },
+  "baseline": {
+    "recoveredAt": "2026-10-19T10:14:21.667Z",
+    "phaseStartedAt": "2026-10-19T09:57:20.166Z",
+    "sourceEvidence": "docs/evidence/r8-electron44.json",
+    "archive": {
+      "file": "E:\\wp-electron44-qa-382a53c790\\win-unpacked\\resources\\app.asar",
+      "bytes": 16394521,
+      "sha256": "7d9d9a5dee2e36f77c7e4a1c121aa760d9bc6b9450655c2e1a0b9c646037a5a5"
+    },
+    "files": [
+      {
+        "file": "dist/assets/AISearchPanel-FN0jw3zG.js",
+        "sha256": "5d2a86cc140a02a9e142ca044a3945eb0140002c98b6c3cfcf33e86c53066b6b",
+        "bytes": 18798
+      },
+      {
+        "file": "dist/assets/DownloadCenter-XyUzAvdq.js",
+        "sha256": "12a0ae14e8f3dcd2798bfb2c34391be7e6a2d1018847670400d574e6a8d81e88",
+        "bytes": 31562
+      },
+      {
+        "file": "dist/assets/NetworkResourceLibrary-aDHIthyR.js",
+        "sha256": "18b1642d1d25f161e4e711bc7a08b19525b8b056fe7cc45521a22aadbe8cfd65",
+        "bytes": 14735
+      },
+      {
+        "file": "dist/assets/Settings-69mGAe7X.js",
+        "sha256": "bfad6230f34ce18dee47939779b28cf49f4db09ac976a96543fc6c57fc82c837",
+        "bytes": 99515
+      },
+      {
+        "file": "dist/assets/VideoAnalysisSidebar-BW4BzVm2.js",
+        "sha256": "81430100ba1ec4a6e30eca7b378037147273e49746491b8b252de5aff0ebb9f9",
+        "bytes": 7127
+      },
+      {
+        "file": "dist/assets/index-BhcHHf6w.js",
+        "sha256": "4d7477025f4dae76812095e8b22790fa7329f4da2c3f70b4c32db9e55408a60e",
+        "bytes": 418306
+      },
+      {
+        "file": "dist/assets/index-sBnJh8hk.css",
+        "sha256": "1744fd69f512707b39d84621d55cc000103856b49ca48c6a6c20f67db04fd529",
+        "bytes": 183515
+      },
+      {
+        "file": "dist/assets/useDownloadStateObserver-Doppx9GU.js",
+        "sha256": "81f905755edc04fb21e8909a7cea6775c20c30929e2f658c39005f4202e98c2e",
+        "bytes": 2808
+      },
+      {
+        "file": "dist/index.html",
+        "sha256": "a8ce3a4905de0541cf29d78fa875e705bb2cd0e3dac7c649f03cbc4767fde28c",
+        "bytes": 378
+      }
+    ],
+    "fallback": [
+      [
+        "analysis-results\\G086 Bronya分析结果2026-06-22_20-00-44.json",
+        "01db5f778601802471791e416b40c3ac8f96248e4542b78a867eaee77dd265e4"
+      ],
+      [
+        "downloads\\aria2.session",
+        "bbe9d72e7e5001c01f3a012fa73e5d35b6d53b9e76e08190bba58973ce1ba9bc"
+      ],
+      [
+        "llama-server-err.log",
+        "5744b9bb378569a3a4f664b62aad9a4b0025cd7d419cba73b793fb62cb737f42"
+      ],
+      [
+        "llama-server-out.log",
+        "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      ],
+      [
+        "remote-identity.json",
+        "0abcd8df9c1443a348b050b5abe28ac419ecef717ddf31a0daa680f153061324"
+      ],
+      [
+        "scan-index\\029fa92465c3409cba74ce3db6b927dfec0d4f581b12122975041a32ab324e8a.json",
+        "33b1310886821b4f01322041a561c8a6b4ed10aa351772effb396e7b1b547cfd"
+      ],
+      [
+        "scan-index\\06cf5926d93db3cc7b30882ee7dbecb69d51ce4e00de7901de3d48b866f9afc3.json",
+        "274848604327a2f96f0d152b9f23a7b4e5470fdd67c744e1c181e86c2d284059"
+      ],
+      [
+        "scan-index\\0e65747e6e0fc76a1e0c86e951c35d6c7392c184ba6cb43724d7d58856ff212a.json",
+        "3ac45a0678e6ed4554fe1f315f923d999b0311096acd3c9394e3d85826d37db9"
+      ],
+      [
+        "scan-index\\114890f3437dd45b34313ba38d9d3c36a09701d5d672bf8abd7af8c922db61af.json",
+        "3796d21463d2b2418c485565780e9628a50ab4f1a69d8faeadec1eb70a9af290"
+      ],
+      [
+        "scan-index\\1465f8e823323fe9c4383abb5a38c9e17fc550dd44cd2f14fd7f7242bc309e12.json",
+        "1be5fefdb59d8af06de2a6be0eeb0025a96253d719de1e0daced6f1fe35cdde0"
+      ],
+      [
+        "scan-index\\153bae098b5d3524553fcf4d8cbb1eacef2471314948819d043b26cebe199e14.json",
+        "689305d629290f70b40c5ea8454db685486f87be218b38da7aa4f0594a1d1cb8"
+      ],
+      [
+        "scan-index\\165f4a9a9309a7ac323647e9acefd754a66c6295cab7db6bdb50830914bf0d68.json",
+        "5b0738883aee24ac7e17fc108a221e395380d2bae6a32f3ba3f70606e4b27ebe"
+      ],
+      [
+        "scan-index\\1db67e5d68a60a19388b0338ed1ee18c2a2bcd0025ab168a1d69920c929bd647.json",
+        "b19f9d1c96db4b9106b2a28058ab1c33f4d3edc45fa693126cad0efe48cd44dd"
+      ],
+      [
+        "scan-index\\3032598f9f4655037a67986db404cfbf60011a2ca84a1e6edcec794c7deab956.json",
+        "db1c59c38bb8ba2122afad18a73d956ec55d4580f4cad17f365b37b71d7e3db8"
+      ],
+      [
+        "scan-index\\358da0698a4692a8052707f22ba2b9c94b5c4e73080d12c721e622b66a80614c.json",
+        "f1fb6fbd25b3d96027a86d6c797b162a74c95544c04f64470ed733ddbc8983ee"
+      ],
+      [
+        "scan-index\\5eb5da5dcf86cb8c66f674df75935c030f8e12d86b6373ebcdaa3d7aba7eb672.json",
+        "489328dc3fa24223d6db18869658db5d01f915838ba97532de8193f8bedc6f93"
+      ],
+      [
+        "scan-index\\5f59f687750abe3eb7d55cdb1aa86cb802bf22f3b00e3bb369f77a7ef2584d06.json",
+        "ae2763e5e5553a4eb759576c8f26efcffc9ef5aa741ddd6aad78b2e33716a719"
+      ],
+      [
+        "scan-index\\602ae02092dd5e362dec6b88bd5afb39f14c218b3e0f0fbd52e5a8d09eddeb0d.json",
+        "cd75909f0b53f3d449d479531d62f3ff1bb3144eb918086cc7a25d05816c2a7d"
+      ],
+      [
+        "scan-index\\664a4a47b45908fdfdf2d6bb5ec7024e41699d7dd2af4110f2889d4eac6dd2d7.json",
+        "64835ce867a827d40088ce1b9c8e4e19cb996d0df4c2e676cbb215cf38868556"
+      ],
+      [
+        "scan-index\\6a4b7a95d1ae5d67f63cc87a4f3486c0a22c35af457355ae63f4303d7bdbcaa1.json",
+        "7ab98d842e31b5da1227cf6e00d98e3e32287c53b0965f3e8a964dbc9e982b20"
+      ],
+      [
+        "scan-index\\6c2bfaa6b9f2b41ef00e065bab2a6d71c599e2ce76cc3f5939228ecc7b8be650.json",
+        "33dd4002ba26ea91ef1c97f264ef0337dd78b37d06f03a538f514ee0809c5107"
+      ],
+      [
+        "scan-index\\703cb3b91afdc3a4a39fb95f9d0c0289fe6dcdab34f10425d71858a05164ce3b.json",
+        "217ca6aa5c2c3b721795e93c7cb5d819317fa55546fee842c81420f84c353fe8"
+      ],
+      [
+        "scan-index\\85bd705cb26d94f80943f15877c1c71cc9f9a665c0bf24f8ab568b0b6bacf550.json",
+        "d4bb5033f4315903b0083789b87e09f4e06cb294a17313439f21987dd0b3a527"
+      ],
+      [
+        "scan-index\\87720e2b63644af82253d5ec9ace977d27e42c03a6033c6811af6c6094928e09.json",
+        "2b01b9760b6e8f5605fd9bb0cbc74e6f248c0bec7428982ce0dbb848c1f6e589"
+      ],
+      [
+        "scan-index\\959e88efa835995e2afff87fc4257966a41b7f45da19d44dc3369ba0d88599c9.json",
+        "bec93346f2dfbf0938b593658fd80e43a9be33b0bd4a0f7bcbf9a8997198ba9e"
+      ],
+      [
+        "scan-index\\9d7bcef01cadb37f1a59d31b708084c192007deea8564d134dcc473b0605201c.json",
+        "04d6bfae12cdb3e73f828813477825cd39dc803c37893be82455ecebe7734312"
+      ],
+      [
+        "scan-index\\a02253e6f623d27dfaa6674be31d9b43fc3d9b2c6bcda125418f1c3dd2a25709.json",
+        "90f629426a02dbbe9d60c7ad0c28090bd77a96693fcd1187b5215eda49184b86"
+      ],
+      [
+        "scan-index\\a17738a5c4b4bc1ce4358ecff69b8e44a1e1a33a7511d9a11eddecd94b9e58cd.json",
+        "a1fd92c4c4c8b9bbfeb105da251cc5230f16f1f68edf7cf909a468da0c242d99"
+      ],
+      [
+        "scan-index\\c53e2ac468d9387f39255a1ee9893eba1abe325ab086dea0025a18d1ef67e75f.json",
+        "2042c353b3e1c29eb236d1a1dfce79afdb85839f40f02f0b70d521eff607e6bb"
+      ],
+      [
+        "scan-index\\cb702390842effe5e6e22e77acbda7b2bbea77ed51a5c07e66c3c5d8d0bc15bf.json",
+        "718b65c8b9b80caa3c5d34bc3244f750cd8243dc4b8743f637c3b12dbbbbda4a"
+      ],
+      [
+        "scan-index\\cbf568b1144651ce061c2dc94a347128724334dd45ac2dd4ebf6890d74c66251.json",
+        "e22fd608a0197ea15fdbd8e3320b49d60e518bb4054b74ffb7504cd8e6035134"
+      ],
+      [
+        "scan-index\\d6cd75e4bc356e88ed2b4c2272c32263e568d67a07b4017d73b22e09c23e8306.json",
+        "d3ccf77f170934b4987c22301d34abbb8b7646d45af03f575057804e4c892629"
+      ],
+      [
+        "scan-index\\db34a207b303445fed1e9654c8e68883c93c5123070913181f89844225e4636a.json",
+        "81149ad6956bdb73b468e88036ef043043faecd14d34901ba5eaa49b775d3a72"
+      ],
+      [
+        "scan-index\\de13066bd94cc789543a5fa9e6100f3297df42c5dd715cccf10b11383b6f1d68.json",
+        "d2ac7243b636179c0e35727cb899a4f608b7c044d759e6b6a52c8f501a3a6945"
+      ],
+      [
+        "scan-index\\eba7ad116c30f43341d30f06e5f9efe510565b2a31a16c0eccab8fc4c303e6bc.json",
+        "636392edc5a9f41da4b70492833939eac890636623ab957400a7118bba472fc7"
+      ],
+      [
+        "scan-index\\f16070f230607bf79853b98a8c462b8e7b854deeb16fe246ba6c9d783c9b2832.json",
+        "becff49c6c81b5dfd4688bbb272be352a8821ce42120b45282ea86c65f6378c2"
+      ],
+      [
+        "scan-index\\f408135604349a60c1b7caa1d60757de692af100c4518e5588f38b619995f186.json",
+        "b894250b5d420a09b89350f33103a5d08edb5fc3d20f3cddf7604ed1fcb9df3a"
+      ],
+      [
+        "scan-index\\f7b0c1004febecbe36453be10ef2ddc2523e5b92f4af5f318ce1049990e93053.json",
+        "77f2b4ded7202b828e8a6e281d549eecd1e79aea4030dfb2a7d918202ab090c5"
+      ],
+      [
+        "scan-index\\f892c389d585d65dff3d06f6c86d3355dc90100c808a4f80da22b2f7e81865ba.json",
+        "b0f007ba8b4249849d726eee7a9fec6cf5926742e62d3cb833bd464423af520e"
+      ],
+      [
+        "scan-index\\fc41c7e68e94b6f115983997d8498353a4f8f41b61fc91662dd84affe70fc9fb.json",
+        "fa79531cd58ae0323d29102813386358d2e599ecb63902231ed73e264196abdc"
+      ],
+      [
+        "settings.json",
+        "6fb990f7edfe0707bb48b8bed65455cc2a521d33e028b45ce77f98b6a466a0d5"
+      ],
+      [
+        "video-metadata-cache.json",
+        "616205b2e97a75ea8842d3b4f6f3de778fc545493659d45e5c0139c6d7087f47"
+      ]
+    ],
+    "settingsSha256": "6fb990f7edfe0707bb48b8bed65455cc2a521d33e028b45ce77f98b6a466a0d5",
+    "note": "Initial workspace dist copy/baseline marker were unavailable. Old bundle comparison is recovered from the prior immutable Windows ASAR after verifying its frozen SHA256; package/lock before snapshots also match that stage.",
+    "metadata": {
+      "file": ".tmp/refactor-tests/r8-vite8/recovered-baseline.json",
+      "bytes": 9313,
+      "sha256": "0359904aa90065cb55f272037e1ab9721481e91cae93ce8cdcf76cb86a5d04b0"
+    }
+  },
+  "bundles": {
+    "before": {
+      "files": [
+        {
+          "name": "AISearchPanel-FN0jw3zG.js",
+          "bytes": 18798,
+          "gzip": 5916
+        },
+        {
+          "name": "DownloadCenter-XyUzAvdq.js",
+          "bytes": 31562,
+          "gzip": 10004
+        },
+        {
+          "name": "index-BhcHHf6w.js",
+          "bytes": 418306,
+          "gzip": 125345
+        },
+        {
+          "name": "index-sBnJh8hk.css",
+          "bytes": 183515,
+          "gzip": 27027
+        },
+        {
+          "name": "NetworkResourceLibrary-aDHIthyR.js",
+          "bytes": 14735,
+          "gzip": 4569
+        },
+        {
+          "name": "Settings-69mGAe7X.js",
+          "bytes": 99515,
+          "gzip": 27284
+        },
+        {
+          "name": "useDownloadStateObserver-Doppx9GU.js",
+          "bytes": 2808,
+          "gzip": 1117
+        },
+        {
+          "name": "VideoAnalysisSidebar-BW4BzVm2.js",
+          "bytes": 7127,
+          "gzip": 2426
+        }
+      ],
+      "totalBytes": 776366,
+      "totalGzip": 203688,
+      "entry": {
+        "name": "index-BhcHHf6w.js",
+        "bytes": 418306,
+        "gzip": 125345
+      },
+      "css": {
+        "name": "index-sBnJh8hk.css",
+        "bytes": 183515,
+        "gzip": 27027
+      }
+    },
+    "after": {
+      "files": [
+        {
+          "name": "AISearchPanel-AO3B7KOR.js",
+          "bytes": 18689,
+          "gzip": 5702
+        },
+        {
+          "name": "DownloadCenter-BHXWJGUC.js",
+          "bytes": 30237,
+          "gzip": 9285
+        },
+        {
+          "name": "index-Cp5PiHsS.css",
+          "bytes": 177702,
+          "gzip": 26584
+        },
+        {
+          "name": "index-C_0ZPm2Z.js",
+          "bytes": 404018,
+          "gzip": 118212
+        },
+        {
+          "name": "NetworkResourceLibrary-CBozh7pc.js",
+          "bytes": 14501,
+          "gzip": 4339
+        },
+        {
+          "name": "Settings-DMRpRVPU.js",
+          "bytes": 98406,
+          "gzip": 25885
+        },
+        {
+          "name": "useDownloadStateObserver-C53D2sOC.js",
+          "bytes": 2660,
+          "gzip": 1055
+        },
+        {
+          "name": "VideoAnalysisSidebar-CMXmg9tC.js",
+          "bytes": 7387,
+          "gzip": 2394
+        }
+      ],
+      "totalBytes": 753600,
+      "totalGzip": 193456,
+      "entry": {
+        "name": "index-C_0ZPm2Z.js",
+        "bytes": 404018,
+        "gzip": 118212
+      },
+      "css": {
+        "name": "index-Cp5PiHsS.css",
+        "bytes": 177702,
+        "gzip": 26584
+      }
+    }
+  },
+  "development": {
+    "date": "2026-10-19T10:08:59.721Z",
+    "fixture": "E:\\wallpaper播放器\\.tmp\\refactor-tests\\vite-dev-中文 空格-1U4aPE",
+    "vite": "8.3.4",
+    "reactPlugin": "6.1.2",
+    "native": {
+      "success": true,
+      "electron": "44.9.0",
+      "errors": [],
+      "counterAfterRefresh": "1"
+    },
+    "scope": "Real project Vite config, loopback dev server, CommonJS shared contract import and state-preserving React Fast Refresh in isolated Electron. Production IPC is verified separately."
+  },
+  "productionRuntime": {
+    "date": "2026-10-19T10:09:04.692Z",
+    "clipboard": [
+      "remote-copy-endpoint: pending completion and rejection",
+      "remote-copy-token: pending completion and rejection",
+      "remote-copy-pairing-code: pending completion and rejection"
+    ],
+    "native": {
+      "success": true,
+      "electron": "44.9.0",
+      "chrome": "152.0.7977.167",
+      "node": "24.22.0",
+      "v8": "15.2.124.43-electron.0",
+      "arch": "x64",
+      "profile": "E:\\wallpaper播放器\\.tmp\\refactor-tests\\runtime-native-中文 空格-kr9iJy",
+      "security": {
+        "allowRunningInsecureContent": false,
+        "contextIsolation": true,
+        "disableDialogs": false,
+        "disablePopups": false,
+        "enableBlinkFeatures": "",
+        "experimentalFeatures": false,
+        "javascript": true,
+        "nodeIntegration": false,
+        "nodeIntegrationInSubFrames": false,
+        "nodeIntegrationInWorker": false,
+        "safeDialogs": false,
+        "safeDialogsMessage": "",
+        "sandbox": true,
+        "webSecurity": true,
+        "webviewTag": true
+      },
+      "lazyModules": [
+        {
+          "prefix": "Settings",
+          "file": "Settings-DMRpRVPU.js",
+          "exports": [
+            "default"
+          ]
+        },
+        {
+          "prefix": "VideoAnalysisSidebar",
+          "file": "VideoAnalysisSidebar-CMXmg9tC.js",
+          "exports": [
+            "VideoAnalysisResultModal",
+            "default"
+          ]
+        },
+        {
+          "prefix": "AISearchPanel",
+          "file": "AISearchPanel-AO3B7KOR.js",
+          "exports": [
+            "default"
+          ]
+        },
+        {
+          "prefix": "DownloadCenter",
+          "file": "DownloadCenter-BHXWJGUC.js",
+          "exports": [
+            "default"
+          ]
+        },
+        {
+          "prefix": "NetworkResourceLibrary",
+          "file": "NetworkResourceLibrary-CBozh7pc.js",
+          "exports": [
+            "default"
+          ]
+        },
+        {
+          "prefix": "useDownloadStateObserver",
+          "file": "useDownloadStateObserver-C53D2sOC.js",
+          "exports": [
+            "t"
+          ]
+        }
+      ],
+      "consoleDetails": [
+        {
+          "method": "debug",
+          "text": "[renderer:debug] runtime44-probe-debug (:1)"
+        },
+        {
+          "method": "info",
+          "text": "[renderer:info] runtime44-probe-info (:1)"
+        },
+        {
+          "method": "warn",
+          "text": "[renderer:warning] runtime44-probe-warning (:1)"
+        },
+        {
+          "method": "error",
+          "text": "[renderer:error] runtime44-probe-error (:1)"
+        }
+      ],
+      "frontend": {
+        "title": "视频画廊",
+        "bridge": "function",
+        "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/152.0.7977.167 Electron/44.9.0 Safari/537.36",
+        "theme": null
+      },
+      "screenshot": "E:\\wallpaper播放器\\.tmp\\refactor-tests\\runtime-native-中文 空格-kr9iJy\\runtime-window.png",
+      "persistedAfterShutdown": true
+    },
+    "conditions": "Clipboard writes are controlled promises; no native clipboard contents are read or modified. Native check uses real main/index, window, preload, frontend, IPC and settings worker with its own profile."
+  },
+  "actualPackage": {
+    "archive": {
+      "file": "E:\\wp-vite8-qa-a25e71a893\\win-unpacked\\resources\\app.asar",
+      "bytes": 16371755,
+      "sha256": "2a2749977ff4e9b420e314c57f3b70d4460ba3dabc6469549686532920f48581"
+    },
+    "executable": {
+      "file": "E:\\wp-vite8-qa-a25e71a893\\win-unpacked\\Wallpaper Player.exe",
+      "bytes": 247185408,
+      "sha256": "47f74302182f6464c160ccfac1130023ace447809f504ca9f9fd326faeafe59e"
+    },
+    "matchedFiles": 101,
+    "shippedDigests": {
+      "dist/assets/AISearchPanel-AO3B7KOR.js": "0f8ab9cf728b97449d7e351144f0b0ffba7a2446214d8bddceb2778856de3367",
+      "dist/assets/DownloadCenter-BHXWJGUC.js": "c2a8b7775c400c72e62f4b950d525ab880e771464077bd620c66c6d12d4ff4b5",
+      "dist/assets/NetworkResourceLibrary-CBozh7pc.js": "c99111a241c46e69c91c0a8c5fc9d829a2feebee36f28712756722cac8af4c89",
+      "dist/assets/Settings-DMRpRVPU.js": "b97a32da99dd218d288d9a681fea77de7f82e08e1ff9a22ef36a72947ac0aa1d",
+      "dist/assets/VideoAnalysisSidebar-CMXmg9tC.js": "e16e787bcfa1ad4dcd1937fbda748f3ac9709a3a534ea031024ee56d4c4453c0",
+      "dist/assets/index-C_0ZPm2Z.js": "86843bf57329d8bedde1e78fa4492e60bf8afbf8f349ef82e5381a10023b2560",
+      "dist/assets/index-Cp5PiHsS.css": "15b1cce0f31a68ff55e6b5f3a3ab1dcf5fc51e387f191606d765fe64ed98bc54",
+      "dist/assets/useDownloadStateObserver-C53D2sOC.js": "0a33c22acf7e9a32c058006e8e93992f74c9846820981329d283a09b1d1780fa",
+      "dist/index.html": "418a64a6410b8819929f123507840a98c6fa3aaddf8e544ab0728fe92e680be9",
+      "main.js": "7198acda5739a568d7c868e07637e69ee1833bf7f734e2c851ef04d95caf13c3",
+      "main/application/download-service.js": "09778e3ef2ddcc6f2b25d57b0e1f070b45e9a141ed96b330771ef13bb5daec29",
+      "main/application/download-tasks.js": "9779d68580b47cb7f57e7ba7f762748fa5d17f82bfc2e0055a77fa0459bd5a49",
+      "main/application/library-service.js": "110b46f24e4b433b1bd74402f0a403cd6f086264915efccf9d7d968429fffef9",
+      "main/application/media-mutation-paths.js": "13fad00c9960895dd22fbfaf4139eb44cbd9e7b6db9c3fffda6b83545f3a0293",
+      "main/application/media-mutations.js": "da1d0a81ec7afaa6c1da34ac0e8f4e75feeee760195b5dd4ece267f9d4971eb3",
+      "main/application/media-work-service.js": "af3a03d9b571a3e83617fbaa7a078c61aa41189f5db5b290acb046d060ed5805",
+      "main/application/mpv-installer.js": "f430087a5b65d5b6fe7dd4ff361b7704d728e6c137bfbe1075dbb77c32f3838e",
+      "main/application/mpv-version-cache.js": "b9082d1f7285143264679ebbfa60a86276e1bb041a30686f75d6fccdf9128458",
+      "main/application/player-service.js": "6394eca46fd28a4419fc914eb826ef51485bef676fbfb5202db59396ce46c9fe",
+      "main/application/resource-scheduler.js": "af4d6ab3e34e0ea4e498820a6fba5cced8d67790fa1d4f18fa713b6674f91682",
+      "main/application/settings-broadcast.js": "f7137590c14a6e3c4fa4217fe318f90d5072942b1d206c2d5d50e4a97e38281e",
+      "main/application/settings-json-worker.js": "40bfb2cf2e6312eb91cb246e9ae20537f79ca89bfd23ddf9e702c43ced57c799",
+      "main/application/settings-json.js": "b051646df7c453b943e1c51f0e58a23caaea1c06b8d4fe243c476e86bfeb60ba",
+      "main/application/settings-startup.js": "55aa1d65ef202b793d6f0548d890233a929cee9cc3907d6fdacda61635cdacf0",
+      "main/application/transcode-service.js": "4c97ba7a53c864e4f6396c432739a1858db79bd5e659b4d537d985c506b00cb4",
+      "main/constants.js": "3a28c8aca49a6b0f16103aed2220003fe12258ea86745cd05e47449d6102bed9",
+      "main/download-manager.js": "827645aea0f6b35719299bf8e961c11f3c290290bf6e1b5af3d3f18018ab14a0",
+      "main/download-xunlei.js": "400e53bfed14c67434fe23acb1dc83d8f2694869edcabc9b00fdc166b3784e15",
+      "main/exec.js": "16304d4d1307f1caa3a850aad5f037c48c20e3ebfcbcd1d2f7a5b5f3531add03",
+      "main/index.js": "f857b8c8624576dd6d24c56cce1f068248b97da5aebac3cbf234d30d563ef5fc",
+      "main/ip-utils.js": "d30b44b3f8236c34113906c5ea8f87db3f86d458bbfddb64c9ff6821e3241170",
+      "main/ipc-channels.js": "0f331e70e6b1ee6bf9f3d815bffb406e459e60f8b759100eb78fafaa97f0ddca",
+      "main/ipc.js": "5e0fb636a97d3548236dc135ff3f82ff73566ea216a29914351bc75dc3b3e458",
+      "main/ipc/downloads.js": "a27da24ddeb3c700f27bbcf81944afda9c9ae9f389dfc74a770716f5d58725be",
+      "main/ipc/files.js": "7cd7adafe5d6fcaf68814e005a1a147c641513dee814b48ab1fa0ddf8543caaa",
+      "main/ipc/media-data.js": "23dc622bb90bdbed724c5bdb86aecaa095a4ee4a1a4312b3387728d179b91300",
+      "main/ipc/media.js": "60248568e1bc5f0540df910ccd171f7982f9ed0b48108c2f3429229a7dc7bb04",
+      "main/ipc/network-resource-service.js": "f91af3c85e39e2f1cacfc6eb321da4ab2f9178cbeaa72f49edce93ac40620f91",
+      "main/ipc/network-resources.js": "92fa52f788314973164be5936708f5adff29271730d62f9bbb740f0bc7064363",
+      "main/ipc/player.js": "71e822d31bd65773e75adf2a4a3a15a6ea7919a9577edd96208d512068439d06",
+      "main/ipc/plugins.js": "1631666db09d154a749d4c75b3bb298c8e0b05d42847d65e4afcff46c67dcb8e",
+      "main/ipc/privacy.js": "3d83d872adc75a6720fa0ddfdc63bfc563deb4f0e76b5fddea93c0725fabdea3",
+      "main/ipc/remote.js": "838980ed5756221e112ecefa26c2e2424edd6023118e242ac5916f18ff7f6fb9",
+      "main/ipc/settings.js": "de7fca92a59b29f8149f869bec5799bbbe8998a611844b28d027fae84e7035ad",
+      "main/ipc/updater.js": "379d0733646824c7b7cdc22b6743d5268d41dcd6491280c16edfd6f0cbcba12a",
+      "main/media-pressure.js": "3995ec75817061ffdf0f39297cbdf373d4163506e9dbbd90ccc5286aef730fbc",
+      "main/mpv-host.js": "afb7a76cbfb88ea786281751d6c6cfea0e10f280d263108c806b71049465c05f",
+      "main/mpv-integration.js": "dbc7c1597c82285f24022a9f1ff499a630d7be6f4779fe4ecb980cfac506a0f0",
+      "main/mpv.js": "3006bb6d74ee2f3ae679fc4265a96b31263efd133c4a5e1759bb2b96344bd989",
+      "main/network-resource-parser.js": "6608ca5f0c15dcd3186b8142fceb256d338edf01d4057e062c521e835119e2f6",
+      "main/paths.js": "3422ec30987c55308fea878739efec3f6ad8f4cf132e157d042a037061dc671b",
+      "main/plugins/builtin.js": "2d1bb7556272f42f01d46eafdead480e333fe049d8520c6ef34b90b10782e79a",
+      "main/plugins/capabilities.js": "4a12956d2f31f0459b226bb710c10a63ded11dd602d65755681bc51fbf8e609f",
+      "main/plugins/core-api.js": "053244b815819208cf7fc553dbcaaa187b71efc7e862a66b66c02d6a6bb495a4",
+      "main/plugins/index.js": "39b2d2a2680bd4676c9a586f28d3062a2eb672f88e432ba6eeb29f37a551ac29",
+      "main/plugins/loader.js": "f5959dca140a4b47301a105264adc0419db9326f0128908f578bab3a39946d59",
+      "main/plugins/manifest.js": "165b9c49ad1bb32905b5bf3b4f55cc522b625fa7fee41f983dcde27378506f16",
+      "main/plugins/official.js": "defb64927c735b9ed6a017298e69d0f958f8202aa63940927e505dca456bfe0c",
+      "main/plugins/registry.js": "2978eef43c6b338e31d2d0e60ec0e7a4cd860a679889469f00a9b23e245ac9c3",
+      "main/portable-user-data.js": "577ced55e53005a55d71a07c0cd4824ac2657d9f6f420385d1ebd54063e33e5e",
+      "main/process-lifecycle.js": "3539243520e61a44487c365c8d1fb0df9ead472229797d83ef90419bab400e62",
+      "main/rate-limiter.js": "26736a7b9716ae07ec27689ed960d69c8ce43f9fd6877733f1f5ddd22ee05769",
+      "main/remote/handlers/desktop.js": "2505822080fab8c3041fd4a6f7bc27d0f26e0c580da0d4755a32474882b4c480",
+      "main/remote/handlers/info.js": "ce9c15b04e78f972f354cad5732bf068f74c2dfdb1746da25e1633fa5ee888f1",
+      "main/remote/handlers/library.js": "823733318ba097126d16a72d50795612cd29b321cb8fb822aa347de298b8daa2",
+      "main/remote/handlers/media.js": "e0d80f996809972cb4fb66db1622e053c30adc274eab78e3334d0edfae97c52b",
+      "main/remote/handlers/network-resources.js": "75121b4b0bd47dc60467008bbb0a7bfcc12b7ee61997cd4f1acf97885704a1b8",
+      "main/remote/handlers/tags.js": "1422546a6e4e1db62d8e7e238dfe3cec725b40c1732e567ed484eda38024512f",
+      "main/remote/handlers/transcode.js": "afb5f616ef8e7b2d24dfef22f66fb352dee1732c4b16b901a521a750a42054fc",
+      "main/remote/http-utils.js": "c5c18a64b48d77e7eae803d84834de38d3180385f779d5e6900fd1755b76dc94",
+      "main/remote/identity.js": "1807700ddbeb1cce5aacc0f17fdc96a45e25e6ff2c1f41f0e6c24e2497972115",
+      "main/remote/index.js": "5305e893b421a9f1ca80f035fbf1ee20448099f4283a6e84dcd80f3db5a62697",
+      "main/remote/json-responses.js": "3844076ab33e7cd3c6e30644ab9bb25baefc885c5e2d09f1570dca54d7ba4e16",
+      "main/remote/media-mutations.js": "76ea043d52a84d980b1b0ff683553cd304da1aa21c806c7d165b54beda11b2aa",
+      "main/remote/network.js": "63ea5008b3e8b0bfe11536a1cee6222e5f4bc856abf9566af9ce38d561023da7",
+      "main/remote/request-lifecycle.js": "97af1ff899688600b53318033fe6700a50930a4c0bc216b801cf29fc39e99a91",
+      "main/remote/server.js": "331f052d3e9e8c27ef20ece86e7eb39b08650351223ced861d7db557d3e977f3",
+      "main/remote/streaming.js": "1910972d998d49279320d39d1b55eb28f92222f1e1d6e7fc32b341b6cdff289d",
+      "main/remote/transcode-cache.js": "e00358c5d62afdcad03ba240994145d4b03ed7528f1e9b515af9392d16818b04",
+      "main/remote/transcode.js": "fed5363a58e63556d088ee4bd31e040670df162f5eb81f7c868fe8dd4ac9a215",
+      "main/remote/video-index.js": "4ffc21b59ec2dc890442375c7471056bf2956d8a9d8cc949693207c0c507b3d8",
+      "main/repositories/settings-file.js": "e45a80bf524c810073ca7395785086207d92b1e012ba50d95bbf4b179677d672",
+      "main/repositories/tag-state.js": "046376c6bb56d3251c6f4a1d80c8e0273eeeac247b5d8031209787ace1852065",
+      "main/repositories/user-media.js": "3049437c334259acaed84e16b52a29d81f3e0f777b3bfa7f3cc4d1c95de3c2b8",
+      "main/scanner.js": "cb0ba79b0359a065e28a80020995617067d2f29a9a5121dd7a9fa5fa16c07b5d",
+      "main/security/ipc-sender.js": "da80398dd786f6a7b6c737fbd2e3f0de9b581584fb5c3f81a16b44a12e570b1a",
+      "main/security/ipc.js": "3727a72b5bbf2ef320d3e04ed436ff41db04d2ece150e7c22ce21dbca177cb5d",
+      "main/security/media-access.js": "c5263dcdc6cfd1c4486774061ddae6764ea4a6abcc84b4972497dd7c296f9bac",
+      "main/security/privacy-password.js": "c52b147621c8c717d46b21906662de74dcdfbb237fb67094a84bafb1c369ffb9",
+      "main/settings.js": "36722c64ccd04a0ca56c3d9b6f72b09ee3924af7b52f65b17a4294ee21314cb1",
+      "main/thumbnail.js": "5eb93e614e75972056f6d387bddcc237a26629ba740181db789e146204b130cb",
+      "main/updater.js": "3a58eaf25abd6face692f0ccc1f73c927e87fc4134ec274b764b375b6459ae4e",
+      "main/user-data.js": "940161537bcad84992d24516497606bcb79bbf551d01521f73337a69d700303a",
+      "main/video-metadata.js": "ff4a40f6b3882b1567c9ab7a42e0a6a62a535a66d33bb873709efc6f0eae3801",
+      "main/window.js": "7e1267a8168c04244f4f6fa249cb4c5ed3eafec2e5e20031d0d4c6561acfc0cc",
+      "main/ytdlp-service.js": "a063a4439364aca0e893eff6d8441584e579c77c6f5946e9917d6da4b90182d4",
+      "packages/contracts/dist/index.js": "6fd89ec15d078d06f85781f98d2c8e9dd4815586539ec255cd40662f23c99ef3",
+      "packages/contracts/dist/schema.js": "6b889492fa4260b6ef309bd8823813802ddb38b71dbc162c0359441819dfc91b",
+      "packages/contracts/dist/settings-feed.js": "d3de55971030b50e35ee4f8e70ebdd1c65a3353553f211aea31e6bf58e98424c",
+      "packages/domain/dist/index.js": "e16a487dbda471e000a1d37a362583167d20f8020c5a017ca81fadfad36a4bdb",
+      "preload.js": "b4a725252f0b0a6ecd2afec36084678984a975b795c363ee2cd09f6fbdff22c6"
+    },
+    "smoke": {
+      "date": "2026-10-19T10:11:08.367Z",
+      "output": "E:\\wp-vite8-qa-a25e71a893",
+      "executable": "E:\\wp-vite8-qa-a25e71a893\\win-unpacked\\Wallpaper Player.exe",
+      "clip": "E:\\wp-vite8-qa-a25e71a893\\smoke-profile-0rhjE3\\media\\runtime-h264.mp4",
+      "profile": "E:\\wp-vite8-qa-a25e71a893\\smoke-profile-0rhjE3",
+      "data": "E:\\wp-vite8-qa-a25e71a893\\smoke-profile-0rhjE3\\Data",
+      "success": true,
+      "native": {
+        "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) wallpaper-player/1.5.1 Chrome/152.0.7977.167 Electron/44.9.0 Safari/537.36",
+        "bridge": "function"
+      },
+      "url": "file:///E:/wp-vite8-qa-a25e71a893/win-unpacked/resources/app.asar/dist/index.html",
+      "cards": 1,
+      "settings": {
+        "theme": "light",
+        "schemaVersion": 1
+      },
+      "screenshot": "E:\\wp-vite8-qa-a25e71a893\\smoke-profile-0rhjE3\\packaged-window.png",
+      "playing": {
+        "filePath": "E:\\wp-vite8-qa-a25e71a893\\smoke-profile-0rhjE3\\media\\runtime-h264.mp4",
+        "timePos": 0.3,
+        "duration": 5,
+        "paused": false,
+        "buffering": false,
+        "volume": 100,
+        "muted": false,
+        "speed": 1,
+        "audioId": 0,
+        "subtitleId": 0,
+        "subtitleVisible": true,
+        "subtitleScale": 1,
+        "loopFile": "false",
+        "abLoopA": null,
+        "abLoopB": null,
+        "playlistPos": 1,
+        "playlistCount": 1,
+        "eofReached": false,
+        "trackList": [
+          {
+            "id": 1,
+            "type": "video",
+            "src-id": 1,
+            "image": false,
+            "albumart": false,
+            "default": true,
+            "forced": false,
+            "dependent": false,
+            "visual-impaired": false,
+            "hearing-impaired": false,
+            "external": false,
+            "selected": true,
+            "main-selection": 0,
+            "ff-index": 0,
+            "decoder": "h264",
+            "decoder-desc": "H.264 / AVC / MPEG-4 AVC / MPEG-4 part 10",
+            "codec": "h264",
+            "codec-desc": "H.264 / AVC / MPEG-4 AVC / MPEG-4 part 10",
+            "codec-profile": "Constrained Baseline",
+            "demux-w": 320,
+            "demux-h": 180,
+            "demux-fps": 30,
+            "demux-par": 1,
+            "metadata": {
+              "language": "und",
+              "handler_name": "VideoHandler",
+              "vendor_id": "[0][0][0][0]",
+              "encoder": "Lavc62.28.101 libx264"
+            }
+          }
+        ],
+        "sessionId": "player_deb26cea-7806-4a88-915c-5d7181f22896",
+        "engineSessionId": 3,
+        "resourceTarget": "E:\\wp-vite8-qa-a25e71a893\\smoke-profile-0rhjE3\\media\\runtime-h264.mp4",
+        "ready": true
+      },
+      "advanced": {
+        "filePath": "E:\\wp-vite8-qa-a25e71a893\\smoke-profile-0rhjE3\\media\\runtime-h264.mp4",
+        "timePos": 0.7,
+        "duration": 5,
+        "paused": false,
+        "buffering": false,
+        "volume": 100,
+        "muted": false,
+        "speed": 1,
+        "audioId": 0,
+        "subtitleId": 0,
+        "subtitleVisible": true,
+        "subtitleScale": 1,
+        "loopFile": "false",
+        "abLoopA": null,
+        "abLoopB": null,
+        "playlistPos": 1,
+        "playlistCount": 1,
+        "eofReached": false,
+        "trackList": [
+          {
+            "id": 1,
+            "type": "video",
+            "src-id": 1,
+            "image": false,
+            "albumart": false,
+            "default": true,
+            "forced": false,
+            "dependent": false,
+            "visual-impaired": false,
+            "hearing-impaired": false,
+            "external": false,
+            "selected": true,
+            "main-selection": 0,
+            "ff-index": 0,
+            "decoder": "h264",
+            "decoder-desc": "H.264 / AVC / MPEG-4 AVC / MPEG-4 part 10",
+            "codec": "h264",
+            "codec-desc": "H.264 / AVC / MPEG-4 AVC / MPEG-4 part 10",
+            "codec-profile": "Constrained Baseline",
+            "demux-w": 320,
+            "demux-h": 180,
+            "demux-fps": 30,
+            "demux-par": 1,
+            "metadata": {
+              "language": "und",
+              "handler_name": "VideoHandler",
+              "vendor_id": "[0][0][0][0]",
+              "encoder": "Lavc62.28.101 libx264"
+            }
+          }
+        ],
+        "sessionId": "player_deb26cea-7806-4a88-915c-5d7181f22896",
+        "engineSessionId": 3,
+        "resourceTarget": "E:\\wp-vite8-qa-a25e71a893\\smoke-profile-0rhjE3\\media\\runtime-h264.mp4",
+        "ready": true
+      },
+      "videoFrame": {
+        "success": true,
+        "sessionId": "player_deb26cea-7806-4a88-915c-5d7181f22896",
+        "screenshotPath": "E:\\wp-vite8-qa-a25e71a893\\smoke-profile-0rhjE3\\Data\\screenshots\\shot-2026-10-19T10-11-11-761Z.png"
+      },
+      "stop": {
+        "success": true,
+        "sessionId": "player_deb26cea-7806-4a88-915c-5d7181f22896"
+      },
+      "cleanExit": true,
+      "exitCode": 0,
+      "persisted": {
+        "theme": "light",
+        "schemaVersion": 1,
+        "playbackRecords": 1
+      }
+    },
+    "decodedFrame": {
+      "file": "E:\\wp-vite8-qa-a25e71a893\\smoke-profile-0rhjE3\\Data\\screenshots\\shot-2026-10-19T10-11-11-761Z.png",
+      "bytes": 38105,
+      "sha256": "a70bc8cdf9eae83bec2fcbecb8d48bb9d24bf89bf0257358d865c729dc8496ad"
+    },
+    "processes": {
+      "checkedAt": "2026-10-19T10:12:13.9444351Z",
+      "prefix": "E:\\wp-vite8-qa-a25e71a893\\",
+      "processes": []
+    },
+    "config": {
+      "output": "E:\\wp-vite8-qa-a25e71a893",
+      "vite": "8.3.4",
+      "signing": false,
+      "electron": "44.9.0",
+      "publish": "never"
+    }
+  },
+  "image": {
+    "file": "docs/evidence/r8-vite8-packaged-window.png",
+    "bytes": 171053,
+    "sha256": "598779f2f8b466422120c9f1af6a3a1593645258ffee3c220171c55a1b1bcbdf"
+  },
+  "audits": {
+    "full": {
+      "totals": {
+        "info": 0,
+        "low": 0,
+        "moderate": 8,
+        "high": 0,
+        "critical": 0,
+        "total": 8
+      },
+      "raw": {
+        "file": ".tmp/refactor-tests/r8-vite8/audit-full-after.json",
+        "bytes": 4666,
+        "sha256": "6f3612f6d17f5bcd7c436dffe8e834884a9efc48de3c928c6ac4f7fbb65eedd7"
+      },
+      "findings": {
+        "@electron/get": {
+          "severity": "moderate",
+          "nodes": [
+            "node_modules/app-builder-lib/node_modules/@electron/get"
+          ],
+          "range": "1.6.0 - 4.0.3",
+          "fixAvailable": {
+            "name": "electron-builder",
+            "version": "26.5.0",
+            "isSemVerMajor": true
+          },
+          "via": [
+            "global-agent"
+          ]
+        },
+        "app-builder-lib": {
+          "severity": "moderate",
+          "nodes": [
+            "node_modules/app-builder-lib"
+          ],
+          "range": "26.6.0 - 27.0.0-alpha.2",
+          "fixAvailable": {
+            "name": "electron-builder",
+            "version": "26.5.0",
+            "isSemVerMajor": true
+          },
+          "via": [
+            "@electron/get",
+            "dmg-builder",
+            "electron-builder-squirrel-windows"
+          ]
+        },
+        "dmg-builder": {
+          "severity": "moderate",
+          "nodes": [
+            "node_modules/dmg-builder"
+          ],
+          "range": "26.6.0 - 27.0.0-alpha.2",
+          "fixAvailable": {
+            "name": "electron-builder",
+            "version": "26.5.0",
+            "isSemVerMajor": true
+          },
+          "via": [
+            "app-builder-lib"
+          ]
+        },
+        "electron-builder": {
+          "severity": "moderate",
+          "nodes": [
+            "node_modules/electron-builder"
+          ],
+          "range": "19.25.0 || 26.6.0 - 27.0.0-alpha.2",
+          "fixAvailable": {
+            "name": "electron-builder",
+            "version": "26.5.0",
+            "isSemVerMajor": true
+          },
+          "via": [
+            "app-builder-lib",
+            "dmg-builder"
+          ]
+        },
+        "electron-builder-squirrel-windows": {
+          "severity": "moderate",
+          "nodes": [
+            "node_modules/electron-builder-squirrel-windows"
+          ],
+          "range": "26.6.0 - 27.0.0-alpha.2",
+          "fixAvailable": true,
+          "via": [
+            "app-builder-lib"
+          ]
+        },
+        "global-agent": {
+          "severity": "moderate",
+          "nodes": [
+            "node_modules/global-agent"
+          ],
+          "range": "<=3.0.0",
+          "fixAvailable": {
+            "name": "electron-builder",
+            "version": "26.5.0",
+            "isSemVerMajor": true
+          },
+          "via": [
+            "roarr"
+          ]
+        },
+        "roarr": {
+          "severity": "moderate",
+          "nodes": [
+            "node_modules/roarr"
+          ],
+          "range": "<=2.15.4",
+          "fixAvailable": {
+            "name": "electron-builder",
+            "version": "26.5.0",
+            "isSemVerMajor": true
+          },
+          "via": [
+            "sprintf-js"
+          ]
+        },
+        "sprintf-js": {
+          "severity": "moderate",
+          "nodes": [
+            "node_modules/sprintf-js"
+          ],
+          "range": "*",
+          "fixAvailable": {
+            "name": "electron-builder",
+            "version": "26.5.0",
+            "isSemVerMajor": true
+          },
+          "via": [
+            {
+              "title": "sprintf-js vulnerable to denial of service through unbounded precision specifiers",
+              "url": "https://github.com/advisories/GHSA-hp3w-g68c-fv3c",
+              "range": "<=1.1.3"
+            }
+          ]
+        }
+      }
+    },
+    "omit-dev": {
+      "totals": {
+        "info": 0,
+        "low": 0,
+        "moderate": 0,
+        "high": 0,
+        "critical": 0,
+        "total": 0
+      },
+      "raw": {
+        "file": ".tmp/refactor-tests/r8-vite8/audit-production-after.json",
+        "bytes": 387,
+        "sha256": "abf88b0cdc17cb38ead4dea1bea12f00bfcfcff8febfd7f50bb861d3d0460e07"
+      },
+      "findings": {}
+    }
+  },
+  "dataPreservation": {
+    "files": 42,
+    "preservedFallbackFiles": [
+      [
+        "analysis-results\\G086 Bronya分析结果2026-06-22_20-00-44.json",
+        "01db5f778601802471791e416b40c3ac8f96248e4542b78a867eaee77dd265e4"
+      ],
+      [
+        "downloads\\aria2.session",
+        "bbe9d72e7e5001c01f3a012fa73e5d35b6d53b9e76e08190bba58973ce1ba9bc"
+      ],
+      [
+        "llama-server-err.log",
+        "5744b9bb378569a3a4f664b62aad9a4b0025cd7d419cba73b793fb62cb737f42"
+      ],
+      [
+        "llama-server-out.log",
+        "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      ],
+      [
+        "remote-identity.json",
+        "0abcd8df9c1443a348b050b5abe28ac419ecef717ddf31a0daa680f153061324"
+      ],
+      [
+        "scan-index\\029fa92465c3409cba74ce3db6b927dfec0d4f581b12122975041a32ab324e8a.json",
+        "33b1310886821b4f01322041a561c8a6b4ed10aa351772effb396e7b1b547cfd"
+      ],
+      [
+        "scan-index\\06cf5926d93db3cc7b30882ee7dbecb69d51ce4e00de7901de3d48b866f9afc3.json",
+        "274848604327a2f96f0d152b9f23a7b4e5470fdd67c744e1c181e86c2d284059"
+      ],
+      [
+        "scan-index\\0e65747e6e0fc76a1e0c86e951c35d6c7392c184ba6cb43724d7d58856ff212a.json",
+        "3ac45a0678e6ed4554fe1f315f923d999b0311096acd3c9394e3d85826d37db9"
+      ],
+      [
+        "scan-index\\114890f3437dd45b34313ba38d9d3c36a09701d5d672bf8abd7af8c922db61af.json",
+        "3796d21463d2b2418c485565780e9628a50ab4f1a69d8faeadec1eb70a9af290"
+      ],
+      [
+        "scan-index\\1465f8e823323fe9c4383abb5a38c9e17fc550dd44cd2f14fd7f7242bc309e12.json",
+        "1be5fefdb59d8af06de2a6be0eeb0025a96253d719de1e0daced6f1fe35cdde0"
+      ],
+      [
+        "scan-index\\153bae098b5d3524553fcf4d8cbb1eacef2471314948819d043b26cebe199e14.json",
+        "689305d629290f70b40c5ea8454db685486f87be218b38da7aa4f0594a1d1cb8"
+      ],
+      [
+        "scan-index\\165f4a9a9309a7ac323647e9acefd754a66c6295cab7db6bdb50830914bf0d68.json",
+        "5b0738883aee24ac7e17fc108a221e395380d2bae6a32f3ba3f70606e4b27ebe"
+      ],
+      [
+        "scan-index\\1db67e5d68a60a19388b0338ed1ee18c2a2bcd0025ab168a1d69920c929bd647.json",
+        "b19f9d1c96db4b9106b2a28058ab1c33f4d3edc45fa693126cad0efe48cd44dd"
+      ],
+      [
+        "scan-index\\3032598f9f4655037a67986db404cfbf60011a2ca84a1e6edcec794c7deab956.json",
+        "db1c59c38bb8ba2122afad18a73d956ec55d4580f4cad17f365b37b71d7e3db8"
+      ],
+      [
+        "scan-index\\358da0698a4692a8052707f22ba2b9c94b5c4e73080d12c721e622b66a80614c.json",
+        "f1fb6fbd25b3d96027a86d6c797b162a74c95544c04f64470ed733ddbc8983ee"
+      ],
+      [
+        "scan-index\\5eb5da5dcf86cb8c66f674df75935c030f8e12d86b6373ebcdaa3d7aba7eb672.json",
+        "489328dc3fa24223d6db18869658db5d01f915838ba97532de8193f8bedc6f93"
+      ],
+      [
+        "scan-index\\5f59f687750abe3eb7d55cdb1aa86cb802bf22f3b00e3bb369f77a7ef2584d06.json",
+        "ae2763e5e5553a4eb759576c8f26efcffc9ef5aa741ddd6aad78b2e33716a719"
+      ],
+      [
+        "scan-index\\602ae02092dd5e362dec6b88bd5afb39f14c218b3e0f0fbd52e5a8d09eddeb0d.json",
+        "cd75909f0b53f3d449d479531d62f3ff1bb3144eb918086cc7a25d05816c2a7d"
+      ],
+      [
+        "scan-index\\664a4a47b45908fdfdf2d6bb5ec7024e41699d7dd2af4110f2889d4eac6dd2d7.json",
+        "64835ce867a827d40088ce1b9c8e4e19cb996d0df4c2e676cbb215cf38868556"
+      ],
+      [
+        "scan-index\\6a4b7a95d1ae5d67f63cc87a4f3486c0a22c35af457355ae63f4303d7bdbcaa1.json",
+        "7ab98d842e31b5da1227cf6e00d98e3e32287c53b0965f3e8a964dbc9e982b20"
+      ],
+      [
+        "scan-index\\6c2bfaa6b9f2b41ef00e065bab2a6d71c599e2ce76cc3f5939228ecc7b8be650.json",
+        "33dd4002ba26ea91ef1c97f264ef0337dd78b37d06f03a538f514ee0809c5107"
+      ],
+      [
+        "scan-index\\703cb3b91afdc3a4a39fb95f9d0c0289fe6dcdab34f10425d71858a05164ce3b.json",
+        "217ca6aa5c2c3b721795e93c7cb5d819317fa55546fee842c81420f84c353fe8"
+      ],
+      [
+        "scan-index\\85bd705cb26d94f80943f15877c1c71cc9f9a665c0bf24f8ab568b0b6bacf550.json",
+        "d4bb5033f4315903b0083789b87e09f4e06cb294a17313439f21987dd0b3a527"
+      ],
+      [
+        "scan-index\\87720e2b63644af82253d5ec9ace977d27e42c03a6033c6811af6c6094928e09.json",
+        "2b01b9760b6e8f5605fd9bb0cbc74e6f248c0bec7428982ce0dbb848c1f6e589"
+      ],
+      [
+        "scan-index\\959e88efa835995e2afff87fc4257966a41b7f45da19d44dc3369ba0d88599c9.json",
+        "bec93346f2dfbf0938b593658fd80e43a9be33b0bd4a0f7bcbf9a8997198ba9e"
+      ],
+      [
+        "scan-index\\9d7bcef01cadb37f1a59d31b708084c192007deea8564d134dcc473b0605201c.json",
+        "04d6bfae12cdb3e73f828813477825cd39dc803c37893be82455ecebe7734312"
+      ],
+      [
+        "scan-index\\a02253e6f623d27dfaa6674be31d9b43fc3d9b2c6bcda125418f1c3dd2a25709.json",
+        "90f629426a02dbbe9d60c7ad0c28090bd77a96693fcd1187b5215eda49184b86"
+      ],
+      [
+        "scan-index\\a17738a5c4b4bc1ce4358ecff69b8e44a1e1a33a7511d9a11eddecd94b9e58cd.json",
+        "a1fd92c4c4c8b9bbfeb105da251cc5230f16f1f68edf7cf909a468da0c242d99"
+      ],
+      [
+        "scan-index\\c53e2ac468d9387f39255a1ee9893eba1abe325ab086dea0025a18d1ef67e75f.json",
+        "2042c353b3e1c29eb236d1a1dfce79afdb85839f40f02f0b70d521eff607e6bb"
+      ],
+      [
+        "scan-index\\cb702390842effe5e6e22e77acbda7b2bbea77ed51a5c07e66c3c5d8d0bc15bf.json",
+        "718b65c8b9b80caa3c5d34bc3244f750cd8243dc4b8743f637c3b12dbbbbda4a"
+      ],
+      [
+        "scan-index\\cbf568b1144651ce061c2dc94a347128724334dd45ac2dd4ebf6890d74c66251.json",
+        "e22fd608a0197ea15fdbd8e3320b49d60e518bb4054b74ffb7504cd8e6035134"
+      ],
+      [
+        "scan-index\\d6cd75e4bc356e88ed2b4c2272c32263e568d67a07b4017d73b22e09c23e8306.json",
+        "d3ccf77f170934b4987c22301d34abbb8b7646d45af03f575057804e4c892629"
+      ],
+      [
+        "scan-index\\db34a207b303445fed1e9654c8e68883c93c5123070913181f89844225e4636a.json",
+        "81149ad6956bdb73b468e88036ef043043faecd14d34901ba5eaa49b775d3a72"
+      ],
+      [
+        "scan-index\\de13066bd94cc789543a5fa9e6100f3297df42c5dd715cccf10b11383b6f1d68.json",
+        "d2ac7243b636179c0e35727cb899a4f608b7c044d759e6b6a52c8f501a3a6945"
+      ],
+      [
+        "scan-index\\eba7ad116c30f43341d30f06e5f9efe510565b2a31a16c0eccab8fc4c303e6bc.json",
+        "636392edc5a9f41da4b70492833939eac890636623ab957400a7118bba472fc7"
+      ],
+      [
+        "scan-index\\f16070f230607bf79853b98a8c462b8e7b854deeb16fe246ba6c9d783c9b2832.json",
+        "becff49c6c81b5dfd4688bbb272be352a8821ce42120b45282ea86c65f6378c2"
+      ],
+      [
+        "scan-index\\f408135604349a60c1b7caa1d60757de692af100c4518e5588f38b619995f186.json",
+        "b894250b5d420a09b89350f33103a5d08edb5fc3d20f3cddf7604ed1fcb9df3a"
+      ],
+      [
+        "scan-index\\f7b0c1004febecbe36453be10ef2ddc2523e5b92f4af5f318ce1049990e93053.json",
+        "77f2b4ded7202b828e8a6e281d549eecd1e79aea4030dfb2a7d918202ab090c5"
+      ],
+      [
+        "scan-index\\f892c389d585d65dff3d06f6c86d3355dc90100c808a4f80da22b2f7e81865ba.json",
+        "b0f007ba8b4249849d726eee7a9fec6cf5926742e62d3cb833bd464423af520e"
+      ],
+      [
+        "scan-index\\fc41c7e68e94b6f115983997d8498353a4f8f41b61fc91662dd84affe70fc9fb.json",
+        "fa79531cd58ae0323d29102813386358d2e599ecb63902231ed73e264196abdc"
+      ],
+      [
+        "settings.json",
+        "6fb990f7edfe0707bb48b8bed65455cc2a521d33e028b45ce77f98b6a466a0d5"
+      ],
+      [
+        "video-metadata-cache.json",
+        "616205b2e97a75ea8842d3b4f6f3de778fc545493659d45e5c0139c6d7087f47"
+      ]
+    ],
+    "settingsSha256": "6fb990f7edfe0707bb48b8bed65455cc2a521d33e028b45ce77f98b6a466a0d5",
+    "freshNonemptyGuardReports": [
+      "verification-guard-2b3280a1-399d-4be2-96e4-1fc22c133b50.jsonl"
+    ],
+    "expectedSyntheticNegativeOnly": true,
+    "packagedIsolation": "Production portable Data and post-run results; NODE_OPTIONS preload protection is not claimed for packaged exe."
+  },
+  "checks": [
+    {
+      "name": "verify:test-data-guard",
+      "exit": 0
+    },
+    {
+      "name": "verify:vite-dev",
+      "exit": 0
+    },
+    {
+      "name": "verify:electron-runtime",
+      "exit": 0,
+      "seconds": 2.26,
+      "log": ".tmp/refactor-tests/r8-vite8/verify-electron-runtime.log"
+    },
+    {
+      "name": "verify:app-state",
+      "exit": 0,
+      "seconds": 6.069,
+      "log": ".tmp/refactor-tests/r8-vite8/verify-app-state.log"
+    },
+    {
+      "name": "verify:settings-snapshots",
+      "exit": 0,
+      "seconds": 4.872,
+      "log": ".tmp/refactor-tests/r8-vite8/verify-settings-snapshots.log"
+    },
+    {
+      "name": "verify:settings-panels",
+      "exit": 0,
+      "seconds": 5.23,
+      "log": ".tmp/refactor-tests/r8-vite8/verify-settings-panels.log"
+    },
+    {
+      "name": "verify:app-initialization",
+      "exit": 0,
+      "seconds": 2.412,
+      "log": ".tmp/refactor-tests/r8-vite8/verify-app-initialization.log"
+    },
+    {
+      "name": "verify:settings-feed",
+      "exit": 0,
+      "seconds": 3.33,
+      "log": ".tmp/refactor-tests/r8-vite8/verify-settings-feed.log"
+    },
+    {
+      "name": "verify:responsive-layout",
+      "exit": 0,
+      "seconds": 67.755,
+      "log": ".tmp/refactor-tests/r8-vite8/verify-responsive-layout.log"
+    },
+    {
+      "name": "verify:desktop-player",
+      "exit": 0,
+      "seconds": 5.089,
+      "log": ".tmp/refactor-tests/r8-vite8/verify-desktop-player.log"
+    },
+    {
+      "name": "verify:contracts",
+      "exit": 0,
+      "seconds": 2.736,
+      "log": ".tmp/refactor-tests/r8-vite8/verify-contracts.log"
+    },
+    {
+      "name": "verify:api-adapters",
+      "exit": 0,
+      "log": ".tmp/refactor-tests/r8-vite8/verify-api-adapters.log"
+    },
+    {
+      "name": "verify:electron-api",
+      "exit": 0,
+      "log": ".tmp/refactor-tests/r8-vite8/verify-electron-api.log"
+    },
+    {
+      "name": "verify:library-query",
+      "exit": 0,
+      "log": ".tmp/refactor-tests/r8-vite8/verify-library-query.log"
+    },
+    {
+      "name": "verify:media-fields",
+      "exit": 0,
+      "log": ".tmp/refactor-tests/r8-vite8/verify-media-fields.log"
+    },
+    {
+      "name": "verify:remote-library",
+      "exit": 0,
+      "log": ".tmp/refactor-tests/r8-vite8/verify-remote-library.log"
+    },
+    {
+      "name": "verify:privacy-passwords",
+      "exit": 0,
+      "log": ".tmp/refactor-tests/r8-vite8/verify-privacy-passwords.log"
+    },
+    {
+      "name": "verify:update-metadata",
+      "exit": 0,
+      "log": ".tmp/refactor-tests/r8-vite8/verify-update-metadata.log"
+    },
+    {
+      "name": "verify:mobile-correctness",
+      "exit": 0,
+      "log": ".tmp/refactor-tests/r8-vite8/verify-mobile-correctness.log"
+    },
+    {
+      "name": "verify:packaged-contracts",
+      "exit": 0,
+      "log": ".tmp/refactor-tests/r8-vite8/verify-packaged-contracts.log"
+    },
+    {
+      "name": "build",
+      "exit": 0
+    },
+    {
+      "name": "mobile typecheck",
+      "exit": 0
+    },
+    {
+      "name": "npm ls --all",
+      "exit": 0
+    },
+    {
+      "name": "actual Windows x64 directory build and silent H264/frame/stop/graceful exit",
+      "exit": 0
+    }
+  ],
+  "rawArtifacts": [
+    {
+      "file": ".tmp/refactor-tests/r8-vite8/package.json.before",
+      "bytes": 14971,
+      "sha256": "1f3064c2e40705bb82e4f83c67392361e4c14082c8b61bc458002f7bf96ca184"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-vite8/package-lock.json.before",
+      "bytes": 217326,
+      "sha256": "ead6c40c96d9304e2f0b33bd2e9d1b06f76939f88d9297c543ce9849a1912942"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-vite8/vite.config.js.before",
+      "bytes": 416,
+      "sha256": "db6626ab36205c76d85adc8214e82c52cf2b43372c21ad0874a8ed84963871a2"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-vite8/recovered-baseline.json",
+      "bytes": 9313,
+      "sha256": "0359904aa90065cb55f272037e1ab9721481e91cae93ce8cdcf76cb86a5d04b0"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-vite8/recover-baseline.cjs",
+      "bytes": 2002,
+      "sha256": "06cc1532305cf2b50e97b77b9398cb1d9cc7102ad647856527fb3a19dad0f0d0"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-vite8/bundle-sizes.json",
+      "bytes": 2318,
+      "sha256": "e3f6a763b2d98c1c1c3cb6d9fe65edfba6746e6222d45f22cef80b27b586cb47"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-vite8/build.log",
+      "bytes": 1522,
+      "sha256": "d2c70b757503a4bab2c661bab8653919ebeafa7f4d52e04343a1bb32ebe521ae"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-vite8/build-directory.log",
+      "bytes": 1403,
+      "sha256": "929f2c61ff401183464ce13c4ecdc17e0a18a02316bb28816c8490790fae883b"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-vite8/build-root.json",
+      "bytes": 137,
+      "sha256": "93536e9b96be946e710eb2e993f30ceccd242525a74eb91974828977908ae06a"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-vite8/ui-regressions.json",
+      "bytes": 1422,
+      "sha256": "7ba536c0e28a831b90eb08f1f1d94f42002d7c9d906bcb66f88a13d8e9796bb4"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-vite8/service-regressions.json",
+      "bytes": 1221,
+      "sha256": "7861f7a24f1ec0fff061c74e67c70532bab9c238c02872d4b146f407935c2148"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-vite8/data-guard.log",
+      "bytes": 1015,
+      "sha256": "c325891d95b84905fae2238c6358364e84e9da53b6b2d04e0cd7654ffabde0d9"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-vite8/guard-evidence.json",
+      "bytes": 849,
+      "sha256": "721366bd2a2d784752190d65d2e387e51dd44323bb9efbfccd1b930ae62fc0b6"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-vite8/dev-hmr.log",
+      "bytes": 330,
+      "sha256": "dc3b022b0f4d024eb2533e9373572c962348727d44e0ee9f02bbdc8205897b17"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-vite8/dev-evidence.json",
+      "bytes": 486,
+      "sha256": "b91b2c6e452e1e201d62f4862dc4b9cd406fc021f9aee5ef31c8e39ee50f3bf5"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-vite8/runtime-evidence.json",
+      "bytes": 3116,
+      "sha256": "10d28b2578c74bfbefe8ef34966aad044c9119f859ffa5e3ff5171fb28f32579"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-vite8/mobile-typecheck.log",
+      "bytes": 63,
+      "sha256": "1e0f0490123b26a1e922ddceb0d3a75f1acc55b8dbd07d5c200b38c8cde87737"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-vite8/installed-tree.json",
+      "bytes": 127765,
+      "sha256": "2316de3be6fdf4bf8b0aebd9f57226805a0fbb1356b962adbb8e6838f50083be"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-vite8/packaged-smoke.cjs",
+      "bytes": 6971,
+      "sha256": "15f678bb916612e4db6eda8292b054d4558d6baf4b396ee40d7985720a92e383"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-vite8/packaged-smoke.json",
+      "bytes": 4590,
+      "sha256": "f8713a550646e7303780e44194b23736e9ccb981a1fcd618bca3d7326ce04943"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-vite8/packaged-app.log",
+      "bytes": 703,
+      "sha256": "5c61d304d3e6cd887c93e2bcef49799d41d2d7ad900de08255442bd861a43e4f"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-vite8/process-audit.json",
+      "bytes": 118,
+      "sha256": "aef63347150d72ba5e5cd267658bec0ef0b34509ec4dc5d55f13cb8014ac2f28"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-vite8/collect-evidence.cjs",
+      "bytes": 12076,
+      "sha256": "c8131f120afa6b15daed2d0fe2a2f546ecc13cb4a7495e7bb8550b6882571e14"
+    }
+  ],
+  "upstream": [
+    "https://vite.dev/guide/migration",
+    "https://v7.vite.dev/guide/migration",
+    "https://vite.dev/guide/dep-pre-bundling#monorepos-and-linked-dependencies",
+    "https://vite.dev/config/dep-optimization-options"
+  ],
+  "notes": [
+    "Build.commonjsOptions is a Vite 8 no-op; native Rolldown handling and explicit package-name prebundling replace it.",
+    "Absolute-file prebundling did not rewrite relative CJS imports. Desktop uses canonical existing private package names, shared TS paths, Vite/test alias resolver and explicit optimizeDeps include.",
+    "First dev probe failed on shared CommonJS named exports, then the metadata read hit plugin package exports restrictions; both corrected. Final HMR check uses both actual shared runtimes and preserves counter=1.",
+    "Four desktop source files changed only shared import identifiers; Node/mobile CommonJS entries and generated runtime bytes remain unchanged. No workspace or directory migration.",
+    "Native production probe imports six delayed modules from file URLs. Dev probe is a small actual React fixture under real project config, not a complete IPC-backed development application.",
+    "Old workspace dist copy/baseline marker were missing; old assets recovered only from frozen, SHA-verified previous ASAR and both before package/lock snapshots match that evidence.",
+    "Asset byte/gzip observations are not controlled build speed, startup, frame-rate or memory measurements; gzip uses the same local Node/zlib defaults on each version.",
+    "Actual package disables publishing, signing and branding edits, preserves original release directory and uses a new portable profile. One short silent H264 smoke does not establish all codecs, hardware decode, sustained budgets or physical mobile acceptance.",
+    "Mobile lock unchanged and type/correctness checks passed; no fresh mobile audit, Hermes export or native APK/IPA in this batch.",
+    "CI configuration inspected but remote jobs not dispatched; remaining tooling/mobile dependencies, migration, signatures, update manifests, TLS and native acceptance still open."
+  ]
+}

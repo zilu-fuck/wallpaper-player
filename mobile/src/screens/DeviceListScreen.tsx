@@ -10,6 +10,7 @@ import { checkDeviceAvailability, type DeviceAvailability } from '../services/co
 import { removeDevice } from '../persistence/devices'
 import type { StoredDevice } from '../types'
 import { useTheme } from '../theme-context'
+import { usePageActivity } from '../hooks/usePageActivity'
 
 type Props = {
   navigation: NavigationContext
@@ -17,15 +18,17 @@ type Props = {
 }
 
 export function DeviceListScreen({ navigation, devices }: Props) {
+  const pageActive = usePageActivity()
   const { colors } = useTheme()
   const styles = createStyles(colors)
   const [availabilityById, setAvailabilityById] = useState<Record<string, DeviceAvailability>>({})
 
   const refreshAvailability = useCallback(() => {
+    const controller = new AbortController()
     let cancelled = false
     setAvailabilityById({})
     devices.forEach((device) => {
-      checkDeviceAvailability(device)
+      checkDeviceAvailability(device, controller.signal)
         .then((availability) => {
           if (cancelled) return
           setAvailabilityById(current => ({ ...current, [device.id]: availability }))
@@ -40,22 +43,25 @@ export function DeviceListScreen({ navigation, devices }: Props) {
     })
     return () => {
       cancelled = true
+      controller.abort()
     }
   }, [devices])
 
-  useEffect(() => refreshAvailability(), [refreshAvailability])
+  useEffect(() => { if (pageActive) return refreshAvailability() }, [refreshAvailability, pageActive])
 
   return (
     <View style={styles.shell}>
-      <View style={styles.header}>
-        <Text style={styles.title}>我的电脑</Text>
-        <Text style={styles.subtitle}>选择一台已绑定的 Wallpaper Player。</Text>
-      </View>
-
       <FlatList
+        accessibilityLabel="已绑定电脑"
         data={devices}
         keyExtractor={item => item.id}
         contentContainerStyle={styles.list}
+        ListHeaderComponent={(
+          <View style={styles.header}>
+            <Text accessibilityRole="header" style={styles.title}>我的电脑</Text>
+            <Text style={styles.subtitle}>选择一台已绑定的 Wallpaper Player。</Text>
+          </View>
+        )}
         renderItem={({ item }) => (
           <DeviceCard
             device={item}
@@ -68,14 +74,23 @@ export function DeviceListScreen({ navigation, devices }: Props) {
                   text: '移除',
                   style: 'destructive',
                   onPress: async () => {
+                    let revokeError = ''
                     if (item.pairedDeviceId) {
-                      await unpairCurrentDevice(item).catch(() => {})
+                      try { await unpairCurrentDevice(item) } catch {
+                        revokeError = '未能通知电脑取消授权。请在电脑端的已绑定设备中移除此手机。'
+                      }
                     }
-                    await removeDevice(item.id)
-                    await navigation.refreshDevices()
+                    try {
+                      await removeDevice(item.id, item.bindingId)
+                      await navigation.refreshDevices()
+                      if (revokeError) Alert.alert('已在手机移除', revokeError)
+                    } catch (error) {
+                      Alert.alert('设备清理失败', error instanceof Error ? error.message : '请重试')
+                      await navigation.refreshDevices().catch(() => {})
+                    }
                   }
                 }
-              ])
+              ], { cancelable: true })
             }}
           />
         )}
@@ -100,23 +115,29 @@ const createStyles = (colors: ReturnType<typeof useTheme>['colors']) => StyleShe
     backgroundColor: colors.background
   },
   header: {
-    padding: 20,
+    paddingHorizontal: 4,
+    paddingTop: 8,
+    paddingBottom: 14,
     gap: 6
   },
   title: {
     color: colors.text,
-    fontSize: 30,
-    fontWeight: '800'
+    fontSize: 28,
+    fontWeight: '800',
+    letterSpacing: 0.4
   },
   subtitle: {
     color: colors.muted,
-    fontSize: 15
+    fontSize: 14,
+    lineHeight: 20
   },
   list: {
     padding: 16,
+    paddingTop: 8,
     gap: 12
   },
   footer: {
-    gap: 12
+    gap: 12,
+    paddingTop: 4
   }
 })

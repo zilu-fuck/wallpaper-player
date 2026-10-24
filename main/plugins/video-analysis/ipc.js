@@ -3,19 +3,14 @@ const fsp = require('fs/promises')
 const { dialog, shell } = require('electron')
 const { core } = require('./core')
 const { pathKey } = core('paths')
-const {
-  loadSettings,
-  saveSettings
-} = core('settings')
+const { saveSettingsAndFlush } = core('settings')
 const { assertAllowedVideoPath } = core('scanner')
 const { getMainWindow } = core('window')
 const {
   findVideoAnalysis,
   listSavedAnalysisResultsForVideos,
   deleteSavedAnalysisResult,
-  startVideoAnalysis,
-  cancelVideoAnalysis,
-  getActiveAnalysisJob,
+  analysisTaskService,
   getAnalysisModelDirectory,
   getAnalysisResultDirectory,
   getVideoAnalysisRuntimeConfig,
@@ -35,6 +30,7 @@ const {
   startVlmService,
   stopVlmService,
   downloadVlmModel,
+  cancelVlmModelDownload,
   listLocalVlmModelFiles,
   selectLocalVlmModelFile,
   listHuggingFaceModelFiles,
@@ -97,21 +93,33 @@ function registerVideoAnalysisIpc(ctx) {
     }
   })
 
-  ctx.ipc.handle('video-analysis-start', async (event, filePath) => {
+  ctx.ipc.handle('video-analysis-start', async (event, filePath, interestId) => {
     try {
-      const resolvedPath = await assertAllowedVideoPath(filePath)
-      return await startVideoAnalysis(resolvedPath, event.sender)
+      const owner = analysisTaskService.windowOwner(event.sender)
+      const authorize = () => assertAllowedVideoPath(filePath, { audience: 'desktop', senderId: event.sender.id })
+      const resolvedPath = await authorize()
+      const result = await analysisTaskService.start(resolvedPath, owner.actor, interestId, { sender: event.sender, authorize, isCurrent: owner.isCurrent })
+      if (result.job?.videoPath) {
+        try { await assertAllowedVideoPath(result.job.videoPath, { audience: 'desktop', senderId: event.sender.id }) }
+        catch { return { ...result, job: { running: true, canCancel: false, interestedClients: 0 } } }
+      }
+      return owner.isCurrent() ? result : { accepted: false, reason: 'stopping', error: '分析窗口已关闭' }
     } catch (err) {
       return { accepted: false, reason: 'error', error: err.message }
     }
   })
 
-  ctx.ipc.handle('video-analysis-cancel', async (_event, jobId) => {
-    return cancelVideoAnalysis(jobId)
+  ctx.ipc.handle('video-analysis-cancel', async (event, jobId, interestId) => {
+    const owner = analysisTaskService.windowOwner(event.sender)
+    return analysisTaskService.cancel(owner.actor, jobId, interestId)
   })
 
-  ctx.ipc.handle('video-analysis-job', async () => {
-    return getActiveAnalysisJob()
+  ctx.ipc.handle('video-analysis-job', async event => {
+    const owner = analysisTaskService.windowOwner(event.sender), job = analysisTaskService.get(owner.actor)
+    if (!job.running) return job
+    try { await assertAllowedVideoPath(job.videoPath, { audience: 'desktop', senderId: event.sender.id }) }
+    catch { return { running: true, canCancel: false, interestedClients: 0 } }
+    return owner.isCurrent() ? job : { running: false }
   })
 
   ctx.ipc.handle('video-analysis-get-output-dir', async () => {
@@ -129,13 +137,7 @@ function registerVideoAnalysisIpc(ctx) {
     if (result.canceled || result.filePaths.length === 0) return null
     const selectedDir = path.resolve(result.filePaths[0])
     sessionAllowedAnalysisResultDirectories.add(pathKey(selectedDir))
-    const settings = loadSettings()
-    saveSettings({
-      videoAnalysis: {
-        ...(settings.videoAnalysis || {}),
-        outputDir: selectedDir
-      }
-    })
+    await saveSettingsAndFlush({ videoAnalysis: { outputDir: selectedDir } })
     return selectedDir
   })
 
@@ -169,17 +171,7 @@ function registerVideoAnalysisIpc(ctx) {
     if (result.canceled || result.filePaths.length === 0) return null
     const selectedDir = path.resolve(result.filePaths[0])
     sessionAllowedAnalysisModelDirectories.add(pathKey(selectedDir))
-    const settings = loadSettings()
-    saveSettings({
-      videoAnalysis: {
-        ...(settings.videoAnalysis || {}),
-        modelDir: selectedDir
-      }
-    })
-    await saveVideoAnalysisRuntimeConfig({
-      ...(await getVideoAnalysisRuntimeConfig()),
-      modelStorageDir: selectedDir
-    })
+    await saveVideoAnalysisRuntimeConfig({ modelStorageDir: selectedDir }, { modelDirectory: selectedDir })
     return selectedDir
   })
 
@@ -212,13 +204,6 @@ function registerVideoAnalysisIpc(ctx) {
 
   ctx.ipc.handle('video-analysis-reset-runtime-config', async () => {
     try {
-      const settings = loadSettings()
-      saveSettings({
-        videoAnalysis: {
-          ...(settings.videoAnalysis || {}),
-          modelDir: getDefaultAnalysisModelDirectory()
-        }
-      })
       return { success: true, config: await resetVideoAnalysisRuntimeConfig() }
     } catch (err) {
       return { success: false, error: err.message }
@@ -338,6 +323,8 @@ function registerVideoAnalysisIpc(ctx) {
       return { success: false, error: err.message }
     }
   })
+
+  ctx.ipc.handle('video-analysis-vlm-download-cancel', () => cancelVlmModelDownload())
 
   ctx.ipc.handle('video-analysis-vlm-start', async () => {
     try {

@@ -1,8 +1,12 @@
 const crypto = require('crypto')
 const http = require('http')
 const https = require('https')
+const { pipeline } = require('stream/promises')
+const { acquireRemoteStream } = require('../../media-pressure')
+const { trackNetworkStream } = require('../streaming')
 const { NETWORK_VIDEO_EXTENSIONS } = require('../../constants')
-const { loadSettings } = require('../../settings')
+const { loadSettingsFields } = require('../../settings')
+const { getTagsRevision } = require('../../repositories/tag-state')
 const {
   assertResolvedTargetPublic,
   isLocalHostname,
@@ -12,7 +16,7 @@ const {
 const { parseNetworkResourcePage } = require('../../network-resource-parser')
 const { enrichNetworkResource, WEBPAGE_SSRF_GUARD_HINT } = require('../../ipc/network-resource-service')
 const { sendError } = require('../http-utils')
-const { createBoundScopedToken, signScopedToken, verifyBoundScopedToken } = require('../identity')
+const { createBoundScopedToken, signScopedToken, verifyBoundScopedToken, refreshIdentity } = require('../identity')
 
 const NETWORK_DIRECTORY_ID = 'network_resources'
 const NETWORK_DIRECTORY_NAME = '网络资源'
@@ -22,6 +26,7 @@ const MAX_PLAYLIST_BYTES = 5 * 1024 * 1024
 const MAX_NETWORK_PROXY_CONCURRENCY = 16
 const MAX_NETWORK_PROXY_PER_RESOURCE = 6
 const NETWORK_PROXY_TOKEN_TTL_MS = 6 * 60 * 60 * 1000
+const networkError = (code, message, status = 502) => Object.assign(new Error(message), { code, status })
 
 const activeNetworkProxyRequests = {
   total: 0,
@@ -204,7 +209,7 @@ function createNetworkItem(resource, episode = null) {
   return isPlayableCandidate(item) ? item : null
 }
 
-function listRemoteNetworkItems(settings = loadSettings()) {
+function listRemoteNetworkItems(settings = loadSettingsFields(['networkResources'])) {
   const resources = Array.isArray(settings.networkResources) ? settings.networkResources : []
   const items = []
   const seen = new Set()
@@ -230,7 +235,7 @@ function listRemoteNetworkItems(settings = loadSettings()) {
   return items
 }
 
-function getRemoteNetworkItemById(id, settings = loadSettings()) {
+function getRemoteNetworkItemById(id, settings = loadSettingsFields(['networkResources'])) {
   const target = String(id || '').trim()
   if (!target.startsWith('network_')) return null
   return listRemoteNetworkItems(settings).find(item => item.id === target) || null
@@ -261,6 +266,7 @@ function toRemoteNetworkVideo(item, context = {}) {
     tags,
     systemTags,
     customTags,
+    customTagsRevision: getTagsRevision({ customTagRevisions: context.customTagRevisions }, { favoriteKey: item.favoriteKey, path: item.url }),
     favorite: Boolean(context.favoriteKeys?.has(item.favoriteKey) || context.favoriteKeys?.has(legacyFavoriteKey)),
     directoryId: NETWORK_DIRECTORY_ID,
     directoryName: NETWORK_DIRECTORY_NAME,
@@ -349,14 +355,26 @@ function rewritePlaylistLine(line, baseUrl, networkId, proxyOptions) {
   return createCheckedProxyPath(networkId, targetUrl, baseUrl, proxyOptions)
 }
 
-function rewriteM3u8Playlist(text, baseUrl, networkId, proxyOptions) {
-  return String(text || '')
-    .split(/\r?\n/)
-    .map(line => rewritePlaylistLine(line.trim(), baseUrl, networkId, proxyOptions))
-    .join('\n')
+async function rewriteM3u8Playlist(text, baseUrl, networkId, proxyOptions, signal) {
+  const input = String(text || '')
+  let lineCount = 1
+  for (const _match of input.matchAll(/\n/g)) {
+    if (++lineCount > 10000) throw Object.assign(new Error('播放列表条目过多'), { status: 502, code: 'network_playlist_too_large' })
+  }
+  const result = [], lines = input.split(/\r?\n/)
+  let bytes = 0
+  for (let index = 0; index < lines.length; index++) {
+    if (signal.aborted) throw signal.reason
+    const line = rewritePlaylistLine(lines[index].trim(), baseUrl, networkId, proxyOptions)
+    bytes += Buffer.byteLength(line, 'utf8') + 1
+    if (bytes > 10 * 1024 * 1024) throw Object.assign(new Error('改写后的播放列表过大'), { status: 502, code: 'network_playlist_too_large' })
+    result.push(line)
+    if (index % 128 === 127) await new Promise(resolve => setImmediate(resolve))
+  }
+  return result.join('\n')
 }
 
-async function resolveNetworkPlayback(item) {
+async function resolveNetworkPlayback(item, options = {}) {
   if (
     item.playbackUrl ||
     item.kind !== 'webpage' ||
@@ -378,7 +396,7 @@ async function resolveNetworkPlayback(item) {
   // 包含网页解析、播放地址/剧集逐条 SSRF 校验与 httpHeaders 规整。
   let resolved
   try {
-    resolved = await enrichNetworkResource(item)
+    resolved = await enrichNetworkResource(item, options)
   } catch (err) {
     if (typeof err?.message === 'string' && err.message.includes(WEBPAGE_SSRF_GUARD_HINT)) {
       throw Object.assign(err, { status: 403, code: 'network_webpage_ssrf_blocked' })
@@ -398,119 +416,119 @@ async function resolveNetworkPlayback(item) {
   }
 }
 
-function pipeNetworkResponse(req, res, targetUrl, playbackHeaders, options = {}, redirects = 0) {
-  return new Promise((resolve, reject) => {
-    let parsed
-    try {
-      parsed = new URL(targetUrl)
-    } catch {
-      reject(Object.assign(new Error('网络资源地址无效'), { status: 400, code: 'invalid_network_url' }))
+async function pipeNetworkResponse(req, res, targetUrl, playbackHeaders, options = {}) {
+  const controller = new AbortController(), signal = controller.signal
+  const untrack = trackNetworkStream(req.remoteServer, controller)
+  const releasePressure = req.method === 'HEAD' ? () => {} : acquireRemoteStream()
+  const startedAt = Date.now()
+  let upstream, response, deadline
+  const networkError = (code, message, status = 502) => Object.assign(new Error(message), { code, status })
+  const disconnect = () => controller.abort(networkError('network_request_cancelled', '网络播放请求已断开', 499))
+  const responseClosed = () => { if (!res.writableFinished) disconnect() }
+  const abortIO = () => {
+    upstream?.destroy(signal.reason); response?.destroy(signal.reason)
+    if (res.headersSent && !res.writableFinished) res.destroy()
+  }
+  const waitClosed = stream => !stream || stream.closed ? Promise.resolve() : new Promise(resolve => stream.once('close', resolve))
+  const closeUpstream = async () => {
+    const pending = [waitClosed(upstream), waitClosed(response)]
+    if (response && !response.closed) response.destroy()
+    if (upstream && !upstream.closed) upstream.destroy()
+    await Promise.all(pending)
+    upstream = null; response = null
+  }
+  const armDeadline = milliseconds => {
+    clearTimeout(deadline)
+    deadline = setTimeout(() => controller.abort(networkError('network_request_timeout', '网络资源请求超过等待时限', 504)), Math.max(1, milliseconds))
+    deadline.unref?.()
+  }
+  req.once('aborted', disconnect); res.once('close', responseClosed)
+  signal.addEventListener('abort', abortIO, { once: true })
+  armDeadline(options.headerTimeoutMs || 15000)
+  try {
+    if (req.aborted || res.destroyed) disconnect()
+    let redirects = 0, ignoreRange = false
+    while (true) {
+      if (signal.aborted) throw signal.reason
+      let parsed
+      try { parsed = new URL(targetUrl) } catch { throw networkError('invalid_network_url', '网络资源地址无效', 400) }
+      const headers = { 'user-agent': playbackHeaders?.userAgent || DEFAULT_BROWSER_UA, accept: req.headers.accept || '*/*' }
+      if (playbackHeaders?.referer) headers.referer = playbackHeaders.referer
+      if (req.headers.range && !ignoreRange && !['.m3u8', '.m3u'].includes(getUrlExtension(targetUrl))) headers.range = req.headers.range
+      response = await new Promise((resolve, reject) => {
+        const client = parsed.protocol === 'http:' ? http : https
+        const request = client.request(parsed, { method: req.method === 'HEAD' ? 'HEAD' : 'GET', headers,
+          signal, timeout: 15000, highWaterMark: 256 * 1024 }, incoming => {
+          incoming.on('error', () => {})
+          resolve(incoming)
+        })
+        upstream = request
+        request.once('timeout', () => { if (upstream === request) controller.abort(networkError('network_idle_timeout', '网络资源读取超时', 504)) })
+        request.on('error', reject)
+        request.end()
+      })
+      const status = Number(response.statusCode || 0), location = response.headers.location
+      if ([301, 302, 303, 307, 308].includes(status) && location) {
+        if (++redirects > MAX_REDIRECTS) throw networkError('network_redirect_limit', '网络资源重定向次数过多')
+        const nextUrl = toAbsolutePlaylistUrl(location, targetUrl)
+        if (!isAllowedPlaylistTarget(nextUrl, targetUrl, options)) throw networkError('network_redirect_blocked', '网络资源重定向到不受信任的地址', 403)
+        await closeUpstream(); targetUrl = nextUrl
+        continue
+      }
+      if (status < 200 || status >= 300) throw networkError('network_upstream_failed', '网络资源请求失败：HTTP ' + (status || '未知'))
+      const playlist = isPlaylistResponse(targetUrl, response.headers) && req.method !== 'HEAD'
+      if (playlist && status === 206) {
+        if (ignoreRange || !headers.range) throw networkError('network_playlist_partial', '上游返回了不完整的播放列表')
+        await closeUpstream(); ignoreRange = true; continue
+      }
+      clearTimeout(deadline)
+      if (playlist) armDeadline((options.playlistTimeoutMs || 30000) - (Date.now() - startedAt))
+      const beforeHeaders = async () => {
+        if (signal.aborted) throw signal.reason
+        if (options.beforeHeaders && !await options.beforeHeaders()) return false
+        return !res.destroyed && !res.writableEnded
+      }
+      const outputHeaders = { 'Content-Type': response.headers['content-type'] || getNetworkContentType(targetUrl),
+        'Accept-Ranges': playlist ? 'none' : response.headers['accept-ranges'] || 'bytes',
+        'Cache-Control': 'no-store', 'X-Content-Type-Options': 'nosniff' }
+      if (response.headers['content-range'] && !playlist) outputHeaders['Content-Range'] = response.headers['content-range']
+      if (req.method === 'HEAD') {
+        if (response.headers['content-length']) outputHeaders['Content-Length'] = response.headers['content-length']
+        if (await beforeHeaders()) { res.writeHead(status, outputHeaders); res.end() }
+        return
+      }
+      if (playlist) {
+        if (Number(response.headers['content-length']) > MAX_PLAYLIST_BYTES) throw networkError('network_playlist_too_large', '播放列表过大')
+        const chunks = []; let received = 0
+        for await (const chunk of response) {
+          received += chunk.length
+          if (received > MAX_PLAYLIST_BYTES) throw networkError('network_playlist_too_large', '播放列表过大')
+          chunks.push(chunk)
+        }
+        const text = await rewriteM3u8Playlist(Buffer.concat(chunks).toString('utf8'), targetUrl, options.networkId, options, signal)
+        const body = Buffer.from(text, 'utf8')
+        if (await beforeHeaders()) {
+          res.writeHead(status, { ...outputHeaders, 'Content-Type': 'application/vnd.apple.mpegurl; charset=utf-8', 'Content-Length': body.length })
+          res.end(body)
+        }
+      } else {
+        if (response.headers['content-length']) outputHeaders['Content-Length'] = response.headers['content-length']
+        if (!await beforeHeaders()) return
+        res.writeHead(status, outputHeaders)
+        await pipeline(response, res, { signal })
+      }
       return
     }
-
-    const headers = {
-      'user-agent': playbackHeaders?.userAgent || DEFAULT_BROWSER_UA,
-      accept: req.headers.accept || '*/*'
-    }
-    if (playbackHeaders?.referer) headers.referer = playbackHeaders.referer
-    if (req.headers.range) headers.range = req.headers.range
-
-    const client = parsed.protocol === 'http:' ? http : https
-    const upstream = client.request(parsed, {
-      method: req.method === 'HEAD' ? 'HEAD' : 'GET',
-      headers,
-      timeout: 15000
-    }, response => {
-      const statusCode = Number(response.statusCode || 0)
-      const location = response.headers.location
-      if ([301, 302, 303, 307, 308].includes(statusCode) && location) {
-        response.resume()
-        if (redirects >= MAX_REDIRECTS) {
-          reject(Object.assign(new Error('网络资源重定向次数过多'), { status: 502, code: 'network_redirect_limit' }))
-          return
-        }
-        const nextUrl = toAbsolutePlaylistUrl(location, targetUrl)
-        if (!isAllowedPlaylistTarget(nextUrl, targetUrl, options)) {
-          reject(Object.assign(new Error('网络资源重定向到不受信任的地址，已停止代理'), {
-            status: 403,
-            code: 'network_redirect_blocked'
-          }))
-          return
-        }
-        pipeNetworkResponse(req, res, nextUrl, playbackHeaders, options, redirects + 1).then(resolve, reject)
-        return
-      }
-
-      if (statusCode < 200 || statusCode >= 300) {
-        response.resume()
-        reject(Object.assign(new Error(`网络资源请求失败：HTTP ${statusCode || '未知'}`), {
-          status: 502,
-          code: 'network_upstream_failed'
-        }))
-        return
-      }
-
-      const headersToSend = {
-        'Content-Type': response.headers['content-type'] || getNetworkContentType(targetUrl),
-        'Accept-Ranges': response.headers['accept-ranges'] || 'bytes',
-        'Cache-Control': 'no-store',
-        'X-Content-Type-Options': 'nosniff'
-      }
-      if (response.headers['content-range']) headersToSend['Content-Range'] = response.headers['content-range']
-
-      if (isPlaylistResponse(targetUrl, response.headers) && req.method !== 'HEAD') {
-        const chunks = []
-        let received = 0
-        response.on('data', chunk => {
-          received += chunk.length
-          if (received > MAX_PLAYLIST_BYTES) {
-            upstream.destroy(new Error('播放列表过大，已停止代理'))
-            return
-          }
-          chunks.push(chunk)
-        })
-        response.on('end', () => {
-          let body
-          try {
-            body = Buffer.from(rewriteM3u8Playlist(
-              Buffer.concat(chunks).toString('utf8'),
-              targetUrl,
-              options.networkId,
-              options
-            ), 'utf8')
-          } catch (err) {
-            reject(err)
-            return
-          }
-          res.writeHead(statusCode, {
-            ...headersToSend,
-            'Content-Type': 'application/vnd.apple.mpegurl; charset=utf-8',
-            'Content-Length': body.length
-          })
-          res.end(body)
-          resolve()
-        })
-        response.on('error', reject)
-        return
-      }
-
-      if (response.headers['content-length']) headersToSend['Content-Length'] = response.headers['content-length']
-      res.writeHead(statusCode, headersToSend)
-      if (req.method === 'HEAD') {
-        response.resume()
-        res.end()
-        resolve()
-        return
-      }
-      response.pipe(res)
-      response.on('end', resolve)
-    })
-
-    upstream.on('timeout', () => upstream.destroy(new Error('网络资源请求超时')))
-    upstream.on('error', reject)
-    req.on('aborted', () => upstream.destroy())
-    upstream.end()
-  })
+  } catch (error) {
+    if (req.aborted || res.destroyed || res.writableEnded) return
+    if (res.headersSent) { res.destroy(); return }
+    throw signal.aborted ? signal.reason : error
+  } finally {
+    clearTimeout(deadline)
+    await closeUpstream()
+    req.off('aborted', disconnect); res.off('close', responseClosed); signal.removeEventListener('abort', abortIO)
+    releasePressure(); untrack()
+  }
 }
 
 function getNetworkContentType(targetUrl) {
@@ -525,7 +543,7 @@ function getNetworkContentType(targetUrl) {
   return 'application/octet-stream'
 }
 
-function createNetworkResourceHandlers({ getRequestToken, allowLegacyToken } = {}) {
+function createNetworkResourceHandlers({ getRequestToken, allowLegacyToken, authorizeNetwork, headerTimeoutMs, playlistTimeoutMs } = {}) {
   async function handleNetworkThumbnail(req, res) {
     sendError(req, res, 404, 'network_thumbnail_not_found', '网络资源暂无缩略图')
   }
@@ -536,15 +554,38 @@ function createNetworkResourceHandlers({ getRequestToken, allowLegacyToken } = {
       sendError(req, res, 404, 'network_resource_not_found', '网络资源不存在')
       return
     }
-    const playback = await resolveNetworkPlayback(item)
-    const accessToken = typeof getRequestToken === 'function' ? getRequestToken(req, requestUrl, false) : ''
-    await withNetworkProxySlot(networkId, () => pipeNetworkResponse(req, res, playback.url, playback.httpHeaders, {
-      networkId,
-      accessToken
-    }))
+    await withNetworkProxySlot(networkId, async () => {
+      const controller = new AbortController(), untrack = trackNetworkStream(req.remoteServer, controller)
+      const abort = () => controller.abort(networkError('network_request_cancelled', '网络播放准备已取消', 499))
+      const closed = () => { if (!res.writableFinished) abort() }
+      req.once('aborted', abort); res.once('close', closed)
+      let playback
+      try {
+        if (req.aborted || res.destroyed) abort()
+        playback = await resolveNetworkPlayback(item, { signal: controller.signal })
+        if (controller.signal.aborted) throw controller.signal.reason
+      } catch (error) {
+        if (controller.signal.aborted) { if (!res.destroyed) res.destroy(); return }
+        throw error
+      } finally { untrack(); req.off('aborted', abort); res.off('close', closed) }
+      if (req.aborted || res.destroyed) return
+      if (authorizeNetwork && !await authorizeNetwork(req, res, requestUrl)) return
+      const current = getRemoteNetworkItemById(networkId)
+      if (!current || current.url !== item.url) throw networkError('network_resource_not_found', '网络资源已移除或改变', 404)
+      const accessToken = typeof getRequestToken === 'function' ? getRequestToken(req, requestUrl, false) : ''
+      await pipeNetworkResponse(req, res, playback.url, playback.httpHeaders, {
+      networkId, accessToken, headerTimeoutMs, playlistTimeoutMs,
+      beforeHeaders: () => {
+        if (getRemoteNetworkItemById(networkId)?.url !== item.url) throw Object.assign(new Error('网络资源已移除或改变'), { status: 404, code: 'network_resource_not_found' })
+        return !authorizeNetwork || authorizeNetwork(req, res, requestUrl)
+      }
+      })
+    })
   }
 
   async function handleNetworkProxy(req, res, networkId, requestUrl) {
+    await refreshIdentity()
+    if (req.aborted || res.destroyed || res.writableEnded) return
     const item = getRemoteNetworkItemById(networkId)
     if (!item) {
       sendError(req, res, 404, 'network_resource_not_found', '网络资源不存在')
@@ -564,7 +605,16 @@ function createNetworkResourceHandlers({ getRequestToken, allowLegacyToken } = {
     await withNetworkProxySlot(networkId, () => pipeNetworkResponse(req, res, targetUrl, item.httpHeaders, {
       networkId,
       networkToken,
-      networkTokenFactory
+      networkTokenFactory, headerTimeoutMs, playlistTimeoutMs,
+      beforeHeaders: async () => {
+        await refreshIdentity()
+        if (!getRemoteNetworkItemById(networkId)) throw Object.assign(new Error('网络资源已移除'), { status: 404, code: 'network_resource_not_found' })
+        if (!verifyBoundScopedToken('network-proxy', networkId + '\n' + targetUrl, networkToken,
+          { allowLegacyToken: typeof allowLegacyToken === 'function' ? allowLegacyToken() : false })) {
+          throw Object.assign(new Error('网络播放授权已失效'), { status: 401, code: 'unauthorized' })
+        }
+        return true
+      }
     }))
   }
 
@@ -576,6 +626,7 @@ function createNetworkResourceHandlers({ getRequestToken, allowLegacyToken } = {
 }
 
 module.exports = {
+  getNetworkProxyDiagnostics: () => ({ active: activeNetworkProxyRequests.total, resources: activeNetworkProxyRequests.byNetworkId.size }),
   isAllowedPlaylistTarget,
   NETWORK_DIRECTORY_ID,
   NETWORK_DIRECTORY_NAME,

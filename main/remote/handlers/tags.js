@@ -1,136 +1,87 @@
-const { getPlaybackState, loadSettings, saveSettingsAndFlush, upsertPlaybackState, verifyPrivacyPassword } = require('../../settings')
-const { assertAllowedVideoPath } = require('../../scanner')
+const { readPlaybackState, loadSettings, updateSettingsAndFlush, verifyPrivacyPassword } = require('../../settings')
+const { createPrivacyAttemptQueue } = require('../../security/privacy-password')
+const { withRequestSignal } = require('../request-lifecycle')
 const { createFailureLimiter } = require('../../rate-limiter')
-const { pathKey, normalizedPathKey } = require('../../paths')
-const { getFavoriteKeyForVideoId, getPathForVideoId } = require('../video-index')
 const { readBody, sendError, sendJson } = require('../http-utils')
-const { getLegacyNetworkFavoriteKey, getNetworkFavoriteKey, getRemoteNetworkItemById } = require('./network-resources')
+const { getRemoteNetworkItemById } = require('./network-resources')
+const { collectLegacyTagEntries, normalizeRequestTags } = require('../../application/media-mutations')
+const { createRemoteMediaMutationService } = require('../media-mutations')
 
 // 远程隐私密码尝试频率限制（与桌面端 IPC 共用同一套规则：5 次失败后锁定 30 秒）
 const remotePrivacyLimiter = createFailureLimiter({ limit: 5, lockMs: 30 * 1000 })
-
-// 旧版本以原始路径字符串作为 customTags 键，而当前解析走 realpath 规范化，
-// Windows 上大小写、subst 映射盘、junction 差异都会导致键不匹配。
-// 先按 pathKey 快路径匹配，未命中时按 realpath 归一化慢路径匹配，
-// 保证遗留 path-key 标签在迁移/展示时不丢失。
-function collectLegacyTagEntries(customTags, target) {
-  const candidates = [target.path, target.rawPath].filter(Boolean)
-  const fastKeys = new Set(candidates.map(pathKey))
-  const realKeys = new Set(candidates.map(normalizedPathKey))
-  const entries = []
-  for (const [key, tags] of Object.entries(customTags)) {
-    if (fastKeys.has(pathKey(key)) || realKeys.has(normalizedPathKey(key))) {
-      entries.push([key, tags])
-    }
-  }
-  return entries
-}
+const passwordAttempts = createPrivacyAttemptQueue()
 
 function getClientIp(req) {
   return String(req?.socket?.remoteAddress || 'unknown')
 }
 
-function normalizeRequestTags(tags) {
-  return Array.isArray(tags)
-    ? [...new Set(tags.filter(tag => typeof tag === 'string' && tag.trim()).map(tag => tag.trim()))]
-    : []
+function playbackActor(req) {
+  const auth = req.remoteAuthorization
+  return auth?.type === 'paired' ? `paired:${auth.deviceId}` : 'legacy'
+}
+
+function publicPlayback(req, state) {
+  if (!state) return null
+  const cursor = state.writers?.[playbackActor(req)]
+  return { position: state.position, updatedAt: state.updatedAt, revision: state.revision || 0,
+    ...(cursor ? { writer: { session: cursor.session, sequence: cursor.sequence } } : {}) }
 }
 
 function createTagsHandlers({ resolveVideoPath }) {
-  async function resolveFavoriteTarget(videoId) {
-    const networkItem = getRemoteNetworkItemById(videoId)
-    if (networkItem) {
-      return {
-        favoriteKey: getNetworkFavoriteKey(networkItem),
-        legacyFavoriteKey: getLegacyNetworkFavoriteKey(networkItem),
-        path: networkItem.url
-      }
-    }
-
-    const videoPath = await resolveVideoPath(videoId)
-    const favoriteKey = getFavoriteKeyForVideoId(videoId)
-    if (!favoriteKey) return null
-    await assertAllowedVideoPath(videoPath)
-    return {
-      favoriteKey,
-      legacyFavoriteKey: '',
-      path: videoPath,
-      rawPath: getPathForVideoId(videoId)
-    }
-  }
+  const mutations = createRemoteMediaMutationService({ resolveVideoPath })
 
   async function handleGetPlayback(req, res, videoId) {
     const networkItem = getRemoteNetworkItemById(videoId)
     const videoPath = networkItem ? networkItem.url : await resolveVideoPath(videoId)
-    const settings = loadSettings()
-    sendJson(req, res, 200, getPlaybackState(settings.playbackStates, videoPath) || null)
+    return sendJson(req, res, 200, publicPlayback(req, readPlaybackState(videoPath)))
   }
 
   async function handlePutPlayback(req, res, videoId) {
-    const networkItem = getRemoteNetworkItemById(videoId)
-    const videoPath = networkItem ? networkItem.url : await resolveVideoPath(videoId)
+    if (!getRemoteNetworkItemById(videoId)) await resolveVideoPath(videoId)
     const body = await readBody(req)
-    const settings = loadSettings()
-    const playbackStates = upsertPlaybackState(settings.playbackStates, videoPath, {
-      position: Number(body.position) || 0,
-      updatedAt: Date.now()
-    })
-    await saveSettingsAndFlush({ playbackStates })
-    sendJson(req, res, 200, { success: true })
+    if (!Number.isFinite(body?.position) || body.position < 0) {
+      sendError(req, res, 400, 'invalid_playback_position', '播放位置必须是非负数')
+      return
+    }
+    const versioned = ['baseRevision', 'session', 'sequence'].some(key => Object.hasOwn(body, key))
+    if (versioned && (!Number.isSafeInteger(body.baseRevision) || body.baseRevision < 0 ||
+      !Number.isSafeInteger(body.session) || body.session <= 0 || !Number.isSafeInteger(body.sequence) || body.sequence <= 0)) {
+      sendError(req, res, 400, 'invalid_playback_revision', '播放进度版本无效')
+      return
+    }
+    const result = await mutations.savePlayback(videoId, {
+      position: body.position
+    }, versioned ? { actor: playbackActor(req), baseRevision: body.baseRevision, session: body.session, sequence: body.sequence } : undefined)
+    return sendJson(req, res, 200, { success: true, playback: publicPlayback(req, result.value.playback) })
   }
 
   async function handleToggleFavorite(req, res, videoId) {
-    const target = await resolveFavoriteTarget(videoId)
-    if (!target) {
-      sendError(req, res, 404, 'video_not_found', '视频不存在或索引尚未加载')
-      return
-    }
-
-    const settings = loadSettings()
-    const favorites = Array.isArray(settings.favorites) ? settings.favorites : []
-    const favorite = !favorites.includes(target.favoriteKey) &&
-      !favorites.includes(target.legacyFavoriteKey) &&
-      !favorites.includes(target.path)
-    const nextFavorites = favorite
-      ? [...favorites, target.favoriteKey]
-      : favorites.filter(item => (
-        item !== target.favoriteKey &&
-        item !== target.legacyFavoriteKey &&
-        item !== target.path
-      ))
-    await saveSettingsAndFlush({ favorites: nextFavorites })
-    sendJson(req, res, 200, { success: true, favorite })
+    const body = await readBody(req)
+    const desired = body && Object.hasOwn(body, 'favorite') ? body.favorite : undefined
+    const result = await mutations.setFavorite(videoId, desired)
+    return sendJson(req, res, 200, { success: true, favorite: result.value.favorite })
   }
 
   async function handlePutTags(req, res, videoId) {
-    const target = await resolveFavoriteTarget(videoId)
-    if (!target) {
-      sendError(req, res, 404, 'video_not_found', '视频不存在或索引尚未加载')
-      return
-    }
-
     const body = await readBody(req)
-    const tags = normalizeRequestTags(body.tags)
-    const settings = loadSettings()
-    const customTags = { ...(settings.customTags || {}) }
-    if (target.legacyFavoriteKey) delete customTags[target.legacyFavoriteKey]
-    for (const [key] of collectLegacyTagEntries(customTags, target)) delete customTags[key]
-    if (tags.length > 0) {
-      customTags[target.favoriteKey] = tags
-    } else {
-      delete customTags[target.favoriteKey]
-    }
-    await saveSettingsAndFlush({ customTags })
-    sendJson(req, res, 200, { success: true, customTags: tags })
+    const condition = body.expectedRevision === undefined ? undefined : { expectedRevision: body.expectedRevision, operationId: body.operationId }
+    const service = createRemoteMediaMutationService({ resolveVideoPath, actor: playbackActor(req) })
+    const result = await service.setVideoTags(videoId, body?.tags, condition)
+    const { customTags, customTagsRevision, operationRevision, replayed } = result.value
+    return sendJson(req, res, 200, { success: true, customTags, customTagsRevision, operationRevision, replayed })
+  }
+
+  async function handleGetTags(req, res, videoId) {
+    const result = await mutations.getVideoTags(videoId)
+    return sendJson(req, res, 200, { customTags: result.value.customTags, customTagsRevision: result.value.customTagsRevision })
   }
 
   async function handlePutBulkTags(req, res) {
     const body = await readBody(req)
-    const videoIds = Array.isArray(body.videoIds)
+    const videoIds = Array.isArray(body?.videoIds)
       ? [...new Set(body.videoIds.filter(id => typeof id === 'string' && id.trim()).map(id => id.trim()))]
       : []
-    const tags = normalizeRequestTags(body.tags)
-
+    const tags = normalizeRequestTags(body?.tags)
     if (!videoIds.length) {
       sendError(req, res, 400, 'missing_video_ids', '请选择要添加标签的视频')
       return
@@ -139,60 +90,56 @@ function createTagsHandlers({ resolveVideoPath }) {
       sendError(req, res, 400, 'missing_tags', '请输入要添加的标签')
       return
     }
-
-    const settings = loadSettings()
-    const customTags = { ...(settings.customTags || {}) }
-    let updatedCount = 0
-
-    for (const videoId of videoIds) {
-      const target = await resolveFavoriteTarget(videoId)
-      if (!target) continue
-      const legacyEntries = collectLegacyTagEntries(customTags, target)
-      const currentTags = [
-        ...(Array.isArray(customTags[target.favoriteKey]) ? customTags[target.favoriteKey] : []),
-        ...(target.legacyFavoriteKey && Array.isArray(customTags[target.legacyFavoriteKey]) ? customTags[target.legacyFavoriteKey] : []),
-        ...legacyEntries.flatMap(([, tags]) => (Array.isArray(tags) ? tags : []))
-      ]
-      customTags[target.favoriteKey] = [...new Set([...currentTags, ...tags])]
-      if (target.legacyFavoriteKey) delete customTags[target.legacyFavoriteKey]
-      for (const [key] of legacyEntries) delete customTags[key]
-      updatedCount += 1
-    }
-
-    await saveSettingsAndFlush({ customTags })
-    sendJson(req, res, 200, { success: true, updatedCount, tags })
+    const result = await mutations.appendTagsBulk(videoIds, tags)
+    return sendJson(req, res, 200, {
+      success: true, updatedCount: result.value.updatedCount, tags,
+      updated: result.value.updated.map(({ id, index, customTags, customTagsRevision }) => ({ id, index, customTags, customTagsRevision })),
+      failed: result.value.failed
+    })
   }
 
   // 还原所有隐藏标签：需验证隐私密码，通过后清空 hiddenTags
   async function handleRestoreHiddenTags(req, res) {
-    const clientIp = getClientIp(req)
-    const waitMs = remotePrivacyLimiter.getWaitMs(clientIp)
-    if (waitMs > 0) {
-      sendError(req, res, 429, 'too_many_attempts', `密码错误次数过多，请 ${Math.ceil(waitMs / 1000)} 秒后再试`)
-      return
-    }
+    return withRequestSignal(req, res, async signal => {
+      const body = await readBody(req)
+      const clientIp = getClientIp(req)
+      return passwordAttempts(clientIp, async () => {
+        const check = () => signal.throwIfAborted()
+        check()
+        const waitMs = remotePrivacyLimiter.getWaitMs(clientIp)
+        if (waitMs > 0) {
+          sendError(req, res, 429, 'too_many_attempts', `密码错误次数过多，请 ${Math.ceil(waitMs / 1000)} 秒后再试`)
+          return
+        }
 
-    const body = await readBody(req)
-    const password = typeof body?.password === 'string' ? body.password : ''
-    const settings = loadSettings()
+        const password = typeof body?.password === 'string' ? body.password : ''
+        const settings = loadSettings()
 
-    if (!settings.privacy?.passwordSet) {
-      sendError(req, res, 400, 'privacy_not_set', '尚未设置隐私密码，请在电脑端设置后再使用此功能')
-      return
-    }
-    if (!verifyPrivacyPassword(password, settings.privacy)) {
-      const lockedMs = remotePrivacyLimiter.recordFailure(clientIp)
-      if (lockedMs > 0) {
-        sendError(req, res, 429, 'too_many_attempts', `密码错误次数过多，请 ${Math.ceil(lockedMs / 1000)} 秒后再试`)
-        return
-      }
-      sendError(req, res, 403, 'invalid_password', '隐私密码不正确')
-      return
-    }
-    remotePrivacyLimiter.reset(clientIp)
+        if (!settings.privacy?.passwordSet) {
+          sendError(req, res, 400, 'privacy_not_set', '尚未设置隐私密码，请在电脑端设置后再使用此功能')
+          return
+        }
+        const correct = await verifyPrivacyPassword(password, settings.privacy, check)
+        check()
+        if (!correct) {
+          const lockedMs = remotePrivacyLimiter.recordFailure(clientIp)
+          if (lockedMs > 0) {
+            sendError(req, res, 429, 'too_many_attempts', `密码错误次数过多，请 ${Math.ceil(lockedMs / 1000)} 秒后再试`)
+            return
+          }
+          sendError(req, res, 403, 'invalid_password', '隐私密码不正确')
+          return
+        }
+        remotePrivacyLimiter.reset(clientIp)
 
-    await saveSettingsAndFlush({ hiddenTags: [] })
-    sendJson(req, res, 200, { success: true })
+        await updateSettingsAndFlush(current => {
+          check()
+          if (current.privacy?.salt !== settings.privacy.salt || current.privacy?.passwordHash !== settings.privacy.passwordHash) throw Object.assign(new Error('隐私密码已变化，请重新验证'), { status: 409, code: 'privacy_changed' })
+          return { patch: { hiddenTags: [] } }
+        })
+        return sendJson(req, res, 200, { success: true })
+      })
+    })
   }
 
   return {
@@ -200,6 +147,7 @@ function createTagsHandlers({ resolveVideoPath }) {
     handlePutPlayback,
     handleToggleFavorite,
     handlePutTags,
+    handleGetTags,
     handlePutBulkTags,
     handleRestoreHiddenTags
   }

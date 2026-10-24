@@ -22,6 +22,7 @@
 
 .settings-overlay {
   z-index: 1300;
+  background: rgba(3, 5, 10, 0.72);
 }
 
 .tag-editor-overlay {
@@ -569,8 +570,8 @@
 
 .player-analysis-tags span {
   color: white;
-  border-color: rgba(34, 211, 238, 0.32);
-  background: rgba(34, 211, 238, 0.18);
+  border-color: rgba(45, 212, 234, 0.32);
+  background: rgba(45, 212, 234, 0.18);
 }
 
 .player-analysis-tag-bind {
@@ -596,9 +597,9 @@
 .player-analysis-tag-bind-head button {
   min-height: 26px;
   padding: 0 10px;
-  border: 1px solid rgba(34, 211, 238, 0.4);
+  border: 1px solid rgba(45, 212, 234, 0.4);
   border-radius: var(--radius-sm);
-  background: rgba(34, 211, 238, 0.2);
+  background: rgba(45, 212, 234, 0.2);
   color: white;
   font-size: 11px;
   font-weight: 800;
@@ -630,8 +631,8 @@
 }
 
 .player-analysis-tag-options button.active {
-  border-color: rgba(34, 211, 238, 0.46);
-  background: rgba(34, 211, 238, 0.24);
+  border-color: rgba(45, 212, 234, 0.46);
+  background: rgba(45, 212, 234, 0.24);
   color: white;
 }
 
@@ -662,8 +663,8 @@
 
 .player-analysis-timeline button:hover,
 .player-analysis-timeline button.active {
-  border-color: rgba(34, 211, 238, 0.48);
-  background: rgba(34, 211, 238, 0.18);
+  border-color: rgba(45, 212, 234, 0.48);
+  background: rgba(45, 212, 234, 0.18);
   color: white;
 }
 
@@ -701,8 +702,8 @@
 
 .player-analysis-toggle.active {
   color: white;
-  border-color: rgba(34, 211, 238, 0.54);
-  background: rgba(34, 211, 238, 0.28);
+  border-color: rgba(45, 212, 234, 0.54);
+  background: rgba(45, 212, 234, 0.28);
 }
 
 .player-analysis-spinner {
@@ -1356,9 +1357,7 @@
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  background: linear-gradient(180deg, rgba(34, 211, 238, 0.05), transparent 120px), var(--glass-bg);
-  backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
-  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+  background: linear-gradient(180deg, rgba(45, 212, 234, 0.05), transparent 120px), var(--bg-surface);
   border: 1px solid var(--glass-border-strong);
   border-radius: var(--radius-xl);
   box-shadow: inset 0 1px 0 var(--glass-highlight), var(--shadow-lg);
@@ -1441,14 +1440,14 @@
 
 .settings-nav-item:hover,
 .settings-nav-item.active {
-  border-color: rgba(34, 211, 238, 0.32);
+  border-color: rgba(45, 212, 234, 0.32);
   background: var(--accent-soft);
   color: var(--text-primary);
   box-shadow: inset 0 1px 0 var(--glass-highlight);
 }
 
 .settings-nav-item.active {
-  border-color: rgba(34, 211, 238, 0.45);
+  border-color: rgba(45, 212, 234, 0.45);
   background: var(--accent-soft);
   box-shadow: inset 0 1px 0 var(--glass-highlight), 0 0 16px var(--accent-glow);
 }
@@ -1652,7 +1651,7 @@
 .player-playlist-item.active .player-playlist-index {
   background: var(--accent-grad);
   border-color: transparent;
-  color: #04121a;
+  color: var(--accent-contrast);
   font-weight: 700;
   box-shadow: 0 0 12px var(--accent-glow);
 }
@@ -1696,7 +1695,7 @@
   padding: 0 8px;
   border-radius: var(--radius-pill);
   background: var(--accent-soft);
-  border: 1px solid rgba(34, 211, 238, 0.32);
+  border: 1px solid rgba(45, 212, 234, 0.32);
   color: var(--accent);
   font-size: 10px;
   font-weight: 700;

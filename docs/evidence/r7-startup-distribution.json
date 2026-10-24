@@ -1,0 +1,1447 @@
+{
+  "date": "2026-10-23T16:28:46.868Z",
+  "localDate": "2026-10-24",
+  "status": "Async settings and declared plugin startup integrated into a fresh local production-identity Windows distribution; full R7/R8 goal remains active",
+  "build": {
+    "directory": "E:\\wallpaper播放器\\release\\windows-1.5.1-58137ba9-9694-4cf2-bec4-221bffb20392",
+    "version": "1.5.1",
+    "sourceChanges": [
+      "main/application/settings-json-worker.js",
+      "main/application/settings-json.js",
+      "main/application/settings-startup.js",
+      "main/index.js",
+      "main/path-identity.js",
+      "main/paths.js",
+      "main/plugins/capabilities.js",
+      "main/plugins/core-api.js",
+      "main/plugins/index.js",
+      "main/plugins/registry.js",
+      "main/repositories/settings-file.js",
+      "main/repositories/settings-normalize.js",
+      "main/repositories/tag-normalizers.js",
+      "main/repositories/tag-state.js",
+      "main/settings.js"
+    ],
+    "archive": {
+      "file": "E:\\wallpaper播放器\\release\\windows-1.5.1-58137ba9-9694-4cf2-bec4-221bffb20392\\win-unpacked\\resources\\app.asar",
+      "bytes": 16543407,
+      "sha256": "678ad7cdb2193e4eca3f4b8948a71097aa602d8438efb7cc0b76370ec787bbe5",
+      "sha512": "Meprq6xDq5N2q3Zv+qxTVVwjXGOHmXQN1Sdd1hiPT2Oqhc3YLq2kbCulyoPl9qS2l412HdUvVQjDlVK/2u7ecQ=="
+    },
+    "embeddedFiles": 115,
+    "vendorFiles": 24,
+    "assets": [
+      {
+        "file": "Wallpaper-Player-Setup-1.5.1.exe",
+        "role": "installer",
+        "bytes": 232525174,
+        "sha256": "50453d94a6aaf499c9c65810159f4d2e16c6259c9ed8d3f9debcda1e82418a4b",
+        "sha512": "yeqVTyKYs5L5kzBbKgkMrINW2nZ2bhRrbnU0U972SVre4GIKKO4NOvZwqvETwgHHViGtpOogROXKWgICS8yVag==",
+        "bootstrapArch": "ia32",
+        "productVersion": "1.5.1",
+        "signing": {
+          "status": "NotSigned",
+          "certificateSha256": null
+        }
+      },
+      {
+        "file": "Wallpaper-Player-1.5.1.exe",
+        "role": "portable",
+        "bytes": 232080673,
+        "sha256": "c90923075641efe2df2078a8b0129d980564ef720492c03f939f7a56699e5b39",
+        "sha512": "OHIWc7ihrBfMwRFcyDTGGxGvJJRrANvj0w05CcIIpx9u9wi5QfdyzRIc+nl0/yqNPoHsdx1SqHR86QLEkwDbHA==",
+        "bootstrapArch": "ia32",
+        "productVersion": "1.5.1",
+        "signing": {
+          "status": "NotSigned",
+          "certificateSha256": null
+        }
+      },
+      {
+        "file": "Wallpaper-Player-Setup-1.5.1.exe.blockmap",
+        "role": "blockmap",
+        "bytes": 242921,
+        "sha256": "54d182d94c0a24a0b982545ef1f16165a9c98ed34f39446e9e025cba9edcb9e4",
+        "sha512": "kU5JBj5U0iCxjoGn8w+2+YWU6R5656ozfTmK5LaxmAmzN2Te/iBwDZNJ/LVt2p2hqcrfI7RyHZP/lGaEVJ+84w=="
+      },
+      {
+        "file": "latest.yml",
+        "role": "desktop-update-metadata",
+        "bytes": 361,
+        "sha256": "986214c40faf896ece1c1878f7c2039b6fd0e53a2bdcd1d33e47b2ec6886d64a",
+        "sha512": "m1gN5zUVvhvOEwl7GLU+AiuVot0LkvCzG7ogvKyb5tEw6MnYFX/HHJmabXUD/rbdzYLz36yr3RiG8gMlu1k+aQ=="
+      },
+      {
+        "file": "Wallpaper-Player-Plugin-video-analysis-1.0.0.zip",
+        "source": "plugins/Wallpaper-Player-Plugin-video-analysis-1.0.0.zip",
+        "role": "plugin",
+        "pluginId": "video-analysis",
+        "version": "1.0.0",
+        "bytes": 570218532,
+        "sha256": "365c2f5ccbec6afe7df5ce4b5c5df1699728cac113884abd48898d8209a5502a",
+        "sha512": "5W7hIMUaK+frnE+0/87KhyfC6BKbFTT2R3GgW+TCtG7Z037HNRooT/RVGrJTOMq5eDFEBHKhlSiVZQ9vMI838w=="
+      },
+      {
+        "file": "Wallpaper-Player-Plugin-ai-search-0.1.0.zip",
+        "source": "plugins/Wallpaper-Player-Plugin-ai-search-0.1.0.zip",
+        "role": "plugin",
+        "pluginId": "ai-search",
+        "version": "0.1.0",
+        "bytes": 2955069,
+        "sha256": "464e129ebb9a4731fff800c26c6e4c94ddbe33fbd1699486c166d9e112a97fc8",
+        "sha512": "rKd4RQyHFHEIADm+H3KQddNRMuu2UbSuiK4OK+hkfrp3JV36mLcSdLA0UNlAPW+7L5X1xi5kiTVNPmq1lDzOKw=="
+      },
+      {
+        "file": "Wallpaper-Player-Plugin-agent-bridge-0.1.0.zip",
+        "source": "plugins/Wallpaper-Player-Plugin-agent-bridge-0.1.0.zip",
+        "role": "plugin",
+        "pluginId": "agent-bridge",
+        "version": "0.1.0",
+        "bytes": 1093,
+        "sha256": "9f499408c282a144ffe411648d476fd4e36bd010c6e8974be3b9fd16460bed1a",
+        "sha512": "W5qWvlCSHQT8RlE31UF1e06dN3162tSZVhs7nqyFBhFLJdcN7Z8rE2WDw6ZMjQIygO89K/Xbuev/TJY+ImfSqg=="
+      }
+    ],
+    "qaWrapperAbsent": true,
+    "runtime": "Pinned local Electron44.9.0 selected through builder CLI override; default cold runtime download remains outside this check",
+    "frontendBuild": "npm run build passed: shared contracts/domain and Vite production output; existing npm mirror and Vite native-loader compatibility warnings retained",
+    "sourceFilesStillUnchangedAfterRuntime": 170,
+    "sourceCommit": null,
+    "signed": false,
+    "published": false
+  },
+  "native": {
+    "setup": {
+      "id": "9520f08e",
+      "root": "E:\\wallpaper播放器",
+      "base": "E:/wpstartqa-9520f08e",
+      "data": "E:\\wpstartqa-9520f08e\\Data",
+      "mediaDirectory": "E:\\wpstartqa-9520f08e\\media",
+      "media": [
+        {
+          "file": "E:\\wpstartqa-9520f08e\\media\\00000-landscape.mp4",
+          "width": 1920,
+          "height": 1080,
+          "audio": "AAC stereo silence",
+          "video": "H26430fps",
+          "sha256": "286fde20e163ec77b49fc8dcf80a72f11220d20757d1ddccef015bb7d700d5ee",
+          "source": "E:\\wpres10k-3ce30520\\media\\00000-landscape.mp4"
+        },
+        {
+          "file": "E:\\wpstartqa-9520f08e\\media\\00001-portrait.mp4",
+          "width": 720,
+          "height": 1280,
+          "audio": "AAC stereo silence",
+          "video": "H26430fps",
+          "sha256": "d286b52cbfb235526f85c803f821b20c3e615e6bace8653f7891f6e031f0c38f",
+          "source": "E:\\wpres10k-3ce30520\\media\\00001-portrait.mp4"
+        }
+      ],
+      "executable": "E:\\wpstartqa-9520f08e\\Wallpaper-Player.exe",
+      "artifact": {
+        "file": "E:\\wallpaper播放器\\release\\windows-1.5.1-58137ba9-9694-4cf2-bec4-221bffb20392\\Wallpaper-Player-1.5.1.exe",
+        "role": "portable",
+        "bytes": 232080673,
+        "sha256": "c90923075641efe2df2078a8b0129d980564ef720492c03f939f7a56699e5b39",
+        "sha512": "OHIWc7ihrBfMwRFcyDTGGxGvJJRrANvj0w05CcIIpx9u9wi5QfdyzRIc+nl0/yqNPoHsdx1SqHR86QLEkwDbHA==",
+        "bootstrapArch": "ia32",
+        "productVersion": "1.5.1",
+        "signing": {
+          "status": "NotSigned",
+          "certificateSha256": null
+        }
+      },
+      "archive": {
+        "file": "E:\\wallpaper播放器\\release\\windows-1.5.1-58137ba9-9694-4cf2-bec4-221bffb20392\\win-unpacked\\resources\\app.asar",
+        "bytes": 16543407,
+        "sha256": "678ad7cdb2193e4eca3f4b8948a71097aa602d8438efb7cc0b76370ec787bbe5",
+        "sha512": "Meprq6xDq5N2q3Zv+qxTVVwjXGOHmXQN1Sdd1hiPT2Oqhc3YLq2kbCulyoPl9qS2l412HdUvVQjDlVK/2u7ecQ=="
+      },
+      "build": "E:\\wallpaper播放器\\release\\windows-1.5.1-58137ba9-9694-4cf2-bec4-221bffb20392",
+      "plugins": [
+        {
+          "file": "E:\\wallpaper播放器\\release\\windows-1.5.1-58137ba9-9694-4cf2-bec4-221bffb20392\\plugins\\Wallpaper-Player-Plugin-video-analysis-1.0.0.zip",
+          "source": "plugins/Wallpaper-Player-Plugin-video-analysis-1.0.0.zip",
+          "role": "plugin",
+          "pluginId": "video-analysis",
+          "version": "1.0.0",
+          "bytes": 570218532,
+          "sha256": "365c2f5ccbec6afe7df5ce4b5c5df1699728cac113884abd48898d8209a5502a",
+          "sha512": "5W7hIMUaK+frnE+0/87KhyfC6BKbFTT2R3GgW+TCtG7Z037HNRooT/RVGrJTOMq5eDFEBHKhlSiVZQ9vMI838w=="
+        },
+        {
+          "file": "E:\\wallpaper播放器\\release\\windows-1.5.1-58137ba9-9694-4cf2-bec4-221bffb20392\\plugins\\Wallpaper-Player-Plugin-ai-search-0.1.0.zip",
+          "source": "plugins/Wallpaper-Player-Plugin-ai-search-0.1.0.zip",
+          "role": "plugin",
+          "pluginId": "ai-search",
+          "version": "0.1.0",
+          "bytes": 2955069,
+          "sha256": "464e129ebb9a4731fff800c26c6e4c94ddbe33fbd1699486c166d9e112a97fc8",
+          "sha512": "rKd4RQyHFHEIADm+H3KQddNRMuu2UbSuiK4OK+hkfrp3JV36mLcSdLA0UNlAPW+7L5X1xi5kiTVNPmq1lDzOKw=="
+        },
+        {
+          "file": "E:\\wallpaper播放器\\release\\windows-1.5.1-58137ba9-9694-4cf2-bec4-221bffb20392\\plugins\\Wallpaper-Player-Plugin-agent-bridge-0.1.0.zip",
+          "source": "plugins/Wallpaper-Player-Plugin-agent-bridge-0.1.0.zip",
+          "role": "plugin",
+          "pluginId": "agent-bridge",
+          "version": "0.1.0",
+          "bytes": 1093,
+          "sha256": "9f499408c282a144ffe411648d476fd4e36bd010c6e8974be3b9fd16460bed1a",
+          "sha512": "W5qWvlCSHQT8RlE31UF1e06dN3162tSZVhs7nqyFBhFLJdcN7Z8rE2WDw6ZMjQIygO89K/Xbuev/TJY+ImfSqg=="
+        }
+      ],
+      "method": "New owned portable copy and Data, two copied synthetic H264/AAC media contents and 10000 generated tag keys; production app sources/ASAR unchanged, normal stacking, never always-on-top"
+    },
+    "prepared": {
+      "passed": true,
+      "profile": "E:\\wpstartqa-9520f08e\\Data",
+      "build": "E:\\wallpaper播放器\\release\\windows-1.5.1-58137ba9-9694-4cf2-bec4-221bffb20392",
+      "installed": [
+        {
+          "id": "video-analysis",
+          "publisher": "official",
+          "configurable": true
+        },
+        {
+          "id": "ai-search",
+          "publisher": "official",
+          "configurable": true
+        },
+        {
+          "id": "agent-bridge",
+          "publisher": "official",
+          "configurable": true
+        }
+      ],
+      "enabled": [
+        "video-analysis"
+      ],
+      "legacySeed": {
+        "bytes": 249545,
+        "sha256": "9d75c3418a1619a345768d3b21ae2d96bccc7d7cd20b0144eb92b83f2ce426a7",
+        "tags": 10000,
+        "bom": true,
+        "schemaVersion": 0
+      },
+      "windowsCreated": 0
+    },
+    "runs": [
+      {
+        "index": 1,
+        "browserPort": 59634,
+        "nodePort": 59635,
+        "resumingAfterComparatorCorrection": true,
+        "startedAt": "2026-10-23T16:22:42.205Z",
+        "cases": [
+          "real portable restart preserves the original legacy migration audit, 10000 tags, unknown data and renderer credential redaction",
+          "selected project SVG and replay return to the same workbench without overflow or remount",
+          "real UI pause/seek reaches distinct decoded native target frame",
+          "real native host remains inside picture and outside header/toolbar at normal and narrow/150% layouts; all windows never always-on-top",
+          "actual native player process closes before application exit"
+        ],
+        "passed": true,
+        "identity": {
+          "pid": 40604,
+          "profile": "E:\\wpstartqa-9520f08e\\Data",
+          "archive": "C:\\Users\\s1897\\AppData\\Local\\Temp\\3L6QGKsCOcRDGNuduUu5zPpfM7O\\resources\\app.asar",
+          "version": "1.5.1"
+        },
+        "window": {
+          "bounds": {
+            "x": 10,
+            "y": 10,
+            "width": 1100,
+            "height": 760
+          },
+          "alwaysOnTop": false,
+          "zoom": 1
+        },
+        "publicSettings": {
+          "tags": 10000,
+          "schemaVersion": 1,
+          "theme": "dark",
+          "privacyRedacted": true
+        },
+        "plugins": [
+          {
+            "id": "agent-bridge",
+            "status": "planned",
+            "enabled": false
+          },
+          {
+            "id": "ai-search",
+            "status": "disabled",
+            "enabled": false
+          },
+          {
+            "id": "video-analysis",
+            "status": "active",
+            "enabled": true
+          }
+        ],
+        "migration": {
+          "schemaVersion": 1,
+          "from": 0,
+          "to": 1,
+          "sourceSha256": "9d75c3418a1619a345768d3b21ae2d96bccc7d7cd20b0144eb92b83f2ce426a7",
+          "targetSha256": "30d1904cd09c074b7702993cae88d17858713661b3adee54bd09bec80ade1193",
+          "committedAt": "2026-10-23T16:18:56.131Z",
+          "backup": "settings.v1.backup.json"
+        },
+        "splash": {
+          "count": 1,
+          "image": 1024,
+          "width": 1100,
+          "scroll": 1100
+        },
+        "initialPlayback": {
+          "filePath": "E:\\wpstartqa-9520f08e\\media\\00000-landscape.mp4",
+          "timePos": 11,
+          "duration": 20,
+          "paused": false,
+          "buffering": false,
+          "volume": 0,
+          "muted": true,
+          "speed": 1,
+          "audioId": 1,
+          "subtitleId": 0,
+          "subtitleVisible": true,
+          "subtitleScale": 1,
+          "loopFile": "false",
+          "abLoopA": null,
+          "abLoopB": null,
+          "playlistPos": 1,
+          "playlistCount": 1,
+          "eofReached": false,
+          "trackList": [
+            {
+              "id": 1,
+              "type": "video",
+              "src-id": 1,
+              "image": false,
+              "albumart": false,
+              "default": true,
+              "forced": false,
+              "dependent": false,
+              "visual-impaired": false,
+              "hearing-impaired": false,
+              "external": false,
+              "selected": true,
+              "main-selection": 0,
+              "ff-index": 0,
+              "decoder": "h264",
+              "decoder-desc": "H.264 / AVC / MPEG-4 AVC / MPEG-4 part 10",
+              "codec": "h264",
+              "codec-desc": "H.264 / AVC / MPEG-4 AVC / MPEG-4 part 10",
+              "codec-profile": "Constrained Baseline",
+              "demux-w": 1920,
+              "demux-h": 1080,
+              "demux-fps": 30,
+              "demux-par": 1,
+              "metadata": {
+                "language": "und",
+                "handler_name": "VideoHandler",
+                "vendor_id": "[0][0][0][0]",
+                "encoder": "Lavc62.28.101 libx264"
+              }
+            },
+            {
+              "id": 1,
+              "type": "audio",
+              "src-id": 2,
+              "audio-channels": 2,
+              "image": false,
+              "albumart": false,
+              "default": true,
+              "forced": false,
+              "dependent": false,
+              "visual-impaired": false,
+              "hearing-impaired": false,
+              "external": false,
+              "selected": true,
+              "main-selection": 0,
+              "ff-index": 1,
+              "decoder": "aac",
+              "decoder-desc": "AAC (Advanced Audio Coding)",
+              "codec": "aac",
+              "codec-desc": "AAC (Advanced Audio Coding)",
+              "codec-profile": "LC",
+              "demux-channel-count": 2,
+              "demux-channels": "stereo",
+              "demux-samplerate": 48000,
+              "demux-bitrate": 2278,
+              "metadata": {
+                "language": "und",
+                "handler_name": "SoundHandler",
+                "vendor_id": "[0][0][0][0]"
+              }
+            }
+          ],
+          "sessionId": "player_c7c5a1f3-84a2-4100-a6f0-44de2df11d48",
+          "engineSessionId": 3,
+          "resourceTarget": "E:\\wpstartqa-9520f08e\\media\\00000-landscape.mp4",
+          "ready": true
+        },
+        "paused": {
+          "filePath": "E:\\wpstartqa-9520f08e\\media\\00000-landscape.mp4",
+          "timePos": 4.9,
+          "duration": 20,
+          "paused": true,
+          "buffering": false,
+          "volume": 0,
+          "muted": true,
+          "speed": 1,
+          "audioId": 1,
+          "subtitleId": 0,
+          "subtitleVisible": true,
+          "subtitleScale": 1,
+          "loopFile": "false",
+          "abLoopA": null,
+          "abLoopB": null,
+          "playlistPos": 1,
+          "playlistCount": 1,
+          "eofReached": false,
+          "trackList": [
+            {
+              "id": 1,
+              "type": "video",
+              "src-id": 1,
+              "image": false,
+              "albumart": false,
+              "default": true,
+              "forced": false,
+              "dependent": false,
+              "visual-impaired": false,
+              "hearing-impaired": false,
+              "external": false,
+              "selected": true,
+              "main-selection": 0,
+              "ff-index": 0,
+              "decoder": "h264",
+              "decoder-desc": "H.264 / AVC / MPEG-4 AVC / MPEG-4 part 10",
+              "codec": "h264",
+              "codec-desc": "H.264 / AVC / MPEG-4 AVC / MPEG-4 part 10",
+              "codec-profile": "Constrained Baseline",
+              "demux-w": 1920,
+              "demux-h": 1080,
+              "demux-fps": 30,
+              "demux-par": 1,
+              "metadata": {
+                "language": "und",
+                "handler_name": "VideoHandler",
+                "vendor_id": "[0][0][0][0]",
+                "encoder": "Lavc62.28.101 libx264"
+              }
+            },
+            {
+              "id": 1,
+              "type": "audio",
+              "src-id": 2,
+              "audio-channels": 2,
+              "image": false,
+              "albumart": false,
+              "default": true,
+              "forced": false,
+              "dependent": false,
+              "visual-impaired": false,
+              "hearing-impaired": false,
+              "external": false,
+              "selected": true,
+              "main-selection": 0,
+              "ff-index": 1,
+              "decoder": "aac",
+              "decoder-desc": "AAC (Advanced Audio Coding)",
+              "codec": "aac",
+              "codec-desc": "AAC (Advanced Audio Coding)",
+              "codec-profile": "LC",
+              "demux-channel-count": 2,
+              "demux-channels": "stereo",
+              "demux-samplerate": 48000,
+              "demux-bitrate": 2278,
+              "metadata": {
+                "language": "und",
+                "handler_name": "SoundHandler",
+                "vendor_id": "[0][0][0][0]"
+              }
+            }
+          ],
+          "sessionId": "player_c7c5a1f3-84a2-4100-a6f0-44de2df11d48",
+          "engineSessionId": 3,
+          "resourceTarget": "E:\\wpstartqa-9520f08e\\media\\00000-landscape.mp4",
+          "ready": true
+        },
+        "resumedBeforeRecheck": {
+          "filePath": "E:\\wpstartqa-9520f08e\\media\\00000-landscape.mp4",
+          "timePos": 11.233333,
+          "duration": 20,
+          "paused": true,
+          "buffering": false,
+          "volume": 0,
+          "muted": true,
+          "speed": 1,
+          "audioId": 1,
+          "subtitleId": 0,
+          "subtitleVisible": true,
+          "subtitleScale": 1,
+          "loopFile": "false",
+          "abLoopA": null,
+          "abLoopB": null,
+          "playlistPos": 1,
+          "playlistCount": 1,
+          "eofReached": false,
+          "trackList": [
+            {
+              "id": 1,
+              "type": "video",
+              "src-id": 1,
+              "image": false,
+              "albumart": false,
+              "default": true,
+              "forced": false,
+              "dependent": false,
+              "visual-impaired": false,
+              "hearing-impaired": false,
+              "external": false,
+              "selected": true,
+              "main-selection": 0,
+              "ff-index": 0,
+              "decoder": "h264",
+              "decoder-desc": "H.264 / AVC / MPEG-4 AVC / MPEG-4 part 10",
+              "codec": "h264",
+              "codec-desc": "H.264 / AVC / MPEG-4 AVC / MPEG-4 part 10",
+              "codec-profile": "Constrained Baseline",
+              "demux-w": 1920,
+              "demux-h": 1080,
+              "demux-fps": 30,
+              "demux-par": 1,
+              "metadata": {
+                "language": "und",
+                "handler_name": "VideoHandler",
+                "vendor_id": "[0][0][0][0]",
+                "encoder": "Lavc62.28.101 libx264"
+              }
+            },
+            {
+              "id": 1,
+              "type": "audio",
+              "src-id": 2,
+              "audio-channels": 2,
+              "image": false,
+              "albumart": false,
+              "default": true,
+              "forced": false,
+              "dependent": false,
+              "visual-impaired": false,
+              "hearing-impaired": false,
+              "external": false,
+              "selected": true,
+              "main-selection": 0,
+              "ff-index": 1,
+              "decoder": "aac",
+              "decoder-desc": "AAC (Advanced Audio Coding)",
+              "codec": "aac",
+              "codec-desc": "AAC (Advanced Audio Coding)",
+              "codec-profile": "LC",
+              "demux-channel-count": 2,
+              "demux-channels": "stereo",
+              "demux-samplerate": 48000,
+              "demux-bitrate": 2278,
+              "metadata": {
+                "language": "und",
+                "handler_name": "SoundHandler",
+                "vendor_id": "[0][0][0][0]"
+              }
+            }
+          ],
+          "sessionId": "player_c7c5a1f3-84a2-4100-a6f0-44de2df11d48",
+          "engineSessionId": 3,
+          "resourceTarget": "E:\\wpstartqa-9520f08e\\media\\00000-landscape.mp4",
+          "ready": true
+        },
+        "seeked": {
+          "filePath": "E:\\wpstartqa-9520f08e\\media\\00000-landscape.mp4",
+          "timePos": 11,
+          "duration": 20,
+          "paused": true,
+          "buffering": false,
+          "volume": 0,
+          "muted": true,
+          "speed": 1,
+          "audioId": 1,
+          "subtitleId": 0,
+          "subtitleVisible": true,
+          "subtitleScale": 1,
+          "loopFile": "false",
+          "abLoopA": null,
+          "abLoopB": null,
+          "playlistPos": 1,
+          "playlistCount": 1,
+          "eofReached": false,
+          "trackList": [
+            {
+              "id": 1,
+              "type": "video",
+              "src-id": 1,
+              "image": false,
+              "albumart": false,
+              "default": true,
+              "forced": false,
+              "dependent": false,
+              "visual-impaired": false,
+              "hearing-impaired": false,
+              "external": false,
+              "selected": true,
+              "main-selection": 0,
+              "ff-index": 0,
+              "decoder": "h264",
+              "decoder-desc": "H.264 / AVC / MPEG-4 AVC / MPEG-4 part 10",
+              "codec": "h264",
+              "codec-desc": "H.264 / AVC / MPEG-4 AVC / MPEG-4 part 10",
+              "codec-profile": "Constrained Baseline",
+              "demux-w": 1920,
+              "demux-h": 1080,
+              "demux-fps": 30,
+              "demux-par": 1,
+              "metadata": {
+                "language": "und",
+                "handler_name": "VideoHandler",
+                "vendor_id": "[0][0][0][0]",
+                "encoder": "Lavc62.28.101 libx264"
+              }
+            },
+            {
+              "id": 1,
+              "type": "audio",
+              "src-id": 2,
+              "audio-channels": 2,
+              "image": false,
+              "albumart": false,
+              "default": true,
+              "forced": false,
+              "dependent": false,
+              "visual-impaired": false,
+              "hearing-impaired": false,
+              "external": false,
+              "selected": true,
+              "main-selection": 0,
+              "ff-index": 1,
+              "decoder": "aac",
+              "decoder-desc": "AAC (Advanced Audio Coding)",
+              "codec": "aac",
+              "codec-desc": "AAC (Advanced Audio Coding)",
+              "codec-profile": "LC",
+              "demux-channel-count": 2,
+              "demux-channels": "stereo",
+              "demux-samplerate": 48000,
+              "demux-bitrate": 2278,
+              "metadata": {
+                "language": "und",
+                "handler_name": "SoundHandler",
+                "vendor_id": "[0][0][0][0]"
+              }
+            }
+          ],
+          "sessionId": "player_c7c5a1f3-84a2-4100-a6f0-44de2df11d48",
+          "engineSessionId": 3,
+          "resourceTarget": "E:\\wpstartqa-9520f08e\\media\\00000-landscape.mp4",
+          "ready": true
+        },
+        "frame": {
+          "file": "E:\\wpstartqa-9520f08e\\Data\\screenshots\\shot-2026-10-23T16-22-56-184Z.png",
+          "sha256": "4a6aa989aa185e9e662a5f1e95957fb7e4c5fd78420fe587c9f3ed4b3d695038",
+          "comparison": {
+            "passed": true,
+            "best": {
+              "frame": 330,
+              "time": 11,
+              "normalizedMeanAbsoluteError": 0.0071525848765432104
+            },
+            "old": {
+              "frame": 147,
+              "time": 4.9,
+              "normalizedMeanAbsoluteError": 0.022101568173565723
+            },
+            "comparedFrames": 20,
+            "method": "Own untagged HD 30fps H264 converted with explicit BT709 input matrix to match the observed BT709 native PNG; both scaled to 640x360 RGB24. Original error and 0.5 relative thresholds retained; target ±0.3s compared against distinct pre-seek frame.",
+            "calibration": "frame-color-diagnostic.json"
+          }
+        },
+        "geometry": [
+          {
+            "width": 1100,
+            "height": 760,
+            "zoom": 1,
+            "dom": {
+              "surface": {
+                "x": 27.390625,
+                "y": 94.5,
+                "right": 1016.609375,
+                "bottom": 618.75
+              },
+              "header": {
+                "x": 27.390625,
+                "y": 29,
+                "right": 1072.609375,
+                "bottom": 94.5
+              },
+              "toolbar": {
+                "x": 27.390625,
+                "y": 618.75,
+                "right": 1072.609375,
+                "bottom": 731
+              },
+              "shell": {
+                "x": 26.390625,
+                "y": 28,
+                "right": 1073.609375,
+                "bottom": 732
+              }
+            },
+            "native": {
+              "content": {
+                "x": 10,
+                "y": 10,
+                "width": 1100,
+                "height": 760
+              },
+              "zoom": 1,
+              "windows": [
+                {
+                  "parent": 1,
+                  "bounds": {
+                    "x": 38,
+                    "y": 105,
+                    "width": 988,
+                    "height": 523
+                  },
+                  "visible": true,
+                  "alwaysOnTop": false
+                },
+                {
+                  "bounds": {
+                    "x": 10,
+                    "y": 10,
+                    "width": 1100,
+                    "height": 760
+                  },
+                  "visible": true,
+                  "alwaysOnTop": false
+                }
+              ]
+            },
+            "expected": {
+              "x": 37.390625,
+              "y": 104.5,
+              "right": 1026.609375,
+              "bottom": 628.75
+            }
+          },
+          {
+            "width": 900,
+            "height": 600,
+            "zoom": 1.5,
+            "dom": {
+              "surface": {
+                "x": 12.666666984558105,
+                "y": 86.16667175292969,
+                "right": 587.3333539962769,
+                "bottom": 272.1666717529297
+              },
+              "header": {
+                "x": 12.666666984558105,
+                "y": 20.666667938232422,
+                "right": 587.3333539962769,
+                "bottom": 86.16666793823242
+              },
+              "toolbar": {
+                "x": 12.666666984558105,
+                "y": 272.16668701171875,
+                "right": 587.3333539962769,
+                "bottom": 379.33335876464844
+              },
+              "shell": {
+                "x": 12,
+                "y": 20,
+                "right": 588,
+                "bottom": 380
+              }
+            },
+            "native": {
+              "content": {
+                "x": 10,
+                "y": 10,
+                "width": 900,
+                "height": 600
+              },
+              "zoom": 1.5,
+              "windows": [
+                {
+                  "parent": 1,
+                  "bounds": {
+                    "x": 30,
+                    "y": 140,
+                    "width": 861,
+                    "height": 278
+                  },
+                  "visible": true,
+                  "alwaysOnTop": false
+                },
+                {
+                  "bounds": {
+                    "x": 10,
+                    "y": 10,
+                    "width": 900,
+                    "height": 600
+                  },
+                  "visible": true,
+                  "alwaysOnTop": false
+                }
+              ]
+            },
+            "expected": {
+              "x": 29.000000476837158,
+              "y": 139.25000762939453,
+              "right": 891.0000309944153,
+              "bottom": 418.25000762939453
+            }
+          }
+        ],
+        "persisted": {
+          "tags": 10000,
+          "theme": "dark",
+          "favorites": 1,
+          "progress": {
+            "position": 11,
+            "volume": 0,
+            "speed": 1,
+            "muted": true,
+            "audioId": 1,
+            "subtitleId": 0,
+            "subtitleVisible": true,
+            "subtitleScale": 1,
+            "loopMode": "off",
+            "abLoopA": null,
+            "abLoopB": null,
+            "updatedAt": 1792772577996,
+            "revision": 6,
+            "writers": {}
+          }
+        },
+        "finishedAt": "2026-10-23T16:22:59.096Z"
+      },
+      {
+        "index": 2,
+        "browserPort": 59766,
+        "nodePort": 59767,
+        "resumingAfterComparatorCorrection": false,
+        "startedAt": "2026-10-23T16:22:59.115Z",
+        "cases": [
+          "real portable restart preserves the original legacy migration audit, 10000 tags, unknown data and renderer credential redaction",
+          "selected project SVG and replay return to the same workbench without overflow or remount",
+          "real native host remains inside picture and outside header/toolbar at normal and narrow/150% layouts; all windows never always-on-top",
+          "actual native player process closes before application exit"
+        ],
+        "passed": true,
+        "identity": {
+          "pid": 45208,
+          "profile": "E:\\wpstartqa-9520f08e\\Data",
+          "archive": "C:\\Users\\s1897\\AppData\\Local\\Temp\\3L6QGKsCOcRDGNuduUu5zPpfM7O\\resources\\app.asar",
+          "version": "1.5.1"
+        },
+        "window": {
+          "bounds": {
+            "x": 10,
+            "y": 10,
+            "width": 1100,
+            "height": 760
+          },
+          "alwaysOnTop": false,
+          "zoom": 1
+        },
+        "publicSettings": {
+          "tags": 10000,
+          "schemaVersion": 1,
+          "theme": "dark",
+          "privacyRedacted": true
+        },
+        "plugins": [
+          {
+            "id": "agent-bridge",
+            "status": "planned",
+            "enabled": false
+          },
+          {
+            "id": "ai-search",
+            "status": "disabled",
+            "enabled": false
+          },
+          {
+            "id": "video-analysis",
+            "status": "active",
+            "enabled": true
+          }
+        ],
+        "migration": {
+          "schemaVersion": 1,
+          "from": 0,
+          "to": 1,
+          "sourceSha256": "9d75c3418a1619a345768d3b21ae2d96bccc7d7cd20b0144eb92b83f2ce426a7",
+          "targetSha256": "30d1904cd09c074b7702993cae88d17858713661b3adee54bd09bec80ade1193",
+          "committedAt": "2026-10-23T16:18:56.131Z",
+          "backup": "settings.v1.backup.json"
+        },
+        "splash": {
+          "count": 1,
+          "image": 1024,
+          "width": 1100,
+          "scroll": 1100
+        },
+        "initialPlayback": {
+          "filePath": "E:\\wpstartqa-9520f08e\\media\\00000-landscape.mp4",
+          "timePos": 11,
+          "duration": 20,
+          "paused": false,
+          "buffering": false,
+          "volume": 0,
+          "muted": true,
+          "speed": 1,
+          "audioId": 1,
+          "subtitleId": 0,
+          "subtitleVisible": true,
+          "subtitleScale": 1,
+          "loopFile": "false",
+          "abLoopA": null,
+          "abLoopB": null,
+          "playlistPos": 1,
+          "playlistCount": 1,
+          "eofReached": false,
+          "trackList": [
+            {
+              "id": 1,
+              "type": "video",
+              "src-id": 1,
+              "image": false,
+              "albumart": false,
+              "default": true,
+              "forced": false,
+              "dependent": false,
+              "visual-impaired": false,
+              "hearing-impaired": false,
+              "external": false,
+              "selected": true,
+              "main-selection": 0,
+              "ff-index": 0,
+              "decoder": "h264",
+              "decoder-desc": "H.264 / AVC / MPEG-4 AVC / MPEG-4 part 10",
+              "codec": "h264",
+              "codec-desc": "H.264 / AVC / MPEG-4 AVC / MPEG-4 part 10",
+              "codec-profile": "Constrained Baseline",
+              "demux-w": 1920,
+              "demux-h": 1080,
+              "demux-fps": 30,
+              "demux-par": 1,
+              "metadata": {
+                "language": "und",
+                "handler_name": "VideoHandler",
+                "vendor_id": "[0][0][0][0]",
+                "encoder": "Lavc62.28.101 libx264"
+              }
+            },
+            {
+              "id": 1,
+              "type": "audio",
+              "src-id": 2,
+              "audio-channels": 2,
+              "image": false,
+              "albumart": false,
+              "default": true,
+              "forced": false,
+              "dependent": false,
+              "visual-impaired": false,
+              "hearing-impaired": false,
+              "external": false,
+              "selected": true,
+              "main-selection": 0,
+              "ff-index": 1,
+              "decoder": "aac",
+              "decoder-desc": "AAC (Advanced Audio Coding)",
+              "codec": "aac",
+              "codec-desc": "AAC (Advanced Audio Coding)",
+              "codec-profile": "LC",
+              "demux-channel-count": 2,
+              "demux-channels": "stereo",
+              "demux-samplerate": 48000,
+              "demux-bitrate": 2278,
+              "metadata": {
+                "language": "und",
+                "handler_name": "SoundHandler",
+                "vendor_id": "[0][0][0][0]"
+              }
+            }
+          ],
+          "sessionId": "player_a9d9101f-8b65-44be-8286-8ec3b6b6449e",
+          "engineSessionId": 3,
+          "resourceTarget": "E:\\wpstartqa-9520f08e\\media\\00000-landscape.mp4",
+          "ready": true
+        },
+        "paused": {
+          "filePath": "E:\\wpstartqa-9520f08e\\media\\00000-landscape.mp4",
+          "timePos": 11.3,
+          "duration": 20,
+          "paused": true,
+          "buffering": false,
+          "volume": 0,
+          "muted": true,
+          "speed": 1,
+          "audioId": 1,
+          "subtitleId": 0,
+          "subtitleVisible": true,
+          "subtitleScale": 1,
+          "loopFile": "false",
+          "abLoopA": null,
+          "abLoopB": null,
+          "playlistPos": 1,
+          "playlistCount": 1,
+          "eofReached": false,
+          "trackList": [
+            {
+              "id": 1,
+              "type": "video",
+              "src-id": 1,
+              "image": false,
+              "albumart": false,
+              "default": true,
+              "forced": false,
+              "dependent": false,
+              "visual-impaired": false,
+              "hearing-impaired": false,
+              "external": false,
+              "selected": true,
+              "main-selection": 0,
+              "ff-index": 0,
+              "decoder": "h264",
+              "decoder-desc": "H.264 / AVC / MPEG-4 AVC / MPEG-4 part 10",
+              "codec": "h264",
+              "codec-desc": "H.264 / AVC / MPEG-4 AVC / MPEG-4 part 10",
+              "codec-profile": "Constrained Baseline",
+              "demux-w": 1920,
+              "demux-h": 1080,
+              "demux-fps": 30,
+              "demux-par": 1,
+              "metadata": {
+                "language": "und",
+                "handler_name": "VideoHandler",
+                "vendor_id": "[0][0][0][0]",
+                "encoder": "Lavc62.28.101 libx264"
+              }
+            },
+            {
+              "id": 1,
+              "type": "audio",
+              "src-id": 2,
+              "audio-channels": 2,
+              "image": false,
+              "albumart": false,
+              "default": true,
+              "forced": false,
+              "dependent": false,
+              "visual-impaired": false,
+              "hearing-impaired": false,
+              "external": false,
+              "selected": true,
+              "main-selection": 0,
+              "ff-index": 1,
+              "decoder": "aac",
+              "decoder-desc": "AAC (Advanced Audio Coding)",
+              "codec": "aac",
+              "codec-desc": "AAC (Advanced Audio Coding)",
+              "codec-profile": "LC",
+              "demux-channel-count": 2,
+              "demux-channels": "stereo",
+              "demux-samplerate": 48000,
+              "demux-bitrate": 2278,
+              "metadata": {
+                "language": "und",
+                "handler_name": "SoundHandler",
+                "vendor_id": "[0][0][0][0]"
+              }
+            }
+          ],
+          "sessionId": "player_a9d9101f-8b65-44be-8286-8ec3b6b6449e",
+          "engineSessionId": 3,
+          "resourceTarget": "E:\\wpstartqa-9520f08e\\media\\00000-landscape.mp4",
+          "ready": true
+        },
+        "geometry": [
+          {
+            "width": 1100,
+            "height": 760,
+            "zoom": 1,
+            "dom": {
+              "surface": {
+                "x": 27.390625,
+                "y": 94.5,
+                "right": 1016.609375,
+                "bottom": 618.75
+              },
+              "header": {
+                "x": 27.390625,
+                "y": 29,
+                "right": 1072.609375,
+                "bottom": 94.5
+              },
+              "toolbar": {
+                "x": 27.390625,
+                "y": 618.75,
+                "right": 1072.609375,
+                "bottom": 731
+              },
+              "shell": {
+                "x": 26.390625,
+                "y": 28,
+                "right": 1073.609375,
+                "bottom": 732
+              }
+            },
+            "native": {
+              "content": {
+                "x": 10,
+                "y": 10,
+                "width": 1100,
+                "height": 760
+              },
+              "zoom": 1,
+              "windows": [
+                {
+                  "parent": 1,
+                  "bounds": {
+                    "x": 38,
+                    "y": 105,
+                    "width": 988,
+                    "height": 523
+                  },
+                  "visible": true,
+                  "alwaysOnTop": false
+                },
+                {
+                  "bounds": {
+                    "x": 10,
+                    "y": 10,
+                    "width": 1100,
+                    "height": 760
+                  },
+                  "visible": true,
+                  "alwaysOnTop": false
+                }
+              ]
+            },
+            "expected": {
+              "x": 37.390625,
+              "y": 104.5,
+              "right": 1026.609375,
+              "bottom": 628.75
+            }
+          },
+          {
+            "width": 900,
+            "height": 600,
+            "zoom": 1.5,
+            "dom": {
+              "surface": {
+                "x": 12.666666984558105,
+                "y": 86.16667175292969,
+                "right": 587.3333539962769,
+                "bottom": 272.1666717529297
+              },
+              "header": {
+                "x": 12.666666984558105,
+                "y": 20.666667938232422,
+                "right": 587.3333539962769,
+                "bottom": 86.16666793823242
+              },
+              "toolbar": {
+                "x": 12.666666984558105,
+                "y": 272.16668701171875,
+                "right": 587.3333539962769,
+                "bottom": 379.33335876464844
+              },
+              "shell": {
+                "x": 12,
+                "y": 20,
+                "right": 588,
+                "bottom": 380
+              }
+            },
+            "native": {
+              "content": {
+                "x": 10,
+                "y": 10,
+                "width": 900,
+                "height": 600
+              },
+              "zoom": 1.5,
+              "windows": [
+                {
+                  "parent": 1,
+                  "bounds": {
+                    "x": 30,
+                    "y": 140,
+                    "width": 861,
+                    "height": 278
+                  },
+                  "visible": true,
+                  "alwaysOnTop": false
+                },
+                {
+                  "bounds": {
+                    "x": 10,
+                    "y": 10,
+                    "width": 900,
+                    "height": 600
+                  },
+                  "visible": true,
+                  "alwaysOnTop": false
+                }
+              ]
+            },
+            "expected": {
+              "x": 29.000000476837158,
+              "y": 139.25000762939453,
+              "right": 891.0000309944153,
+              "bottom": 418.25000762939453
+            }
+          }
+        ],
+        "persisted": {
+          "tags": 10000,
+          "theme": "dark",
+          "favorites": 1,
+          "progress": {
+            "position": 11.3,
+            "volume": 0,
+            "speed": 1,
+            "muted": true,
+            "audioId": 1,
+            "subtitleId": 0,
+            "subtitleVisible": true,
+            "subtitleScale": 1,
+            "loopMode": "off",
+            "abLoopA": null,
+            "abLoopB": null,
+            "updatedAt": 1792772594107,
+            "revision": 8,
+            "writers": {}
+          }
+        },
+        "finishedAt": "2026-10-23T16:23:15.189Z"
+      }
+    ],
+    "originalStartup": {
+      "file": ".tmp/refactor-tests/r7-startup-distribution/portable-first-failed.json",
+      "initialMigrationPassed": true,
+      "migration": {
+        "schemaVersion": 1,
+        "from": 0,
+        "to": 1,
+        "sourceSha256": "9d75c3418a1619a345768d3b21ae2d96bccc7d7cd20b0144eb92b83f2ce426a7",
+        "targetSha256": "30d1904cd09c074b7702993cae88d17858713661b3adee54bd09bec80ade1193",
+        "committedAt": "2026-10-23T16:18:56.131Z",
+        "backup": "settings.v1.backup.json"
+      },
+      "initialTags": 10000,
+      "rendererPrivacyRedacted": true,
+      "error": "AssertionError [ERR_ASSERTION]: {\"best\":{\"frame\":330,\"time\":11,\"normalizedMeanAbsoluteError\":0.039175574164851124},\"old\":{\"frame\":39,\"time\":1.3,\"normalizedMeanAbsoluteError\":0.05065468409586057}}\n    at compareFrame (E:\\wallpaper播放器\\.tmp\\refactor-tests\\r7-startup-distribution\\compare-frame.cjs:20:10)\n    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)\n    at async launch (E:\\wallpaper播放器\\.tmp\\refactor-tests\\r7-startup-distribution\\portable-smoke.cjs:71:76)\n    at async main (E:\\wallpaper播放器\\.tmp\\refactor-tests\\r7-startup-distribution\\portable-smoke.cjs:118:17)",
+      "correctlyRetainedAsFailure": true
+    },
+    "inspectorScope": "Main inspector verifies PID/profile/extracted ASAR, reads plugin/player/window state, sets ordinary owned QA window bounds/focus and requests graceful quit. Browser CDP drives production UI. Production main/preload/frontend sources and ASAR are unchanged; no QA entry or pre-start logic wrapper.",
+    "screenshotReview": [
+      "packaged-splash.png",
+      "packaged-library.png",
+      "native-seek-frame.png"
+    ],
+    "screenshotsPersonallyInspected": true,
+    "neverAlwaysOnTop": true,
+    "closure": {
+      "date": "2026-10-23T16:24:19.6021489Z",
+      "mainPids": [
+        41472,
+        40604,
+        45208
+      ],
+      "liveOwnedProcesses": 0,
+      "live": [],
+      "inspectedExecutablePaths": [
+        "C:\\Users\\s1897\\AppData\\Local\\Temp\\3L6QGKsCOcRDGNuduUu5zPpfM7O\\Wallpaper Player.exe",
+        "C:\\Users\\s1897\\AppData\\Local\\Temp\\3L6QGKsCOcRDGNuduUu5zPpfM7O\\resources\\vendor\\mpv\\mpv.exe",
+        "C:\\Users\\s1897\\AppData\\Local\\Temp\\3L6QGKsCOcRDGNuduUu5zPpfM7O\\Wallpaper Player.exe",
+        "C:\\Users\\s1897\\AppData\\Local\\Temp\\3L6QGKsCOcRDGNuduUu5zPpfM7O\\resources\\vendor\\mpv\\mpv.exe",
+        "C:\\Users\\s1897\\AppData\\Local\\Temp\\3L6QGKsCOcRDGNuduUu5zPpfM7O\\Wallpaper Player.exe",
+        "C:\\Users\\s1897\\AppData\\Local\\Temp\\3L6QGKsCOcRDGNuduUu5zPpfM7O\\resources\\vendor\\mpv\\mpv.exe"
+      ]
+    }
+  },
+  "installer": {
+    "passed": true,
+    "installer": {
+      "file": "Wallpaper-Player-Setup-1.5.1.exe",
+      "role": "installer",
+      "bytes": 232525174,
+      "sha256": "50453d94a6aaf499c9c65810159f4d2e16c6259c9ed8d3f9debcda1e82418a4b",
+      "sha512": "yeqVTyKYs5L5kzBbKgkMrINW2nZ2bhRrbnU0U972SVre4GIKKO4NOvZwqvETwgHHViGtpOogROXKWgICS8yVag==",
+      "bootstrapArch": "ia32",
+      "productVersion": "1.5.1",
+      "signing": {
+        "status": "NotSigned",
+        "certificateSha256": null
+      }
+    },
+    "extractedAsar": {
+      "file": "E:\\wallpaper播放器\\.tmp\\refactor-tests\\r7-startup-distribution\\installer-extract\\app.asar",
+      "sha256": "678ad7cdb2193e4eca3f4b8948a71097aa602d8438efb7cc0b76370ec787bbe5"
+    },
+    "installed": false,
+    "method": "Cached builder 7za lists/extracts only resources/app.asar directly from the actual NSIS EXE, then hashes it against the checked ASAR; no installer execution or production registration change"
+  },
+  "signatures": [
+    {
+      "file": "E:\\wallpaper播放器\\release\\windows-1.5.1-58137ba9-9694-4cf2-bec4-221bffb20392\\Wallpaper-Player-Setup-1.5.1.exe",
+      "status": "NotSigned",
+      "signer": null
+    },
+    {
+      "file": "E:\\wallpaper播放器\\release\\windows-1.5.1-58137ba9-9694-4cf2-bec4-221bffb20392\\Wallpaper-Player-1.5.1.exe",
+      "status": "NotSigned",
+      "signer": null
+    },
+    {
+      "file": "E:\\wallpaper播放器\\release\\windows-1.5.1-58137ba9-9694-4cf2-bec4-221bffb20392\\win-unpacked\\Wallpaper Player.exe",
+      "status": "NotSigned",
+      "signer": null
+    }
+  ],
+  "environment": {
+    "Caption": "Microsoft Windows 11 专业版",
+    "Version": "10.0.26300",
+    "BuildNumber": "26300",
+    "OSArchitecture": "64 位"
+  },
+  "retainedFailures": [
+    "The first portable run passed cold legacy settings/10000-tag migration, official plugin activation, credential redaction, SVG/replay, favorite and native pause/seek; its new RGB comparison failed absolute/relative thresholds. The run exited gracefully and remains failed in the original record.",
+    "ffprobe shows untagged HD YUV420 source and BT709/sRGB-tagged full-range native PNG. A separate four-matrix diagnostic gives target-frame NMAE 0.03918 under default/BT601 and 0.00715 under explicit BT709. Comparator now uses the matching matrix; original 0.015 absolute and 0.5 relative thresholds are unchanged. The original PNG independently passes at frame330/11s, rather than silently discarding the failure.",
+    "After the first owned process was terminal, verification resumed using its existing Data and durable 11s progress/favorite. It first proves resume, uses the real UI to establish a distinct 5s control then seeks to 11s again, completes geometry/cleanup checks, and restarts once more. No profile reset or production rebuild hides the failed attempt.",
+    "Installer inspection initially looked for an uninstalled 7zip-bin Node module; the already-used builder cache 7za executable was then located from its live build log. Installer extraction and ASAR match passed."
+  ],
+  "frameDiagnostic": {
+    "results": [
+      {
+        "matrix": "default",
+        "errors": [
+          {
+            "frame": 39,
+            "error": 0.05065468409586057
+          },
+          {
+            "frame": 330,
+            "error": 0.039175574164851124
+          }
+        ]
+      },
+      {
+        "matrix": "bt601",
+        "errors": [
+          {
+            "frame": 39,
+            "error": 0.05065468409586057
+          },
+          {
+            "frame": 330,
+            "error": 0.039175574164851124
+          }
+        ]
+      },
+      {
+        "matrix": "bt709",
+        "errors": [
+          {
+            "frame": 39,
+            "error": 0.01958473470406681
+          },
+          {
+            "frame": 330,
+            "error": 0.0071525848765432104
+          }
+        ]
+      },
+      {
+        "matrix": "bt2020",
+        "errors": [
+          {
+            "frame": 39,
+            "error": 0.029762209513435004
+          },
+          {
+            "frame": 330,
+            "error": 0.017416496459694987
+          }
+        ]
+      }
+    ],
+    "correctedOriginal": {
+      "passed": true,
+      "best": {
+        "frame": 330,
+        "time": 11,
+        "normalizedMeanAbsoluteError": 0.0071525848765432104
+      },
+      "old": {
+        "frame": 39,
+        "time": 1.3,
+        "normalizedMeanAbsoluteError": 0.01958473470406681
+      },
+      "comparedFrames": 20,
+      "method": "Own untagged HD 30fps H264 converted with explicit BT709 input matrix to match the observed BT709 native PNG; both scaled to 640x360 RGB24. Original error and 0.5 relative thresholds retained; target ±0.3s compared against distinct pre-seek frame.",
+      "calibration": "frame-color-diagnostic.json"
+    },
+    "originalComparator": ".tmp/refactor-tests/r7-startup-distribution/compare-frame-original.cjs"
+  },
+  "preservation": {
+    "originalDataFiles": 42,
+    "historicalPublicAssets": 8,
+    "selectedSvgUnchanged": true,
+    "packageLockUnchanged": true,
+    "previousFormalBundle": "E:\\wallpaper播放器\\release\\windows-1.5.1-681574df-1a6a-4e26-baed-c87963ce8c67",
+    "previousFormalAsarAndAssetsUnchanged": true,
+    "earlierQaAndFormalArtifactsCheckedByBuildVerifier": true,
+    "currentPointer": {
+      "schemaVersion": 1,
+      "kind": "windows",
+      "id": "58137ba9-9694-4cf2-bec4-221bffb20392",
+      "projectRoot": "e:\\wallpaper播放器",
+      "version": "1.5.1",
+      "mode": "distribution",
+      "sourceCommit": null,
+      "output": "release/windows-1.5.1-58137ba9-9694-4cf2-bec4-221bffb20392",
+      "integrity": "official-package-integrity.json"
+    },
+    "productionInstallationReplaced": false,
+    "releasePublished": false
+  },
+  "limits": [
+    "No actual NSIS installation/upgrade was performed. Payload extraction, PE/version/update/hash/signature checks and actual copied portable execution do not replace interactive install/upgrade matrices.",
+    "This fresh build has short native startup/playback/restart/layout checks, not a repeated 20-minute resource acceptance. Previous R6 long-run evidence stays attached to its older frozen ASAR.",
+    "Two copied synthetic H264/AAC clips and 10000 generated tag keys are used; this is not 10000 distinct media contents or physical phone/LAN acceptance.",
+    "Legacy synchronous plugin/settings APIs, other full configuration consumers, large extension callbacks and renderer data preparation remain. Whole cold-start latency and two-second interaction budget are not established.",
+    "Physical Android 60-minute PSS/FPS/LAN, other Windows/media matrices, iOS, signing/identity migration, historical theme drift and cloud/public delivery remain open."
+  ],
+  "raw": {
+    "directory": ".tmp/refactor-tests/r7-startup-distribution",
+    "build": ".tmp/refactor-tests/r7-startup-distribution/build.json",
+    "verification": ".tmp/refactor-tests/r7-startup-distribution/build-verification.json",
+    "inputs": ".tmp/refactor-tests/r7-startup-distribution/source-inputs.json",
+    "portable": ".tmp/refactor-tests/r7-startup-distribution/portable-result.json",
+    "firstFailure": ".tmp/refactor-tests/r7-startup-distribution/portable-first-failed.json",
+    "color": ".tmp/refactor-tests/r7-startup-distribution/frame-color-diagnostic.json",
+    "installer": ".tmp/refactor-tests/r7-startup-distribution/installer-payload.json",
+    "processClosure": ".tmp/refactor-tests/r7-startup-distribution/process-closure.json"
+  }
+}

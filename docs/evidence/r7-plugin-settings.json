@@ -1,0 +1,365 @@
+{
+  "date": "2026-10-23T16:07:44.448Z",
+  "localDate": "2026-10-24",
+  "status": "Declared plugin settings preparation and internal selected reads completed; full R7/R8 objective remains active",
+  "implementation": {
+    "preparation": "Declared plugin settingsSections register/remove through a private asynchronous owner on the existing settings queue. Core parsing/normalization/canonical JSON use the same bounded worker and canonical cache; registration itself does not write a file.",
+    "compatibility": "Legacy synchronous registerSettingsSection and context settings.get/savePatch/plugins.saveConfig remain available. Main callbacks preserve defaults, normalization and property-key toJSON behavior. Special __proto__ sections are explicit own properties.",
+    "ownership": "Cache/revision changes retry at most eight times. Generation/profile changes and serializer shutdown prevent late publication; failed registration removes its definition. Repeated disposers share one operation and cannot remove a replacement owner.",
+    "selectedReads": "Registry enabled/config/list and install rollback snapshots select plugins. Core authorization selects remoteAccess; player/analysis bridges select playbackMode/videoAnalysis. Public shapes and detached values remain.",
+    "bootstrap": "Schema defaults/config normalization now selects the latest plugins state inside the durable queue and returns no unused full settings result. Enabled state commits likewise avoid a full input/result clone.",
+    "shutdown": "Initial registry setup participates in lifecycle draining; closing prevents late activation/placeholders. Manifest scanning has a disposal generation and plugin-service disposal coalesces. Main startup rechecks quitting after identity and plugin setup before starting later services/windows."
+  },
+  "verification": {
+    "cases": [
+      "real registry setup, selected reads, disable and unregister avoid full main JSON/realpath work with 10000 tags; captured previous modules provide the same positive control and callback results",
+      "registered defaults, callback order, keyed JSON, detached ownership, builtin overrides and special own keys are preserved; preparation stays read-only and an old disposer cannot remove a new owner",
+      "section preparation shares the real durable queue, retries a superseding synchronous cache and lets queued/debounced writes commit without busy-worker failures or lost intent",
+      "callback and worker failure leave the cache/files unchanged, roll back the registered definition and allow a real retry; duplicates and storage metadata remain rejected",
+      "shutdown and changed profile scopes retire pending registration without late publication; disposal after serializer shutdown removes its owner without reviving a worker",
+      "actual plugin authorization/player/analysis bridges read only selected fields, retain fresh legacy-token revocation and preserve paired authorization/default playback behavior",
+      "registry disposal drains an in-progress declared-section setup, prevents late plugin activation/error placeholders and permits an explicit later setup",
+      "config bootstrap selects the latest plugin state inside the durable queue, preserves zero values/install metadata and cannot overwrite a preceding committed config with its earlier snapshot",
+      "a manifest scan retired by plugin-service shutdown cannot register core capabilities or activate plugins; disposal coalesces and an explicit later service setup can restart",
+      "actual Electron main startup/quit drains official plugin setup and cannot restart services; removing only the new quit guard reaches the controlled boundary as a positive control, with zero windows in both modes"
+    ],
+    "repositoryTags": 10000,
+    "comparison": {
+      "tags": 10000,
+      "before": {
+        "setup": {
+          "fullParses": 8,
+          "fullStringifies": 2,
+          "syncRealpaths": 3
+        },
+        "selectedReads": {
+          "fullParses": 4,
+          "fullStringifies": 0,
+          "syncRealpaths": 0
+        },
+        "disable": {
+          "fullParses": 3,
+          "fullStringifies": 0,
+          "syncRealpaths": 0
+        },
+        "unregister": {
+          "fullParses": 2,
+          "fullStringifies": 1,
+          "syncRealpaths": 3
+        },
+        "callbacks": [
+          1,
+          7,
+          "json:fixtureSection"
+        ]
+      },
+      "after": {
+        "setup": {
+          "fullParses": 0,
+          "fullStringifies": 0,
+          "syncRealpaths": 0
+        },
+        "selectedReads": {
+          "fullParses": 0,
+          "fullStringifies": 0,
+          "syncRealpaths": 0
+        },
+        "disable": {
+          "fullParses": 0,
+          "fullStringifies": 0,
+          "syncRealpaths": 0
+        },
+        "unregister": {
+          "fullParses": 0,
+          "fullStringifies": 0,
+          "syncRealpaths": 0
+        },
+        "callbacks": [
+          1,
+          7,
+          "json:fixtureSection"
+        ]
+      }
+    },
+    "coreBridgeCounts": {
+      "fullParses": 0,
+      "fullStringifies": 0,
+      "syncRealpaths": 0
+    },
+    "nativeStartupQuit": [
+      {
+        "passed": true,
+        "mode": "guard-control",
+        "electron": "44.9.0",
+        "profile": "E:\\wallpaper播放器\\.tmp\\refactor-tests\\plugin-settings-knmJSI\\native-guard-control",
+        "windows": [],
+        "postSetupIpcEntries": 1,
+        "controlSourceSha256": "02e3acd26cc8a515c4dd9d37295a389a236ebca3567bbbe328aa032637a1078c",
+        "preparedPlugins": [
+          {
+            "id": "video-analysis",
+            "status": "disabled"
+          },
+          {
+            "id": "ai-search",
+            "status": "disabled"
+          },
+          {
+            "id": "agent-bridge",
+            "status": "planned"
+          }
+        ],
+        "closedSettingsDrain": true,
+        "sourceDigests": {
+          "main/index.js": "414a5556cb017ab2c7893bd8661197ac544e98cf1906243a52b251241e4c54d8",
+          "main/settings.js": "3f77a8d7c2cb8b3b31a844cb98b120aba32a3e2753a120074f7e880c6f3482da",
+          "main/plugins/registry.js": "fe140797a7255b3a3a591a1c1465f5191f0e042f306678b734b77cc42c17a12b",
+          "main/plugins/index.js": "045655c473c629aabca140237a01f385fcbd4e7841f6d1c5c89266758e588b3b",
+          "scripts/verify-plugin-settings-electron.js": "5e240d4ea9aace07d95d434788853e20577d0c45aa2764345f3ab6c71ac15d68"
+        }
+      },
+      {
+        "passed": true,
+        "mode": "current",
+        "electron": "44.9.0",
+        "profile": "E:\\wallpaper播放器\\.tmp\\refactor-tests\\plugin-settings-knmJSI\\native-current",
+        "windows": [],
+        "postSetupIpcEntries": 0,
+        "preparedPlugins": [
+          {
+            "id": "video-analysis",
+            "status": "disabled"
+          },
+          {
+            "id": "ai-search",
+            "status": "disabled"
+          },
+          {
+            "id": "agent-bridge",
+            "status": "planned"
+          }
+        ],
+        "closedSettingsDrain": true,
+        "sourceDigests": {
+          "main/index.js": "414a5556cb017ab2c7893bd8661197ac544e98cf1906243a52b251241e4c54d8",
+          "main/settings.js": "3f77a8d7c2cb8b3b31a844cb98b120aba32a3e2753a120074f7e880c6f3482da",
+          "main/plugins/registry.js": "fe140797a7255b3a3a591a1c1465f5191f0e042f306678b734b77cc42c17a12b",
+          "main/plugins/index.js": "045655c473c629aabca140237a01f385fcbd4e7841f6d1c5c89266758e588b3b",
+          "scripts/verify-plugin-settings-electron.js": "5e240d4ea9aace07d95d434788853e20577d0c45aa2764345f3ab6c71ac15d68"
+        }
+      }
+    ],
+    "realRuntime": {
+      "electron": "44.9.0",
+      "plugins": [
+        {
+          "id": "video-analysis",
+          "status": "disabled"
+        },
+        {
+          "id": "ai-search",
+          "status": "disabled"
+        },
+        {
+          "id": "agent-bridge",
+          "status": "planned"
+        }
+      ],
+      "windows": [
+        {
+          "startupComplete": true,
+          "alwaysOnTop": false
+        }
+      ],
+      "initialSettingsPreparation": {
+        "fullParses": 0,
+        "fullStringifies": 0,
+        "syncSettingsReads": 0,
+        "syncLibraryRealpaths": 0
+      },
+      "sectionPreparations": [
+        {
+          "key": "videoAnalysis",
+          "counters": {
+            "fullParses": 0,
+            "fullStringifies": 0,
+            "syncSettingsReads": 0,
+            "syncLibraryRealpaths": 0
+          }
+        }
+      ],
+      "splashReleasedWorkbench": true,
+      "persistedAfterShutdown": true,
+      "profile": "E:\\wallpaper播放器\\.tmp\\refactor-tests\\runtime-native-中文 空格-u0wQJd",
+      "screenshot": ".tmp/refactor-tests/r7-plugin-settings/runtime-window.png",
+      "screenshotPersonallyInspected": true
+    },
+    "checks": [
+      {
+        "name": "plugin-settings",
+        "command": [
+          "node",
+          "scripts/run-verify.cjs",
+          "scripts/verify-plugin-settings-lifecycle.js"
+        ],
+        "exitCode": 0,
+        "elapsedMs": 4249
+      },
+      {
+        "name": "complete-runtime",
+        "command": [
+          "node",
+          "scripts/run-verify.cjs",
+          "scripts/verify-electron-runtime.js"
+        ],
+        "exitCode": 0,
+        "elapsedMs": 5149
+      },
+      {
+        "name": "native-video-plugin",
+        "command": [
+          "node",
+          "scripts/run-verify.cjs",
+          "--electron",
+          "scripts/verify-plugin-video-lifecycle.js"
+        ],
+        "exitCode": 0,
+        "elapsedMs": 834
+      },
+      {
+        "name": "native-external-plugin",
+        "command": [
+          "node",
+          "scripts/run-verify.cjs",
+          "--electron",
+          "scripts/verify-external-plugin-lifecycle.js"
+        ],
+        "exitCode": 0,
+        "elapsedMs": 1799
+      },
+      {
+        "name": "registry",
+        "command": [
+          "node",
+          "scripts/run-verify.cjs",
+          "scripts/verify-plugin-registry.js"
+        ],
+        "exitCode": 0,
+        "elapsedMs": 372
+      },
+      {
+        "name": "settings-startup",
+        "command": [
+          "node",
+          "scripts/run-verify.cjs",
+          "scripts/verify-settings-startup.js"
+        ],
+        "exitCode": 0,
+        "elapsedMs": 1943
+      },
+      {
+        "name": "shutdown-persistence",
+        "command": [
+          "node",
+          "scripts/run-verify.cjs",
+          "scripts/verify-shutdown-persistence.js"
+        ],
+        "exitCode": 0,
+        "elapsedMs": 5317
+      },
+      {
+        "name": "settings-recovery",
+        "command": [
+          "node",
+          "scripts/run-verify.cjs",
+          "scripts/verify-settings-recovery.js"
+        ],
+        "exitCode": 0,
+        "elapsedMs": 678
+      },
+      {
+        "name": "remote-route",
+        "command": [
+          "node",
+          "scripts/run-verify.cjs",
+          "scripts/verify-plugin-remote-route.js"
+        ],
+        "exitCode": 0,
+        "elapsedMs": 369
+      }
+    ],
+    "intermediateRegressions": [
+      "JSON worker 14 cases passed against the same final main/settings.js digest, before later main/index shutdown guards. It is not represented as a fresh final-index test.",
+      "Analysis config store rollback/atomicity and real service/VLM/directory/reset IPC passed; plugin implementation source is unchanged in this phase."
+    ],
+    "ci": "New verify:plugin-settings entry and existing CI configuration parsed locally; no cloud CI run.",
+    "scope": "Positive-control and new code use the same Node verifier with actual worker/storage/registry and 10000 generated tag keys; controlled dependencies apply to bridge and fault tests. Native startup/quit uses real main and official plugins, stopping the negative control at IPC before windows/shortcuts/player. Complete runtime separately uses real main/preload/IPC/frontend and existing dist in an isolated Chinese/space profile with an empty media library. Native tests disable hardware acceleration. No real decode, native latency/PSS/FPS or whole-cold-start budget claim."
+  },
+  "retainedFailures": [
+    "Initial isolated Electron plugin test runs passed application assertions but logged cache contention because old helpers changed profile paths after Electron readiness. Helpers now set userData/sessionData before readiness.",
+    "After isolating caches, old helper cleanup attempted to recursively remove its still-open Chromium profile. External test exited 1; video helper remained live after EPERM/unhandled rejection. The exact live executable, command, PID/start time were checked before closing only that owned helper; its parent session ended with exit 1. Helpers now flush/dispose settings and retain their isolated profiles until process exit. Fresh final runs both exited 0 without those cleanup/cache errors."
+  ],
+  "preservation": {
+    "originalDataFiles": 42,
+    "historicalPublicAssets": 8,
+    "selectedSvgUnchanged": true,
+    "packageLockUnchanged": true,
+    "latestFormalPackage": "release/windows-1.5.1-681574df-1a6a-4e26-baed-c87963ce8c67",
+    "latestFormalAsarAndSevenAssetsUnchanged": true,
+    "newFullDistributionBuilt": false,
+    "productionInstallationReplaced": false,
+    "windowsAlwaysOnTop": false
+  },
+  "limits": [
+    "Legacy synchronous plugin settings APIs and other full settings consumers remain; plugin list/config selection still copies the plugins field. Larger extension callbacks execute on main.",
+    "Worker messages still clone the full prepared cache and canonical text; this measures location/count of work, not total startup latency or memory.",
+    "No new full Windows distribution was built. The unchanged formal R6 bundle and its 20-minute evidence predate this and the previous startup source phase.",
+    "Physical Android long-run PSS/FPS/LAN, other Windows/media matrices, iOS, signing/identity migration and historical theme drift remain open."
+  ],
+  "baselineSources": [
+    {
+      "file": "main/settings.js",
+      "sha256": "5912ac7a79902dc3db50c4982a43bab05e5e5066df5ac63cbc9a5b20a12a7bc2"
+    },
+    {
+      "file": "main/plugins/registry.js",
+      "sha256": "2978eef43c6b338e31d2d0e60ec0e7a4cd860a679889469f00a9b23e245ac9c3"
+    },
+    {
+      "file": "main/plugins/index.js",
+      "sha256": "39b2d2a2680bd4676c9a586f28d3062a2eb672f88e432ba6eeb29f37a551ac29"
+    },
+    {
+      "file": "main/plugins/core-api.js",
+      "sha256": "a41852f048cb033065d49e69a8680e0257a7a42e859a4066b78c3d4dc2698023"
+    },
+    {
+      "file": "main/plugins/capabilities.js",
+      "sha256": "4a12956d2f31f0459b226bb710c10a63ded11dd602d65755681bc51fbf8e609f"
+    }
+  ],
+  "sourceHashes": {
+    "main/settings.js": "3f77a8d7c2cb8b3b31a844cb98b120aba32a3e2753a120074f7e880c6f3482da",
+    "main/index.js": "414a5556cb017ab2c7893bd8661197ac544e98cf1906243a52b251241e4c54d8",
+    "main/plugins/registry.js": "fe140797a7255b3a3a591a1c1465f5191f0e042f306678b734b77cc42c17a12b",
+    "main/plugins/index.js": "045655c473c629aabca140237a01f385fcbd4e7841f6d1c5c89266758e588b3b",
+    "main/plugins/core-api.js": "83b7ce61053336ca67cba4323e860625a059b458a4aabc5ea509ffb470d9a0f3",
+    "main/plugins/capabilities.js": "bf6c815712e7c636329dc3b66cabf75e12e4afdf4ed3341e0d9e7677bbe7d2b1",
+    "scripts/verify-plugin-settings-lifecycle.js": "f4f71ed5f5b30375853548e259c27feacb53bb17e1f0acfeeaf726805d219e27",
+    "scripts/verify-plugin-settings-electron.js": "5e240d4ea9aace07d95d434788853e20577d0c45aa2764345f3ab6c71ac15d68",
+    "scripts/verify-plugin-video-lifecycle.js": "d4eb827fe386077eef4d3f643c783bc9bc39876ba64035398808237b34221ad9",
+    "scripts/verify-external-plugin-lifecycle.js": "adee60609543d919f45ea0f4b158bfd9c645f05a2dbe9bcf133d851cf5474468",
+    "scripts/verify-electron-runtime-electron.js": "0f1d6ffe4662c977a8b282f3fda919436d4c69cbed4fa7e1e800f4d804d7aec5",
+    "package.json": "0f397c26490ab5ed7e29dc880714094bfd97381bebe3c23653394dcc040882d6",
+    ".github/workflows/ci.yml": "e3da008d22537b13ead75616ae658457125328acad9aaf7c027393a6433a4720"
+  },
+  "raw": {
+    "directory": ".tmp/refactor-tests/r7-plugin-settings",
+    "mainResult": ".tmp/refactor-tests/r7-plugin-settings/lifecycle.json",
+    "checks": ".tmp/refactor-tests/r7-plugin-settings/checks.json",
+    "runtime": ".tmp/refactor-tests/r7-plugin-settings/runtime.json",
+    "nativeOriginalFixture": "E:\\wallpaper播放器\\.tmp\\refactor-tests\\plugin-settings-knmJSI",
+    "originalPreservationManifest": ".tmp/refactor-tests/r7-native-player-overflow/baseline.json",
+    "preservation": ".tmp/refactor-tests/r7-plugin-settings/preservation.json"
+  }
+}

@@ -1,0 +1,748 @@
+{
+  "date": "2026-10-23T11:56:02.370Z",
+  "scope": "First explicit camera permission request survives system background/foreground; existing cancellation and pairing ownership preserved",
+  "source": {
+    "file": "mobile/src/screens/PairDeviceScreen.tsx",
+    "before": "ded13b7343674b93771510137c6098e03d9898cd3ec2490eb386bb5540a154c4",
+    "after": "e8ff480cd3cae0d5171a8247514f7ac5feed5ffa566a4a5f0d25769da40e6631"
+  },
+  "behavior": {
+    "savedOldComponentFails": true,
+    "regression": "before-test.log",
+    "fixed": "behavior-test.log",
+    "typecheck": "typecheck.log",
+    "bundles": [
+      {
+        "platform": "android",
+        "bytes": 3125612,
+        "modules": 2570,
+        "reactVersion": "19.3.0",
+        "sharedContracts": true,
+        "excludedBuildOnlyAdvisories": [
+          "braces",
+          "node-forge"
+        ]
+      },
+      {
+        "platform": "ios",
+        "bytes": 3121172,
+        "modules": 2572,
+        "reactVersion": "19.3.0",
+        "sharedContracts": true,
+        "excludedBuildOnlyAdvisories": [
+          "braces",
+          "node-forge"
+        ]
+      }
+    ]
+  },
+  "native": {
+    "appId": "com.wallpaperplayer.mobile.qa.camera",
+    "versionCode": 1,
+    "platform": "API36 x86_64 own emulator, both cameras emulated, no host webcam",
+    "unwrappedProductionApp": true,
+    "optimizedR8": true,
+    "metadata": {
+      "apk": "E:\\wpcamera-03b7a945\\mobile\\android\\app\\build\\outputs\\apk\\release\\app-release.apk",
+      "bytes": 34664914,
+      "sha256": "50f2b52360280d153980a698542e919a1947cd8440d242e2aa0ad96d466877e7",
+      "sha512": "7Bn7Du27+CdVHaRRH3W7m4gCWL4z9741bFdPFtGO4roLnu/oLVPK2P3j3KCfwYbxrBw1n3s217L4DRwSnpQJHg==",
+      "actual": {
+        "applicationId": "com.wallpaperplayer.mobile.qa.camera",
+        "versionCode": 1,
+        "version": "0.1.4",
+        "certificateSha256": "fac61745dc0903786fb9ede62a962b399f7348f0bb6f899b8332667591033b9c",
+        "debugCertificate": true,
+        "abi": [
+          "x86_64"
+        ],
+        "minSdk": 24,
+        "targetSdk": 36,
+        "verified": true
+      },
+      "r8Mapping": {
+        "file": "E:\\wpcamera-03b7a945\\mobile\\android\\app\\build\\outputs\\mapping\\release\\mapping.txt",
+        "bytes": 85197693,
+        "sha256": "eda23520b8c9a7226aa3448fae25b0d83674b60d4aa4425ac74507d1da89fe49",
+        "sha512": "hajCgLI+Qkx0oe+7Ir7V7G1V3VAZ7Z3nSpvSRQQPIRz5d+cg8aBccpry/4Ny8Wg6Tvc8lcQyDEtY5PyPzMGJ7w=="
+      }
+    },
+    "exactInstalledApkHash": true,
+    "inputsVerified": 66,
+    "native": {
+      "date": "2026-10-23T11:54:04.839Z",
+      "passed": true,
+      "appId": "com.wallpaperplayer.mobile.qa.camera",
+      "serial": "emulator-5580",
+      "cases": [
+        "One initial scan tap followed by a real system grant opens the production CameraView without another scan tap",
+        "Explicit cancel and hardware back both leave the scanner; already-granted permission opens normally",
+        "Backgrounding an active scanner closes it and foregrounding does not reopen it",
+        "A real permission denial returns to pairing with an actionable error and no scanner",
+        "Retry after denial can grant permission and opens the scanner from that one retry tap",
+        "System permission flow remains usable across a real Home/foreground excursion; granting the resumed request opens the scanner",
+        "Dismissing the permission dialog with Back does not open a scanner"
+      ],
+      "screenshots": [
+        "E:\\wallpaper播放器\\.tmp\\refactor-tests\\r7-camera-permission\\native-ui-final-cameras\\fresh-pair.png",
+        "E:\\wallpaper播放器\\.tmp\\refactor-tests\\r7-camera-permission\\native-ui-final-cameras\\first-permission.png",
+        "E:\\wallpaper播放器\\.tmp\\refactor-tests\\r7-camera-permission\\native-ui-final-cameras\\first-grant-scanner.png",
+        "E:\\wallpaper播放器\\.tmp\\refactor-tests\\r7-camera-permission\\native-ui-final-cameras\\foreground-no-reopen.png",
+        "E:\\wallpaper播放器\\.tmp\\refactor-tests\\r7-camera-permission\\native-ui-final-cameras\\denied.png",
+        "E:\\wallpaper播放器\\.tmp\\refactor-tests\\r7-camera-permission\\native-ui-final-cameras\\retry-after-denial.png",
+        "E:\\wallpaper播放器\\.tmp\\refactor-tests\\r7-camera-permission\\native-ui-final-cameras\\grant-after-home.png",
+        "E:\\wallpaper播放器\\.tmp\\refactor-tests\\r7-camera-permission\\native-ui-final-cameras\\dialog-dismissed.png"
+      ],
+      "snapshots": [
+        "E:\\wallpaper播放器\\.tmp\\refactor-tests\\r7-camera-permission\\native-ui-final-cameras\\001-fresh-pair.xml",
+        "E:\\wallpaper播放器\\.tmp\\refactor-tests\\r7-camera-permission\\native-ui-final-cameras\\002-tap.xml",
+        "E:\\wallpaper播放器\\.tmp\\refactor-tests\\r7-camera-permission\\native-ui-final-cameras\\003-first-prompt.xml",
+        "E:\\wallpaper播放器\\.tmp\\refactor-tests\\r7-camera-permission\\native-ui-final-cameras\\004-permission.xml",
+        "E:\\wallpaper播放器\\.tmp\\refactor-tests\\r7-camera-permission\\native-ui-final-cameras\\005-first-grant-scanner.xml",
+        "E:\\wallpaper播放器\\.tmp\\refactor-tests\\r7-camera-permission\\native-ui-final-cameras\\006-tap.xml",
+        "E:\\wallpaper播放器\\.tmp\\refactor-tests\\r7-camera-permission\\native-ui-final-cameras\\007-cancelled.xml",
+        "E:\\wallpaper播放器\\.tmp\\refactor-tests\\r7-camera-permission\\native-ui-final-cameras\\008-tap.xml",
+        "E:\\wallpaper播放器\\.tmp\\refactor-tests\\r7-camera-permission\\native-ui-final-cameras\\009-already-granted.xml",
+        "E:\\wallpaper播放器\\.tmp\\refactor-tests\\r7-camera-permission\\native-ui-final-cameras\\010-hardware-back.xml",
+        "E:\\wallpaper播放器\\.tmp\\refactor-tests\\r7-camera-permission\\native-ui-final-cameras\\011-tap.xml",
+        "E:\\wallpaper播放器\\.tmp\\refactor-tests\\r7-camera-permission\\native-ui-final-cameras\\012-before-home.xml",
+        "E:\\wallpaper播放器\\.tmp\\refactor-tests\\r7-camera-permission\\native-ui-final-cameras\\013-foreground-no-reopen.xml",
+        "E:\\wallpaper播放器\\.tmp\\refactor-tests\\r7-camera-permission\\native-ui-final-cameras\\014-fresh-pair.xml",
+        "E:\\wallpaper播放器\\.tmp\\refactor-tests\\r7-camera-permission\\native-ui-final-cameras\\015-tap.xml",
+        "E:\\wallpaper播放器\\.tmp\\refactor-tests\\r7-camera-permission\\native-ui-final-cameras\\016-permission.xml",
+        "E:\\wallpaper播放器\\.tmp\\refactor-tests\\r7-camera-permission\\native-ui-final-cameras\\017-denied.xml",
+        "E:\\wallpaper播放器\\.tmp\\refactor-tests\\r7-camera-permission\\native-ui-final-cameras\\018-tap.xml",
+        "E:\\wallpaper播放器\\.tmp\\refactor-tests\\r7-camera-permission\\native-ui-final-cameras\\019-permission.xml",
+        "E:\\wallpaper播放器\\.tmp\\refactor-tests\\r7-camera-permission\\native-ui-final-cameras\\020-retry-after-denial.xml",
+        "E:\\wallpaper播放器\\.tmp\\refactor-tests\\r7-camera-permission\\native-ui-final-cameras\\021-tap.xml",
+        "E:\\wallpaper播放器\\.tmp\\refactor-tests\\r7-camera-permission\\native-ui-final-cameras\\022-fresh-pair.xml",
+        "E:\\wallpaper播放器\\.tmp\\refactor-tests\\r7-camera-permission\\native-ui-final-cameras\\023-tap.xml",
+        "E:\\wallpaper播放器\\.tmp\\refactor-tests\\r7-camera-permission\\native-ui-final-cameras\\024-before-prompt-home.xml",
+        "E:\\wallpaper播放器\\.tmp\\refactor-tests\\r7-camera-permission\\native-ui-final-cameras\\025-prompt-resumed.xml",
+        "E:\\wallpaper播放器\\.tmp\\refactor-tests\\r7-camera-permission\\native-ui-final-cameras\\026-tap.xml",
+        "E:\\wallpaper播放器\\.tmp\\refactor-tests\\r7-camera-permission\\native-ui-final-cameras\\027-permission.xml",
+        "E:\\wallpaper播放器\\.tmp\\refactor-tests\\r7-camera-permission\\native-ui-final-cameras\\028-grant-after-home.xml",
+        "E:\\wallpaper播放器\\.tmp\\refactor-tests\\r7-camera-permission\\native-ui-final-cameras\\029-tap.xml",
+        "E:\\wallpaper播放器\\.tmp\\refactor-tests\\r7-camera-permission\\native-ui-final-cameras\\030-fresh-pair.xml",
+        "E:\\wallpaper播放器\\.tmp\\refactor-tests\\r7-camera-permission\\native-ui-final-cameras\\031-tap.xml",
+        "E:\\wallpaper播放器\\.tmp\\refactor-tests\\r7-camera-permission\\native-ui-final-cameras\\032-before-dialog-back.xml",
+        "E:\\wallpaper播放器\\.tmp\\refactor-tests\\r7-camera-permission\\native-ui-final-cameras\\033-dialog-dismissed.xml"
+      ]
+    },
+    "actualCameraActiveAndReleased": true,
+    "stopped": {
+      "date": "2026-10-23T11:56:01.2517703Z",
+      "devices": "List of devices attached\r\n\r\n",
+      "remaining": 0,
+      "physicalDeviceAvailable": false,
+      "source": "User confirmed no physical phone available"
+    }
+  },
+  "harnessCorrections": [
+    "Initial native harness accepted only the AOSP permission-controller package; the Google API36 image uses com.google.android.permissioncontroller. Original failure retained.",
+    "The first seven UI cases passed with only one emulated camera, but CameraX rejected the advertised missing front camera and preview stayed black. That run is UI evidence only. The final run provides both emulated cameras and explicitly checks active camera clients and release."
+  ],
+  "limits": [
+    "No physical phone: 60-minute PSS growth/final PSS/FPS and real LAN remain unaccepted",
+    "Native iOS camera permission and actual QR-to-PC binding are outside this run",
+    "Independent debug-signed QA identity; no production APK identity/signing migration or replacement"
+  ],
+  "raw": [
+    {
+      "file": ".tmp/refactor-tests/r7-camera-permission/apk-metadata.json",
+      "sha256": "1ec94ce57eb089c06f725977e6877cb5b7b38b51bf898f7b275eab1f27371fdb"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-camera-permission/baseline.json",
+      "sha256": "735cfa33f51b6bd085aa8e48fa965e36c4f1ab260ba9d4fc8627d3deb36ab32b"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-camera-permission/before-test.cjs",
+      "sha256": "c381c49d0dfb9600aa0e45a956afda5cd891038d8db57c5b9beed522d8f6a4c8"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-camera-permission/before-test.log",
+      "sha256": "72cca3aa2ce39805a576cff03044e75da3fbe6de845330503c1634c5b0a232d7"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-camera-permission/behavior-test.log",
+      "sha256": "10dc7e5d44bec5606b55632d87413a9ec0eb46c242b324cb504b330b9fa3c585"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-camera-permission/bundles.log",
+      "sha256": "d598c0ce310ca05fd6db148316b2447396be6ba530caaf5588bfbcd059e00f2a"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-camera-permission/camera-logcat.txt",
+      "sha256": "c1bbae396f43024f23ac6b83743a782d95189b9a9a45911ce39e55231c69232b"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-camera-permission/contracts-android-bundle/metadata.json",
+      "sha256": "06f7ef99c5b6b976b902f9117e9988a836ec94ca1991cbe708bc4e8001ec8975"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-camera-permission/contracts-android-bundle/_expo/static/js/android/AppEntry-78a5cee2075608665e16ff0988cd8111.hbc",
+      "sha256": "25c97bf0eb5e17a55e67433cfffe25798b53cd2b3e45b1b6bc0c12c8fa4c8dba"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-camera-permission/contracts-android-bundle/_expo/static/js/android/AppEntry-78a5cee2075608665e16ff0988cd8111.hbc.map",
+      "sha256": "61185a995faaeda088f8323d6b748627ba3513ab81820df5680a4af278236021"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-camera-permission/contracts-bundles-evidence.json",
+      "sha256": "916af64a4ed0f79f3aa853c8fc5e9ec835ee28c200e073cdeab19ceb027c2eaf"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-camera-permission/contracts-ios-bundle/metadata.json",
+      "sha256": "90a24f67e57b6946bcf531d150197b402624ef582c0eb4efbe12a3f82431437c"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-camera-permission/contracts-ios-bundle/_expo/static/js/ios/AppEntry-48bc788cdd293f8fe65c000f1e607e02.hbc",
+      "sha256": "ef7e75f7882988cd017d3ee2e202b086363cb74141d62e135b153513ed66cb0a"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-camera-permission/contracts-ios-bundle/_expo/static/js/ios/AppEntry-48bc788cdd293f8fe65c000f1e607e02.hbc.map",
+      "sha256": "496b725b49e00d7903425e2ad2e43cae2f2df262cf520b87b405dfce1007dde5"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-camera-permission/emulator-both-cameras-launch.json",
+      "sha256": "837abb33147401e7b33fcaa41a3ee87e30f9fc153d0c9544624d2a9c503ac285"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-camera-permission/emulator-both-cameras-stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-camera-permission/emulator-both-cameras-stdout.log",
+      "sha256": "bdf689b120970b12b9f57124565c9701f107291e383cccf86e6bc0f1c809ae7a"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-camera-permission/emulator-launch.json",
+      "sha256": "31fbc2286f324e7e41a0bd4aa3b6fb6f9fc5c2b95c5ed095fd1e23c815e67711"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-camera-permission/emulator-stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-camera-permission/emulator-stdout.log",
+      "sha256": "cd30134fc8b11db2c9c09441be2cdc64888ea9c76e421aecfa1aea671fd1d77e"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-camera-permission/emulator-stopped.json",
+      "sha256": "94fa87bd68e866863ed85add5aef536fca1effe480300dbbf48c24c84a3db6e4"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-camera-permission/finalize.cjs",
+      "sha256": "213324f5dd8fd7056dd5343180d5d9ba74fffc215488ed9f6a9d74b679849118"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-camera-permission/installed-camera-qa.apk",
+      "sha256": "50f2b52360280d153980a698542e919a1947cd8440d242e2aa0ad96d466877e7"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-camera-permission/native-build.ps1",
+      "sha256": "45da63e66a90c716b37170383e1dfbe3b5aedfc524ffd4c1c56cf248023064d3"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-camera-permission/native-gradle.log",
+      "sha256": "6ad8150475db767b5a8c0ef386bc0cae05dc21cf5c1e5c05931d48f444abda75"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-camera-permission/native-inputs.json",
+      "sha256": "9b823491e2f78ffbcadd794492b509d0eb807bf213324c7e79ca365d84885e2f"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-camera-permission/native-install.cjs",
+      "sha256": "caed2684193f27ff0a955f06a9d222a8704dc80e49ca9988a17069e959acf044"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-camera-permission/native-install.json",
+      "sha256": "bd9a8d8f66529a4059de375439dd54b173c0860b7036e269cde9630528806e43"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-camera-permission/native-install.log",
+      "sha256": "385a9a9be72f7fe0f4cf7c6c67b8b87abcb0cf86de1718c3e744bd650137b372"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-camera-permission/native-patches.log",
+      "sha256": "7d87859f2f4d771e001878411612cc60a8f74b74bdb9b324bfef7e8644d089f3"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-camera-permission/native-prebuild.log",
+      "sha256": "d5e4be0a0c10691bffa446716505e068d943d1fca32f0d93d5af6f817e29c4e4"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-camera-permission/native-stage-command.log",
+      "sha256": "54baa9831f212da7005c0357ca6beaaea14eae5d7a8c44c7dcebf67bb203e367"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-camera-permission/native-stage.cjs",
+      "sha256": "45e06884d048241525dfe32f5b963c0087c1f75f55923f537290ce0e9861e2d0"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-camera-permission/native-stage.json",
+      "sha256": "9f7c82c2d25c8c45f747ee8f96cd1eb3ab01572ef061583307a80cbe7d66f44b"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-camera-permission/native-ui/001-fresh-pair.xml",
+      "sha256": "7e6ed4004b465003acb3201fe44dfa8b09a8bfb19431d491a0939d72d9eec342"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-camera-permission/native-ui/002-tap.xml",
+      "sha256": "7e6ed4004b465003acb3201fe44dfa8b09a8bfb19431d491a0939d72d9eec342"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-camera-permission/native-ui/003-first-prompt.xml",
+      "sha256": "0a9f00027531cc2a6cc9103f4da1b4f211c2fe6b0091f06eeef6177006308576"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-camera-permission/native-ui/004-permission.xml",
+      "sha256": "0a9f00027531cc2a6cc9103f4da1b4f211c2fe6b0091f06eeef6177006308576"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-camera-permission/native-ui/after-stop-camera.txt",
+      "sha256": "6eb88cef20b0307a9568da3dd0469640898b39f632e626006bfb8859fdbfb693"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-camera-permission/native-ui/failure-camera.txt",
+      "sha256": "6eb88cef20b0307a9568da3dd0469640898b39f632e626006bfb8859fdbfb693"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-camera-permission/native-ui/failure.png",
+      "sha256": "300fd514fe0e03e9fd764d0a4c8805213d2459b069199398b4ae758df460947a"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-camera-permission/native-ui/first-permission.png",
+      "sha256": "1b76876ee5f2a2f4d1c4fe430ef4c1c0389ca82d1d683c8f17f5d889faef536c"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-camera-permission/native-ui/fresh-pair.png",
+      "sha256": "43d8174eade43e21083ab0d5c0bda115acf7ece52fdb3f038301d271b5480aaa"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-camera-permission/native-ui-final/001-fresh-pair.xml",
+      "sha256": "7e6ed4004b465003acb3201fe44dfa8b09a8bfb19431d491a0939d72d9eec342"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-camera-permission/native-ui-final/002-tap.xml",
+      "sha256": "7e6ed4004b465003acb3201fe44dfa8b09a8bfb19431d491a0939d72d9eec342"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-camera-permission/native-ui-final/003-first-prompt.xml",
+      "sha256": "0a9f00027531cc2a6cc9103f4da1b4f211c2fe6b0091f06eeef6177006308576"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-camera-permission/native-ui-final/004-permission.xml",
+      "sha256": "0a9f00027531cc2a6cc9103f4da1b4f211c2fe6b0091f06eeef6177006308576"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-camera-permission/native-ui-final/005-first-grant-scanner.xml",
+      "sha256": "8e4ebc45044e7f80c8a61109a239827ff0995e7ab84249a28d3dd8e4982baffd"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-camera-permission/native-ui-final/006-tap.xml",
+      "sha256": "8e4ebc45044e7f80c8a61109a239827ff0995e7ab84249a28d3dd8e4982baffd"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-camera-permission/native-ui-final/007-cancelled.xml",
+      "sha256": "7e6ed4004b465003acb3201fe44dfa8b09a8bfb19431d491a0939d72d9eec342"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-camera-permission/native-ui-final/008-tap.xml",
+      "sha256": "7e6ed4004b465003acb3201fe44dfa8b09a8bfb19431d491a0939d72d9eec342"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-camera-permission/native-ui-final/009-already-granted.xml",
+      "sha256": "2e8c0dfc5d8bd59c003fb05c7972bcfd85b971fc022f77a7ed08243155f0317b"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-camera-permission/native-ui-final/010-hardware-back.xml",
+      "sha256": "7e6ed4004b465003acb3201fe44dfa8b09a8bfb19431d491a0939d72d9eec342"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-camera-permission/native-ui-final/011-tap.xml",
+      "sha256": "7e6ed4004b465003acb3201fe44dfa8b09a8bfb19431d491a0939d72d9eec342"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-camera-permission/native-ui-final/012-before-home.xml",
+      "sha256": "2e8c0dfc5d8bd59c003fb05c7972bcfd85b971fc022f77a7ed08243155f0317b"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-camera-permission/native-ui-final/013-foreground-no-reopen.xml",
+      "sha256": "7e6ed4004b465003acb3201fe44dfa8b09a8bfb19431d491a0939d72d9eec342"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-camera-permission/native-ui-final/014-fresh-pair.xml",
+      "sha256": "7e6ed4004b465003acb3201fe44dfa8b09a8bfb19431d491a0939d72d9eec342"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-camera-permission/native-ui-final/015-tap.xml",
+      "sha256": "7e6ed4004b465003acb3201fe44dfa8b09a8bfb19431d491a0939d72d9eec342"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-camera-permission/native-ui-final/016-permission.xml",
+      "sha256": "0a9f00027531cc2a6cc9103f4da1b4f211c2fe6b0091f06eeef6177006308576"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-camera-permission/native-ui-final/017-denied.xml",
+      "sha256": "d3e4659218a1c3ce2bee224a5d6204260f050bcc552029dbfdc2fa320502ecf9"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-camera-permission/native-ui-final/018-tap.xml",
+      "sha256": "d3e4659218a1c3ce2bee224a5d6204260f050bcc552029dbfdc2fa320502ecf9"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-camera-permission/native-ui-final/019-permission.xml",
+      "sha256": "ec808bc155aaf24a2ba3d69a4a5b0eb8c6d4da0bf0071c38d4fc1cf9864f40b9"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-camera-permission/native-ui-final/020-retry-after-denial.xml",
+      "sha256": "8e4ebc45044e7f80c8a61109a239827ff0995e7ab84249a28d3dd8e4982baffd"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-camera-permission/native-ui-final/021-tap.xml",
+      "sha256": "8e4ebc45044e7f80c8a61109a239827ff0995e7ab84249a28d3dd8e4982baffd"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-camera-permission/native-ui-final/022-fresh-pair.xml",
+      "sha256": "7e6ed4004b465003acb3201fe44dfa8b09a8bfb19431d491a0939d72d9eec342"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-camera-permission/native-ui-final/023-tap.xml",
+      "sha256": "7e6ed4004b465003acb3201fe44dfa8b09a8bfb19431d491a0939d72d9eec342"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-camera-permission/native-ui-final/024-before-prompt-home.xml",
+      "sha256": "0a9f00027531cc2a6cc9103f4da1b4f211c2fe6b0091f06eeef6177006308576"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-camera-permission/native-ui-final/025-prompt-resumed.xml",
+      "sha256": "d3e4659218a1c3ce2bee224a5d6204260f050bcc552029dbfdc2fa320502ecf9"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-camera-permission/native-ui-final/026-tap.xml",
+      "sha256": "d3e4659218a1c3ce2bee224a5d6204260f050bcc552029dbfdc2fa320502ecf9"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-camera-permission/native-ui-final/027-permission.xml",
+      "sha256": "0a9f00027531cc2a6cc9103f4da1b4f211c2fe6b0091f06eeef6177006308576"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-camera-permission/native-ui-final/028-grant-after-home.xml",
+      "sha256": "8e4ebc45044e7f80c8a61109a239827ff0995e7ab84249a28d3dd8e4982baffd"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-camera-permission/native-ui-final/029-tap.xml",
+      "sha256": "8e4ebc45044e7f80c8a61109a239827ff0995e7ab84249a28d3dd8e4982baffd"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-camera-permission/native-ui-final/030-fresh-pair.xml",
+      "sha256": "7e6ed4004b465003acb3201fe44dfa8b09a8bfb19431d491a0939d72d9eec342"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-camera-permission/native-ui-final/031-tap.xml",
+      "sha256": "7e6ed4004b465003acb3201fe44dfa8b09a8bfb19431d491a0939d72d9eec342"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-camera-permission/native-ui-final/032-before-dialog-back.xml",
+      "sha256": "0a9f00027531cc2a6cc9103f4da1b4f211c2fe6b0091f06eeef6177006308576"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-camera-permission/native-ui-final/033-dialog-dismissed.xml",
+      "sha256": "d3e4659218a1c3ce2bee224a5d6204260f050bcc552029dbfdc2fa320502ecf9"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-camera-permission/native-ui-final/after-stop-camera.txt",
+      "sha256": "bcf2485dba9d95d423a1bac03f4a6c9bbe92e2c978174649f606f5a425d40658"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-camera-permission/native-ui-final/background-camera.txt",
+      "sha256": "8bc3ad101c64a3d18cd3380a0f4d5df297eb2b2266a951868053cdf7525274d8"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-camera-permission/native-ui-final/cancelled-camera.txt",
+      "sha256": "6eb88cef20b0307a9568da3dd0469640898b39f632e626006bfb8859fdbfb693"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-camera-permission/native-ui-final/denied.png",
+      "sha256": "db3da071066e232ff5469af10d8fb12979be03cd2d4eebc0c1ce343959422b91"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-camera-permission/native-ui-final/dialog-dismissed-camera.txt",
+      "sha256": "bcf2485dba9d95d423a1bac03f4a6c9bbe92e2c978174649f606f5a425d40658"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-camera-permission/native-ui-final/dialog-dismissed.png",
+      "sha256": "b336c12c268a2530d48b942877119b33d5bec58af57de2d53770b0c5898c10ae"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-camera-permission/native-ui-final/first-grant-camera.txt",
+      "sha256": "6eb88cef20b0307a9568da3dd0469640898b39f632e626006bfb8859fdbfb693"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-camera-permission/native-ui-final/first-grant-scanner.png",
+      "sha256": "b3bfa607394ba0ccfd6661edf1b31e55bdde1892101827d8d106127ebe5741e3"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-camera-permission/native-ui-final/first-permission.png",
+      "sha256": "73614fde2539486a83b7b11aac9bc0550b94e4e3f1f01cdd0eebd146b22fb65f"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-camera-permission/native-ui-final/foreground-no-reopen.png",
+      "sha256": "9f2529d6552a3f7ba3e8ab148480aab77dc9d7a3f0910c4b5e50ce209127dcf4"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-camera-permission/native-ui-final/fresh-pair.png",
+      "sha256": "aad2f30188a0b947580189f361986b97573c4ceec22fa8878e392db86078bca2"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-camera-permission/native-ui-final/grant-after-home.png",
+      "sha256": "b156018ab076899cb7cd74c3014a81dd0025eb2bf2072c11d57891b3737516ce"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-camera-permission/native-ui-final/retry-after-denial.png",
+      "sha256": "b156018ab076899cb7cd74c3014a81dd0025eb2bf2072c11d57891b3737516ce"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-camera-permission/native-ui-final-cameras/001-fresh-pair.xml",
+      "sha256": "7e6ed4004b465003acb3201fe44dfa8b09a8bfb19431d491a0939d72d9eec342"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-camera-permission/native-ui-final-cameras/002-tap.xml",
+      "sha256": "7e6ed4004b465003acb3201fe44dfa8b09a8bfb19431d491a0939d72d9eec342"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-camera-permission/native-ui-final-cameras/003-first-prompt.xml",
+      "sha256": "0a9f00027531cc2a6cc9103f4da1b4f211c2fe6b0091f06eeef6177006308576"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-camera-permission/native-ui-final-cameras/004-permission.xml",
+      "sha256": "0a9f00027531cc2a6cc9103f4da1b4f211c2fe6b0091f06eeef6177006308576"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-camera-permission/native-ui-final-cameras/005-first-grant-scanner.xml",
+      "sha256": "2e8c0dfc5d8bd59c003fb05c7972bcfd85b971fc022f77a7ed08243155f0317b"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-camera-permission/native-ui-final-cameras/006-tap.xml",
+      "sha256": "2e8c0dfc5d8bd59c003fb05c7972bcfd85b971fc022f77a7ed08243155f0317b"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-camera-permission/native-ui-final-cameras/007-cancelled.xml",
+      "sha256": "7e6ed4004b465003acb3201fe44dfa8b09a8bfb19431d491a0939d72d9eec342"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-camera-permission/native-ui-final-cameras/008-tap.xml",
+      "sha256": "7e6ed4004b465003acb3201fe44dfa8b09a8bfb19431d491a0939d72d9eec342"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-camera-permission/native-ui-final-cameras/009-already-granted.xml",
+      "sha256": "2e8c0dfc5d8bd59c003fb05c7972bcfd85b971fc022f77a7ed08243155f0317b"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-camera-permission/native-ui-final-cameras/010-hardware-back.xml",
+      "sha256": "7e6ed4004b465003acb3201fe44dfa8b09a8bfb19431d491a0939d72d9eec342"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-camera-permission/native-ui-final-cameras/011-tap.xml",
+      "sha256": "7e6ed4004b465003acb3201fe44dfa8b09a8bfb19431d491a0939d72d9eec342"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-camera-permission/native-ui-final-cameras/012-before-home.xml",
+      "sha256": "2e8c0dfc5d8bd59c003fb05c7972bcfd85b971fc022f77a7ed08243155f0317b"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-camera-permission/native-ui-final-cameras/013-foreground-no-reopen.xml",
+      "sha256": "7e6ed4004b465003acb3201fe44dfa8b09a8bfb19431d491a0939d72d9eec342"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-camera-permission/native-ui-final-cameras/014-fresh-pair.xml",
+      "sha256": "7e6ed4004b465003acb3201fe44dfa8b09a8bfb19431d491a0939d72d9eec342"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-camera-permission/native-ui-final-cameras/015-tap.xml",
+      "sha256": "7e6ed4004b465003acb3201fe44dfa8b09a8bfb19431d491a0939d72d9eec342"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-camera-permission/native-ui-final-cameras/016-permission.xml",
+      "sha256": "0a9f00027531cc2a6cc9103f4da1b4f211c2fe6b0091f06eeef6177006308576"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-camera-permission/native-ui-final-cameras/017-denied.xml",
+      "sha256": "d3e4659218a1c3ce2bee224a5d6204260f050bcc552029dbfdc2fa320502ecf9"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-camera-permission/native-ui-final-cameras/018-tap.xml",
+      "sha256": "d3e4659218a1c3ce2bee224a5d6204260f050bcc552029dbfdc2fa320502ecf9"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-camera-permission/native-ui-final-cameras/019-permission.xml",
+      "sha256": "ec808bc155aaf24a2ba3d69a4a5b0eb8c6d4da0bf0071c38d4fc1cf9864f40b9"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-camera-permission/native-ui-final-cameras/020-retry-after-denial.xml",
+      "sha256": "2e8c0dfc5d8bd59c003fb05c7972bcfd85b971fc022f77a7ed08243155f0317b"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-camera-permission/native-ui-final-cameras/021-tap.xml",
+      "sha256": "2e8c0dfc5d8bd59c003fb05c7972bcfd85b971fc022f77a7ed08243155f0317b"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-camera-permission/native-ui-final-cameras/022-fresh-pair.xml",
+      "sha256": "7e6ed4004b465003acb3201fe44dfa8b09a8bfb19431d491a0939d72d9eec342"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-camera-permission/native-ui-final-cameras/023-tap.xml",
+      "sha256": "7e6ed4004b465003acb3201fe44dfa8b09a8bfb19431d491a0939d72d9eec342"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-camera-permission/native-ui-final-cameras/024-before-prompt-home.xml",
+      "sha256": "0a9f00027531cc2a6cc9103f4da1b4f211c2fe6b0091f06eeef6177006308576"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-camera-permission/native-ui-final-cameras/025-prompt-resumed.xml",
+      "sha256": "d3e4659218a1c3ce2bee224a5d6204260f050bcc552029dbfdc2fa320502ecf9"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-camera-permission/native-ui-final-cameras/026-tap.xml",
+      "sha256": "d3e4659218a1c3ce2bee224a5d6204260f050bcc552029dbfdc2fa320502ecf9"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-camera-permission/native-ui-final-cameras/027-permission.xml",
+      "sha256": "0a9f00027531cc2a6cc9103f4da1b4f211c2fe6b0091f06eeef6177006308576"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-camera-permission/native-ui-final-cameras/028-grant-after-home.xml",
+      "sha256": "2e8c0dfc5d8bd59c003fb05c7972bcfd85b971fc022f77a7ed08243155f0317b"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-camera-permission/native-ui-final-cameras/029-tap.xml",
+      "sha256": "2e8c0dfc5d8bd59c003fb05c7972bcfd85b971fc022f77a7ed08243155f0317b"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-camera-permission/native-ui-final-cameras/030-fresh-pair.xml",
+      "sha256": "7e6ed4004b465003acb3201fe44dfa8b09a8bfb19431d491a0939d72d9eec342"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-camera-permission/native-ui-final-cameras/031-tap.xml",
+      "sha256": "7e6ed4004b465003acb3201fe44dfa8b09a8bfb19431d491a0939d72d9eec342"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-camera-permission/native-ui-final-cameras/032-before-dialog-back.xml",
+      "sha256": "0a9f00027531cc2a6cc9103f4da1b4f211c2fe6b0091f06eeef6177006308576"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-camera-permission/native-ui-final-cameras/033-dialog-dismissed.xml",
+      "sha256": "d3e4659218a1c3ce2bee224a5d6204260f050bcc552029dbfdc2fa320502ecf9"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-camera-permission/native-ui-final-cameras/after-stop-camera.txt",
+      "sha256": "dba74753854eda8a6fb770fe692aa57d556f4663d667af2d346139aa221ec56b"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-camera-permission/native-ui-final-cameras/already-granted-camera.txt",
+      "sha256": "6b458ceb464d57d794ba517f77b77c37100fa70fc93b39c01e30c375aa923f75"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-camera-permission/native-ui-final-cameras/background-camera.txt",
+      "sha256": "af9b4aab29c953bb868e81e65449f1a265252251c185cb2b98fea7fd43acb212"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-camera-permission/native-ui-final-cameras/before-home-camera.txt",
+      "sha256": "84ad048043c96e0a14b5391e7d838f351b094351bc96fb2616890854e0a3fbe3"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-camera-permission/native-ui-final-cameras/cancelled-camera.txt",
+      "sha256": "f6814d72a81ab5dda498a94791b166b9e8698e94bab50fba4d7ca289e034e018"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-camera-permission/native-ui-final-cameras/denied.png",
+      "sha256": "46072d21659b984f5315179fa2edbbdd64355f71140bf0e902f29e610c123c1e"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-camera-permission/native-ui-final-cameras/dialog-dismissed-camera.txt",
+      "sha256": "dba74753854eda8a6fb770fe692aa57d556f4663d667af2d346139aa221ec56b"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-camera-permission/native-ui-final-cameras/dialog-dismissed.png",
+      "sha256": "b631f0582cb870b19125781715a3ab4dc4e4d4523fbdaeb2128d8df573be07c5"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-camera-permission/native-ui-final-cameras/first-grant-camera.txt",
+      "sha256": "877e3d297d213219c47c493e81dcede64906c258b6cd1681760a9849cd327645"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-camera-permission/native-ui-final-cameras/first-grant-scanner.png",
+      "sha256": "531f1c5a96b1bfd23a31d89f191e4ef02e69a5a56ac25afd12177e5f315adcc7"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-camera-permission/native-ui-final-cameras/first-permission.png",
+      "sha256": "5d4ff4ee074173797ade3ffe3f6153958f78706720f7ac2082066bdd457d1b68"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-camera-permission/native-ui-final-cameras/foreground-no-reopen.png",
+      "sha256": "af7af3a30ad2bb0db4eacb3295768bdec8e9dac071d8c63bb815c89bec3a6688"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-camera-permission/native-ui-final-cameras/fresh-pair.png",
+      "sha256": "210fe3071b88a1e2583e0ed85e6c7998d21a4b237e9dabc56f9c9f420352ce34"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-camera-permission/native-ui-final-cameras/grant-after-home-camera.txt",
+      "sha256": "a1a7e8ff2949a30fb8fdcdc198c4dd4eaa0bed20ba9c8c20fdd2cdcb73eacb7c"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-camera-permission/native-ui-final-cameras/grant-after-home.png",
+      "sha256": "f437bdf678b7c607c95d3b427e9c5f8d35a9c12cf1ce594a5bcbfe02dee7e9ae"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-camera-permission/native-ui-final-cameras/retry-after-denial-camera.txt",
+      "sha256": "da8f586535a9ebacec4f8a5e8a11e7eaa74efc8fda4f98195443edf2a9338a4a"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-camera-permission/native-ui-final-cameras/retry-after-denial.png",
+      "sha256": "442823bf094191289704e4f8253c5096eebe6e056376c370e3b7f58cbaa7b3f1"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-camera-permission/native-ui-first-harness-result.json",
+      "sha256": "3ce4d18bf5048c7a061846fad3a7cb4ae463b189da8983ae12e7e18ff222986b"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-camera-permission/native-ui-first-harness.log",
+      "sha256": "262d4e48b21a61dbc9f97214110103b8647d6a3943497449d234079d1feed8ca"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-camera-permission/native-ui-result.json",
+      "sha256": "4da26d856c9682ac477f03402274e0e5beb1a2c419649ab09242e07d075761dd"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-camera-permission/native-ui-single-camera-result.json",
+      "sha256": "90d9512967b0b73872e756f5cbc6674a0697bce2d3bc53922dfd62358a9b2e8e"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-camera-permission/native-ui-single-camera.log",
+      "sha256": "389659e34ee1afa28fe0d2422868d1e04951f05a556e90e7dcb04d8da26d9ff2"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-camera-permission/native-ui.cjs",
+      "sha256": "57d59885e81c72a2e72160f107f7f986d10c1f28089dab5387aa1181542556ce"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-camera-permission/native-ui.log",
+      "sha256": "389659e34ee1afa28fe0d2422868d1e04951f05a556e90e7dcb04d8da26d9ff2"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-camera-permission/PairDeviceScreen.tsx.before",
+      "sha256": "ded13b7343674b93771510137c6098e03d9898cd3ec2490eb386bb5540a154c4"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-camera-permission/typecheck.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-camera-permission/verify-mobile-input-accessibility.js.before",
+      "sha256": "0d34b225284dd6748f698d5bda6def5fbda48db30ed76d1fab591a749a8a225a"
+    }
+  ]
+}

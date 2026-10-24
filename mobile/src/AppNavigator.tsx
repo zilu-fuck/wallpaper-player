@@ -1,62 +1,43 @@
 import { StyleSheet, View } from 'react-native'
 import type { NavigationContext } from '../App'
-import type { StoredDevice, VideoItem } from './types'
+import type { AppRoute } from './services/navigation-store'
 import { DeviceListScreen } from './screens/DeviceListScreen'
 import { LibraryScreen } from './screens/LibraryScreen'
 import { PairDeviceScreen } from './screens/PairDeviceScreen'
 import { PlayerScreen } from './screens/PlayerScreen'
 import { SearchScreen } from './screens/SearchScreen'
 
-export type AppRoute =
-  | { name: 'loading' }
-  | { name: 'pair' }
-  | { name: 'devices', devices: StoredDevice[] }
-  | { name: 'library', device: StoredDevice }
-  | { name: 'search', device: StoredDevice, videos: VideoItem[] }
-  | { name: 'player', device: StoredDevice, video: VideoItem, videos: VideoItem[] }
+export type { AppRoute } from './services/navigation-store'
 
-type Props = {
-  context: NavigationContext
-}
-
-export function AppNavigator({ context }: Props) {
-  const { route, previousRoute } = context
-  const stackedLibraryRoute = route.name === 'library'
-    ? route
-    : route.name === 'player' && previousRoute?.name === 'library'
-      ? previousRoute
-      : null
-
-  if (stackedLibraryRoute) {
-    return (
-      <View style={styles.stack}>
-        <View style={StyleSheet.absoluteFill}>
-          <LibraryScreen navigation={context} device={stackedLibraryRoute.device} />
-        </View>
-        {route.name === 'player' ? (
-          <View style={StyleSheet.absoluteFill}>
-            <PlayerScreen navigation={context} device={route.device} video={route.video} videos={route.videos} />
+export function AppNavigator({ context }: { context: NavigationContext }) {
+  const { stack, route: current, resources } = context
+  const renderRoute = (route: AppRoute, focused: boolean) => {
+    if (route.name === 'devices') return <DeviceListScreen navigation={context} devices={resources.getDevices()} />
+    if (route.name === 'pair') return <PairDeviceScreen navigation={context} />
+    const device = resources.getDevice(route)
+    if (!device) return null
+    if (route.name === 'library') return <LibraryScreen navigation={context} device={device} focused={focused} />
+    const videos = resources.getPlaylist(route)
+    if (route.name === 'search') return <SearchScreen navigation={context} device={device} videos={videos} />
+    if (route.name === 'player') {
+      const video = videos.find(item => item.id === route.videoId)
+      return video ? <PlayerScreen navigation={context} device={device} video={video} videos={videos} focused={focused} /> : null
+    }
+    return null
+  }
+  return (
+    <View style={styles.stack}>
+      {stack.filter(route => route.key === current.key || route.name === 'library' || route.name === 'search').map(route => {
+        const focused = route.key === current.key
+        return (
+          <View key={route.key} style={StyleSheet.absoluteFill} pointerEvents={focused ? 'auto' : 'none'}
+            accessibilityElementsHidden={!focused} importantForAccessibility={focused ? 'auto' : 'no-hide-descendants'}>
+            {renderRoute(route, focused)}
           </View>
-        ) : null}
-      </View>
-    )
-  }
-
-  switch (route.name) {
-    case 'devices':
-      return <DeviceListScreen navigation={context} devices={route.devices} />
-    case 'search':
-      return <SearchScreen navigation={context} device={route.device} videos={route.videos} />
-    case 'player':
-      return <PlayerScreen navigation={context} device={route.device} video={route.video} videos={route.videos} />
-    case 'pair':
-    default:
-      return <PairDeviceScreen navigation={context} />
-  }
+        )
+      })}
+    </View>
+  )
 }
 
-const styles = StyleSheet.create({
-  stack: {
-    flex: 1
-  }
-})
+const styles = StyleSheet.create({ stack: { flex: 1 } })

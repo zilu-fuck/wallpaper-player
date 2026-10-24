@@ -1,0 +1,87 @@
+/* Critical launch styles. Vite includes this blocking stylesheet from index.html. */
+html, body { height: 100%; margin: 0; background: #070a11; }
+html[data-theme="light"] body { background: #eef2f8; }
+.splash {
+  position: fixed; inset: 0; z-index: 9999; overflow: hidden; contain: paint;
+  color: #edf2fa; font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+  isolation: isolate;
+}
+.splash-scene {
+  position: absolute; inset: 0; overflow: hidden; transform-origin: 50% 50%;
+  background: radial-gradient(ellipse at center, #101729, #0b0d16 32%, #07080c 70%);
+}
+.splash.is-leaving { pointer-events: none; }
+.splash.is-leaving .splash-scene { animation: splash-portal 700ms cubic-bezier(0.7, 0, 0.2, 1) both; }
+.splash-halo { position: absolute; top: 50%; left: 50%; width: min(66vw, 660px); height: min(54vw, 470px); transform: translate(-50%, -50%); }
+.splash-halo::before, .splash-halo::after { content: ''; position: absolute; width: 60%; height: 80%; border-radius: 50%; filter: blur(80px); animation: splash-breathe 2200ms ease-in-out infinite alternate; }
+.splash-halo::before { top: 7%; left: 0; background: #00dfea; }
+.splash-halo::after { right: 0; bottom: 0; background: #9225eb; animation-delay: -1100ms; }
+.splash-grid { position: absolute; inset: 0; opacity: 0.11; background-image: linear-gradient(#aab7da12 1px, transparent 1px), linear-gradient(90deg, #aab7da12 1px, transparent 1px); background-size: 64px 64px; mask-image: radial-gradient(ellipse at center, #000, transparent 64%); }
+.splash-meta { position: absolute; left: clamp(22px, 4vw, 64px); right: clamp(22px, 4vw, 64px); display: flex; justify-content: space-between; gap: 16px; font: 9px/1.6 ui-monospace, Consolas, monospace; letter-spacing: 2px; color: #66738b; }
+.splash-meta-top { top: max(26px, env(safe-area-inset-top)); }
+.splash-meta-bottom { bottom: max(30px, env(safe-area-inset-bottom)); }
+.splash-meta-bottom span:last-child { padding-right: 156px; }
+.splash-meta-top span:first-child::before { content: ''; display: inline-block; width: 5px; height: 5px; margin-right: 11px; border-radius: 50%; background: #00f2fe; box-shadow: 0 0 12px #00f2fe99; vertical-align: middle; }
+.splash-mark { position: absolute; top: 50%; left: 50%; width: clamp(172px, 23vw, 232px); aspect-ratio: 1; transform: translate(-50%, -50%); perspective: 800px; }
+.splash-mark::before { content: ''; position: absolute; inset: -26px; border: 1px solid #667eac12; border-radius: 50%; }
+.splash-tilt { position: relative; width: 100%; height: 100%; transform: rotateX(var(--splash-tilt-x, 0deg)) rotateY(var(--splash-tilt-y, 0deg)); transition: transform 180ms ease-out; }
+.splash-mark img, .splash-mark svg { display: block; position: absolute; inset: 0; width: 100%; height: 100%; }
+.splash-mark img { animation: splash-icon-fill 700ms 500ms ease both; }
+.splash-mark svg { overflow: visible; filter: drop-shadow(0 0 5px #00f2fe38) drop-shadow(0 0 22px #8b4dfe25); }
+.splash-ghost { fill: none; stroke: #82c8e8; stroke-width: 4; opacity: 0.1; }
+.splash-trace { fill: none; stroke: url(#splash-neon); stroke-width: 7; stroke-linejoin: round; stroke-linecap: round; stroke-dasharray: 50 100; stroke-dashoffset: 50; animation: splash-outline 1200ms cubic-bezier(0.35, 0, 0.25, 1) both; }
+.splash-tile { fill: none; stroke: url(#splash-neon); stroke-width: 5; stroke-linejoin: round; stroke-linecap: round; stroke-dasharray: 100; stroke-dashoffset: 100; animation: splash-tile-draw 1100ms 100ms cubic-bezier(0.35, 0, 0.25, 1) both; }
+.splash-laser { fill: none; stroke: #e2fcff; stroke-width: 10; stroke-linecap: round; stroke-dasharray: 1.5 98.5; stroke-dashoffset: 100; opacity: 0; filter: drop-shadow(0 0 4px #00f2fe); animation: splash-laser-run 1200ms cubic-bezier(0.35, 0, 0.25, 1) both; }
+.splash-brand { position: absolute; top: calc(50% + clamp(114px, 14vw, 146px)); left: 0; width: 100%; padding: 0 16px; text-align: center; animation: splash-brand-in 900ms 900ms cubic-bezier(0.35, 0, 0.25, 1) both; }
+.splash-title { margin: 0; color: inherit; font-size: clamp(23px, 2.3vw, 28px); font-weight: 500; line-height: 1.5; white-space: nowrap; animation: splash-type-in 900ms 900ms cubic-bezier(0.35, 0, 0.25, 1) both; }
+.splash-caption { margin: 13px 0 0; color: #8395ae; font-size: 9px; letter-spacing: 3px; text-indent: 3px; }
+.splash-bar { width: 108px; height: 1px; margin: 26px auto 0; overflow: hidden; background: #ffffff0c; }
+.splash-bar::after { content: ''; display: block; height: 100%; transform: scaleX(0); transform-origin: left; background: linear-gradient(90deg, #00f2fe, #b429f9); animation: splash-progress 800ms 1000ms cubic-bezier(0.35, 0, 0.25, 1) both; }
+.splash-workbench-pending #root { opacity: 0; transform: scale(0.92); }
+.splash-workbench-entering #root { transform-origin: 50% 50vh; animation: splash-workbench-in 700ms cubic-bezier(0.7, 0, 0.2, 1) both; }
+.splash-replay { position: fixed; z-index: 10000; right: max(72px, env(safe-area-inset-right)); bottom: max(18px, env(safe-area-inset-bottom)); display: flex; align-items: center; gap: 8px; min-height: 36px; padding: 9px 13px; border: 1px solid #85bded24; border-radius: 99px; background: #101722eb; color: #99aabe; font: 11px 'Segoe UI', 'Microsoft YaHei', sans-serif; box-shadow: 0 4px 24px #0003; backdrop-filter: blur(12px); cursor: pointer; touch-action: manipulation; }
+.splash-replay svg { width: 13px; height: 13px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+.splash-replay:hover { border-color: #66dbf877; color: #bcf3ff; }
+.splash-replay:focus-visible { outline: 2px solid #00f2fe; outline-offset: 4px; }
+html[data-theme="light"] .splash-replay { color: #405371; background: #f1f6ffeb; border-color: #739bd840; }
+body:has(.player-overlay, .settings-overlay, .overlay, dialog[open]) .splash-replay { display: none; }
+@keyframes splash-outline { to { stroke-dashoffset: 0; } }
+@keyframes splash-tile-draw { to { stroke-dashoffset: 0; } }
+@keyframes splash-laser-run { 0% { opacity: 0; stroke-dashoffset: 100; } 8%, 92% { opacity: 1; } 100% { opacity: 0; stroke-dashoffset: 0; } }
+@keyframes splash-icon-fill { from { opacity: 0; } to { opacity: 1; } }
+@keyframes splash-breathe { from { opacity: 0.14; transform: scale(0.86); } to { opacity: 0.32; transform: scale(1.12); } }
+@keyframes splash-brand-in { from { opacity: 0; transform: translateY(12px); filter: blur(5px); } to { opacity: 1; transform: translateY(0); filter: blur(0); } }
+@keyframes splash-type-in { from { letter-spacing: 24px; text-indent: 24px; } to { letter-spacing: 8px; text-indent: 8px; } }
+@keyframes splash-progress { to { transform: scaleX(1); } }
+@keyframes splash-portal { from { transform: scale(1); opacity: 1; } to { transform: scale(20); opacity: 0; } }
+@keyframes splash-workbench-in { from { transform: scale(0.92); opacity: 0; filter: blur(8px); } to { transform: scale(1); opacity: 1; filter: blur(0); } }
+@media (max-width: 760px) {
+  .splash-halo { width: 94vw; height: 80vw; }
+  .splash-meta { font-size: 8px; letter-spacing: 1.3px; }
+  .splash-meta-bottom { bottom: 78px; }
+  .splash-meta-bottom span:last-child { display: none; }
+  .splash-caption { font-size: 8px; letter-spacing: 1.6px; }
+  .splash-replay { right: 16px; bottom: max(16px, env(safe-area-inset-bottom)); min-height: 44px; }
+}
+@media (max-width: 420px) { .splash-meta-top span:last-child { display: none; } }
+@media (max-width: 760px) and (max-height: 680px) { .splash-meta-bottom { display: none; } }
+@media (max-height: 480px) and (orientation: landscape) {
+  .splash-mark { width: 130px; top: 43%; }
+  .splash-brand { top: calc(43% + 78px); }
+  .splash-title { font-size: 20px; }
+  .splash-caption { margin-top: 5px; font-size: 8px; }
+  .splash-bar { margin-top: 12px; }
+  .splash-scene { transform-origin: 50% 43%; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .splash-mark img, .splash-trace, .splash-tile, .splash-laser, .splash-brand, .splash-title, .splash-bar::after, .splash-halo::before, .splash-halo::after { animation: none; }
+  .splash-trace, .splash-tile { stroke-dashoffset: 0; }
+  .splash-halo::before, .splash-halo::after { opacity: 0.2; }
+  .splash-title { letter-spacing: 8px; text-indent: 8px; }
+  .splash-tilt { transform: none; transition: none; }
+  .splash-workbench-pending #root { transform: none; }
+  .splash.is-leaving .splash-scene { animation: splash-reduced-out 160ms linear both; }
+  .splash-workbench-entering #root { animation: splash-reduced-in 160ms linear both; }
+  @keyframes splash-reduced-out { to { opacity: 0; } }
+  @keyframes splash-reduced-in { from { opacity: 0; } to { opacity: 1; } }
+}

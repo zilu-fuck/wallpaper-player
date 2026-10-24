@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { analysisEventPatch, isAnalysisTerminal } from '../services/analysis-task-events'
 
 function pathKey(filePath) {
   return String(filePath || '').replace(/\\/g, '/').toLowerCase()
@@ -14,8 +15,11 @@ function getVideoName(video) {
 
 function createTask(video, status = 'queued') {
   const videoPath = getVideoPath(video)
+  const id = `analysis-${Date.now()}-${Math.random().toString(36).slice(2)}`
   return {
-    id: `analysis-${Date.now()}-${Math.random().toString(36).slice(2)}`,
+    id,
+    interestId: id,
+    canCancel: true,
     video,
     videoPath,
     videoName: getVideoName(video),
@@ -44,6 +48,8 @@ function createTaskFromJob(job) {
     message: job?.lastEvent?.message || job?.lastEvent?.stage || '正在分析',
     stage: job?.lastEvent?.stage || '',
     jobId: job?.jobId || '',
+    interestId: job?.interestId,
+    canCancel: Boolean(job?.canCancel),
     analysis: null,
     savedResultPath: '',
     error: '',
@@ -98,6 +104,8 @@ export function useVideoAnalysisTasks({ settings, videos = [], plugins = [], plu
   const [savedResultsMessage, setSavedResultsMessage] = useState('')
   const runningTaskIdRef = useRef('')
   const startingRef = useRef(false)
+  const retiredInterestsRef = useRef(new Set())
+  const latestEventsRef = useRef(new Map())
   const videoAnalysisPlugin = plugins.find?.(plugin => plugin.id === 'video-analysis')
   const enabled = Boolean(pluginsLoaded && videoAnalysisPlugin?.enabled && settings?.videoAnalysis?.enabled)
 
@@ -119,7 +127,19 @@ export function useVideoAnalysisTasks({ settings, videos = [], plugins = [], plu
     })
 
     try {
-      const result = await window.electronAPI?.startVideoAnalysis?.(task.videoPath)
+      const result = await window.electronAPI?.startVideoAnalysis?.(task.videoPath, task.interestId)
+      if (retiredInterestsRef.current.has(task.interestId)) {
+        const latest = latestEventsRef.current.get(result?.job?.jobId)
+        if (!result?.accepted) {
+          if (runningTaskIdRef.current === task.id) runningTaskIdRef.current = ''
+          updateTask(task.id, { status: 'cancelled', canCancel: false, message: '分析已取消', finishedAt: Date.now() })
+        } else {
+          if (isAnalysisTerminal(latest?.status) && runningTaskIdRef.current === task.id) runningTaskIdRef.current = ''
+          updateTask(task.id, { status: 'running', jobId: result.job.jobId, canCancel: false, interestReleased: true,
+            message: '正在取消分析', ...analysisEventPatch({ ...task, interestReleased: true }, latest) })
+        }
+        return
+      }
       if (!result?.accepted) {
         runningTaskIdRef.current = ''
         updateTask(task.id, {
@@ -131,11 +151,16 @@ export function useVideoAnalysisTasks({ settings, videos = [], plugins = [], plu
         return
       }
 
+      const latest = latestEventsRef.current.get(result.job?.jobId)
+      if (isAnalysisTerminal(latest?.status) && runningTaskIdRef.current === task.id) runningTaskIdRef.current = ''
       updateTask(task.id, {
         status: 'running',
         jobId: result.job?.jobId || '',
+        canCancel: result.job?.canCancel !== false,
+        interestId: result.job?.interestId || task.interestId,
         message: result.job?.lastEvent?.message || '正在分析',
-        stage: result.job?.lastEvent?.stage || ''
+        stage: result.job?.lastEvent?.stage || '',
+        ...analysisEventPatch(task, latest)
       })
     } catch (err) {
       runningTaskIdRef.current = ''
@@ -171,8 +196,9 @@ export function useVideoAnalysisTasks({ settings, videos = [], plugins = [], plu
     window.electronAPI.getVideoAnalysisJob()
       .then((job) => {
         if (canceled || !job?.running || !job.videoPath || !job.jobId) return
-        const task = createTaskFromJob(job)
-        runningTaskIdRef.current = task.id
+        const latest = latestEventsRef.current.get(job.jobId)
+        const task = { ...createTaskFromJob(job), ...analysisEventPatch({}, latest) }
+        if (!isAnalysisTerminal(task.status)) runningTaskIdRef.current = task.id
         setSidebarOpen(true)
         setTasks(prev => {
           const existing = prev.find(item => (
@@ -186,9 +212,12 @@ export function useVideoAnalysisTasks({ settings, videos = [], plugins = [], plu
                     ...item,
                     status: 'running',
                     jobId: job.jobId,
+                    canCancel: Boolean(job.canCancel),
+                    interestId: job.interestId || item.interestId,
                     message: job.lastEvent?.message || job.lastEvent?.stage || item.message || '正在分析',
                     stage: job.lastEvent?.stage || item.stage,
-                    startedAt: item.startedAt || job.startedAt || Date.now()
+                    startedAt: item.startedAt || job.startedAt || Date.now(),
+                    ...analysisEventPatch(item, latest)
                   }
                 : item
             ))
@@ -254,72 +283,18 @@ export function useVideoAnalysisTasks({ settings, videos = [], plugins = [], plu
     if (!enabled || !window.electronAPI?.onVideoAnalysisEvent) return undefined
 
     const remove = window.electronAPI.onVideoAnalysisEvent((payload) => {
-      if (!payload?.videoPath) return
+      if (!payload?.videoPath || !payload.jobId) return
+      const remembered = latestEventsRef.current.get(payload.jobId)
+      if (isAnalysisTerminal(remembered?.status) && !isAnalysisTerminal(payload.status)) return
+      latestEventsRef.current.set(payload.jobId, payload)
+      while (latestEventsRef.current.size > 128) latestEventsRef.current.delete(latestEventsRef.current.keys().next().value)
       const payloadKey = pathKey(payload.videoPath)
 
       setTasks(prev => prev.map(task => {
         if (pathKey(task.videoPath) !== payloadKey) return task
-        if (!['queued', 'starting', 'running'].includes(task.status) && task.jobId !== payload.jobId) return task
-
-        if (payload.status === 'started') {
-          runningTaskIdRef.current = task.id
-          return {
-            ...task,
-            status: 'running',
-            jobId: payload.jobId || task.jobId,
-            message: payload.message || '开始分析当前视频',
-            startedAt: task.startedAt || Date.now(),
-            error: ''
-          }
-        }
-
-        if (payload.status === 'running') {
-          return {
-            ...task,
-            status: 'running',
-            jobId: payload.jobId || task.jobId,
-            stage: payload.event?.stage || task.stage,
-            message: payload.event?.message || payload.event?.stage || '正在分析'
-          }
-        }
-
-        if (payload.status === 'success') {
-          if (runningTaskIdRef.current === task.id) runningTaskIdRef.current = ''
-          return {
-            ...task,
-            status: 'success',
-            source: '',
-            jobId: payload.jobId || task.jobId,
-            message: '分析完成',
-            analysis: payload.analysis || task.analysis,
-            savedResultPath: payload.savedResultPath || task.savedResultPath,
-            finishedAt: Date.now()
-          }
-        }
-
-        if (payload.status === 'cancelled') {
-          if (runningTaskIdRef.current === task.id) runningTaskIdRef.current = ''
-          return {
-            ...task,
-            status: 'cancelled',
-            message: '分析已取消',
-            error: '',
-            finishedAt: Date.now()
-          }
-        }
-
-        if (payload.status === 'error') {
-          if (runningTaskIdRef.current === task.id) runningTaskIdRef.current = ''
-          return {
-            ...task,
-            status: 'error',
-            message: '分析失败',
-            error: payload.error || '视频分析失败',
-            finishedAt: Date.now()
-          }
-        }
-
-        return task
+        if (!task.jobId || task.jobId !== payload.jobId || isAnalysisTerminal(task.status)) return task
+        if (isAnalysisTerminal(payload.status) && runningTaskIdRef.current === task.id) runningTaskIdRef.current = ''
+        return { ...task, ...analysisEventPatch(task, payload) }
       }))
     })
 
@@ -348,14 +323,27 @@ export function useVideoAnalysisTasks({ settings, videos = [], plugins = [], plu
 
   const cancelRunningTask = useCallback(async () => {
     const task = tasks.find(item => item.id === runningTaskIdRef.current)
-    await window.electronAPI?.cancelVideoAnalysis?.(task?.jobId)
-  }, [tasks])
+    if (!task || task.canCancel === false || !task.interestId) return
+    retiredInterestsRef.current.add(task.interestId)
+    while (retiredInterestsRef.current.size > 1024) retiredInterestsRef.current.delete(retiredInterestsRef.current.values().next().value)
+    try {
+      const result = await window.electronAPI?.cancelVideoAnalysis?.(task.jobId, task.interestId)
+      if (!result?.success) { retiredInterestsRef.current.delete(task.interestId); updateTask(task.id, { message: '取消未确认，请重试' }); return }
+      updateTask(task.id, { canCancel: false, interestReleased: true,
+        message: result.shared ? '已取消本次分析，其他设备或窗口仍在分析' : '正在取消分析' })
+      if (!result.shared && !result.taskCancelled) {
+        if (runningTaskIdRef.current === task.id) runningTaskIdRef.current = ''
+        updateTask(task.id, { status: 'cancelled', message: '分析已取消', finishedAt: Date.now() })
+      }
+    } catch { retiredInterestsRef.current.delete(task.interestId); updateTask(task.id, { message: '取消未确认，请重试' }) }
+  }, [tasks, updateTask])
 
   const retryTask = useCallback((taskId) => {
     setSidebarOpen(true)
     setTasks(prev => prev.map(task => (
       task.id === taskId
-        ? { ...task, status: 'queued', message: '等待分析', error: '', jobId: '', startedAt: null, finishedAt: null }
+        ? { ...task, interestId: `${task.id}-${Date.now().toString(36)}`, canCancel: true, interestReleased: false,
+            status: 'queued', message: '等待分析', error: '', jobId: '', startedAt: null, finishedAt: null }
         : task
     )))
   }, [])

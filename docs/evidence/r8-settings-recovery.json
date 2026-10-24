@@ -1,0 +1,1455 @@
+{
+  "date": "2026-10-19T09:11:56.294Z",
+  "stage": "R8 initial settings format/backup/startup recovery and protected verification delivery",
+  "environment": {
+    "node": "24.14.0",
+    "v8": "13.6.233.17-node.41",
+    "platform": "win32",
+    "arch": "x64",
+    "osRelease": "10.0.26300",
+    "cpu": "AMD Ryzen 7 5800X 8-Core Processor             ",
+    "electron": "35.7.5"
+  },
+  "sourceDigests": {
+    "main/settings.js": "36722c64ccd04a0ca56c3d9b6f72b09ee3924af7b52f65b17a4294ee21314cb1",
+    "main/repositories/settings-file.js": "e45a80bf524c810073ca7395785086207d92b1e012ba50d95bbf4b179677d672",
+    "main/application/settings-startup.js": "55aa1d65ef202b793d6f0548d890233a929cee9cc3907d6fdacda61635cdacf0",
+    "main/application/settings-json.js": "b051646df7c453b943e1c51f0e58a23caaea1c06b8d4fe243c476e86bfeb60ba",
+    "main/application/settings-json-worker.js": "40bfb2cf2e6312eb91cb246e9ae20537f79ca89bfd23ddf9e702c43ced57c799",
+    "main/index.js": "f857b8c8624576dd6d24c56cce1f068248b97da5aebac3cbf234d30d563ef5fc",
+    "main.js": "7198acda5739a568d7c868e07637e69ee1833bf7f734e2c851ef04d95caf13c3",
+    "main/portable-user-data.js": "577ced55e53005a55d71a07c0cd4824ac2657d9f6f420385d1ebd54063e33e5e",
+    "main/user-data.js": "940161537bcad84992d24516497606bcb79bbf551d01521f73337a69d700303a",
+    "main/repositories/user-media.js": "3049437c334259acaed84e16b52a29d81f3e0f777b3bfa7f3cc4d1c95de3c2b8",
+    "main/application/media-mutations.js": "da1d0a81ec7afaa6c1da34ac0e8f4e75feeee760195b5dd4ece267f9d4971eb3",
+    "main/remote/media-mutations.js": "76ea043d52a84d980b1b0ff683553cd304da1aa21c806c7d165b54beda11b2aa",
+    "main/ipc/settings.js": "de7fca92a59b29f8149f869bec5799bbbe8998a611844b28d027fae84e7035ad",
+    "main/plugins/core-api.js": "053244b815819208cf7fc553dbcaaa187b71efc7e862a66b66c02d6a6bb495a4",
+    "scripts/run-verify.cjs": "8126a5af38a417233a333c535d0c06ab2b92419f5d4615a0b26db08df74766a6",
+    "scripts/test-data-guard.cjs": "ee61c45dd4f2671dd9c9af2b68e589e60fb15dcae8b7d879e1a4663b37270d3f",
+    "scripts/verify-test-data-guard.js": "6ef14c06994f315cba282a3d2bcd3ad7112d3d3a91ee2402b7744e42e6c33664",
+    "scripts/verify-settings-recovery.js": "c30338b1e4bf4c16ce52b9f5133ec4ffa3e630a7b5ae3525c02b021c4de93dcf",
+    "scripts/verify-settings-recovery-ui.js": "c8b9c0a167662f8ef12aea994e6c7dab6986cb1a6ed9f49a439a9e3bec832338",
+    "scripts/verify-settings-recovery-electron.js": "00170d995e5e5178414d27b0b38a0230dfb33e10e4cb1f33850ad056ebe8fb07",
+    "scripts/verify-packaged-contracts.js": "6027f686e207c7e99fb229b634115dcd2477df716797485569ab4543f6dbcf17",
+    "scripts/verify-shutdown-persistence.js": "0a38d801e5f5da6981b3ac0e0e3b9d67caf0f119f6d331cc7d44c7c4e29e7180",
+    "scripts/verify-remote-library-flow.js": "0176657c89d96a3b434d376849e3b8550b28e76617d8ecd6b5a7e5188143add4",
+    "package.json": "f2736a52a7483dba961a72f8dcca785dcf1fd63388c175bc43833aa50213b8ec",
+    ".github/workflows/ci.yml": "2a6a8301aca9e8e509a552efd464727f7c04399a14fbb6e85286c35e4b5ba16f",
+    "docs/refactor-progress.md": "f9a67fd4df0c7c6cf38595821058995ba5672412b88f8cddbf37d51b0c03ecfe",
+    "docs/desktop-mobile-review-and-refactor-plan.md": "85594eb5cbf9650a7e3e4503e2a6fbc487b1b9aa083f8e857ad65af107e483fa",
+    "docs/protocol-contracts.md": "920d34a494756c828638f18c9ce39aa75145afd81827d1b2ca8e97b61fea609b"
+  },
+  "inputArtifacts": {
+    "lifecycle": {
+      "file": ".tmp/refactor-tests/settings-recovery-lifecycle.json",
+      "sha256": "37902f206ac5f0ebe9ef6060a4564b4772742fce719cbc5b438341d0fc1ecbdb"
+    },
+    "native": {
+      "file": ".tmp/refactor-tests/settings-recovery-electron.json",
+      "sha256": "9b1413d3a5d9bc0218daef61acb02f473b486277d0ae30122c1b24fa5de44c0c"
+    },
+    "guard": {
+      "file": ".tmp/refactor-tests/test-data-guard-evidence.json",
+      "sha256": "ea41eeac033f20fbb15c69d8e41b15588f91db68b0cd56125084475af3a74dc6"
+    },
+    "costs": {
+      "file": ".tmp/refactor-tests/settings-recovery-cost-series.json",
+      "sha256": "16e6ad1ce106c587fe788434d721037b37e2c98acdccf2c46e907b0c7a1a9b9c"
+    },
+    "worker": {
+      "file": ".tmp/refactor-tests/settings-json-lifecycle.json",
+      "sha256": "dbe1d47f0a565ec40536416816c8150c97561bfe02f03e38f224f43bfd256843"
+    },
+    "patches": {
+      "file": ".tmp/refactor-tests/settings-patch-lifecycle.json",
+      "sha256": "9a50c9d7ccab2801a136b2e5872066a3cac64c7d81bad48c4334a1084fd44245"
+    },
+    "feed": {
+      "file": ".tmp/refactor-tests/settings-feed-lifecycle.json",
+      "sha256": "1fa917a5583273c86383f84a1b7180328abed94ff8440c0a56d836282ab122ed"
+    },
+    "nativeFeed": {
+      "file": ".tmp/refactor-tests/settings-feed-electron.json",
+      "sha256": "bc652a98abd15fb42de09c914dcdf31219036500da7b6a47328a93fbc45049e4"
+    },
+    "appUI": {
+      "file": ".tmp/refactor-tests/settings-replies-app-ui.json",
+      "sha256": "ea8062100356405e09bff98391e9e8a7ac94263dd4132c22fd97f44ca5ef5247"
+    },
+    "remoteIsolation": {
+      "file": ".tmp/refactor-tests/remote-library-isolation.json",
+      "sha256": "2ff539d1a24652a7a69f4443a7562782bf61125cdceb804c0ead86871965e641"
+    },
+    "previousScopeCorrection": {
+      "file": "docs/evidence/r7-media-fields.json",
+      "sha256": "d7be332f44f706ca74b5257c3adecc7890c3cacdc40894860c190bdf662f0589"
+    }
+  },
+  "scope": [
+    "Flat JSON schemaVersion 1, legacy version 0 compatibility, last readable disk generation backup and best-effort migration record.",
+    "No default replacement on malformed/unreadable/unsupported files; explicit startup recovery before business initialization, corrupt bytes preserved.",
+    "Actual owned process interruption at three commit phases and actual Electron main/index startup in five isolated Unicode/space profiles.",
+    "88 direct Node/Electron verification entries use a child runner/preload; synthetic negative reporting cannot be swallowed as success.",
+    "Actual ASAR calls include user-media repository, schema/backup, storage restore and startup recovery helper."
+  ],
+  "lifecycle": {
+    "date": "2026-10-19T09:06:48.021Z",
+    "fixture": ".tmp\\refactor-tests\\settings-recovery-Ax18iN",
+    "passed": [
+      "fresh installs stay read-only until a commit; first backup and prior-generation rotation are complete",
+      "write input bytes are captured before asynchronous IO and cannot mutate the next backup generation",
+      "legacy BOM/plain-object data is backed up byte-for-byte and schema migration records retain source identity",
+      "truncation, empty, non-object and invalid versions never turn into defaults or get overwritten",
+      "unsupported primary versions cannot silently fall back or be downgraded by a write",
+      "simultaneously invalid primary and backup remain unchanged and cannot be replaced by defaults",
+      "recovery is explicit, preserves corrupt bytes separately and never exposes document content in diagnostics",
+      "failed restore reports stable diagnostic paths and retains the corrupt primary and valid backup",
+      "a missing primary with a surviving backup requires recovery rather than a new blank profile",
+      "changed primary/backup candidates cannot be restored using a stale confirmation",
+      "permission and filesystem read failures are visible and do not create defaults",
+      "backup and primary rename failures keep the last committed primary, clean own temporaries and allow retry",
+      "audit failure cannot report an already committed write as failed and its record retries later",
+      "initial backup failure preserves successful primary semantics and a later commit repairs the backup",
+      "synchronous exit writes rotate backups and a later failed read also blocks synchronous overwrite",
+      "startup cancellation preserves files and explicit recovery starts only after successful restore",
+      "actual owned child termination during partial temp, before primary rename and after primary rename leaves readable committed generations",
+      "production settings reserve schemaVersion, preserve legacy result contracts and rotate backup through actual worker commits",
+      "plugin settings facade retains existing helpers and stable identity without exposing startup recovery"
+    ],
+    "sourceDigests": {
+      "main/repositories/settings-file.js": "e45a80bf524c810073ca7395785086207d92b1e012ba50d95bbf4b179677d672",
+      "main/application/settings-startup.js": "55aa1d65ef202b793d6f0548d890233a929cee9cc3907d6fdacda61635cdacf0",
+      "main/settings.js": "36722c64ccd04a0ca56c3d9b6f72b09ee3924af7b52f65b17a4294ee21314cb1",
+      "main/application/settings-json-worker.js": "40bfb2cf2e6312eb91cb246e9ae20537f79ca89bfd23ddf9e702c43ced57c799",
+      "main/index.js": "f857b8c8624576dd6d24c56cce1f068248b97da5aebac3cbf234d30d563ef5fc",
+      "main/plugins/core-api.js": "053244b815819208cf7fc553dbcaaa187b71efc7e862a66b66c02d6a6bb495a4",
+      "scripts/run-verify.cjs": "8126a5af38a417233a333c535d0c06ab2b92419f5d4615a0b26db08df74766a6",
+      "scripts/test-data-guard.cjs": "ee61c45dd4f2671dd9c9af2b68e589e60fb15dcae8b7d879e1a4663b37270d3f"
+    },
+    "conditions": "Actual production storage/settings worker and filesystem, controlled rename/read errors and actual owned Node child termination at three commit gates. Startup dialog selection controlled; separate actual Electron startup checks required. No power-loss, fsync/directory durability or signed-update acceptance."
+  },
+  "actualElectronStartup": {
+    "date": "2026-10-19T09:06:52.464Z",
+    "results": [
+      {
+        "fixture": ".tmp\\refactor-tests\\settings-recovery-native-中文 空格-AHsdH4",
+        "mode": "corrupt",
+        "exitSeen": 1,
+        "identityEntered": 0,
+        "dialogs": [
+          {
+            "type": "error",
+            "title": "设置无法读取",
+            "buttons": [
+              "退出"
+            ],
+            "defaultId": 0,
+            "cancelId": 0
+          }
+        ],
+        "sourceDigests": {
+          "main/index.js": "f857b8c8624576dd6d24c56cce1f068248b97da5aebac3cbf234d30d563ef5fc",
+          "main/settings.js": "36722c64ccd04a0ca56c3d9b6f72b09ee3924af7b52f65b17a4294ee21314cb1",
+          "main/application/settings-startup.js": "55aa1d65ef202b793d6f0548d890233a929cee9cc3907d6fdacda61635cdacf0",
+          "main/repositories/settings-file.js": "e45a80bf524c810073ca7395785086207d92b1e012ba50d95bbf4b179677d672"
+        }
+      },
+      {
+        "fixture": ".tmp\\refactor-tests\\settings-recovery-native-中文 空格-IfI4pL",
+        "mode": "future",
+        "exitSeen": 1,
+        "identityEntered": 0,
+        "dialogs": [
+          {
+            "type": "error",
+            "title": "设置无法读取",
+            "buttons": [
+              "退出"
+            ],
+            "defaultId": 0,
+            "cancelId": 0
+          }
+        ],
+        "sourceDigests": {
+          "main/index.js": "f857b8c8624576dd6d24c56cce1f068248b97da5aebac3cbf234d30d563ef5fc",
+          "main/settings.js": "36722c64ccd04a0ca56c3d9b6f72b09ee3924af7b52f65b17a4294ee21314cb1",
+          "main/application/settings-startup.js": "55aa1d65ef202b793d6f0548d890233a929cee9cc3907d6fdacda61635cdacf0",
+          "main/repositories/settings-file.js": "e45a80bf524c810073ca7395785086207d92b1e012ba50d95bbf4b179677d672"
+        }
+      },
+      {
+        "fixture": ".tmp\\refactor-tests\\settings-recovery-native-中文 空格-Z9KQEl",
+        "mode": "cancel",
+        "exitSeen": 1,
+        "identityEntered": 0,
+        "dialogs": [
+          {
+            "type": "warning",
+            "title": "设置需要恢复",
+            "buttons": [
+              "退出并保留文件",
+              "从备份恢复并启动"
+            ],
+            "defaultId": 0,
+            "cancelId": 0
+          }
+        ],
+        "sourceDigests": {
+          "main/index.js": "f857b8c8624576dd6d24c56cce1f068248b97da5aebac3cbf234d30d563ef5fc",
+          "main/settings.js": "36722c64ccd04a0ca56c3d9b6f72b09ee3924af7b52f65b17a4294ee21314cb1",
+          "main/application/settings-startup.js": "55aa1d65ef202b793d6f0548d890233a929cee9cc3907d6fdacda61635cdacf0",
+          "main/repositories/settings-file.js": "e45a80bf524c810073ca7395785086207d92b1e012ba50d95bbf4b179677d672"
+        }
+      },
+      {
+        "fixture": ".tmp\\refactor-tests\\settings-recovery-native-中文 空格-YTI7fV",
+        "mode": "restore",
+        "exitSeen": null,
+        "identityEntered": 1,
+        "dialogs": [
+          {
+            "type": "warning",
+            "title": "设置需要恢复",
+            "buttons": [
+              "退出并保留文件",
+              "从备份恢复并启动"
+            ],
+            "defaultId": 0,
+            "cancelId": 0
+          }
+        ],
+        "sourceDigests": {
+          "main/index.js": "f857b8c8624576dd6d24c56cce1f068248b97da5aebac3cbf234d30d563ef5fc",
+          "main/settings.js": "36722c64ccd04a0ca56c3d9b6f72b09ee3924af7b52f65b17a4294ee21314cb1",
+          "main/application/settings-startup.js": "55aa1d65ef202b793d6f0548d890233a929cee9cc3907d6fdacda61635cdacf0",
+          "main/repositories/settings-file.js": "e45a80bf524c810073ca7395785086207d92b1e012ba50d95bbf4b179677d672"
+        }
+      },
+      {
+        "fixture": ".tmp\\refactor-tests\\settings-recovery-native-中文 空格-dlJ0kQ",
+        "mode": "changed",
+        "exitSeen": 1,
+        "identityEntered": 0,
+        "dialogs": [
+          {
+            "type": "warning",
+            "title": "设置需要恢复",
+            "buttons": [
+              "退出并保留文件",
+              "从备份恢复并启动"
+            ],
+            "defaultId": 0,
+            "cancelId": 0
+          },
+          {
+            "type": "error",
+            "title": "设置无法读取",
+            "buttons": [
+              "退出"
+            ],
+            "defaultId": 0,
+            "cancelId": 0
+          }
+        ],
+        "sourceDigests": {
+          "main/index.js": "f857b8c8624576dd6d24c56cce1f068248b97da5aebac3cbf234d30d563ef5fc",
+          "main/settings.js": "36722c64ccd04a0ca56c3d9b6f72b09ee3924af7b52f65b17a4294ee21314cb1",
+          "main/application/settings-startup.js": "55aa1d65ef202b793d6f0548d890233a929cee9cc3907d6fdacda61635cdacf0",
+          "main/repositories/settings-file.js": "e45a80bf524c810073ca7395785086207d92b1e012ba50d95bbf4b179677d672"
+        }
+      }
+    ],
+    "conditions": "Actual Electron production main/index startup in separate Unicode/space profiles. Native dialog answers controlled; actual identity initialization held after recovery to avoid external service/plugin/player startup. Before-choice and failure cases create no normal window or identity store. Not manual native dialog layout, signed installer or power-loss acceptance."
+  },
+  "testDataProtection": {
+    "date": "2026-10-19T08:43:29.449Z",
+    "fixture": ".tmp\\refactor-tests\\data-guard-z5NwCW",
+    "passed": [
+      "sync/callback/promise filesystem mutation blocked before write",
+      "writable open and streams blocked",
+      "recursive ancestor mutation blocked",
+      "relative filesystem alias, hardlink and file URL blocked",
+      "worker preload inherits protection",
+      "actual Electron main preload inherits protection",
+      "runner fails even when the test catches the protection error and explicitly exits zero"
+    ],
+    "checks": 15,
+    "intentionalReport": ".tmp\\refactor-tests\\verification-guard-76e7a07f-f205-4730-857c-4c6399280598.jsonl",
+    "conditions": "Synthetic protected directory only; no project fallback mutation attempted. Guard is for accidental verification writes, not a general security sandbox. Junction fixture retained."
+  },
+  "protectionScope": {
+    "guardedScripts": [
+      "verify:contracts-generated",
+      "verify:contracts",
+      "verify:tag-conflicts",
+      "verify:library-invalidation",
+      "verify:library-query",
+      "verify:library-performance",
+      "verify:connection-lifecycle",
+      "verify:file-stream-lifecycle",
+      "verify:player-task-lifecycle",
+      "verify:mobile-navigation",
+      "verify:analysis-request-lifecycle",
+      "verify:analysis-job-lifecycle",
+      "verify:analysis-interests",
+      "verify:download-lifecycle",
+      "verify:mpv-installer",
+      "verify:download-observation",
+      "verify:download-tasks",
+      "verify:remote-server-lifecycle",
+      "verify:player-resources",
+      "verify:transcode-interests",
+      "verify:transcode-preparation",
+      "verify:transcode-cache",
+      "verify:transcode-operations",
+      "verify:desktop-player",
+      "verify:ipc-sender",
+      "verify:mobile-playback-adapter",
+      "verify:resource-scheduler",
+      "verify:media-job-lifecycle",
+      "verify:network-stream-lifecycle",
+      "verify:preparation-lifecycle",
+      "verify:packaged-contracts",
+      "verify:mobile-bundles",
+      "verify:remote-mobile",
+      "verify:remote-settings",
+      "verify:remote-api",
+      "verify:remote-library",
+      "verify:legacy-tags",
+      "verify:thumbnail-playback",
+      "verify:plugin-official",
+      "verify:ai-search",
+      "verify:vendor",
+      "verify:vlm-path-migration",
+      "verify:vlm-installed-probe",
+      "verify:electron-api",
+      "verify:plugins",
+      "verify:plugin-remote",
+      "verify:plugin-video",
+      "verify:plugin-external",
+      "verify:plugin-package",
+      "verify:vlm-ui",
+      "verify:analysis-settings",
+      "verify:analysis-config",
+      "verify:settings-snapshots",
+      "verify:settings-panels",
+      "verify:app-initialization",
+      "verify:privacy-passwords",
+      "verify:media-policy-settings",
+      "verify:updater-startup",
+      "verify:json-responses",
+      "verify:library-paths",
+      "verify:responsive-layout",
+      "verify:mobile-accessibility",
+      "verify:mobile-input-accessibility",
+      "verify:mobile-player-panels",
+      "verify:app-state",
+      "verify:startup",
+      "verify:settings-persistence",
+      "verify:test-data-guard",
+      "verify:settings-recovery",
+      "verify:settings-commit",
+      "verify:settings-json",
+      "verify:settings-feed",
+      "verify:settings-replies",
+      "verify:identity-io",
+      "verify:media-access",
+      "verify:media-mutations",
+      "verify:media-fields",
+      "verify:media-mutation-paths",
+      "verify:shutdown-persistence",
+      "verify:update-metadata",
+      "verify:remote-pressure",
+      "verify:mobile-multi-device",
+      "verify:mobile-correctness",
+      "verify:mobile-player",
+      "verify:mobile-performance",
+      "verify:video-metadata",
+      "verify:mobile-transcode",
+      "verify:mobile-transcode-concurrency"
+    ],
+    "otherVerifyEntries": [
+      [
+        "verify:api-adapters",
+        "tsc --noEmit -p tsconfig.adapters.json"
+      ],
+      [
+        "verify:mobile-lan",
+        "npm run verify:remote-mobile && npm run verify:remote-settings && npm run verify:remote-api && npm run verify:remote-library && npm run verify:mobile-multi-device && npm run verify:mobile-player && npm run verify:mobile-performance && npm run verify:mobile-transcode && npm run verify:mobile-transcode-concurrency"
+      ]
+    ],
+    "inheritance": "Node options use an absolute forward-slash quoted preload path. Current Node worker and actual development Electron runtime inheritance verified; runtime probe is an early CI gate. Production application entry points do not import the test guard.",
+    "limits": "Common JavaScript filesystem accidental-write protection, not a security sandbox; arbitrary native/external process writes and deliberate bypasses are not covered. Per-fixture path assertions remain necessary.",
+    "reports": [
+      {
+        "file": ".tmp/refactor-tests/verification-guard-76e7a07f-f205-4730-857c-4c6399280598.jsonl",
+        "sha256": "d19e488403bf0327d074d95a99af07368988a0eea9509a2ec19db14bab64fb59",
+        "intentional": true,
+        "reason": "synthetic protected directory self-test catches an error and exits zero; runner must still fail"
+      }
+    ]
+  },
+  "dataPreservation": {
+    "baseline": "docs/evidence/r7-media-fields.json",
+    "files": 42,
+    "preservedFallbackFiles": [
+      [
+        "analysis-results\\G086 Bronya分析结果2026-06-22_20-00-44.json",
+        "01db5f778601802471791e416b40c3ac8f96248e4542b78a867eaee77dd265e4"
+      ],
+      [
+        "downloads\\aria2.session",
+        "bbe9d72e7e5001c01f3a012fa73e5d35b6d53b9e76e08190bba58973ce1ba9bc"
+      ],
+      [
+        "llama-server-err.log",
+        "5744b9bb378569a3a4f664b62aad9a4b0025cd7d419cba73b793fb62cb737f42"
+      ],
+      [
+        "llama-server-out.log",
+        "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      ],
+      [
+        "remote-identity.json",
+        "0abcd8df9c1443a348b050b5abe28ac419ecef717ddf31a0daa680f153061324"
+      ],
+      [
+        "scan-index\\029fa92465c3409cba74ce3db6b927dfec0d4f581b12122975041a32ab324e8a.json",
+        "33b1310886821b4f01322041a561c8a6b4ed10aa351772effb396e7b1b547cfd"
+      ],
+      [
+        "scan-index\\06cf5926d93db3cc7b30882ee7dbecb69d51ce4e00de7901de3d48b866f9afc3.json",
+        "274848604327a2f96f0d152b9f23a7b4e5470fdd67c744e1c181e86c2d284059"
+      ],
+      [
+        "scan-index\\0e65747e6e0fc76a1e0c86e951c35d6c7392c184ba6cb43724d7d58856ff212a.json",
+        "3ac45a0678e6ed4554fe1f315f923d999b0311096acd3c9394e3d85826d37db9"
+      ],
+      [
+        "scan-index\\114890f3437dd45b34313ba38d9d3c36a09701d5d672bf8abd7af8c922db61af.json",
+        "3796d21463d2b2418c485565780e9628a50ab4f1a69d8faeadec1eb70a9af290"
+      ],
+      [
+        "scan-index\\1465f8e823323fe9c4383abb5a38c9e17fc550dd44cd2f14fd7f7242bc309e12.json",
+        "1be5fefdb59d8af06de2a6be0eeb0025a96253d719de1e0daced6f1fe35cdde0"
+      ],
+      [
+        "scan-index\\153bae098b5d3524553fcf4d8cbb1eacef2471314948819d043b26cebe199e14.json",
+        "689305d629290f70b40c5ea8454db685486f87be218b38da7aa4f0594a1d1cb8"
+      ],
+      [
+        "scan-index\\165f4a9a9309a7ac323647e9acefd754a66c6295cab7db6bdb50830914bf0d68.json",
+        "5b0738883aee24ac7e17fc108a221e395380d2bae6a32f3ba3f70606e4b27ebe"
+      ],
+      [
+        "scan-index\\1db67e5d68a60a19388b0338ed1ee18c2a2bcd0025ab168a1d69920c929bd647.json",
+        "b19f9d1c96db4b9106b2a28058ab1c33f4d3edc45fa693126cad0efe48cd44dd"
+      ],
+      [
+        "scan-index\\3032598f9f4655037a67986db404cfbf60011a2ca84a1e6edcec794c7deab956.json",
+        "db1c59c38bb8ba2122afad18a73d956ec55d4580f4cad17f365b37b71d7e3db8"
+      ],
+      [
+        "scan-index\\358da0698a4692a8052707f22ba2b9c94b5c4e73080d12c721e622b66a80614c.json",
+        "f1fb6fbd25b3d96027a86d6c797b162a74c95544c04f64470ed733ddbc8983ee"
+      ],
+      [
+        "scan-index\\5eb5da5dcf86cb8c66f674df75935c030f8e12d86b6373ebcdaa3d7aba7eb672.json",
+        "489328dc3fa24223d6db18869658db5d01f915838ba97532de8193f8bedc6f93"
+      ],
+      [
+        "scan-index\\5f59f687750abe3eb7d55cdb1aa86cb802bf22f3b00e3bb369f77a7ef2584d06.json",
+        "ae2763e5e5553a4eb759576c8f26efcffc9ef5aa741ddd6aad78b2e33716a719"
+      ],
+      [
+        "scan-index\\602ae02092dd5e362dec6b88bd5afb39f14c218b3e0f0fbd52e5a8d09eddeb0d.json",
+        "cd75909f0b53f3d449d479531d62f3ff1bb3144eb918086cc7a25d05816c2a7d"
+      ],
+      [
+        "scan-index\\664a4a47b45908fdfdf2d6bb5ec7024e41699d7dd2af4110f2889d4eac6dd2d7.json",
+        "64835ce867a827d40088ce1b9c8e4e19cb996d0df4c2e676cbb215cf38868556"
+      ],
+      [
+        "scan-index\\6a4b7a95d1ae5d67f63cc87a4f3486c0a22c35af457355ae63f4303d7bdbcaa1.json",
+        "7ab98d842e31b5da1227cf6e00d98e3e32287c53b0965f3e8a964dbc9e982b20"
+      ],
+      [
+        "scan-index\\6c2bfaa6b9f2b41ef00e065bab2a6d71c599e2ce76cc3f5939228ecc7b8be650.json",
+        "33dd4002ba26ea91ef1c97f264ef0337dd78b37d06f03a538f514ee0809c5107"
+      ],
+      [
+        "scan-index\\703cb3b91afdc3a4a39fb95f9d0c0289fe6dcdab34f10425d71858a05164ce3b.json",
+        "217ca6aa5c2c3b721795e93c7cb5d819317fa55546fee842c81420f84c353fe8"
+      ],
+      [
+        "scan-index\\85bd705cb26d94f80943f15877c1c71cc9f9a665c0bf24f8ab568b0b6bacf550.json",
+        "d4bb5033f4315903b0083789b87e09f4e06cb294a17313439f21987dd0b3a527"
+      ],
+      [
+        "scan-index\\87720e2b63644af82253d5ec9ace977d27e42c03a6033c6811af6c6094928e09.json",
+        "2b01b9760b6e8f5605fd9bb0cbc74e6f248c0bec7428982ce0dbb848c1f6e589"
+      ],
+      [
+        "scan-index\\959e88efa835995e2afff87fc4257966a41b7f45da19d44dc3369ba0d88599c9.json",
+        "bec93346f2dfbf0938b593658fd80e43a9be33b0bd4a0f7bcbf9a8997198ba9e"
+      ],
+      [
+        "scan-index\\9d7bcef01cadb37f1a59d31b708084c192007deea8564d134dcc473b0605201c.json",
+        "04d6bfae12cdb3e73f828813477825cd39dc803c37893be82455ecebe7734312"
+      ],
+      [
+        "scan-index\\a02253e6f623d27dfaa6674be31d9b43fc3d9b2c6bcda125418f1c3dd2a25709.json",
+        "90f629426a02dbbe9d60c7ad0c28090bd77a96693fcd1187b5215eda49184b86"
+      ],
+      [
+        "scan-index\\a17738a5c4b4bc1ce4358ecff69b8e44a1e1a33a7511d9a11eddecd94b9e58cd.json",
+        "a1fd92c4c4c8b9bbfeb105da251cc5230f16f1f68edf7cf909a468da0c242d99"
+      ],
+      [
+        "scan-index\\c53e2ac468d9387f39255a1ee9893eba1abe325ab086dea0025a18d1ef67e75f.json",
+        "2042c353b3e1c29eb236d1a1dfce79afdb85839f40f02f0b70d521eff607e6bb"
+      ],
+      [
+        "scan-index\\cb702390842effe5e6e22e77acbda7b2bbea77ed51a5c07e66c3c5d8d0bc15bf.json",
+        "718b65c8b9b80caa3c5d34bc3244f750cd8243dc4b8743f637c3b12dbbbbda4a"
+      ],
+      [
+        "scan-index\\cbf568b1144651ce061c2dc94a347128724334dd45ac2dd4ebf6890d74c66251.json",
+        "e22fd608a0197ea15fdbd8e3320b49d60e518bb4054b74ffb7504cd8e6035134"
+      ],
+      [
+        "scan-index\\d6cd75e4bc356e88ed2b4c2272c32263e568d67a07b4017d73b22e09c23e8306.json",
+        "d3ccf77f170934b4987c22301d34abbb8b7646d45af03f575057804e4c892629"
+      ],
+      [
+        "scan-index\\db34a207b303445fed1e9654c8e68883c93c5123070913181f89844225e4636a.json",
+        "81149ad6956bdb73b468e88036ef043043faecd14d34901ba5eaa49b775d3a72"
+      ],
+      [
+        "scan-index\\de13066bd94cc789543a5fa9e6100f3297df42c5dd715cccf10b11383b6f1d68.json",
+        "d2ac7243b636179c0e35727cb899a4f608b7c044d759e6b6a52c8f501a3a6945"
+      ],
+      [
+        "scan-index\\eba7ad116c30f43341d30f06e5f9efe510565b2a31a16c0eccab8fc4c303e6bc.json",
+        "636392edc5a9f41da4b70492833939eac890636623ab957400a7118bba472fc7"
+      ],
+      [
+        "scan-index\\f16070f230607bf79853b98a8c462b8e7b854deeb16fe246ba6c9d783c9b2832.json",
+        "becff49c6c81b5dfd4688bbb272be352a8821ce42120b45282ea86c65f6378c2"
+      ],
+      [
+        "scan-index\\f408135604349a60c1b7caa1d60757de692af100c4518e5588f38b619995f186.json",
+        "b894250b5d420a09b89350f33103a5d08edb5fc3d20f3cddf7604ed1fcb9df3a"
+      ],
+      [
+        "scan-index\\f7b0c1004febecbe36453be10ef2ddc2523e5b92f4af5f318ce1049990e93053.json",
+        "77f2b4ded7202b828e8a6e281d549eecd1e79aea4030dfb2a7d918202ab090c5"
+      ],
+      [
+        "scan-index\\f892c389d585d65dff3d06f6c86d3355dc90100c808a4f80da22b2f7e81865ba.json",
+        "b0f007ba8b4249849d726eee7a9fec6cf5926742e62d3cb833bd464423af520e"
+      ],
+      [
+        "scan-index\\fc41c7e68e94b6f115983997d8498353a4f8f41b61fc91662dd84affe70fc9fb.json",
+        "fa79531cd58ae0323d29102813386358d2e599ecb63902231ed73e264196abdc"
+      ],
+      [
+        "settings.json",
+        "6fb990f7edfe0707bb48b8bed65455cc2a521d33e028b45ce77f98b6a466a0d5"
+      ],
+      [
+        "video-metadata-cache.json",
+        "616205b2e97a75ea8842d3b4f6f3de778fc545493659d45e5c0139c6d7087f47"
+      ]
+    ],
+    "settingsSha256": "6fb990f7edfe0707bb48b8bed65455cc2a521d33e028b45ce77f98b6a466a0d5",
+    "status": "All 42 post-incident fallback file contents preserved; no prior lost originals were reconstructed, restored or overwritten in this batch."
+  },
+  "regressions": {
+    "worker": {
+      "date": "2026-10-19T08:55:32.042Z",
+      "fixture": ".tmp\\refactor-tests\\settings-json-lifecycle-SLN6sj",
+      "passed": [
+        "worker snapshot and returned fields have separate ownership",
+        "seed mismatch, JSON canonical semantics and serialization error recovery",
+        "configured byte budget rejects before publication and recovers",
+        "single active job and graceful close wait for actual worker completion",
+        "forced close terminates only the owned thread before releasing the job",
+        "unexpected thread exit and malformed response recover after thread exit",
+        "deadline terminates a live blocked worker and later requests recover",
+        "idle worker does not keep an otherwise completed Node process alive",
+        "idle retirement releases the owned thread and later reseeds from current state",
+        "ordinary production patch sends changed fields and preserves input/result/cache ownership",
+        "value-only result and worker failure never publish or replace the durable file",
+        "synchronous changes during worker preparation rebase and flush together",
+        "custom property-key JSON, special keys and directory callback ownership stay compatible",
+        "path rebase compares the encoded durable snapshot before scheduling a follow-up write"
+      ],
+      "sourceDigests": {
+        "main/settings.js": "36722c64ccd04a0ca56c3d9b6f72b09ee3924af7b52f65b17a4294ee21314cb1",
+        "main/application/settings-json.js": "b051646df7c453b943e1c51f0e58a23caaea1c06b8d4fe243c476e86bfeb60ba",
+        "main/application/settings-json-worker.js": "40bfb2cf2e6312eb91cb246e9ae20537f79ca89bfd23ddf9e702c43ced57c799",
+        "main/application/media-mutations.js": "da1d0a81ec7afaa6c1da34ac0e8f4e75feeee760195b5dd4ece267f9d4971eb3",
+        "main/remote/media-mutations.js": "76ea043d52a84d980b1b0ff683553cd304da1aa21c806c7d165b54beda11b2aa",
+        "main/index.js": "f857b8c8624576dd6d24c56cce1f068248b97da5aebac3cbf234d30d563ef5fc"
+      },
+      "conditions": "Actual Node worker threads, actual production settings and atomic filesystem. Controlled shared-memory gate, thread exit/timeout, configurable test byte limit, process exit and message fault injection. No native-device, cold-start or power-loss acceptance."
+    },
+    "patches": {
+      "date": "2026-10-19T08:55:32.375Z",
+      "fixture": ".tmp\\refactor-tests\\settings-patch-lifecycle-Drfq22",
+      "passed": [
+        "detached initial/provider defaults",
+        "patch-only intent",
+        "cache unchanged before rename",
+        "sync field/plugin rebase",
+        "observer/result/callback/input isolation after commit",
+        "in-flight input cannot change durable intent",
+        "queued input captured at call",
+        "snapshot stamps",
+        "failed custom merge does not mutate cache or notify",
+        "explicit undefined reset",
+        "unrelated patch preserves path config",
+        "actual policy re-resolves retargeted root",
+        "explicit path patch normalizes current root"
+      ],
+      "conditions": "Production settings and media policy, actual atomic file writes and real directory junction/symlink. Rename delay/failure controlled; no renderer/native performance claim."
+    },
+    "feed": {
+      "date": "2026-10-19T08:55:31.423Z",
+      "fixture": ".tmp\\refactor-tests\\settings-feed-GHdGnR",
+      "passed": [
+        "shared schema protects metadata, special keys and map ordering",
+        "initial feed reads coalesce and a pre-reply event triggers one fresh baseline",
+        "entity changes preserve unchanged references and optimistic intent rejects stale full acknowledgments",
+        "lost/out-of-order messages coalesce recovery and fresh baselines bound invalid-clock retries",
+        "private fields and malformed map order cannot partially mutate confirmed settings",
+        "retired reads do not publish after disposal and current recovery failures stay visible",
+        "negotiated broadcasts carry one entity and keep a stable feed for multiple readers",
+        "field and playback reads avoid full snapshots while keeping detached values",
+        "legacy listeners coexist and stale unsubscribe messages cannot disable newer listeners",
+        "unannounced version changes recover with a full snapshot and privacy changes stay redacted",
+        "failed commits and retired frame scopes cannot emit state"
+      ],
+      "sourceDigests": {
+        "main/settings.js": "36722c64ccd04a0ca56c3d9b6f72b09ee3924af7b52f65b17a4294ee21314cb1",
+        "main/application/settings-broadcast.js": "f7137590c14a6e3c4fa4217fe318f90d5072942b1d206c2d5d50e4a97e38281e",
+        "main/application/settings-json.js": "b051646df7c453b943e1c51f0e58a23caaea1c06b8d4fe243c476e86bfeb60ba",
+        "main/application/settings-json-worker.js": "40bfb2cf2e6312eb91cb246e9ae20537f79ca89bfd23ddf9e702c43ced57c799",
+        "src/services/settings-client.js": "36c2fe66bd85f54bb4e89445fadf8f1c704a0bc271d79fe5f0b6eadd5f1ffdb1",
+        "src/hooks/useAppState.js": "26bd3629c0ebfeeed7a394ff90f0b4a1bdace96a1f110ee097cae405ed420a05",
+        "src/utils/share-json.js": "91392d99af0dbc903522f41b35b1f7a4beb2bd8947251fb95f9c7873523b52a4",
+        "preload.js": "b4a725252f0b0a6ecd2afec36084678984a975b795c363ee2cd09f6fbdff22c6",
+        "packages/contracts/src/settings-feed.ts": "8266d590aa5b9b2ac6bfa2a72fb4f9a269cd9e29de0de4cdf76832f7805342f6"
+      },
+      "conditions": "Actual production settings, worker, publisher and renderer SettingsClient. Renderer hooks loaded through controlled harness and main-frame scope injected here; actual Electron frame/preload verification is separate."
+    },
+    "nativeFeed": {
+      "date": "2026-10-19T08:55:33.896Z",
+      "fixture": ".tmp\\refactor-tests\\settings-feed-ui-EEH3gq",
+      "passed": [
+        "production sandbox preload and SettingsClient receive only narrow actual Electron events",
+        "legacy full subscriptions coexist and unsubscribe without changing current consumers",
+        "a lost native event produces one authoritative full resync",
+        "foreign navigation cannot read or receive settings and an authorized reload gets a fresh feed",
+        "production SettingsClient requests version-only durable save replies without an extra full read",
+        "a version acknowledgment repairs a lost final save event with one authoritative full read",
+        "production media adapters use small version replies, recover a lost last event and preserve tag replay, bulk and legacy reads"
+      ],
+      "ordinary": [
+        {
+          "channel": "settings-patched",
+          "kind": "settings-patch-v1",
+          "bytes": 271,
+          "feedId": "5119638d-d4b9-4a27-b173-00643af9464c",
+          "mapKeys": {}
+        },
+        {
+          "channel": "settings-patched",
+          "kind": "settings-patch-v1",
+          "bytes": 525,
+          "feedId": "5119638d-d4b9-4a27-b173-00643af9464c",
+          "mapKeys": {
+            "playbackStates": [
+              "fixture-video"
+            ]
+          }
+        },
+        {
+          "channel": "settings-patched",
+          "kind": "settings-patch-v1",
+          "bytes": 312,
+          "feedId": "5119638d-d4b9-4a27-b173-00643af9464c",
+          "mapKeys": {
+            "customTags": [
+              "file-7"
+            ]
+          }
+        }
+      ],
+      "replies": [
+        {
+          "channel": "save-settings",
+          "bytes": 97,
+          "hasSettings": false,
+          "version": {
+            "epoch": "dd06dd65-07fc-4b2f-80fe-d53001420b61",
+            "revision": 12
+          }
+        },
+        {
+          "channel": "save-settings",
+          "bytes": 97,
+          "hasSettings": false,
+          "version": {
+            "epoch": "dd06dd65-07fc-4b2f-80fe-d53001420b61",
+            "revision": 13
+          }
+        },
+        {
+          "channel": "media-set-favorite",
+          "bytes": 247,
+          "hasSettings": false,
+          "version": {
+            "epoch": "dd06dd65-07fc-4b2f-80fe-d53001420b61",
+            "revision": 14
+          }
+        },
+        {
+          "channel": "media-set-favorite",
+          "bytes": 248,
+          "hasSettings": false,
+          "version": {
+            "epoch": "dd06dd65-07fc-4b2f-80fe-d53001420b61",
+            "revision": 15
+          }
+        },
+        {
+          "channel": "media-get-tags",
+          "bytes": 220,
+          "hasSettings": false,
+          "version": {
+            "epoch": "dd06dd65-07fc-4b2f-80fe-d53001420b61",
+            "revision": 15
+          }
+        },
+        {
+          "channel": "media-set-tags",
+          "bytes": 321,
+          "hasSettings": false,
+          "version": {
+            "epoch": "dd06dd65-07fc-4b2f-80fe-d53001420b61",
+            "revision": 16
+          }
+        },
+        {
+          "channel": "media-set-tags",
+          "bytes": 320,
+          "hasSettings": false,
+          "version": {
+            "epoch": "dd06dd65-07fc-4b2f-80fe-d53001420b61",
+            "revision": 16
+          }
+        },
+        {
+          "channel": "media-append-tags",
+          "bytes": 358,
+          "hasSettings": false,
+          "version": {
+            "epoch": "dd06dd65-07fc-4b2f-80fe-d53001420b61",
+            "revision": 17
+          }
+        }
+      ],
+      "sourceDigests": {
+        "main/settings.js": "36722c64ccd04a0ca56c3d9b6f72b09ee3924af7b52f65b17a4294ee21314cb1",
+        "main/application/settings-broadcast.js": "f7137590c14a6e3c4fa4217fe318f90d5072942b1d206c2d5d50e4a97e38281e",
+        "main/ipc/settings.js": "de7fca92a59b29f8149f869bec5799bbbe8998a611844b28d027fae84e7035ad",
+        "main/ipc/media-data.js": "23dc622bb90bdbed724c5bdb86aecaa095a4ee4a1a4312b3387728d179b91300",
+        "main/application/media-mutations.js": "da1d0a81ec7afaa6c1da34ac0e8f4e75feeee760195b5dd4ece267f9d4971eb3",
+        "main/security/ipc-sender.js": "da80398dd786f6a7b6c737fbd2e3f0de9b581584fb5c3f81a16b44a12e570b1a",
+        "preload.js": "b4a725252f0b0a6ecd2afec36084678984a975b795c363ee2cd09f6fbdff22c6",
+        "src/api/media.ts": "c63e9606db06783225a634a278624ea3ba0a4fb9541624cffb105e1c0ff44e73",
+        "src/services/settings-client.js": "36c2fe66bd85f54bb4e89445fadf8f1c704a0bc271d79fe5f0b6eadd5f1ffdb1",
+        "src/utils/share-json.js": "91392d99af0dbc903522f41b35b1f7a4beb2bd8947251fb95f9c7873523b52a4",
+        "packages/contracts/dist/settings-feed.js": "d3de55971030b50e35ee4f8e70ebdd1c65a3353553f211aea31e6bf58e98424c"
+      },
+      "conditions": "Actual hidden Electron, production sandbox preload, guarded IPC and freshly bundled SettingsClient. 10000 generated tags, no decoder. JSON payload size is not IPC wire size or native latency/P95."
+    },
+    "rebuiltAppUI": {
+      "date": "2026-10-19T08:55:35.049Z",
+      "passed": [
+        "rebuilt production App uses version acknowledgments with queued intent and old reply isolation",
+        "actual settings disk failure shows a visible error and retry succeeds",
+        "actual favorite hook recovers a lost last event with one feed read",
+        "actual tag editor recovers a lost last event with one feed read and closes after reconciliation"
+      ],
+      "mediaReplies": [
+        {
+          "channel": "media-set-favorite",
+          "version": {
+            "epoch": "9291fca9-a283-467f-9901-bf9cfe5928c7",
+            "revision": 8
+          },
+          "bytes": 218,
+          "hasSettings": false
+        },
+        {
+          "channel": "media-get-tags",
+          "version": {
+            "epoch": "9291fca9-a283-467f-9901-bf9cfe5928c7",
+            "revision": 8
+          },
+          "bytes": 219,
+          "hasSettings": false
+        },
+        {
+          "channel": "media-set-tags",
+          "version": {
+            "epoch": "9291fca9-a283-467f-9901-bf9cfe5928c7",
+            "revision": 9
+          },
+          "bytes": 297,
+          "hasSettings": false
+        }
+      ],
+      "sourceDigests": {
+        "main/settings.js": "36722c64ccd04a0ca56c3d9b6f72b09ee3924af7b52f65b17a4294ee21314cb1",
+        "main/ipc/settings.js": "de7fca92a59b29f8149f869bec5799bbbe8998a611844b28d027fae84e7035ad",
+        "main/ipc/media-data.js": "23dc622bb90bdbed724c5bdb86aecaa095a4ee4a1a4312b3387728d179b91300",
+        "preload.js": "b4a725252f0b0a6ecd2afec36084678984a975b795c363ee2cd09f6fbdff22c6",
+        "src/services/settings-client.js": "36c2fe66bd85f54bb4e89445fadf8f1c704a0bc271d79fe5f0b6eadd5f1ffdb1",
+        "src/hooks/useAppState.js": "26bd3629c0ebfeeed7a394ff90f0b4a1bdace96a1f110ee097cae405ed420a05",
+        "src/hooks/useAppController.js": "8708aac4dff9f3815db09d96f40e09f44f9bcffbd4ad26b136cfcd6cbd6562c3",
+        "src/hooks/useFavorites.js": "8ab483bb36c39a82c53d3b86f06932df28e7b0b67279a33d489bded6b8d9f2e4",
+        "src/hooks/useTagEditor.js": "1779628a8d9755d29a18f63e714a5b23dc1ba18c5b18c90d3a1459ec0510128d",
+        "src/api/media.ts": "c63e9606db06783225a634a278624ea3ba0a4fb9541624cffb105e1c0ff44e73"
+      },
+      "conditions": "Actual rebuilt production App, guarded IPC and preload in hidden Electron with synthetic video headers. UI clicks via executeJavaScript, no decode or physical device."
+    },
+    "remoteIsolation": {
+      "date": "2026-10-19T08:45:34.798Z",
+      "fixture": "C:\\Users\\s1897\\AppData\\Local\\Temp\\wallpaper-player-library-flow-hGj7sf",
+      "verifiedUserData": "C:\\Users\\s1897\\AppData\\Local\\Temp\\wallpaper-player-library-flow-hGj7sf\\.tmp-wallpaper-player",
+      "preservedFallbackFiles": [
+        [
+          "analysis-results\\G086 Bronya分析结果2026-06-22_20-00-44.json",
+          "01db5f778601802471791e416b40c3ac8f96248e4542b78a867eaee77dd265e4"
+        ],
+        [
+          "downloads\\aria2.session",
+          "bbe9d72e7e5001c01f3a012fa73e5d35b6d53b9e76e08190bba58973ce1ba9bc"
+        ],
+        [
+          "llama-server-err.log",
+          "5744b9bb378569a3a4f664b62aad9a4b0025cd7d419cba73b793fb62cb737f42"
+        ],
+        [
+          "llama-server-out.log",
+          "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        ],
+        [
+          "remote-identity.json",
+          "0abcd8df9c1443a348b050b5abe28ac419ecef717ddf31a0daa680f153061324"
+        ],
+        [
+          "scan-index\\029fa92465c3409cba74ce3db6b927dfec0d4f581b12122975041a32ab324e8a.json",
+          "33b1310886821b4f01322041a561c8a6b4ed10aa351772effb396e7b1b547cfd"
+        ],
+        [
+          "scan-index\\06cf5926d93db3cc7b30882ee7dbecb69d51ce4e00de7901de3d48b866f9afc3.json",
+          "274848604327a2f96f0d152b9f23a7b4e5470fdd67c744e1c181e86c2d284059"
+        ],
+        [
+          "scan-index\\0e65747e6e0fc76a1e0c86e951c35d6c7392c184ba6cb43724d7d58856ff212a.json",
+          "3ac45a0678e6ed4554fe1f315f923d999b0311096acd3c9394e3d85826d37db9"
+        ],
+        [
+          "scan-index\\114890f3437dd45b34313ba38d9d3c36a09701d5d672bf8abd7af8c922db61af.json",
+          "3796d21463d2b2418c485565780e9628a50ab4f1a69d8faeadec1eb70a9af290"
+        ],
+        [
+          "scan-index\\1465f8e823323fe9c4383abb5a38c9e17fc550dd44cd2f14fd7f7242bc309e12.json",
+          "1be5fefdb59d8af06de2a6be0eeb0025a96253d719de1e0daced6f1fe35cdde0"
+        ],
+        [
+          "scan-index\\153bae098b5d3524553fcf4d8cbb1eacef2471314948819d043b26cebe199e14.json",
+          "689305d629290f70b40c5ea8454db685486f87be218b38da7aa4f0594a1d1cb8"
+        ],
+        [
+          "scan-index\\165f4a9a9309a7ac323647e9acefd754a66c6295cab7db6bdb50830914bf0d68.json",
+          "5b0738883aee24ac7e17fc108a221e395380d2bae6a32f3ba3f70606e4b27ebe"
+        ],
+        [
+          "scan-index\\1db67e5d68a60a19388b0338ed1ee18c2a2bcd0025ab168a1d69920c929bd647.json",
+          "b19f9d1c96db4b9106b2a28058ab1c33f4d3edc45fa693126cad0efe48cd44dd"
+        ],
+        [
+          "scan-index\\3032598f9f4655037a67986db404cfbf60011a2ca84a1e6edcec794c7deab956.json",
+          "db1c59c38bb8ba2122afad18a73d956ec55d4580f4cad17f365b37b71d7e3db8"
+        ],
+        [
+          "scan-index\\358da0698a4692a8052707f22ba2b9c94b5c4e73080d12c721e622b66a80614c.json",
+          "f1fb6fbd25b3d96027a86d6c797b162a74c95544c04f64470ed733ddbc8983ee"
+        ],
+        [
+          "scan-index\\5eb5da5dcf86cb8c66f674df75935c030f8e12d86b6373ebcdaa3d7aba7eb672.json",
+          "489328dc3fa24223d6db18869658db5d01f915838ba97532de8193f8bedc6f93"
+        ],
+        [
+          "scan-index\\5f59f687750abe3eb7d55cdb1aa86cb802bf22f3b00e3bb369f77a7ef2584d06.json",
+          "ae2763e5e5553a4eb759576c8f26efcffc9ef5aa741ddd6aad78b2e33716a719"
+        ],
+        [
+          "scan-index\\602ae02092dd5e362dec6b88bd5afb39f14c218b3e0f0fbd52e5a8d09eddeb0d.json",
+          "cd75909f0b53f3d449d479531d62f3ff1bb3144eb918086cc7a25d05816c2a7d"
+        ],
+        [
+          "scan-index\\664a4a47b45908fdfdf2d6bb5ec7024e41699d7dd2af4110f2889d4eac6dd2d7.json",
+          "64835ce867a827d40088ce1b9c8e4e19cb996d0df4c2e676cbb215cf38868556"
+        ],
+        [
+          "scan-index\\6a4b7a95d1ae5d67f63cc87a4f3486c0a22c35af457355ae63f4303d7bdbcaa1.json",
+          "7ab98d842e31b5da1227cf6e00d98e3e32287c53b0965f3e8a964dbc9e982b20"
+        ],
+        [
+          "scan-index\\6c2bfaa6b9f2b41ef00e065bab2a6d71c599e2ce76cc3f5939228ecc7b8be650.json",
+          "33dd4002ba26ea91ef1c97f264ef0337dd78b37d06f03a538f514ee0809c5107"
+        ],
+        [
+          "scan-index\\703cb3b91afdc3a4a39fb95f9d0c0289fe6dcdab34f10425d71858a05164ce3b.json",
+          "217ca6aa5c2c3b721795e93c7cb5d819317fa55546fee842c81420f84c353fe8"
+        ],
+        [
+          "scan-index\\85bd705cb26d94f80943f15877c1c71cc9f9a665c0bf24f8ab568b0b6bacf550.json",
+          "d4bb5033f4315903b0083789b87e09f4e06cb294a17313439f21987dd0b3a527"
+        ],
+        [
+          "scan-index\\87720e2b63644af82253d5ec9ace977d27e42c03a6033c6811af6c6094928e09.json",
+          "2b01b9760b6e8f5605fd9bb0cbc74e6f248c0bec7428982ce0dbb848c1f6e589"
+        ],
+        [
+          "scan-index\\959e88efa835995e2afff87fc4257966a41b7f45da19d44dc3369ba0d88599c9.json",
+          "bec93346f2dfbf0938b593658fd80e43a9be33b0bd4a0f7bcbf9a8997198ba9e"
+        ],
+        [
+          "scan-index\\9d7bcef01cadb37f1a59d31b708084c192007deea8564d134dcc473b0605201c.json",
+          "04d6bfae12cdb3e73f828813477825cd39dc803c37893be82455ecebe7734312"
+        ],
+        [
+          "scan-index\\a02253e6f623d27dfaa6674be31d9b43fc3d9b2c6bcda125418f1c3dd2a25709.json",
+          "90f629426a02dbbe9d60c7ad0c28090bd77a96693fcd1187b5215eda49184b86"
+        ],
+        [
+          "scan-index\\a17738a5c4b4bc1ce4358ecff69b8e44a1e1a33a7511d9a11eddecd94b9e58cd.json",
+          "a1fd92c4c4c8b9bbfeb105da251cc5230f16f1f68edf7cf909a468da0c242d99"
+        ],
+        [
+          "scan-index\\c53e2ac468d9387f39255a1ee9893eba1abe325ab086dea0025a18d1ef67e75f.json",
+          "2042c353b3e1c29eb236d1a1dfce79afdb85839f40f02f0b70d521eff607e6bb"
+        ],
+        [
+          "scan-index\\cb702390842effe5e6e22e77acbda7b2bbea77ed51a5c07e66c3c5d8d0bc15bf.json",
+          "718b65c8b9b80caa3c5d34bc3244f750cd8243dc4b8743f637c3b12dbbbbda4a"
+        ],
+        [
+          "scan-index\\cbf568b1144651ce061c2dc94a347128724334dd45ac2dd4ebf6890d74c66251.json",
+          "e22fd608a0197ea15fdbd8e3320b49d60e518bb4054b74ffb7504cd8e6035134"
+        ],
+        [
+          "scan-index\\d6cd75e4bc356e88ed2b4c2272c32263e568d67a07b4017d73b22e09c23e8306.json",
+          "d3ccf77f170934b4987c22301d34abbb8b7646d45af03f575057804e4c892629"
+        ],
+        [
+          "scan-index\\db34a207b303445fed1e9654c8e68883c93c5123070913181f89844225e4636a.json",
+          "81149ad6956bdb73b468e88036ef043043faecd14d34901ba5eaa49b775d3a72"
+        ],
+        [
+          "scan-index\\de13066bd94cc789543a5fa9e6100f3297df42c5dd715cccf10b11383b6f1d68.json",
+          "d2ac7243b636179c0e35727cb899a4f608b7c044d759e6b6a52c8f501a3a6945"
+        ],
+        [
+          "scan-index\\eba7ad116c30f43341d30f06e5f9efe510565b2a31a16c0eccab8fc4c303e6bc.json",
+          "636392edc5a9f41da4b70492833939eac890636623ab957400a7118bba472fc7"
+        ],
+        [
+          "scan-index\\f16070f230607bf79853b98a8c462b8e7b854deeb16fe246ba6c9d783c9b2832.json",
+          "becff49c6c81b5dfd4688bbb272be352a8821ce42120b45282ea86c65f6378c2"
+        ],
+        [
+          "scan-index\\f408135604349a60c1b7caa1d60757de692af100c4518e5588f38b619995f186.json",
+          "b894250b5d420a09b89350f33103a5d08edb5fc3d20f3cddf7604ed1fcb9df3a"
+        ],
+        [
+          "scan-index\\f7b0c1004febecbe36453be10ef2ddc2523e5b92f4af5f318ce1049990e93053.json",
+          "77f2b4ded7202b828e8a6e281d549eecd1e79aea4030dfb2a7d918202ab090c5"
+        ],
+        [
+          "scan-index\\f892c389d585d65dff3d06f6c86d3355dc90100c808a4f80da22b2f7e81865ba.json",
+          "b0f007ba8b4249849d726eee7a9fec6cf5926742e62d3cb833bd464423af520e"
+        ],
+        [
+          "scan-index\\fc41c7e68e94b6f115983997d8498353a4f8f41b61fc91662dd84affe70fc9fb.json",
+          "fa79531cd58ae0323d29102813386358d2e599ecb63902231ed73e264196abdc"
+        ],
+        [
+          "settings.json",
+          "6fb990f7edfe0707bb48b8bed65455cc2a521d33e028b45ce77f98b6a466a0d5"
+        ],
+        [
+          "video-metadata-cache.json",
+          "616205b2e97a75ea8842d3b4f6f3de778fc545493659d45e5c0139c6d7087f47"
+        ]
+      ],
+      "conditions": "Fixture entered before any production import; user-data assertion before writes and full project fallback content hash inventory unchanged after the production HTTP library/transcode/pairing test."
+    }
+  },
+  "packagedScope": {
+    "command": "npm run verify:packaged-contracts -- --in-process-gpu --no-sandbox",
+    "exitCode": 0,
+    "actualCalls": "Archive imports user-media.updateUserMedia and verifies selected fields/commit, reads primary/backup schemaVersion 1, invokes settings-startup.prepareSettingsForStartup against archived settings-file implementation and checks preserved corrupt bytes/restored state. Actual worker archive path and source gate checks retained.",
+    "notEstablished": "No signed installer, installed-package startup/native-dialog layout, full transitive service graph or release acceptance claimed."
+  },
+  "previousEvidenceCorrection": {
+    "file": "docs/evidence/r7-media-fields.json",
+    "scope": "Corrected 2026-10-19: this checkpoint staged the new user-media module but only executed the generic settings transaction and media path preparation in Electron/ASAR. It did not directly execute the user-media repository. The later R8 settings-recovery batch adds actual archived repository and recovery-helper calls.",
+    "reason": {
+      "date": "2026-10-19",
+      "reason": "Prior wording overstated execution of the scoped media repository; observations and performance data unchanged.",
+      "followup": "docs/evidence/r8-settings-recovery.json"
+    }
+  },
+  "currentCostDiagnostics": {
+    "metrics": [
+      {
+        "operation": "favorite patch",
+        "millisecondsMedian": 41.589,
+        "maximumObservedHeartbeatMs": 16.259800000000013,
+        "fullStateStringifies": [
+          0
+        ],
+        "fullStateParses": [
+          2
+        ]
+      },
+      {
+        "operation": "theme patch",
+        "millisecondsMedian": 41.31790000000001,
+        "maximumObservedHeartbeatMs": 17.611699999999985,
+        "fullStateStringifies": [
+          0
+        ],
+        "fullStateParses": [
+          2
+        ]
+      },
+      {
+        "operation": "whole tag map patch",
+        "millisecondsMedian": 83.1139,
+        "maximumObservedHeartbeatMs": 17.969299999999976,
+        "fullStateStringifies": [
+          0
+        ],
+        "fullStateParses": [
+          2
+        ]
+      },
+      {
+        "operation": "read-only snapshot",
+        "millisecondsMedian": 15.252599999999973,
+        "maximumObservedHeartbeatMs": 16.572299999999984,
+        "fullStateStringifies": [
+          1
+        ],
+        "fullStateParses": [
+          2
+        ]
+      }
+    ],
+    "costSeries": {
+      "date": "2026-10-19T08:56:25.909Z",
+      "conditions": "Three sequential current-code independent processes after targeted tests completed. Existing warmed 10000-tag repository workload with one legacy full listener and complete returns, actual worker/atomic primary+backup writes and verification preload overhead. No pre-change comparison, native transport, long-run P95 or power-loss claim.",
+      "runs": [
+        {
+          "date": "2026-10-19T08:56:23.834Z",
+          "fixture": ".tmp\\refactor-tests\\settings-json-cost-WK3J4V",
+          "baseline": false,
+          "sourceSha256": "36722c64ccd04a0ca56c3d9b6f72b09ee3924af7b52f65b17a4294ee21314cb1",
+          "sourceDigests": {
+            "main/settings.js": "36722c64ccd04a0ca56c3d9b6f72b09ee3924af7b52f65b17a4294ee21314cb1",
+            "main/application/settings-json.js": "b051646df7c453b943e1c51f0e58a23caaea1c06b8d4fe243c476e86bfeb60ba",
+            "main/application/settings-json-worker.js": "40bfb2cf2e6312eb91cb246e9ae20537f79ca89bfd23ddf9e702c43ced57c799"
+          },
+          "tagEntries": 10000,
+          "results": [
+            {
+              "name": "favorite patch",
+              "milliseconds": 39.860600000000034,
+              "maxHeartbeatGapMs": 12.632400000000018,
+              "fullStateStringifies": 0,
+              "fullStateParses": 2,
+              "synchronousRealpaths": 0,
+              "unrelatedSectionNormalizations": 0,
+              "workerMessages": 1,
+              "workerSeeds": 0
+            },
+            {
+              "name": "theme patch",
+              "milliseconds": 41.49040000000002,
+              "maxHeartbeatGapMs": 15.575199999999995,
+              "fullStateStringifies": 0,
+              "fullStateParses": 2,
+              "synchronousRealpaths": 0,
+              "unrelatedSectionNormalizations": 0,
+              "workerMessages": 1,
+              "workerSeeds": 0
+            },
+            {
+              "name": "whole tag map patch",
+              "milliseconds": 81.0086,
+              "maxHeartbeatGapMs": 16.661699999999996,
+              "fullStateStringifies": 0,
+              "fullStateParses": 2,
+              "synchronousRealpaths": 0,
+              "unrelatedSectionNormalizations": 0,
+              "workerMessages": 1,
+              "workerSeeds": 0
+            },
+            {
+              "name": "read-only snapshot",
+              "milliseconds": 15.252599999999973,
+              "maxHeartbeatGapMs": 15.22539999999998,
+              "fullStateStringifies": 1,
+              "fullStateParses": 2,
+              "synchronousRealpaths": 0,
+              "unrelatedSectionNormalizations": 0,
+              "workerMessages": 0,
+              "workerSeeds": 0
+            }
+          ],
+          "memory": {
+            "beforeSetup": {
+              "rss": 40579072,
+              "heapTotal": 8204288,
+              "heapUsed": 5910424,
+              "external": 2125806,
+              "arrayBuffers": 63858
+            },
+            "beforeOperations": {
+              "rss": 121380864,
+              "heapTotal": 54054912,
+              "heapUsed": 22267208,
+              "external": 5898098,
+              "arrayBuffers": 1953267
+            },
+            "afterOperations": {
+              "rss": 160075776,
+              "heapTotal": 58376192,
+              "heapUsed": 29697208,
+              "external": 7781115,
+              "arrayBuffers": 3836216
+            }
+          },
+          "conditions": "Production settings repository, one local directory, warmed 10000 generated tags, one no-op listener and actual atomic writes. JSON stringify/parse counts instrument the main thread only; worker serialization is separate. RSS is a process observation including threads, not peak memory or mobile PSS. Individual observations exclude actual renderer/IPC preparation and are not P95, cold-start or native acceptance."
+        },
+        {
+          "date": "2026-10-19T08:56:24.798Z",
+          "fixture": ".tmp\\refactor-tests\\settings-json-cost-HegMV5",
+          "baseline": false,
+          "sourceSha256": "36722c64ccd04a0ca56c3d9b6f72b09ee3924af7b52f65b17a4294ee21314cb1",
+          "sourceDigests": {
+            "main/settings.js": "36722c64ccd04a0ca56c3d9b6f72b09ee3924af7b52f65b17a4294ee21314cb1",
+            "main/application/settings-json.js": "b051646df7c453b943e1c51f0e58a23caaea1c06b8d4fe243c476e86bfeb60ba",
+            "main/application/settings-json-worker.js": "40bfb2cf2e6312eb91cb246e9ae20537f79ca89bfd23ddf9e702c43ced57c799"
+          },
+          "tagEntries": 10000,
+          "results": [
+            {
+              "name": "favorite patch",
+              "milliseconds": 41.589,
+              "maxHeartbeatGapMs": 16.259800000000013,
+              "fullStateStringifies": 0,
+              "fullStateParses": 2,
+              "synchronousRealpaths": 0,
+              "unrelatedSectionNormalizations": 0,
+              "workerMessages": 1,
+              "workerSeeds": 0
+            },
+            {
+              "name": "theme patch",
+              "milliseconds": 40.5213,
+              "maxHeartbeatGapMs": 17.611699999999985,
+              "fullStateStringifies": 0,
+              "fullStateParses": 2,
+              "synchronousRealpaths": 0,
+              "unrelatedSectionNormalizations": 0,
+              "workerMessages": 1,
+              "workerSeeds": 0
+            },
+            {
+              "name": "whole tag map patch",
+              "milliseconds": 85.6918,
+              "maxHeartbeatGapMs": 17.969299999999976,
+              "fullStateStringifies": 0,
+              "fullStateParses": 2,
+              "synchronousRealpaths": 0,
+              "unrelatedSectionNormalizations": 0,
+              "workerMessages": 1,
+              "workerSeeds": 0
+            },
+            {
+              "name": "read-only snapshot",
+              "milliseconds": 14.739100000000008,
+              "maxHeartbeatGapMs": 14.7149,
+              "fullStateStringifies": 1,
+              "fullStateParses": 2,
+              "synchronousRealpaths": 0,
+              "unrelatedSectionNormalizations": 0,
+              "workerMessages": 0,
+              "workerSeeds": 0
+            }
+          ],
+          "memory": {
+            "beforeSetup": {
+              "rss": 40534016,
+              "heapTotal": 8204288,
+              "heapUsed": 5901144,
+              "external": 2125806,
+              "arrayBuffers": 63858
+            },
+            "beforeOperations": {
+              "rss": 121761792,
+              "heapTotal": 53792768,
+              "heapUsed": 22316744,
+              "external": 5898098,
+              "arrayBuffers": 1953267
+            },
+            "afterOperations": {
+              "rss": 160768000,
+              "heapTotal": 58638336,
+              "heapUsed": 29696976,
+              "external": 7781115,
+              "arrayBuffers": 3836216
+            }
+          },
+          "conditions": "Production settings repository, one local directory, warmed 10000 generated tags, one no-op listener and actual atomic writes. JSON stringify/parse counts instrument the main thread only; worker serialization is separate. RSS is a process observation including threads, not peak memory or mobile PSS. Individual observations exclude actual renderer/IPC preparation and are not P95, cold-start or native acceptance."
+        },
+        {
+          "date": "2026-10-19T08:56:25.772Z",
+          "fixture": ".tmp\\refactor-tests\\settings-json-cost-6bERZu",
+          "baseline": false,
+          "sourceSha256": "36722c64ccd04a0ca56c3d9b6f72b09ee3924af7b52f65b17a4294ee21314cb1",
+          "sourceDigests": {
+            "main/settings.js": "36722c64ccd04a0ca56c3d9b6f72b09ee3924af7b52f65b17a4294ee21314cb1",
+            "main/application/settings-json.js": "b051646df7c453b943e1c51f0e58a23caaea1c06b8d4fe243c476e86bfeb60ba",
+            "main/application/settings-json-worker.js": "40bfb2cf2e6312eb91cb246e9ae20537f79ca89bfd23ddf9e702c43ced57c799"
+          },
+          "tagEntries": 10000,
+          "results": [
+            {
+              "name": "favorite patch",
+              "milliseconds": 41.684199999999976,
+              "maxHeartbeatGapMs": 16.081099999999992,
+              "fullStateStringifies": 0,
+              "fullStateParses": 2,
+              "synchronousRealpaths": 0,
+              "unrelatedSectionNormalizations": 0,
+              "workerMessages": 1,
+              "workerSeeds": 0
+            },
+            {
+              "name": "theme patch",
+              "milliseconds": 41.31790000000001,
+              "maxHeartbeatGapMs": 16.153099999999995,
+              "fullStateStringifies": 0,
+              "fullStateParses": 2,
+              "synchronousRealpaths": 0,
+              "unrelatedSectionNormalizations": 0,
+              "workerMessages": 1,
+              "workerSeeds": 0
+            },
+            {
+              "name": "whole tag map patch",
+              "milliseconds": 83.1139,
+              "maxHeartbeatGapMs": 17.174300000000017,
+              "fullStateStringifies": 0,
+              "fullStateParses": 2,
+              "synchronousRealpaths": 0,
+              "unrelatedSectionNormalizations": 0,
+              "workerMessages": 1,
+              "workerSeeds": 0
+            },
+            {
+              "name": "read-only snapshot",
+              "milliseconds": 16.603399999999965,
+              "maxHeartbeatGapMs": 16.572299999999984,
+              "fullStateStringifies": 1,
+              "fullStateParses": 2,
+              "synchronousRealpaths": 0,
+              "unrelatedSectionNormalizations": 0,
+              "workerMessages": 0,
+              "workerSeeds": 0
+            }
+          ],
+          "memory": {
+            "beforeSetup": {
+              "rss": 40554496,
+              "heapTotal": 8204288,
+              "heapUsed": 5904624,
+              "external": 2125806,
+              "arrayBuffers": 63858
+            },
+            "beforeOperations": {
+              "rss": 121724928,
+              "heapTotal": 54579200,
+              "heapUsed": 22257896,
+              "external": 5898098,
+              "arrayBuffers": 1953267
+            },
+            "afterOperations": {
+              "rss": 160952320,
+              "heapTotal": 58638336,
+              "heapUsed": 29698176,
+              "external": 7781115,
+              "arrayBuffers": 3836216
+            }
+          },
+          "conditions": "Production settings repository, one local directory, warmed 10000 generated tags, one no-op listener and actual atomic writes. JSON stringify/parse counts instrument the main thread only; worker serialization is separate. RSS is a process observation including threads, not peak memory or mobile PSS. Individual observations exclude actual renderer/IPC preparation and are not P95, cold-start or native acceptance."
+        }
+      ]
+    },
+    "memoryMiB": {
+      "beforeOperationsRssMedian": 116.0859375,
+      "afterOperationsRssMedian": 153.3203125
+    },
+    "scope": "Current-only legacy full listener/full returns workload, actual primary+backup IO, current worker and test guard overhead. No before/after acceleration claim, native transport/P95/cold startup/decoding or peak/PSS claim. Backup retains owned bytes and adds IO."
+  },
+  "verification": [
+    {
+      "command": "npm run verify:test-data-guard",
+      "exitCode": 0,
+      "scope": "Targeted local acceptance only"
+    },
+    {
+      "command": "npm run verify:settings-recovery",
+      "exitCode": 0,
+      "scope": "Targeted local acceptance only"
+    },
+    {
+      "command": "npm run verify:settings-persistence",
+      "exitCode": 0,
+      "scope": "Targeted local acceptance only"
+    },
+    {
+      "command": "node scripts/run-verify.cjs scripts/verify-settings-json-lifecycle.js",
+      "exitCode": 0,
+      "scope": "Targeted local acceptance only"
+    },
+    {
+      "command": "node scripts/run-verify.cjs scripts/verify-settings-patch-lifecycle.js",
+      "exitCode": 0,
+      "scope": "Targeted local acceptance only"
+    },
+    {
+      "command": "npm run verify:shutdown-persistence",
+      "exitCode": 0,
+      "scope": "Targeted local acceptance only"
+    },
+    {
+      "command": "npm run verify:settings-snapshots",
+      "exitCode": 0,
+      "scope": "Targeted local acceptance only"
+    },
+    {
+      "command": "npm run verify:settings-panels",
+      "exitCode": 0,
+      "scope": "Targeted local acceptance only"
+    },
+    {
+      "command": "npm run verify:app-initialization",
+      "exitCode": 0,
+      "scope": "Targeted local acceptance only"
+    },
+    {
+      "command": "npm run verify:settings-feed",
+      "exitCode": 0,
+      "scope": "Targeted local acceptance only"
+    },
+    {
+      "command": "npm run verify:media-fields",
+      "exitCode": 0,
+      "scope": "Targeted local acceptance only"
+    },
+    {
+      "command": "npm run verify:media-mutations",
+      "exitCode": 0,
+      "scope": "Targeted local acceptance only"
+    },
+    {
+      "command": "npm run verify:tag-conflicts",
+      "exitCode": 0,
+      "scope": "Targeted local acceptance only"
+    },
+    {
+      "command": "npm run verify:mobile-correctness",
+      "exitCode": 0,
+      "scope": "Targeted local acceptance only"
+    },
+    {
+      "command": "npm run verify:remote-library",
+      "exitCode": 0,
+      "scope": "Targeted local acceptance only"
+    },
+    {
+      "command": "npm run verify:privacy-passwords",
+      "exitCode": 0,
+      "scope": "Targeted local acceptance only"
+    },
+    {
+      "command": "npm run verify:contracts",
+      "exitCode": 0,
+      "scope": "Targeted local acceptance only"
+    },
+    {
+      "command": "npm run verify:startup",
+      "exitCode": 0,
+      "scope": "Targeted local acceptance only"
+    },
+    {
+      "command": "npm run verify:electron-api",
+      "exitCode": 0,
+      "scope": "Targeted local acceptance only"
+    },
+    {
+      "command": "npm run verify:packaged-contracts -- --in-process-gpu --no-sandbox",
+      "exitCode": 0,
+      "scope": "Targeted local acceptance only"
+    },
+    {
+      "command": "npm run verify:plugins",
+      "exitCode": 0,
+      "scope": "Targeted local acceptance only"
+    },
+    {
+      "command": "npm run verify:analysis-interests",
+      "exitCode": 0,
+      "scope": "Targeted local acceptance only"
+    }
+  ],
+  "developmentNotes": [
+    "Initial shutdown fixture lacked the new startup dependency, timed out, then was corrected and passed; no data guard report was produced by that failure.",
+    "Initial Node options probe used Windows backslashes that were parsed incorrectly; absolute paths normalized to forward slashes before verified Node/Electron/worker execution.",
+    "Old ASAR execution scope was corrected explicitly; copying a module into a stage is not evidence it ran.",
+    "Migration/first-backup auxiliary failures after a successful primary commit log warnings instead of falsely reporting the durable primary as failed."
+  ],
+  "limits": [
+    "Only this settings JSON repository is covered. Identity/mobile-local/other cache repositories and complete migration/rollback journals are still open.",
+    "No fsync/directory durability or OS/power-loss promise. Each file rename is separate; process-kill tests do not establish cross-file crash atomicity.",
+    "Only startup/re-read observations detect malformed/unsupported documents; existing warm-cache external-edit behavior is not a file monitoring guarantee.",
+    "Migration audit retry is in-process best effort; exit before a failed record is repaired may lose audit history. Legacy reader remains supported.",
+    "Corrupt archives and crash orphan temps are retained rather than treated as committed data; no automatic broad deletion.",
+    "Initial backup failure can leave a durable primary without backup until a later successful retry; warning logged.",
+    "R6 physical decode/contention/rotation/PSS, remaining R7 repository/type/feature/cold-stability work, and other R8 dependency/signing/update/TLS/native delivery remain open."
+  ]
+}

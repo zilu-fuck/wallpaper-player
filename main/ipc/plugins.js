@@ -1,9 +1,9 @@
-const { dialog, ipcMain, shell } = require('electron')
+const { dialog, shell } = require('electron')
+const { ipcMain: appIpcMain } = require('../security/ipc')
 const fsp = require('fs/promises')
 const { IPC } = require('../ipc-channels')
 const {
-  loadSettings,
-  saveSettings,
+  updateSettingsAndFlush,
   sanitizeSettingsForSave
 } = require('../settings')
 const { getMainWindow } = require('../window')
@@ -45,7 +45,7 @@ function preserveMaskedPluginSecrets(plugin, nextConfig, currentConfig) {
   return mergeValue(nextConfig, currentConfig || {}, '')
 }
 
-function registerPluginIpc() {
+function registerPluginIpc(ipcMain = appIpcMain) {
   ipcMain.handle(IPC.PLUGINS_LIST, async () => {
     return pluginRegistry.listPlugins()
   })
@@ -102,30 +102,28 @@ function registerPluginIpc() {
 
   ipcMain.handle(IPC.PLUGINS_SAVE_CONFIG, async (_event, pluginId, config) => {
     try {
-      const plugin = pluginRegistry.getPlugin(pluginId)
-      if (!plugin) return { success: false, error: '插件不存在' }
-      const settings = loadSettings()
-      const currentConfig = settings.plugins?.[plugin.id]?.config || {}
-      const nextConfig = pluginRegistry.normalizePluginConfig(
-        plugin,
-        preserveMaskedPluginSecrets(plugin, config, currentConfig)
-      )
-      if (plugin.id === 'ai-search' && config && !Object.prototype.hasOwnProperty.call(config, 'feedbackMemory') && Array.isArray(currentConfig.feedbackMemory)) {
-        nextConfig.feedbackMemory = currentConfig.feedbackMemory
-      }
-      saveSettings(sanitizeSettingsForSave({
-        plugins: {
-          [plugin.id]: {
-            ...(settings.plugins?.[plugin.id] || {}),
-            config: nextConfig,
-            updatedAt: new Date().toISOString()
-          }
+      return await pluginRegistry.runLifecycle(async () => {
+        const plugin = pluginRegistry.getPlugin(pluginId)
+        if (!plugin) return { success: false, error: '插件不存在' }
+        if (!config || typeof config !== 'object' || Array.isArray(config)) throw new Error('插件配置修改无效')
+        await updateSettingsAndFlush(settings => {
+          const currentConfig = settings.plugins?.[plugin.id]?.config || {}
+          const nextConfig = pluginRegistry.normalizePluginConfig(plugin, { ...currentConfig, ...preserveMaskedPluginSecrets(plugin, config, currentConfig) })
+          if (plugin.id === 'ai-search' && !Object.hasOwn(config, 'feedbackMemory') && Array.isArray(currentConfig.feedbackMemory)) nextConfig.feedbackMemory = currentConfig.feedbackMemory
+          return { patch: sanitizeSettingsForSave({
+            plugins: {
+              [plugin.id]: {
+                config: nextConfig,
+                updatedAt: new Date().toISOString()
+              }
+            }
+          }) }
+        })
+        return {
+          success: true,
+          plugin: pluginRegistry.listPlugins().find(item => item.id === plugin.id)
         }
-      }))
-      return {
-        success: true,
-        plugin: pluginRegistry.listPlugins().find(item => item.id === plugin.id)
-      }
+      })
     } catch (err) {
       return { success: false, error: err.message }
     }

@@ -2,6 +2,8 @@ const http = require('http')
 const https = require('https')
 const { assertResolvedTargetPublic } = require('./ip-utils')
 const { parseWithYtDlp } = require('./ytdlp-service')
+const { mediaScheduler, taskError } = require('./application/resource-scheduler')
+const crypto = require('crypto')
 
 const DEFAULT_TIMEOUT_MS = 12000
 const DEFAULT_MAX_BODY_BYTES = 5 * 1024 * 1024
@@ -90,74 +92,58 @@ function getUrlExtension(url) {
   }
 }
 
-function fetchText(url, redirects = 0, options = {}) {
-  return new Promise((resolve, reject) => {
-    let parsed
-    try {
-      parsed = new URL(url)
-    } catch {
-      reject(new Error('网页地址无效'))
-      return
-    }
-
-    const timeoutMs = Number(options.timeoutMs || DEFAULT_TIMEOUT_MS)
-    const headers = {
-      'user-agent': DEFAULT_BROWSER_UA,
-      accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-      ...(options.headers && typeof options.headers === 'object' ? options.headers : {})
-    }
-    const client = parsed.protocol === 'http:' ? http : https
-    const request = client.get(parsed, {
-      timeout: timeoutMs,
-      headers
-    }, response => {
-      const statusCode = Number(response.statusCode || 0)
-      const location = response.headers.location
-      if ([301, 302, 303, 307, 308].includes(statusCode) && location) {
-        response.resume()
-        if (redirects >= MAX_REDIRECTS) {
-          reject(new Error('网页重定向次数过多'))
-          return
-        }
-        const nextUrl = toAbsoluteUrl(location, url)
-        // 解析阶段重定向到内网 → SSRF 防线；局域网网页（url 本身是内网）放行。
-        assertResolvedTargetPublic(url, nextUrl, '网页重定向到本地或内网地址，已停止解析')
-        fetchText(nextUrl, redirects + 1, options).then(resolve, reject)
-        return
-      }
-
-      if (statusCode < 200 || statusCode >= 300) {
-        response.resume()
-        reject(new Error(`网页请求失败：HTTP ${statusCode || '未知'}`))
-        return
-      }
-
-      const contentLength = Number(response.headers['content-length'] || 0)
-      const maxBodyBytes = Number(options.maxBodyBytes || DEFAULT_MAX_BODY_BYTES)
-      if (contentLength > maxBodyBytes) {
-        response.resume()
-        reject(new Error('网页内容过大，已停止解析'))
-        return
-      }
-
-      const chunks = []
-      let received = 0
-      response.on('data', chunk => {
-        received += chunk.length
-        if (received > maxBodyBytes) {
-          request.destroy(new Error('网页内容过大，已停止解析'))
-          return
-        }
-        chunks.push(chunk)
+async function fetchText(url, redirects = 0, options = {}) {
+  const initial = new URL(url), maxBodyBytes = options.maxBodyBytes || DEFAULT_MAX_BODY_BYTES
+  const controller = new AbortController(), signal = controller.signal
+  const abort = () => controller.abort(options.signal.reason || new Error('网页解析已取消'))
+  options.signal?.addEventListener('abort', abort, { once: true }); if (options.signal?.aborted) abort()
+  const timeoutMs = Math.max(1, Math.min(options.timeoutMs || DEFAULT_TIMEOUT_MS, (options.deadlineAt || Infinity) - Date.now()))
+  const timer = setTimeout(() => controller.abort(new Error('网页解析超时')), timeoutMs); timer.unref?.()
+  let current = initial, request, response
+  const closed = stream => !stream || stream.closed ? Promise.resolve() : new Promise(resolve => stream.once('close', resolve))
+  const closeUpstream = async () => {
+    const pending = [closed(request), closed(response)]
+    response?.destroy(); request?.destroy(); await Promise.all(pending); request = response = null
+  }
+  try {
+    while (true) {
+      if (signal.aborted) throw signal.reason
+      if (!['http:', 'https:'].includes(current.protocol)) throw new Error('网页地址必须是 HTTP 或 HTTPS')
+      const headers = { 'user-agent': DEFAULT_BROWSER_UA, accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8', ...options.headers }
+      if (current.origin !== initial.origin) for (const name of Object.keys(headers)) if (/^(authorization|cookie)$/i.test(name)) delete headers[name]
+      response = await new Promise((resolve, reject) => {
+        request = (current.protocol === 'http:' ? http : https).get(current, { headers, signal }, incoming => {
+          incoming.on('error', () => {}); resolve(incoming)
+        })
+        request.on('error', reject)
       })
-      response.on('end', () => resolve(Buffer.concat(chunks).toString('utf8')))
-    })
-
-    request.on('timeout', () => {
-      request.destroy(new Error('网页解析超时'))
-    })
-    request.on('error', reject)
-  })
+      if (signal.aborted) throw signal.reason
+      const status = response.statusCode, location = response.headers.location
+      if ([301, 302, 303, 307, 308].includes(status) && location) {
+        if (++redirects > MAX_REDIRECTS) throw new Error('网页重定向次数过多')
+        const next = new URL(location, current)
+        assertResolvedTargetPublic(initial.toString(), next.toString(), '网页重定向到本地或内网地址，已停止解析')
+        if (current.protocol === 'https:' && next.protocol !== 'https:') throw new Error('网页重定向不允许 HTTPS 降级')
+        await closeUpstream(); current = next; continue
+      }
+      if (status < 200 || status >= 300) throw new Error('网页请求失败：HTTP ' + status)
+      if (Number(response.headers['content-length']) > maxBodyBytes) throw new Error('网页内容过大，已停止解析')
+      const chunks = []; let received = 0
+      for await (const chunk of response) {
+        if (signal.aborted) throw signal.reason
+        received += chunk.length
+        if (received > maxBodyBytes) throw new Error('网页内容过大，已停止解析')
+        chunks.push(chunk)
+      }
+      if (signal.aborted) throw signal.reason
+      return Buffer.concat(chunks).toString('utf8')
+    }
+  } catch (error) {
+    if (signal.aborted) throw signal.reason
+    throw error
+  } finally {
+    clearTimeout(timer); options.signal?.removeEventListener('abort', abort); await closeUpstream()
+  }
 }
 
 async function fetchJson(url, options) {
@@ -361,8 +347,8 @@ const yh5dmParser = {
       return false
     }
   },
-  async parse(url) {
-    const html = await fetchText(url)
+  async parse(url, options = {}) {
+    const html = await fetchText(url, 0, options)
     const player = extractPlayerObject(html)
     if (!player?.url) {
       throw new Error('未找到网页中的播放地址')
@@ -413,11 +399,11 @@ const bilibiliParser = {
       return false
     }
   },
-  async parse(url) {
+  async parse(url, options = {}) {
     const bvid = getBilibiliBvid(url)
     if (!bvid) throw new Error('未识别到 B 站视频 BV 号')
 
-    const view = await fetchJson(`https://api.bilibili.com/x/web-interface/view?bvid=${encodeURIComponent(bvid)}`)
+    const view = await fetchJson(`https://api.bilibili.com/x/web-interface/view?bvid=${encodeURIComponent(bvid)}`, options)
     if (view?.code !== 0 || !view?.data?.cid) {
       throw new Error(view?.message || 'B 站视频信息解析失败')
     }
@@ -428,7 +414,7 @@ const bilibiliParser = {
     const pageIndex = getBilibiliPageIndex(url)
     const currentPage = pages.find(page => Number(page.page) === pageIndex) || pages[0]
     const cid = currentPage?.cid || view.data.cid
-    const play = await fetchJson(`https://api.bilibili.com/x/player/playurl?bvid=${encodeURIComponent(bvid)}&cid=${encodeURIComponent(cid)}&fnval=0&qn=16&platform=html5`)
+    const play = await fetchJson(`https://api.bilibili.com/x/player/playurl?bvid=${encodeURIComponent(bvid)}&cid=${encodeURIComponent(cid)}&fnval=0&qn=16&platform=html5`, options)
     const playbackUrl = play?.data?.durl?.[0]?.url || ''
     if (play?.code !== 0 || !playbackUrl) {
       throw new Error(play?.message || 'B 站播放地址解析失败')
@@ -468,7 +454,7 @@ const twitterParser = {
   supports(url) {
     return Boolean(getTwitterStatusId(url))
   },
-  async parse(url) {
+  async parse(url, options = {}) {
     const statusId = getTwitterStatusId(url)
     if (!statusId) {
       throw new Error('未识别到 X / Twitter 状态 ID')
@@ -476,11 +462,13 @@ const twitterParser = {
 
     try {
       return await parseWithYtDlp(url, {
+        ...options,
         parser: this.id,
         parserName: this.name,
         siteName: this.name
       })
     } catch (ytDlpError) {
+      if (options.signal?.aborted) throw options.signal.reason
       if (!/未检测到 yt-dlp/i.test(ytDlpError.message)) {
         throw new Error(`X / Twitter 暂时无法解析：${ytDlpError.message}`)
       }
@@ -491,6 +479,7 @@ const twitterParser = {
       payload = await fetchJson(
         `https://cdn.syndication.twimg.com/tweet-result?id=${encodeURIComponent(statusId)}&lang=zh-cn`,
         {
+          ...options,
           timeoutMs: 6000,
           headers: {
             accept: 'application/json,text/plain,*/*',
@@ -549,19 +538,22 @@ const genericParser = {
       return false
     }
   },
-  async parse(url) {
+  async parse(url, options = {}) {
     let html = ''
     try {
-      html = await fetchText(url)
+      html = await fetchText(url, 0, options)
     } catch (fetchError) {
+      if (options.signal?.aborted) throw options.signal.reason
       try {
         return await parseWithYtDlp(url, {
+          ...options,
           parser: this.id,
           parserName: this.name,
           siteName: getHostName(url) || this.name,
           timeoutMs: 18000
         })
       } catch (ytDlpError) {
+        if (options.signal?.aborted) throw options.signal.reason
         throw new Error(`网页请求失败：${fetchError.message}；yt-dlp 也未解析成功：${ytDlpError.message}`)
       }
     }
@@ -569,6 +561,7 @@ const genericParser = {
     if (mediaUrls.length === 0) {
       try {
         return await parseWithYtDlp(url, {
+          ...options,
           parser: this.id,
           parserName: this.name,
           siteName: getHostName(url) || this.name,
@@ -613,24 +606,53 @@ function getParserForUrl(url) {
   return parsers.find(parser => parser.supports(url)) || null
 }
 
-async function parseNetworkResourcePage(url) {
+async function parseNetworkResourcePage(url, options = {}) {
   const parser = getParserForUrl(url)
   if (!parser) {
     throw new Error('暂不支持解析该网页资源')
   }
+  const key = 'network-parse:' + crypto.createHash('sha256').update(JSON.stringify([url, options.headers || null])).digest('hex')
+  const deadlineAt = Math.min(options.deadlineAt || Infinity, Date.now() + Math.min(45000, options.timeoutMs || 45000))
+  const controller = new AbortController()
+  const abort = () => controller.abort(options.signal.reason || taskError('task_cancelled', '网页解析已取消', 499))
+  const timeout = () => controller.abort(taskError('task_timeout', '网页解析超过最长等待时间', 504, true))
+  options.signal?.addEventListener('abort', abort, { once: true }); if (options.signal?.aborted) abort()
+  const timer = setTimeout(timeout, Math.max(1, deadlineAt - Date.now())); timer.unref?.()
+  const { signal: _signal, deadlineAt: _deadline, timeoutMs: _timeout, ...sharedOptions } = options
+  const start = () => mediaScheduler.enqueue({ key,
+    type: 'network-parse', resources: { parser: 1 }, priority: options.priority || 80,
+    signal: controller.signal, timeoutMs: 45000 }, async context => {
+    try {
+      const result = await parser.parse(url, { ...sharedOptions, ...context }); context.throwIfAborted(); return result
+    } catch (err) {
+      context.throwIfAborted()
+      return createWebpageShellResult(url, { parser: parser.id, parserName: parser.name,
+        site: getHostName(url) || parser.name, error: err?.message || '网页资源解析失败' })
+    }
+  })
   try {
-    return await parser.parse(url)
-  } catch (err) {
-    return createWebpageShellResult(url, {
-      parser: parser.id,
-      parserName: parser.name,
-      site: getHostName(url) || parser.name,
-      error: err?.message || '网页资源解析失败'
-    })
+    while (true) {
+      if (Date.now() >= deadlineAt) timeout()
+      if (controller.signal.aborted) throw controller.signal.reason
+      try {
+        const result = await start()
+        if (Date.now() >= deadlineAt) timeout()
+        if (controller.signal.aborted) throw controller.signal.reason
+        return result
+      } catch (error) {
+        if (controller.signal.aborted) throw controller.signal.reason
+        if (error.code !== 'task_cancelling') throw error
+        await mediaScheduler.waitForKey(key, { signal: controller.signal, deadlineAt })
+      }
+    }
+  } finally {
+    clearTimeout(timer); options.signal?.removeEventListener('abort', abort)
+    await mediaScheduler.waitForCancelledKey(key)
   }
 }
 
 module.exports = {
   getParserForUrl,
+  fetchText,
   parseNetworkResourcePage
 }

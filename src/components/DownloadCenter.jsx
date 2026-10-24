@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { WINDOW_EVENTS } from '../api/events'
 import { createPortal } from 'react-dom'
+import { useDownloadStateObserver } from '../hooks/useDownloadStateObserver'
+import { useDownloadSubmission } from '../hooks/useDownloadSubmission'
 
 const VIDEO_EXTENSIONS = new Set([
   '.mp4',
@@ -135,7 +137,7 @@ function getTaskPhase(task) {
   const eta = speed > 0 && remaining > 0 ? `约 ${formatDuration(remaining / speed)}` : '未知'
   const health = task?.sourceHealth
 
-  if (task?.engine === 'xunlei' || task?.status === 'external') {
+  if ((task?.engine === 'xunlei' || task?.status === 'external') && task.status !== 'error') {
     return {
       className: 'external',
       label: '迅雷接管',
@@ -163,7 +165,7 @@ function getTaskPhase(task) {
     return {
       className: 'paused',
       label: '已暂停',
-      detail: completed > 0 ? '已暂停，可继续下载' : '任务已暂停',
+      detail: task.message || (completed > 0 ? '已暂停，可继续下载' : '任务已暂停'),
       eta: '已暂停'
     }
   }
@@ -249,7 +251,6 @@ function findPendingMagnetTask(rawTasks, pendingTask) {
   if (!pendingTask) return null
   const metadataTask = rawTasks.find(task => task.gid === pendingTask.metadataGid)
   const followedIds = new Set(metadataTask?.followedBy || [])
-  const knownIds = new Set(pendingTask.knownTaskGids || [])
   const directTask = rawTasks.find(task => (
     task.gid === pendingTask.metadataGid &&
     !isMetadataTask(task) &&
@@ -258,21 +259,12 @@ function findPendingMagnetTask(rawTasks, pendingTask) {
   if (directTask) return directTask
 
   const followedTask = rawTasks.find(task => (
-    followedIds.has(task.gid) ||
+    followedIds.has(task.gid) || (task.rootGid === pendingTask.metadataGid && task.gid !== pendingTask.metadataGid) ||
     task.following === pendingTask.metadataGid
   ) && !isMetadataTask(task))
   if (followedTask) return followedTask
 
-  const targetDir = normalizeDir(pendingTask.dir)
-  const expectedName = getMagnetDisplayName(pendingTask.magnet).toLowerCase()
-  const sameDirTasks = rawTasks.filter(task => {
-    if (isMetadataTask(task) || !task.bittorrent || !task.files?.length) return false
-    return targetDir && normalizeDir(task.dir) === targetDir
-  })
-  return sameDirTasks.find(task => {
-    const nameMatches = expectedName && String(task.name || '').toLowerCase().includes(expectedName)
-    return nameMatches
-  }) || sameDirTasks.find(task => !knownIds.has(task.gid)) || null
+  return null
 }
 
 export default function DownloadCenter({
@@ -282,8 +274,9 @@ export default function DownloadCenter({
   onSettingsChanged,
   libraryDirectories = []
 }) {
-  const [state, setState] = useState({ engine: null, tasks: [] })
   const [message, setMessage] = useState('')
+  const { state, setState, refreshState } = useDownloadStateObserver(setMessage)
+  const submission = useDownloadSubmission()
   const [saveDir, setSaveDir] = useState('')
   const [saveDirInLibrary, setSaveDirInLibrary] = useState(false)
   const [downloadInput, setDownloadInput] = useState('')
@@ -299,7 +292,14 @@ export default function DownloadCenter({
   const pendingHandledRef = useRef(null)
 
   const rawTasks = state.tasks || []
-  const tasks = useMemo(() => rawTasks.filter(task => !isMetadataTask(task)), [rawTasks])
+  const tasks = useMemo(() => {
+    const represented = new Set()
+    for (const task of rawTasks) if (!isMetadataTask(task)) {
+      if (task.following) represented.add(task.following)
+      if (task.rootGid && task.rootGid !== task.gid) represented.add(task.rootGid)
+    }
+    return rawTasks.filter(task => !isMetadataTask(task) || task.status !== 'complete' || !represented.has(task.gid))
+  }, [rawTasks])
   const engine = state.engine
   const xunlei = engine?.xunlei
   const metadataTasks = useMemo(() => getMetadataTasks(rawTasks), [rawTasks])
@@ -313,6 +313,8 @@ export default function DownloadCenter({
   ), [libraryDirectories])
 
   const openDownloadDialog = useCallback((presetInput = '', sourceResource = null) => {
+    submission.newIntent()
+    setSubmitting(false)
     setDownloadInput(presetInput)
     setDownloadSourceResource(sourceResource)
     setDownloadEngine('aria2')
@@ -320,11 +322,11 @@ export default function DownloadCenter({
     setFileDialogTaskGid('')
     setMessage('')
     setDownloadDialogOpen(true)
-  }, [])
+  }, [submission])
 
   const closeDownloadDialog = useCallback(() => {
     if (pendingMagnetTask?.metadataGid) {
-      window.electronAPI?.downloadRemove?.(pendingMagnetTask.metadataGid)
+      window.electronAPI?.downloadRemove?.(pendingMagnetTask.metadataGid, { expectedGeneration: pendingMagnetTask.metadataGeneration })
         .then((result) => {
           if (result?.success) {
             setState({ engine: result.engine, tasks: result.tasks || [] })
@@ -337,24 +339,6 @@ export default function DownloadCenter({
     setPendingMagnetTask(null)
     setFileDialogTaskGid('')
   }, [pendingMagnetTask])
-
-  const refreshState = useCallback(async (options = {}) => {
-    const result = await window.electronAPI?.downloadGetState?.(options)
-    if (!result?.success) {
-      setMessage(result?.error || '读取下载中心状态失败')
-      return null
-    }
-    setState({ engine: result.engine, tasks: result.tasks || [] })
-    return result
-  }, [])
-
-  useEffect(() => {
-    refreshState({ start: true })
-    const timer = window.setInterval(() => {
-      refreshState({ start: false }).catch(() => {})
-    }, 1000)
-    return () => window.clearInterval(timer)
-  }, [refreshState])
 
   useEffect(() => {
     setSelectedTaskGid(prev => {
@@ -371,6 +355,8 @@ export default function DownloadCenter({
 
   useEffect(() => {
     if (!pendingMagnetTask) return
+    const metadata = rawTasks.find(task => task.gid === pendingMagnetTask.metadataGid)
+    if (metadata?.status === 'error') { setMessage(metadata.errorMessage || '磁链任务未能建立，请核对状态后重新添加'); setPendingMagnetTask(null); return }
     if (pendingMagnetTask.fileTaskGid) return
     if (!pendingFileTask) {
       const waitedMs = Date.now() - pendingMagnetTask.createdAt
@@ -395,7 +381,7 @@ export default function DownloadCenter({
     setFileDialogTaskGid(pendingFileTask.gid)
     setDownloadDialogOpen(false)
     setMessage('')
-  }, [pendingFileTask, pendingMagnetTask])
+  }, [pendingFileTask, pendingMagnetTask, rawTasks])
 
   useEffect(() => {
     if (!fileDialogTaskGid) return
@@ -514,6 +500,7 @@ export default function DownloadCenter({
     if (!dir) return
     setSubmitting(true)
     setMessage('')
+    let retired = false
     try {
       if (downloadEngine === 'xunlei') {
         const result = await window.electronAPI?.downloadAddXunlei?.({
@@ -540,16 +527,16 @@ export default function DownloadCenter({
       }
       const knownTaskGids = isMagnet ? (state.tasks || []).map(task => task.gid).filter(Boolean) : []
       const result = isMagnet
-        ? await window.electronAPI?.downloadAddMagnet?.({
+        ? await submission.submit('downloadAddMagnet', {
             magnet: input,
             dir
           })
         : (downloadSourceResource && input === String(downloadSourceResource.url || '').trim()
-            ? await window.electronAPI?.downloadAddNetworkResource?.({
+            ? await submission.submit('downloadAddNetworkResource', {
                 resource: downloadSourceResource,
                 dir
               })
-            : await window.electronAPI?.downloadAddUrl?.({
+            : await submission.submit('downloadAddUrl', {
                 url: input,
                 dir
               }))
@@ -560,25 +547,34 @@ export default function DownloadCenter({
       setState({ engine: result.state?.engine, tasks: result.state?.tasks || [] })
       setSelectedTaskGid(result.gid || result.state?.tasks?.[0]?.gid || '')
       setSaveDirInLibrary(Boolean(result.libraryDirectory))
+      if (result.operationState === 'removed') {
+        setDownloadDialogOpen(false); setPendingMagnetTask(null)
+        setMessage('原操作已移除，未重复创建任务；如需新下载，请重新打开添加窗口。')
+        return
+      }
       if (isMagnet) {
         setPendingMagnetTask({
           metadataGid: result.gid,
+          metadataGeneration: result.state?.tasks?.find(task => task.gid === result.gid)?.taskGeneration,
           magnet: input,
           dir,
           knownTaskGids,
           createdAt: Date.now()
         })
-        setMessage('正在获取磁链元数据，解析出文件列表后会进入文件选择。')
+        setMessage(result.confirmationPending ? '操作已记录，正在核对磁链接收结果，请勿重复添加。' : '正在获取磁链元数据，解析出文件列表后会进入文件选择。')
         return
       }
       setDownloadInput('')
       setDownloadSourceResource(null)
       setDownloadDialogOpen(false)
-      setMessage('下载任务已加入队列。')
+      setMessage(result.confirmationPending ? '操作已记录，正在核对引擎结果；请勿重复添加。' : '下载任务已加入队列。')
+    } catch (error) {
+      retired = error.code === 'download_submission_retired'
+      if (!retired) setMessage(error.message || '创建下载任务失败')
     } finally {
-      setSubmitting(false)
+      if (!retired) setSubmitting(false)
     }
-  }, [downloadEngine, downloadInput, downloadSourceResource, ensureSaveDir, refreshState, state.tasks])
+  }, [downloadEngine, downloadInput, downloadSourceResource, ensureSaveDir, refreshState, state.tasks, submission])
 
   const toggleFile = useCallback((gid, fileIndex) => {
     setFileSelections(prev => {
@@ -600,7 +596,7 @@ export default function DownloadCenter({
     setSubmitting(true)
     setMessage('')
     try {
-      const result = await window.electronAPI?.downloadSelectFiles?.(task.gid, selected)
+      const result = await window.electronAPI?.downloadSelectFiles?.(task.gid, selected, { expectedGeneration: task.taskGeneration })
       if (!result?.success) {
         setMessage(result?.error || '应用文件选择失败')
         return
@@ -623,15 +619,16 @@ export default function DownloadCenter({
     setPendingMagnetTask(null)
     setMessage('')
     try {
-      let result = await window.electronAPI?.downloadRemove?.(gid)
-      if (metadataGid && metadataGid !== gid) {
-        result = await window.electronAPI?.downloadRemove?.(metadataGid)
-      }
+      const currentTask = tasks.find(task => task.gid === gid)
+      const result = await window.electronAPI?.downloadRemove?.(metadataGid || gid,
+        { expectedGeneration: metadataGid ? pendingMagnetTask.metadataGeneration : currentTask?.taskGeneration })
       if (result?.success) {
         setState({ engine: result.engine, tasks: result.tasks || [] })
+      } else {
+        setMessage(result?.error || '任务状态已改变，未取消旧任务；请在下载列表核对')
       }
     } catch {}
-  }, [fileDialogTaskGid, pendingMagnetTask])
+  }, [fileDialogTaskGid, pendingMagnetTask, tasks])
 
   useEffect(() => {
     if (!downloadDialogOpen && !fileDialogTaskGid) return undefined
@@ -675,7 +672,7 @@ export default function DownloadCenter({
         resume: window.electronAPI?.downloadResume,
         remove: window.electronAPI?.downloadRemove
       }[action]
-      const result = await api?.(task.gid)
+      const result = await api?.(task.gid, { expectedGeneration: task.taskGeneration })
       if (!result?.success) {
         setMessage(result?.error || '操作下载任务失败')
         return
@@ -837,8 +834,8 @@ export default function DownloadCenter({
                 const totalLength = getTaskTotalLength(task)
                 const phase = getTaskPhase(task)
                 const isExternalTask = task.engine === 'xunlei' || task.status === 'external'
-                const canPauseTask = !isExternalTask && ['active', 'waiting'].includes(task.status)
-                const canResumeTask = !isExternalTask && task.status === 'paused'
+                const canPauseTask = !isExternalTask && task.controls?.pause !== false && ['active', 'waiting'].includes(task.status)
+                const canResumeTask = !isExternalTask && task.controls?.resume !== false && task.status === 'paused'
                 return (
                   <div
                     className={`download-center-task ${phase.className}${isSelected ? ' selected' : ''}`}
@@ -876,7 +873,7 @@ export default function DownloadCenter({
                             </svg>
                           </button>
                         )}
-                        <button type="button" className="download-icon-btn" onClick={() => controlTask(task, 'remove')} disabled={submitting} title="移除" aria-label="移除">
+                        <button type="button" className="download-icon-btn" onClick={() => controlTask(task, 'remove')} disabled={submitting} title={isExternalTask ? '移除接管记录（不会停止迅雷下载）' : '移除'} aria-label={isExternalTask ? '移除接管记录' : '移除'}>
                           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                             <path d="M18 6L6 18M6 6l12 12" />
                           </svg>

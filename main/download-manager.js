@@ -7,14 +7,19 @@ const crypto = require('crypto')
 const { spawn } = require('child_process')
 const { app } = require('electron')
 const log = require('electron-log')
-const { execFileAsync } = require('./exec')
+const { execFileTreeAsync } = require('./exec')
 const { getUserDataDir } = require('./user-data')
-const { getResourcePath, isExistingFile } = require('./paths')
-const { detectYtDlp, getSystemProxy, getYtDlpStatus } = require('./ytdlp-service')
+const { getResourcePath } = require('./paths')
+const { detectYtDlp, getSystemProxyAsync, getYtDlpStatus } = require('./ytdlp-service')
 const { createXunleiManager } = require('./download-xunlei')
+const { mediaScheduler, taskError } = require('./application/resource-scheduler')
+const { getMediaPressure, onMediaPressureChanged } = require('./media-pressure')
+const { stopProcessTree, workerSpawnSpec } = require('./process-lifecycle')
+const { DownloadTasks, validGid, digest } = require('./application/download-tasks')
 
 const RPC_TIMEOUT_MS = 5000
 const START_TIMEOUT_MS = 10000
+const START_DEADLINE_MS = 45000
 const BT_PORT_RANGE = process.env.WALLPAPER_PLAYER_BT_PORT_RANGE || '51413-51423'
 const PORT_CHECK_CACHE_MS = 5000
 const PUBLIC_BT_TRACKERS = [
@@ -41,8 +46,58 @@ let startPromise = null
 let lastRuntimeError = ''
 let lastBtPortStatus = null
 let lastBtPortCheckedAt = 0
+let downloadClosing = false, sessionExpired = false, engineSequence = 0, disposePromise = null
+let engineClosed = Promise.resolve(), policyQueue = Promise.resolve(), policyRunning = false, policyDirty = false, appliedPolicy = null
+let preflightCheckedAt = 0, preflightRevision = 0, preflightAppliedRevision = -1
+const startupAbort = new AbortController(), activeRpcRequests = new Set()
+const DOWNLOAD_SESSION_MS = 24 * 60 * 60 * 1000
+const RPC_MAX_BYTES = 8 * 1024 * 1024
+const RPC_MAX_READERS = 32
+const stoppingError = () => Object.assign(new Error('下载服务正在关闭'), { code: 'download_stopping' })
+function checkStartup() { if (downloadClosing || startupAbort.signal.aborted) throw stoppingError() }
+function checkPreparation(options = {}) { checkStartup(); options.throwIfAborted?.(); if (options.signal?.aborted) throw options.signal.reason }
+function awaitObservation(work, signal) {
+  if (!signal) return work
+  return new Promise((resolve, reject) => {
+    const abort = () => { signal.removeEventListener('abort', abort); reject(signal.reason) }
+    signal.addEventListener('abort', abort, { once: true })
+    Promise.resolve(work).then(value => { signal.removeEventListener('abort', abort); resolve(value) }, error => { signal.removeEventListener('abort', abort); reject(error) })
+    if (signal.aborted) abort()
+  })
+}
+function playbackDownloadOptions() {
+  return { 'max-concurrent-downloads': getMediaPressure().active ? '1' : '3', 'max-overall-download-limit': getMediaPressure().active ? '2M' : '0' }
+}
+function updateDownloadPressurePolicy() {
+  policyDirty = true
+  if (policyRunning) return policyQueue
+  policyRunning = true
+  policyQueue = (async () => {
+    while (policyDirty && !downloadClosing) {
+      policyDirty = false
+      if (!isProcessRunning()) return
+      const child = aria2Process, options = playbackDownloadOptions(), key = JSON.stringify(options)
+      if (appliedPolicy?.child === child && appliedPolicy.key === key) continue
+      await rpc('aria2.changeGlobalOption', [options])
+      if (aria2Process === child) appliedPolicy = { child, key }
+    }
+  })().catch(() => { appliedPolicy = null }).finally(() => {
+    policyRunning = false
+    if (policyDirty && !downloadClosing) updateDownloadPressurePolicy()
+  })
+  return policyQueue
+}
+const removePressureListener = onMediaPressureChanged(updateDownloadPressurePolicy)
 
 const xunlei = createXunleiManager({ getDownloadStateDir })
+const downloadTasks = new DownloadTasks({ filename: () => path.join(getDownloadStateDir(), 'tasks.json'), rpc,
+  async stopEngine() {
+    const child = aria2Process
+    if (!child) return
+    sessionExpired = true; lastRuntimeError = '无法确认超时任务已暂停，正在停止自有下载引擎；请稍后明确继续'
+    await rpc('aria2.saveSession', [], { timeout: 800 }).catch(() => {})
+    await stopProcessTree(child, { processGroup: process.platform !== 'win32' }); await engineClosed
+  } })
 
 function getDownloadStateDir() {
   return path.join(getUserDataDir(), 'downloads')
@@ -89,29 +144,32 @@ function getCandidatePaths() {
   ].filter(Boolean)
 }
 
-async function canRunCommand(command) {
+async function canRunCommand(command, options = {}) {
   try {
-    await execFileAsync(command, ['--version'], {
-      timeout: 2500,
+    await execFileTreeAsync(command, ['--version'], {
+      timeout: Math.max(1, Math.min(2500, (options.deadlineAt || Infinity) - Date.now())), maxBuffer: 128 * 1024,
+      signal: options.signal || startupAbort.signal,
       windowsHide: true,
       encoding: 'utf-8'
     })
     return true
   } catch {
+    checkPreparation(options)
     return false
   }
 }
 
-async function detectAria2c(refresh = false) {
+async function detectAria2c(refresh = false, options = {}) {
+  checkPreparation(options)
   if (!refresh && detectedAria2Path) return detectedAria2Path
-  if (detectPromise) return detectPromise
+  if (!options.signal && detectPromise) return detectPromise
 
-  detectPromise = (async () => {
-    detectedAria2Path = null
+  const work = (async () => {
     detectError = ''
     const tried = []
 
     for (const candidate of getCandidatePaths()) {
+      checkPreparation(options)
       const normalized = String(candidate).trim()
       if (!normalized) continue
       if (tried.includes(normalized)) continue
@@ -120,26 +178,30 @@ async function detectAria2c(refresh = false) {
       const looksLikePath = path.isAbsolute(normalized) || normalized.includes(path.sep) || normalized.includes('/')
       if (looksLikePath) {
         const resolved = path.resolve(normalized)
-        if (isExistingFile(resolved)) {
+        const exists = await fsp.stat(resolved).then(stat => stat.isFile(), () => false)
+        checkPreparation(options)
+        if (exists) {
           detectedAria2Path = resolved
           return detectedAria2Path
         }
         continue
       }
 
-      if (await canRunCommand(normalized)) {
+      if (await canRunCommand(normalized, options)) {
+        checkPreparation(options)
         detectedAria2Path = normalized
         return detectedAria2Path
       }
     }
 
+    checkPreparation(options)
+    detectedAria2Path = null
     detectError = '未检测到内置 aria2c。请重新执行 npm run prepare-vendor，或把 aria2c 加入 PATH。'
     return null
-  })().finally(() => {
-    detectPromise = null
-  })
-
-  return detectPromise
+  })()
+  if (options.signal) return work
+  detectPromise = work
+  try { return await work } finally { if (detectPromise === work) detectPromise = null }
 }
 
 async function getFreePort() {
@@ -168,7 +230,8 @@ function isPortAvailable(port, host) {
   })
 }
 
-async function checkBtPortStatus(refresh = false) {
+async function checkBtPortStatus(refresh = false, options = {}) {
+  checkPreparation(options)
   const now = Date.now()
   if (!refresh && lastBtPortStatus && now - lastBtPortCheckedAt < PORT_CHECK_CACHE_MS) {
     return lastBtPortStatus
@@ -194,7 +257,9 @@ async function checkBtPortStatus(refresh = false) {
 
   const checked = []
   for (const port of ports) {
+    checkPreparation(options)
     const tcpAvailable = await isPortAvailable(port, '0.0.0.0')
+    checkPreparation(options)
     checked.push({
       port,
       tcpAvailable
@@ -217,57 +282,65 @@ async function checkBtPortStatus(refresh = false) {
 }
 
 async function rpc(method, params = [], options = {}) {
-  if (!isProcessRunning()) {
-    throw new Error('aria2 引擎未运行')
-  }
-  const body = JSON.stringify({
-    jsonrpc: '2.0',
-    id: `${Date.now()}-${Math.random().toString(36).slice(2)}`,
-    method,
-    params: getRpcTokenParams(params)
-  })
-
+  if (options.signal?.aborted) throw options.signal.reason
+  if (downloadClosing && !options.allowClosing) throw stoppingError()
+  if (!isProcessRunning() || !aria2Port) throw new Error('aria2 引擎未运行')
+  if (activeRpcRequests.size >= RPC_MAX_READERS) throw new Error('下载控制请求过多，请稍后再试')
+  const child = aria2Process, port = aria2Port
+  const body = JSON.stringify({ jsonrpc: '2.0', id: crypto.randomUUID(), method, params: getRpcTokenParams(params) })
   return new Promise((resolve, reject) => {
-    const request = http.request({
-      hostname: '127.0.0.1',
-      port: aria2Port,
-      path: '/jsonrpc',
-      method: 'POST',
-      timeout: options.timeout || RPC_TIMEOUT_MS,
-      headers: {
-        'Content-Type': 'application/json',
-        'Content-Length': Buffer.byteLength(body)
-      }
-    }, (response) => {
-      let raw = ''
-      response.setEncoding('utf8')
-      response.on('data', chunk => { raw += chunk })
-      response.on('end', () => {
+    let response, timer, settled = false, received = 0
+    const closed = stream => !stream || stream.closed ? Promise.resolve() : new Promise(done => stream.once('close', done))
+    const abort = () => finish(options.signal.reason)
+    const finish = (error, result) => {
+      if (settled) return
+      settled = true; clearTimeout(timer); options.signal?.removeEventListener('abort', abort)
+      const waiting = [closed(request), closed(response)]
+      if (error) { response?.destroy(); request.destroy() }
+      Promise.all(waiting).then(() => {
+        if (error) reject(error)
+        else if (child !== aria2Process && !options.allowClosing) reject(new Error('下载会话已改变，请重试'))
+        else resolve(result)
+      })
+    }
+    const request = http.request({ hostname: '127.0.0.1', port, path: '/jsonrpc', method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Content-Length': Buffer.byteLength(body) } }, incoming => {
+      response = incoming
+      const chunks = []
+      response.on('data', chunk => {
+        if (settled) return
+        received += chunk.length
+        if (received > RPC_MAX_BYTES) { finish(new Error('下载控制响应过大')); return }
+        chunks.push(chunk)
+      })
+      response.once('aborted', () => finish(new Error('下载控制连接已中断')))
+      response.once('error', finish)
+      response.once('end', () => {
+        if (settled) return
         try {
-          const parsed = JSON.parse(raw)
-          if (parsed.error) {
-            reject(new Error(parsed.error.message || `aria2 RPC 错误: ${parsed.error.code}`))
-            return
-          }
-          resolve(parsed.result)
-        } catch (err) {
-          reject(err)
-        }
+          let parsed
+          try { parsed = JSON.parse(Buffer.concat(chunks).toString('utf8')) } catch { throw new Error('下载控制服务响应格式无效') }
+          if (parsed.error) throw Object.assign(new Error('aria2 RPC 操作失败：' + (parsed.error.code || '未知错误')), { code: 'aria2_rpc_error', aria2Code: parsed.error.code, rpcMethod: method,
+            taskNotFound: typeof parsed.error.message === 'string' && /\bGID\s*#?\s*[0-9a-f]{16}\s+is not found\b/i.test(parsed.error.message) })
+          if (response.statusCode !== 200) throw new Error('下载控制服务响应异常')
+          finish(null, parsed.result)
+        } catch (error) { finish(error) }
       })
     })
-
-    request.on('timeout', () => {
-      request.destroy(new Error('aria2 RPC 响应超时'))
-    })
-    request.on('error', reject)
-    request.write(body)
-    request.end()
+    const record = { request, abort: () => finish(stoppingError()) }
+    activeRpcRequests.add(record)
+    request.once('close', () => activeRpcRequests.delete(record))
+    request.on('error', finish)
+    timer = setTimeout(() => finish(new Error('aria2 RPC 响应超时')), options.timeout || RPC_TIMEOUT_MS)
+    timer.unref?.(); request.end(body)
+    options.signal?.addEventListener('abort', abort, { once: true }); if (options.signal?.aborted) abort()
   })
 }
 
-async function waitForRpcReady() {
+async function waitForRpcReady(check = checkStartup) {
   const startedAt = Date.now()
   while (Date.now() - startedAt < START_TIMEOUT_MS) {
+    check()
     if (!isProcessRunning()) {
       throw new Error(lastRuntimeError || 'aria2 引擎启动后立即退出')
     }
@@ -281,12 +354,30 @@ async function waitForRpcReady() {
   throw new Error('aria2 引擎启动超时')
 }
 
-async function ensureStarted() {
-  if (isProcessRunning()) return getEngineStatus()
+async function ensureStarted(options = {}) {
+  checkStartup()
+  const expiredAtEntry = sessionExpired
+  if (options.resume) sessionExpired = false
+  if (sessionExpired) throw new Error('下载运行时间过长，已暂停；请点击继续或重新添加任务')
   if (startPromise) return startPromise
+  if (expiredAtEntry && options.resume) { await engineClosed; checkStartup() }
+  if (isProcessRunning()) return getEngineStatus()
 
+  const preparation = new AbortController()
+  const abortPreparation = () => preparation.abort(stoppingError())
+  startupAbort.signal.addEventListener('abort', abortPreparation, { once: true })
+  const preparationTimeout = setTimeout(() => preparation.abort(new Error('下载引擎准备超过最长等待时间')), START_DEADLINE_MS)
+  preparationTimeout.unref?.()
+  const check = () => { checkStartup(); if (preparation.signal.aborted) throw preparation.signal.reason }
   startPromise = (async () => {
-    const aria2Path = await detectAria2c()
+    await engineClosed; check()
+    const lease = await mediaScheduler.acquire({ key: 'aria2-daemon:' + (++engineSequence), type: 'download-daemon',
+      resources: { transfer: 3 }, priority: 20, timeoutMs: DOWNLOAD_SESSION_MS, signal: preparation.signal })
+    let launched = false
+    try {
+    check()
+    const aria2Path = await detectAria2c(false, { signal: preparation.signal, throwIfAborted: check })
+    check()
     if (!aria2Path) {
       throw new Error(detectError || '未检测到 aria2c')
     }
@@ -294,18 +385,24 @@ async function ensureStarted() {
     const stateDir = getDownloadStateDir()
     const sessionPath = getAria2SessionPath()
     await fsp.mkdir(stateDir, { recursive: true })
+    check()
     await fsp.mkdir(getDefaultDownloadDir(), { recursive: true })
+    check()
     if (!fs.existsSync(sessionPath)) {
       await fsp.writeFile(sessionPath, '', 'utf-8')
     }
 
+    check()
+    await downloadTasks.load(); check()
     aria2Port = await getFreePort()
+    check()
     aria2Secret = crypto.randomBytes(24).toString('hex')
     lastRuntimeError = ''
 
     const args = [
       '--no-conf=true',
       '--enable-rpc=true',
+      `--stop-with-process=${process.pid}`,
       '--rpc-listen-all=false',
       `--rpc-listen-port=${aria2Port}`,
       `--rpc-secret=${aria2Secret}`,
@@ -317,11 +414,11 @@ async function ensureStarted() {
       '--auto-save-interval=10',
       '--continue=true',
       '--pause=true',
-      '--max-concurrent-downloads=3',
+      '--max-concurrent-downloads=' + playbackDownloadOptions()['max-concurrent-downloads'],
       '--max-connection-per-server=16',
       '--split=16',
       '--min-split-size=1M',
-      '--max-overall-download-limit=0',
+      '--max-overall-download-limit=' + playbackDownloadOptions()['max-overall-download-limit'],
       '--max-download-limit=0',
       '--disk-cache=64M',
       '--file-allocation=prealloc',
@@ -342,31 +439,42 @@ async function ensureStarted() {
       '--seed-time=0'
     ]
 
-    aria2Process = spawn(aria2Path, args, {
-      windowsHide: true,
-      stdio: ['ignore', 'ignore', 'pipe']
-    })
-
-    aria2Process.stderr?.on('data', (chunk) => {
-      const line = String(chunk || '').trim()
-      if (line) log.warn('[aria2]', line)
-    })
-    aria2Process.once('error', (err) => {
-      lastRuntimeError = err.message
-    })
-    aria2Process.once('exit', (code, signal) => {
-      if (code != null || signal) {
-        lastRuntimeError = `aria2 已退出: ${code ?? signal}`
+    check()
+    const spec = workerSpawnSpec(aria2Path, args, { windowsHide: true, detached: process.platform !== 'win32', stdio: ['ignore', 'ignore', 'pipe'] })
+    const child = spawn(spec.file, spec.args, spec.options)
+    aria2Process = child; launched = true
+    const expired = () => {
+      if (!downloadClosing && !preparation.signal.aborted) { sessionExpired = true; lastRuntimeError = '下载运行时间过长，已暂停；请点击继续或重新添加任务' }
+      void stopProcessTree(child, { processGroup: process.platform !== 'win32' }).catch(() => {})
+    }
+    lease.signal.addEventListener('abort', expired, { once: true })
+    child.stderr?.on('data', chunk => { if (chunk.length) log.warn('[aria2] output received', { bytes: chunk.length }) })
+    child.once('error', error => { lastRuntimeError = '下载引擎启动失败：' + (error.code || '未知错误') })
+    engineClosed = new Promise(resolve => child.once('close', (code, signal) => {
+      downloadTasks.engineStopped()
+      lease.signal.removeEventListener('abort', expired); lease.release()
+      if (aria2Process === child) {
+        if (!downloadClosing && !sessionExpired) lastRuntimeError = 'aria2 已退出：' + (code ?? signal)
+        aria2Process = null; aria2Port = null; aria2Secret = ''
       }
-      aria2Process = null
-      aria2Port = null
-      aria2Secret = ''
-    })
+      resolve()
+    }))
 
-    await waitForRpcReady()
+    await waitForRpcReady(check)
+    check()
+    await downloadTasks.engineStarted(); check()
     await checkBtPortStatus(true).catch(() => {})
+    check()
+    await updateDownloadPressurePolicy()
+    check()
     return getEngineStatus()
+    } catch (error) {
+      if (launched && aria2Process) { await stopProcessTree(aria2Process, { processGroup: process.platform !== 'win32' }); await engineClosed }
+      else lease.release()
+      throw error
+    }
   })().finally(() => {
+    clearTimeout(preparationTimeout); startupAbort.signal.removeEventListener('abort', abortPreparation)
     startPromise = null
   })
 
@@ -402,11 +510,11 @@ function normalizeDownloadHeaders(headers) {
   return values
 }
 
-function getDownloadProxy(headers) {
+async function getDownloadProxy(headers, context = {}) {
   const targetUrl = headers && typeof headers === 'object' && !Array.isArray(headers) && typeof headers.url === 'string'
     ? headers.url
     : ''
-  const proxyState = getSystemProxy(targetUrl)
+  const proxyState = await getSystemProxyAsync(targetUrl, { ...context, signal: context.signal || startupAbort.signal })
   return proxyState.enabled ? proxyState.proxy : ''
 }
 
@@ -528,11 +636,14 @@ async function listTasks(options = {}) {
     'following',
     'infoHash'
   ]
-  const [active, waiting, stopped] = await Promise.all([
-    rpc('aria2.tellActive', [keys]),
-    rpc('aria2.tellWaiting', [0, 100, keys]),
-    rpc('aria2.tellStopped', [0, 100, keys])
+  const results = await Promise.allSettled([
+    rpc('aria2.tellActive', [keys], options),
+    rpc('aria2.tellWaiting', [0, 100, keys], options),
+    rpc('aria2.tellStopped', [0, 100, keys], options)
   ])
+  const failure = results.find(result => result.status === 'rejected')
+  if (failure) throw failure.reason
+  const [active, waiting, stopped] = results.map(result => result.value)
 
   return [...active, ...waiting, ...stopped]
     .map(normalizeTask)
@@ -567,57 +678,103 @@ function getEngineStatus() {
   }
 }
 
+async function prepareSnapshot(refresh, options) {
+  checkPreparation(options)
+  if (refresh) preflightRevision++
+  if (!refresh && preflightAppliedRevision === preflightRevision && Date.now() - preflightCheckedAt < 30000) return
+  const key = 'download-preflight'
+  try {
+    const enqueue = () => mediaScheduler.enqueue({ key, type: 'download-preflight', resources: { prepare: 1 }, signal: options.signal,
+      priority: 30, timeoutMs: 30000 }, async context => {
+      do {
+        const revision = preflightRevision, force = revision !== preflightAppliedRevision
+        const results = await Promise.allSettled([
+          getSystemProxyAsync('', { ...context, refresh: force }), detectAria2c(force, context), detectYtDlp(force, context),
+          xunlei.detect(force, context), checkBtPortStatus(force, context)
+        ])
+        context.throwIfAborted(); checkStartup()
+        const failure = results.find(result => result.status === 'rejected')
+        if (failure) throw failure.reason
+        preflightAppliedRevision = revision; preflightCheckedAt = Date.now()
+      } while (preflightAppliedRevision !== preflightRevision)
+    })
+    while (true) {
+      checkPreparation(options)
+      try { await enqueue(); break } catch (error) {
+        if (error.code !== 'task_cancelling') throw error
+        await mediaScheduler.waitForKey(key, options)
+      }
+    }
+  } finally { await mediaScheduler.waitForCancelledKey(key) }
+}
+
 async function getSnapshot(options = {}) {
+  checkPreparation(options)
+  const start = options.start !== false, refresh = Boolean(options.refresh), key = 'download-snapshot:' + start + ':' + refresh
+  const deadlineAt = Date.now() + 60000
+  try {
+    while (true) {
+      checkPreparation(options)
+      if (Date.now() >= deadlineAt) throw taskError('task_timeout', '下载状态读取超过最长等待时间', 504, true)
+      try {
+        return await mediaScheduler.enqueue({ key, type: 'download-observation', resources: { control: 1 }, priority: 40,
+          signal: options.signal, timeoutMs: deadlineAt - Date.now() }, context => readSnapshot({ ...context, start, refresh }))
+      } catch (error) {
+        if (error.code !== 'task_cancelling') throw error
+        await mediaScheduler.waitForKey(key, { signal: options.signal, deadlineAt })
+      }
+    }
+  } finally { await mediaScheduler.waitForCancelledKey(key) }
+}
+
+async function readSnapshot(options) {
+  checkStartup()
   const start = options.start !== false
   const refresh = Boolean(options.refresh)
-  await detectAria2c(refresh)
-  await detectYtDlp(refresh).catch(() => null)
-  await xunlei.detect(refresh).catch(() => null)
-  await checkBtPortStatus(refresh).catch((err) => {
-    lastBtPortStatus = {
-      range: BT_PORT_RANGE,
-      ports: [],
-      available: false,
-      usablePort: null,
-      checkedAt: new Date().toISOString(),
-      note: err.message || 'BT 端口检测失败'
-    }
-  })
+  await prepareSnapshot(refresh, options); checkPreparation(options)
+  await downloadTasks.load(); checkPreparation(options)
 
   if (!detectedAria2Path) {
     return {
       engine: getEngineStatus(),
-      tasks: (await xunlei.loadTasks()).map(xunlei.normalizeTask)
+      tasks: [...downloadTasks.decorate(), ...(await xunlei.loadTasks()).map(xunlei.normalizeTask)]
     }
   }
 
   if (!start && !isProcessRunning()) {
     return {
       engine: getEngineStatus(),
-      tasks: (await xunlei.loadTasks()).map(xunlei.normalizeTask)
+      tasks: [...downloadTasks.decorate(), ...(await xunlei.loadTasks()).map(xunlei.normalizeTask)]
     }
   }
 
   try {
-    const [tasks, xunleiTasks] = await Promise.all([
-      listTasks(),
+    if (start) await awaitObservation(ensureStarted(), options.signal)
+    checkPreparation(options)
+    const results = await Promise.allSettled([
+      listTasks({ ensure: false, signal: options.signal }),
       xunlei.loadTasks()
     ])
+    checkPreparation(options)
+    const failure = results.find(result => result.status === 'rejected')
+    if (failure) throw failure.reason
+    const [tasks, xunleiTasks] = results.map(result => result.value)
     return {
       engine: getEngineStatus(),
-      tasks: [...tasks, ...xunleiTasks.map(xunlei.normalizeTask)]
+      tasks: [...downloadTasks.decorate(tasks), ...xunleiTasks.map(xunlei.normalizeTask)]
     }
   } catch (err) {
+    checkPreparation(options)
     lastRuntimeError = err.message
     return {
       engine: getEngineStatus(),
-      tasks: (await xunlei.loadTasks()).map(xunlei.normalizeTask)
+      tasks: [...downloadTasks.decorate(), ...(await xunlei.loadTasks()).map(xunlei.normalizeTask)]
     }
   }
 }
 
 async function assertDownloadDirectory(dir) {
-  const resolved = path.resolve(String(dir || '').trim())
+  const resolved = await fsp.realpath(path.resolve(String(dir || '').trim()))
   const stats = await fsp.stat(resolved)
   if (!stats.isDirectory()) {
     throw new Error('保存路径不是目录')
@@ -627,17 +784,24 @@ async function assertDownloadDirectory(dir) {
 
 // 迅雷接管适配已拆出至 ./download-xunlei
 
-async function addXunleiTask({ url, dir }) {
-  return xunlei.addTask({ url, dir, assertDownloadDirectory })
+async function addXunleiTask({ url, dir }, options = {}) {
+  checkStartup()
+  return xunlei.addTask({ url, dir, assertDownloadDirectory }, { ...options, throwIfAborted: () => checkPreparation(options) })
 }
 
-async function addUrl({ url, dir, httpHeaders }) {
+async function taskSnapshot() {
+  try { return await getSnapshot({ start: false }) }
+  catch { return { engine: getEngineStatus(), tasks: [...downloadTasks.decorate(), ...(await xunlei.loadTasks()).map(xunlei.normalizeTask)] } }
+}
+async function addUrl({ url, dir, httpHeaders, operationId, sourceIdentity }, context = {}) {
+  checkPreparation(context)
   const parsed = new URL(String(url || '').trim())
   if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') {
     throw new Error('仅支持 http/https 下载地址')
   }
   const targetDir = await assertDownloadDirectory(dir)
-  await ensureStarted()
+  checkPreparation(context)
+  await ensureStarted({ resume: true })
   const options = {
     dir: targetDir,
     continue: 'true',
@@ -647,16 +811,18 @@ async function addUrl({ url, dir, httpHeaders }) {
   }
   const headers = normalizeDownloadHeaders(httpHeaders)
   if (headers.length > 0) options.header = headers
-  const proxy = getDownloadProxy({ ...(httpHeaders || {}), url: parsed.toString() })
+  const proxy = await getDownloadProxy({ ...(httpHeaders || {}), url: parsed.toString() }, context)
+  checkStartup()
   if (proxy) options['all-proxy'] = proxy
-  const gid = await rpc('aria2.addUri', [
-    [parsed.toString()],
-    options
-  ])
+  checkPreparation(context)
+  const result = await downloadTasks.submit({ operationId, kind: 'url', name: path.basename(parsed.pathname),
+    fingerprint: digest(JSON.stringify(sourceIdentity ? ['network', sourceIdentity, targetDir] : ['url', parsed.toString(), targetDir, headers])) }, (gid, internal) => {
+    internal.throwIfAborted(); return rpc('aria2.addUri', [[parsed.toString()], { ...options, gid }])
+  }, context)
   await rpc('aria2.saveSession').catch(() => {})
   return {
-    gid,
-    state: await getSnapshot({ start: true })
+    ...result, success: result.accepted, error: result.accepted ? undefined : '下载引擎未接受此操作，请查看任务状态',
+    state: await taskSnapshot()
   }
 }
 
@@ -685,14 +851,19 @@ function normalizeMagnet(rawMagnet) {
   return magnet
 }
 
-async function addMagnet({ magnet, dir }) {
+async function addMagnet({ magnet, dir, operationId }, context = {}) {
+  checkPreparation(context)
   const normalizedMagnet = normalizeMagnet(magnet)
   const targetDir = await assertDownloadDirectory(dir)
-  await ensureStarted()
-  const gid = await rpc('aria2.addUri', [
+  checkPreparation(context)
+  await ensureStarted({ resume: true })
+  const result = await downloadTasks.submit({ operationId, kind: 'magnet', name: new URL(normalizedMagnet).searchParams.get('dn') || '磁链元数据',
+    fingerprint: digest(JSON.stringify(['magnet', normalizedMagnet, targetDir])) }, (gid, internal) => {
+    internal.throwIfAborted(); return rpc('aria2.addUri', [
     [normalizedMagnet],
     {
       dir: targetDir,
+      gid,
       pause: 'false',
       'pause-metadata': 'true',
       'bt-save-metadata': 'true',
@@ -702,76 +873,87 @@ async function addMagnet({ magnet, dir }) {
       'seed-time': '0',
       continue: 'true'
     }
-  ])
+  ]) }, context)
   await rpc('aria2.saveSession').catch(() => {})
   return {
-    gid,
-    state: await getSnapshot({ start: true })
+    ...result, success: result.accepted, error: result.accepted ? undefined : '下载引擎未接受此操作，请查看任务状态',
+    state: await taskSnapshot()
   }
 }
 
-async function changeSelectedFiles(gid, fileIndexes) {
+async function changeSelectedFiles(gid, fileIndexes, options = {}) {
   const normalizedGid = String(gid || '').trim()
+  if (normalizedGid.startsWith('xunlei-')) throw new Error('外部下载需在迅雷中选择文件')
   const indexes = Array.isArray(fileIndexes)
     ? [...new Set(fileIndexes.map(value => Number(value)).filter(value => Number.isInteger(value) && value > 0))]
     : []
   if (!normalizedGid) throw new Error('下载任务无效')
+  validGid(normalizedGid)
   if (indexes.length === 0) throw new Error('请至少选择一个文件')
   await ensureStarted()
-  await rpc('aria2.changeOption', [
-    normalizedGid,
-    {
-      'select-file': indexes.sort((a, b) => a - b).join(',')
-    }
-  ])
-  await rpc('aria2.saveSession').catch(() => {})
-  await rpc('aria2.unpause', [normalizedGid]).catch(() => {})
-  return getSnapshot({ start: true })
+  const result = await downloadTasks.control(normalizedGid, 'select', indexes, options)
+  return { ...(await taskSnapshot()), ...result, success: result.accepted }
 }
 
-async function pause(gid) {
+async function pause(gid, options = {}) {
   const normalizedGid = String(gid || '').trim()
+  if (normalizedGid.startsWith('xunlei-')) throw new Error('外部下载需在迅雷中暂停')
   if (!normalizedGid) throw new Error('下载任务无效')
+  validGid(normalizedGid)
   await ensureStarted()
-  await rpc('aria2.pause', [normalizedGid])
-  await rpc('aria2.saveSession').catch(() => {})
-  return getSnapshot({ start: true })
+  const result = await downloadTasks.control(normalizedGid, 'pause', undefined, options)
+  return { ...(await taskSnapshot()), ...result, success: result.accepted }
 }
 
-async function resume(gid) {
+async function resume(gid, options = {}) {
   const normalizedGid = String(gid || '').trim()
+  if (normalizedGid.startsWith('xunlei-')) throw new Error('外部下载需在迅雷中继续')
   if (!normalizedGid) throw new Error('下载任务无效')
-  await ensureStarted()
-  await rpc('aria2.unpause', [normalizedGid])
-  await rpc('aria2.saveSession').catch(() => {})
-  return getSnapshot({ start: true })
+  validGid(normalizedGid)
+  await ensureStarted({ resume: true })
+  const result = await downloadTasks.control(normalizedGid, 'resume', undefined, options)
+  return { ...(await taskSnapshot()), ...result, success: result.accepted }
 }
 
-async function remove(gid) {
+async function remove(gid, options = {}) {
   const normalizedGid = String(gid || '').trim()
   if (!normalizedGid) throw new Error('下载任务无效')
   if (normalizedGid.startsWith('xunlei-')) {
     await xunlei.removeTask(normalizedGid)
-    return getSnapshot({ start: true })
+    return getSnapshot({ start: false })
   }
+  validGid(normalizedGid)
   await ensureStarted()
-  try {
-    await rpc('aria2.remove', [normalizedGid])
-  } catch {
-    await rpc('aria2.removeDownloadResult', [normalizedGid])
-  }
-  await rpc('aria2.saveSession').catch(() => {})
-  return getSnapshot({ start: true })
+  const result = await downloadTasks.control(normalizedGid, 'remove', undefined, options)
+  return { ...(await taskSnapshot()), ...result, success: result.accepted }
 }
 
 function disposeDownloadManager() {
-  if (!isProcessRunning()) return
-  rpc('aria2.saveSession').catch(() => {})
-  rpc('aria2.shutdown').catch(() => {
-    try {
-      aria2Process?.kill()
-    } catch {}
-  })
+  if (disposePromise) return disposePromise
+  downloadClosing = true; removePressureListener()
+  const taskCleanup = downloadTasks.dispose()
+  if (!aria2Process || startPromise) startupAbort.abort(stoppingError())
+  const requests = [...activeRpcRequests]
+  const rpcClosed = requests.map(record => record.request.closed ? Promise.resolve() : new Promise(resolve => record.request.once('close', resolve)))
+  for (const record of requests) record.abort()
+  disposePromise = (async () => {
+    await Promise.all(rpcClosed)
+    await taskCleanup
+    const child = aria2Process
+    if (child && isProcessRunning()) {
+      await rpc('aria2.saveSession', [], { timeout: 1000, allowClosing: true }).catch(() => {})
+      await rpc('aria2.shutdown', [], { timeout: 600, allowClosing: true }).catch(() => {})
+      startupAbort.abort(stoppingError())
+      await stopProcessTree(child, { processGroup: process.platform !== 'win32' })
+    }
+    startupAbort.abort(stoppingError())
+    await startPromise?.catch(() => {})
+    await engineClosed
+    await policyQueue.catch(() => {})
+    await xunlei.dispose?.()
+    await mediaScheduler.waitForIdle(['download-daemon'])
+  })()
+  return disposePromise
 }
 
 module.exports = {
@@ -786,5 +968,6 @@ module.exports = {
   pause,
   resume,
   remove,
-  disposeDownloadManager
+  disposeDownloadManager,
+  getDownloadDiagnostics: () => ({ closing: downloadClosing, starting: Boolean(startPromise), running: isProcessRunning(), rpc: activeRpcRequests.size, expired: sessionExpired })
 }

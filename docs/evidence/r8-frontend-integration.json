@@ -1,0 +1,2149 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-10-23T06:51:23.195Z",
+  "phase": "R8 DeepSeek frontend integration and reachable mobile update entry",
+  "previousEvidence": "docs/evidence/r8-update-context.json",
+  "previousGoalTurn": "progress",
+  "implementation": {
+    "frontendAuthorization": "User confirmed DeepSeek frontend work complete and requested integration",
+    "productionFrontendChanged": [
+      "mobile/src/components/MobileUpdateCard.tsx",
+      "mobile/src/screens/LibraryScreen.tsx"
+    ],
+    "otherFrontendChanges": 0,
+    "behavior": [
+      "Initial connection failure has a scoped update card in a scrollable screen",
+      "All existing device/pair/settings update entries use the same production service",
+      "Page inactivity, app background, scope changes and re-pairing cancel checks and clear results",
+      "Retry and error cannot retain an earlier download action, including captured event callbacks",
+      "Opening revalidates the binding and ignores late results/errors after a different scope",
+      "Native update buttons retain explicit accessible names through busy state"
+    ],
+    "themeAndLayoutPreserved": true,
+    "dependenciesAndVersionsChanged": false,
+    "officialReleaseOrUpdateDownloaded": false
+  },
+  "automated": {
+    "regressionChecks": [
+      {
+        "name": "build",
+        "passed": true
+      },
+      {
+        "name": "verify:api-adapters",
+        "passed": true
+      },
+      {
+        "name": "verify:electron-api",
+        "passed": true
+      },
+      {
+        "name": "verify:responsive-layout",
+        "passed": true
+      },
+      {
+        "name": "verify:mobile-update-ui",
+        "passed": true
+      },
+      {
+        "name": "verify:mobile-navigation",
+        "passed": true
+      },
+      {
+        "name": "verify:mobile-accessibility",
+        "passed": true
+      },
+      {
+        "name": "verify:mobile-input-accessibility",
+        "passed": true
+      },
+      {
+        "name": "verify:mobile-player-panels",
+        "passed": true
+      },
+      {
+        "name": "verify:mobile-player",
+        "passed": true
+      },
+      {
+        "name": "verify:update-context",
+        "passed": true
+      },
+      {
+        "name": "verify:mobile-updates",
+        "passed": true
+      },
+      {
+        "name": "verify:connection-lifecycle",
+        "passed": true
+      },
+      {
+        "name": "verify:desktop-player",
+        "passed": true
+      },
+      {
+        "name": "verify:electron-runtime",
+        "passed": true
+      },
+      {
+        "name": "verify:mobile-correctness",
+        "passed": true
+      }
+    ],
+    "componentBehaviorGroups": 8,
+    "componentLog": ".tmp/refactor-tests/r8-frontend-integration/update-ui-final.log",
+    "contextServiceGroups": 18,
+    "updateDiscoveryGroups": 22,
+    "typecheck": "typecheck-final.log",
+    "fullCloudCiTriggered": false
+  },
+  "desktop": {
+    "source": "Current production Vite renderer with actual Electron44 IPC and isolated settings",
+    "viewportThemeZoomCases": 24,
+    "failures": [],
+    "layout": {
+      "navigation": {
+        "focusWrap": true,
+        "backgroundInert": true,
+        "escapeAndFocusReturn": true,
+        "directoryHitTest": true
+      },
+      "preferencePreserved": true,
+      "settings": [
+        {
+          "page": "基础设置",
+          "withinViewport": true,
+          "overflow": false
+        },
+        {
+          "page": "手机访问",
+          "withinViewport": true,
+          "overflow": false
+        },
+        {
+          "page": "插件管理",
+          "withinViewport": true,
+          "overflow": false
+        },
+        {
+          "page": "系统状态",
+          "withinViewport": true,
+          "overflow": false
+        }
+      ],
+      "dock": {
+        "width": 376,
+        "withinViewport": true,
+        "overflow": false,
+        "backgroundInert": true
+      },
+      "reducedMotion": {
+        "matches": true,
+        "transition": "1e-05s",
+        "animation": "1e-05s"
+      }
+    },
+    "realPlaybackDecodeInThisLayoutCheck": false,
+    "playerAndRuntimeSuites": true,
+    "screenshots": [
+      {
+        "file": ".tmp/refactor-tests/r8-frontend-integration/desktop-layout/desktop-after-dark-1024-200.png",
+        "sha256": "1108a9e8dec0569862af3db1b305b10d169067e40429048dce6b9df30cc892ff"
+      },
+      {
+        "file": ".tmp/refactor-tests/r8-frontend-integration/desktop-layout/desktop-after-dock-1024-200.png",
+        "sha256": "806e47fd54bd947fb5703c431ac3c58aef5ce12ac5618abd1bba996947774b91"
+      },
+      {
+        "file": ".tmp/refactor-tests/r8-frontend-integration/desktop-layout/desktop-after-light-1024-200.png",
+        "sha256": "fe37ba5ededddec6d67f3fbd4c9025427b69779f565080e33bea5119f4dd77f2"
+      },
+      {
+        "file": ".tmp/refactor-tests/r8-frontend-integration/desktop-layout/desktop-after-navigation-1024-200.png",
+        "sha256": "b3f89e77cd66b3601c6e2f1d4d4c62fb1a941eafb2f69ec8ffd6283f6633da53"
+      }
+    ]
+  },
+  "mobileBundles": {
+    "hermesExports": [
+      {
+        "platform": "android",
+        "bytes": 3125272,
+        "modules": 2570,
+        "reactVersion": "19.3.0",
+        "sharedContracts": true,
+        "excludedBuildOnlyAdvisories": [
+          "braces",
+          "node-forge"
+        ]
+      },
+      {
+        "platform": "ios",
+        "bytes": 3120836,
+        "modules": 2572,
+        "reactVersion": "19.3.0",
+        "sharedContracts": true,
+        "excludedBuildOnlyAdvisories": [
+          "braces",
+          "node-forge"
+        ]
+      }
+    ],
+    "sharedContractsAndCurrentModulesVerified": true,
+    "actualIosNativeTest": false
+  },
+  "native": {
+    "stage": {
+      "date": "2026-10-23T06:29:05.652Z",
+      "stage": "E:/wpf-6b87d744",
+      "source": "E:\\wallpaper播放器",
+      "sdk": "E:/wp-native-qa-lRJFHV/sdk",
+      "java": "C:/Program Files/Java/jdk-21",
+      "gradle": "E:/wp-sdk58-qa-c4c02030/bootstrap/gradle-9.4.1/bin/gradle.bat",
+      "appId": "com.wallpaperplayer.mobile.qa.frontend",
+      "versionCode": 1,
+      "purpose": "Full production mobile UI, synthetic bound PC and catalog; no production device data or update APK"
+    },
+    "apk": {
+      "apk": "E:\\wpf-6b87d744\\mobile\\android\\app\\build\\outputs\\apk\\release\\app-release.apk",
+      "bytes": 34449619,
+      "sha256": "10e69a5170a81cf61788013a5528ff4b2a2e634e882bc481596fbfa3afa8165e",
+      "sha512": "2J9Ano+kvaIYI2+B8oyBdlOH1fqRG0jaQlbgQbUbbpTrWVofIBDR+5VvwvJHYFucuNxC8Zjinr0GHcUubeD9iQ==",
+      "actual": {
+        "applicationId": "com.wallpaperplayer.mobile.qa.frontend",
+        "versionCode": 1,
+        "version": "0.1.4",
+        "certificateSha256": "fac61745dc0903786fb9ede62a962b399f7348f0bb6f899b8332667591033b9c",
+        "debugCertificate": true,
+        "abi": [
+          "x86_64"
+        ],
+        "minSdk": 24,
+        "targetSdk": 36,
+        "verified": true
+      },
+      "r8Mapping": {
+        "file": "E:\\wpf-6b87d744\\mobile\\android\\app\\build\\outputs\\mapping\\release\\mapping.txt",
+        "bytes": 85197867,
+        "sha256": "a534ee4fa8cd76f56ffb23b706f6e7471bfb9e1e050080f980b1cb676a488d97",
+        "sha512": "RlnK2Z4RYhqLRS6IgGTlXylA3GYMBgsaj1U7+6ML1Teqb0bavQoQQMbV/jt79iIO2pPypFFxJq+RTF7LJRwhqw=="
+      }
+    },
+    "hermes": {
+      "bytes": 3127704,
+      "sha256": "3a3961190363c8e795afe97e21fa7f2b28d77a59d03eb2d038ecc1a309118f14",
+      "magic": "c61fbc03c103191f",
+      "identicalToApk": true
+    },
+    "frozenInputs": 66,
+    "compiledProductionModules": [
+      {
+        "file": "ProductionApp.tsx",
+        "sha256": "f22dd5fe3757a007b517ad3d8d5f0f8bfc6b414ee588a619b636d691df4510fb"
+      },
+      {
+        "file": "src/AppNavigator.tsx",
+        "sha256": "c4cacc8f12f40bb6f89910fafd2b26682e91a5dacd580d4f7860deea5f0a96ab"
+      },
+      {
+        "file": "src/components/MobileUpdateCard.tsx",
+        "sha256": "3990f814f210ef0b8081a76e9e59d029d106f895b4cfe2b19cfe1be787345fb8"
+      },
+      {
+        "file": "src/screens/DeviceListScreen.tsx",
+        "sha256": "7ac18ad9ad29d0802061722eb54eace8ac48c92800cbfc96c3f10422558f0aa5"
+      },
+      {
+        "file": "src/screens/LibraryScreen.tsx",
+        "sha256": "52e44ec8e379e53bf5185db49edd1d37b2fef1eb31bf688c2c499a7cf283a1f6"
+      },
+      {
+        "file": "src/screens/PairDeviceScreen.tsx",
+        "sha256": "ded13b7343674b93771510137c6098e03d9898cd3ec2490eb386bb5540a154c4"
+      },
+      {
+        "file": "src/screens/PlayerScreen.tsx",
+        "sha256": "03dfee072cef5fab56880cf5fe40e502f60c1e7bef02ed3a6dd1431c54726f85"
+      },
+      {
+        "file": "src/theme.ts",
+        "sha256": "29dcefcae5aaada51e04c2b1dae8418a16553f16317e0dbf6d2a75c332d91997"
+      },
+      {
+        "file": "src/theme-context.tsx",
+        "sha256": "70ee91fb42dddf0cc81d14d3d95d7f22493cb286874d15bc388bf3b46054772d"
+      },
+      {
+        "file": "src/hooks/usePageActivity.ts",
+        "sha256": "9f4fc53e137436d5ba7d1b1f9141704e4e06ad9fbd5957e89b75ed175bbe6488"
+      },
+      {
+        "file": "src/services/updates.ts",
+        "sha256": "7da81705108f39f413861a866f27851185410756fa63c3cb275e0aa4d7b29265"
+      },
+      {
+        "file": "src/services/update-manifest.ts",
+        "sha256": "609f326ccffbc7dbcc227b6314e5ca31d4a938957934786f1f7fa42649e22831"
+      },
+      {
+        "file": "src/services/update-environment.ts",
+        "sha256": "adc0fe1c6f2f45c4a57a8ae9f18c95a00b42487683804981d9143329ef05acf6"
+      },
+      {
+        "file": "src/services/update-server-context.ts",
+        "sha256": "29ebd3afcb946840b51025907a1bb895e80419112cfc92c85013c8ef7687d704"
+      },
+      {
+        "file": "src/services/active-device-context.ts",
+        "sha256": "10042da861eca926e14db332e2393de5dfa6ea1b727056444eefb3f2a02b29a5"
+      },
+      {
+        "file": "src/services/navigation-store.ts",
+        "sha256": "53d18e5557f1e6f0e2b30f1b656754b7356ade19159efcc4add0a2c722cbd5e0"
+      },
+      {
+        "file": "src/services/connection-manager.ts",
+        "sha256": "3f92c54fad30daeab135ecea44896935f663bc0c43b578481d3c7223698b444e"
+      },
+      {
+        "file": "src/services/api.ts",
+        "sha256": "92c6dd8c797ba5e96fc250973c4181a888b162c1abc18408411d62160c5233f0"
+      },
+      {
+        "file": "src/persistence/devices.ts",
+        "sha256": "8ae8324b8a271d432b07fa391eee9afdc428f43f1c8fac9fb8916adbd6f14d36"
+      }
+    ],
+    "currentProductionApp": "App.tsx copied byte-for-byte to ProductionApp.tsx under a QA bootstrap; complete production AppNavigator/screens/styles/hooks",
+    "qaTransport": "Only expo/fetch imported by updates.ts is mapped by QA Metro resolver to a local catalog adapter; production service source and native streaming fetch remain intact",
+    "cases": [
+      "Complete production navigation reaches an update card after the newer-client connection gate and displays a compatible synthetic protocol3 candidate",
+      "Leaving the failed connection screen cancels a held native manifest stream and clears the old download result",
+      "A fresh authorization failure is visible and cannot fall back to a catalog result or stale download button",
+      "Reconnect reaches the production library and its settings update entry remains enabled after closing navigation, in both themes",
+      "Backgrounding cancels a held manifest stream and returning requires a new check",
+      "At 360x640dp with 160% font, the failure screen scrolls to a working update check"
+    ],
+    "supplementalScroll": {
+      "passed": true,
+      "rectangles": {
+        "checkBefore": [
+          86,
+          1058,
+          318,
+          1146
+        ],
+        "检查更新": [
+          86,
+          1058,
+          318,
+          1146
+        ],
+        "下载更新": [
+          334,
+          1058,
+          570,
+          1146
+        ]
+      },
+      "widthDp": 360,
+      "heightDp": 640,
+      "fontScale": 1.6,
+      "restored": {
+        "size": "Physical size: 1080x2340",
+        "density": "Physical density: 440",
+        "font": "1.0"
+      },
+      "apkSha256": "10e69a5170a81cf61788013a5528ff4b2a2e634e882bc481596fbfa3afa8165e",
+      "candidateDownloaded": false
+    },
+    "passed": true,
+    "nativeAcceptanceGroups": 7,
+    "screenshots": [
+      ".tmp/refactor-tests/r8-frontend-integration/native-ui-final-success/mobile-devices-dark.png",
+      ".tmp/refactor-tests/r8-frontend-integration/native-ui-final-success/mobile-connection-failure-dark.png",
+      ".tmp/refactor-tests/r8-frontend-integration/native-ui-final-success/mobile-scoped-candidate-dark.png",
+      ".tmp/refactor-tests/r8-frontend-integration/native-ui-final-success/mobile-authorization-revoked.png",
+      ".tmp/refactor-tests/r8-frontend-integration/native-ui-final-success/mobile-library-dark.png",
+      ".tmp/refactor-tests/r8-frontend-integration/native-ui-final-success/mobile-settings-dark.png",
+      ".tmp/refactor-tests/r8-frontend-integration/native-ui-final-success/mobile-settings-light.png",
+      ".tmp/refactor-tests/r8-frontend-integration/native-ui-final-success/mobile-small-360dp-font160-top.png",
+      ".tmp/refactor-tests/r8-frontend-integration/native-ui-final-success/mobile-small-360dp-font160-update.png"
+    ],
+    "supplementalScreenshot": ".tmp/refactor-tests/r8-frontend-integration/native-small-scroll/mobile-small-scroll-complete.png",
+    "scope": "Full current production UI and native module in an isolated QA app. QA bootstrap supplies a synthetic binding; Metro maps only update catalog transport to owned localhost. Protocol3 and candidate APK metadata are fixtures; no APK download/install.",
+    "noCandidateApkTransfer": true,
+    "currentSharedProtocol": 2,
+    "syntheticFutureProtocol": 3,
+    "oldQaPackagePreserved": true,
+    "displayRestored": true,
+    "shutdown": {
+      "date": "2026-10-23T06:51:06.491Z",
+      "passed": true,
+      "oldPackageAfter": "package:/data/app/~~s6xS4PGkgwYhTfKbPbqgMQ==/com.wallpaperplayer.mobile.qa.sdk58-xBDaPMM0hJYfqhYzN_HTPA==/base.apk",
+      "stoppedPackage": "com.wallpaperplayer.mobile.qa.frontend",
+      "reverseRemoved": 49429,
+      "displayRestored": true,
+      "nativeEnvironmentMatchesApk": true,
+      "emulatorShutdown": "OK: killing emulator, bye bye\r\r\nOK\r\r\n",
+      "serverShutdownRequested": true
+    },
+    "emulatorDataRetained": true,
+    "testCorrections": [
+      "Expected server English message corrected to production Chinese authorization message",
+      "Native selector now prefers an actionable button over the same-name settings heading",
+      "Production buttons gained explicit accessible names after native busy state replaced the implicit name; final APK rebuilt and reinstalled",
+      "Initial-failure small-screen scenario resets only this phase QA synthetic cache so the intentionally retained offline library does not bypass the gate",
+      "Supplemental scroll verifies the complete 44dp check and download targets inside the safe viewport; candidate download is not pressed"
+    ],
+    "earlierFailedAttemptsRetained": [
+      "native-ui-result.json",
+      "native-ui-final/native-ui-result.json",
+      "native-ui-accepted/native-ui-result.json",
+      "native-ui-complete/native-ui-result.json"
+    ]
+  },
+  "workflow": {
+    "actionlint": {
+      "version": "1.7.12",
+      "exitCode": 0
+    },
+    "powershell": {
+      "failures": [],
+      "scripts": 112
+    }
+  },
+  "preservation": {
+    "originalFallbackFiles": [
+      {
+        "file": ".tmp-wallpaper-player/analysis-results/G086 Bronya分析结果2026-06-22_20-00-44.json",
+        "bytes": 3873,
+        "sha256": "01db5f778601802471791e416b40c3ac8f96248e4542b78a867eaee77dd265e4",
+        "sha512": "iyw4/Gr6XPWtLoQ9c+6Y4MfSAkwIJ5GEXlylTSgcauA7JdITUqkvviqngOcXtmt0/acatShPvnKSYPYQS4i7Gw=="
+      },
+      {
+        "file": ".tmp-wallpaper-player/downloads/aria2.session",
+        "bytes": 2428,
+        "sha256": "bbe9d72e7e5001c01f3a012fa73e5d35b6d53b9e76e08190bba58973ce1ba9bc",
+        "sha512": "kUeLdSNzgAIPCflk0SjGHwcnPI0onGBAaWNfOWR5mIirAx8P8X5NsaKcuLcanGTkbao6rDlYwv7IkTgAO9IDSw=="
+      },
+      {
+        "file": ".tmp-wallpaper-player/llama-server-err.log",
+        "bytes": 87774,
+        "sha256": "5744b9bb378569a3a4f664b62aad9a4b0025cd7d419cba73b793fb62cb737f42",
+        "sha512": "ZnN0RcBburL6Ar6DvnUg0DSfCPYsKYjnYEas3nHGA5qdG7eXIh4U5vUPxKG8YLizNa7WQQb5kQV0lv/WGbknvw=="
+      },
+      {
+        "file": ".tmp-wallpaper-player/llama-server-out.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "sha512": "z4PhNX7vuL3xVChQ1m2AB9Yg5AULVxXcg/SpIdNs6c5H0NE8XYXysP+DGNKHfuwvY7kxvUdBeoGlODJ6+SfaPg=="
+      },
+      {
+        "file": ".tmp-wallpaper-player/remote-identity.json",
+        "bytes": 566,
+        "sha256": "0abcd8df9c1443a348b050b5abe28ac419ecef717ddf31a0daa680f153061324",
+        "sha512": "XvbFfKC+cCrSnQH/oJMKUFaEalXRT7nfaUR+/x5+PU2zpJAupUIQXIA1l82Fqgb/FrOSVKPPBcZqrkF6ns7qWw=="
+      },
+      {
+        "file": ".tmp-wallpaper-player/scan-index/029fa92465c3409cba74ce3db6b927dfec0d4f581b12122975041a32ab324e8a.json",
+        "bytes": 3642,
+        "sha256": "33b1310886821b4f01322041a561c8a6b4ed10aa351772effb396e7b1b547cfd",
+        "sha512": "5EiJNPPQONupaa7Sh+Sg71Y+rVxn0lfb60Yh9efMOD3utOoQoj49EeQxjkdAHBfMporaGhtWpL7/E58686/zew=="
+      },
+      {
+        "file": ".tmp-wallpaper-player/scan-index/06cf5926d93db3cc7b30882ee7dbecb69d51ce4e00de7901de3d48b866f9afc3.json",
+        "bytes": 2804,
+        "sha256": "274848604327a2f96f0d152b9f23a7b4e5470fdd67c744e1c181e86c2d284059",
+        "sha512": "SfqtOuo1zybHY9rNSzVPEY8GX8ze3//TDKguB+bnjwnkeuVpuQVj2Vty2ylkDHPMjPXmp0jUt68R9zoI+4GX0w=="
+      },
+      {
+        "file": ".tmp-wallpaper-player/scan-index/0e65747e6e0fc76a1e0c86e951c35d6c7392c184ba6cb43724d7d58856ff212a.json",
+        "bytes": 3544,
+        "sha256": "3ac45a0678e6ed4554fe1f315f923d999b0311096acd3c9394e3d85826d37db9",
+        "sha512": "JgrxWZh+aE0Nin+UuLG8ox8+HknyXbJTVUwtv1hCfiFDKIt6NGjqeAY2VvlkIwFriM2ckV6ivxe3Y/gML3K55Q=="
+      },
+      {
+        "file": ".tmp-wallpaper-player/scan-index/114890f3437dd45b34313ba38d9d3c36a09701d5d672bf8abd7af8c922db61af.json",
+        "bytes": 2804,
+        "sha256": "3796d21463d2b2418c485565780e9628a50ab4f1a69d8faeadec1eb70a9af290",
+        "sha512": "HhTKLIOn4KVc35dqiq1C8/vgYqjsy283HCb5hf059Oxtbv5JDDvFX04oTo2bELF3+lKXVphJ6unFDntwFAZ2mQ=="
+      },
+      {
+        "file": ".tmp-wallpaper-player/scan-index/1465f8e823323fe9c4383abb5a38c9e17fc550dd44cd2f14fd7f7242bc309e12.json",
+        "bytes": 3644,
+        "sha256": "1be5fefdb59d8af06de2a6be0eeb0025a96253d719de1e0daced6f1fe35cdde0",
+        "sha512": "CpOFNP0GX5osz0op032Dd7FLmQAOzPuyE93/eojg+9ByVjB+EYnL+lRCNtYYpHKtgUDa70CsKgqsKmj9zrvYjw=="
+      },
+      {
+        "file": ".tmp-wallpaper-player/scan-index/153bae098b5d3524553fcf4d8cbb1eacef2471314948819d043b26cebe199e14.json",
+        "bytes": 3542,
+        "sha256": "689305d629290f70b40c5ea8454db685486f87be218b38da7aa4f0594a1d1cb8",
+        "sha512": "8kerKuwc+cRXh4AudNWIRGsiyRbNQ8/zxsYjznmUe+rNeNL/WnHBot6q/4Vuw2UNi4TyHXw8m0V0MBn46xYkSA=="
+      },
+      {
+        "file": ".tmp-wallpaper-player/scan-index/165f4a9a9309a7ac323647e9acefd754a66c6295cab7db6bdb50830914bf0d68.json",
+        "bytes": 3648,
+        "sha256": "5b0738883aee24ac7e17fc108a221e395380d2bae6a32f3ba3f70606e4b27ebe",
+        "sha512": "GZ7tj7mlwK/O89WI8ML7AjmqLVxdj5e7mYbY14b0R/bjfpE9QZCEPFWI7PzE1Qgd0cUausDqYOydvmZlpzZGEg=="
+      },
+      {
+        "file": ".tmp-wallpaper-player/scan-index/1db67e5d68a60a19388b0338ed1ee18c2a2bcd0025ab168a1d69920c929bd647.json",
+        "bytes": 3648,
+        "sha256": "b19f9d1c96db4b9106b2a28058ab1c33f4d3edc45fa693126cad0efe48cd44dd",
+        "sha512": "vrUy+UuWCJRS4x5JPcvCK5+TjuF5mjdMCEjabdWa9LC7tHyQxtzDHRZml+sMMTD97TLeiKrAoJXOZD0Nis7/PA=="
+      },
+      {
+        "file": ".tmp-wallpaper-player/scan-index/3032598f9f4655037a67986db404cfbf60011a2ca84a1e6edcec794c7deab956.json",
+        "bytes": 2806,
+        "sha256": "db1c59c38bb8ba2122afad18a73d956ec55d4580f4cad17f365b37b71d7e3db8",
+        "sha512": "HVNYzoort16/Ncksp7jBnqk5WCQZJa4KO8eaE0ahR40LJw5m05O/JyT4YGKP1eQfiLxzahH9JX78x69NcGb/jg=="
+      },
+      {
+        "file": ".tmp-wallpaper-player/scan-index/358da0698a4692a8052707f22ba2b9c94b5c4e73080d12c721e622b66a80614c.json",
+        "bytes": 2804,
+        "sha256": "f1fb6fbd25b3d96027a86d6c797b162a74c95544c04f64470ed733ddbc8983ee",
+        "sha512": "rysp1c9kbIPLesxhSgtiIrnJ83hfhytNyyNk0uH6e7GdN/vMbOiHlE642t1ZXqJTauM2hfzPz2e8rL/nP2JdRQ=="
+      },
+      {
+        "file": ".tmp-wallpaper-player/scan-index/5eb5da5dcf86cb8c66f674df75935c030f8e12d86b6373ebcdaa3d7aba7eb672.json",
+        "bytes": 2804,
+        "sha256": "489328dc3fa24223d6db18869658db5d01f915838ba97532de8193f8bedc6f93",
+        "sha512": "T8qvhLmNGsRKWXxfl4Gtw8GwUFVG5yADJG77jBAw7k4f2VWaKPNrLLpNloWUbAjc07irh5+8XbgOBV9XZftm0A=="
+      },
+      {
+        "file": ".tmp-wallpaper-player/scan-index/5f59f687750abe3eb7d55cdb1aa86cb802bf22f3b00e3bb369f77a7ef2584d06.json",
+        "bytes": 3308,
+        "sha256": "ae2763e5e5553a4eb759576c8f26efcffc9ef5aa741ddd6aad78b2e33716a719",
+        "sha512": "0g+ToYRbljDXBhGZZKZcofBZ+hEyEgd0rmuhucc707de8aCvJ5oNX0d74t8MZbS9EKgJ0tRmDrbYpkPcLjoGLg=="
+      },
+      {
+        "file": ".tmp-wallpaper-player/scan-index/602ae02092dd5e362dec6b88bd5afb39f14c218b3e0f0fbd52e5a8d09eddeb0d.json",
+        "bytes": 2804,
+        "sha256": "cd75909f0b53f3d449d479531d62f3ff1bb3144eb918086cc7a25d05816c2a7d",
+        "sha512": "/4Odv2/hdYwttrHPlYyGSedfSREkrg8GsABmSmYCLRSdfMf1X5p3/0ojSEOGXzX8ZeJNvo706Z1EIe+7zwq35g=="
+      },
+      {
+        "file": ".tmp-wallpaper-player/scan-index/664a4a47b45908fdfdf2d6bb5ec7024e41699d7dd2af4110f2889d4eac6dd2d7.json",
+        "bytes": 3644,
+        "sha256": "64835ce867a827d40088ce1b9c8e4e19cb996d0df4c2e676cbb215cf38868556",
+        "sha512": "NVP/GLwJxIW5cfXNSvpnzFyWtmDeu4DzE63wNyLSWFA1nfhwqkcYqVc0+SIKigFFGQqzLt+tHGpUA6eRZPGgkw=="
+      },
+      {
+        "file": ".tmp-wallpaper-player/scan-index/6a4b7a95d1ae5d67f63cc87a4f3486c0a22c35af457355ae63f4303d7bdbcaa1.json",
+        "bytes": 3644,
+        "sha256": "7ab98d842e31b5da1227cf6e00d98e3e32287c53b0965f3e8a964dbc9e982b20",
+        "sha512": "NyiKXbyq1oe6J2npG624E+HF+rCXCdRYs6Il4Ef0gzTtslMoRsfE+DLoPapLYHQSW6U8ExbHQTcwAnDM0U9wqQ=="
+      },
+      {
+        "file": ".tmp-wallpaper-player/scan-index/6c2bfaa6b9f2b41ef00e065bab2a6d71c599e2ce76cc3f5939228ecc7b8be650.json",
+        "bytes": 2804,
+        "sha256": "33dd4002ba26ea91ef1c97f264ef0337dd78b37d06f03a538f514ee0809c5107",
+        "sha512": "F+Ey+/oGXuwgd17lgc1XOAv8Z72NWNqPxumGRLqvou3fyWyHxy2LmBHssjF4dOjZtkNQn//W6Cw/iqQaDi1mOQ=="
+      },
+      {
+        "file": ".tmp-wallpaper-player/scan-index/703cb3b91afdc3a4a39fb95f9d0c0289fe6dcdab34f10425d71858a05164ce3b.json",
+        "bytes": 3648,
+        "sha256": "217ca6aa5c2c3b721795e93c7cb5d819317fa55546fee842c81420f84c353fe8",
+        "sha512": "IUU53piv+yx2nQR68jiDyzrLOW1IAUZbbp7T+GWa1ccecbCAnTooc+xE5NS8IcdbmoCyoaJTQ/obZvI8F3u1ug=="
+      },
+      {
+        "file": ".tmp-wallpaper-player/scan-index/85bd705cb26d94f80943f15877c1c71cc9f9a665c0bf24f8ab568b0b6bacf550.json",
+        "bytes": 2806,
+        "sha256": "d4bb5033f4315903b0083789b87e09f4e06cb294a17313439f21987dd0b3a527",
+        "sha512": "NrfeVgZKaLZ30q5dyBAvCcDZkgicLHIvehVasAO2XXOZZTCWIIRy3nHfXkQmhANQK3YKmTpqnaKrs4GBI6h5nA=="
+      },
+      {
+        "file": ".tmp-wallpaper-player/scan-index/87720e2b63644af82253d5ec9ace977d27e42c03a6033c6811af6c6094928e09.json",
+        "bytes": 2802,
+        "sha256": "2b01b9760b6e8f5605fd9bb0cbc74e6f248c0bec7428982ce0dbb848c1f6e589",
+        "sha512": "iCCi1mNzPOVPyR1cbkBM7AxK/MkwbFER9KR2S0aBAAndRi0T+hVSA0cZ9M9vmDPyjWHgrfGjXb+btYMs44Cd1Q=="
+      },
+      {
+        "file": ".tmp-wallpaper-player/scan-index/959e88efa835995e2afff87fc4257966a41b7f45da19d44dc3369ba0d88599c9.json",
+        "bytes": 3542,
+        "sha256": "bec93346f2dfbf0938b593658fd80e43a9be33b0bd4a0f7bcbf9a8997198ba9e",
+        "sha512": "dQAtg3U7P2g5MYh7BExWdhxBNOsAzhiI/T8QULgKXtsXMNOS6Wz8FFuvvbDEsYEVfidJyTx7XDcM1TNba/snpw=="
+      },
+      {
+        "file": ".tmp-wallpaper-player/scan-index/9d7bcef01cadb37f1a59d31b708084c192007deea8564d134dcc473b0605201c.json",
+        "bytes": 3646,
+        "sha256": "04d6bfae12cdb3e73f828813477825cd39dc803c37893be82455ecebe7734312",
+        "sha512": "mmyVIHPDUxg0J1fw4absJBT8pxXVxGydWULDVqoGgZ/T6n2K+HT+MPsDPC4Q4fzt42I9w93/WkKClNUeKsQBEg=="
+      },
+      {
+        "file": ".tmp-wallpaper-player/scan-index/a02253e6f623d27dfaa6674be31d9b43fc3d9b2c6bcda125418f1c3dd2a25709.json",
+        "bytes": 3646,
+        "sha256": "90f629426a02dbbe9d60c7ad0c28090bd77a96693fcd1187b5215eda49184b86",
+        "sha512": "fG5aIsYjKTh7Jkzn4jXeCKXo7MkJ1MI81w7aVbEp0wp6+hDwsZxg1sDGGEVFKjyaLFL03yzuCSwzSWpm0RaOdg=="
+      },
+      {
+        "file": ".tmp-wallpaper-player/scan-index/a17738a5c4b4bc1ce4358ecff69b8e44a1e1a33a7511d9a11eddecd94b9e58cd.json",
+        "bytes": 3648,
+        "sha256": "a1fd92c4c4c8b9bbfeb105da251cc5230f16f1f68edf7cf909a468da0c242d99",
+        "sha512": "F5HdrOrZUO8fIHS1o89eF7h/7ML40JlbFL20LjQjJ6QyZV1sM7mgbHMrrhmwBmPW7jD9SSG9DJU8RixzIRb4pA=="
+      },
+      {
+        "file": ".tmp-wallpaper-player/scan-index/c53e2ac468d9387f39255a1ee9893eba1abe325ab086dea0025a18d1ef67e75f.json",
+        "bytes": 2804,
+        "sha256": "2042c353b3e1c29eb236d1a1dfce79afdb85839f40f02f0b70d521eff607e6bb",
+        "sha512": "q+AwWtox8bz3pRPCOQJbIhLMae2jHK2MpFgVQOOFSbY2eK9wXc+JsZVZhcuZriT9T6O3virpdZjldWTted0Www=="
+      },
+      {
+        "file": ".tmp-wallpaper-player/scan-index/cb702390842effe5e6e22e77acbda7b2bbea77ed51a5c07e66c3c5d8d0bc15bf.json",
+        "bytes": 3648,
+        "sha256": "718b65c8b9b80caa3c5d34bc3244f750cd8243dc4b8743f637c3b12dbbbbda4a",
+        "sha512": "VwI5kOJHT0HBNfNf53S8wPNjIKD0E1xyayfBFLo7R9GrCm+JAChnXDUD6GVWERfnX/o+g8v1KUXIc6RYwVmZSg=="
+      },
+      {
+        "file": ".tmp-wallpaper-player/scan-index/cbf568b1144651ce061c2dc94a347128724334dd45ac2dd4ebf6890d74c66251.json",
+        "bytes": 2806,
+        "sha256": "e22fd608a0197ea15fdbd8e3320b49d60e518bb4054b74ffb7504cd8e6035134",
+        "sha512": "R+e155qYNIEMMkhu21Nr6saous6xPVus16OS660Z33iA457ArcVOPLhrvG4WJ0zuO30PXvrIgNBH1K82vrgnDQ=="
+      },
+      {
+        "file": ".tmp-wallpaper-player/scan-index/d6cd75e4bc356e88ed2b4c2272c32263e568d67a07b4017d73b22e09c23e8306.json",
+        "bytes": 2804,
+        "sha256": "d3ccf77f170934b4987c22301d34abbb8b7646d45af03f575057804e4c892629",
+        "sha512": "RqfvOli86TmrbwzJg6/0qmhbU+xZfSXhyRoUE3CglspacMmAObLy0iVsbsLa6XNu3LmUWLcwPLHb+u8dPh4DkQ=="
+      },
+      {
+        "file": ".tmp-wallpaper-player/scan-index/db34a207b303445fed1e9654c8e68883c93c5123070913181f89844225e4636a.json",
+        "bytes": 3648,
+        "sha256": "81149ad6956bdb73b468e88036ef043043faecd14d34901ba5eaa49b775d3a72",
+        "sha512": "XX9oIcBnulsAfGyi3UgTmRmy0XKAlHrsFNcW2LUSpKGIpLXeRcNfUij50lShTYa6Ng+LTQMCVKrjrmH8GYlMAg=="
+      },
+      {
+        "file": ".tmp-wallpaper-player/scan-index/de13066bd94cc789543a5fa9e6100f3297df42c5dd715cccf10b11383b6f1d68.json",
+        "bytes": 3648,
+        "sha256": "d2ac7243b636179c0e35727cb899a4f608b7c044d759e6b6a52c8f501a3a6945",
+        "sha512": "/iBjVcHVkmDBH0UfuUv7GFI7zmWhQwiurz/Q5x8id5LLqaDcLdWEjCcgyR6lyob3aW56aY/2hxTjNHPUh1Z0kg=="
+      },
+      {
+        "file": ".tmp-wallpaper-player/scan-index/eba7ad116c30f43341d30f06e5f9efe510565b2a31a16c0eccab8fc4c303e6bc.json",
+        "bytes": 3646,
+        "sha256": "636392edc5a9f41da4b70492833939eac890636623ab957400a7118bba472fc7",
+        "sha512": "+ZUzFXtHhbC1NoZ6p6668vkdiHbZam7+MUDiSkmJY7VPe8u4nXV1DyhmCatQr+7PKNKljbBUXV0KJua57UUx/A=="
+      },
+      {
+        "file": ".tmp-wallpaper-player/scan-index/f16070f230607bf79853b98a8c462b8e7b854deeb16fe246ba6c9d783c9b2832.json",
+        "bytes": 3644,
+        "sha256": "becff49c6c81b5dfd4688bbb272be352a8821ce42120b45282ea86c65f6378c2",
+        "sha512": "551Jsgf2K8+PezP3FuKxD517yMnQKj+S9Ao6VIZ3gkkvhsbABUL8u2lnMgM7bxHhRlv7bUILXp9nQ2ku2Wj9BQ=="
+      },
+      {
+        "file": ".tmp-wallpaper-player/scan-index/f408135604349a60c1b7caa1d60757de692af100c4518e5588f38b619995f186.json",
+        "bytes": 3646,
+        "sha256": "b894250b5d420a09b89350f33103a5d08edb5fc3d20f3cddf7604ed1fcb9df3a",
+        "sha512": "xheXBso55dwHEgykAvfDZf4n/26SCAP7fAyW0+BzsBmCJ+kcBgURcjEGCeYNaqTQqihKydkgsGs46ew8DHyERg=="
+      },
+      {
+        "file": ".tmp-wallpaper-player/scan-index/f7b0c1004febecbe36453be10ef2ddc2523e5b92f4af5f318ce1049990e93053.json",
+        "bytes": 3646,
+        "sha256": "77f2b4ded7202b828e8a6e281d549eecd1e79aea4030dfb2a7d918202ab090c5",
+        "sha512": "l/iSSuhoNjz2tFcSPobHYiXReYIlJaCmkLixky5HUeo+x272kifGGRjKSUukapRVTnvVQybUWX45ju2TN7gcew=="
+      },
+      {
+        "file": ".tmp-wallpaper-player/scan-index/f892c389d585d65dff3d06f6c86d3355dc90100c808a4f80da22b2f7e81865ba.json",
+        "bytes": 3644,
+        "sha256": "b0f007ba8b4249849d726eee7a9fec6cf5926742e62d3cb833bd464423af520e",
+        "sha512": "Fs2lK+N0GU/ztNoqj/OAFg2rQzejqj+cdVpT5Q1w52Tp4KZKJNwMi4VyEKTGTbDwOTj/opUURVbIaFzdTeVJpg=="
+      },
+      {
+        "file": ".tmp-wallpaper-player/scan-index/fc41c7e68e94b6f115983997d8498353a4f8f41b61fc91662dd84affe70fc9fb.json",
+        "bytes": 3646,
+        "sha256": "fa79531cd58ae0323d29102813386358d2e599ecb63902231ed73e264196abdc",
+        "sha512": "snnACJ0NqnrAILRdOeWbzApt189/MsfL+hNou4uzRTPDa2NELP3D44teP3+gIe3arlc7mcdslaPIlyO8XtDHSg=="
+      },
+      {
+        "file": ".tmp-wallpaper-player/settings.json",
+        "bytes": 22291,
+        "sha256": "6fb990f7edfe0707bb48b8bed65455cc2a521d33e028b45ce77f98b6a466a0d5",
+        "sha512": "5ZkzZzpz3QlA05Qeu4IOhPuUYVIAuCnMfvzvH0loMSNBo58NFt578k3Q+wWhPLsHh5hjfxeh1Db0boZ00WSsaA=="
+      },
+      {
+        "file": ".tmp-wallpaper-player/video-metadata-cache.json",
+        "bytes": 39687,
+        "sha256": "616205b2e97a75ea8842d3b4f6f3de778fc545493659d45e5c0139c6d7087f47",
+        "sha512": "vImCz/hAu8kdmXwFXl6Atw2rREaBoO44lHfPhdDlXBJrHxMC0PIO7KzRlV7WM5IaAfPT3aE7Dgtvr2NmHiUT4Q=="
+      }
+    ],
+    "count": 42,
+    "retainedPublicArtifacts": [
+      {
+        "file": "release/Wallpaper-Player-Setup-1.4.0.exe",
+        "bytes": 204165215,
+        "sha256": "ebea8ed1eda6529d98edf8937645236826e1120cffd5e79ad3ffea50da1351c8",
+        "sha512": "+1/EwHV0Iu01FqWY7JOXtJ7aRDavagF0wIz0aEoA4ZnULIxkWi68Ys9pXK/8xjrsr6OGIivw5hj7NW58ql/Wrw=="
+      },
+      {
+        "file": "release/Wallpaper-Player-1.4.0.exe",
+        "bytes": 203941071,
+        "sha256": "23fcd04385d3b895259711f00983c7fec5fefce1834fce2cc8e2c469fdcd6f14",
+        "sha512": "bRFR1d7pmRUeRVtX7FToivqxdNaac16ot4NbB/uMOMj9VNnhHnEbVLXG1RUR5N8DJXy12/6aUYZwpnakGyxGxA=="
+      },
+      {
+        "file": "release/Wallpaper-Player-Setup-1.4.0.exe.blockmap",
+        "bytes": 212662,
+        "sha256": "725f928d1ff169d97633f85175878ecab838d0707864a35be60634ba9e2abd7e",
+        "sha512": "hlfYqOfkaDWX0+sorrDPuJH4QHRibVyuDhBeokDrfe1w78XM1Vh2UjsMRVmtGv4t2aRg3uh781h+TQ6RfJW9FA=="
+      },
+      {
+        "file": "release/latest.yml",
+        "bytes": 361,
+        "sha256": "4f5c80d6597d12f99f6b9aa2f6b64ad6b89b84b43b49cfc6204dd8651ed1edb9",
+        "sha512": "F/zeGav7F4QoOW6ZDET2h/9JHcnPf4ZMD2QmkQqM2BF4ZNUAFUetG2ncaDAAUx1kFzPNHXaD2bv3oGIb5Uq07w=="
+      },
+      {
+        "file": "release/plugins/Wallpaper-Player-Plugin-video-analysis-1.0.0.zip",
+        "bytes": 570209084,
+        "sha256": "552847152007d463424d43971778f40545b95139830dd15cc76957de59b4baa1",
+        "sha512": "LVbf4akQEqnAWSanp4f4obrc1ZY+td2XHD8b/IDoRZ28IbVLWP2nGuMOgafC2jaOziVa31WuyZYAAEfbmH912Q=="
+      },
+      {
+        "file": "release/plugins/Wallpaper-Player-Plugin-ai-search-0.1.0.zip",
+        "bytes": 2955538,
+        "sha256": "83f0949f361f03a78f78496c9b15510b0c6f8fb0581cea9bf8b94724faa7d781",
+        "sha512": "tyJjoVTN9JitDPVFx2+Lv01fzo5Bik3ELcl64iyxz5QBl7YSmTvJXT3MGyyVlkD1I+BO8tPtbHqtpQ8koXuatw=="
+      },
+      {
+        "file": "release/plugins/Wallpaper-Player-Plugin-agent-bridge-0.1.0.zip",
+        "bytes": 1093,
+        "sha256": "9f499408c282a144ffe411648d476fd4e36bd010c6e8974be3b9fd16460bed1a",
+        "sha512": "W5qWvlCSHQT8RlE31UF1e06dN3162tSZVhs7nqyFBhFLJdcN7Z8rE2WDw6ZMjQIygO89K/Xbuev/TJY+ImfSqg=="
+      },
+      {
+        "file": "mobile/dist/wallpaper-player-mobile-0.1.4-arm64-release.apk",
+        "bytes": 40710234,
+        "sha256": "f7e46638aa17f66ce68c9c96484909667af7e720bcc63fdc4f46ced39cbaec22",
+        "sha512": "TVvLeuH/1CXDXpspYbDHt8xwcX76SAe134l24lPwQkAGhg2FGJgUWumA2KeVmQ2sCePdONcklROdfjANnJ7lKg=="
+      }
+    ],
+    "unchangedFiles": [
+      {
+        "file": "mobile/App.tsx",
+        "bytes": 10585,
+        "sha256": "f22dd5fe3757a007b517ad3d8d5f0f8bfc6b414ee588a619b636d691df4510fb",
+        "sha512": "kf2KOwokdrirNvTsBW1XFvOvrDI0oQxdglCh6k+8Weia65KZW51Q75RKUeKtMFzKtunXQ1xuqLobUjaxgtymJQ=="
+      },
+      {
+        "file": "mobile/src/components/MobileUpdateCard.tsx",
+        "bytes": 3961,
+        "sha256": "a5de054d744c7acfe71b5693157ccb4f4e7b5c73f0ee5271b0ee9c7395b99b61",
+        "sha512": "NR0yzmaf/jdua00CiM8sBBl98rakl5/tds1Ou9KR8fcJoymIUS6+nMbU6NFv/rkBiLdqUw9ZljxwzBlVWSIA+w=="
+      },
+      {
+        "file": "mobile/package.json",
+        "bytes": 1182,
+        "sha256": "1ce981a25f1254563d86081ceed97647db0107425c21031b64c5c00801ae1a2e",
+        "sha512": "3ATU7EQtbMIw7aZjkxiHIlcuH3oiNlVbG2q+MrFJ0a6LBFYyxcO/kVSKg5hVKWSKOSRNbuupGcfMd2tV9UE75g=="
+      },
+      {
+        "file": "mobile/package-lock.json",
+        "bytes": 243933,
+        "sha256": "3ec79a6d47c6fda299304ccaecb5304596900e5c45740ea90ec22e228fecf45a",
+        "sha512": "g2VgwByHafoUxtlMU0Pn8OYiF5W8GiTSse/vVC3fnLkdN07F/I0gWGT6a1q06/dQUSbKEn5knRK2aOlaKRgJjA=="
+      },
+      {
+        "file": "mobile/app.json",
+        "bytes": 999,
+        "sha256": "326d496a86ba0b28d4f4fc3b3e645cedb784a1b07523c955005877414477e9dd",
+        "sha512": "GX6N9JLy7lwS7gA9SXSP8WG0kFss2gDAmBF/JQfAPpFXSqIQmBqJL+OjLA9SnL/qQVS/GQDY5pnmslSdfNqUxA=="
+      },
+      {
+        "file": "package-lock.json",
+        "bytes": 203306,
+        "sha256": "7366f3a5de4b9fbbafdea8a1febbc35828fa788fe006635b87727d559f4d149a",
+        "sha512": "RlEJSH/3FNIOlPddlsGbHoUyOf0H6r167tEABKn3fwuJOG3HkQK4ST6WAvPNMMrAolSeTabf7JjrIjMxnp5cEw=="
+      }
+    ],
+    "otherFrontendChanges": [],
+    "rootPackageOnlyAddedScript": [
+      "verify:update-context"
+    ],
+    "nativeGuardViolations": 0,
+    "originalQaPackagePathPreserved": true,
+    "originalAvdDataRetained": true,
+    "rechecked": true,
+    "changedBaselineFiles": [
+      "package.json",
+      ".github/workflows/ci.yml",
+      "scripts/verify-mobile-bundles.js",
+      "scripts/verify-responsive-layout.js",
+      "mobile/src/components/MobileUpdateCard.tsx",
+      "mobile/src/screens/LibraryScreen.tsx"
+    ],
+    "desktopFrontendUnchanged": true,
+    "mobileAppConfigAndDependencyLocksUnchanged": true,
+    "originalDataCount": 42,
+    "historicalArtifactCount": 8
+  },
+  "sources": [
+    {
+      "file": "mobile/src/components/MobileUpdateCard.tsx",
+      "sha256": "3990f814f210ef0b8081a76e9e59d029d106f895b4cfe2b19cfe1be787345fb8"
+    },
+    {
+      "file": "mobile/src/screens/LibraryScreen.tsx",
+      "sha256": "52e44ec8e379e53bf5185db49edd1d37b2fef1eb31bf688c2c499a7cf283a1f6"
+    },
+    {
+      "file": "mobile/App.tsx",
+      "sha256": "f22dd5fe3757a007b517ad3d8d5f0f8bfc6b414ee588a619b636d691df4510fb"
+    },
+    {
+      "file": "mobile/app.json",
+      "sha256": "326d496a86ba0b28d4f4fc3b3e645cedb784a1b07523c955005877414477e9dd"
+    },
+    {
+      "file": "mobile/package.json",
+      "sha256": "1ce981a25f1254563d86081ceed97647db0107425c21031b64c5c00801ae1a2e"
+    },
+    {
+      "file": "mobile/package-lock.json",
+      "sha256": "3ec79a6d47c6fda299304ccaecb5304596900e5c45740ea90ec22e228fecf45a"
+    },
+    {
+      "file": "package.json",
+      "sha256": "01de51132f469116b485fbb2b283b8880606c6fd5b6c2379b8afbe34af40b48f"
+    },
+    {
+      "file": "package-lock.json",
+      "sha256": "7366f3a5de4b9fbbafdea8a1febbc35828fa788fe006635b87727d559f4d149a"
+    },
+    {
+      "file": ".github/workflows/ci.yml",
+      "sha256": "1e599be8abef735b842757322bc06c2073825ac0cbae33988ad7c0086c6f3727"
+    },
+    {
+      "file": "scripts/verify-mobile-update-ui.js",
+      "sha256": "f5b7178108fe6a469df12ff17689e947fbea9bf682f8c6dab6f7a7b52ed3c89f"
+    },
+    {
+      "file": "scripts/verify-mobile-bundles.js",
+      "sha256": "32ffc463c814699f22d39a9058d96ca0db6d91765dd798666ea1154366a1a9b1"
+    },
+    {
+      "file": "scripts/verify-responsive-layout.js",
+      "sha256": "2b199c494629cbe627b3d5397efa142f6c71aba0ec7c72e4bf565b96398aacaf"
+    }
+  ],
+  "rawEvidence": [
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/actionlint.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/apk-metadata.json",
+      "sha256": "386cde53af28549add92e92167a7592ca493fe591fdab71d8f10ac9dcc99b541"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/build.log",
+      "sha256": "d3d2e3160b48c7d1da2be9e55e90d3d8a2b2ac884bf530c6adaf2785598cb145"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/bundles/contracts-android-bundle/metadata.json",
+      "sha256": "1c5b24b105a6793368e06f27b331a02586cf508fd99d0139c2e86697a00d5872"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/bundles/contracts-android-bundle/_expo/static/js/android/AppEntry-120a7758b97a346a4b1e26d421dd9082.hbc",
+      "sha256": "270164a8c5c24a47f77e20335d38c11633231da1b1a3abbf68a13d92ba250e1b"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/bundles/contracts-android-bundle/_expo/static/js/android/AppEntry-120a7758b97a346a4b1e26d421dd9082.hbc.map",
+      "sha256": "6faa87aa1750b6234f192d5fe9f4bea5ef52b2de4ba4bc8f6a64d65e77acf45d"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/bundles/contracts-bundles-evidence.json",
+      "sha256": "0dccc426ebd56faae4f4f61e65fc85531f75d0bebe0bc4a7f038ed791f3387ac"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/bundles/contracts-ios-bundle/metadata.json",
+      "sha256": "dd6b21c2fbda00101fa5d8777f99794bd99f140edc090e21b9d81f828076fba8"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/bundles/contracts-ios-bundle/_expo/static/js/ios/AppEntry-3c95ec1977f2cd18d50f286c8d9c06b0.hbc",
+      "sha256": "df78b490a37ae138a437ba54cc508f1101f93ac00418c846c64bc58e43bbffbf"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/bundles/contracts-ios-bundle/_expo/static/js/ios/AppEntry-3c95ec1977f2cd18d50f286c8d9c06b0.hbc.map",
+      "sha256": "0e3b40be1728f820f5d49ab4b196fe2d66ad2d4b58e80bb86d1c68a506f0765b"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/bundles-final/contracts-android-bundle/metadata.json",
+      "sha256": "8117aa5b8ebf30978087fa6ee359a47e78359c6c504504754f3a84d421a1813d"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/bundles-final/contracts-android-bundle/_expo/static/js/android/AppEntry-944c389c554381e8a8a488da745e4fe4.hbc",
+      "sha256": "ff5012321bacd5b02e0a90de6c014d99dfa61554614aa3769f42cf08600f5bbc"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/bundles-final/contracts-android-bundle/_expo/static/js/android/AppEntry-944c389c554381e8a8a488da745e4fe4.hbc.map",
+      "sha256": "5bc9c008eb040b0cebabbd2cfffe2cc1751ba7f0eec725475e5b361f77b7be3c"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/bundles-final/contracts-bundles-evidence.json",
+      "sha256": "f7d8af354cd698835e2965cf0aa2c6d997a3a20c32f06ea41396c1c52e50b5e1"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/bundles-final/contracts-ios-bundle/metadata.json",
+      "sha256": "1cdf1a013cab18563bb746014c517a4f4e99fb25bf57b2cba01587fc9bf905ab"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/bundles-final/contracts-ios-bundle/_expo/static/js/ios/AppEntry-dc215a9280201ce639a205883f6fca60.hbc",
+      "sha256": "b92176dd5ffb9dd38eba84643b0f82a2acdb9e13a2e9d4963a1b7a0617483889"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/bundles-final/contracts-ios-bundle/_expo/static/js/ios/AppEntry-dc215a9280201ce639a205883f6fca60.hbc.map",
+      "sha256": "65168593637c0acb554df73ce2111a20b95a41568ab72ba7d52cead53b722a4f"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/bundles-final.log",
+      "sha256": "d9a2e29b01bb2e3f8d502deaa2264dc4ae32068d89add0b743e984e59701a0b3"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/bundles.log",
+      "sha256": "9997396fd62a1d29afd9f51caaa7ada03d263399b180fa02c6ff5d3d223a31fb"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/desktop-layout/desktop-after-dark-1024-200.png",
+      "sha256": "1108a9e8dec0569862af3db1b305b10d169067e40429048dce6b9df30cc892ff"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/desktop-layout/desktop-after-dock-1024-200.png",
+      "sha256": "806e47fd54bd947fb5703c431ac3c58aef5ce12ac5618abd1bba996947774b91"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/desktop-layout/desktop-after-light-1024-200.png",
+      "sha256": "fe37ba5ededddec6d67f3fbd4c9025427b69779f565080e33bea5119f4dd77f2"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/desktop-layout/desktop-after-navigation-1024-200.png",
+      "sha256": "b3f89e77cd66b3601c6e2f1d4d4c62fb1a941eafb2f69ec8ffd6283f6633da53"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/desktop-layout/desktop-layout-after.json",
+      "sha256": "096b882b7fdc387dadfbf6fc546c0cb2b8ea968a26cd0f26475f8368e7313ccf"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/emulator-error.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/emulator-launch.json",
+      "sha256": "f043327669b2ecba84b2172e385d2499cb5a9fc4e8e84d9ce3acd2839f34d090"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/emulator-scroll-error.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/emulator-scroll-launch.json",
+      "sha256": "455c9f82a426fd31c1beb430a251e8961bfbfa2b31639ebce0379b06fff690d6"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/emulator-scroll.log",
+      "sha256": "1f497b2078da00d2e6d076461dfe8f7a6bb13fa62d43707a5bd2240f3dcd2e3d"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/emulator-stopped.json",
+      "sha256": "c21a4e438c36988be159852902444189c2395b002f129a780e2ae1389289d560"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/emulator.log",
+      "sha256": "dea4b3ee929a523fc0d6f0cc5f24a1be45db9ec5cf36add7813407caafe8c6cb"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/extra-regressions.json",
+      "sha256": "18f0d090c337338a28d5358c6cdcdffed417f30943a1f8ea8f0e36ebf63009e3"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/finalize.cjs",
+      "sha256": "08851b77dfd13204192bc583bf042c5570528f151d1e11c13f066e91dfcc9bad"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/initial-apk-metadata.json",
+      "sha256": "572169edfed9346df8cf2ee567c8b8664a0a90c1aeb8b0e481d91048313275b0"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/initial-build.apk",
+      "sha256": "4352270e91830152cc9e528c36407789a0e0a5c908be1c7855c02008acc0641c"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/initial-installed-frontend-qa.apk",
+      "sha256": "4352270e91830152cc9e528c36407789a0e0a5c908be1c7855c02008acc0641c"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/initial-MobileUpdateCard.tsx",
+      "sha256": "a7a650ccf0cf307d7545800a6428bcec7b3f52f0b9650269a2e27ef665af55fb"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/initial-native-gradle.log",
+      "sha256": "e9b7f648eecc60b4e641174a69fe13e6df90c166e6e9090b1860b27b48ed0a42"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/initial-native-hermes.hbc",
+      "sha256": "dc6bcf29f736a89c43f21629a32dc18b5c78542015ea86bfd7bbc8e8d3754987"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/initial-native-input-verification.json",
+      "sha256": "5d41057820b972dbc23c43596c02b4869b447ac2da8ba0b1dd23685f2690f6dd"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/initial-native-inputs.json",
+      "sha256": "7662ee88cf65b9603a73bdd65ecffc2f2e009c65a4c48d68679c241cdb4a884f"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/initial-native-install.json",
+      "sha256": "6fb11aa6691e389aa5557f5e8d5ad6b017a533fa9fb8882b5ae96527a1672951"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/initial-native.map",
+      "sha256": "85350e00ebe1a5ed7f39d9694901834eb3e200f394c1030918e6842b60184bfd"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/installed-frontend-qa.apk",
+      "sha256": "10e69a5170a81cf61788013a5528ff4b2a2e634e882bc481596fbfa3afa8165e"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/mobile-connection-failure-dark.png",
+      "sha256": "108f8030c69d8c26f8f0b11a4ceec538e9b06e36f60332ca821216f46e541ef5"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/mobile-devices-dark.png",
+      "sha256": "fad23d2ccbb040f6e16796a89d9e3fe804f7f16e8de02c5c86192b8486b90d1e"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/mobile-failure.png",
+      "sha256": "afe1af497c49b3ecc65e00f0881c6daf4d56ae4d2715cb2e1458d415440e297d"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/mobile-scoped-candidate-dark.png",
+      "sha256": "337627c7db8269d980fe435404a239ee6f40725cb39b2029e4f8921c6a1c4777"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-build.ps1",
+      "sha256": "45da63e66a90c716b37170383e1dfbe3b5aedfc524ffd4c1c56cf248023064d3"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-display-before.json",
+      "sha256": "01f34445f2343e02649341cc2f9f12112e6391448f136f4866c4994c2c18d4e0"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-gradle.log",
+      "sha256": "d1cd9a323ba842dacea669398ceb6bfd15f4e6c74fbbbbac911fe64100bbc2c5"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-hermes-final.hbc",
+      "sha256": "3a3961190363c8e795afe97e21fa7f2b28d77a59d03eb2d038ecc1a309118f14"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-hermes.hbc",
+      "sha256": "dc6bcf29f736a89c43f21629a32dc18b5c78542015ea86bfd7bbc8e8d3754987"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-input-verification.json",
+      "sha256": "2ca616d3324ab1279ef96f3ff69fce975de2cc905973ac6ab25e17d3c4c061d4"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-inputs.json",
+      "sha256": "5f6be18ccdfb51c0347f137097a5d6bc30a90d77052585cb2f4a35d584ee9616"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-install.cjs",
+      "sha256": "ff3698508bf56e50ed096447124a622ea23b995edec46b270256e721331d4e4d"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-install.json",
+      "sha256": "b845a4ffc3878f3c5df6982915cd736c2f87fe1b843b581acbe127b20af17425"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-logcat.log",
+      "sha256": "b1ad9b3618c66511a6ad1acbbae0e11f92649becac87229e05312a78f34c605e"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-network-ui.json",
+      "sha256": "e2d5881dcc5e6c866770b45571d8b088e8c6691ffa2a72c26aeabf384623c6d7"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-network.json",
+      "sha256": "1267d2a294371459766e405683e19009163230fd0da5fa87fb9715874518befe"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-patches.log",
+      "sha256": "7d87859f2f4d771e001878411612cc60a8f74b74bdb9b324bfef7e8644d089f3"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-prebuild.log",
+      "sha256": "d5e4be0a0c10691bffa446716505e068d943d1fca32f0d93d5af6f817e29c4e4"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-scroll-stop.json",
+      "sha256": "14027fdec965e83717cabf97afa00001e946b235a959dd845db019abf7300762"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-server-first.json",
+      "sha256": "eb057296db4b7043bc882157d4ceab504f9dc57f10e07235b6bd631fb57709ee"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-server.cjs",
+      "sha256": "59729f88a05c36df38c994a8fea38aeff51275d4b279ece0f649be325b2707e7"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-server.json",
+      "sha256": "64bb5ae9a96d526d4ba92866bfae198d9f32b3da9c354affdb5e2d277fba9eb8"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-small-scroll/mobile-small-scroll-complete.png",
+      "sha256": "681a4dd396a08efa7eaac7e46a4c2a4ed0f5f0d0f1ae0d1109f6f8eaa203c9df"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-small-scroll/result.json",
+      "sha256": "f3b8c63fbcf0f011788069542dd167f60b9a2e0bbbdb4f42cc9aff6070f1a68c"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-small-scroll/ui-1.xml",
+      "sha256": "b6767677ca6394fac2122dbe003ad41926b1d71f959a8fd7c6916665b9324000"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-small-scroll/ui-2.xml",
+      "sha256": "8fc93d1499e4a145efa00147428644e1cf08aacfc29ffc93fcaf952637610eff"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-small-scroll/ui-3.xml",
+      "sha256": "d2b25aaff94ef84c9de207d0f08b5c2c1762f1f4c58cfaec6cd9e88b7d40694b"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-small-scroll/ui-4.xml",
+      "sha256": "63813de4aaf49bd0ff91ecb844dcab04b659be5061ae99ec2c082a815be70889"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-small-scroll/ui-5.xml",
+      "sha256": "3293a36c59a468382060e687d822c1deedd5468ab8917bfc4fedbd76c0b1d60c"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-small-scroll/ui-6.xml",
+      "sha256": "369d4ffd65af2b00559a2a3043a81a5e6231d8ca845f8aa54d781260f657d50e"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-small-scroll.cjs",
+      "sha256": "4fb9438d476cd6129256f2508e35463edcaa27bf71ad12bc24e4038bf9cb7e8e"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-stage.cjs",
+      "sha256": "ab1e67c5ebebd9092751cd71a3348510687bac6758abe1efd799ebddbbb92f90"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-stage.json",
+      "sha256": "88d1c71640a1be2d9bab907fd3737fc79002664975b5557027ef5712efe2423e"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-stop.cjs",
+      "sha256": "5d58465d61bff360c1ef901048b33ebb8b4b80a24ae430e1c39aca10e2d5acc8"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-stop.json",
+      "sha256": "3df8fb6a643e1ad2bd87dd014fc5d227162b0f037af1f0aa4e208d70521bbe70"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-ui-001-devices.xml",
+      "sha256": "15c149ccaef40f5bf84ebbcccab555030094cce96f0554e9aea2ba0ed9715ecf"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-ui-002-tap.xml",
+      "sha256": "15c149ccaef40f5bf84ebbcccab555030094cce96f0554e9aea2ba0ed9715ecf"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-ui-003-connection-failure.xml",
+      "sha256": "63d099a714ad7358011eeaca0b3a0ead22f342d79cdd2c4ec3ee30e633edf0a3"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-ui-004-tap.xml",
+      "sha256": "63d099a714ad7358011eeaca0b3a0ead22f342d79cdd2c4ec3ee30e633edf0a3"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-ui-005-scoped-candidate.xml",
+      "sha256": "3d96a9f7389bf09bdd36105df5cced0790b185df278c80c08e94ed249139d9a7"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-ui-006-tap.xml",
+      "sha256": "3d96a9f7389bf09bdd36105df5cced0790b185df278c80c08e94ed249139d9a7"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-ui-007-pending.xml",
+      "sha256": "2b2b2d536c23f017bd54708857d87eedb57c92de5866b201a41dcbc236b252fe"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-ui-008-back-clears.xml",
+      "sha256": "15c149ccaef40f5bf84ebbcccab555030094cce96f0554e9aea2ba0ed9715ecf"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-ui-009-tap.xml",
+      "sha256": "15c149ccaef40f5bf84ebbcccab555030094cce96f0554e9aea2ba0ed9715ecf"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-ui-010-revoked-gate.xml",
+      "sha256": "63d099a714ad7358011eeaca0b3a0ead22f342d79cdd2c4ec3ee30e633edf0a3"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-ui-011-tap.xml",
+      "sha256": "63d099a714ad7358011eeaca0b3a0ead22f342d79cdd2c4ec3ee30e633edf0a3"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-ui-012-revoked-error.xml",
+      "sha256": "b2a70cfca4c858e9fb7cfe2acb08a013f895b92ee61c8756a1b0c4fc495b6192"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-ui-013-revoked-error.xml",
+      "sha256": "b2a70cfca4c858e9fb7cfe2acb08a013f895b92ee61c8756a1b0c4fc495b6192"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-ui-014-revoked-error.xml",
+      "sha256": "b2a70cfca4c858e9fb7cfe2acb08a013f895b92ee61c8756a1b0c4fc495b6192"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-ui-015-revoked-error.xml",
+      "sha256": "b2a70cfca4c858e9fb7cfe2acb08a013f895b92ee61c8756a1b0c4fc495b6192"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-ui-016-revoked-error.xml",
+      "sha256": "b2a70cfca4c858e9fb7cfe2acb08a013f895b92ee61c8756a1b0c4fc495b6192"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-ui-017-revoked-error.xml",
+      "sha256": "b2a70cfca4c858e9fb7cfe2acb08a013f895b92ee61c8756a1b0c4fc495b6192"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-ui-018-revoked-error.xml",
+      "sha256": "b2a70cfca4c858e9fb7cfe2acb08a013f895b92ee61c8756a1b0c4fc495b6192"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-ui-019-revoked-error.xml",
+      "sha256": "b2a70cfca4c858e9fb7cfe2acb08a013f895b92ee61c8756a1b0c4fc495b6192"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-ui-020-revoked-error.xml",
+      "sha256": "b2a70cfca4c858e9fb7cfe2acb08a013f895b92ee61c8756a1b0c4fc495b6192"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-ui-021-revoked-error.xml",
+      "sha256": "b2a70cfca4c858e9fb7cfe2acb08a013f895b92ee61c8756a1b0c4fc495b6192"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-ui-022-revoked-error.xml",
+      "sha256": "b2a70cfca4c858e9fb7cfe2acb08a013f895b92ee61c8756a1b0c4fc495b6192"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-ui-023-revoked-error.xml",
+      "sha256": "b2a70cfca4c858e9fb7cfe2acb08a013f895b92ee61c8756a1b0c4fc495b6192"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-ui-024-revoked-error.xml",
+      "sha256": "b2a70cfca4c858e9fb7cfe2acb08a013f895b92ee61c8756a1b0c4fc495b6192"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-ui-025-revoked-error.xml",
+      "sha256": "b2a70cfca4c858e9fb7cfe2acb08a013f895b92ee61c8756a1b0c4fc495b6192"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-ui-026-revoked-error.xml",
+      "sha256": "b2a70cfca4c858e9fb7cfe2acb08a013f895b92ee61c8756a1b0c4fc495b6192"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-ui-027-revoked-error.xml",
+      "sha256": "b2a70cfca4c858e9fb7cfe2acb08a013f895b92ee61c8756a1b0c4fc495b6192"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-ui-028-revoked-error.xml",
+      "sha256": "b2a70cfca4c858e9fb7cfe2acb08a013f895b92ee61c8756a1b0c4fc495b6192"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-ui-029-revoked-error.xml",
+      "sha256": "b2a70cfca4c858e9fb7cfe2acb08a013f895b92ee61c8756a1b0c4fc495b6192"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-ui-accepted/mobile-authorization-revoked.png",
+      "sha256": "df52ee61d0ff28c9f245c9004be53b523098b80652bddfee2c569c4b48b815ad"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-ui-accepted/mobile-connection-failure-dark.png",
+      "sha256": "7dc5c71cdfa6a7f28d5c8b8c4c8f4e79de8a95d7580f491fe6a7eef3bd9cf92e"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-ui-accepted/mobile-devices-dark.png",
+      "sha256": "d30a21cc628c400c0839247bad52820e52a4aa92d9da9f68ea54ef24c0adc50b"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-ui-accepted/mobile-failure.png",
+      "sha256": "49105d13940118f0e27d1f79461124b772efb5a3c2605592c59bf8e7d08eb3d1"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-ui-accepted/mobile-library-dark.png",
+      "sha256": "42965ad2d9a9e665bbcd44fb1cf537a22bc0b01fa8615b9c01020cb5c08e406e"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-ui-accepted/mobile-scoped-candidate-dark.png",
+      "sha256": "8ba0312dea15efae8bd40c0caeb5a311e82a3a8fdacf867c4a01f2cc857b5ca3"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-ui-accepted/mobile-settings-dark.png",
+      "sha256": "c2b271c0d58ac4262d13c9bfe2f3ea40ad41cc9cdfce1dce7d5243326111469c"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-ui-accepted/mobile-settings-light.png",
+      "sha256": "c6265cc322fce5296c75bdc02b83b5d146e99623857d09e0e26c82430fa1f2cc"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-ui-accepted/native-display-before.json",
+      "sha256": "01f34445f2343e02649341cc2f9f12112e6391448f136f4866c4994c2c18d4e0"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-ui-accepted/native-logcat.log",
+      "sha256": "31e34f26e77ca18cb76b813c8e3864f399327408c0f6f74c9523e57c42fd5155"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-ui-accepted/native-ui-001-devices.xml",
+      "sha256": "15c149ccaef40f5bf84ebbcccab555030094cce96f0554e9aea2ba0ed9715ecf"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-ui-accepted/native-ui-002-tap.xml",
+      "sha256": "15c149ccaef40f5bf84ebbcccab555030094cce96f0554e9aea2ba0ed9715ecf"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-ui-accepted/native-ui-003-connection-failure.xml",
+      "sha256": "63d099a714ad7358011eeaca0b3a0ead22f342d79cdd2c4ec3ee30e633edf0a3"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-ui-accepted/native-ui-004-tap.xml",
+      "sha256": "63d099a714ad7358011eeaca0b3a0ead22f342d79cdd2c4ec3ee30e633edf0a3"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-ui-accepted/native-ui-005-scoped-candidate.xml",
+      "sha256": "3d96a9f7389bf09bdd36105df5cced0790b185df278c80c08e94ed249139d9a7"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-ui-accepted/native-ui-006-tap.xml",
+      "sha256": "3d96a9f7389bf09bdd36105df5cced0790b185df278c80c08e94ed249139d9a7"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-ui-accepted/native-ui-007-pending.xml",
+      "sha256": "2b2b2d536c23f017bd54708857d87eedb57c92de5866b201a41dcbc236b252fe"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-ui-accepted/native-ui-008-back-clears.xml",
+      "sha256": "15c149ccaef40f5bf84ebbcccab555030094cce96f0554e9aea2ba0ed9715ecf"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-ui-accepted/native-ui-009-tap.xml",
+      "sha256": "15c149ccaef40f5bf84ebbcccab555030094cce96f0554e9aea2ba0ed9715ecf"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-ui-accepted/native-ui-010-revoked-gate.xml",
+      "sha256": "63d099a714ad7358011eeaca0b3a0ead22f342d79cdd2c4ec3ee30e633edf0a3"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-ui-accepted/native-ui-011-tap.xml",
+      "sha256": "63d099a714ad7358011eeaca0b3a0ead22f342d79cdd2c4ec3ee30e633edf0a3"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-ui-accepted/native-ui-012-revoked-error.xml",
+      "sha256": "b2a70cfca4c858e9fb7cfe2acb08a013f895b92ee61c8756a1b0c4fc495b6192"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-ui-accepted/native-ui-013-tap.xml",
+      "sha256": "b2a70cfca4c858e9fb7cfe2acb08a013f895b92ee61c8756a1b0c4fc495b6192"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-ui-accepted/native-ui-014-ready-library.xml",
+      "sha256": "122fd96ead7df0e8e71b7c4bb972a78ad7d491911435f9462bf313dd8a8e87ad"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-ui-accepted/native-ui-015-tap.xml",
+      "sha256": "122fd96ead7df0e8e71b7c4bb972a78ad7d491911435f9462bf313dd8a8e87ad"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-ui-accepted/native-ui-016-tap.xml",
+      "sha256": "4bbee2eab0ae3361fc66004ab84935f564042db8354c17b9fb8043ff5b9b05b3"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-ui-accepted/native-ui-017-settings.xml",
+      "sha256": "745ff8f5a7bd9d3a79c21ee88c1fef43010f005dd39d211fa98e9d0eb3dd6089"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-ui-accepted/native-ui-018-tap.xml",
+      "sha256": "745ff8f5a7bd9d3a79c21ee88c1fef43010f005dd39d211fa98e9d0eb3dd6089"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-ui-accepted/native-ui-019-settings-update.xml",
+      "sha256": "2b1f4c2686b1fb9fa121ed8a047d4ce35b9ef4ea1047be371f4250f279481d7c"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-ui-accepted/native-ui-020-tap.xml",
+      "sha256": "2b1f4c2686b1fb9fa121ed8a047d4ce35b9ef4ea1047be371f4250f279481d7c"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-ui-accepted/native-ui-021-tap.xml",
+      "sha256": "0728f601d6cb554d42bb3c0ddb58d5695a1dbaafe1d7def7b0c0b703f3519b8b"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-ui-accepted/native-ui-022-background-pending.xml",
+      "sha256": "0728f601d6cb554d42bb3c0ddb58d5695a1dbaafe1d7def7b0c0b703f3519b8b"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-ui-accepted/native-ui-023-background-pending.xml",
+      "sha256": "0728f601d6cb554d42bb3c0ddb58d5695a1dbaafe1d7def7b0c0b703f3519b8b"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-ui-accepted/native-ui-024-background-pending.xml",
+      "sha256": "0728f601d6cb554d42bb3c0ddb58d5695a1dbaafe1d7def7b0c0b703f3519b8b"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-ui-accepted/native-ui-025-background-pending.xml",
+      "sha256": "0728f601d6cb554d42bb3c0ddb58d5695a1dbaafe1d7def7b0c0b703f3519b8b"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-ui-accepted/native-ui-026-background-pending.xml",
+      "sha256": "0728f601d6cb554d42bb3c0ddb58d5695a1dbaafe1d7def7b0c0b703f3519b8b"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-ui-accepted/native-ui-027-background-pending.xml",
+      "sha256": "0728f601d6cb554d42bb3c0ddb58d5695a1dbaafe1d7def7b0c0b703f3519b8b"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-ui-accepted/native-ui-028-background-pending.xml",
+      "sha256": "0728f601d6cb554d42bb3c0ddb58d5695a1dbaafe1d7def7b0c0b703f3519b8b"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-ui-accepted/native-ui-029-background-pending.xml",
+      "sha256": "0728f601d6cb554d42bb3c0ddb58d5695a1dbaafe1d7def7b0c0b703f3519b8b"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-ui-accepted/native-ui-030-background-pending.xml",
+      "sha256": "0728f601d6cb554d42bb3c0ddb58d5695a1dbaafe1d7def7b0c0b703f3519b8b"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-ui-accepted/native-ui-031-background-pending.xml",
+      "sha256": "0728f601d6cb554d42bb3c0ddb58d5695a1dbaafe1d7def7b0c0b703f3519b8b"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-ui-accepted/native-ui-032-background-pending.xml",
+      "sha256": "0728f601d6cb554d42bb3c0ddb58d5695a1dbaafe1d7def7b0c0b703f3519b8b"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-ui-accepted/native-ui-033-background-pending.xml",
+      "sha256": "0728f601d6cb554d42bb3c0ddb58d5695a1dbaafe1d7def7b0c0b703f3519b8b"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-ui-accepted/native-ui-034-background-pending.xml",
+      "sha256": "0728f601d6cb554d42bb3c0ddb58d5695a1dbaafe1d7def7b0c0b703f3519b8b"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-ui-accepted/native-ui-035-background-pending.xml",
+      "sha256": "0728f601d6cb554d42bb3c0ddb58d5695a1dbaafe1d7def7b0c0b703f3519b8b"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-ui-accepted/native-ui-036-background-pending.xml",
+      "sha256": "0728f601d6cb554d42bb3c0ddb58d5695a1dbaafe1d7def7b0c0b703f3519b8b"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-ui-accepted/native-ui-037-background-pending.xml",
+      "sha256": "0728f601d6cb554d42bb3c0ddb58d5695a1dbaafe1d7def7b0c0b703f3519b8b"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-ui-accepted/native-ui-038-background-pending.xml",
+      "sha256": "0728f601d6cb554d42bb3c0ddb58d5695a1dbaafe1d7def7b0c0b703f3519b8b"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-ui-accepted/native-ui-039-background-pending.xml",
+      "sha256": "0728f601d6cb554d42bb3c0ddb58d5695a1dbaafe1d7def7b0c0b703f3519b8b"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-ui-accepted/native-ui-result.json",
+      "sha256": "57ba9b9d0917e3c4003e8c6bd5a69b5e6db99a0e69ce07b414e231cec2d249bc"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-ui-before-cache-fixture-fix.cjs",
+      "sha256": "98648fd9d5b7936ee950e6933b27ccd1cd832091758a50d968d20e0bd5c06ab3"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-ui-complete/mobile-authorization-revoked.png",
+      "sha256": "a11c76c5c7574fedb2ba6e7f66629b58f15fd6b65a52068ef66abdf175ee82ab"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-ui-complete/mobile-connection-failure-dark.png",
+      "sha256": "fcfcfbfef5cea35e0ec4caf2ea3a5240b183c9e8a227593d7b1deda98229e307"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-ui-complete/mobile-devices-dark.png",
+      "sha256": "8370b9d195146ec26fb6040f9cd17648f92c6ab80d676b871846e9185986f9d3"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-ui-complete/mobile-failure.png",
+      "sha256": "e9ee4d9649a9953a5d8079380b13ca3337a8e72361c5694679ff36f46dcac0a7"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-ui-complete/mobile-library-dark.png",
+      "sha256": "0e8e99b8dcf5e9fafae80dbb809ea4053bfee65b0102be9e04b66d533930bc5c"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-ui-complete/mobile-scoped-candidate-dark.png",
+      "sha256": "e5823b16d51da0a1f17dd295fbee243ab1c9056711a0aad2cc15dae3e1606a6d"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-ui-complete/mobile-settings-dark.png",
+      "sha256": "1aed5c5946a4a46a03a454cbee4d957af9b809b80e8672548cfba3260865c02f"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-ui-complete/mobile-settings-light.png",
+      "sha256": "fd8e152ed491e02a331ecffbeb0d8ce97983adc2e36458953bb41d044d65e661"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-ui-complete/native-display-before.json",
+      "sha256": "01f34445f2343e02649341cc2f9f12112e6391448f136f4866c4994c2c18d4e0"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-ui-complete/native-logcat.log",
+      "sha256": "29211175ca71fdd08c60be61a9d9581fb1508852d7baeb0a231a4b4eb802fd2e"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-ui-complete/native-ui-001-devices.xml",
+      "sha256": "15c149ccaef40f5bf84ebbcccab555030094cce96f0554e9aea2ba0ed9715ecf"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-ui-complete/native-ui-002-tap.xml",
+      "sha256": "15c149ccaef40f5bf84ebbcccab555030094cce96f0554e9aea2ba0ed9715ecf"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-ui-complete/native-ui-003-connection-failure.xml",
+      "sha256": "63d099a714ad7358011eeaca0b3a0ead22f342d79cdd2c4ec3ee30e633edf0a3"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-ui-complete/native-ui-004-tap.xml",
+      "sha256": "63d099a714ad7358011eeaca0b3a0ead22f342d79cdd2c4ec3ee30e633edf0a3"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-ui-complete/native-ui-005-scoped-candidate.xml",
+      "sha256": "406baebaadbb7ad03d28630b0cec9e84ab0e9414286b8e3e4ec27ec98ea67ba3"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-ui-complete/native-ui-006-tap.xml",
+      "sha256": "406baebaadbb7ad03d28630b0cec9e84ab0e9414286b8e3e4ec27ec98ea67ba3"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-ui-complete/native-ui-007-pending.xml",
+      "sha256": "cb85b2b7201cb797c6b74b541ac7f33b69952ffe3ef1fdd58f574f23812699a9"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-ui-complete/native-ui-008-back-clears.xml",
+      "sha256": "15c149ccaef40f5bf84ebbcccab555030094cce96f0554e9aea2ba0ed9715ecf"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-ui-complete/native-ui-009-tap.xml",
+      "sha256": "15c149ccaef40f5bf84ebbcccab555030094cce96f0554e9aea2ba0ed9715ecf"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-ui-complete/native-ui-010-revoked-gate.xml",
+      "sha256": "63d099a714ad7358011eeaca0b3a0ead22f342d79cdd2c4ec3ee30e633edf0a3"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-ui-complete/native-ui-011-tap.xml",
+      "sha256": "63d099a714ad7358011eeaca0b3a0ead22f342d79cdd2c4ec3ee30e633edf0a3"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-ui-complete/native-ui-012-revoked-error.xml",
+      "sha256": "725a7450cdf646609704b77b573692eb1a2ef247c84ab3b41b9e2bbbe93419f8"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-ui-complete/native-ui-013-tap.xml",
+      "sha256": "725a7450cdf646609704b77b573692eb1a2ef247c84ab3b41b9e2bbbe93419f8"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-ui-complete/native-ui-014-ready-library.xml",
+      "sha256": "122fd96ead7df0e8e71b7c4bb972a78ad7d491911435f9462bf313dd8a8e87ad"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-ui-complete/native-ui-015-tap.xml",
+      "sha256": "122fd96ead7df0e8e71b7c4bb972a78ad7d491911435f9462bf313dd8a8e87ad"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-ui-complete/native-ui-016-tap.xml",
+      "sha256": "4bbee2eab0ae3361fc66004ab84935f564042db8354c17b9fb8043ff5b9b05b3"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-ui-complete/native-ui-017-settings.xml",
+      "sha256": "745ff8f5a7bd9d3a79c21ee88c1fef43010f005dd39d211fa98e9d0eb3dd6089"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-ui-complete/native-ui-018-tap.xml",
+      "sha256": "745ff8f5a7bd9d3a79c21ee88c1fef43010f005dd39d211fa98e9d0eb3dd6089"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-ui-complete/native-ui-019-settings-update.xml",
+      "sha256": "61d2b8478e6a67bf35d545cb5e5b43e8f126d50e4dc1ff73cea535e0b18b8345"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-ui-complete/native-ui-020-tap.xml",
+      "sha256": "61d2b8478e6a67bf35d545cb5e5b43e8f126d50e4dc1ff73cea535e0b18b8345"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-ui-complete/native-ui-021-tap.xml",
+      "sha256": "f050412cd9a77ce0a7a3ca89717faafab186aa9445fede9a03b2deb9bd1ce0ad"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-ui-complete/native-ui-022-background-pending.xml",
+      "sha256": "4044d1aae2cdefcf938fc028b19fbb507f4818499968d12789839740f39ca749"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-ui-complete/native-ui-023-foreground-cleared.xml",
+      "sha256": "4c57c83e4535e40eb8fdce09020ba40aa5d48e9cc70a07c6609f0edf278337ed"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-ui-complete/native-ui-024-small-devices.xml",
+      "sha256": "9f7bf99599690fe937ca3b913ca2bb73fb9d7156ab48fe8d0cab24f0391d3128"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-ui-complete/native-ui-025-tap.xml",
+      "sha256": "9f7bf99599690fe937ca3b913ca2bb73fb9d7156ab48fe8d0cab24f0391d3128"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-ui-complete/native-ui-026-small-gate.xml",
+      "sha256": "d2f2dd9e0a81773652891923ff6ab30a6ee6b7a709efbb3e1f477aef5099b4a6"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-ui-complete/native-ui-027-small-gate.xml",
+      "sha256": "d2f2dd9e0a81773652891923ff6ab30a6ee6b7a709efbb3e1f477aef5099b4a6"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-ui-complete/native-ui-028-small-gate.xml",
+      "sha256": "d2f2dd9e0a81773652891923ff6ab30a6ee6b7a709efbb3e1f477aef5099b4a6"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-ui-complete/native-ui-029-small-gate.xml",
+      "sha256": "d2f2dd9e0a81773652891923ff6ab30a6ee6b7a709efbb3e1f477aef5099b4a6"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-ui-complete/native-ui-030-small-gate.xml",
+      "sha256": "d2f2dd9e0a81773652891923ff6ab30a6ee6b7a709efbb3e1f477aef5099b4a6"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-ui-complete/native-ui-031-small-gate.xml",
+      "sha256": "d2f2dd9e0a81773652891923ff6ab30a6ee6b7a709efbb3e1f477aef5099b4a6"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-ui-complete/native-ui-032-small-gate.xml",
+      "sha256": "d2f2dd9e0a81773652891923ff6ab30a6ee6b7a709efbb3e1f477aef5099b4a6"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-ui-complete/native-ui-033-small-gate.xml",
+      "sha256": "d2f2dd9e0a81773652891923ff6ab30a6ee6b7a709efbb3e1f477aef5099b4a6"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-ui-complete/native-ui-034-small-gate.xml",
+      "sha256": "d2f2dd9e0a81773652891923ff6ab30a6ee6b7a709efbb3e1f477aef5099b4a6"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-ui-complete/native-ui-035-small-gate.xml",
+      "sha256": "d2f2dd9e0a81773652891923ff6ab30a6ee6b7a709efbb3e1f477aef5099b4a6"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-ui-complete/native-ui-036-small-gate.xml",
+      "sha256": "d2f2dd9e0a81773652891923ff6ab30a6ee6b7a709efbb3e1f477aef5099b4a6"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-ui-complete/native-ui-037-small-gate.xml",
+      "sha256": "d2f2dd9e0a81773652891923ff6ab30a6ee6b7a709efbb3e1f477aef5099b4a6"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-ui-complete/native-ui-038-small-gate.xml",
+      "sha256": "d2f2dd9e0a81773652891923ff6ab30a6ee6b7a709efbb3e1f477aef5099b4a6"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-ui-complete/native-ui-039-small-gate.xml",
+      "sha256": "d2f2dd9e0a81773652891923ff6ab30a6ee6b7a709efbb3e1f477aef5099b4a6"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-ui-complete/native-ui-040-small-gate.xml",
+      "sha256": "d2f2dd9e0a81773652891923ff6ab30a6ee6b7a709efbb3e1f477aef5099b4a6"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-ui-complete/native-ui-041-small-gate.xml",
+      "sha256": "d2f2dd9e0a81773652891923ff6ab30a6ee6b7a709efbb3e1f477aef5099b4a6"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-ui-complete/native-ui-042-small-gate.xml",
+      "sha256": "d2f2dd9e0a81773652891923ff6ab30a6ee6b7a709efbb3e1f477aef5099b4a6"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-ui-complete/native-ui-043-small-gate.xml",
+      "sha256": "d2f2dd9e0a81773652891923ff6ab30a6ee6b7a709efbb3e1f477aef5099b4a6"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-ui-complete/native-ui-result.json",
+      "sha256": "a8e419e3e548df45ba6f5886b3700b2f1549bb0f4523c841a52bc3b84d4af594"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-ui-final/mobile-authorization-revoked.png",
+      "sha256": "26170c81a881edb03fed2847f82f2c786ae9fa19faf6452416d9cd45784cb45c"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-ui-final/mobile-connection-failure-dark.png",
+      "sha256": "d9197abef63a6a24538f83469849226a0649acaeb7eb6b8f4801e4dbf1e9b4e9"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-ui-final/mobile-devices-dark.png",
+      "sha256": "89129fd24f2bb5592a439b62e227542ec3a9f4f0c68840ca2600559b259b2669"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-ui-final/mobile-failure.png",
+      "sha256": "11c6f98526f9fe5c19cc72b7c0db8976be32b5949d4bd7a8f040458b4fbd9bd1"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-ui-final/mobile-library-dark.png",
+      "sha256": "d1e6a680f29becc9314aa7f0919afdddb482d488e713061147a11ad1544d4cb1"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-ui-final/mobile-scoped-candidate-dark.png",
+      "sha256": "396bd33747a5cd9680d050eef0fdf5ad87c2430227e73d1bce71f4a8d3e033bf"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-ui-final/native-display-before.json",
+      "sha256": "01f34445f2343e02649341cc2f9f12112e6391448f136f4866c4994c2c18d4e0"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-ui-final/native-logcat.log",
+      "sha256": "00cf805c0a042b0cf95e6c6b6cf96220a57bd0a9ccf1f682705a3bf6e6b92029"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-ui-final/native-ui-001-devices.xml",
+      "sha256": "15c149ccaef40f5bf84ebbcccab555030094cce96f0554e9aea2ba0ed9715ecf"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-ui-final/native-ui-002-tap.xml",
+      "sha256": "15c149ccaef40f5bf84ebbcccab555030094cce96f0554e9aea2ba0ed9715ecf"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-ui-final/native-ui-003-connection-failure.xml",
+      "sha256": "63d099a714ad7358011eeaca0b3a0ead22f342d79cdd2c4ec3ee30e633edf0a3"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-ui-final/native-ui-004-tap.xml",
+      "sha256": "63d099a714ad7358011eeaca0b3a0ead22f342d79cdd2c4ec3ee30e633edf0a3"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-ui-final/native-ui-005-scoped-candidate.xml",
+      "sha256": "3d96a9f7389bf09bdd36105df5cced0790b185df278c80c08e94ed249139d9a7"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-ui-final/native-ui-006-tap.xml",
+      "sha256": "3d96a9f7389bf09bdd36105df5cced0790b185df278c80c08e94ed249139d9a7"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-ui-final/native-ui-007-pending.xml",
+      "sha256": "2b2b2d536c23f017bd54708857d87eedb57c92de5866b201a41dcbc236b252fe"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-ui-final/native-ui-008-back-clears.xml",
+      "sha256": "15c149ccaef40f5bf84ebbcccab555030094cce96f0554e9aea2ba0ed9715ecf"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-ui-final/native-ui-009-tap.xml",
+      "sha256": "15c149ccaef40f5bf84ebbcccab555030094cce96f0554e9aea2ba0ed9715ecf"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-ui-final/native-ui-010-revoked-gate.xml",
+      "sha256": "63d099a714ad7358011eeaca0b3a0ead22f342d79cdd2c4ec3ee30e633edf0a3"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-ui-final/native-ui-011-tap.xml",
+      "sha256": "63d099a714ad7358011eeaca0b3a0ead22f342d79cdd2c4ec3ee30e633edf0a3"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-ui-final/native-ui-012-revoked-error.xml",
+      "sha256": "b2a70cfca4c858e9fb7cfe2acb08a013f895b92ee61c8756a1b0c4fc495b6192"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-ui-final/native-ui-013-tap.xml",
+      "sha256": "b2a70cfca4c858e9fb7cfe2acb08a013f895b92ee61c8756a1b0c4fc495b6192"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-ui-final/native-ui-014-ready-library.xml",
+      "sha256": "122fd96ead7df0e8e71b7c4bb972a78ad7d491911435f9462bf313dd8a8e87ad"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-ui-final/native-ui-015-tap.xml",
+      "sha256": "122fd96ead7df0e8e71b7c4bb972a78ad7d491911435f9462bf313dd8a8e87ad"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-ui-final/native-ui-016-tap.xml",
+      "sha256": "4bbee2eab0ae3361fc66004ab84935f564042db8354c17b9fb8043ff5b9b05b3"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-ui-final/native-ui-017-settings.xml",
+      "sha256": "745ff8f5a7bd9d3a79c21ee88c1fef43010f005dd39d211fa98e9d0eb3dd6089"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-ui-final/native-ui-018-tap.xml",
+      "sha256": "745ff8f5a7bd9d3a79c21ee88c1fef43010f005dd39d211fa98e9d0eb3dd6089"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-ui-final/native-ui-019-settings-update.xml",
+      "sha256": "745ff8f5a7bd9d3a79c21ee88c1fef43010f005dd39d211fa98e9d0eb3dd6089"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-ui-final/native-ui-020-settings-update.xml",
+      "sha256": "745ff8f5a7bd9d3a79c21ee88c1fef43010f005dd39d211fa98e9d0eb3dd6089"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-ui-final/native-ui-021-settings-update.xml",
+      "sha256": "745ff8f5a7bd9d3a79c21ee88c1fef43010f005dd39d211fa98e9d0eb3dd6089"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-ui-final/native-ui-022-settings-update.xml",
+      "sha256": "745ff8f5a7bd9d3a79c21ee88c1fef43010f005dd39d211fa98e9d0eb3dd6089"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-ui-final/native-ui-023-settings-update.xml",
+      "sha256": "745ff8f5a7bd9d3a79c21ee88c1fef43010f005dd39d211fa98e9d0eb3dd6089"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-ui-final/native-ui-024-settings-update.xml",
+      "sha256": "745ff8f5a7bd9d3a79c21ee88c1fef43010f005dd39d211fa98e9d0eb3dd6089"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-ui-final/native-ui-025-settings-update.xml",
+      "sha256": "745ff8f5a7bd9d3a79c21ee88c1fef43010f005dd39d211fa98e9d0eb3dd6089"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-ui-final/native-ui-026-settings-update.xml",
+      "sha256": "745ff8f5a7bd9d3a79c21ee88c1fef43010f005dd39d211fa98e9d0eb3dd6089"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-ui-final/native-ui-027-settings-update.xml",
+      "sha256": "745ff8f5a7bd9d3a79c21ee88c1fef43010f005dd39d211fa98e9d0eb3dd6089"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-ui-final/native-ui-028-settings-update.xml",
+      "sha256": "745ff8f5a7bd9d3a79c21ee88c1fef43010f005dd39d211fa98e9d0eb3dd6089"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-ui-final/native-ui-029-settings-update.xml",
+      "sha256": "745ff8f5a7bd9d3a79c21ee88c1fef43010f005dd39d211fa98e9d0eb3dd6089"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-ui-final/native-ui-030-settings-update.xml",
+      "sha256": "745ff8f5a7bd9d3a79c21ee88c1fef43010f005dd39d211fa98e9d0eb3dd6089"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-ui-final/native-ui-031-settings-update.xml",
+      "sha256": "745ff8f5a7bd9d3a79c21ee88c1fef43010f005dd39d211fa98e9d0eb3dd6089"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-ui-final/native-ui-032-settings-update.xml",
+      "sha256": "745ff8f5a7bd9d3a79c21ee88c1fef43010f005dd39d211fa98e9d0eb3dd6089"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-ui-final/native-ui-033-settings-update.xml",
+      "sha256": "745ff8f5a7bd9d3a79c21ee88c1fef43010f005dd39d211fa98e9d0eb3dd6089"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-ui-final/native-ui-034-settings-update.xml",
+      "sha256": "745ff8f5a7bd9d3a79c21ee88c1fef43010f005dd39d211fa98e9d0eb3dd6089"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-ui-final/native-ui-035-settings-update.xml",
+      "sha256": "745ff8f5a7bd9d3a79c21ee88c1fef43010f005dd39d211fa98e9d0eb3dd6089"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-ui-final/native-ui-036-settings-update.xml",
+      "sha256": "745ff8f5a7bd9d3a79c21ee88c1fef43010f005dd39d211fa98e9d0eb3dd6089"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-ui-final/native-ui-result.json",
+      "sha256": "2717bdb3ea4f8a5b666ad1ebdf54610f630ba515b24f2bbeeab6c06491521537"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-ui-final-success/mobile-authorization-revoked.png",
+      "sha256": "861145937068af5d341205f7b30d06d11b711a043c9fe78d7baa8a21c9af1b0f"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-ui-final-success/mobile-connection-failure-dark.png",
+      "sha256": "422e8edd2ae8928c716ed389b19497b662b98de8527a49c0c68906f319a40f0b"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-ui-final-success/mobile-devices-dark.png",
+      "sha256": "7638804b766ac6ac46fa5a2cf479ae348ca2681280abf938d3f3b580755afe29"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-ui-final-success/mobile-library-dark.png",
+      "sha256": "d0ff2790395ea146c2d01663359f337e00011e9d8aae76c1a310b6e7a30e97be"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-ui-final-success/mobile-scoped-candidate-dark.png",
+      "sha256": "7bcf10f5317e7822cc2599874563a457b4a1d4d152c42da72aa8dda941a22a70"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-ui-final-success/mobile-settings-dark.png",
+      "sha256": "a25c5a4268508730c7fbb719adf95590530e2a2cfee82e30d0969f4496e34637"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-ui-final-success/mobile-settings-light.png",
+      "sha256": "dbde060918911b2773c40d39d1a5e1670866e5a0f3c5434d348891cd5b5f6af2"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-ui-final-success/mobile-small-360dp-font160-top.png",
+      "sha256": "c844b752c8ecf275d70c1675a902d4767d38b74bfb4c0162b5c465239a714fbb"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-ui-final-success/mobile-small-360dp-font160-update.png",
+      "sha256": "ddd928dabfadf08cf20c4860ba186c2f02d50f826f278cc99dc40402915e8a10"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-ui-final-success/native-display-before.json",
+      "sha256": "01f34445f2343e02649341cc2f9f12112e6391448f136f4866c4994c2c18d4e0"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-ui-final-success/native-logcat.log",
+      "sha256": "bf79cbc179c9af9f48e3e84334542300563db996680148cb7c666c46bbd4c766"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-ui-final-success/native-ui-001-devices.xml",
+      "sha256": "15c149ccaef40f5bf84ebbcccab555030094cce96f0554e9aea2ba0ed9715ecf"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-ui-final-success/native-ui-002-tap.xml",
+      "sha256": "15c149ccaef40f5bf84ebbcccab555030094cce96f0554e9aea2ba0ed9715ecf"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-ui-final-success/native-ui-003-connection-failure.xml",
+      "sha256": "63d099a714ad7358011eeaca0b3a0ead22f342d79cdd2c4ec3ee30e633edf0a3"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-ui-final-success/native-ui-004-tap.xml",
+      "sha256": "63d099a714ad7358011eeaca0b3a0ead22f342d79cdd2c4ec3ee30e633edf0a3"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-ui-final-success/native-ui-005-scoped-candidate.xml",
+      "sha256": "406baebaadbb7ad03d28630b0cec9e84ab0e9414286b8e3e4ec27ec98ea67ba3"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-ui-final-success/native-ui-006-tap.xml",
+      "sha256": "406baebaadbb7ad03d28630b0cec9e84ab0e9414286b8e3e4ec27ec98ea67ba3"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-ui-final-success/native-ui-007-pending.xml",
+      "sha256": "cb85b2b7201cb797c6b74b541ac7f33b69952ffe3ef1fdd58f574f23812699a9"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-ui-final-success/native-ui-008-back-clears.xml",
+      "sha256": "15c149ccaef40f5bf84ebbcccab555030094cce96f0554e9aea2ba0ed9715ecf"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-ui-final-success/native-ui-009-tap.xml",
+      "sha256": "15c149ccaef40f5bf84ebbcccab555030094cce96f0554e9aea2ba0ed9715ecf"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-ui-final-success/native-ui-010-revoked-gate.xml",
+      "sha256": "63d099a714ad7358011eeaca0b3a0ead22f342d79cdd2c4ec3ee30e633edf0a3"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-ui-final-success/native-ui-011-tap.xml",
+      "sha256": "63d099a714ad7358011eeaca0b3a0ead22f342d79cdd2c4ec3ee30e633edf0a3"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-ui-final-success/native-ui-012-revoked-error.xml",
+      "sha256": "725a7450cdf646609704b77b573692eb1a2ef247c84ab3b41b9e2bbbe93419f8"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-ui-final-success/native-ui-013-tap.xml",
+      "sha256": "725a7450cdf646609704b77b573692eb1a2ef247c84ab3b41b9e2bbbe93419f8"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-ui-final-success/native-ui-014-ready-library.xml",
+      "sha256": "122fd96ead7df0e8e71b7c4bb972a78ad7d491911435f9462bf313dd8a8e87ad"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-ui-final-success/native-ui-015-tap.xml",
+      "sha256": "122fd96ead7df0e8e71b7c4bb972a78ad7d491911435f9462bf313dd8a8e87ad"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-ui-final-success/native-ui-016-tap.xml",
+      "sha256": "4bbee2eab0ae3361fc66004ab84935f564042db8354c17b9fb8043ff5b9b05b3"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-ui-final-success/native-ui-017-settings.xml",
+      "sha256": "745ff8f5a7bd9d3a79c21ee88c1fef43010f005dd39d211fa98e9d0eb3dd6089"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-ui-final-success/native-ui-018-tap.xml",
+      "sha256": "745ff8f5a7bd9d3a79c21ee88c1fef43010f005dd39d211fa98e9d0eb3dd6089"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-ui-final-success/native-ui-019-settings-update.xml",
+      "sha256": "61d2b8478e6a67bf35d545cb5e5b43e8f126d50e4dc1ff73cea535e0b18b8345"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-ui-final-success/native-ui-020-tap.xml",
+      "sha256": "61d2b8478e6a67bf35d545cb5e5b43e8f126d50e4dc1ff73cea535e0b18b8345"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-ui-final-success/native-ui-021-tap.xml",
+      "sha256": "f050412cd9a77ce0a7a3ca89717faafab186aa9445fede9a03b2deb9bd1ce0ad"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-ui-final-success/native-ui-022-background-pending.xml",
+      "sha256": "4044d1aae2cdefcf938fc028b19fbb507f4818499968d12789839740f39ca749"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-ui-final-success/native-ui-023-foreground-cleared.xml",
+      "sha256": "4c57c83e4535e40eb8fdce09020ba40aa5d48e9cc70a07c6609f0edf278337ed"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-ui-final-success/native-ui-024-small-devices.xml",
+      "sha256": "8fc93d1499e4a145efa00147428644e1cf08aacfc29ffc93fcaf952637610eff"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-ui-final-success/native-ui-025-tap.xml",
+      "sha256": "8fc93d1499e4a145efa00147428644e1cf08aacfc29ffc93fcaf952637610eff"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-ui-final-success/native-ui-026-small-gate.xml",
+      "sha256": "d2b25aaff94ef84c9de207d0f08b5c2c1762f1f4c58cfaec6cd9e88b7d40694b"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-ui-final-success/native-ui-027-small-scroll.xml",
+      "sha256": "d2b25aaff94ef84c9de207d0f08b5c2c1762f1f4c58cfaec6cd9e88b7d40694b"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-ui-final-success/native-ui-028-tap.xml",
+      "sha256": "d2b25aaff94ef84c9de207d0f08b5c2c1762f1f4c58cfaec6cd9e88b7d40694b"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-ui-final-success/native-ui-029-small-candidate.xml",
+      "sha256": "35ba78e5fbeb25a9d30322e3d25ad0729bcee191026b2e2e7e5d73c878f412cd"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-ui-final-success/native-ui-result.json",
+      "sha256": "cbc67ecc34e41f2741e7bae25d1265ade5a8c887773947c5dc429dccbb19ebd5"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-ui-result.json",
+      "sha256": "ba991c09a860ee846a0497922cada8a9b4b527ff8789367dc6d52473c416cd87"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/native-ui.cjs",
+      "sha256": "ef34a4420f75e7bd07a86885910f16bb1ca91f3173905c510c1e36eee4151142"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/powershell-parse.json",
+      "sha256": "1ff8b5ad137960d1f6829c508bb9925ce4cf10e499732606858718da4fdc1a1a"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/prepare.cjs",
+      "sha256": "0a0229eee1324074f355751c54c2909a231af29251463607e11beb586a507cf7"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/regressions.cjs",
+      "sha256": "bcc88ef304e34bd4ad314070439ef2d46d72b78e094dfcbb3fdbef3d5ea09a27"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/regressions.json",
+      "sha256": "1f20ae580b864d393dd671469f9fdd8c0d31d6d2eae0fd100d653e9ea5f8294d"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/sync-final.cjs",
+      "sha256": "80eba007efc36a46dbb863bd6b76a6d653745923bba3fdf8dc8f47ba12c0c235"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/typecheck-final.log",
+      "sha256": "1e0f0490123b26a1e922ddceb0d3a75f1acc55b8dbd07d5c200b38c8cde87737"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/typecheck.log",
+      "sha256": "1e0f0490123b26a1e922ddceb0d3a75f1acc55b8dbd07d5c200b38c8cde87737"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/update-ui-final.log",
+      "sha256": "92ab448d1f5dc512447b74b1e84457383447a6727c089cbaa41d4b15bc0909e4"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/verify-api-adapters.log",
+      "sha256": "e00c00e2ad20f35b7929c64f5b04ee21a3e8c92a2a2ba98eef851f8b332677ae"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/verify-connection-lifecycle.log",
+      "sha256": "a0bbd120cf089334b4ac8b6f494a9b8c1e3457707fad69342aae3b978afe8db9"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/verify-desktop-player.log",
+      "sha256": "cbd33f47bc8a04002516b14b2aa7d52d1d0f6d68ccca8ceac0b6f0dc396b76eb"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/verify-electron-api.log",
+      "sha256": "642f97d5c1b1acdf89348a24229cf3b5d5c3c36695832bdbf6bfdfb4cddf0313"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/verify-electron-runtime.log",
+      "sha256": "abfb0c875963888290c4e93a2c85a04e5f19d2f00a0bfaeeec8f4ce0a13e570e"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/verify-inputs.cjs",
+      "sha256": "4c4ae0a7f8195afae7d38d94b4d88abb087e06d156b9fd5ba0c5d1dd695f6da7"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/verify-mobile-accessibility.log",
+      "sha256": "2ecde94c47af00c8b13407d57d23c01a57b0c3b88ce28ca8d8e7e981b89f1d7c"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/verify-mobile-correctness.log",
+      "sha256": "7bdacf31c981e963ef9f0fa59a1084c9a4e3c797d6a7451e31d61bf42e9010b7"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/verify-mobile-input-accessibility.log",
+      "sha256": "9b3da1cf4a860d7220c976d1d760c6d3b2d561f0107e9d031e7868089551d796"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/verify-mobile-navigation.log",
+      "sha256": "d2fe1fdb6abb04a31567d4c6bc47f94ef4d53fee8e408a91f0a0318070094989"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/verify-mobile-player-panels.log",
+      "sha256": "a17f1949d7c79e4e4721c759cfdc56eeb7e88ade2149598007a519fc3d89fabe"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/verify-mobile-player.log",
+      "sha256": "7ef228c80a973f1a2d4faaaaa3cfa994477435b8a16f7b6c7732d2396628e4ca"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/verify-mobile-update-ui.log",
+      "sha256": "623835be8d3b27c6eed165c5282d60fb890cec1915555f8e516357cae0809385"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/verify-mobile-updates.log",
+      "sha256": "8a0d14b489da91a2722e6a77c663c2569f0f60ec06ac45900d3d5b8c39dd71e1"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/verify-responsive-layout.log",
+      "sha256": "8d11719d7a2e7a1c0ffd288c105b83ec1ba1741d5c38b0b67309a00639904e1d"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/verify-update-context.log",
+      "sha256": "41eb046192f0f993d02938ef097c1c7e50f8276995305d8fad49dc94e7743d4e"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/workflow-scripts.cjs",
+      "sha256": "dc18f14d0736587af7aa26c57b97d7444c39c427eca14615f0dc2727717d5d1d"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-frontend-integration/workflow-scripts.json",
+      "sha256": "7f79e6eaec4a9f6560fea21e570608da675c1cb26f062834d25bcfd99be814df"
+    }
+  ],
+  "published": false,
+  "goalStatus": "active",
+  "remaining": [
+    "Full Windows NSIS/portable delivery",
+    "Production Android signing identity migration and versionCode",
+    "Physical arm64, long-run memory/performance and native iOS acceptance",
+    "LAN transport and remaining R6/R7/R8 requirements"
+  ]
+}

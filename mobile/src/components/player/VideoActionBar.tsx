@@ -9,6 +9,7 @@ type Props = {
   analysisLabel?: string
   analysisActive?: boolean
   networkResource?: boolean
+  compact?: boolean
   bottomOffset: number
   rightOffset: number
   onFavorite: () => void
@@ -44,6 +45,7 @@ export function VideoActionBar({
   analysisLabel = '分析',
   analysisActive = false,
   networkResource = false,
+  compact = false,
   bottomOffset,
   rightOffset,
   onFavorite,
@@ -63,7 +65,7 @@ export function VideoActionBar({
         onPress={onFavorite}
       />
       <ActionButton label="标签" icon={<Tags color={colors.text} size={24} />} onPress={onTags} />
-      {!networkResource ? (
+      {!networkResource && !compact ? (
         <ActionButton
           label={analysisLabel}
           icon={<Brain color={analysisActive ? colors.accent : colors.text} size={23} />}
@@ -72,8 +74,8 @@ export function VideoActionBar({
           onPress={onAnalysis}
         />
       ) : null}
-      {!networkResource ? <ActionButton label="缓存" icon={<Download color={colors.text} size={24} />} onPress={onCache} /> : null}
-      <ActionButton label="电脑播放" icon={<MonitorPlay color={colors.text} size={24} />} onPress={onDesktopPlay} />
+      {!networkResource && !compact ? <ActionButton label="缓存" icon={<Download color={colors.text} size={24} />} onPress={onCache} /> : null}
+      {!compact ? <ActionButton label="电脑播放" icon={<MonitorPlay color={colors.text} size={24} />} onPress={onDesktopPlay} /> : null}
       <ActionButton label="更多" icon={<MoreHorizontal color={colors.text} size={25} />} onPress={onMore} />
     </View>
   )

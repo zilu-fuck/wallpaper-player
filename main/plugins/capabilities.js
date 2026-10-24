@@ -1,4 +1,4 @@
-const { getPublicVideoDirectories, loadSettings } = require('../settings')
+const { getPublicVideoDirectories, loadSettingsFields } = require('../settings')
 const { scanWithCache, assertAllowedVideoPath } = require('../scanner')
 const { mpvManager } = require('../mpv-integration')
 const { getPathForVideoId, rememberVideos, getVideoId } = require('../remote/video-index')
@@ -20,7 +20,7 @@ async function listVideoLibrary(options = {}) {
   const limit = Math.max(1, Math.min(500, Number(options.limit) || 100))
   const items = []
   for (const directory of getPublicVideoDirectories()) {
-    const result = await scanWithCache(directory)
+    const result = await scanWithCache(directory, false, { audience: 'remote' })
     if (Array.isArray(result?.videos)) {
       rememberVideos(result.videos)
       for (const video of result.videos) {
@@ -42,13 +42,13 @@ async function resolveVideoPathById(videoId) {
   if (!videoPath) {
     throw Object.assign(new Error('Video is not indexed'), { code: 'video_not_found' })
   }
-  return assertAllowedVideoPath(videoPath)
+  return assertAllowedVideoPath(videoPath, { audience: 'remote' })
 }
 
 async function playVideo(videoId, options = {}) {
   const videoPath = await resolveVideoPathById(videoId)
   await mpvManager.play(videoPath, {
-    mode: options.mode || loadSettings().playbackMode || 'order',
+    mode: options.mode || loadSettingsFields(['playbackMode']).playbackMode || 'order',
     resume: options.resume !== false
   })
   return { success: true, videoId }
@@ -73,7 +73,7 @@ function createCoreCapabilities(pluginRegistry) {
         return analysis.findVideoAnalysis(videoPath)
       },
       async start(videoId) {
-        if (!loadSettings().videoAnalysis?.enabled) {
+        if (!loadSettingsFields(['videoAnalysis']).videoAnalysis?.enabled) {
           return { accepted: false, reason: 'disabled', error: '请先在电脑端设置里开启视频理解' }
         }
         const videoPath = await resolveVideoPathById(videoId)

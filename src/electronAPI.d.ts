@@ -16,7 +16,22 @@ export interface IpcResult<T = unknown> {
   error?: string
   canceled?: boolean
   settings?: AppSettings
+  settingsVersion?: import('../packages/contracts').SettingsVersion
   [key: string]: unknown
+}
+
+/** 应用内询问框（替代系统 showMessageBox 的确认类弹窗） */
+export interface AppAskPayload {
+  id: number
+  tone: 'question' | 'warning' | 'error' | 'info'
+  title: string
+  message: string
+  detail: string
+  buttons: string[]
+  defaultId: number
+  cancelId: number
+  checkboxLabel: string
+  checkboxChecked: boolean
 }
 
 export interface VideoMediaInfo {
@@ -31,6 +46,8 @@ export interface VideoMediaInfo {
   container: string
   probedAt: number
 }
+
+export type MediaMutationTarget = import('../packages/contracts').MediaMutationTarget
 
 export interface VideoItem {
   id: string
@@ -56,6 +73,8 @@ export interface VideoItem {
 }
 
 export interface AppSettings {
+  /** Main-process snapshot identity; never persisted or submitted as a setting. */
+  _settingsVersion?: { epoch: string; revision: number }
   theme?: 'dark' | 'light'
   playbackMode?: string
   directories?: string[]
@@ -100,6 +119,8 @@ export interface DownloadTask {
   [key: string]: unknown
 }
 
+export interface DownloadControlOptions { expectedGeneration?: string }
+
 export interface DownloadState {
   engine: {
     available?: boolean
@@ -109,6 +130,8 @@ export interface DownloadState {
 }
 
 export interface PluginInfo {
+  _settingsVersion?: { epoch: string; revision: number }
+  secretKeys?: string[]
   id: string
   name: string
   enabled: boolean
@@ -129,6 +152,7 @@ export interface PairingRequest {
 }
 
 export interface RemoteAccessState {
+  _remoteVersion?: { epoch: string; revision: number }
   settings: {
     enabled: boolean
     port: number
@@ -236,16 +260,23 @@ export interface ScanResult {
 export interface ElectronAPI {
   // 扫描与缩略图
   scanDirectory(dirPath: string, force?: boolean): Promise<ScanResult | { error: string }>
-  generateThumbnail(videoPath: string): Promise<IpcResult>
+  generateThumbnail(videoPath: string, requestId?: string): Promise<IpcResult>
   getThumbnailUrl(thumbnailPath: string): Promise<string | null>
-  generatePreviewFrame(videoPath: string, seconds: number): Promise<IpcResult>
-  getVideoMetadata(videoPath: string, options?: unknown): Promise<VideoMediaInfo | { available: boolean; error: string; probedAt: number }>
+  generatePreviewFrame(videoPath: string, seconds: number, requestId?: string): Promise<IpcResult>
+  cancelMediaWork(requestId: string): Promise<IpcResult>
+  getVideoMetadata(videoPath: string, options?: { force?: boolean; requestId?: string }): Promise<{ success: boolean; media?: VideoMediaInfo; error?: string }>
 
   // 设置与通用
   getSettings(): Promise<AppSettings>
+  getSettingsFeed(): Promise<import('../packages/contracts').SettingsFeed>
+  onSettingsPatched(callback: (event: import('../packages/contracts').SettingsEvent) => void): () => void
   getAppVersion(): Promise<string>
-  saveSettings(settings: Partial<AppSettings>): Promise<IpcResult>
+  saveSettings(settings: Partial<AppSettings>, options?: import('../packages/contracts').SettingsReplyOptions): Promise<IpcResult>
   onSettingsChanged(callback: (settings: AppSettings) => void): () => void
+  setVideoFavorite(video: MediaMutationTarget, favorite: boolean, options?: import('../packages/contracts').SettingsReplyOptions): Promise<IpcResult>
+  setVideoCustomTags(video: MediaMutationTarget, tags: string[], condition?: import('../packages/contracts').TagWrite, options?: import('../packages/contracts').SettingsReplyOptions): Promise<IpcResult>
+  getVideoCustomTags(video: MediaMutationTarget, options?: import('../packages/contracts').SettingsReplyOptions): Promise<IpcResult>
+  appendVideoCustomTags(videos: MediaMutationTarget[], tags: string[], options?: import('../packages/contracts').SettingsReplyOptions): Promise<IpcResult>
   checkFfmpeg(): Promise<unknown>
   selectMpvPath(): Promise<IpcResult>
 
@@ -258,15 +289,15 @@ export interface ElectronAPI {
 
   // 下载中心
   downloadSelectDirectory(): Promise<IpcResult & { path?: string; libraryDirectory?: boolean }>
-  downloadGetState(options?: { start?: boolean; refresh?: boolean }): Promise<DownloadState>
+  downloadGetState(options?: { start?: boolean; refresh?: boolean; requestId?: string }): Promise<DownloadState>
   downloadAddNetworkResource(payload: unknown): Promise<IpcResult & DownloadState>
   downloadAddUrl(payload: unknown): Promise<IpcResult & DownloadState>
   downloadAddMagnet(payload: unknown): Promise<IpcResult & DownloadState>
   downloadAddXunlei(payload: unknown): Promise<IpcResult & DownloadState>
-  downloadSelectFiles(gid: string, fileIndexes: number[]): Promise<IpcResult & DownloadState>
-  downloadPause(gid: string): Promise<IpcResult & DownloadState>
-  downloadResume(gid: string): Promise<IpcResult & DownloadState>
-  downloadRemove(gid: string): Promise<IpcResult & DownloadState>
+  downloadSelectFiles(gid: string, fileIndexes: number[], options?: DownloadControlOptions): Promise<IpcResult & DownloadState>
+  downloadPause(gid: string, options?: DownloadControlOptions): Promise<IpcResult & DownloadState>
+  downloadResume(gid: string, options?: DownloadControlOptions): Promise<IpcResult & DownloadState>
+  downloadRemove(gid: string, options?: DownloadControlOptions): Promise<IpcResult & DownloadState>
   downloadOpenDirectory(dirPath: string): Promise<IpcResult>
 
   // 插件
@@ -278,8 +309,10 @@ export interface ElectronAPI {
   savePluginConfig(pluginId: string, config: unknown): Promise<IpcResult>
 
   // 隐私
-  setPrivacyPassword(password: string): Promise<IpcResult>
-  unlockPrivacy(password: string): Promise<IpcResult>
+  setPrivacyPassword(password: string, options?: { verifyOnly?: boolean }): Promise<IpcResult>
+  unlockPrivacy(password: string, options?: { verifyOnly?: boolean }): Promise<IpcResult>
+  lockPrivacy(): Promise<IpcResult>
+  onPrivacyStateChanged(callback: (state: { unlocked: boolean }) => void): () => void
 
   // 远程访问（手机端）
   remoteGetState(): Promise<RemoteAccessState>
@@ -294,6 +327,17 @@ export interface ElectronAPI {
   remoteRejectPairingRequest(requestId: string): Promise<IpcResult>
   onRemoteAccessState(callback: (state: RemoteAccessState) => void): () => void
   onRemotePlayOnDesktop(callback: (payload: RemotePlayOnDesktopPayload) => void): () => void
+
+  // 窗口外壳（自绘标题栏）
+  windowGetState(): Promise<{ success: boolean; maximized: boolean; fullscreen: boolean }>
+  windowMinimize(): Promise<IpcResult>
+  windowToggleMaximize(): Promise<{ success: boolean; maximized: boolean; fullscreen?: boolean }>
+  windowClose(): Promise<IpcResult>
+  windowCloseDecide(payload: { id: number; action: 'minimize' | 'exit' | 'cancel'; remember?: boolean }): Promise<IpcResult>
+  onWindowClosePrompt(callback: (payload: { id: number }) => void): () => void
+  onWindowMaximizedChanged(callback: (state: { maximized: boolean; fullscreen: boolean }) => void): () => void
+  appAskReply(payload: { id: number; response: number; checkboxChecked?: boolean }): Promise<IpcResult>
+  onAppAsk(callback: (payload: AppAskPayload) => void): () => void
 
   // 文件与目录
   selectDirectory(): Promise<string | { path: string; privateDirectory?: boolean } | null>
@@ -310,8 +354,8 @@ export interface ElectronAPI {
   getVideoAnalysis(filePath: string): Promise<unknown>
   listSavedVideoAnalysis(videos: unknown[]): Promise<unknown[]>
   deleteSavedVideoAnalysis(resultPath: string): Promise<IpcResult>
-  startVideoAnalysis(filePath: string): Promise<VideoAnalysisJob | IpcResult>
-  cancelVideoAnalysis(jobId: string): Promise<IpcResult>
+  startVideoAnalysis(filePath: string, interestId?: string): Promise<VideoAnalysisJob | IpcResult>
+  cancelVideoAnalysis(jobId?: string, interestId?: string): Promise<IpcResult>
   getVideoAnalysisJob(): Promise<VideoAnalysisJob | null>
   getVideoAnalysisOutputDir(): Promise<string>
   selectVideoAnalysisOutputDir(): Promise<IpcResult>
@@ -331,6 +375,7 @@ export interface ElectronAPI {
   listVideoAnalysisLocalVlmFiles(): Promise<unknown[]>
   selectVideoAnalysisLocalVlmFile(filePath: string): Promise<IpcResult>
   downloadVideoAnalysisVlmModel(selection: unknown): Promise<unknown>
+  cancelVideoAnalysisVlmDownload(): Promise<IpcResult>
   startVideoAnalysisVlmService(): Promise<unknown>
   stopVideoAnalysisVlmService(): Promise<unknown>
   onVideoAnalysisEvent(callback: (event: unknown) => void): () => void
@@ -345,8 +390,9 @@ export interface ElectronAPI {
 
   // mpv 播放
   checkMpv(): Promise<unknown>
-  downloadMpv(): Promise<IpcResult>
+  downloadMpv(requestId?: string): Promise<IpcResult>
   mpvPlay(filePath: string, options?: MpvPlayOptions): Promise<IpcResult>
+  playerAction(request: import('../packages/contracts').PlayerAction): Promise<import('../packages/contracts').PlayerActionResult>
   mpvPlayUrl(url: string, options?: MpvPlayOptions): Promise<IpcResult>
   setMediaPlaybackActive(active: boolean): Promise<IpcResult>
   mpvSetHostBounds(bounds: { x: number; y: number; width: number; height: number }): Promise<IpcResult>

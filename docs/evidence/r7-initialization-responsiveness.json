@@ -1,0 +1,120 @@
+{
+  "date": "2026-10-15T09:28:53.744Z",
+  "sourceSha256": {
+    "main/security/privacy-password.js": "c52b147621c8c717d46b21906662de74dcdfbb237fb67094a84bafb1c369ffb9",
+    "main/security/media-access.js": "4993158bf306ffd44074b76ad2993c4279e3ec66a47051fbdf9570a0bf1c41fc",
+    "main/settings.js": "7ca44498fcd4f4169630b8235ef6943dac44d403bc5117e72b4cd6fa84041ce1",
+    "main/updater.js": "3a58eaf25abd6face692f0ccc1f73c927e87fc4134ec274b764b375b6459ae4e",
+    "main/ipc/privacy.js": "3d83d872adc75a6720fa0ddfdc63bfc563deb4f0e76b5fddea93c0725fabdea3",
+    "main/remote/handlers/tags.js": "88947cf53265f04bcd1d72e4653affd569c8f77b99ab82b272e2b02d4bb8ea2a",
+    "src/services/app-initialization.js": "67a4ba53a96b59abb49afb65ce3e0bb6cfdb1324f7fa26b5008c45cb974530ec",
+    "src/hooks/useAppInitialization.js": "2b33273b3be836b56472d5ac75f4667d1b168a59921bfd4e03f5c774b797e771",
+    "src/hooks/useAppState.js": "9bf65943f6ab87c2db680cf410cf0dd0e4ae366bd968448a2d1e28708912fa59",
+    "src/hooks/useAppController.js": "fe8a1fcb52dbb643470e34b30862c587003b20def8b61f450415cb0e7617e03e",
+    "src/components/InitializationNotice.jsx": "35037545238bcb5f106793d9cc457a5168ea3431c6bf5cd83b946c0e10aeeb6a",
+    "scripts/verify-app-initialization.js": "7d8c8bc0783e04a409b5f33f12ae6a2760e1a0d6484782814060628aa9a57aca",
+    "scripts/verify-privacy-passwords.js": "5e8fc9018791a89b02ad38f26f3a28bb5106def1ed1693d55608ff4b0f754037",
+    "scripts/verify-media-policy-settings.js": "1132fd1df979217c1eb0c21dda6de20211bc1f3e5f19eb59121647e1f5b58284",
+    "scripts/verify-updater-startup.js": "7d76bdb156222904587e4c7a6108840dcf9e9367833fe3b30524a248cd623b22"
+  },
+  "password": {
+    "environment": {
+      "platform": "win32",
+      "node": "v24.14.0"
+    },
+    "operations": 8,
+    "iterations": 120000,
+    "concurrent": 2,
+    "before": {
+      "firstTurnMs": 205.56719999999996,
+      "totalMs": 205.58909999999992
+    },
+    "after": {
+      "firstTurnMs": 0.15550000000007458,
+      "totalMs": 101.57280000000014
+    }
+  },
+  "permissionSnapshot": {
+    "operations": 200,
+    "tagEntries": 2000,
+    "fullSnapshotMs": 583.9770000000001,
+    "minimalSnapshotMs": 0.7895999999999503,
+    "interpretation": "Settings capture only; actual filesystem and policy work is excluded. No cached permission decision."
+  },
+  "startup": {
+    "size": 10000,
+    "fixture": "24-byte MP4 headers on local disk; real scanner/settings/HTTP; no decoder or native UI",
+    "coldScanMs": 8834.138500000001,
+    "firstQueryMs": 654.9386999999988,
+    "queryP95Ms": 20.390400000000227,
+    "searchP95Ms": 16.97940000000017,
+    "responseP95Bytes": 137554,
+    "revisionMs": 12.36409999999887,
+    "eventLoopP95Ms": 19.791871,
+    "snapshotBuilds": 1,
+    "hotIndexedFirstPageMs": 4505.9994,
+    "count": 10000,
+    "desktopWarmupMs": 2436.0225000000064,
+    "desktopInteractiveMs": 1696.3345000000045,
+    "desktopSamples": [
+      {
+        "desktopInteractiveMs": 1696.3345000000045,
+        "firstPageCards": 100,
+        "filteredCards": 1,
+        "searchHandled": true,
+        "progressiveScan": true,
+        "phases": {
+          "mainRequiredMs": 314.36379999999997,
+          "nativeReadyMs": 368.83680000000004,
+          "windowCreatedMs": 515.4852,
+          "documentLoadedMs": 751.8711,
+          "scanStartMs": 820.5354000000001,
+          "scanEndMs": 986.5580000000001,
+          "scanCount": 131,
+          "firstCardsMs": 1143.6172000000001
+        }
+      },
+      {
+        "desktopInteractiveMs": 1618.2593999999954,
+        "firstPageCards": 100,
+        "filteredCards": 1,
+        "searchHandled": true,
+        "progressiveScan": true,
+        "phases": {
+          "mainRequiredMs": 290.58430000000004,
+          "nativeReadyMs": 347.79540000000003,
+          "windowCreatedMs": 507.04580000000004,
+          "documentLoadedMs": 724.9213,
+          "scanStartMs": 799.4608000000001,
+          "scanEndMs": 951.0415,
+          "scanCount": 131,
+          "firstCardsMs": 1100.5074
+        }
+      },
+      {
+        "desktopInteractiveMs": 1468.7837,
+        "firstPageCards": 100,
+        "filteredCards": 1,
+        "searchHandled": true,
+        "progressiveScan": true,
+        "phases": {
+          "mainRequiredMs": 273.3637,
+          "nativeReadyMs": 318.95680000000004,
+          "windowCreatedMs": 445.26980000000003,
+          "documentLoadedMs": 645.8439,
+          "scanStartMs": 722.4934,
+          "scanEndMs": 874.3669000000001,
+          "scanCount": 131,
+          "firstCardsMs": 1016.4350000000001
+        }
+      }
+    ]
+  },
+  "notes": [
+    "Crypto and settings-capture timings are small production-module microbenchmarks, sensitive to host load; other regression tools could be running. They are not full service latency guarantees.",
+    "Desktop startup used actual main/preload/production React, a hidden Chromium window and explicit --in-process-gpu --no-sandbox. No production or CI default flags changed.",
+    "The desktop fixture contains 10k 24-byte MP4 headers, no decoder. A validated indexed prefix renders first; full index work continues in the background.",
+    "Three scored samples satisfy the existing 2-second gate. The separate 2436ms warmup and earlier failures remain visible in r7-startup-budget-observation.json.",
+    "No phone native performance, real media decoding, installed updater download/install, signing or long-session memory acceptance is established."
+  ]
+}

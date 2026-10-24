@@ -1,0 +1,225 @@
+{
+  "date": "2026-10-18T14:41:25.192Z",
+  "stage": "R7 batch 12: shared desktop/mobile media mutation path preparation",
+  "sourceDigests": {
+    "main/application/media-mutations.js": "ead7c7e564a383af2f33ce0b6b6665a371797c3315cc2aed46c27e38d3d13872",
+    "main/application/media-mutation-paths.js": "aadf4ee7550a6d0335a63dae337e62fb641a8780645eb9399f18a205ff994666",
+    "main/settings.js": "51b54c9e45d8f81c343f4d90fc3316c5ee47b8710c86eef6f98c869ec7e2b0d0",
+    "main/repositories/tag-state.js": "046376c6bb56d3251c6f4a1d80c8e0273eeeac247b5d8031209787ace1852065",
+    "main/ipc/media-data.js": "fbcf14db2be08e8b3e9b5b7fe67ac5ea8b4f2d59d0e8c5050a3241ab05b890a9",
+    "main/remote/media-mutations.js": "cf14eb6a3923fec99b85d45794c448e618ab46006bf5459f6d43e31af15f5729",
+    "scripts/verify-media-mutation-paths.js": "3062e8434c39a5e45b9e4162e8ef8ca9eaa57a834d22fb3a8abe604fedfd5c56",
+    "scripts/verify-media-mutation-path-lifecycle.js": "2e0fd37f5aaed3b88bc91733f708c2826bfdf26d799fac89bd067fa959f817a1",
+    "scripts/verify-packaged-contracts.js": "1562f95200be8e161ec7e57e94e4341dbf6a74bcbd6e7acfd51762b4607e8a20",
+    "package.json": "2faf1b56f663665109efb351d3454a3877a18e9cbf6ff5aab5bcc11a247c07ac",
+    ".github/workflows/ci.yml": "483ca73f25e85b0b12c134ea606d6757b6730be272268b9bd09522884d76ed1b",
+    "docs/refactor-progress.md": "a932942c09c5621dbf9986f69088bc358d03007a4f0455cb925faa8b08c1cdba",
+    "docs/desktop-mobile-review-and-refactor-plan.md": "ca6e514c795b264b3534bde02e45973874905d06a7e01897b92abccf05b08f5f"
+  },
+  "baseline": {
+    "date": "2026-10-18T14:40:16.185Z",
+    "fixture": ".tmp\\refactor-tests\\media-mutation-paths-uZGNL0",
+    "baseline": true,
+    "sourceDigests": {
+      "main/application/media-mutations.js": "f747ad40a62ab4c340f8c1c313c291810ab689956b4dec07aa49413765260c41",
+      "main/application/media-mutation-paths.js": "aadf4ee7550a6d0335a63dae337e62fb641a8780645eb9399f18a205ff994666",
+      "main/settings.js": "51b54c9e45d8f81c343f4d90fc3316c5ee47b8710c86eef6f98c869ec7e2b0d0",
+      "main/repositories/tag-state.js": "046376c6bb56d3251c6f4a1d80c8e0273eeeac247b5d8031209787ace1852065",
+      "main/ipc/media-data.js": "fbcf14db2be08e8b3e9b5b7fe67ac5ea8b4f2d59d0e8c5050a3241ab05b890a9",
+      "main/remote/media-mutations.js": "cf14eb6a3923fec99b85d45794c448e618ab46006bf5459f6d43e31af15f5729"
+    },
+    "files": 64,
+    "legacyKeys": 512,
+    "aliases": 8,
+    "results": [
+      {
+        "name": "read legacy tags",
+        "milliseconds": 155.99560000000002,
+        "maxHeartbeatGapMs": 151.94550000000004,
+        "synchronousRealpathCalls": 518,
+        "mediaSynchronousRealpathCalls": 517
+      },
+      {
+        "name": "replace tags",
+        "milliseconds": 296.31680000000006,
+        "maxHeartbeatGapMs": 288.5255,
+        "synchronousRealpathCalls": 1038,
+        "mediaSynchronousRealpathCalls": 1031
+      },
+      {
+        "name": "append eight targets",
+        "milliseconds": 1503.2767,
+        "maxHeartbeatGapMs": 1493.6196999999997,
+        "synchronousRealpathCalls": 7750,
+        "mediaSynchronousRealpathCalls": 7664
+      },
+      {
+        "name": "clear alias favorites",
+        "milliseconds": 14.445999999999913,
+        "maxHeartbeatGapMs": 7.575600000000122,
+        "synchronousRealpathCalls": 24,
+        "mediaSynchronousRealpathCalls": 17
+      }
+    ],
+    "baselineMode": "Captured pre-change media service module; current compatible settings/revision helpers. The optional preparation API is unused by the captured module.",
+    "conditions": "Production media service/settings/scanner, actual Windows junctions (directory symlinks on other platforms) and generated MP4 file headers. Not decoding or physical mobile performance. Root/settings normalization and identity reads remain separate work; media/legacy realpath counts are scoped to .mp4 paths."
+  },
+  "after": {
+    "date": "2026-10-18T14:40:09.018Z",
+    "fixture": ".tmp\\refactor-tests\\media-mutation-paths-OQB3Sz",
+    "baseline": false,
+    "sourceDigests": {
+      "main/application/media-mutations.js": "ead7c7e564a383af2f33ce0b6b6665a371797c3315cc2aed46c27e38d3d13872",
+      "main/application/media-mutation-paths.js": "aadf4ee7550a6d0335a63dae337e62fb641a8780645eb9399f18a205ff994666",
+      "main/settings.js": "51b54c9e45d8f81c343f4d90fc3316c5ee47b8710c86eef6f98c869ec7e2b0d0",
+      "main/repositories/tag-state.js": "046376c6bb56d3251c6f4a1d80c8e0273eeeac247b5d8031209787ace1852065",
+      "main/ipc/media-data.js": "fbcf14db2be08e8b3e9b5b7fe67ac5ea8b4f2d59d0e8c5050a3241ab05b890a9",
+      "main/remote/media-mutations.js": "cf14eb6a3923fec99b85d45794c448e618ab46006bf5459f6d43e31af15f5729"
+    },
+    "files": 64,
+    "legacyKeys": 512,
+    "aliases": 8,
+    "results": [
+      {
+        "name": "read legacy tags",
+        "milliseconds": 37.0333,
+        "maxHeartbeatGapMs": 4.104799999999983,
+        "synchronousRealpathCalls": 0,
+        "mediaSynchronousRealpathCalls": 0
+      },
+      {
+        "name": "replace tags",
+        "milliseconds": 38.5686,
+        "maxHeartbeatGapMs": 3.6590000000000202,
+        "synchronousRealpathCalls": 6,
+        "mediaSynchronousRealpathCalls": 0
+      },
+      {
+        "name": "append eight targets",
+        "milliseconds": 41.9803,
+        "maxHeartbeatGapMs": 3.991899999999987,
+        "synchronousRealpathCalls": 6,
+        "mediaSynchronousRealpathCalls": 0
+      },
+      {
+        "name": "clear alias favorites",
+        "milliseconds": 8.178399999999954,
+        "maxHeartbeatGapMs": 3.113900000000001,
+        "synchronousRealpathCalls": 6,
+        "mediaSynchronousRealpathCalls": 0
+      }
+    ],
+    "conditions": "Production media service/settings/scanner, actual Windows junctions (directory symlinks on other platforms) and generated MP4 file headers. Not decoding or physical mobile performance. Root/settings normalization and identity reads remain separate work; media/legacy realpath counts are scoped to .mp4 paths."
+  },
+  "large": {
+    "date": "2026-10-18T14:40:13.206Z",
+    "fixture": ".tmp\\refactor-tests\\media-mutation-paths-z2K7mK",
+    "baseline": false,
+    "sourceDigests": {
+      "main/application/media-mutations.js": "ead7c7e564a383af2f33ce0b6b6665a371797c3315cc2aed46c27e38d3d13872",
+      "main/application/media-mutation-paths.js": "aadf4ee7550a6d0335a63dae337e62fb641a8780645eb9399f18a205ff994666",
+      "main/settings.js": "51b54c9e45d8f81c343f4d90fc3316c5ee47b8710c86eef6f98c869ec7e2b0d0",
+      "main/repositories/tag-state.js": "046376c6bb56d3251c6f4a1d80c8e0273eeeac247b5d8031209787ace1852065",
+      "main/ipc/media-data.js": "fbcf14db2be08e8b3e9b5b7fe67ac5ea8b4f2d59d0e8c5050a3241ab05b890a9",
+      "main/remote/media-mutations.js": "cf14eb6a3923fec99b85d45794c448e618ab46006bf5459f6d43e31af15f5729"
+    },
+    "files": 1280,
+    "legacyKeys": 10240,
+    "aliases": 8,
+    "results": [
+      {
+        "name": "read legacy tags",
+        "milliseconds": 636.5877,
+        "maxHeartbeatGapMs": 26.336300000000165,
+        "synchronousRealpathCalls": 0,
+        "mediaSynchronousRealpathCalls": 0
+      },
+      {
+        "name": "replace tags",
+        "milliseconds": 662.9265,
+        "maxHeartbeatGapMs": 61.209299999999985,
+        "synchronousRealpathCalls": 6,
+        "mediaSynchronousRealpathCalls": 0
+      },
+      {
+        "name": "append eight targets",
+        "milliseconds": 1009.6086,
+        "maxHeartbeatGapMs": 94.82020000000011,
+        "synchronousRealpathCalls": 6,
+        "mediaSynchronousRealpathCalls": 0
+      },
+      {
+        "name": "clear alias favorites",
+        "milliseconds": 177.98900000000003,
+        "maxHeartbeatGapMs": 93.83690000000024,
+        "synchronousRealpathCalls": 6,
+        "mediaSynchronousRealpathCalls": 0
+      }
+    ],
+    "conditions": "Production media service/settings/scanner, actual Windows junctions (directory symlinks on other platforms) and generated MP4 file headers. Not decoding or physical mobile performance. Root/settings normalization and identity reads remain separate work; media/legacy realpath counts are scoped to .mp4 paths."
+  },
+  "lifecycle": {
+    "date": "2026-10-18T14:39:42.153Z",
+    "fixture": ".tmp\\refactor-tests\\mutation-path-lifecycle-Ktw3XS",
+    "legacyMaximum": 8,
+    "targetResolutionMaximum": 8,
+    "authenticatedPlaybackWhileBlockedMs": 4.222399999999993,
+    "mappedDriveChecked": true,
+    "passed": [
+      "key-set reprepare",
+      "latest CAS rejection",
+      "flush joins preparation and retry",
+      "current desktop lock",
+      "partial deleted target",
+      "bounded ordered target resolution",
+      "retargeted root rejected",
+      "retargeted original alias rejected",
+      "three-attempt limit and recovery",
+      "network-only preparation skips local IO",
+      "read preserves background write failure",
+      "actual Windows subst read and legacy removal"
+    ],
+    "conditions": "Production service/settings/scanner and authenticated HTTP, real local files and junctions; only async realpath timing is controlled. Metadata scheduler paused. No decoder or physical-phone performance claim."
+  },
+  "initialCapture": {
+    "date": "2026-10-18T14:07:54.844Z",
+    "fixture": ".tmp\\refactor-tests\\media-mutation-paths-sNDwse",
+    "sourceDigests": {
+      "main/application/media-mutations.js": "f747ad40a62ab4c340f8c1c313c291810ab689956b4dec07aa49413765260c41",
+      "main/settings.js": "42f3b5a00fcab73dfd42aad0a8d88f59f6c1b69c419e4adfdb6d46f5c0e78bde",
+      "main/repositories/tag-state.js": "252856e9fbeae12609fb7f450f549f1bc9132bfc646b00e4f934d1a75387f9e1"
+    },
+    "note": "Initial pre-change measurements completed and were written before the benchmark cleanup called a missing metadata export and exited 1. Cleanup was corrected to disposeVideoMetadata. The captured original media module is SHA-verified and replayed successfully above against current compatible helpers; the original observation is not listed as a passing check."
+  },
+  "checks": [
+    "verify:media-mutation-paths",
+    "captured baseline replay (exit 0)",
+    "10240-key diagnostic run (media path IO assertions only)",
+    "verify:media-mutations",
+    "verify:tag-conflicts",
+    "verify:media-access",
+    "verify:library-paths",
+    "verify:media-policy-settings",
+    "verify:settings-persistence",
+    "verify:settings-snapshots (production Electron UI included)",
+    "verify:shutdown-persistence",
+    "verify:remote-api",
+    "verify:remote-library",
+    "verify:mobile-correctness",
+    "verify:contracts (current and legacy client/server matrix)",
+    "verify:api-adapters",
+    "verify:packaged-contracts -- --in-process-gpu --no-sandbox",
+    "verify-legacy-tags-path-key.js (its synthetic mapped-drive case skips; actual subst is proven independently by the new lifecycle test)",
+    "npm run build",
+    "CI YAML parse and command presence",
+    "git diff --check"
+  ],
+  "scope": "Actual production shared media service, settings queue, authenticated HTTP, filesystem/junction/subst and Electron/ASAR helper runtime. MP4 inputs are file headers, metadata scheduling paused, no decoding or native-phone benchmark. Mobile UI, protocol and dependencies unchanged in this batch.",
+  "limits": [
+    "Single observations after scan/config warmup; heartbeat maxima are not event-loop P95 or a mixed playback/query resource test.",
+    "Large configuration diagnostics still show up to about 95ms heartbeat gaps. No complete responsiveness budget claim.",
+    "Current mutations still make six synchronous root realpath calls in settings normalization for this one-root fixture; identity sync reads and full snapshot/normalization/JSON preparation remain work.",
+    "Sync legacy helpers and createFileTarget.assertAccess remain for compatibility; the production service uses prepared access.",
+    "R6 physical decode/contention/rotation/PSS, remaining R7 work, and R8 dependency/migration/signing/update/TLS/native delivery are incomplete."
+  ]
+}

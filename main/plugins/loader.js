@@ -192,13 +192,10 @@ async function extractZipToTemp(sourceZip) {
   await execFileAsync('powershell.exe', [
     '-NoLogo',
     '-NoProfile',
-    '-ExecutionPolicy',
-    'Bypass',
+    '-NonInteractive',
     '-Command',
-    '& { param($sourceZip, $extractDir) Expand-Archive -LiteralPath $sourceZip -DestinationPath $extractDir -Force }',
-    sourceZip,
-    extractDir
-  ], { windowsHide: true })
+    "$ErrorActionPreference = 'Stop'; Add-Type -AssemblyName System.IO.Compression.FileSystem; [IO.Compression.ZipFile]::ExtractToDirectory($env:WP_PLUGIN_ARCHIVE_PATH, $env:WP_PLUGIN_EXTRACT_DIR)"
+  ], { windowsHide: true, env: { ...process.env, WP_PLUGIN_ARCHIVE_PATH: sourceZip, WP_PLUGIN_EXTRACT_DIR: extractDir } })
   return extractDir
 }
 

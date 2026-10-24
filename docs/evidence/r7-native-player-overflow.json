@@ -1,0 +1,4812 @@
+{
+  "phase": "R7 native-player overflow correction",
+  "date": "2026-10-23T10:47:17.606Z",
+  "request": "Fix the video layer crossing the player chrome in the attached screenshot.",
+  "status": "verified locally; unsigned Windows replacement built",
+  "causes": [
+    "The native mpv host used renderer CSS coordinates directly as screen DIP, omitting the WebContents zoom factor.",
+    "The native window is above the DOM, so overflow and z-index do not clip it against an overlaid title bar.",
+    "The old fixed height reserves, entry transform and non-wrapping controls reduced available room or clipped chrome."
+  ],
+  "changes": {
+    "production": [
+      "main/mpv-host.js",
+      "main/mpv.js",
+      "src/components/VideoPlayer.jsx",
+      "src/services/player-resources.js",
+      "src/styles/player-v3.css"
+    ],
+    "tests": [
+      "scripts/verify-mpv-host-geometry.js",
+      "scripts/verify-desktop-player-resources.js",
+      "scripts/verify-desktop-player.js",
+      "scripts/verify-responsive-layout.js"
+    ],
+    "behavior": "Use separate native-player title, picture and toolbar rows. Preserve CSS fractions, convert to DIP with the actual page zoom, round inward and clip to the content viewport. Remove native entry transforms, fit the card to the viewport, wrap controls and show native menus beside the video. Explicitly size fullscreen content.",
+    "mobileSourceChanged": false,
+    "dependencyOrVersionChanged": false
+  },
+  "build": {
+    "passed": true,
+    "directory": "E:\\wallpaper播放器\\release\\windows-1.5.1-f5c8825c-0ff8-4eaa-8f3e-ce73b43dd88c",
+    "version": "1.5.1",
+    "productionSourceChanges": [
+      "main/mpv-host.js",
+      "main/mpv.js",
+      "src/components/VideoPlayer.jsx",
+      "src/services/player-resources.js",
+      "src/styles/player-v3.css"
+    ],
+    "qaWrapperAbsent": true,
+    "archive": {
+      "file": "E:\\wallpaper播放器\\release\\windows-1.5.1-f5c8825c-0ff8-4eaa-8f3e-ce73b43dd88c\\win-unpacked\\resources\\app.asar",
+      "bytes": 16416119,
+      "sha256": "c3ead2a12b362a86675b0847b88dabbf00eb4c223d2086b788ddde8db5257f02",
+      "sha512": "r0K37vH8f6bm5/ugju+u3sRU7rz+M11+EbnpdhPIIdlmCCr8j9/8asKMhcwpKqQ5hsdxOwd1taWfzLLJKY79zA=="
+    },
+    "embedded": [
+      "main/application/confirm.js",
+      "main/application/download-service.js",
+      "main/application/download-tasks.js",
+      "main/application/extract-mpv.ps1",
+      "main/application/library-service.js",
+      "main/application/media-mutation-paths.js",
+      "main/application/media-mutations.js",
+      "main/application/media-work-service.js",
+      "main/application/mpv-installer.js",
+      "main/application/mpv-version-cache.js",
+      "main/application/player-service.js",
+      "main/application/resource-scheduler.js",
+      "main/application/settings-broadcast.js",
+      "main/application/settings-json-worker.js",
+      "main/application/settings-json.js",
+      "main/application/settings-startup.js",
+      "main/application/transcode-service.js",
+      "main/constants.js",
+      "main/download-manager.js",
+      "main/download-xunlei.js",
+      "main/exec.js",
+      "main/index.js",
+      "main/ip-utils.js",
+      "main/ipc/app-dialogs.js",
+      "main/ipc/downloads.js",
+      "main/ipc/files.js",
+      "main/ipc/media-data.js",
+      "main/ipc/media.js",
+      "main/ipc/network-resource-service.js",
+      "main/ipc/network-resources.js",
+      "main/ipc/player.js",
+      "main/ipc/plugins.js",
+      "main/ipc/privacy.js",
+      "main/ipc/remote.js",
+      "main/ipc/settings.js",
+      "main/ipc/updater.js",
+      "main/ipc/window-shell.js",
+      "main/ipc-channels.js",
+      "main/ipc.js",
+      "main/media-pressure.js",
+      "main/mpv-host.js",
+      "main/mpv-integration.js",
+      "main/mpv.js",
+      "main/network-resource-parser.js",
+      "main/paths.js",
+      "main/plugins/builtin.js",
+      "main/plugins/capabilities.js",
+      "main/plugins/core-api.js",
+      "main/plugins/index.js",
+      "main/plugins/loader.js",
+      "main/plugins/manifest.js",
+      "main/plugins/official.js",
+      "main/plugins/registry.js",
+      "main/portable-user-data.js",
+      "main/process-lifecycle.js",
+      "main/rate-limiter.js",
+      "main/remote/handlers/desktop.js",
+      "main/remote/handlers/info.js",
+      "main/remote/handlers/library.js",
+      "main/remote/handlers/media.js",
+      "main/remote/handlers/network-resources.js",
+      "main/remote/handlers/tags.js",
+      "main/remote/handlers/transcode.js",
+      "main/remote/http-utils.js",
+      "main/remote/identity.js",
+      "main/remote/index.js",
+      "main/remote/json-responses.js",
+      "main/remote/media-mutations.js",
+      "main/remote/network.js",
+      "main/remote/request-lifecycle.js",
+      "main/remote/server.js",
+      "main/remote/streaming.js",
+      "main/remote/transcode-cache.js",
+      "main/remote/transcode.js",
+      "main/remote/video-index.js",
+      "main/repositories/settings-file.js",
+      "main/repositories/tag-state.js",
+      "main/repositories/user-media.js",
+      "main/scanner.js",
+      "main/security/ipc-sender.js",
+      "main/security/ipc.js",
+      "main/security/media-access.js",
+      "main/security/privacy-password.js",
+      "main/settings.js",
+      "main/thumbnail.js",
+      "main/updater.js",
+      "main/user-data.js",
+      "main/video-metadata.js",
+      "main/window.js",
+      "main/ytdlp-service.js",
+      "dist/assets/AISearchPanel-PoGC1A1J.js",
+      "dist/assets/DownloadCenter-pK_jAmHt.js",
+      "dist/assets/index-CriAAwGc.js",
+      "dist/assets/index-DhGRM5JI.css",
+      "dist/assets/NetworkResourceLibrary-zze6y7vL.js",
+      "dist/assets/Settings-B_WubDz0.js",
+      "dist/assets/useDownloadStateObserver-Cl7Iuef5.js",
+      "dist/assets/VideoAnalysisSidebar-CEOug7Vx.js",
+      "dist/index.html",
+      "packages/contracts/dist/index.js",
+      "packages/contracts/dist/schema.js",
+      "packages/contracts/dist/settings-feed.js",
+      "packages/contracts/package.json",
+      "packages/domain/dist/index.js",
+      "packages/domain/package.json",
+      "main.js",
+      "preload.js"
+    ],
+    "vendor": [
+      "vendor/aria2/aria2c.exe",
+      "vendor/aria2/AUTHORS",
+      "vendor/aria2/ChangeLog",
+      "vendor/aria2/COPYING",
+      "vendor/aria2/LICENSE.OpenSSL",
+      "vendor/aria2/NEWS",
+      "vendor/aria2/README.html",
+      "vendor/aria2/README.mingw",
+      "vendor/ffmpeg/bin/ffmpeg.exe",
+      "vendor/ffmpeg/bin/ffplay.exe",
+      "vendor/ffmpeg/bin/ffprobe.exe",
+      "vendor/ffmpeg/LICENSE",
+      "vendor/ffmpeg/presets/libvpx-1080p.ffpreset",
+      "vendor/ffmpeg/presets/libvpx-1080p50_60.ffpreset",
+      "vendor/ffmpeg/presets/libvpx-360p.ffpreset",
+      "vendor/ffmpeg/presets/libvpx-720p.ffpreset",
+      "vendor/ffmpeg/presets/libvpx-720p50_60.ffpreset",
+      "vendor/ffmpeg/README.txt",
+      "vendor/mpv/mpv-register.bat",
+      "vendor/mpv/mpv-unregister.bat",
+      "vendor/mpv/mpv.com",
+      "vendor/mpv/mpv.exe",
+      "vendor/mpv/vulkan-1.dll",
+      "vendor/yt-dlp/yt-dlp.exe"
+    ],
+    "assets": [
+      {
+        "file": "Wallpaper-Player-Setup-1.5.1.exe",
+        "role": "installer",
+        "bytes": 232014308,
+        "sha256": "8e5114b458ae44d72da7538c829f808145dd029a8150aa0d4dd0e73970a78f4c",
+        "sha512": "gTwfx95gpu8OaIEgD3mAPwettsaREFxe3RsVt4tOTylP6T8BsWvJWaaQAexyqBdVF9EZyS8z+g8xCG7fsIr5og==",
+        "bootstrapArch": "ia32",
+        "productVersion": "1.5.1",
+        "signing": {
+          "status": "NotSigned",
+          "certificateSha256": null
+        }
+      },
+      {
+        "file": "Wallpaper-Player-1.5.1.exe",
+        "role": "portable",
+        "bytes": 231790163,
+        "sha256": "cafef57499dcf3c80cd9c544c1d4a8da050cdceb6c19db9d5a6d2e98f004b454",
+        "sha512": "ZDcISuXQjdTag4aL8OPHgZ9+kw9AkWOpqx5TkIjK0qJUDV6DSZyCYpTc0sYrOHH82ngCJkRKXyDAxcrtkiMRzA==",
+        "bootstrapArch": "ia32",
+        "productVersion": "1.5.1",
+        "signing": {
+          "status": "NotSigned",
+          "certificateSha256": null
+        }
+      },
+      {
+        "file": "Wallpaper-Player-Setup-1.5.1.exe.blockmap",
+        "role": "blockmap",
+        "bytes": 241958,
+        "sha256": "4231b69da05f515dedb0b2a171f0710a36672db0911ea44187661b2fe98739bb",
+        "sha512": "RynnOQTG5txMP4vjhNnbPYf/SN4bbDV64SV73Kfgo9LdTG80u/wWB09SQWxqLHBCNBXFzy5q9EVjT+h5ZTVy8A=="
+      },
+      {
+        "file": "latest.yml",
+        "role": "desktop-update-metadata",
+        "bytes": 361,
+        "sha256": "03e375662ee0bcd2b7c2b6a63bfe1b7eca6e55eb622d324db6dc7b44e948aae1",
+        "sha512": "uMPud7Nbi/QTSAsrWCYWRdvu9pCVJN7Q92BlySbDv5j8VbSDaqG1JF1YPjeYL6fa+F5rEknVtcr/9+HjlEx5EA=="
+      },
+      {
+        "file": "Wallpaper-Player-Plugin-video-analysis-1.0.0.zip",
+        "source": "plugins/Wallpaper-Player-Plugin-video-analysis-1.0.0.zip",
+        "role": "plugin",
+        "pluginId": "video-analysis",
+        "version": "1.0.0",
+        "bytes": 570218532,
+        "sha256": "365c2f5ccbec6afe7df5ce4b5c5df1699728cac113884abd48898d8209a5502a",
+        "sha512": "5W7hIMUaK+frnE+0/87KhyfC6BKbFTT2R3GgW+TCtG7Z037HNRooT/RVGrJTOMq5eDFEBHKhlSiVZQ9vMI838w=="
+      },
+      {
+        "file": "Wallpaper-Player-Plugin-ai-search-0.1.0.zip",
+        "source": "plugins/Wallpaper-Player-Plugin-ai-search-0.1.0.zip",
+        "role": "plugin",
+        "pluginId": "ai-search",
+        "version": "0.1.0",
+        "bytes": 2955069,
+        "sha256": "464e129ebb9a4731fff800c26c6e4c94ddbe33fbd1699486c166d9e112a97fc8",
+        "sha512": "rKd4RQyHFHEIADm+H3KQddNRMuu2UbSuiK4OK+hkfrp3JV36mLcSdLA0UNlAPW+7L5X1xi5kiTVNPmq1lDzOKw=="
+      },
+      {
+        "file": "Wallpaper-Player-Plugin-agent-bridge-0.1.0.zip",
+        "source": "plugins/Wallpaper-Player-Plugin-agent-bridge-0.1.0.zip",
+        "role": "plugin",
+        "pluginId": "agent-bridge",
+        "version": "0.1.0",
+        "bytes": 1093,
+        "sha256": "9f499408c282a144ffe411648d476fd4e36bd010c6e8974be3b9fd16460bed1a",
+        "sha512": "W5qWvlCSHQT8RlE31UF1e06dN3162tSZVhs7nqyFBhFLJdcN7Z8rE2WDw6ZMjQIygO89K/Xbuev/TJY+ImfSqg=="
+      }
+    ],
+    "originalData": 42,
+    "historicalArtifacts": 8,
+    "oldQaArtifactsPreserved": true,
+    "releasePublished": false,
+    "signatures": [
+      {
+        "path": "E:\\wallpaper播放器\\release\\windows-1.5.1-f5c8825c-0ff8-4eaa-8f3e-ce73b43dd88c\\Wallpaper-Player-Setup-1.5.1.exe",
+        "status": "NotSigned"
+      },
+      {
+        "path": "E:\\wallpaper播放器\\release\\windows-1.5.1-f5c8825c-0ff8-4eaa-8f3e-ce73b43dd88c\\Wallpaper-Player-1.5.1.exe",
+        "status": "NotSigned"
+      },
+      {
+        "path": "E:\\wallpaper播放器\\release\\windows-1.5.1-f5c8825c-0ff8-4eaa-8f3e-ce73b43dd88c\\win-unpacked\\Wallpaper Player.exe",
+        "status": "NotSigned"
+      }
+    ]
+  },
+  "acceptance": {
+    "oldPackageNegativeCheck": {
+      "passed": false,
+      "error": "AssertionError [ERR_ASSERTION]: Native picture overlaps title/close/fullscreen controls\n    at main (E:\\wallpaper播放器\\.tmp\\refactor-tests\\r7-native-player-overflow\\repro.cjs:42:11)",
+      "archiveSha256": "6085a306e34a1342396d97eb2130d6f48cb66375d56c85636c30664d117ad202",
+      "raw": ".tmp\\refactor-tests\\r7-native-player-overflow\\repro-4-result.json"
+    },
+    "currentSource": {
+      "passed": true,
+      "cases": 14,
+      "raw": ".tmp\\refactor-tests\\r7-native-player-overflow\\source-2-result.json"
+    },
+    "productionPortable": {
+      "passed": true,
+      "pid": 47536,
+      "profile": "E:\\wpbounds-a562eea5\\Data",
+      "archiveSha256": "c3ead2a12b362a86675b0847b88dabbf00eb4c223d2086b788ddde8db5257f02",
+      "cases": [
+        {
+          "width": 1366,
+          "height": 768,
+          "zoom": 1,
+          "fullscreen": false,
+          "action": "normal",
+          "dom": {
+            "viewport": {
+              "width": 1366,
+              "height": 768,
+              "scale": 1
+            },
+            "elements": {
+              ".player-overlay": {
+                "x": 0,
+                "y": 0,
+                "width": 1366,
+                "height": 768,
+                "right": 1366,
+                "bottom": 768,
+                "clientHeight": 768,
+                "scrollHeight": 768,
+                "overflow": "visible",
+                "transform": "none",
+                "maxHeight": "none",
+                "animation": "fadeIn"
+              },
+              ".player-shell": {
+                "x": 32.78125,
+                "y": 28,
+                "width": 1300.4375,
+                "height": 712,
+                "right": 1333.21875,
+                "bottom": 740,
+                "clientHeight": 710,
+                "scrollHeight": 710,
+                "overflow": "hidden",
+                "transform": "none",
+                "maxHeight": "100%",
+                "animation": "none"
+              },
+              ".player-stage": {
+                "x": 33.78125,
+                "y": 94.5,
+                "width": 1298.4375,
+                "height": 532.25,
+                "right": 1332.21875,
+                "bottom": 626.75,
+                "clientHeight": 532,
+                "scrollHeight": 532,
+                "overflow": "hidden",
+                "transform": "none",
+                "maxHeight": "none",
+                "animation": "none"
+              },
+              ".player-video-surface": {
+                "x": 33.78125,
+                "y": 94.5,
+                "width": 1242.4375,
+                "height": 532.25,
+                "right": 1276.21875,
+                "bottom": 626.75,
+                "clientHeight": 532,
+                "scrollHeight": 532,
+                "overflow": "hidden",
+                "transform": "none",
+                "maxHeight": "none",
+                "animation": "none"
+              },
+              ".player-mpv-host-surface": {
+                "x": 33.78125,
+                "y": 94.5,
+                "width": 1242.4375,
+                "height": 532.25,
+                "right": 1276.21875,
+                "bottom": 626.75,
+                "clientHeight": 532,
+                "scrollHeight": 532,
+                "overflow": "hidden",
+                "transform": "none",
+                "maxHeight": "none",
+                "animation": "none"
+              },
+              ".player-topbar": {
+                "x": 33.78125,
+                "y": 29,
+                "width": 1298.4375,
+                "height": 65.5,
+                "right": 1332.21875,
+                "bottom": 94.5,
+                "clientHeight": 66,
+                "scrollHeight": 66,
+                "overflow": "visible",
+                "transform": "none",
+                "maxHeight": "none",
+                "animation": "none"
+              },
+              ".player-toolbar": {
+                "x": 33.78125,
+                "y": 626.75,
+                "width": 1298.4375,
+                "height": 112.25,
+                "right": 1332.21875,
+                "bottom": 739,
+                "clientHeight": 111,
+                "scrollHeight": 111,
+                "overflow": "visible",
+                "transform": "none",
+                "maxHeight": "none",
+                "animation": "none"
+              },
+              ".player-progress-row": {
+                "x": 51.78125,
+                "y": 641.75,
+                "width": 1262.4375,
+                "height": 27.25,
+                "right": 1314.21875,
+                "bottom": 669,
+                "clientHeight": 27,
+                "scrollHeight": 27,
+                "overflow": "visible",
+                "transform": "none",
+                "maxHeight": "none",
+                "animation": "none"
+              }
+            }
+          },
+          "native": {
+            "main": {
+              "x": 20,
+              "y": 20,
+              "width": 1366,
+              "height": 768
+            },
+            "content": {
+              "x": 20,
+              "y": 20,
+              "width": 1366,
+              "height": 768
+            },
+            "zoom": 1,
+            "windows": [
+              {
+                "id": 2,
+                "parent": 1,
+                "bounds": {
+                  "x": 54,
+                  "y": 115,
+                  "width": 1242,
+                  "height": 531
+                },
+                "visible": true
+              },
+              {
+                "id": 1,
+                "bounds": {
+                  "x": 20,
+                  "y": 20,
+                  "width": 1366,
+                  "height": 768
+                },
+                "visible": true
+              }
+            ]
+          },
+          "buttons": [
+            {
+              "label": "关闭播放器",
+              "x": 49.78125,
+              "y": 43.75,
+              "right": 85.78125,
+              "bottom": 79.75,
+              "width": 36,
+              "height": 36
+            },
+            {
+              "label": "展开播放列表",
+              "x": 1246.21875,
+              "y": 45.75,
+              "right": 1278.21875,
+              "bottom": 77.75,
+              "width": 32,
+              "height": 32
+            },
+            {
+              "label": "全屏",
+              "x": 1280.21875,
+              "y": 45.75,
+              "right": 1312.21875,
+              "bottom": 77.75,
+              "width": 32,
+              "height": 32
+            },
+            {
+              "label": "播放进度",
+              "x": 119.78125,
+              "y": 645.375,
+              "right": 1246.21875,
+              "bottom": 659.375,
+              "width": 1126.4375,
+              "height": 14
+            },
+            {
+              "label": "上一首",
+              "x": 51.78125,
+              "y": 685,
+              "right": 85.78125,
+              "bottom": 719,
+              "width": 34,
+              "height": 34
+            },
+            {
+              "label": "暂停",
+              "x": 93.78125,
+              "y": 681,
+              "right": 135.78125,
+              "bottom": 723,
+              "width": 42,
+              "height": 42
+            },
+            {
+              "label": "下一首",
+              "x": 143.78125,
+              "y": 685,
+              "right": 177.78125,
+              "bottom": 719,
+              "width": 34,
+              "height": 34
+            },
+            {
+              "label": "重新播放",
+              "x": 179.78125,
+              "y": 685,
+              "right": 213.78125,
+              "bottom": 719,
+              "width": 34,
+              "height": 34
+            },
+            {
+              "label": "清晰度",
+              "x": 964.125,
+              "y": 687,
+              "right": 1012.375,
+              "bottom": 717,
+              "width": 48.25,
+              "height": 30
+            },
+            {
+              "label": "倍速",
+              "x": 1016.375,
+              "y": 687,
+              "right": 1053.96875,
+              "bottom": 717,
+              "width": 37.59375,
+              "height": 30
+            },
+            {
+              "label": "字幕",
+              "x": 1057.96875,
+              "y": 687,
+              "right": 1106.21875,
+              "bottom": 717,
+              "width": 48.25,
+              "height": 30
+            },
+            {
+              "label": "取消静音",
+              "x": 1116.21875,
+              "y": 685,
+              "right": 1150.21875,
+              "bottom": 719,
+              "width": 34,
+              "height": 34
+            },
+            {
+              "label": "音量",
+              "x": 1154.21875,
+              "y": 700,
+              "right": 1242.21875,
+              "bottom": 704,
+              "width": 88,
+              "height": 4
+            },
+            {
+              "label": "设置",
+              "x": 1242.21875,
+              "y": 685,
+              "right": 1276.21875,
+              "bottom": 719,
+              "width": 34,
+              "height": 34
+            },
+            {
+              "label": "画中画",
+              "x": 1280.21875,
+              "y": 685,
+              "right": 1314.21875,
+              "bottom": 719,
+              "width": 34,
+              "height": 34
+            }
+          ]
+        },
+        {
+          "width": 1366,
+          "height": 626,
+          "zoom": 1,
+          "fullscreen": false,
+          "action": "normal",
+          "dom": {
+            "viewport": {
+              "width": 1366,
+              "height": 626,
+              "scale": 1
+            },
+            "elements": {
+              ".player-overlay": {
+                "x": 0,
+                "y": 0,
+                "width": 1366,
+                "height": 626,
+                "right": 1366,
+                "bottom": 626,
+                "clientHeight": 626,
+                "scrollHeight": 626,
+                "overflow": "visible",
+                "transform": "none",
+                "maxHeight": "none",
+                "animation": "fadeIn"
+              },
+              ".player-shell": {
+                "x": 32.78125,
+                "y": 28,
+                "width": 1300.4375,
+                "height": 570,
+                "right": 1333.21875,
+                "bottom": 598,
+                "clientHeight": 568,
+                "scrollHeight": 568,
+                "overflow": "hidden",
+                "transform": "none",
+                "maxHeight": "100%",
+                "animation": "none"
+              },
+              ".player-stage": {
+                "x": 33.78125,
+                "y": 94.5,
+                "width": 1298.4375,
+                "height": 390.25,
+                "right": 1332.21875,
+                "bottom": 484.75,
+                "clientHeight": 390,
+                "scrollHeight": 390,
+                "overflow": "hidden",
+                "transform": "none",
+                "maxHeight": "none",
+                "animation": "none"
+              },
+              ".player-video-surface": {
+                "x": 33.78125,
+                "y": 94.5,
+                "width": 1242.4375,
+                "height": 390.25,
+                "right": 1276.21875,
+                "bottom": 484.75,
+                "clientHeight": 390,
+                "scrollHeight": 390,
+                "overflow": "hidden",
+                "transform": "none",
+                "maxHeight": "none",
+                "animation": "none"
+              },
+              ".player-mpv-host-surface": {
+                "x": 33.78125,
+                "y": 94.5,
+                "width": 1242.4375,
+                "height": 390.25,
+                "right": 1276.21875,
+                "bottom": 484.75,
+                "clientHeight": 390,
+                "scrollHeight": 390,
+                "overflow": "hidden",
+                "transform": "none",
+                "maxHeight": "none",
+                "animation": "none"
+              },
+              ".player-topbar": {
+                "x": 33.78125,
+                "y": 29,
+                "width": 1298.4375,
+                "height": 65.5,
+                "right": 1332.21875,
+                "bottom": 94.5,
+                "clientHeight": 66,
+                "scrollHeight": 66,
+                "overflow": "visible",
+                "transform": "none",
+                "maxHeight": "none",
+                "animation": "none"
+              },
+              ".player-toolbar": {
+                "x": 33.78125,
+                "y": 484.75,
+                "width": 1298.4375,
+                "height": 112.25,
+                "right": 1332.21875,
+                "bottom": 597,
+                "clientHeight": 111,
+                "scrollHeight": 111,
+                "overflow": "visible",
+                "transform": "none",
+                "maxHeight": "none",
+                "animation": "none"
+              },
+              ".player-progress-row": {
+                "x": 51.78125,
+                "y": 499.75,
+                "width": 1262.4375,
+                "height": 27.25,
+                "right": 1314.21875,
+                "bottom": 527,
+                "clientHeight": 27,
+                "scrollHeight": 27,
+                "overflow": "visible",
+                "transform": "none",
+                "maxHeight": "none",
+                "animation": "none"
+              }
+            }
+          },
+          "native": {
+            "main": {
+              "x": 20,
+              "y": 20,
+              "width": 1366,
+              "height": 626
+            },
+            "content": {
+              "x": 20,
+              "y": 20,
+              "width": 1366,
+              "height": 626
+            },
+            "zoom": 1,
+            "windows": [
+              {
+                "id": 2,
+                "parent": 1,
+                "bounds": {
+                  "x": 54,
+                  "y": 115,
+                  "width": 1242,
+                  "height": 389
+                },
+                "visible": true
+              },
+              {
+                "id": 1,
+                "bounds": {
+                  "x": 20,
+                  "y": 20,
+                  "width": 1366,
+                  "height": 626
+                },
+                "visible": true
+              }
+            ]
+          },
+          "buttons": [
+            {
+              "label": "关闭播放器",
+              "x": 49.78125,
+              "y": 43.75,
+              "right": 85.78125,
+              "bottom": 79.75,
+              "width": 36,
+              "height": 36
+            },
+            {
+              "label": "展开播放列表",
+              "x": 1246.21875,
+              "y": 45.75,
+              "right": 1278.21875,
+              "bottom": 77.75,
+              "width": 32,
+              "height": 32
+            },
+            {
+              "label": "全屏",
+              "x": 1280.21875,
+              "y": 45.75,
+              "right": 1312.21875,
+              "bottom": 77.75,
+              "width": 32,
+              "height": 32
+            },
+            {
+              "label": "播放进度",
+              "x": 119.78125,
+              "y": 503.375,
+              "right": 1246.21875,
+              "bottom": 517.375,
+              "width": 1126.4375,
+              "height": 14
+            },
+            {
+              "label": "上一首",
+              "x": 51.78125,
+              "y": 543,
+              "right": 85.78125,
+              "bottom": 577,
+              "width": 34,
+              "height": 34
+            },
+            {
+              "label": "暂停",
+              "x": 93.78125,
+              "y": 539,
+              "right": 135.78125,
+              "bottom": 581,
+              "width": 42,
+              "height": 42
+            },
+            {
+              "label": "下一首",
+              "x": 143.78125,
+              "y": 543,
+              "right": 177.78125,
+              "bottom": 577,
+              "width": 34,
+              "height": 34
+            },
+            {
+              "label": "重新播放",
+              "x": 179.78125,
+              "y": 543,
+              "right": 213.78125,
+              "bottom": 577,
+              "width": 34,
+              "height": 34
+            },
+            {
+              "label": "清晰度",
+              "x": 964.125,
+              "y": 545,
+              "right": 1012.375,
+              "bottom": 575,
+              "width": 48.25,
+              "height": 30
+            },
+            {
+              "label": "倍速",
+              "x": 1016.375,
+              "y": 545,
+              "right": 1053.96875,
+              "bottom": 575,
+              "width": 37.59375,
+              "height": 30
+            },
+            {
+              "label": "字幕",
+              "x": 1057.96875,
+              "y": 545,
+              "right": 1106.21875,
+              "bottom": 575,
+              "width": 48.25,
+              "height": 30
+            },
+            {
+              "label": "取消静音",
+              "x": 1116.21875,
+              "y": 543,
+              "right": 1150.21875,
+              "bottom": 577,
+              "width": 34,
+              "height": 34
+            },
+            {
+              "label": "音量",
+              "x": 1154.21875,
+              "y": 558,
+              "right": 1242.21875,
+              "bottom": 562,
+              "width": 88,
+              "height": 4
+            },
+            {
+              "label": "设置",
+              "x": 1242.21875,
+              "y": 543,
+              "right": 1276.21875,
+              "bottom": 577,
+              "width": 34,
+              "height": 34
+            },
+            {
+              "label": "画中画",
+              "x": 1280.21875,
+              "y": 543,
+              "right": 1314.21875,
+              "bottom": 577,
+              "width": 34,
+              "height": 34
+            }
+          ],
+          "image": "fixed-1-1366-1-normal-native.png"
+        },
+        {
+          "width": 900,
+          "height": 600,
+          "zoom": 1,
+          "fullscreen": false,
+          "action": "normal",
+          "dom": {
+            "viewport": {
+              "width": 900,
+              "height": 600,
+              "scale": 1
+            },
+            "elements": {
+              ".player-overlay": {
+                "x": 0,
+                "y": 0,
+                "width": 900,
+                "height": 600,
+                "right": 900,
+                "bottom": 600,
+                "clientHeight": 600,
+                "scrollHeight": 600,
+                "overflow": "visible",
+                "transform": "none",
+                "maxHeight": "none",
+                "animation": "fadeIn"
+              },
+              ".player-shell": {
+                "x": 12,
+                "y": 20,
+                "width": 876,
+                "height": 560,
+                "right": 888,
+                "bottom": 580,
+                "clientHeight": 558,
+                "scrollHeight": 558,
+                "overflow": "hidden",
+                "transform": "none",
+                "maxHeight": "100%",
+                "animation": "none"
+              },
+              ".player-stage": {
+                "x": 13,
+                "y": 86.5,
+                "width": 874,
+                "height": 384.25,
+                "right": 887,
+                "bottom": 470.75,
+                "clientHeight": 384,
+                "scrollHeight": 384,
+                "overflow": "hidden",
+                "transform": "none",
+                "maxHeight": "none",
+                "animation": "none"
+              },
+              ".player-video-surface": {
+                "x": 13,
+                "y": 86.5,
+                "width": 818,
+                "height": 384.25,
+                "right": 831,
+                "bottom": 470.75,
+                "clientHeight": 384,
+                "scrollHeight": 384,
+                "overflow": "hidden",
+                "transform": "none",
+                "maxHeight": "none",
+                "animation": "none"
+              },
+              ".player-mpv-host-surface": {
+                "x": 13,
+                "y": 86.5,
+                "width": 818,
+                "height": 384.25,
+                "right": 831,
+                "bottom": 470.75,
+                "clientHeight": 384,
+                "scrollHeight": 384,
+                "overflow": "hidden",
+                "transform": "none",
+                "maxHeight": "none",
+                "animation": "none"
+              },
+              ".player-topbar": {
+                "x": 13,
+                "y": 21,
+                "width": 874,
+                "height": 65.5,
+                "right": 887,
+                "bottom": 86.5,
+                "clientHeight": 66,
+                "scrollHeight": 66,
+                "overflow": "visible",
+                "transform": "none",
+                "maxHeight": "none",
+                "animation": "none"
+              },
+              ".player-toolbar": {
+                "x": 13,
+                "y": 470.75,
+                "width": 874,
+                "height": 108.25,
+                "right": 887,
+                "bottom": 579,
+                "clientHeight": 107,
+                "scrollHeight": 107,
+                "overflow": "visible",
+                "transform": "none",
+                "maxHeight": "none",
+                "animation": "none"
+              },
+              ".player-progress-row": {
+                "x": 27,
+                "y": 483.75,
+                "width": 846,
+                "height": 27.25,
+                "right": 873,
+                "bottom": 511,
+                "clientHeight": 27,
+                "scrollHeight": 27,
+                "overflow": "visible",
+                "transform": "none",
+                "maxHeight": "none",
+                "animation": "none"
+              }
+            }
+          },
+          "native": {
+            "main": {
+              "x": 20,
+              "y": 20,
+              "width": 900,
+              "height": 600
+            },
+            "content": {
+              "x": 20,
+              "y": 20,
+              "width": 900,
+              "height": 600
+            },
+            "zoom": 1,
+            "windows": [
+              {
+                "id": 2,
+                "parent": 1,
+                "bounds": {
+                  "x": 33,
+                  "y": 107,
+                  "width": 818,
+                  "height": 383
+                },
+                "visible": true
+              },
+              {
+                "id": 1,
+                "bounds": {
+                  "x": 20,
+                  "y": 20,
+                  "width": 900,
+                  "height": 600
+                },
+                "visible": true
+              }
+            ]
+          },
+          "buttons": [
+            {
+              "label": "关闭播放器",
+              "x": 29,
+              "y": 35.75,
+              "right": 65,
+              "bottom": 71.75,
+              "width": 36,
+              "height": 36
+            },
+            {
+              "label": "展开播放列表",
+              "x": 801,
+              "y": 37.75,
+              "right": 833,
+              "bottom": 69.75,
+              "width": 32,
+              "height": 32
+            },
+            {
+              "label": "全屏",
+              "x": 835,
+              "y": 37.75,
+              "right": 867,
+              "bottom": 69.75,
+              "width": 32,
+              "height": 32
+            },
+            {
+              "label": "播放进度",
+              "x": 95,
+              "y": 487.375,
+              "right": 805,
+              "bottom": 501.375,
+              "width": 710,
+              "height": 14
+            },
+            {
+              "label": "上一首",
+              "x": 27,
+              "y": 527,
+              "right": 61,
+              "bottom": 561,
+              "width": 34,
+              "height": 34
+            },
+            {
+              "label": "暂停",
+              "x": 69,
+              "y": 523,
+              "right": 111,
+              "bottom": 565,
+              "width": 42,
+              "height": 42
+            },
+            {
+              "label": "下一首",
+              "x": 119,
+              "y": 527,
+              "right": 153,
+              "bottom": 561,
+              "width": 34,
+              "height": 34
+            },
+            {
+              "label": "重新播放",
+              "x": 155,
+              "y": 527,
+              "right": 189,
+              "bottom": 561,
+              "width": 34,
+              "height": 34
+            },
+            {
+              "label": "清晰度",
+              "x": 542.90625,
+              "y": 529,
+              "right": 591.15625,
+              "bottom": 559,
+              "width": 48.25,
+              "height": 30
+            },
+            {
+              "label": "倍速",
+              "x": 595.15625,
+              "y": 529,
+              "right": 632.75,
+              "bottom": 559,
+              "width": 37.59375,
+              "height": 30
+            },
+            {
+              "label": "字幕",
+              "x": 636.75,
+              "y": 529,
+              "right": 685,
+              "bottom": 559,
+              "width": 48.25,
+              "height": 30
+            },
+            {
+              "label": "取消静音",
+              "x": 695,
+              "y": 527,
+              "right": 729,
+              "bottom": 561,
+              "width": 34,
+              "height": 34
+            },
+            {
+              "label": "音量",
+              "x": 733,
+              "y": 542,
+              "right": 803,
+              "bottom": 546,
+              "width": 70,
+              "height": 4
+            },
+            {
+              "label": "设置",
+              "x": 801,
+              "y": 527,
+              "right": 835,
+              "bottom": 561,
+              "width": 34,
+              "height": 34
+            },
+            {
+              "label": "画中画",
+              "x": 839,
+              "y": 527,
+              "right": 873,
+              "bottom": 561,
+              "width": 34,
+              "height": 34
+            }
+          ]
+        },
+        {
+          "width": 1024,
+          "height": 600,
+          "zoom": 1.25,
+          "fullscreen": false,
+          "action": "normal",
+          "dom": {
+            "viewport": {
+              "width": 819,
+              "height": 480,
+              "scale": 1.25
+            },
+            "elements": {
+              ".player-overlay": {
+                "x": 0,
+                "y": 0,
+                "width": 819.2000122070312,
+                "height": 480,
+                "right": 819.2000122070312,
+                "bottom": 480,
+                "clientHeight": 480,
+                "scrollHeight": 480,
+                "overflow": "visible",
+                "transform": "none",
+                "maxHeight": "none",
+                "animation": "fadeIn"
+              },
+              ".player-shell": {
+                "x": 12,
+                "y": 20,
+                "width": 795.2000122070312,
+                "height": 440,
+                "right": 807.2000122070312,
+                "bottom": 460,
+                "clientHeight": 438,
+                "scrollHeight": 438,
+                "overflow": "hidden",
+                "transform": "none",
+                "maxHeight": "100%",
+                "animation": "none"
+              },
+              ".player-stage": {
+                "x": 12.800000190734863,
+                "y": 86.30000305175781,
+                "width": 793.6000366210938,
+                "height": 265.6000061035156,
+                "right": 806.4000368118286,
+                "bottom": 351.90000915527344,
+                "clientHeight": 266,
+                "scrollHeight": 266,
+                "overflow": "hidden",
+                "transform": "none",
+                "maxHeight": "none",
+                "animation": "none"
+              },
+              ".player-video-surface": {
+                "x": 12.800000190734863,
+                "y": 86.30000305175781,
+                "width": 737.6000366210938,
+                "height": 265.6000061035156,
+                "right": 750.4000368118286,
+                "bottom": 351.90000915527344,
+                "clientHeight": 266,
+                "scrollHeight": 266,
+                "overflow": "hidden",
+                "transform": "none",
+                "maxHeight": "none",
+                "animation": "none"
+              },
+              ".player-mpv-host-surface": {
+                "x": 12.800000190734863,
+                "y": 86.30000305175781,
+                "width": 737.6000366210938,
+                "height": 265.6000061035156,
+                "right": 750.4000368118286,
+                "bottom": 351.90000915527344,
+                "clientHeight": 266,
+                "scrollHeight": 266,
+                "overflow": "hidden",
+                "transform": "none",
+                "maxHeight": "none",
+                "animation": "none"
+              },
+              ".player-topbar": {
+                "x": 12.800000190734863,
+                "y": 20.80000114440918,
+                "width": 793.6000366210938,
+                "height": 65.5,
+                "right": 806.4000368118286,
+                "bottom": 86.30000114440918,
+                "clientHeight": 66,
+                "scrollHeight": 66,
+                "overflow": "visible",
+                "transform": "none",
+                "maxHeight": "none",
+                "animation": "none"
+              },
+              ".player-toolbar": {
+                "x": 12.800000190734863,
+                "y": 351.8999938964844,
+                "width": 793.6000366210938,
+                "height": 107.30000305175781,
+                "right": 806.4000368118286,
+                "bottom": 459.1999969482422,
+                "clientHeight": 107,
+                "scrollHeight": 107,
+                "overflow": "visible",
+                "transform": "none",
+                "maxHeight": "none",
+                "animation": "none"
+              },
+              ".player-progress-row": {
+                "x": 26.80000114440918,
+                "y": 364.70001220703125,
+                "width": 765.6000366210938,
+                "height": 26.5,
+                "right": 792.4000377655029,
+                "bottom": 391.20001220703125,
+                "clientHeight": 27,
+                "scrollHeight": 27,
+                "overflow": "visible",
+                "transform": "none",
+                "maxHeight": "none",
+                "animation": "none"
+              }
+            }
+          },
+          "native": {
+            "main": {
+              "x": 20,
+              "y": 20,
+              "width": 1024,
+              "height": 600
+            },
+            "content": {
+              "x": 20,
+              "y": 20,
+              "width": 1024,
+              "height": 600
+            },
+            "zoom": 1.25,
+            "windows": [
+              {
+                "id": 2,
+                "parent": 1,
+                "bounds": {
+                  "x": 37,
+                  "y": 128,
+                  "width": 921,
+                  "height": 331
+                },
+                "visible": true
+              },
+              {
+                "id": 1,
+                "bounds": {
+                  "x": 20,
+                  "y": 20,
+                  "width": 1024,
+                  "height": 600
+                },
+                "visible": true
+              }
+            ]
+          },
+          "buttons": [
+            {
+              "label": "关闭播放器",
+              "x": 28.80000114440918,
+              "y": 35.54999923706055,
+              "right": 64.80000114440918,
+              "bottom": 71.54999923706055,
+              "width": 36,
+              "height": 36
+            },
+            {
+              "label": "展开播放列表",
+              "x": 720.6000366210938,
+              "y": 37.54999923706055,
+              "right": 752.6000366210938,
+              "bottom": 69.54999923706055,
+              "width": 32,
+              "height": 32
+            },
+            {
+              "label": "全屏",
+              "x": 754.6000366210938,
+              "y": 37.54999923706055,
+              "right": 786.6000366210938,
+              "bottom": 69.54999923706055,
+              "width": 32,
+              "height": 32
+            },
+            {
+              "label": "播放进度",
+              "x": 82.80000305175781,
+              "y": 367.95001220703125,
+              "right": 736.4000396728516,
+              "bottom": 381.95001220703125,
+              "width": 653.6000366210938,
+              "height": 14
+            },
+            {
+              "label": "上一首",
+              "x": 26.80000114440918,
+              "y": 407.20001220703125,
+              "right": 60.80000114440918,
+              "bottom": 441.20001220703125,
+              "width": 34,
+              "height": 34
+            },
+            {
+              "label": "暂停",
+              "x": 68.80000305175781,
+              "y": 403.20001220703125,
+              "right": 110.80000305175781,
+              "bottom": 445.20001220703125,
+              "width": 42,
+              "height": 42
+            },
+            {
+              "label": "下一首",
+              "x": 118.80000305175781,
+              "y": 407.20001220703125,
+              "right": 152.8000030517578,
+              "bottom": 441.20001220703125,
+              "width": 34,
+              "height": 34
+            },
+            {
+              "label": "重新播放",
+              "x": 154.8000030517578,
+              "y": 407.20001220703125,
+              "right": 188.8000030517578,
+              "bottom": 441.20001220703125,
+              "width": 34,
+              "height": 34
+            },
+            {
+              "label": "清晰度",
+              "x": 484.125,
+              "y": 409.20001220703125,
+              "right": 524.9500007629395,
+              "bottom": 439.20001220703125,
+              "width": 40.82500076293945,
+              "height": 30
+            },
+            {
+              "label": "倍速",
+              "x": 528.9500122070312,
+              "y": 409.20001220703125,
+              "right": 559.5750122070312,
+              "bottom": 439.20001220703125,
+              "width": 30.625,
+              "height": 30
+            },
+            {
+              "label": "字幕",
+              "x": 563.5750122070312,
+              "y": 409.20001220703125,
+              "right": 604.4000129699707,
+              "bottom": 439.20001220703125,
+              "width": 40.82500076293945,
+              "height": 30
+            },
+            {
+              "label": "取消静音",
+              "x": 614.4000244140625,
+              "y": 407.20001220703125,
+              "right": 648.4000244140625,
+              "bottom": 441.20001220703125,
+              "width": 34,
+              "height": 34
+            },
+            {
+              "label": "音量",
+              "x": 652.4000244140625,
+              "y": 422.20001220703125,
+              "right": 722.4000244140625,
+              "bottom": 426.20001220703125,
+              "width": 70,
+              "height": 4
+            },
+            {
+              "label": "设置",
+              "x": 720.4000244140625,
+              "y": 407.20001220703125,
+              "right": 754.4000244140625,
+              "bottom": 441.20001220703125,
+              "width": 34,
+              "height": 34
+            },
+            {
+              "label": "画中画",
+              "x": 758.4000244140625,
+              "y": 407.20001220703125,
+              "right": 792.4000244140625,
+              "bottom": 441.20001220703125,
+              "width": 34,
+              "height": 34
+            }
+          ]
+        },
+        {
+          "width": 1024,
+          "height": 600,
+          "zoom": 1.5,
+          "fullscreen": false,
+          "action": "normal",
+          "dom": {
+            "viewport": {
+              "width": 683,
+              "height": 400,
+              "scale": 1.5
+            },
+            "elements": {
+              ".player-overlay": {
+                "x": 0,
+                "y": 0,
+                "width": 682.6666870117188,
+                "height": 400,
+                "right": 682.6666870117188,
+                "bottom": 400,
+                "clientHeight": 400,
+                "scrollHeight": 400,
+                "overflow": "visible",
+                "transform": "none",
+                "maxHeight": "none",
+                "animation": "fadeIn"
+              },
+              ".player-shell": {
+                "x": 12,
+                "y": 20,
+                "width": 658.6666870117188,
+                "height": 360,
+                "right": 670.6666870117188,
+                "bottom": 380,
+                "clientHeight": 359,
+                "scrollHeight": 359,
+                "overflow": "hidden",
+                "transform": "none",
+                "maxHeight": "100%",
+                "animation": "none"
+              },
+              ".player-stage": {
+                "x": 12.666666984558105,
+                "y": 86.16667175292969,
+                "width": 657.3333740234375,
+                "height": 186,
+                "right": 670.0000410079956,
+                "bottom": 272.1666717529297,
+                "clientHeight": 186,
+                "scrollHeight": 186,
+                "overflow": "hidden",
+                "transform": "none",
+                "maxHeight": "none",
+                "animation": "none"
+              },
+              ".player-video-surface": {
+                "x": 12.666666984558105,
+                "y": 86.16667175292969,
+                "width": 657.3333740234375,
+                "height": 186,
+                "right": 670.0000410079956,
+                "bottom": 272.1666717529297,
+                "clientHeight": 186,
+                "scrollHeight": 186,
+                "overflow": "hidden",
+                "transform": "none",
+                "maxHeight": "none",
+                "animation": "none"
+              },
+              ".player-mpv-host-surface": {
+                "x": 12.666666984558105,
+                "y": 86.16667175292969,
+                "width": 657.3333740234375,
+                "height": 186,
+                "right": 670.0000410079956,
+                "bottom": 272.1666717529297,
+                "clientHeight": 186,
+                "scrollHeight": 186,
+                "overflow": "hidden",
+                "transform": "none",
+                "maxHeight": "none",
+                "animation": "none"
+              },
+              ".player-topbar": {
+                "x": 12.666666984558105,
+                "y": 20.666667938232422,
+                "width": 657.3333740234375,
+                "height": 65.5,
+                "right": 670.0000410079956,
+                "bottom": 86.16666793823242,
+                "clientHeight": 66,
+                "scrollHeight": 66,
+                "overflow": "visible",
+                "transform": "none",
+                "maxHeight": "none",
+                "animation": "none"
+              },
+              ".player-toolbar": {
+                "x": 12.666666984558105,
+                "y": 272.16668701171875,
+                "width": 657.3333740234375,
+                "height": 107.16667175292969,
+                "right": 670.0000410079956,
+                "bottom": 379.33335876464844,
+                "clientHeight": 107,
+                "scrollHeight": 107,
+                "overflow": "visible",
+                "transform": "none",
+                "maxHeight": "none",
+                "animation": "none"
+              },
+              ".player-progress-row": {
+                "x": 26.666667938232422,
+                "y": 284.8333435058594,
+                "width": 629.3333740234375,
+                "height": 26.5,
+                "right": 656.0000419616699,
+                "bottom": 311.3333435058594,
+                "clientHeight": 27,
+                "scrollHeight": 27,
+                "overflow": "visible",
+                "transform": "none",
+                "maxHeight": "none",
+                "animation": "none"
+              }
+            }
+          },
+          "native": {
+            "main": {
+              "x": 20,
+              "y": 20,
+              "width": 1024,
+              "height": 600
+            },
+            "content": {
+              "x": 20,
+              "y": 20,
+              "width": 1024,
+              "height": 600
+            },
+            "zoom": 1.5,
+            "windows": [
+              {
+                "id": 2,
+                "parent": 1,
+                "bounds": {
+                  "x": 40,
+                  "y": 150,
+                  "width": 985,
+                  "height": 278
+                },
+                "visible": true
+              },
+              {
+                "id": 1,
+                "bounds": {
+                  "x": 20,
+                  "y": 20,
+                  "width": 1024,
+                  "height": 600
+                },
+                "visible": true
+              }
+            ]
+          },
+          "buttons": [
+            {
+              "label": "关闭播放器",
+              "x": 28.666667938232422,
+              "y": 35.41666793823242,
+              "right": 64.66666793823242,
+              "bottom": 71.41666793823242,
+              "width": 36,
+              "height": 36
+            },
+            {
+              "label": "展开播放列表",
+              "x": 584.3333740234375,
+              "y": 37.41666793823242,
+              "right": 616.3333740234375,
+              "bottom": 69.41666793823242,
+              "width": 32,
+              "height": 32
+            },
+            {
+              "label": "全屏",
+              "x": 618.3333740234375,
+              "y": 37.41666793823242,
+              "right": 650.3333740234375,
+              "bottom": 69.41666793823242,
+              "width": 32,
+              "height": 32
+            },
+            {
+              "label": "播放进度",
+              "x": 136.6666717529297,
+              "y": 288.0833435058594,
+              "right": 654.0000457763672,
+              "bottom": 302.0833435058594,
+              "width": 517.3333740234375,
+              "height": 14
+            },
+            {
+              "label": "上一首",
+              "x": 26.666667938232422,
+              "y": 327.3333435058594,
+              "right": 60.66666793823242,
+              "bottom": 361.3333435058594,
+              "width": 34,
+              "height": 34
+            },
+            {
+              "label": "暂停",
+              "x": 68.66667175292969,
+              "y": 323.3333435058594,
+              "right": 110.66667175292969,
+              "bottom": 365.3333435058594,
+              "width": 42,
+              "height": 42
+            },
+            {
+              "label": "下一首",
+              "x": 118.66667175292969,
+              "y": 327.3333435058594,
+              "right": 152.6666717529297,
+              "bottom": 361.3333435058594,
+              "width": 34,
+              "height": 34
+            },
+            {
+              "label": "重新播放",
+              "x": 154.6666717529297,
+              "y": 327.3333435058594,
+              "right": 188.6666717529297,
+              "bottom": 361.3333435058594,
+              "width": 34,
+              "height": 34
+            },
+            {
+              "label": "清晰度",
+              "x": 348.4895935058594,
+              "y": 329.3333435058594,
+              "right": 389.0625114440918,
+              "bottom": 359.3333435058594,
+              "width": 40.57291793823242,
+              "height": 30
+            },
+            {
+              "label": "倍速",
+              "x": 393.0625,
+              "y": 329.3333435058594,
+              "right": 423.4270839691162,
+              "bottom": 359.3333435058594,
+              "width": 30.36458396911621,
+              "height": 30
+            },
+            {
+              "label": "字幕",
+              "x": 427.4270935058594,
+              "y": 329.3333435058594,
+              "right": 468.0000114440918,
+              "bottom": 359.3333435058594,
+              "width": 40.57291793823242,
+              "height": 30
+            },
+            {
+              "label": "取消静音",
+              "x": 478,
+              "y": 327.3333435058594,
+              "right": 512,
+              "bottom": 361.3333435058594,
+              "width": 34,
+              "height": 34
+            },
+            {
+              "label": "音量",
+              "x": 516,
+              "y": 342.3333435058594,
+              "right": 586,
+              "bottom": 346.3333435058594,
+              "width": 70,
+              "height": 4
+            },
+            {
+              "label": "设置",
+              "x": 584,
+              "y": 327.3333435058594,
+              "right": 618,
+              "bottom": 361.3333435058594,
+              "width": 34,
+              "height": 34
+            },
+            {
+              "label": "画中画",
+              "x": 622,
+              "y": 327.3333435058594,
+              "right": 656,
+              "bottom": 361.3333435058594,
+              "width": 34,
+              "height": 34
+            }
+          ]
+        },
+        {
+          "width": 1024,
+          "height": 600,
+          "zoom": 2,
+          "fullscreen": false,
+          "action": "normal",
+          "dom": {
+            "viewport": {
+              "width": 512,
+              "height": 300,
+              "scale": 2
+            },
+            "elements": {
+              ".player-overlay": {
+                "x": 0,
+                "y": 0,
+                "width": 512,
+                "height": 300,
+                "right": 512,
+                "bottom": 300,
+                "clientHeight": 300,
+                "scrollHeight": 300,
+                "overflow": "visible",
+                "transform": "none",
+                "maxHeight": "none",
+                "animation": "fadeIn"
+              },
+              ".player-shell": {
+                "x": 12,
+                "y": 20,
+                "width": 488,
+                "height": 260,
+                "right": 500,
+                "bottom": 280,
+                "clientHeight": 258,
+                "scrollHeight": 258,
+                "overflow": "hidden",
+                "transform": "none",
+                "maxHeight": "100%",
+                "animation": "none"
+              },
+              ".player-stage": {
+                "x": 13,
+                "y": 86.5,
+                "width": 486,
+                "height": 37,
+                "right": 499,
+                "bottom": 123.5,
+                "clientHeight": 37,
+                "scrollHeight": 61,
+                "overflow": "hidden",
+                "transform": "none",
+                "maxHeight": "none",
+                "animation": "none"
+              },
+              ".player-video-surface": {
+                "x": 13,
+                "y": 86.5,
+                "width": 486,
+                "height": 37,
+                "right": 499,
+                "bottom": 123.5,
+                "clientHeight": 37,
+                "scrollHeight": 37,
+                "overflow": "hidden",
+                "transform": "none",
+                "maxHeight": "none",
+                "animation": "none"
+              },
+              ".player-mpv-host-surface": {
+                "x": 13,
+                "y": 86.5,
+                "width": 486,
+                "height": 37,
+                "right": 499,
+                "bottom": 123.5,
+                "clientHeight": 37,
+                "scrollHeight": 37,
+                "overflow": "hidden",
+                "transform": "none",
+                "maxHeight": "none",
+                "animation": "none"
+              },
+              ".player-topbar": {
+                "x": 13,
+                "y": 21,
+                "width": 486,
+                "height": 65.5,
+                "right": 499,
+                "bottom": 86.5,
+                "clientHeight": 66,
+                "scrollHeight": 66,
+                "overflow": "visible",
+                "transform": "none",
+                "maxHeight": "none",
+                "animation": "none"
+              },
+              ".player-toolbar": {
+                "x": 13,
+                "y": 123.5,
+                "width": 486,
+                "height": 155.5,
+                "right": 499,
+                "bottom": 279,
+                "clientHeight": 155,
+                "scrollHeight": 155,
+                "overflow": "visible",
+                "transform": "none",
+                "maxHeight": "none",
+                "animation": "none"
+              },
+              ".player-progress-row": {
+                "x": 27,
+                "y": 136.5,
+                "width": 458,
+                "height": 26.5,
+                "right": 485,
+                "bottom": 163,
+                "clientHeight": 27,
+                "scrollHeight": 27,
+                "overflow": "visible",
+                "transform": "none",
+                "maxHeight": "none",
+                "animation": "none"
+              }
+            }
+          },
+          "native": {
+            "main": {
+              "x": 20,
+              "y": 20,
+              "width": 1024,
+              "height": 600
+            },
+            "content": {
+              "x": 20,
+              "y": 20,
+              "width": 1024,
+              "height": 600
+            },
+            "zoom": 2,
+            "windows": [
+              {
+                "id": 2,
+                "parent": 1,
+                "bounds": {
+                  "x": 46,
+                  "y": 193,
+                  "width": 972,
+                  "height": 74
+                },
+                "visible": true
+              },
+              {
+                "id": 1,
+                "bounds": {
+                  "x": 20,
+                  "y": 20,
+                  "width": 1024,
+                  "height": 600
+                },
+                "visible": true
+              }
+            ]
+          },
+          "buttons": [
+            {
+              "label": "关闭播放器",
+              "x": 29,
+              "y": 35.75,
+              "right": 65,
+              "bottom": 71.75,
+              "width": 36,
+              "height": 36
+            },
+            {
+              "label": "展开播放列表",
+              "x": 413,
+              "y": 37.75,
+              "right": 445,
+              "bottom": 69.75,
+              "width": 32,
+              "height": 32
+            },
+            {
+              "label": "全屏",
+              "x": 447,
+              "y": 37.75,
+              "right": 479,
+              "bottom": 69.75,
+              "width": 32,
+              "height": 32
+            },
+            {
+              "label": "播放进度",
+              "x": 137,
+              "y": 139.75,
+              "right": 483,
+              "bottom": 153.75,
+              "width": 346,
+              "height": 14
+            },
+            {
+              "label": "上一首",
+              "x": 27,
+              "y": 179,
+              "right": 61,
+              "bottom": 213,
+              "width": 34,
+              "height": 34
+            },
+            {
+              "label": "暂停",
+              "x": 69,
+              "y": 175,
+              "right": 111,
+              "bottom": 217,
+              "width": 42,
+              "height": 42
+            },
+            {
+              "label": "下一首",
+              "x": 119,
+              "y": 179,
+              "right": 153,
+              "bottom": 213,
+              "width": 34,
+              "height": 34
+            },
+            {
+              "label": "重新播放",
+              "x": 155,
+              "y": 179,
+              "right": 189,
+              "bottom": 213,
+              "width": 34,
+              "height": 34
+            },
+            {
+              "label": "清晰度",
+              "x": 27,
+              "y": 233,
+              "right": 68.234375,
+              "bottom": 263,
+              "width": 41.234375,
+              "height": 30
+            },
+            {
+              "label": "倍速",
+              "x": 72.234375,
+              "y": 233,
+              "right": 103.2578125,
+              "bottom": 263,
+              "width": 31.0234375,
+              "height": 30
+            },
+            {
+              "label": "字幕",
+              "x": 107.2578125,
+              "y": 233,
+              "right": 148.4921875,
+              "bottom": 263,
+              "width": 41.234375,
+              "height": 30
+            },
+            {
+              "label": "取消静音",
+              "x": 158.4921875,
+              "y": 231,
+              "right": 192.4921875,
+              "bottom": 265,
+              "width": 34,
+              "height": 34
+            },
+            {
+              "label": "音量",
+              "x": 196.4921875,
+              "y": 246,
+              "right": 266.4921875,
+              "bottom": 250,
+              "width": 70,
+              "height": 4
+            },
+            {
+              "label": "设置",
+              "x": 264.4921875,
+              "y": 231,
+              "right": 298.4921875,
+              "bottom": 265,
+              "width": 34,
+              "height": 34
+            },
+            {
+              "label": "画中画",
+              "x": 302.4921875,
+              "y": 231,
+              "right": 336.4921875,
+              "bottom": 265,
+              "width": 34,
+              "height": 34
+            }
+          ]
+        },
+        {
+          "width": 1366,
+          "height": 768,
+          "zoom": 1.25,
+          "fullscreen": false,
+          "action": "normal",
+          "dom": {
+            "viewport": {
+              "width": 1093,
+              "height": 614,
+              "scale": 1.25
+            },
+            "elements": {
+              ".player-overlay": {
+                "x": 0,
+                "y": 0,
+                "width": 1092.800048828125,
+                "height": 614.4000244140625,
+                "right": 1092.800048828125,
+                "bottom": 614.4000244140625,
+                "clientHeight": 614,
+                "scrollHeight": 614,
+                "overflow": "visible",
+                "transform": "none",
+                "maxHeight": "none",
+                "animation": "fadeIn"
+              },
+              ".player-shell": {
+                "x": 26.225000381469727,
+                "y": 28,
+                "width": 1040.3499755859375,
+                "height": 558.4000244140625,
+                "right": 1066.5749759674072,
+                "bottom": 586.4000244140625,
+                "clientHeight": 557,
+                "scrollHeight": 557,
+                "overflow": "hidden",
+                "transform": "none",
+                "maxHeight": "100%",
+                "animation": "none"
+              },
+              ".player-stage": {
+                "x": 27.024999618530273,
+                "y": 94.30000305175781,
+                "width": 1038.75,
+                "height": 379.25,
+                "right": 1065.7749996185303,
+                "bottom": 473.5500030517578,
+                "clientHeight": 379,
+                "scrollHeight": 379,
+                "overflow": "hidden",
+                "transform": "none",
+                "maxHeight": "none",
+                "animation": "none"
+              },
+              ".player-video-surface": {
+                "x": 27.024999618530273,
+                "y": 94.30000305175781,
+                "width": 982.75,
+                "height": 379.25,
+                "right": 1009.7749996185303,
+                "bottom": 473.5500030517578,
+                "clientHeight": 379,
+                "scrollHeight": 379,
+                "overflow": "hidden",
+                "transform": "none",
+                "maxHeight": "none",
+                "animation": "none"
+              },
+              ".player-mpv-host-surface": {
+                "x": 27.024999618530273,
+                "y": 94.30000305175781,
+                "width": 982.75,
+                "height": 379.25,
+                "right": 1009.7749996185303,
+                "bottom": 473.5500030517578,
+                "clientHeight": 379,
+                "scrollHeight": 379,
+                "overflow": "hidden",
+                "transform": "none",
+                "maxHeight": "none",
+                "animation": "none"
+              },
+              ".player-topbar": {
+                "x": 27.024999618530273,
+                "y": 28.80000114440918,
+                "width": 1038.75,
+                "height": 65.5,
+                "right": 1065.7749996185303,
+                "bottom": 94.30000114440918,
+                "clientHeight": 66,
+                "scrollHeight": 66,
+                "overflow": "visible",
+                "transform": "none",
+                "maxHeight": "none",
+                "animation": "none"
+              },
+              ".player-toolbar": {
+                "x": 27.024999618530273,
+                "y": 473.5500183105469,
+                "width": 1038.75,
+                "height": 112.05000305175781,
+                "right": 1065.7749996185303,
+                "bottom": 585.6000213623047,
+                "clientHeight": 111,
+                "scrollHeight": 111,
+                "overflow": "visible",
+                "transform": "none",
+                "maxHeight": "none",
+                "animation": "none"
+              },
+              ".player-progress-row": {
+                "x": 45.025001525878906,
+                "y": 488.3500061035156,
+                "width": 1002.75,
+                "height": 27.25,
+                "right": 1047.775001525879,
+                "bottom": 515.6000061035156,
+                "clientHeight": 27,
+                "scrollHeight": 27,
+                "overflow": "visible",
+                "transform": "none",
+                "maxHeight": "none",
+                "animation": "none"
+              }
+            }
+          },
+          "native": {
+            "main": {
+              "x": 20,
+              "y": 20,
+              "width": 1366,
+              "height": 768
+            },
+            "content": {
+              "x": 20,
+              "y": 20,
+              "width": 1366,
+              "height": 768
+            },
+            "zoom": 1.25,
+            "windows": [
+              {
+                "id": 2,
+                "parent": 1,
+                "bounds": {
+                  "x": 54,
+                  "y": 138,
+                  "width": 1228,
+                  "height": 473
+                },
+                "visible": true
+              },
+              {
+                "id": 1,
+                "bounds": {
+                  "x": 20,
+                  "y": 20,
+                  "width": 1366,
+                  "height": 768
+                },
+                "visible": true
+              }
+            ]
+          },
+          "buttons": [
+            {
+              "label": "关闭播放器",
+              "x": 43.025001525878906,
+              "y": 43.54999923706055,
+              "right": 79.0250015258789,
+              "bottom": 79.54999923706055,
+              "width": 36,
+              "height": 36
+            },
+            {
+              "label": "展开播放列表",
+              "x": 979.9750366210938,
+              "y": 45.54999923706055,
+              "right": 1011.9750366210938,
+              "bottom": 77.54999923706055,
+              "width": 32,
+              "height": 32
+            },
+            {
+              "label": "全屏",
+              "x": 1013.9750366210938,
+              "y": 45.54999923706055,
+              "right": 1045.9750366210938,
+              "bottom": 77.54999923706055,
+              "width": 32,
+              "height": 32
+            },
+            {
+              "label": "播放进度",
+              "x": 113.0250015258789,
+              "y": 491.9750061035156,
+              "right": 979.7750015258789,
+              "bottom": 505.9750061035156,
+              "width": 866.75,
+              "height": 14
+            },
+            {
+              "label": "上一首",
+              "x": 45.025001525878906,
+              "y": 531.6000366210938,
+              "right": 79.0250015258789,
+              "bottom": 565.6000366210938,
+              "width": 34,
+              "height": 34
+            },
+            {
+              "label": "暂停",
+              "x": 87.0250015258789,
+              "y": 527.6000366210938,
+              "right": 129.0250015258789,
+              "bottom": 569.6000366210938,
+              "width": 42,
+              "height": 42
+            },
+            {
+              "label": "下一首",
+              "x": 137.02500915527344,
+              "y": 531.6000366210938,
+              "right": 171.02500915527344,
+              "bottom": 565.6000366210938,
+              "width": 34,
+              "height": 34
+            },
+            {
+              "label": "重新播放",
+              "x": 173.02500915527344,
+              "y": 531.6000366210938,
+              "right": 207.02500915527344,
+              "bottom": 565.6000366210938,
+              "width": 34,
+              "height": 34
+            },
+            {
+              "label": "清晰度",
+              "x": 698.875,
+              "y": 533.6000366210938,
+              "right": 746.7250022888184,
+              "bottom": 563.6000366210938,
+              "width": 47.85000228881836,
+              "height": 30
+            },
+            {
+              "label": "倍速",
+              "x": 750.7250366210938,
+              "y": 533.6000366210938,
+              "right": 787.9250373840332,
+              "bottom": 563.6000366210938,
+              "width": 37.20000076293945,
+              "height": 30
+            },
+            {
+              "label": "字幕",
+              "x": 791.9249877929688,
+              "y": 533.6000366210938,
+              "right": 839.7749900817871,
+              "bottom": 563.6000366210938,
+              "width": 47.85000228881836,
+              "height": 30
+            },
+            {
+              "label": "取消静音",
+              "x": 849.7750244140625,
+              "y": 531.6000366210938,
+              "right": 883.7750244140625,
+              "bottom": 565.6000366210938,
+              "width": 34,
+              "height": 34
+            },
+            {
+              "label": "音量",
+              "x": 887.7750244140625,
+              "y": 546.6000366210938,
+              "right": 975.7750244140625,
+              "bottom": 550.6000366210938,
+              "width": 88,
+              "height": 4
+            },
+            {
+              "label": "设置",
+              "x": 975.7750244140625,
+              "y": 531.6000366210938,
+              "right": 1009.7750244140625,
+              "bottom": 565.6000366210938,
+              "width": 34,
+              "height": 34
+            },
+            {
+              "label": "画中画",
+              "x": 1013.7750244140625,
+              "y": 531.6000366210938,
+              "right": 1047.7750244140625,
+              "bottom": 565.6000366210938,
+              "width": 34,
+              "height": 34
+            }
+          ]
+        },
+        {
+          "width": 1366,
+          "height": 768,
+          "zoom": 1.5,
+          "fullscreen": false,
+          "action": "normal",
+          "dom": {
+            "viewport": {
+              "width": 911,
+              "height": 512,
+              "scale": 1.5
+            },
+            "elements": {
+              ".player-overlay": {
+                "x": 0,
+                "y": 0,
+                "width": 910.6666870117188,
+                "height": 512,
+                "right": 910.6666870117188,
+                "bottom": 512,
+                "clientHeight": 512,
+                "scrollHeight": 512,
+                "overflow": "visible",
+                "transform": "none",
+                "maxHeight": "none",
+                "animation": "fadeIn"
+              },
+              ".player-shell": {
+                "x": 12,
+                "y": 20,
+                "width": 886.6666870117188,
+                "height": 472,
+                "right": 898.6666870117188,
+                "bottom": 492,
+                "clientHeight": 471,
+                "scrollHeight": 471,
+                "overflow": "hidden",
+                "transform": "none",
+                "maxHeight": "100%",
+                "animation": "none"
+              },
+              ".player-stage": {
+                "x": 12.666666984558105,
+                "y": 86.16667175292969,
+                "width": 885.3333740234375,
+                "height": 297.25,
+                "right": 898.0000410079956,
+                "bottom": 383.4166717529297,
+                "clientHeight": 297,
+                "scrollHeight": 297,
+                "overflow": "hidden",
+                "transform": "none",
+                "maxHeight": "none",
+                "animation": "none"
+              },
+              ".player-video-surface": {
+                "x": 12.666666984558105,
+                "y": 86.16667175292969,
+                "width": 829.3333740234375,
+                "height": 297.25,
+                "right": 842.0000410079956,
+                "bottom": 383.4166717529297,
+                "clientHeight": 297,
+                "scrollHeight": 297,
+                "overflow": "hidden",
+                "transform": "none",
+                "maxHeight": "none",
+                "animation": "none"
+              },
+              ".player-mpv-host-surface": {
+                "x": 12.666666984558105,
+                "y": 86.16667175292969,
+                "width": 829.3333740234375,
+                "height": 297.25,
+                "right": 842.0000410079956,
+                "bottom": 383.4166717529297,
+                "clientHeight": 297,
+                "scrollHeight": 297,
+                "overflow": "hidden",
+                "transform": "none",
+                "maxHeight": "none",
+                "animation": "none"
+              },
+              ".player-topbar": {
+                "x": 12.666666984558105,
+                "y": 20.666667938232422,
+                "width": 885.3333740234375,
+                "height": 65.5,
+                "right": 898.0000410079956,
+                "bottom": 86.16666793823242,
+                "clientHeight": 66,
+                "scrollHeight": 66,
+                "overflow": "visible",
+                "transform": "none",
+                "maxHeight": "none",
+                "animation": "none"
+              },
+              ".player-toolbar": {
+                "x": 12.666666984558105,
+                "y": 383.41668701171875,
+                "width": 885.3333740234375,
+                "height": 107.91667175292969,
+                "right": 898.0000410079956,
+                "bottom": 491.33335876464844,
+                "clientHeight": 107,
+                "scrollHeight": 107,
+                "overflow": "visible",
+                "transform": "none",
+                "maxHeight": "none",
+                "animation": "none"
+              },
+              ".player-progress-row": {
+                "x": 26.666667938232422,
+                "y": 396.0833435058594,
+                "width": 857.3333740234375,
+                "height": 27.25,
+                "right": 884.0000419616699,
+                "bottom": 423.3333435058594,
+                "clientHeight": 27,
+                "scrollHeight": 27,
+                "overflow": "visible",
+                "transform": "none",
+                "maxHeight": "none",
+                "animation": "none"
+              }
+            }
+          },
+          "native": {
+            "main": {
+              "x": 20,
+              "y": 20,
+              "width": 1366,
+              "height": 768
+            },
+            "content": {
+              "x": 20,
+              "y": 20,
+              "width": 1366,
+              "height": 768
+            },
+            "zoom": 1.5,
+            "windows": [
+              {
+                "id": 2,
+                "parent": 1,
+                "bounds": {
+                  "x": 40,
+                  "y": 150,
+                  "width": 1243,
+                  "height": 445
+                },
+                "visible": true
+              },
+              {
+                "id": 1,
+                "bounds": {
+                  "x": 20,
+                  "y": 20,
+                  "width": 1366,
+                  "height": 768
+                },
+                "visible": true
+              }
+            ]
+          },
+          "buttons": [
+            {
+              "label": "关闭播放器",
+              "x": 28.666667938232422,
+              "y": 35.41666793823242,
+              "right": 64.66666793823242,
+              "bottom": 71.41666793823242,
+              "width": 36,
+              "height": 36
+            },
+            {
+              "label": "展开播放列表",
+              "x": 812.3333740234375,
+              "y": 37.41666793823242,
+              "right": 844.3333740234375,
+              "bottom": 69.41666793823242,
+              "width": 32,
+              "height": 32
+            },
+            {
+              "label": "全屏",
+              "x": 846.3333740234375,
+              "y": 37.41666793823242,
+              "right": 878.3333740234375,
+              "bottom": 69.41666793823242,
+              "width": 32,
+              "height": 32
+            },
+            {
+              "label": "播放进度",
+              "x": 94.66667175292969,
+              "y": 399.7083435058594,
+              "right": 816.0000457763672,
+              "bottom": 413.7083435058594,
+              "width": 721.3333740234375,
+              "height": 14
+            },
+            {
+              "label": "上一首",
+              "x": 26.666667938232422,
+              "y": 439.3333435058594,
+              "right": 60.66666793823242,
+              "bottom": 473.3333435058594,
+              "width": 34,
+              "height": 34
+            },
+            {
+              "label": "暂停",
+              "x": 68.66667175292969,
+              "y": 435.3333435058594,
+              "right": 110.66667175292969,
+              "bottom": 477.3333435058594,
+              "width": 42,
+              "height": 42
+            },
+            {
+              "label": "下一首",
+              "x": 118.66667175292969,
+              "y": 439.3333435058594,
+              "right": 152.6666717529297,
+              "bottom": 473.3333435058594,
+              "width": 34,
+              "height": 34
+            },
+            {
+              "label": "重新播放",
+              "x": 154.6666717529297,
+              "y": 439.3333435058594,
+              "right": 188.6666717529297,
+              "bottom": 473.3333435058594,
+              "width": 34,
+              "height": 34
+            },
+            {
+              "label": "清晰度",
+              "x": 555.90625,
+              "y": 441.3333435058594,
+              "right": 603.4895858764648,
+              "bottom": 471.3333435058594,
+              "width": 47.583335876464844,
+              "height": 30
+            },
+            {
+              "label": "倍速",
+              "x": 607.4896240234375,
+              "y": 441.3333435058594,
+              "right": 644.4167098999023,
+              "bottom": 471.3333435058594,
+              "width": 36.927085876464844,
+              "height": 30
+            },
+            {
+              "label": "字幕",
+              "x": 648.4166870117188,
+              "y": 441.3333435058594,
+              "right": 696.0000228881836,
+              "bottom": 471.3333435058594,
+              "width": 47.583335876464844,
+              "height": 30
+            },
+            {
+              "label": "取消静音",
+              "x": 706,
+              "y": 439.3333435058594,
+              "right": 740,
+              "bottom": 473.3333435058594,
+              "width": 34,
+              "height": 34
+            },
+            {
+              "label": "音量",
+              "x": 744,
+              "y": 454.3333435058594,
+              "right": 814,
+              "bottom": 458.3333435058594,
+              "width": 70,
+              "height": 4
+            },
+            {
+              "label": "设置",
+              "x": 812,
+              "y": 439.3333435058594,
+              "right": 846,
+              "bottom": 473.3333435058594,
+              "width": 34,
+              "height": 34
+            },
+            {
+              "label": "画中画",
+              "x": 850,
+              "y": 439.3333435058594,
+              "right": 884,
+              "bottom": 473.3333435058594,
+              "width": 34,
+              "height": 34
+            }
+          ]
+        },
+        {
+          "width": 1366,
+          "height": 768,
+          "zoom": 2,
+          "fullscreen": false,
+          "action": "normal",
+          "dom": {
+            "viewport": {
+              "width": 683,
+              "height": 384,
+              "scale": 2
+            },
+            "elements": {
+              ".player-overlay": {
+                "x": 0,
+                "y": 0,
+                "width": 683,
+                "height": 384,
+                "right": 683,
+                "bottom": 384,
+                "clientHeight": 384,
+                "scrollHeight": 384,
+                "overflow": "visible",
+                "transform": "none",
+                "maxHeight": "none",
+                "animation": "fadeIn"
+              },
+              ".player-shell": {
+                "x": 12,
+                "y": 20,
+                "width": 659,
+                "height": 344,
+                "right": 671,
+                "bottom": 364,
+                "clientHeight": 342,
+                "scrollHeight": 342,
+                "overflow": "hidden",
+                "transform": "none",
+                "maxHeight": "100%",
+                "animation": "none"
+              },
+              ".player-stage": {
+                "x": 13,
+                "y": 86.5,
+                "width": 657,
+                "height": 169,
+                "right": 670,
+                "bottom": 255.5,
+                "clientHeight": 169,
+                "scrollHeight": 169,
+                "overflow": "hidden",
+                "transform": "none",
+                "maxHeight": "none",
+                "animation": "none"
+              },
+              ".player-video-surface": {
+                "x": 13,
+                "y": 86.5,
+                "width": 657,
+                "height": 169,
+                "right": 670,
+                "bottom": 255.5,
+                "clientHeight": 169,
+                "scrollHeight": 169,
+                "overflow": "hidden",
+                "transform": "none",
+                "maxHeight": "none",
+                "animation": "none"
+              },
+              ".player-mpv-host-surface": {
+                "x": 13,
+                "y": 86.5,
+                "width": 657,
+                "height": 169,
+                "right": 670,
+                "bottom": 255.5,
+                "clientHeight": 169,
+                "scrollHeight": 169,
+                "overflow": "hidden",
+                "transform": "none",
+                "maxHeight": "none",
+                "animation": "none"
+              },
+              ".player-topbar": {
+                "x": 13,
+                "y": 21,
+                "width": 657,
+                "height": 65.5,
+                "right": 670,
+                "bottom": 86.5,
+                "clientHeight": 66,
+                "scrollHeight": 66,
+                "overflow": "visible",
+                "transform": "none",
+                "maxHeight": "none",
+                "animation": "none"
+              },
+              ".player-toolbar": {
+                "x": 13,
+                "y": 255.5,
+                "width": 657,
+                "height": 107.5,
+                "right": 670,
+                "bottom": 363,
+                "clientHeight": 107,
+                "scrollHeight": 107,
+                "overflow": "visible",
+                "transform": "none",
+                "maxHeight": "none",
+                "animation": "none"
+              },
+              ".player-progress-row": {
+                "x": 27,
+                "y": 268.5,
+                "width": 629,
+                "height": 26.5,
+                "right": 656,
+                "bottom": 295,
+                "clientHeight": 27,
+                "scrollHeight": 27,
+                "overflow": "visible",
+                "transform": "none",
+                "maxHeight": "none",
+                "animation": "none"
+              }
+            }
+          },
+          "native": {
+            "main": {
+              "x": 20,
+              "y": 20,
+              "width": 1366,
+              "height": 768
+            },
+            "content": {
+              "x": 20,
+              "y": 20,
+              "width": 1366,
+              "height": 768
+            },
+            "zoom": 2,
+            "windows": [
+              {
+                "id": 2,
+                "parent": 1,
+                "bounds": {
+                  "x": 46,
+                  "y": 193,
+                  "width": 1314,
+                  "height": 338
+                },
+                "visible": true
+              },
+              {
+                "id": 1,
+                "bounds": {
+                  "x": 20,
+                  "y": 20,
+                  "width": 1366,
+                  "height": 768
+                },
+                "visible": true
+              }
+            ]
+          },
+          "buttons": [
+            {
+              "label": "关闭播放器",
+              "x": 29,
+              "y": 35.75,
+              "right": 65,
+              "bottom": 71.75,
+              "width": 36,
+              "height": 36
+            },
+            {
+              "label": "展开播放列表",
+              "x": 584,
+              "y": 37.75,
+              "right": 616,
+              "bottom": 69.75,
+              "width": 32,
+              "height": 32
+            },
+            {
+              "label": "全屏",
+              "x": 618,
+              "y": 37.75,
+              "right": 650,
+              "bottom": 69.75,
+              "width": 32,
+              "height": 32
+            },
+            {
+              "label": "播放进度",
+              "x": 137,
+              "y": 271.75,
+              "right": 654,
+              "bottom": 285.75,
+              "width": 517,
+              "height": 14
+            },
+            {
+              "label": "上一首",
+              "x": 27,
+              "y": 311,
+              "right": 61,
+              "bottom": 345,
+              "width": 34,
+              "height": 34
+            },
+            {
+              "label": "暂停",
+              "x": 69,
+              "y": 307,
+              "right": 111,
+              "bottom": 349,
+              "width": 42,
+              "height": 42
+            },
+            {
+              "label": "下一首",
+              "x": 119,
+              "y": 311,
+              "right": 153,
+              "bottom": 345,
+              "width": 34,
+              "height": 34
+            },
+            {
+              "label": "重新播放",
+              "x": 155,
+              "y": 311,
+              "right": 189,
+              "bottom": 345,
+              "width": 34,
+              "height": 34
+            },
+            {
+              "label": "清晰度",
+              "x": 346.5078125,
+              "y": 313,
+              "right": 387.7421875,
+              "bottom": 343,
+              "width": 41.234375,
+              "height": 30
+            },
+            {
+              "label": "倍速",
+              "x": 391.7421875,
+              "y": 313,
+              "right": 422.765625,
+              "bottom": 343,
+              "width": 31.0234375,
+              "height": 30
+            },
+            {
+              "label": "字幕",
+              "x": 426.765625,
+              "y": 313,
+              "right": 468,
+              "bottom": 343,
+              "width": 41.234375,
+              "height": 30
+            },
+            {
+              "label": "取消静音",
+              "x": 478,
+              "y": 311,
+              "right": 512,
+              "bottom": 345,
+              "width": 34,
+              "height": 34
+            },
+            {
+              "label": "音量",
+              "x": 516,
+              "y": 326,
+              "right": 586,
+              "bottom": 330,
+              "width": 70,
+              "height": 4
+            },
+            {
+              "label": "设置",
+              "x": 584,
+              "y": 311,
+              "right": 618,
+              "bottom": 345,
+              "width": 34,
+              "height": 34
+            },
+            {
+              "label": "画中画",
+              "x": 622,
+              "y": 311,
+              "right": 656,
+              "bottom": 345,
+              "width": 34,
+              "height": 34
+            }
+          ]
+        },
+        {
+          "width": 1366,
+          "height": 626,
+          "zoom": 1,
+          "fullscreen": false,
+          "action": "speed",
+          "dom": {
+            "viewport": {
+              "width": 1366,
+              "height": 626,
+              "scale": 1
+            },
+            "elements": {
+              ".player-overlay": {
+                "x": 0,
+                "y": 0,
+                "width": 1366,
+                "height": 626,
+                "right": 1366,
+                "bottom": 626,
+                "clientHeight": 626,
+                "scrollHeight": 626,
+                "overflow": "visible",
+                "transform": "none",
+                "maxHeight": "none",
+                "animation": "fadeIn"
+              },
+              ".player-shell": {
+                "x": 32.78125,
+                "y": 28,
+                "width": 1300.4375,
+                "height": 570,
+                "right": 1333.21875,
+                "bottom": 598,
+                "clientHeight": 568,
+                "scrollHeight": 568,
+                "overflow": "hidden",
+                "transform": "none",
+                "maxHeight": "100%",
+                "animation": "none"
+              },
+              ".player-stage": {
+                "x": 33.78125,
+                "y": 94.5,
+                "width": 1298.4375,
+                "height": 390.25,
+                "right": 1332.21875,
+                "bottom": 484.75,
+                "clientHeight": 390,
+                "scrollHeight": 390,
+                "overflow": "hidden",
+                "transform": "none",
+                "maxHeight": "none",
+                "animation": "none"
+              },
+              ".player-video-surface": {
+                "x": 33.78125,
+                "y": 94.5,
+                "width": 962.4375,
+                "height": 390.25,
+                "right": 996.21875,
+                "bottom": 484.75,
+                "clientHeight": 390,
+                "scrollHeight": 390,
+                "overflow": "hidden",
+                "transform": "none",
+                "maxHeight": "none",
+                "animation": "none"
+              },
+              ".player-mpv-host-surface": {
+                "x": 33.78125,
+                "y": 94.5,
+                "width": 962.4375,
+                "height": 390.25,
+                "right": 996.21875,
+                "bottom": 484.75,
+                "clientHeight": 390,
+                "scrollHeight": 390,
+                "overflow": "hidden",
+                "transform": "none",
+                "maxHeight": "none",
+                "animation": "none"
+              },
+              ".player-topbar": {
+                "x": 33.78125,
+                "y": 29,
+                "width": 1298.4375,
+                "height": 65.5,
+                "right": 1332.21875,
+                "bottom": 94.5,
+                "clientHeight": 66,
+                "scrollHeight": 66,
+                "overflow": "visible",
+                "transform": "none",
+                "maxHeight": "none",
+                "animation": "none"
+              },
+              ".player-toolbar": {
+                "x": 33.78125,
+                "y": 484.75,
+                "width": 1298.4375,
+                "height": 112.25,
+                "right": 1332.21875,
+                "bottom": 597,
+                "clientHeight": 111,
+                "scrollHeight": 111,
+                "overflow": "visible",
+                "transform": "none",
+                "maxHeight": "none",
+                "animation": "none"
+              },
+              ".player-progress-row": {
+                "x": 51.78125,
+                "y": 499.75,
+                "width": 1262.4375,
+                "height": 27.25,
+                "right": 1314.21875,
+                "bottom": 527,
+                "clientHeight": 27,
+                "scrollHeight": 27,
+                "overflow": "visible",
+                "transform": "none",
+                "maxHeight": "none",
+                "animation": "none"
+              }
+            }
+          },
+          "native": {
+            "main": {
+              "x": 20,
+              "y": 20,
+              "width": 1366,
+              "height": 626
+            },
+            "content": {
+              "x": 20,
+              "y": 20,
+              "width": 1366,
+              "height": 626
+            },
+            "zoom": 1,
+            "windows": [
+              {
+                "id": 2,
+                "parent": 1,
+                "bounds": {
+                  "x": 54,
+                  "y": 115,
+                  "width": 962,
+                  "height": 389
+                },
+                "visible": true
+              },
+              {
+                "id": 1,
+                "bounds": {
+                  "x": 20,
+                  "y": 20,
+                  "width": 1366,
+                  "height": 626
+                },
+                "visible": true
+              }
+            ]
+          },
+          "buttons": [
+            {
+              "label": "关闭播放器",
+              "x": 49.78125,
+              "y": 43.75,
+              "right": 85.78125,
+              "bottom": 79.75,
+              "width": 36,
+              "height": 36
+            },
+            {
+              "label": "展开播放列表",
+              "x": 1246.21875,
+              "y": 45.75,
+              "right": 1278.21875,
+              "bottom": 77.75,
+              "width": 32,
+              "height": 32
+            },
+            {
+              "label": "全屏",
+              "x": 1280.21875,
+              "y": 45.75,
+              "right": 1312.21875,
+              "bottom": 77.75,
+              "width": 32,
+              "height": 32
+            },
+            {
+              "label": "播放进度",
+              "x": 119.78125,
+              "y": 503.375,
+              "right": 1246.21875,
+              "bottom": 517.375,
+              "width": 1126.4375,
+              "height": 14
+            },
+            {
+              "label": "上一首",
+              "x": 51.78125,
+              "y": 543,
+              "right": 85.78125,
+              "bottom": 577,
+              "width": 34,
+              "height": 34
+            },
+            {
+              "label": "暂停",
+              "x": 93.78125,
+              "y": 539,
+              "right": 135.78125,
+              "bottom": 581,
+              "width": 42,
+              "height": 42
+            },
+            {
+              "label": "下一首",
+              "x": 143.78125,
+              "y": 543,
+              "right": 177.78125,
+              "bottom": 577,
+              "width": 34,
+              "height": 34
+            },
+            {
+              "label": "重新播放",
+              "x": 179.78125,
+              "y": 543,
+              "right": 213.78125,
+              "bottom": 577,
+              "width": 34,
+              "height": 34
+            },
+            {
+              "label": "清晰度",
+              "x": 964.125,
+              "y": 545,
+              "right": 1012.375,
+              "bottom": 575,
+              "width": 48.25,
+              "height": 30
+            },
+            {
+              "label": "倍速",
+              "x": 1016.375,
+              "y": 545,
+              "right": 1053.96875,
+              "bottom": 575,
+              "width": 37.59375,
+              "height": 30
+            },
+            {
+              "label": "字幕",
+              "x": 1057.96875,
+              "y": 545,
+              "right": 1106.21875,
+              "bottom": 575,
+              "width": 48.25,
+              "height": 30
+            },
+            {
+              "label": "取消静音",
+              "x": 1116.21875,
+              "y": 543,
+              "right": 1150.21875,
+              "bottom": 577,
+              "width": 34,
+              "height": 34
+            },
+            {
+              "label": "音量",
+              "x": 1154.21875,
+              "y": 558,
+              "right": 1242.21875,
+              "bottom": 562,
+              "width": 88,
+              "height": 4
+            },
+            {
+              "label": "设置",
+              "x": 1242.21875,
+              "y": 543,
+              "right": 1276.21875,
+              "bottom": 577,
+              "width": 34,
+              "height": 34
+            },
+            {
+              "label": "画中画",
+              "x": 1280.21875,
+              "y": 543,
+              "right": 1314.21875,
+              "bottom": 577,
+              "width": 34,
+              "height": 34
+            }
+          ],
+          "image": "fixed-1-1366-1-speed-native.png"
+        },
+        {
+          "width": 1024,
+          "height": 600,
+          "zoom": 2,
+          "fullscreen": false,
+          "action": "speed",
+          "dom": {
+            "viewport": {
+              "width": 512,
+              "height": 300,
+              "scale": 2
+            },
+            "elements": {
+              ".player-overlay": {
+                "x": 0,
+                "y": 0,
+                "width": 512,
+                "height": 300,
+                "right": 512,
+                "bottom": 300,
+                "clientHeight": 300,
+                "scrollHeight": 300,
+                "overflow": "visible",
+                "transform": "none",
+                "maxHeight": "none",
+                "animation": "fadeIn"
+              },
+              ".player-shell": {
+                "x": 12,
+                "y": 20,
+                "width": 488,
+                "height": 260,
+                "right": 500,
+                "bottom": 280,
+                "clientHeight": 258,
+                "scrollHeight": 258,
+                "overflow": "hidden",
+                "transform": "none",
+                "maxHeight": "100%",
+                "animation": "none"
+              },
+              ".player-stage": {
+                "x": 13,
+                "y": 86.5,
+                "width": 486,
+                "height": 37,
+                "right": 499,
+                "bottom": 123.5,
+                "clientHeight": 37,
+                "scrollHeight": 61,
+                "overflow": "hidden",
+                "transform": "none",
+                "maxHeight": "none",
+                "animation": "none"
+              },
+              ".player-video-surface": {
+                "x": 13,
+                "y": 86.5,
+                "width": 336,
+                "height": 37,
+                "right": 349,
+                "bottom": 123.5,
+                "clientHeight": 37,
+                "scrollHeight": 37,
+                "overflow": "hidden",
+                "transform": "none",
+                "maxHeight": "none",
+                "animation": "none"
+              },
+              ".player-mpv-host-surface": {
+                "x": 13,
+                "y": 86.5,
+                "width": 336,
+                "height": 37,
+                "right": 349,
+                "bottom": 123.5,
+                "clientHeight": 37,
+                "scrollHeight": 37,
+                "overflow": "hidden",
+                "transform": "none",
+                "maxHeight": "none",
+                "animation": "none"
+              },
+              ".player-topbar": {
+                "x": 13,
+                "y": 21,
+                "width": 486,
+                "height": 65.5,
+                "right": 499,
+                "bottom": 86.5,
+                "clientHeight": 66,
+                "scrollHeight": 66,
+                "overflow": "visible",
+                "transform": "none",
+                "maxHeight": "none",
+                "animation": "none"
+              },
+              ".player-toolbar": {
+                "x": 13,
+                "y": 123.5,
+                "width": 486,
+                "height": 155.5,
+                "right": 499,
+                "bottom": 279,
+                "clientHeight": 155,
+                "scrollHeight": 155,
+                "overflow": "visible",
+                "transform": "none",
+                "maxHeight": "none",
+                "animation": "none"
+              },
+              ".player-progress-row": {
+                "x": 27,
+                "y": 136.5,
+                "width": 458,
+                "height": 26.5,
+                "right": 485,
+                "bottom": 163,
+                "clientHeight": 27,
+                "scrollHeight": 27,
+                "overflow": "visible",
+                "transform": "none",
+                "maxHeight": "none",
+                "animation": "none"
+              }
+            }
+          },
+          "native": {
+            "main": {
+              "x": 20,
+              "y": 20,
+              "width": 1024,
+              "height": 600
+            },
+            "content": {
+              "x": 20,
+              "y": 20,
+              "width": 1024,
+              "height": 600
+            },
+            "zoom": 2,
+            "windows": [
+              {
+                "id": 2,
+                "parent": 1,
+                "bounds": {
+                  "x": 46,
+                  "y": 193,
+                  "width": 672,
+                  "height": 74
+                },
+                "visible": true
+              },
+              {
+                "id": 1,
+                "bounds": {
+                  "x": 20,
+                  "y": 20,
+                  "width": 1024,
+                  "height": 600
+                },
+                "visible": true
+              }
+            ]
+          },
+          "buttons": [
+            {
+              "label": "关闭播放器",
+              "x": 29,
+              "y": 35.75,
+              "right": 65,
+              "bottom": 71.75,
+              "width": 36,
+              "height": 36
+            },
+            {
+              "label": "展开播放列表",
+              "x": 413,
+              "y": 37.75,
+              "right": 445,
+              "bottom": 69.75,
+              "width": 32,
+              "height": 32
+            },
+            {
+              "label": "全屏",
+              "x": 447,
+              "y": 37.75,
+              "right": 479,
+              "bottom": 69.75,
+              "width": 32,
+              "height": 32
+            },
+            {
+              "label": "播放进度",
+              "x": 137,
+              "y": 139.75,
+              "right": 483,
+              "bottom": 153.75,
+              "width": 346,
+              "height": 14
+            },
+            {
+              "label": "上一首",
+              "x": 27,
+              "y": 179,
+              "right": 61,
+              "bottom": 213,
+              "width": 34,
+              "height": 34
+            },
+            {
+              "label": "暂停",
+              "x": 69,
+              "y": 175,
+              "right": 111,
+              "bottom": 217,
+              "width": 42,
+              "height": 42
+            },
+            {
+              "label": "下一首",
+              "x": 119,
+              "y": 179,
+              "right": 153,
+              "bottom": 213,
+              "width": 34,
+              "height": 34
+            },
+            {
+              "label": "重新播放",
+              "x": 155,
+              "y": 179,
+              "right": 189,
+              "bottom": 213,
+              "width": 34,
+              "height": 34
+            },
+            {
+              "label": "清晰度",
+              "x": 27,
+              "y": 233,
+              "right": 68.234375,
+              "bottom": 263,
+              "width": 41.234375,
+              "height": 30
+            },
+            {
+              "label": "倍速",
+              "x": 72.234375,
+              "y": 233,
+              "right": 103.2578125,
+              "bottom": 263,
+              "width": 31.0234375,
+              "height": 30
+            },
+            {
+              "label": "字幕",
+              "x": 107.2578125,
+              "y": 233,
+              "right": 148.4921875,
+              "bottom": 263,
+              "width": 41.234375,
+              "height": 30
+            },
+            {
+              "label": "取消静音",
+              "x": 158.4921875,
+              "y": 231,
+              "right": 192.4921875,
+              "bottom": 265,
+              "width": 34,
+              "height": 34
+            },
+            {
+              "label": "音量",
+              "x": 196.4921875,
+              "y": 246,
+              "right": 266.4921875,
+              "bottom": 250,
+              "width": 70,
+              "height": 4
+            },
+            {
+              "label": "设置",
+              "x": 264.4921875,
+              "y": 231,
+              "right": 298.4921875,
+              "bottom": 265,
+              "width": 34,
+              "height": 34
+            },
+            {
+              "label": "画中画",
+              "x": 302.4921875,
+              "y": 231,
+              "right": 336.4921875,
+              "bottom": 265,
+              "width": 34,
+              "height": 34
+            }
+          ],
+          "image": "fixed-1-1024-2-speed-native.png"
+        },
+        {
+          "width": 1366,
+          "height": 626,
+          "zoom": 1,
+          "fullscreen": false,
+          "action": "playlist",
+          "dom": {
+            "viewport": {
+              "width": 1366,
+              "height": 626,
+              "scale": 1
+            },
+            "elements": {
+              ".player-overlay": {
+                "x": 0,
+                "y": 0,
+                "width": 1366,
+                "height": 626,
+                "right": 1366,
+                "bottom": 626,
+                "clientHeight": 626,
+                "scrollHeight": 626,
+                "overflow": "visible",
+                "transform": "none",
+                "maxHeight": "none",
+                "animation": "fadeIn"
+              },
+              ".player-shell": {
+                "x": 32.78125,
+                "y": 28,
+                "width": 1300.4375,
+                "height": 570,
+                "right": 1333.21875,
+                "bottom": 598,
+                "clientHeight": 568,
+                "scrollHeight": 568,
+                "overflow": "hidden",
+                "transform": "none",
+                "maxHeight": "100%",
+                "animation": "none"
+              },
+              ".player-stage": {
+                "x": 33.78125,
+                "y": 94.5,
+                "width": 1298.4375,
+                "height": 390.25,
+                "right": 1332.21875,
+                "bottom": 484.75,
+                "clientHeight": 390,
+                "scrollHeight": 390,
+                "overflow": "hidden",
+                "transform": "none",
+                "maxHeight": "none",
+                "animation": "none"
+              },
+              ".player-video-surface": {
+                "x": 33.78125,
+                "y": 94.5,
+                "width": 968.4375,
+                "height": 390.25,
+                "right": 1002.21875,
+                "bottom": 484.75,
+                "clientHeight": 390,
+                "scrollHeight": 390,
+                "overflow": "hidden",
+                "transform": "none",
+                "maxHeight": "none",
+                "animation": "none"
+              },
+              ".player-mpv-host-surface": {
+                "x": 33.78125,
+                "y": 94.5,
+                "width": 968.4375,
+                "height": 390.25,
+                "right": 1002.21875,
+                "bottom": 484.75,
+                "clientHeight": 390,
+                "scrollHeight": 390,
+                "overflow": "hidden",
+                "transform": "none",
+                "maxHeight": "none",
+                "animation": "none"
+              },
+              ".player-topbar": {
+                "x": 33.78125,
+                "y": 29,
+                "width": 1298.4375,
+                "height": 65.5,
+                "right": 1332.21875,
+                "bottom": 94.5,
+                "clientHeight": 66,
+                "scrollHeight": 66,
+                "overflow": "visible",
+                "transform": "none",
+                "maxHeight": "none",
+                "animation": "none"
+              },
+              ".player-toolbar": {
+                "x": 33.78125,
+                "y": 484.75,
+                "width": 1298.4375,
+                "height": 112.25,
+                "right": 1332.21875,
+                "bottom": 597,
+                "clientHeight": 111,
+                "scrollHeight": 111,
+                "overflow": "visible",
+                "transform": "none",
+                "maxHeight": "none",
+                "animation": "none"
+              },
+              ".player-progress-row": {
+                "x": 51.78125,
+                "y": 499.75,
+                "width": 1262.4375,
+                "height": 27.25,
+                "right": 1314.21875,
+                "bottom": 527,
+                "clientHeight": 27,
+                "scrollHeight": 27,
+                "overflow": "visible",
+                "transform": "none",
+                "maxHeight": "none",
+                "animation": "none"
+              }
+            }
+          },
+          "native": {
+            "main": {
+              "x": 20,
+              "y": 20,
+              "width": 1366,
+              "height": 626
+            },
+            "content": {
+              "x": 20,
+              "y": 20,
+              "width": 1366,
+              "height": 626
+            },
+            "zoom": 1,
+            "windows": [
+              {
+                "id": 2,
+                "parent": 1,
+                "bounds": {
+                  "x": 54,
+                  "y": 115,
+                  "width": 968,
+                  "height": 389
+                },
+                "visible": true
+              },
+              {
+                "id": 1,
+                "bounds": {
+                  "x": 20,
+                  "y": 20,
+                  "width": 1366,
+                  "height": 626
+                },
+                "visible": true
+              }
+            ]
+          },
+          "buttons": [
+            {
+              "label": "关闭播放器",
+              "x": 49.78125,
+              "y": 43.75,
+              "right": 85.78125,
+              "bottom": 79.75,
+              "width": 36,
+              "height": 36
+            },
+            {
+              "label": "收起播放列表",
+              "x": 1246.21875,
+              "y": 45.75,
+              "right": 1278.21875,
+              "bottom": 77.75,
+              "width": 32,
+              "height": 32
+            },
+            {
+              "label": "全屏",
+              "x": 1280.21875,
+              "y": 45.75,
+              "right": 1312.21875,
+              "bottom": 77.75,
+              "width": 32,
+              "height": 32
+            },
+            {
+              "label": "播放进度",
+              "x": 119.78125,
+              "y": 503.375,
+              "right": 1246.21875,
+              "bottom": 517.375,
+              "width": 1126.4375,
+              "height": 14
+            },
+            {
+              "label": "上一首",
+              "x": 51.78125,
+              "y": 543,
+              "right": 85.78125,
+              "bottom": 577,
+              "width": 34,
+              "height": 34
+            },
+            {
+              "label": "暂停",
+              "x": 93.78125,
+              "y": 539,
+              "right": 135.78125,
+              "bottom": 581,
+              "width": 42,
+              "height": 42
+            },
+            {
+              "label": "下一首",
+              "x": 143.78125,
+              "y": 543,
+              "right": 177.78125,
+              "bottom": 577,
+              "width": 34,
+              "height": 34
+            },
+            {
+              "label": "重新播放",
+              "x": 179.78125,
+              "y": 543,
+              "right": 213.78125,
+              "bottom": 577,
+              "width": 34,
+              "height": 34
+            },
+            {
+              "label": "清晰度",
+              "x": 964.125,
+              "y": 545,
+              "right": 1012.375,
+              "bottom": 575,
+              "width": 48.25,
+              "height": 30
+            },
+            {
+              "label": "倍速",
+              "x": 1016.375,
+              "y": 545,
+              "right": 1053.96875,
+              "bottom": 575,
+              "width": 37.59375,
+              "height": 30
+            },
+            {
+              "label": "字幕",
+              "x": 1057.96875,
+              "y": 545,
+              "right": 1106.21875,
+              "bottom": 575,
+              "width": 48.25,
+              "height": 30
+            },
+            {
+              "label": "取消静音",
+              "x": 1116.21875,
+              "y": 543,
+              "right": 1150.21875,
+              "bottom": 577,
+              "width": 34,
+              "height": 34
+            },
+            {
+              "label": "音量",
+              "x": 1154.21875,
+              "y": 558,
+              "right": 1242.21875,
+              "bottom": 562,
+              "width": 88,
+              "height": 4
+            },
+            {
+              "label": "设置",
+              "x": 1242.21875,
+              "y": 543,
+              "right": 1276.21875,
+              "bottom": 577,
+              "width": 34,
+              "height": 34
+            },
+            {
+              "label": "画中画",
+              "x": 1280.21875,
+              "y": 543,
+              "right": 1314.21875,
+              "bottom": 577,
+              "width": 34,
+              "height": 34
+            }
+          ],
+          "image": "fixed-1-1366-1-playlist-native.png"
+        },
+        {
+          "width": 1366,
+          "height": 626,
+          "zoom": 1,
+          "fullscreen": false,
+          "action": "portrait",
+          "dom": {
+            "viewport": {
+              "width": 1366,
+              "height": 626,
+              "scale": 1
+            },
+            "elements": {
+              ".player-overlay": {
+                "x": 0,
+                "y": 0,
+                "width": 1366,
+                "height": 626,
+                "right": 1366,
+                "bottom": 626,
+                "clientHeight": 626,
+                "scrollHeight": 626,
+                "overflow": "visible",
+                "transform": "none",
+                "maxHeight": "none",
+                "animation": "fadeIn"
+              },
+              ".player-shell": {
+                "x": 32.78125,
+                "y": 28,
+                "width": 1300.4375,
+                "height": 570,
+                "right": 1333.21875,
+                "bottom": 598,
+                "clientHeight": 568,
+                "scrollHeight": 568,
+                "overflow": "hidden",
+                "transform": "none",
+                "maxHeight": "100%",
+                "animation": "none"
+              },
+              ".player-stage": {
+                "x": 33.78125,
+                "y": 94.5,
+                "width": 1298.4375,
+                "height": 390.25,
+                "right": 1332.21875,
+                "bottom": 484.75,
+                "clientHeight": 390,
+                "scrollHeight": 390,
+                "overflow": "hidden",
+                "transform": "none",
+                "maxHeight": "none",
+                "animation": "none"
+              },
+              ".player-video-surface": {
+                "x": 33.78125,
+                "y": 94.5,
+                "width": 1242.4375,
+                "height": 390.25,
+                "right": 1276.21875,
+                "bottom": 484.75,
+                "clientHeight": 390,
+                "scrollHeight": 390,
+                "overflow": "hidden",
+                "transform": "none",
+                "maxHeight": "none",
+                "animation": "none"
+              },
+              ".player-mpv-host-surface": {
+                "x": 33.78125,
+                "y": 94.5,
+                "width": 1242.4375,
+                "height": 390.25,
+                "right": 1276.21875,
+                "bottom": 484.75,
+                "clientHeight": 390,
+                "scrollHeight": 390,
+                "overflow": "hidden",
+                "transform": "none",
+                "maxHeight": "none",
+                "animation": "none"
+              },
+              ".player-topbar": {
+                "x": 33.78125,
+                "y": 29,
+                "width": 1298.4375,
+                "height": 65.5,
+                "right": 1332.21875,
+                "bottom": 94.5,
+                "clientHeight": 66,
+                "scrollHeight": 66,
+                "overflow": "visible",
+                "transform": "none",
+                "maxHeight": "none",
+                "animation": "none"
+              },
+              ".player-toolbar": {
+                "x": 33.78125,
+                "y": 484.75,
+                "width": 1298.4375,
+                "height": 112.25,
+                "right": 1332.21875,
+                "bottom": 597,
+                "clientHeight": 111,
+                "scrollHeight": 111,
+                "overflow": "visible",
+                "transform": "none",
+                "maxHeight": "none",
+                "animation": "none"
+              },
+              ".player-progress-row": {
+                "x": 51.78125,
+                "y": 499.75,
+                "width": 1262.4375,
+                "height": 27.25,
+                "right": 1314.21875,
+                "bottom": 527,
+                "clientHeight": 27,
+                "scrollHeight": 27,
+                "overflow": "visible",
+                "transform": "none",
+                "maxHeight": "none",
+                "animation": "none"
+              }
+            }
+          },
+          "native": {
+            "main": {
+              "x": 20,
+              "y": 20,
+              "width": 1366,
+              "height": 626
+            },
+            "content": {
+              "x": 20,
+              "y": 20,
+              "width": 1366,
+              "height": 626
+            },
+            "zoom": 1,
+            "windows": [
+              {
+                "id": 2,
+                "parent": 1,
+                "bounds": {
+                  "x": 54,
+                  "y": 115,
+                  "width": 1242,
+                  "height": 389
+                },
+                "visible": true
+              },
+              {
+                "id": 1,
+                "bounds": {
+                  "x": 20,
+                  "y": 20,
+                  "width": 1366,
+                  "height": 626
+                },
+                "visible": true
+              }
+            ]
+          },
+          "buttons": [
+            {
+              "label": "关闭播放器",
+              "x": 49.78125,
+              "y": 43.75,
+              "right": 85.78125,
+              "bottom": 79.75,
+              "width": 36,
+              "height": 36
+            },
+            {
+              "label": "展开播放列表",
+              "x": 1246.21875,
+              "y": 45.75,
+              "right": 1278.21875,
+              "bottom": 77.75,
+              "width": 32,
+              "height": 32
+            },
+            {
+              "label": "全屏",
+              "x": 1280.21875,
+              "y": 45.75,
+              "right": 1312.21875,
+              "bottom": 77.75,
+              "width": 32,
+              "height": 32
+            },
+            {
+              "label": "播放进度",
+              "x": 119.78125,
+              "y": 503.375,
+              "right": 1246.21875,
+              "bottom": 517.375,
+              "width": 1126.4375,
+              "height": 14
+            },
+            {
+              "label": "上一首",
+              "x": 51.78125,
+              "y": 543,
+              "right": 85.78125,
+              "bottom": 577,
+              "width": 34,
+              "height": 34
+            },
+            {
+              "label": "暂停",
+              "x": 93.78125,
+              "y": 539,
+              "right": 135.78125,
+              "bottom": 581,
+              "width": 42,
+              "height": 42
+            },
+            {
+              "label": "下一首",
+              "x": 143.78125,
+              "y": 543,
+              "right": 177.78125,
+              "bottom": 577,
+              "width": 34,
+              "height": 34
+            },
+            {
+              "label": "重新播放",
+              "x": 179.78125,
+              "y": 543,
+              "right": 213.78125,
+              "bottom": 577,
+              "width": 34,
+              "height": 34
+            },
+            {
+              "label": "清晰度",
+              "x": 964.125,
+              "y": 545,
+              "right": 1012.375,
+              "bottom": 575,
+              "width": 48.25,
+              "height": 30
+            },
+            {
+              "label": "倍速",
+              "x": 1016.375,
+              "y": 545,
+              "right": 1053.96875,
+              "bottom": 575,
+              "width": 37.59375,
+              "height": 30
+            },
+            {
+              "label": "字幕",
+              "x": 1057.96875,
+              "y": 545,
+              "right": 1106.21875,
+              "bottom": 575,
+              "width": 48.25,
+              "height": 30
+            },
+            {
+              "label": "取消静音",
+              "x": 1116.21875,
+              "y": 543,
+              "right": 1150.21875,
+              "bottom": 577,
+              "width": 34,
+              "height": 34
+            },
+            {
+              "label": "音量",
+              "x": 1154.21875,
+              "y": 558,
+              "right": 1242.21875,
+              "bottom": 562,
+              "width": 88,
+              "height": 4
+            },
+            {
+              "label": "设置",
+              "x": 1242.21875,
+              "y": 543,
+              "right": 1276.21875,
+              "bottom": 577,
+              "width": 34,
+              "height": 34
+            },
+            {
+              "label": "画中画",
+              "x": 1280.21875,
+              "y": 543,
+              "right": 1314.21875,
+              "bottom": 577,
+              "width": 34,
+              "height": 34
+            }
+          ],
+          "image": "fixed-1-1366-1-portrait-native.png"
+        },
+        {
+          "width": 1366,
+          "height": 626,
+          "zoom": 1,
+          "fullscreen": true,
+          "action": "normal",
+          "dom": {
+            "viewport": {
+              "width": 1920,
+              "height": 1080,
+              "scale": 1
+            },
+            "elements": {
+              ".player-overlay": {
+                "x": 0,
+                "y": 0,
+                "width": 1920,
+                "height": 1080,
+                "right": 1920,
+                "bottom": 1080,
+                "clientHeight": 1080,
+                "scrollHeight": 1080,
+                "overflow": "visible",
+                "transform": "none",
+                "maxHeight": "none",
+                "animation": "fadeIn"
+              },
+              ".player-shell": {
+                "x": 0,
+                "y": 0,
+                "width": 1920,
+                "height": 1080,
+                "right": 1920,
+                "bottom": 1080,
+                "clientHeight": 1080,
+                "scrollHeight": 1080,
+                "overflow": "hidden",
+                "transform": "none",
+                "maxHeight": "none",
+                "animation": "none"
+              },
+              ".player-stage": {
+                "x": 0,
+                "y": 65.5,
+                "width": 1920,
+                "height": 902.25,
+                "right": 1920,
+                "bottom": 967.75,
+                "clientHeight": 902,
+                "scrollHeight": 902,
+                "overflow": "hidden",
+                "transform": "none",
+                "maxHeight": "none",
+                "animation": "none"
+              },
+              ".player-video-surface": {
+                "x": 0,
+                "y": 65.5,
+                "width": 1864,
+                "height": 902.25,
+                "right": 1864,
+                "bottom": 967.75,
+                "clientHeight": 902,
+                "scrollHeight": 902,
+                "overflow": "hidden",
+                "transform": "none",
+                "maxHeight": "none",
+                "animation": "none"
+              },
+              ".player-mpv-host-surface": {
+                "x": 0,
+                "y": 65.5,
+                "width": 1864,
+                "height": 902.25,
+                "right": 1864,
+                "bottom": 967.75,
+                "clientHeight": 902,
+                "scrollHeight": 902,
+                "overflow": "hidden",
+                "transform": "none",
+                "maxHeight": "none",
+                "animation": "none"
+              },
+              ".player-topbar": {
+                "x": 0,
+                "y": 0,
+                "width": 1920,
+                "height": 65.5,
+                "right": 1920,
+                "bottom": 65.5,
+                "clientHeight": 66,
+                "scrollHeight": 66,
+                "overflow": "visible",
+                "transform": "none",
+                "maxHeight": "none",
+                "animation": "none"
+              },
+              ".player-toolbar": {
+                "x": 0,
+                "y": 967.75,
+                "width": 1920,
+                "height": 112.25,
+                "right": 1920,
+                "bottom": 1080,
+                "clientHeight": 111,
+                "scrollHeight": 111,
+                "overflow": "visible",
+                "transform": "none",
+                "maxHeight": "none",
+                "animation": "none"
+              },
+              ".player-progress-row": {
+                "x": 18,
+                "y": 982.75,
+                "width": 1884,
+                "height": 27.25,
+                "right": 1902,
+                "bottom": 1010,
+                "clientHeight": 27,
+                "scrollHeight": 27,
+                "overflow": "visible",
+                "transform": "none",
+                "maxHeight": "none",
+                "animation": "none"
+              }
+            }
+          },
+          "native": {
+            "main": {
+              "x": 0,
+              "y": 0,
+              "width": 1920,
+              "height": 1080
+            },
+            "content": {
+              "x": 0,
+              "y": 0,
+              "width": 1920,
+              "height": 1080
+            },
+            "zoom": 1,
+            "windows": [
+              {
+                "id": 2,
+                "parent": 1,
+                "bounds": {
+                  "x": 0,
+                  "y": 66,
+                  "width": 1864,
+                  "height": 901
+                },
+                "visible": true
+              },
+              {
+                "id": 1,
+                "bounds": {
+                  "x": 0,
+                  "y": 0,
+                  "width": 1920,
+                  "height": 1080
+                },
+                "visible": true
+              }
+            ]
+          },
+          "buttons": [
+            {
+              "label": "关闭播放器",
+              "x": 16,
+              "y": 14.75,
+              "right": 52,
+              "bottom": 50.75,
+              "width": 36,
+              "height": 36
+            },
+            {
+              "label": "展开播放列表",
+              "x": 1834,
+              "y": 16.75,
+              "right": 1866,
+              "bottom": 48.75,
+              "width": 32,
+              "height": 32
+            },
+            {
+              "label": "退出全屏",
+              "x": 1868,
+              "y": 16.75,
+              "right": 1900,
+              "bottom": 48.75,
+              "width": 32,
+              "height": 32
+            },
+            {
+              "label": "播放进度",
+              "x": 86,
+              "y": 986.375,
+              "right": 1834,
+              "bottom": 1000.375,
+              "width": 1748,
+              "height": 14
+            },
+            {
+              "label": "上一首",
+              "x": 18,
+              "y": 1026,
+              "right": 52,
+              "bottom": 1060,
+              "width": 34,
+              "height": 34
+            },
+            {
+              "label": "暂停",
+              "x": 60,
+              "y": 1022,
+              "right": 102,
+              "bottom": 1064,
+              "width": 42,
+              "height": 42
+            },
+            {
+              "label": "下一首",
+              "x": 110,
+              "y": 1026,
+              "right": 144,
+              "bottom": 1060,
+              "width": 34,
+              "height": 34
+            },
+            {
+              "label": "重新播放",
+              "x": 146,
+              "y": 1026,
+              "right": 180,
+              "bottom": 1060,
+              "width": 34,
+              "height": 34
+            },
+            {
+              "label": "清晰度",
+              "x": 1551.90625,
+              "y": 1028,
+              "right": 1600.15625,
+              "bottom": 1058,
+              "width": 48.25,
+              "height": 30
+            },
+            {
+              "label": "倍速",
+              "x": 1604.15625,
+              "y": 1028,
+              "right": 1641.75,
+              "bottom": 1058,
+              "width": 37.59375,
+              "height": 30
+            },
+            {
+              "label": "字幕",
+              "x": 1645.75,
+              "y": 1028,
+              "right": 1694,
+              "bottom": 1058,
+              "width": 48.25,
+              "height": 30
+            },
+            {
+              "label": "取消静音",
+              "x": 1704,
+              "y": 1026,
+              "right": 1738,
+              "bottom": 1060,
+              "width": 34,
+              "height": 34
+            },
+            {
+              "label": "音量",
+              "x": 1742,
+              "y": 1041,
+              "right": 1830,
+              "bottom": 1045,
+              "width": 88,
+              "height": 4
+            },
+            {
+              "label": "设置",
+              "x": 1830,
+              "y": 1026,
+              "right": 1864,
+              "bottom": 1060,
+              "width": 34,
+              "height": 34
+            },
+            {
+              "label": "画中画",
+              "x": 1868,
+              "y": 1026,
+              "right": 1902,
+              "bottom": 1060,
+              "width": 34,
+              "height": 34
+            }
+          ],
+          "image": "fixed-1-1366-1-normal-fullscreen-native.png"
+        }
+      ],
+      "raw": ".tmp\\refactor-tests\\r7-native-player-overflow\\fixed-1-result.json"
+    },
+    "ci": {
+      "commands": [
+        "npm run build",
+        "npm run verify:desktop-player",
+        "npm run verify:responsive-layout"
+      ],
+      "passed": true,
+      "responsiveCases": 24,
+      "nativePlayerLayoutCases": 6,
+      "nativeLayoutDecodingSubstituted": true,
+      "nativeHostGeometry": "fractional CSS coordinates, 75–200% zoom, inward rounding, clipping, window movement, offscreen hide and listener cleanup"
+    },
+    "images": [
+      {
+        "file": ".tmp/refactor-tests/r7-native-player-overflow/fixed-1-1024-2-speed-native.png",
+        "sha256": "8e015de035ac9950c6c56f7e7e1549ba33e2a8c052fc40db8373cf579f7b9d96"
+      },
+      {
+        "file": ".tmp/refactor-tests/r7-native-player-overflow/fixed-1-1366-1-normal-fullscreen-native.png",
+        "sha256": "83b811c4f0da0d384afa91a2db94682431b98911775a393c00af66b5341a8af8"
+      },
+      {
+        "file": ".tmp/refactor-tests/r7-native-player-overflow/fixed-1-1366-1-normal-native.png",
+        "sha256": "92943e763f4546c7c7548b6afc08d84eb2513f1b89952249fd4b5656a8133e69"
+      },
+      {
+        "file": ".tmp/refactor-tests/r7-native-player-overflow/fixed-1-1366-1-playlist-native.png",
+        "sha256": "50ebe9209b5aae188f75022d3a5d90a1bf2f5b3c145f73fc3e719eae284de3e4"
+      },
+      {
+        "file": ".tmp/refactor-tests/r7-native-player-overflow/fixed-1-1366-1-portrait-native.png",
+        "sha256": "4706178674643e7589b0cd903656f529e4155b042b1127281c462347b6881500"
+      },
+      {
+        "file": ".tmp/refactor-tests/r7-native-player-overflow/fixed-1-1366-1-speed-native.png",
+        "sha256": "de65b49e705ea869a306452711566d9809878a4f8a42397d94fc3fcb3b4bd860"
+      }
+    ],
+    "closure": {
+      "at": "2026-10-23T10:46:14.0566476Z",
+      "ownProcesses": [],
+      "count": 0
+    }
+  },
+  "limitations": [
+    "Actual playback checks use this Windows 11 machine, two generated H264/AAC clips and separate synthetic Data. They do not establish physical phone, LAN, performance or long-duration budgets.",
+    "Native image checks temporarily bring only the test windows above other windows. This is test setup, not a product default.",
+    "Installer, portable and application executable remain NotSigned. Nothing was published or installed over production.",
+    "Historical theme anomaly remains open."
+  ],
+  "precedingResourceChecks": {
+    "status": "partial; full soak not accepted",
+    "cyclesVerified": 30,
+    "cycleEvidence": ".tmp\\refactor-tests\\r6-desktop-native-resources\\soak-result.json",
+    "parentRunPassed": false,
+    "secondRunPassed": false,
+    "note": "Thirty real load/switch/close cycles completed with IPC maps restored and at most one mpv. Long runs stopped on pause/visibility assertions. Failed results are retained; new visibility traces show document hidden even with a non-minimized visible window. Cause is not established. User screenshot correction took priority; no 20-minute pass or memory-budget pass is claimed."
+  },
+  "preservation": {
+    "verifiedFiles": 90,
+    "originalData": 42,
+    "historicalPublicArtifacts": 8,
+    "olderQaArtifacts": 16,
+    "latestQaAndPriorFormalKept": true,
+    "sourceHashes": [
+      {
+        "file": "main/mpv-host.js",
+        "sha256": "1ef6d59dde6aa5be1670c6d1d05365cae5066dbc44874a11c8daf61ecf569b54"
+      },
+      {
+        "file": "main/mpv.js",
+        "sha256": "ca6ff999cbf3560f65d796e3f1a7937f1db45381b507a26003b239abc9073589"
+      },
+      {
+        "file": "src/components/VideoPlayer.jsx",
+        "sha256": "de26897fe525f7ba6afec2938fbf40e6b16c5a79433325a0f3b4c8961c47a26d"
+      },
+      {
+        "file": "src/services/player-resources.js",
+        "sha256": "bea5e04aa7747d543c2c5e5cf30338188bd0b165b90f6ac4ef34f3b869d39045"
+      },
+      {
+        "file": "src/styles/player-v3.css",
+        "sha256": "3df495ffad8cf29596a3dc3648c3b147a27031b3059c099b7d60c52c7b8ff765"
+      },
+      {
+        "file": "scripts/verify-mpv-host-geometry.js",
+        "sha256": "95a028a9d82a6b54fd9a0d0e7365312c53ff68c5809c49e1fd1d6968f2ab3096"
+      },
+      {
+        "file": "scripts/verify-desktop-player-resources.js",
+        "sha256": "a755e61d856d20e4f0206c40c47d14fddb889613a630711d491e55cb2511c4c3"
+      },
+      {
+        "file": "scripts/verify-desktop-player.js",
+        "sha256": "64ded30786df4a485d13132a612dc69d7d1fef84d9a465a3c5038d947f5ef505"
+      },
+      {
+        "file": "scripts/verify-responsive-layout.js",
+        "sha256": "abcc37a2d9192f7c8f0280933eb4e12b6ab676a5bc6934cd8ede4fde8cd2acd9"
+      },
+      {
+        "file": "README.md",
+        "sha256": "e2427abca801906059841fa9a1f0191a9121e09ebdcbecfc2fc8427baf9ff86d"
+      }
+    ],
+    "baseline": ".tmp\\refactor-tests\\r7-native-player-overflow\\baseline.json"
+  },
+  "rawEvidence": [
+    {
+      "file": ".tmp/refactor-tests/r7-native-player-overflow/baseline.json",
+      "sha256": "a9a7a97306dc9a23dab7cad91ad932e572c75439ba59ef5431d05f716efdf481"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-native-player-overflow/build-verification.json",
+      "sha256": "d16a7ecd75902471b1d40c868b28b0262e2ca4c8c39eaa3588005cd4f84eca11"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-native-player-overflow/build.cjs",
+      "sha256": "089048aada0e6d7011c800e249384a6b142a2220d8271af08d94b53a1b189aba"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-native-player-overflow/build.json",
+      "sha256": "d9d7e414958a50be541ea098a3994d7363897fe51b227f90780440e241133a5c"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-native-player-overflow/builder.live.log.process.json",
+      "sha256": "628f7686f278656e9a820e5079f16eaa70d64612e6dbf9c77520764c73ea2bcc"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-native-player-overflow/closure.json",
+      "sha256": "0a5fbfaa33858429925ee7673d9837985d32ed8fba3c9c3d43827039365dd4e2"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-native-player-overflow/final-check.cjs",
+      "sha256": "44f208c228929ab12d241ef39176df9e9e6a6e0dcef2cbbd86353126f0a9bd30"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-native-player-overflow/finalize.cjs",
+      "sha256": "90a239766833547cf36da0fc77dc10456cf510428a52e0e7e76fe0ce748feca3"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-native-player-overflow/fixed-1-progress.json",
+      "sha256": "902e60d1e915d78a4bff4a9ab5f5ed78f6676b72c78b242ad256ee93c04fd86e"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-native-player-overflow/fixed-1-result.json",
+      "sha256": "e5a1557414bac0df0cebce4a257e6e1a7a4b9cbc23453b4375eea6402b31ada1"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-native-player-overflow/fixed-1-started.json",
+      "sha256": "40bc16a663df1be17af64be5dee0cf18a61e7b3b5b46971a33c6cc7f29012dc5"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-native-player-overflow/mpv-host.js.before",
+      "sha256": "afb7a76cbfb88ea786281751d6c6cfea0e10f280d263108c806b71049465c05f"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-native-player-overflow/mpv.js.before",
+      "sha256": "3006bb6d74ee2f3ae679fc4265a96b31263efd133c4a5e1759bb2b96344bd989"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-native-player-overflow/player-resources.js.before",
+      "sha256": "1ca413cf04c27252bc8132869a26561eb91c7dbe0c29e11784eb7c2d956c9404"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-native-player-overflow/player-v3.css.before",
+      "sha256": "560fba56e4e1ba0d2defdd7c4f586f26cae8ec397ed1474fcf51e878844fc669"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-native-player-overflow/repro-2-progress.json",
+      "sha256": "0cc14d5634bb1ba8e47644fe866373c8c9497209ca87d285c1321cb8286a376c"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-native-player-overflow/repro-2-result.json",
+      "sha256": "e8f1a8f76b1ed5d96e670f365b792e38bca0f531e47d1a842d564b70192f9d99"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-native-player-overflow/repro-2-started.json",
+      "sha256": "21cf3967d76ef0623a46f19861e6bbc11a0a819e0d19242875fa1c6f8922e374"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-native-player-overflow/repro-3-progress.json",
+      "sha256": "5f6dba2d99ca97e704dff1a799a50bcd60515cba521cefc60f7aefa4906b14df"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-native-player-overflow/repro-3-result.json",
+      "sha256": "5ed9db9e01b2741dd9c127499c1b5a9fbcd5194ba276b63d6f1175e04e13efcc"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-native-player-overflow/repro-3-started.json",
+      "sha256": "f64413426fb34e250cdc428888420035ce6b48e49aee0106ae3129d07c73fe97"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-native-player-overflow/repro-4-progress.json",
+      "sha256": "6a17b50e555a2fb7c8b9708d8b1cbdac30a4eb57cd99e8a5aa59ef33c515bdaf"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-native-player-overflow/repro-4-result.json",
+      "sha256": "106a8d0b400819edfa6511e8d9459db00f1ca4a522225cac9c21bd7ac34cdb62"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-native-player-overflow/repro-4-started.json",
+      "sha256": "1a9f7353a9729dac211943ed522aab248dcc62b719b09821bb34d51a4c7c23e3"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-native-player-overflow/repro-result.json",
+      "sha256": "5528c13e63e5a78028596a6a83b79c32dc2c66644989af237e8eee1c51785046"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-native-player-overflow/repro-started.json",
+      "sha256": "af47999554636534e375ec66bb53745e11fec657113c3cd0e945576021fbfc78"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-native-player-overflow/repro.cjs",
+      "sha256": "5d990788ce79fe67a82cac28915e340c408cc93ac197c3f34dd2da2a913948c3"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-native-player-overflow/responsive-with-native.json",
+      "sha256": "b2b0372f507e6c1f178c00a29df7630e6a84c7c1dbdd99ae4fb84fe766740650"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-native-player-overflow/setup.json",
+      "sha256": "2988f6f76f9453ffdac8e8180e4594f8f61e48267db631c0ee6d0d6666a199a7"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-native-player-overflow/signatures.json",
+      "sha256": "be92799ab00934ccabdacefde4413ca5c707ac460de7b74ecabe1f6630cfb066"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-native-player-overflow/source-1-progress.json",
+      "sha256": "fc6125b894649d3ed43809576510b930ad6ff37acbb7361147dcad76f88101c2"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-native-player-overflow/source-1-result.json",
+      "sha256": "fb2df9ebf8cfba6585bdc24ada65e3cd9b9792cc0a4a081cf4fcec4a5b458068"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-native-player-overflow/source-1-started.json",
+      "sha256": "e0a525ce88024ceeeec85768f005dfaaa3dc7a4bedf560935c6853ec2ad882a4"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-native-player-overflow/source-2-progress.json",
+      "sha256": "3c48cb6cd9ab515da247e85764fae36d165511e9e5e284f695c172c00fa38e1a"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-native-player-overflow/source-2-result.json",
+      "sha256": "525eb94e3b0afc2f05715e42bb501a6c804c627dd5826d6031c876e30c198641"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-native-player-overflow/source-2-started.json",
+      "sha256": "8c212bfba278efcfc40aa0de2c50f2ccdbd2811c7e6ce2427e81f59de3828240"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-native-player-overflow/source-inputs.json",
+      "sha256": "ee2786e3e7caf8827b02a921b4c1830cd072736a8c29247206862edb63897c98"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-native-player-overflow/verify-build.cjs",
+      "sha256": "45a5be8d696ccb18fbb47077b0e8c173430e8b2724c4193cd8d937ab769094ae"
+    },
+    {
+      "file": ".tmp/refactor-tests/r7-native-player-overflow/VideoPlayer.jsx.before",
+      "sha256": "74bcfa67c85a9f7e11862292de2d9985cf4dd002487644290d96c2592209aaf8"
+    }
+  ],
+  "goalStatus": "active",
+  "themeAnomaly": {
+    "status": "open"
+  }
+}

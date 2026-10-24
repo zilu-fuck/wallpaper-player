@@ -1,22 +1,21 @@
 const { shell } = require('electron')
 const { EVENT } = require('../../ipc-channels')
-const { loadSettings, saveSettingsAndFlush, upsertPlaybackState } = require('../../settings')
+const { createRemoteMediaMutationService } = require('../media-mutations')
 const { getMainWindow } = require('../../window')
 const { readBody, sendError, sendJson } = require('../http-utils')
 const { getRemoteNetworkItemById } = require('./network-resources')
 
 function createDesktopHandlers({ resolveVideoPath }) {
+  const mutations = createRemoteMediaMutationService({ resolveVideoPath })
   async function handlePlayOnDesktop(req, res, videoId) {
     const networkItem = getRemoteNetworkItemById(videoId)
     const videoPath = networkItem ? networkItem.url : await resolveVideoPath(videoId)
     const body = await readBody(req)
     const position = Math.max(0, Number(body.position) || 0)
-    const settings = loadSettings()
-    const playbackStates = upsertPlaybackState(settings.playbackStates, videoPath, {
+    await mutations.savePlayback(videoId, {
       position,
       updatedAt: Date.now()
     })
-    await saveSettingsAndFlush({ playbackStates })
 
     const win = getMainWindow()
     if (!win || win.isDestroyed()) {
@@ -38,7 +37,7 @@ function createDesktopHandlers({ resolveVideoPath }) {
         position
       })
     }
-    sendJson(req, res, 200, { success: true })
+    return sendJson(req, res, 200, { success: true })
   }
 
   async function handleRevealOnDesktop(req, res, videoId) {
@@ -48,7 +47,7 @@ function createDesktopHandlers({ resolveVideoPath }) {
     }
     const videoPath = await resolveVideoPath(videoId)
     shell.showItemInFolder(videoPath)
-    sendJson(req, res, 200, { success: true })
+    return sendJson(req, res, 200, { success: true })
   }
 
   return {

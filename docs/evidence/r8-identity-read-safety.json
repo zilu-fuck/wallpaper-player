@@ -1,0 +1,383 @@
+{
+  "date": "2026-10-23T17:13:21.822Z",
+  "localDate": "2026-10-24",
+  "status": "Settings opacity fixed in both themes and included with identity read safety in a fresh local Windows distribution; remaining project phases stay open",
+  "settings": {
+    "changes": [
+      "Opaque theme surface replaces the 4.5% glass base; dark #0e1522 and light #ffffff retain the subtle top tint",
+      "Dark outer mask alpha 0.72; light grey-blue mask alpha 0.42; solid panel no longer uses redundant backdrop filtering",
+      "Replay splash control hides while settings are open and returns after closing"
+    ],
+    "sourceNative": {
+      "profile": "E:\\wallpaper播放器\\.tmp\\refactor-tests\\settings-opacity\\profile-Va3ZDS",
+      "samples": [
+        {
+          "theme": "dark",
+          "width": 1100,
+          "height": 760,
+          "panel": {
+            "x": 90,
+            "y": 79,
+            "width": 920,
+            "height": 602
+          },
+          "background": "rgb(14, 21, 34)",
+          "backdrop": "none",
+          "overlay": "rgba(3, 5, 10, 0.72)",
+          "overflow": false,
+          "behindPanelPixelInvariant": true,
+          "alwaysOnTop": false
+        },
+        {
+          "theme": "light",
+          "width": 1100,
+          "height": 760,
+          "panel": {
+            "x": 90,
+            "y": 79,
+            "width": 920,
+            "height": 602
+          },
+          "background": "rgb(255, 255, 255)",
+          "backdrop": "none",
+          "overlay": "rgba(15, 23, 42, 0.42)",
+          "overflow": false,
+          "behindPanelPixelInvariant": true,
+          "alwaysOnTop": false
+        },
+        {
+          "theme": "dark",
+          "width": 720,
+          "height": 760,
+          "panel": {
+            "x": 21.59375,
+            "y": 38.5,
+            "width": 676.796875,
+            "height": 683
+          },
+          "background": "rgb(14, 21, 34)",
+          "backdrop": "none",
+          "overlay": "rgba(3, 5, 10, 0.72)",
+          "overflow": false,
+          "behindPanelPixelInvariant": true,
+          "alwaysOnTop": false
+        },
+        {
+          "theme": "light",
+          "width": 720,
+          "height": 760,
+          "panel": {
+            "x": 21.59375,
+            "y": 38.5,
+            "width": 676.796875,
+            "height": 683
+          },
+          "background": "rgb(255, 255, 255)",
+          "backdrop": "none",
+          "overlay": "rgba(15, 23, 42, 0.42)",
+          "overflow": false,
+          "behindPanelPixelInvariant": true,
+          "alwaysOnTop": false
+        }
+      ],
+      "evidence": ".tmp/refactor-tests/settings-opacity/inspection.json",
+      "method": "Actual complete source main/preload/renderer; real theme controls at 1100 and 720 CSS pixels, normal focused windows, never always-on-top. Red/cyan probe behind the actual modal gives byte-identical panel-interior bitmaps."
+    },
+    "packagedNative": {
+      "evidence": ".tmp/refactor-tests/settings-opacity-distribution/portable-result.json",
+      "profile": "E:\\wpopacity-cb8c516d\\Data",
+      "version": "1.5.1",
+      "archive": {
+        "file": "E:\\wallpaper播放器\\release\\windows-1.5.1-886566c7-b3f3-49f0-a779-cc9767b20f2e\\win-unpacked\\resources\\app.asar",
+        "bytes": 16548514,
+        "sha256": "00d92804a24c2aac5e61f8133d3256d9ad2e791018885506d58574d8d1ec1b26",
+        "sha512": "l+NaRpsEQIiCjqRLQlR00yloMVQKTTW4I/4yKA0pePJIuwxq590uZZaAx9KcmqGZeMiONWdeI0rLtfSJPoYURQ=="
+      },
+      "samples": [
+        {
+          "theme": "dark",
+          "width": 1100,
+          "height": 760,
+          "background": "rgb(14, 21, 34)",
+          "backdrop": "none",
+          "overlay": "rgba(3, 5, 10, 0.72)",
+          "replayHidden": true,
+          "fits": true,
+          "screenshot": "E:\\wallpaper播放器\\.tmp\\refactor-tests\\settings-opacity-distribution\\packaged-dark-1100.png",
+          "alwaysOnTop": false,
+          "bounds": {
+            "x": 240,
+            "y": 66,
+            "width": 1100,
+            "height": 760
+          }
+        },
+        {
+          "theme": "light",
+          "width": 1100,
+          "height": 760,
+          "background": "rgb(255, 255, 255)",
+          "backdrop": "none",
+          "overlay": "rgba(15, 23, 42, 0.42)",
+          "replayHidden": true,
+          "fits": true,
+          "screenshot": "E:\\wallpaper播放器\\.tmp\\refactor-tests\\settings-opacity-distribution\\packaged-light-1100.png",
+          "alwaysOnTop": false,
+          "bounds": {
+            "x": 240,
+            "y": 66,
+            "width": 1100,
+            "height": 760
+          }
+        },
+        {
+          "theme": "dark",
+          "width": 900,
+          "height": 760,
+          "background": "rgb(14, 21, 34)",
+          "backdrop": "none",
+          "overlay": "rgba(3, 5, 10, 0.72)",
+          "replayHidden": true,
+          "fits": true,
+          "screenshot": "E:\\wallpaper播放器\\.tmp\\refactor-tests\\settings-opacity-distribution\\packaged-dark-900.png",
+          "alwaysOnTop": false,
+          "bounds": {
+            "x": 240,
+            "y": 66,
+            "width": 900,
+            "height": 760
+          }
+        },
+        {
+          "theme": "light",
+          "width": 900,
+          "height": 760,
+          "background": "rgb(255, 255, 255)",
+          "backdrop": "none",
+          "overlay": "rgba(15, 23, 42, 0.42)",
+          "replayHidden": true,
+          "fits": true,
+          "screenshot": "E:\\wallpaper播放器\\.tmp\\refactor-tests\\settings-opacity-distribution\\packaged-light-900.png",
+          "alwaysOnTop": false,
+          "bounds": {
+            "x": 240,
+            "y": 66,
+            "width": 900,
+            "height": 760
+          }
+        }
+      ],
+      "replayRestoredAfterClose": true,
+      "process": 0,
+      "firstAttempt": {
+        "evidence": ".tmp/refactor-tests/settings-opacity-distribution/portable-first-failed.json",
+        "passed": false,
+        "diagnosis": "The inspector connected before production main initialized app.getAppPath, and the test driver attempted /main/window. Added a main/window readiness wait; application sources and distribution bytes were unchanged. The failed attempt timed out its launcher; the remaining QA main was verified by its own userData and ASAR hash, then closed normally before retry."
+      },
+      "processClosure": {
+        "date": "2026-10-24T01:13:21.1432124+08:00",
+        "count": 0,
+        "processes": []
+      }
+    },
+    "initialChecks": {
+      "records": [
+        ".tmp/refactor-tests/settings-opacity/inspection-first.json",
+        ".tmp/refactor-tests/settings-opacity/inspection-second.json"
+      ],
+      "diagnosis": "Wide layouts passed; 55 differing pixels in the bottom-right two crop rows came from the overlapping replay button and its blur. Added the missing settings-overlay exclusion to the existing replay visibility rule; all four samples then passed without weakening the equality assertion."
+    }
+  },
+  "identity": {
+    "evidence": ".tmp/refactor-tests/identity-read-safety-yxdYS6/result.json",
+    "cases": [
+      "corrupt bytes are retained, cached bearer/scoped credentials and pairing fail closed once, parser fragments stay private and explicit valid repair restores the same identity",
+      "invalid root/credential/peer/version shapes and future documents are not normalized into new identities; valid BOM/known-version documents retain credentials and unknown fields without rewriting",
+      "a missing warm identity is not silently recreated, explicit sync repair works and independent fresh/profile owners still initialize normally",
+      "read permission errors invalidate cached authorization without overwriting bytes; failed writes preserve the last committed authorization and retry without leaking raw error details",
+      "last-seen work suspends after a failed identity read, does not spin/requeue or prevent shutdown, and flushes its owned telemetry after explicit repair",
+      "actual HTTP identity failure closes a paused file stream/listener, emits a redacted desktop state and returns retryable 503 to the production mobile API without deleting its stored binding; valid repair restarts with the same token",
+      "actual Electron complete main/IPC/frontend displays preserved identity failure, keeps retry available, blocks credential mutations and restarts valid repaired identity/QR flow without always-on-top"
+    ],
+    "comparison": {
+      "before": {
+        "damagedBytesOverwritten": true,
+        "identityReplaced": true,
+        "parserFragmentLogged": true
+      },
+      "after": {
+        "damagedBytesOverwritten": false,
+        "identityReplaced": false,
+        "parserFragmentLogged": false
+      },
+      "initialBytes": 250
+    },
+    "http": {
+      "originalStreamStatus": 200,
+      "activeStreamsAfterFailure": 0,
+      "mobileFailureStatus": 503,
+      "mobileBindingPreserved": true,
+      "recoveredIdentityMatches": true
+    },
+    "native": {
+      "passed": true,
+      "profile": "E:\\wallpaper播放器\\.tmp\\refactor-tests\\identity-read-safety-yxdYS6\\native-中文 空格",
+      "steps": [
+        "actual complete main/preload/workbench survives corrupt identity, retains original bytes and presents redacted retry state with disabled credential actions",
+        "repair and actual refresh restart the previously enabled service with the same identity, clear the warning and allow a real QR code without an automatic identity reset"
+      ]
+    },
+    "additionalChecks": [
+      {
+        "name": "network-streams",
+        "exitCode": 0
+      },
+      {
+        "name": "json-responses",
+        "exitCode": 0
+      },
+      {
+        "name": "remote-mobile",
+        "exitCode": 0
+      },
+      {
+        "name": "ipc-sender",
+        "exitCode": 0
+      },
+      {
+        "name": "shutdown-persistence",
+        "exitCode": 0
+      },
+      {
+        "name": "analysis-request",
+        "exitCode": 0
+      },
+      {
+        "name": "electron-api",
+        "exitCode": 0
+      }
+    ],
+    "scope": "Actual identity code in isolated VM owners and real files; captured old module is an optional positive control. Real loopback server/file-stream shutdown, production mobile API and secure/index storage doubles. Complete source main/preload/IPC/frontend in Electron using an isolated Chinese/space profile, with native rendering/QR and explicit repair; hardware acceleration disabled, no always-on-top. No physical phone, backup restore or cross-file crash-recovery acceptance.",
+    "retainedBaseline": ".tmp/refactor-tests/r8-identity-read-safety/baseline.json",
+    "intermediateBuild": ".tmp/refactor-tests/r8-identity-read-safety/build-verification.json",
+    "earlierHarnessFailures": "Early native selectors and telemetry fixture setup were corrected, with failed fixtures retained; see raw identity-read-safety-* directories. No production application failure is relabelled as passing."
+  },
+  "build": {
+    "directory": "E:\\wallpaper播放器\\release\\windows-1.5.1-886566c7-b3f3-49f0-a779-cc9767b20f2e",
+    "version": "1.5.1",
+    "archive": {
+      "file": "E:\\wallpaper播放器\\release\\windows-1.5.1-886566c7-b3f3-49f0-a779-cc9767b20f2e\\win-unpacked\\resources\\app.asar",
+      "bytes": 16548514,
+      "sha256": "00d92804a24c2aac5e61f8133d3256d9ad2e791018885506d58574d8d1ec1b26",
+      "sha512": "l+NaRpsEQIiCjqRLQlR00yloMVQKTTW4I/4yKA0pePJIuwxq590uZZaAx9KcmqGZeMiONWdeI0rLtfSJPoYURQ=="
+    },
+    "embeddedFiles": 116,
+    "vendorFiles": 24,
+    "assets": [
+      {
+        "file": "Wallpaper-Player-Setup-1.5.1.exe",
+        "role": "installer",
+        "bytes": 232526634,
+        "sha256": "bbf7f273620e0e7b0b7d9a806ba09bcd17644734cc042d521ab442af94241716",
+        "sha512": "NUvWVCWtu425XfVEyQPxOFqu06agzPppngF9BvXg/zxebbCMxhV6PYtvntE5JUGNT67yUMlTbaWgbnLiex73gQ==",
+        "bootstrapArch": "ia32",
+        "productVersion": "1.5.1",
+        "signing": {
+          "status": "NotSigned",
+          "certificateSha256": null
+        }
+      },
+      {
+        "file": "Wallpaper-Player-1.5.1.exe",
+        "role": "portable",
+        "bytes": 232082249,
+        "sha256": "9c9724136d1e0fea31933a19ae72717b1d871d7162991274315e14ab7a10b388",
+        "sha512": "Bq8uwRk6RX1lOO9hfdZLVmGPMMzQzPkehaH/jB5q6pdqnvPmMF1+ul8pZLiDHCt3quEnkIQJFtuH4R3VNRlbxA==",
+        "bootstrapArch": "ia32",
+        "productVersion": "1.5.1",
+        "signing": {
+          "status": "NotSigned",
+          "certificateSha256": null
+        }
+      },
+      {
+        "file": "Wallpaper-Player-Setup-1.5.1.exe.blockmap",
+        "role": "blockmap",
+        "bytes": 243046,
+        "sha256": "1092f89b8784160a752e1de518455cb829df08b89ca11cfb61ed3a60261f24a1",
+        "sha512": "omumUeJIiUTC1fQNSvHaP2sagNpzbssSLS1owjv7ckUyPeGFLmDGe0jct8C8WXYQQbp/eNEMKDvzSNCWzJS7Gw=="
+      },
+      {
+        "file": "latest.yml",
+        "role": "desktop-update-metadata",
+        "bytes": 361,
+        "sha256": "f119fcfb7fd71a84ec06260e1c8568d586c008d0646b78941f0f54911cdbd931",
+        "sha512": "7/1kL3Ir6lSW62V4cQcV91ms52A+pcyNg689rRb7NQYfqQgGwC4KLhoUSVaIjG5osfw03I20i/MRJAseTp6HLA=="
+      },
+      {
+        "file": "Wallpaper-Player-Plugin-video-analysis-1.0.0.zip",
+        "source": "plugins/Wallpaper-Player-Plugin-video-analysis-1.0.0.zip",
+        "role": "plugin",
+        "pluginId": "video-analysis",
+        "version": "1.0.0",
+        "bytes": 570218532,
+        "sha256": "365c2f5ccbec6afe7df5ce4b5c5df1699728cac113884abd48898d8209a5502a",
+        "sha512": "5W7hIMUaK+frnE+0/87KhyfC6BKbFTT2R3GgW+TCtG7Z037HNRooT/RVGrJTOMq5eDFEBHKhlSiVZQ9vMI838w=="
+      },
+      {
+        "file": "Wallpaper-Player-Plugin-ai-search-0.1.0.zip",
+        "source": "plugins/Wallpaper-Player-Plugin-ai-search-0.1.0.zip",
+        "role": "plugin",
+        "pluginId": "ai-search",
+        "version": "0.1.0",
+        "bytes": 2955069,
+        "sha256": "464e129ebb9a4731fff800c26c6e4c94ddbe33fbd1699486c166d9e112a97fc8",
+        "sha512": "rKd4RQyHFHEIADm+H3KQddNRMuu2UbSuiK4OK+hkfrp3JV36mLcSdLA0UNlAPW+7L5X1xi5kiTVNPmq1lDzOKw=="
+      },
+      {
+        "file": "Wallpaper-Player-Plugin-agent-bridge-0.1.0.zip",
+        "source": "plugins/Wallpaper-Player-Plugin-agent-bridge-0.1.0.zip",
+        "role": "plugin",
+        "pluginId": "agent-bridge",
+        "version": "0.1.0",
+        "bytes": 1093,
+        "sha256": "9f499408c282a144ffe411648d476fd4e36bd010c6e8974be3b9fd16460bed1a",
+        "sha512": "W5qWvlCSHQT8RlE31UF1e06dN3162tSZVhs7nqyFBhFLJdcN7Z8rE2WDw6ZMjQIygO89K/Xbuev/TJY+ImfSqg=="
+      }
+    ],
+    "qaWrapperAbsent": true,
+    "published": false,
+    "installed": false,
+    "portableExecutable": "E:\\wpopacity-cb8c516d\\Wallpaper-Player.exe"
+  },
+  "productionSources": {
+    "main/repositories/identity-document.js": "e809e65f41f2cec4dd86a2518859c8b1c60f653022bb392752dcac12734d22d2",
+    "main/remote/identity.js": "ce5f7a73f38d5fef6c49f72f1105959f4d8f35ba88e017e9713ef13e8601a65a",
+    "main/remote/index.js": "37e9ef7bb81afcb6586d56b62e4ba7077bc1024b3a515f3a425a2dee024a93fc",
+    "main/ipc/remote.js": "e26c6c7c6e866397c6677fb23183a5f8b4813fbec46172161a34d27c65a34f47",
+    "src/components/settings/RemoteAccessSection.jsx": "897bcd422a7a7270baf977bbfb6f9a2bdb5784bd7f84c81e2d5f73347a33ed07",
+    "src/styles/player.css": "aea2c8f0b3a9c71f5c05a212bb742c17ced9fcc272142de45ed8a51340587472",
+    "src/styles/settings.css": "edd24af0c19d5fb68df1d83ba4dfd948c182e6dc21129ef62354d01e90acd1c2",
+    "src/styles/splash.css": "42c2721cc2a2e10f4cfb91ae5b8c673426b934e13f158ccd53fb4d085bfd3d6a"
+  },
+  "preservation": {
+    "originalData": 42,
+    "historicalArtifacts": 8,
+    "oldQaArtifactsPreserved": true,
+    "selectedSvgUnchanged": true,
+    "lockUnchanged": true
+  },
+  "verification": {
+    "frontendBuild": true,
+    "splashClockAndNativeUi": true,
+    "diffCheck": true
+  },
+  "limitations": [
+    "No physical-phone PSS/FPS/LAN or iOS acceptance added",
+    "No new 20-minute soak on this ASAR; previous R6 long-run evidence remains bound to its old archive",
+    "Identity backup/journal/automatic restore and reset wizard remain open; existing corrupt bytes are preserved for explicit repair",
+    "A cold absent identity with no prior process history still initializes as a fresh profile",
+    "Unchanged local fixed Electron44.9.0 build dependency; no cold-download or interactive installer/upgrade validation",
+    "Executables remain unsigned; no publication, production installation or user-profile modification"
+  ]
+}

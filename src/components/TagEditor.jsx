@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useState } from 'react'
-import { useApp } from '../context/AppContext'
+import { memo, useEffect, useMemo, useState, useRef } from 'react'
+import { useAppFields } from '../context/AppContext'
 
 function getTagKey(value) {
   return String(value || '').trim().toLocaleLowerCase()
@@ -24,10 +24,13 @@ function parseTagText(value) {
   return uniqueTags(String(value || '').split(/[,，\s]+/))
 }
 
-export default function TagEditor() {
+function TagEditor() {
   const {
     tagEditorVideo,
     tagEditorValue,
+    tagEditorLoading = false,
+    tagEditorError = '',
+    handleReloadTagEditor,
     setTagEditorValue,
     bulkTagVideos,
     bulkTagValue,
@@ -37,8 +40,15 @@ export default function TagEditor() {
     handleCloseBulkTagEditor,
     handleSaveBulkTagEditor,
     customTags = {}
-  } = useApp()
+  } = useAppFields([
+    'tagEditorVideo', 'tagEditorValue', 'tagEditorLoading', 'tagEditorError',
+    'handleReloadTagEditor', 'setTagEditorValue', 'bulkTagVideos', 'bulkTagValue',
+    'setBulkTagValue', 'handleCloseTagEditor', 'handleSaveTagEditor', 'handleCloseBulkTagEditor',
+    'handleSaveBulkTagEditor', 'customTags'
+  ])
   const [tagSearch, setTagSearch] = useState('')
+  const [saving, setSaving] = useState(false)
+  const [saveError, setSaveError] = useState('')
 
   const isBulk = bulkTagVideos?.length > 0
   const visible = tagEditorVideo || isBulk
@@ -47,6 +57,22 @@ export default function TagEditor() {
   const close = isBulk ? handleCloseBulkTagEditor : handleCloseTagEditor
   const save = isBulk ? handleSaveBulkTagEditor : handleSaveTagEditor
   const title = isBulk ? '批量添加标签' : '自定义标签'
+  const activeTargetRef = useRef(null)
+  activeTargetRef.current = isBulk ? bulkTagVideos : tagEditorVideo
+  useEffect(() => { setSaveError('') }, [Boolean(visible), tagEditorVideo?.fullPath])
+  async function handleSave() {
+    if (saving || (!isBulk && tagEditorLoading)) return
+    const target = activeTargetRef.current
+    setSaving(true)
+    setSaveError('')
+    try {
+      await save()
+    } catch (error) {
+      if (activeTargetRef.current === target) setSaveError(error?.message || '标签保存失败，请重试')
+    } finally {
+      setSaving(false)
+    }
+  }
   const targetTitle = isBulk ? `已选择 ${bulkTagVideos.length} 个视频` : tagEditorVideo?.name
   const hint = isBulk
     ? '会把输入的标签追加到所有已选视频，不会清除原有标签。'
@@ -118,9 +144,10 @@ export default function TagEditor() {
             id="custom-tags-input"
             className="tag-editor-input"
             value={value}
+            disabled={saving || (!isBulk && tagEditorLoading)}
             onChange={e => setValue(e.target.value)}
             onKeyDown={e => {
-              if (e.key === 'Enter') save()
+              if (e.key === 'Enter') handleSave()
               if (e.key === 'Escape') close()
             }}
             placeholder="用逗号或空格分隔，例如 精选 横屏 角色"
@@ -129,7 +156,7 @@ export default function TagEditor() {
           {currentTags.length ? (
             <div className="tag-editor-selected-tags" aria-label="待保存标签">
               {currentTags.map(tag => (
-                <button className="tag-editor-selected-chip" key={tag} type="button" onClick={() => removeTag(tag)}>
+                <button className="tag-editor-selected-chip" key={tag} type="button" disabled={saving || (!isBulk && tagEditorLoading)} onClick={() => removeTag(tag)}>
                   <span>{tag}</span>
                   <span aria-hidden="true">×</span>
                 </button>
@@ -171,12 +198,19 @@ export default function TagEditor() {
             )}
           </div>
           <p className="tag-editor-hint">{hint}</p>
+          {saveError || (!isBulk && tagEditorError) ? <p role="alert" className="tag-editor-hint" style={{ color: 'var(--danger)' }}>{saveError || tagEditorError}</p> : null}
+          {!isBulk && tagEditorError ? <button className="btn btn-outline" disabled={saving || tagEditorLoading} onClick={() => {
+            setSaveError('')
+            handleReloadTagEditor?.()
+          }}>重新载入最新标签（替换草稿）</button> : null}
         </div>
         <div className="tag-editor-footer">
           <button className="btn btn-outline" onClick={close}>取消</button>
-          <button className="btn btn-primary" onClick={save}>{isBulk ? '添加到已选视频' : '保存'}</button>
+          <button className="btn btn-primary" onClick={handleSave} disabled={saving || (!isBulk && tagEditorLoading)}>{saving ? '保存中' : !isBulk && tagEditorLoading ? '读取中' : isBulk ? '添加到已选视频' : '保存'}</button>
         </div>
       </div>
     </div>
   )
 }
+
+export default memo(TagEditor)

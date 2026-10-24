@@ -1,4 +1,5 @@
-import { Brain, Download, Expand, Heart, Minimize, MonitorPlay, MoreHorizontal, Pause, Play, Tag } from 'lucide-react-native'
+import { useState } from 'react'
+import { Expand, Minimize, MoreHorizontal, Pause, Play } from 'lucide-react-native'
 import { Pressable, StyleSheet, View } from 'react-native'
 import type { EdgeInsets } from 'react-native-safe-area-context'
 import { colors } from '../../theme'
@@ -11,20 +12,14 @@ type Props = {
   currentTime: number
   duration: number
   fullscreenMode: boolean
-  favorite: boolean
-  networkResource?: boolean
   bottomOffset: number
   safeAreaInsets: EdgeInsets
   onTogglePlayback: () => void
   onSeek: (time: number) => void
-  onFavorite: () => void
-  onTags: () => void
-  onAnalysis: () => void
-  onCache: () => void
-  onDesktopPlay: () => void
   onMore: () => void
   onFullscreen: () => void
-  onInteract: () => void
+  onInteract: (holding?: boolean) => void
+  onProgressHeight?: (height: number) => void
 }
 
 export function PlayerControls({
@@ -33,21 +28,16 @@ export function PlayerControls({
   currentTime,
   duration,
   fullscreenMode,
-  favorite,
-  networkResource = false,
   bottomOffset,
   safeAreaInsets,
   onTogglePlayback,
   onSeek,
-  onFavorite,
-  onTags,
-  onAnalysis,
-  onCache,
-  onDesktopPlay,
   onMore,
   onFullscreen,
-  onInteract
+  onInteract,
+  onProgressHeight
 }: Props) {
+  const [progressHeight, setProgressHeight] = useState(80)
   if (!visible) return null
   const FullscreenIcon = fullscreenMode ? Minimize : Expand
 
@@ -56,35 +46,12 @@ export function PlayerControls({
       <View style={[
         fullscreenMode ? styles.bottomRight : styles.topRight,
         fullscreenMode
-          ? { right: safeAreaInsets.right + 12, bottom: bottomOffset + 42 }
+          ? { right: safeAreaInsets.right + 12, bottom: bottomOffset + progressHeight + 12 }
           : { right: safeAreaInsets.right + 12, top: safeAreaInsets.top + 8 }
       ]} pointerEvents="box-none">
         <Pressable accessibilityRole="button" accessibilityLabel={fullscreenMode ? '退出横屏全屏' : '进入横屏全屏'} style={styles.iconButton} onPress={() => { onInteract(); onFullscreen() }} hitSlop={HIT_SLOP}>
           <FullscreenIcon color={colors.text} size={21} />
         </Pressable>
-        {fullscreenMode ? (
-          <>
-            <Pressable accessibilityRole="button" accessibilityLabel={favorite ? '取消收藏' : '收藏'} accessibilityState={{ selected: favorite }} style={styles.iconButton} onPress={() => { onInteract(); onFavorite() }} hitSlop={HIT_SLOP}>
-              <Heart color={favorite ? colors.danger : colors.text} fill={favorite ? colors.danger : 'none'} size={20} />
-            </Pressable>
-            <Pressable accessibilityRole="button" accessibilityLabel="管理标签" style={styles.iconButton} onPress={() => { onInteract(); onTags() }} hitSlop={HIT_SLOP}>
-              <Tag color={colors.text} size={20} />
-            </Pressable>
-            {!networkResource ? (
-              <Pressable accessibilityRole="button" accessibilityLabel="视频分析" style={styles.iconButton} onPress={() => { onInteract(); onAnalysis() }} hitSlop={HIT_SLOP}>
-                <Brain color={colors.text} size={20} />
-              </Pressable>
-            ) : null}
-            {!networkResource ? (
-              <Pressable accessibilityRole="button" accessibilityLabel="缓存兼容格式" style={styles.iconButton} onPress={() => { onInteract(); onCache() }} hitSlop={HIT_SLOP}>
-                <Download color={colors.text} size={20} />
-              </Pressable>
-            ) : null}
-            <Pressable accessibilityRole="button" accessibilityLabel="在电脑端播放" style={styles.iconButton} onPress={() => { onInteract(); onDesktopPlay() }} hitSlop={HIT_SLOP}>
-              <MonitorPlay color={colors.text} size={20} />
-            </Pressable>
-          </>
-        ) : null}
         <Pressable accessibilityRole="button" accessibilityLabel="更多播放设置" style={styles.iconButton} onPress={() => { onInteract(); onMore() }} hitSlop={HIT_SLOP}>
           <MoreHorizontal color={colors.text} size={23} />
         </Pressable>
@@ -96,7 +63,7 @@ export function PlayerControls({
           : <Play color={colors.text} fill={colors.text} size={38} />}
       </Pressable>
 
-      <View style={[styles.bottomControls, {
+      <View onLayout={event => { const height = event.nativeEvent.layout.height; if (height > 0) { setProgressHeight(height); onProgressHeight?.(height) } }} style={[styles.bottomControls, {
         bottom: bottomOffset,
         left: safeAreaInsets.left + 12,
         right: safeAreaInsets.right + 12
@@ -105,7 +72,7 @@ export function PlayerControls({
           currentTime={currentTime}
           duration={duration}
           onSeek={onSeek}
-          onScrubChange={() => onInteract()}
+          onScrubChange={onInteract}
         />
       </View>
     </View>
@@ -135,9 +102,9 @@ const styles = StyleSheet.create({
     maxWidth: '72%'
   },
   iconButton: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
+    width: 48,
+    height: 48,
+    borderRadius: 24,
     backgroundColor: 'rgba(0,0,0,0.38)',
     alignItems: 'center',
     justifyContent: 'center'

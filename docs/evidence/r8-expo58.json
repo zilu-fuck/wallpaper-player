@@ -1,0 +1,2407 @@
+{
+  "date": "2026-10-19T11:29:55.485Z",
+  "stage": "R8 Expo58 / React Native 0.88 native optimized release checkpoint",
+  "intermediate": "docs/evidence/r8-expo57.json",
+  "nativeDeliveryAccepted": false,
+  "environment": {
+    "node": "v24.14.0",
+    "platform": "win32",
+    "arch": "x64"
+  },
+  "versions": {
+    "before": {
+      "@react-native-async-storage/async-storage": "2.2.0",
+      "expo": "^56.0.12",
+      "expo-camera": "^56.0.8",
+      "expo-clipboard": "~56.0.4",
+      "expo-screen-orientation": "~56.0.5",
+      "expo-secure-store": "^56.0.4",
+      "expo-status-bar": "~56.0.4",
+      "expo-video": "^56.1.4",
+      "lucide-react-native": "^1.21.0",
+      "react": "19.2.3",
+      "react-native": "0.85.3",
+      "react-native-safe-area-context": "~5.7.0",
+      "react-native-svg": "15.15.4"
+    },
+    "intermediate": {
+      "@react-native-async-storage/async-storage": "2.2.0",
+      "expo": "57.0.30",
+      "expo-camera": "57.0.6",
+      "expo-clipboard": "57.0.2",
+      "expo-screen-orientation": "57.0.3",
+      "expo-secure-store": "57.0.4",
+      "expo-status-bar": "57.0.1",
+      "expo-video": "57.0.5",
+      "lucide-react-native": "1.21.0",
+      "react": "19.2.3",
+      "react-native": "0.86.3",
+      "react-native-safe-area-context": "5.7.0",
+      "react-native-svg": "15.15.4"
+    },
+    "after": {
+      "@react-native-async-storage/async-storage": "2.2.0",
+      "expo": "58.0.14",
+      "expo-camera": "~58.0.10",
+      "expo-clipboard": "~58.0.3",
+      "expo-screen-orientation": "~58.0.3",
+      "expo-secure-store": "~58.0.2",
+      "expo-status-bar": "~58.0.3",
+      "expo-video": "~58.0.11",
+      "lucide-react-native": "^1.21.0",
+      "react": "19.3.0",
+      "react-native": "0.88.0",
+      "react-native-safe-area-context": "~5.10.1",
+      "react-native-svg": "15.16.0",
+      "expo-system-ui": "~58.0.6"
+    },
+    "installed": {
+      "@react-native-async-storage/async-storage": "2.2.0",
+      "expo": "58.0.14",
+      "expo-camera": "58.0.10",
+      "expo-clipboard": "58.0.3",
+      "expo-screen-orientation": "58.0.3",
+      "expo-secure-store": "58.0.2",
+      "expo-status-bar": "58.0.3",
+      "expo-video": "58.0.11",
+      "lucide-react-native": "1.21.0",
+      "react": "19.3.0",
+      "react-native": "0.88.0",
+      "react-native-safe-area-context": "5.10.1",
+      "react-native-svg": "15.16.0",
+      "expo-system-ui": "58.0.6"
+    },
+    "nodeEngines": {
+      "node": "^22.13.0 || ^24.3.0 || ^26.0.0 || >=27.0.0"
+    }
+  },
+  "packageChanges": [
+    {
+      "path": "node_modules/2g",
+      "before": null,
+      "after": "1.0.1",
+      "integrity": "sha512-+uViadKOS/wwR4pFu5g8TPn3QHpKqoX19JHCnp8k/3cLpImdcXozwvZA6Q/5PeW3AcU8neL8faaMidBcv7o8CA=="
+    },
+    {
+      "path": "node_modules/@babel/generator",
+      "before": "7.29.7",
+      "after": "7.29.8",
+      "integrity": "sha512-gZbepsdh3WDtgZKWL+vTPh71LSBrm/Y4/QDZBVCcYfmeTEEuoOYwlSy+G1StfJg+/Zy550u/3TATbm7qDbbMtg=="
+    },
+    {
+      "path": "node_modules/@babel/helper-create-regexp-features-plugin",
+      "before": "7.29.7",
+      "after": "7.29.10",
+      "integrity": "sha512-/YY9soQuWa8TURtHXHT+GbklpbAA+dZErxFGHIr6qgDg96xuGWrTAs1+MfjgVJPF0YLQsOVsOYs8lhgsPbOinQ=="
+    },
+    {
+      "path": "node_modules/@babel/helpers",
+      "before": "7.29.7",
+      "after": "7.29.10",
+      "integrity": "sha512-EMCx3AGZ3WfAl6ht7AyQoPm2Lh+BGYEMdc4Q6Hf7uSCDOZFuLq44qNwL+iaim8VlyYhRAo4X43+weadK8ZB4Yg=="
+    },
+    {
+      "path": "node_modules/@babel/parser",
+      "before": "7.29.7",
+      "after": "7.29.9",
+      "integrity": "sha512-CjXrNHTnvqBVqHgdBysY3vk2T8tpJHb5/RMeHJBTyVa9xgugCB0CJTx/3oO8RV2QRQP391RWpB7D6hLjm8V9uA=="
+    },
+    {
+      "path": "node_modules/@babel/plugin-transform-typescript",
+      "before": "7.29.7",
+      "after": "7.29.9",
+      "integrity": "sha512-FFwIwzU+7SCOuxxV4YtJql6T9981ZVTm+FHO5GhVsRqCTdy0WwrEZh3l42ARpXruJUDGOptdduHW6Zr7pNPLNg=="
+    },
+    {
+      "path": "node_modules/@babel/traverse",
+      "before": "7.29.7",
+      "after": "7.29.10",
+      "integrity": "sha512-B3lYAs2nkKskbgQ1nfy8Ma9ao9Q1rntTAQHrzzyDuj+TSO+X3le6PfWwqDvodsb+OumE10eMFfuMCTQSQ5iuIQ=="
+    },
+    {
+      "path": "node_modules/@babel/types",
+      "before": "7.29.7",
+      "after": "7.29.8",
+      "integrity": "sha512-Vj1jF3cPfxg7OAfoI7QnVKLoILlm2JF9pnVHrX8qx7AHMiYWT+NDAA7jChlNgRS4WTLc/fD1lXLmPixluj+3Gg=="
+    },
+    {
+      "path": "node_modules/@expo/cli",
+      "before": "56.1.16",
+      "after": null,
+      "integrity": null
+    },
+    {
+      "path": "node_modules/@expo/code-signing-certificates",
+      "before": "0.0.6",
+      "after": "0.0.7",
+      "integrity": "sha512-zP0tnfqrFFRL8INtOaQ6XwEYfdIpIH9vrEo7y0bHQGQa50z4/QWXE5CI4nRUHxqFW4MVWOwXFg1hom1aAZHNkQ=="
+    },
+    {
+      "path": "node_modules/@expo/config",
+      "before": "56.0.9",
+      "after": "58.0.6",
+      "integrity": "sha512-PT1qv4s/R5A/NxXb4efGlFsYF5Consi7F8xSsJBAN090EGDr6U1EDQGOijFqzDc3JA2epD8zjKLJLOVB9YOewg=="
+    },
+    {
+      "path": "node_modules/@expo/config-plugins",
+      "before": "56.0.9",
+      "after": "58.0.9",
+      "integrity": "sha512-HyP7V1QgDxeHcOEh4qQH7cfK7cI7wNp0y9lszAu98SRYCshhDbwB9gWpFfnpX1GQUtgiqG4Hvgh1z3ntcGwAjw=="
+    },
+    {
+      "path": "node_modules/@expo/config-types",
+      "before": "56.0.6",
+      "after": "58.0.3",
+      "integrity": "sha512-wyfrwkTT/hQHzwyqkXkngKxoOa8L6ovsTP4h/UukS1mTmssee5et6HOPoN5RtawdJPnm5JO28f//C/wXlpka8Q=="
+    },
+    {
+      "path": "node_modules/@expo/devcert",
+      "before": "1.2.1",
+      "after": "1.2.2",
+      "integrity": "sha512-wz1YedXwdNbYqk/PRr34vixnuw1+l6uSwmPXUj649cot5iYNccb2zIOnK7Nonb1Pfd/dxAY6CvU6KM3uSdxC7A=="
+    },
+    {
+      "path": "node_modules/@expo/devtools",
+      "before": "56.0.2",
+      "after": null,
+      "integrity": null
+    },
+    {
+      "path": "node_modules/@expo/dom-webview",
+      "before": "56.0.5",
+      "after": null,
+      "integrity": null
+    },
+    {
+      "path": "node_modules/@expo/env",
+      "before": "2.3.0",
+      "after": "2.5.2",
+      "integrity": "sha512-z8kCvBVJpd2S20a+Ab1otQgz8sJLeR7CXDTsuAMcNbYFsK10Fdhfb7rx9Ys1vvlbijnY55eZhQvJACajc1IjBQ=="
+    },
+    {
+      "path": "node_modules/@expo/expo-modules-macros-plugin",
+      "before": "0.2.2",
+      "after": null,
+      "integrity": null
+    },
+    {
+      "path": "node_modules/@expo/fingerprint",
+      "before": "0.19.4",
+      "after": "0.21.5",
+      "integrity": "sha512-4ngc+aPgMK56sYc47tfabmoaNdP7OvPBOH7QPgN3riSYM0Ev+KwsGRDius5jBBwjCI9ADp7IpjJEK9xlRYjjvA=="
+    },
+    {
+      "path": "node_modules/@expo/image-utils",
+      "before": "0.10.1",
+      "after": "0.12.5",
+      "integrity": "sha512-nsFYd7GfDdwZa+S+p+EkVCkh7UKKNf0kfUXDQ53HbyMmNFD3psb5JYwU/2N+uZG5wOEfKGfQ5u7pk/wn2gMlBA=="
+    },
+    {
+      "path": "node_modules/@expo/inline-modules",
+      "before": "0.0.12",
+      "after": "0.2.6",
+      "integrity": "sha512-S8PK3wx6ogwunoQ7pqdPbklQGtXloeWTAOzWJ9yIL7xHFxvnI/Ryj0phA3KEGCMlaKZjaCP1h/3s7n/ueErRgQ=="
+    },
+    {
+      "path": "node_modules/@expo/json-file",
+      "before": "10.2.0",
+      "after": "11.2.1",
+      "integrity": "sha512-UPhKoFCj8BcwgLB1rKQ1CuR/REITnZLiqxHEHOeH1tPsdXcHGtUDh0P5bLbr7oU0nKVdtJ5rzyKx8jniMQdESQ=="
+    },
+    {
+      "path": "node_modules/@expo/local-build-cache-provider",
+      "before": "56.0.8",
+      "after": "58.0.6",
+      "integrity": "sha512-AJk3pslFNlwRMbUbfvxhu6CPA9U7A+JPb88VS/uWkG/S/QMJL90Iw4sPVfG4BOKfRUNkB8ipl432Dr4txjSMKw=="
+    },
+    {
+      "path": "node_modules/@expo/log-box",
+      "before": "56.0.13",
+      "after": null,
+      "integrity": null
+    },
+    {
+      "path": "node_modules/@expo/log-box-utils",
+      "before": null,
+      "after": "58.0.2",
+      "integrity": "sha512-My8Lwe9FU/yDwwzqwi5LN2rzzDcJqIAZKrD9f0XHZEKz/FQnWJYdt1rsV7+RwqMGeGq2XsxTCVT1ggTCOvumxw=="
+    },
+    {
+      "path": "node_modules/@expo/metro",
+      "before": "56.0.0",
+      "after": "58.0.0",
+      "integrity": "sha512-PMD640ihB0C3Oqm0AnDVJ/8qF2cKbRUEqGuSOr4tM/OTb9ktxsQqsiSSSeaOEgdCZBq20AxRS0d6WHNhhH2P+g=="
+    },
+    {
+      "path": "node_modules/@expo/metro-config",
+      "before": "56.0.14",
+      "after": null,
+      "integrity": null
+    },
+    {
+      "path": "node_modules/@expo/metro-file-map",
+      "before": "56.0.3",
+      "after": "58.0.5",
+      "integrity": "sha512-Y2w8qKklLffZie28In4WF6f6e8nIJOhU0mZ5UaQdCiITVQm2a5teNdIDudEPkBsh8ItlvyHZt9n42PN2onRbkQ=="
+    },
+    {
+      "path": "node_modules/@expo/modules-macros-win32-arm64",
+      "before": null,
+      "after": "0.20.0",
+      "integrity": "sha512-7B57gc7+TeygPcK8fLYlEhJbbvaPh+JBzex11YIYZrSzbFhz7Q+Z37fSdAfp4EsfCswJNcX0S6wpkgSlVNefVw=="
+    },
+    {
+      "path": "node_modules/@expo/modules-macros-win32-x64",
+      "before": null,
+      "after": "0.20.0",
+      "integrity": "sha512-BM5a2U2tCyHzmtiSEY70KPsts82Mfy1bHSZ7AUbg6z9LcnxuThxJlcH85/SV5eFbhrPfgDBAG/WAncyZCvKvyA=="
+    },
+    {
+      "path": "node_modules/@expo/osascript",
+      "before": "2.6.0",
+      "after": "2.8.1",
+      "integrity": "sha512-SCi+6q6uOkGhiAn6AIP/OPFgaIq/iKD2oYpnAOg2rShHStJ8ey7wyT127RbOaZXmlcY/62rHOX1WiiMnD8u/BA=="
+    },
+    {
+      "path": "node_modules/@expo/package-manager",
+      "before": "1.12.1",
+      "after": "1.14.2",
+      "integrity": "sha512-sftl0eRVVCarI6grMdjAB3jX2pX1Mt3cdSnajlXS4QyeDkaKRM/ntBy6dcagj1VL0+cEfEqctlyvinmlZdNubg=="
+    },
+    {
+      "path": "node_modules/@expo/platforms",
+      "before": null,
+      "after": "58.0.1",
+      "integrity": "sha512-KtLrtAvpShq16l9lTxd2fZSjULxcGxXrJTHA31iUVqrc+Af7aTAJW4ZB3yQBgi/w+kSb6BB/CG9RXI0ohbMm6g=="
+    },
+    {
+      "path": "node_modules/@expo/plist",
+      "before": "0.7.0",
+      "after": "0.10.1",
+      "integrity": "sha512-nuNOqj+r/hGJbZ1Ax3jUpZaOB8UAMHUrISALJEUKaCieTflYj7224EqFWmMpriCGk9wXS1gH+9GGVnSj0tWzuQ=="
+    },
+    {
+      "path": "node_modules/@expo/prebuild-config",
+      "before": "56.0.16",
+      "after": "58.0.14",
+      "integrity": "sha512-2wVzVDfXjRB3LzUbW5shOM/A+6eUUCfR+2bpZiWRBBZBtZP2HA5Zq1YgCio1tDqMGAHf2NQQDhvy/Rz1U6aC3A=="
+    },
+    {
+      "path": "node_modules/@expo/require-utils",
+      "before": "56.1.3",
+      "after": "58.0.4",
+      "integrity": "sha512-DvjS5NCitXYcad2Woe1EMHJKcbhTbE77HX0BgOQGL2LFHE3q2H0n8kCWDPBOCVJ63Drap3c35nwoJwF5TQL7Tw=="
+    },
+    {
+      "path": "node_modules/@expo/router-server",
+      "before": "56.0.14",
+      "after": null,
+      "integrity": null
+    },
+    {
+      "path": "node_modules/@expo/schema-utils",
+      "before": "56.0.1",
+      "after": "58.0.2",
+      "integrity": "sha512-w28y8SG+5ZTdDdmH2ZnCQk9wHVwGzI9NqX5V4urJUFEnxbm7I129fJRkb8RIAJmMA1WKU5h3ONmranV473uaXQ=="
+    },
+    {
+      "path": "node_modules/@expo/sdk-runtime-versions",
+      "before": "1.0.0",
+      "after": "1.0.1",
+      "integrity": "sha512-kvisefkhxu8Fm/4M8G6DEqUaigrXfrSOm2lFw7hsk/nq0zchcp6B4wSk8rlheHY8FRi5iHxKtoVMGY/3M6h04A=="
+    },
+    {
+      "path": "node_modules/@expo/ws-tunnel",
+      "before": "2.0.0",
+      "after": null,
+      "integrity": null
+    },
+    {
+      "path": "node_modules/@expo/xcpretty",
+      "before": "4.4.4",
+      "after": "4.4.7",
+      "integrity": "sha512-EbxYllZ7/ozONVZd425cm4XnolfW+AmSFT5aP7Jdno6oc3WrYQcHz2CO20z/2rwWwYgztmV2PXvYH+BQ8YFjqg=="
+    },
+    {
+      "path": "node_modules/@jridgewell/sourcemap-codec",
+      "before": "1.5.5",
+      "after": "1.6.0",
+      "integrity": "sha512-T7jf+5zgsZHwNJ4lvQ7/aezbyk0nNX+zJVWpmHA7VYsEx7a7qr5Rg5IbtJFqkgze5Y2sruq1RUY8Q837Od7iFw=="
+    },
+    {
+      "path": "node_modules/@noxcturnal/noxcturnal-darwin-arm64",
+      "before": null,
+      "after": "0.1.5",
+      "integrity": "sha512-hQgDaWxKYln83Uk1Hh4Liju9AvGoYh4aLd4A1ou3lGn5hxzhW2uO+z3mERtWk6BMGVazvi/yUXtp9x3IlaWyhA=="
+    },
+    {
+      "path": "node_modules/@noxcturnal/noxcturnal-darwin-x64",
+      "before": null,
+      "after": "0.1.5",
+      "integrity": "sha512-I57zR8QF7Xam+4nGD5UoIODsw0VjkVyn51iDBL3CMaDR5Lh1OxXwKZMYKtv3CtQl+RSDsMfmXBEqGYLE8lIPHg=="
+    },
+    {
+      "path": "node_modules/@noxcturnal/noxcturnal-linux-arm64-gnu",
+      "before": null,
+      "after": "0.1.5",
+      "integrity": "sha512-gVH4XJPh8RdrdjjlU0dKeielQt/FXfvqhr8IEWEf3VeNtQs8l2rPzFPdqS0uwLWQYHLBGgB0LkuOil1KKYx1gQ=="
+    },
+    {
+      "path": "node_modules/@noxcturnal/noxcturnal-linux-arm64-musl",
+      "before": null,
+      "after": "0.1.5",
+      "integrity": "sha512-rzQ075fcHZ+ebsELussRjnW8WBMy1RuLdS8wSqBGhdVlPR7/NaSyoWkNxnVDT8sEO26xjqGoW/o/08ghBzr/zA=="
+    },
+    {
+      "path": "node_modules/@noxcturnal/noxcturnal-linux-x64-gnu",
+      "before": null,
+      "after": "0.1.5",
+      "integrity": "sha512-X5O0lXMrv8HGOGoXDB1PG0Hjt7Rl+MJA+seR2NecQvUAAw2gzDvF/unCV5sqTAVeHfXhBHEFGkLenHZSD44efg=="
+    },
+    {
+      "path": "node_modules/@noxcturnal/noxcturnal-linux-x64-musl",
+      "before": null,
+      "after": "0.1.5",
+      "integrity": "sha512-fkQIQHRxqldNXVmjxfeCvGOiLhLU9SLBw1As02pMA2xjyiZfiXcUn4SUrZ92ciGnyCS8/XMbx+nZSxgEc3qDPw=="
+    },
+    {
+      "path": "node_modules/@noxcturnal/noxcturnal-win32-arm64-msvc",
+      "before": null,
+      "after": "0.1.5",
+      "integrity": "sha512-baeH5m/vM1nf0J2UkW8cfgiVogpM0gRO9b4PZWknXQPbv5+k+0N5sGOYl/UAO2q72qYb3Xbiu7eD8c4A2kR2SA=="
+    },
+    {
+      "path": "node_modules/@noxcturnal/noxcturnal-win32-x64-msvc",
+      "before": null,
+      "after": "0.1.5",
+      "integrity": "sha512-2faDMzom8pCG/s/uR4Czh1atz4KohI85AaSmA2vtAuVnCq+nLL4Viys3A5vUlNz9MNBmTNFxzXyF2Z5HtfxXLg=="
+    },
+    {
+      "path": "node_modules/@oxc-project/types",
+      "before": null,
+      "after": "0.154.0",
+      "integrity": "sha512-KYOUGQFlLWR+s4QMV2Q9ko38TZm7EdO87Qm7rvZLqk/webse/cDjtyxKhg/47l0byCbs/k46LT8qc4PKjAikzA=="
+    },
+    {
+      "path": "node_modules/@react-native/asset-utils",
+      "before": null,
+      "after": "0.88.0",
+      "integrity": "sha512-Bj1DxQt5f4OrjdlgSVkZT37Z3hx5hUIN5AUDSqL/e99vgtTcqj5vnm067epZL1EF/QiqsniZO8Q1GSkItOakDg=="
+    },
+    {
+      "path": "node_modules/@react-native/assets-registry",
+      "before": "0.85.3",
+      "after": null,
+      "integrity": null
+    },
+    {
+      "path": "node_modules/@react-native/babel-plugin-codegen",
+      "before": "0.85.3",
+      "after": "0.88.0",
+      "integrity": "sha512-leGEnCcS7Q0hTxvzvhNtr8zGQpI1gfWqXjzC4UedsFmNMv6kIo4s70o0XbtM30ZXbpfWe4BcSC8NKWuak5sI4A=="
+    },
+    {
+      "path": "node_modules/@react-native/codegen",
+      "before": "0.85.3",
+      "after": "0.88.0",
+      "integrity": "sha512-SAGg+XfzsrPiYTscbKa9bo2/H2ei2TjyxW8RTMq2Ps661kRK3AnmpMGVfrEFshEMr3FGEbuQIvj86X98kaXlRA=="
+    },
+    {
+      "path": "node_modules/@react-native/codegen/node_modules/flow-estree",
+      "before": null,
+      "after": "0.327.0",
+      "integrity": "sha512-f9vK751YUzD0qaHSpKc5/qQM6gqOlgGS+4ZRqTNcZOpVqn3mC55yEQ6dUG2K1eaVm5FbKkz9CFWe6XNvrkQFQg=="
+    },
+    {
+      "path": "node_modules/@react-native/codegen/node_modules/flow-parser",
+      "before": null,
+      "after": "0.327.0",
+      "integrity": "sha512-/MYZ5hXWf5ozpbdfUDmazMgQXviLxWEiRLH3MppEGDdW0itRVqmB5UaU7QX+SBCDNiq+gEesSVn8nlxmPDyDkw=="
+    },
+    {
+      "path": "node_modules/@react-native/community-cli-plugin",
+      "before": "0.85.3",
+      "after": "0.88.0",
+      "integrity": "sha512-WrQdXbjVt1gwAay8ZzYtpOi9ly99ksJ0VMYFdVcMe6nq3vtiRgqKRpHgCdN6ySIbtr5o+aJ+Vr7OTDY98ec/Ow=="
+    },
+    {
+      "path": "node_modules/@react-native/community-cli-plugin/node_modules/commander",
+      "before": null,
+      "after": "12.1.0",
+      "integrity": "sha512-Vw8qHK3bZM9y/P10u3Vib8o/DdkvA2OtPtZvD871QKjy74Wj1WSKFILMPRPSdUSx5RFK1arlJzEtA4PkFgnbuA=="
+    },
+    {
+      "path": "node_modules/@react-native/debugger-frontend",
+      "before": "0.85.3",
+      "after": "0.88.0",
+      "integrity": "sha512-v5cnBaaWhDRPcQv8EC20zj53jOAKH7u2wnzzXS4JTNu+diPC+cA2+kC7rq3eKI5vGhlAcG2kDPoViRuC0AY0oA=="
+    },
+    {
+      "path": "node_modules/@react-native/debugger-shell",
+      "before": "0.85.3",
+      "after": "0.88.0",
+      "integrity": "sha512-p82zT8ZKNx7nIm/8zf8pi55sxm5KQBm8td47kzoJysTdqHLyPsRMUvDXtvCJIWadHSv7RJ6t/yiCc+IoImLBtw=="
+    },
+    {
+      "path": "node_modules/@react-native/dev-middleware",
+      "before": "0.85.3",
+      "after": "0.88.0",
+      "integrity": "sha512-sHLxVHOwfkF672ZzMepNh4d3IKbrZy3qXDKWSwN5LC5VJkzzZ5FdmSPP4N/CCn2pcKJ4oSqvojXwN4De3Xk92A=="
+    },
+    {
+      "path": "node_modules/@react-native/dev-middleware/node_modules/ws",
+      "before": "7.5.11",
+      "after": null,
+      "integrity": null
+    },
+    {
+      "path": "node_modules/@react-native/gradle-plugin",
+      "before": "0.85.3",
+      "after": "0.88.0",
+      "integrity": "sha512-4jPSKslOfJj8NKY/jv9qmWkxZYmqPyamoS3Vs0JOFxw9t4PM6L/ea0fUsjNV0LxC9zJlvWilPJOCTOf7h8wlyw=="
+    },
+    {
+      "path": "node_modules/@react-native/js-polyfills",
+      "before": "0.85.3",
+      "after": "0.88.0",
+      "integrity": "sha512-Iq6v4+EWdOLv0M1+BpADQJBVfInl6FkABXCIBSi0FbvHahEYT+Y4UJ7Cm96p18gbEN1VKzqz3nbBbwLA6bx0rQ=="
+    },
+    {
+      "path": "node_modules/@react-native/normalize-colors",
+      "before": "0.85.3",
+      "after": "0.88.0",
+      "integrity": "sha512-eZCu3tGAQCfvMCPQJVY4dmoMX8ZZYBvqIGHX7lwOYyzNK+Dl8e5ky7ZoXub1Rq75oSrQXNNmSP2CDjNNXXZpFQ=="
+    },
+    {
+      "path": "node_modules/@react-native/virtualized-lists",
+      "before": "0.85.3",
+      "after": "0.88.0",
+      "integrity": "sha512-zpZIOAbobdS93edwHkNUdGDzvElNeQJqukRERRPns3/ucPvuMd2G4fYpmVJSVjhxtGCcLLB1PFndLYYfwaYoBQ=="
+    },
+    {
+      "path": "node_modules/@types/node",
+      "before": "26.0.0",
+      "after": "26.6.5",
+      "integrity": "sha512-uMzsv9stDdofIZBx4UGh4Z9ZgXnGC9seRDscilBcTHAeOFk67MZg/k9bWVfO+bk4qZmG+l52hRnLwUiH2LnJTg=="
+    },
+    {
+      "path": "node_modules/@types/react",
+      "before": "19.2.17",
+      "after": "19.3.0",
+      "integrity": "sha512-N0rFCuH9YoxG9/m61l9MfpJKfmLOVU0em7ipIz6TRgSSkvReLB9vL85GB+yr8Bs5leqpvg96JSwF4ZS1s4viQg=="
+    },
+    {
+      "path": "node_modules/abort-controller",
+      "before": "3.0.0",
+      "after": null,
+      "integrity": null
+    },
+    {
+      "path": "node_modules/accepts",
+      "before": "1.3.8",
+      "after": "2.0.0",
+      "integrity": "sha512-5cvg6CtKwfgdmVqY1WIiXKc3Q1bkRqGLi+2W/6ao+6Y7gu/RCwRuAhGEzh5B4KlszSuTLgZYuqFqo5bImjNKng=="
+    },
+    {
+      "path": "node_modules/acorn",
+      "before": "8.17.0",
+      "after": "8.19.0",
+      "integrity": "sha512-oJlA3XiRm7Cyk6qFD2Jn8ak9B7jSy0qy00ADO3+8dpT0LSjFihQYv4C02LFCSYJV3Q37xYwwRy5m+IpIiUzqWw=="
+    },
+    {
+      "path": "node_modules/agent-cli-detector",
+      "before": null,
+      "after": "0.1.7",
+      "integrity": "sha512-d8OWDVdZMgjhLUT9ZPgSv/BdFFF9pVuscC0JdUSz3bjwE15gcp6u/o0/JooM2yyAWC49KThFhXlgTXRa9B7yng=="
+    },
+    {
+      "path": "node_modules/babel-plugin-react-native-web",
+      "before": "0.21.2",
+      "after": "0.21.4",
+      "integrity": "sha512-FSclsDTGi5EcvpbW3TM7s8GLWwQqo5wI9zQqJr2m0IoJRenSkp1+bVvdeZXTNznI5Ms9Bry7DLBR+C5Shb9gtw=="
+    },
+    {
+      "path": "node_modules/babel-plugin-syntax-hermes-parser",
+      "before": "0.33.3",
+      "after": "0.36.1",
+      "integrity": "sha512-ycduwJbvdvIMmVvlAZqGggS+pm5Eu4Bk9pcV9Sm2Z4PJNRVsKkv0g7vHj+LeuC1gHTeF67sJXFOq61IlqCa2hA=="
+    },
+    {
+      "path": "node_modules/babel-preset-expo",
+      "before": "56.0.15",
+      "after": null,
+      "integrity": null
+    },
+    {
+      "path": "node_modules/bplist-parser",
+      "before": "0.3.2",
+      "after": "0.3.1",
+      "integrity": "sha512-PyJxiNtA5T2PlLIeBot4lbp7rj4OadzjnMZD/G5zuBNt8ei/yCU7+wW0h2bag9vr8c+/WuRWmSxbqAl9hL1rBA=="
+    },
+    {
+      "path": "node_modules/browserslist",
+      "before": "4.29.3",
+      "after": "4.29.4",
+      "integrity": "sha512-2TcbbiwXEq+N0kD36tykpCfyyQigUXmuwNQbnPp4Xk4PX9JOqVIKjJlIDjpH7uY6tmRGoAd+apeT1p60T8wsdA=="
+    },
+    {
+      "path": "node_modules/bser",
+      "before": "2.1.1",
+      "after": "2.1.2",
+      "integrity": "sha512-V2o8YS2EhrKMO9AumnkK0ynynfFlsajpYupwq7S46H5mhcanwxDkNTw3K67wPIcKTH1ffkA4vhMOtAc7gRmPZw=="
+    },
+    {
+      "path": "node_modules/chrome-launcher",
+      "before": "0.15.2",
+      "after": null,
+      "integrity": null
+    },
+    {
+      "path": "node_modules/chromium-edge-launcher",
+      "before": "0.3.0",
+      "after": null,
+      "integrity": null
+    },
+    {
+      "path": "node_modules/cliui/node_modules/strip-ansi",
+      "before": "6.0.1",
+      "after": null,
+      "integrity": null
+    },
+    {
+      "path": "node_modules/content-type",
+      "before": null,
+      "after": "2.1.0",
+      "integrity": "sha512-mj7UPXE0jaqaOsukNZRUEfEi2AcL7C/vwmwcHV0O97eO1E1pxBZuyjlZrx5seTaNBg1U6+o35wpa35Qfcc+7ag=="
+    },
+    {
+      "path": "node_modules/core-js-compat",
+      "before": "3.49.0",
+      "after": "3.51.0",
+      "integrity": "sha512-52r6fkXgxv4GLMjmFcMWRx7X9bw071xTTdrDcdyPGRqU2oE+9pCG0bAOMifSBdLw0JRBZKEF0q3B55qPlLuE8g=="
+    },
+    {
+      "path": "node_modules/define-lazy-prop",
+      "before": null,
+      "after": "2.0.0",
+      "integrity": "sha512-Ds09qNh8yw3khSjiJjiUInaGX9xlqZDY7JVryGxdxV7NPeuqQfplOpQ66yJFZut3jLa5zOwkXw1g9EI2uKh4Og=="
+    },
+    {
+      "path": "node_modules/escape-string-regexp",
+      "before": "4.0.0",
+      "after": "1.0.5",
+      "integrity": "sha512-vbRorB5FUQWvla16U8R/qgaFIya2qGzwDrNmCZuYKrbdSUMG6I1ZCGQRefkRVhuOkIGVne7BQ35DSfo1qvJqFg=="
+    },
+    {
+      "path": "node_modules/event-target-shim",
+      "before": "5.0.1",
+      "after": null,
+      "integrity": null
+    },
+    {
+      "path": "node_modules/expo",
+      "before": "56.0.12",
+      "after": "58.0.14",
+      "integrity": "sha512-M05O++KRgG4NA6kQ9AP60kbN8xqHJ6S8uTXdtkeiwcGVIYzdu2kaUXJyraVturvePO/Mf4PWa0C9+JggrHITwA=="
+    },
+    {
+      "path": "node_modules/expo-asset",
+      "before": "56.0.17",
+      "after": null,
+      "integrity": null
+    },
+    {
+      "path": "node_modules/expo-camera",
+      "before": "56.0.8",
+      "after": "58.0.10",
+      "integrity": "sha512-QXs93Kd2oZO2VuiCUPPHZgzUIPazdURx9Mse+i03U+74K5Vy7FT1F4ONp21w91aTIp1NbWtmJAcJNjSnTE+5bQ=="
+    },
+    {
+      "path": "node_modules/expo-clipboard",
+      "before": "56.0.4",
+      "after": "58.0.3",
+      "integrity": "sha512-OglmYYTXecF9dti5sOYJS9lXAJpk6VDNqFvOLTm9fRdUjQj2D6UQV7q00jNZbRpf0ztMxlQSassUnzngn9wmvQ=="
+    },
+    {
+      "path": "node_modules/expo-constants",
+      "before": "56.0.18",
+      "after": null,
+      "integrity": null
+    },
+    {
+      "path": "node_modules/expo-file-system",
+      "before": "56.0.8",
+      "after": null,
+      "integrity": null
+    },
+    {
+      "path": "node_modules/expo-font",
+      "before": "56.0.7",
+      "after": null,
+      "integrity": null
+    },
+    {
+      "path": "node_modules/expo-keep-awake",
+      "before": "56.0.3",
+      "after": null,
+      "integrity": null
+    },
+    {
+      "path": "node_modules/expo-modules-autolinking",
+      "before": "56.0.16",
+      "after": "58.0.13",
+      "integrity": "sha512-uzLFoTnAKabUdITvzRqWTvFkZsOdRPEXj7AEMAuBEhA2kGhqaBDa2EOWqPXVay0QJVoZuIQaEEgPGAXN1dPuYg=="
+    },
+    {
+      "path": "node_modules/expo-modules-core",
+      "before": null,
+      "after": "58.0.22",
+      "integrity": "sha512-T3YJYziFkF4JlGDpX4zCl91oIxz1Skq5sp1LFVO+GL/BARSIXk013QWGdRZrvt+wMxoVaql5dpOdPdP5q2+0jQ=="
+    },
+    {
+      "path": "node_modules/expo-modules-jsi",
+      "before": "56.0.10",
+      "after": "58.0.15",
+      "integrity": "sha512-PsjYgL4KWtvBqWH242r0wbP99VjgHkHCpkPCekO7nzb+ulkDNyrNnhysxa0TcNpfRTNLetmCUaLs9t4CcoquZQ=="
+    },
+    {
+      "path": "node_modules/expo-modules-macros",
+      "before": null,
+      "after": "0.20.0",
+      "integrity": "sha512-Ekgb5c9LQPM9CPnmDZdeWcOa1eBbCDUGrgdN5lIFNH2GWDUf9doeAOK7IqQOOVviamy37eIp5FW+N1zyrIwzoA=="
+    },
+    {
+      "path": "node_modules/expo-screen-orientation",
+      "before": "56.0.5",
+      "after": "58.0.3",
+      "integrity": "sha512-nvNA5VE0HBZDoZhzn0OngyVk/dSbaIMIvytgEAjADtC0pUXAeuMpfnM/e9oqM3naSDj52/F1kdg5Tx3D21QGHg=="
+    },
+    {
+      "path": "node_modules/expo-secure-store",
+      "before": "56.0.4",
+      "after": "58.0.2",
+      "integrity": "sha512-VupWWEuQF6IiQ06McSymtn7/tehs8ifThhFwAU4UK8poomZcaa2S0UVt/y7G2XozBdkI3xpiPSx+r0pS2zsuYQ=="
+    },
+    {
+      "path": "node_modules/expo-server",
+      "before": "56.0.5",
+      "after": "58.0.5",
+      "integrity": "sha512-FHYecxfGOuAhacHcanR6qCN8Cln9S+FFulcYetLu3ddDg55ohuCsMZ9U4Egzwdm+A2o6N+MdSoJKquBC5F9NIg=="
+    },
+    {
+      "path": "node_modules/expo-status-bar",
+      "before": "56.0.4",
+      "after": "58.0.3",
+      "integrity": "sha512-+GMLHLA81LB+/m2DteQAN7kvH8unVj3zYGSj8D6Csf+mCrc4P6jJwaSbrz17qTizzEIJ5lv6SuU9Zfyy2vSNoQ=="
+    },
+    {
+      "path": "node_modules/expo-system-ui",
+      "before": null,
+      "after": "58.0.6",
+      "integrity": "sha512-K1+GIYhNDc4J0lJAL0m8giesP1dgfavhN+joA6FQ45r1FXAWwS1PaueCiCJaq5hB6z5iAYT7b9XqYp76UU65yw=="
+    },
+    {
+      "path": "node_modules/expo-video",
+      "before": "56.1.4",
+      "after": "58.0.11",
+      "integrity": "sha512-fCQE63LFMFbI9K+o/DNDtVM8MfmYp1PzfUUXMcajILPLuEw+j1C7Wp03vvZnIwwOUSubXJZmxDYSXBIHBnJmag=="
+    },
+    {
+      "path": "node_modules/expo/node_modules/@expo/cli",
+      "before": null,
+      "after": "58.1.11",
+      "integrity": "sha512-wkFTSLXXYqLkRT5oy4DnLuTOtbFIu3qTiXHSHkFSqUBTHiE92y3bOIwM3UN7Y1ys18qVJge8lXjezaEfsHmijQ=="
+    },
+    {
+      "path": "node_modules/expo/node_modules/@expo/cli/node_modules/@expo/router-server",
+      "before": null,
+      "after": "58.0.14",
+      "integrity": "sha512-RSzQYMA+Tv2eTemhjhzpx8+hL+pMC30JTVqAWrk5AZwht+OgaKZar/gHmj4iJf7n3rq+GG6KujrkKF9xAXLz2w=="
+    },
+    {
+      "path": "node_modules/expo/node_modules/@expo/devtools",
+      "before": null,
+      "after": "58.0.2",
+      "integrity": "sha512-WBj/K+vv8JPSmY70ennL04YYOHkpEsGGkfuVY9lfv4XO7Qhbt5qz4q6W7maME194I5oGcimRMigUFfWNkBe90w=="
+    },
+    {
+      "path": "node_modules/expo/node_modules/@expo/dom-webview",
+      "before": null,
+      "after": "58.0.2",
+      "integrity": "sha512-bLkREoP7qL3rEuzxP60xG+TjdPoGjbnZfxkvYo5imJxGWfKMOf7x962W06Pu+WWAr4gcDRk16iA+Clg8D0zjCg=="
+    },
+    {
+      "path": "node_modules/expo/node_modules/@expo/log-box",
+      "before": null,
+      "after": "58.0.12",
+      "integrity": "sha512-IzDYoFY2iUsmSDvl1V7YUM7UkCPDyMVS4e4a38c2LnFc1A3WGMUiQh+vsHLYTPKjIelu4r7/u4V7Gxtfa0oJgA=="
+    },
+    {
+      "path": "node_modules/expo/node_modules/@expo/metro-config",
+      "before": null,
+      "after": "58.0.14",
+      "integrity": "sha512-UDUMAJwYGEzaB26ejMLG/IOVzwKDbHzoODBf3FZeRS94kk9jDf1dWE1VMX6bLBLoiflxXwqrMWiH0Fvz3gZ9YQ=="
+    },
+    {
+      "path": "node_modules/expo/node_modules/@expo/ws-tunnel",
+      "before": null,
+      "after": "2.0.1",
+      "integrity": "sha512-mljsRffbOHzmSimYQbQu9h9NR3alwCCwEEouRGFL4QRTt8dNvsNtKEPa/5jHmtDLDtsh4xXsWKwzjN9BTpeXHQ=="
+    },
+    {
+      "path": "node_modules/expo/node_modules/accepts",
+      "before": null,
+      "after": "1.3.8",
+      "integrity": "sha512-PYAthTa2m2VKxuvSD3DPC/Gy+U+sOA1LAuT8mkmRuvw+NACSaeXEQ+NHcVF7rONl6qcaxV3Uuemwawk+7+SJLw=="
+    },
+    {
+      "path": "node_modules/expo/node_modules/babel-preset-expo",
+      "before": null,
+      "after": "58.0.17",
+      "integrity": "sha512-Rrqc/Z5Idc4bG2/PrEh725t3kvuAc7jUKCJ+wZVU9KXk2bKSdqAniXxQa8aph9aHdv4h5sGKLpMXMaMNz/4+Og=="
+    },
+    {
+      "path": "node_modules/expo/node_modules/expo-asset",
+      "before": null,
+      "after": "58.0.16",
+      "integrity": "sha512-beR3uusLA+rFo+6Ug0L7FPR4b6y/37VwtYW2Jig/i+3Co+oyYCTnvVuFPWhb05W9TOZRxdHUEI569fVKIgtYAA=="
+    },
+    {
+      "path": "node_modules/expo/node_modules/expo-constants",
+      "before": null,
+      "after": "58.0.12",
+      "integrity": "sha512-d3/dsps32nU4m6YJQbXQ1dIfn58GxfmJjTnZ0WtnhdSHTdG/oVsOakLqYRlX/FaLUKkQOSHXMf7hyCx+2a/HSQ=="
+    },
+    {
+      "path": "node_modules/expo/node_modules/expo-file-system",
+      "before": null,
+      "after": "58.0.9",
+      "integrity": "sha512-JT0km3Wa+wDz/7Rli8ifreoMnmk68ulf/uaWzRA26xm/4K+jGTY+cDhnboRmpmXUCBkED6uqxWmNoXjaVU9VUw=="
+    },
+    {
+      "path": "node_modules/expo/node_modules/expo-font",
+      "before": null,
+      "after": "58.0.8",
+      "integrity": "sha512-i9HKj/ljdmmjLamYQEkI4wXJB9+ap7AG5CpCqK/bgwwy45y5T8+1lpNbYgRXE7aQgmDjPpzd09wX6dOZkHfrxg=="
+    },
+    {
+      "path": "node_modules/expo/node_modules/expo-keep-awake",
+      "before": null,
+      "after": "58.0.3",
+      "integrity": "sha512-wLRF+XeVsD/Rt/ZyX+A0mk1brdf8vefWizNAPzqV5eOCgkj23LCRZdN8gUi5X8UwyR8UJ7Y7Dzdz4YDGB/4c9Q=="
+    },
+    {
+      "path": "node_modules/expo/node_modules/expo-modules-core",
+      "before": "56.0.17",
+      "after": null,
+      "integrity": null
+    },
+    {
+      "path": "node_modules/expo/node_modules/mime-db",
+      "before": null,
+      "after": "1.52.0",
+      "integrity": "sha512-sPU4uV7dYlvtWJxwwxHD0PuihVNiE7TyAbQ5SWxDCB9mUYvOgroQOwYQQOKPJ8CIbE+1ETVlOoK1UC2nU3gYvg=="
+    },
+    {
+      "path": "node_modules/expo/node_modules/mime-types",
+      "before": null,
+      "after": "2.1.35",
+      "integrity": "sha512-ZDY+bPm5zTTF+YpCrAU9nK0UgICYPT0QtT1NZWFv4s++TNkcgVaT0g6+4R2uI4MjQjzysHB1zxuWL50hzaeXiw=="
+    },
+    {
+      "path": "node_modules/expo/node_modules/negotiator",
+      "before": null,
+      "after": "0.6.3",
+      "integrity": "sha512-+EUsqGPLsM+j/zdChZjsnX51g4XrHFOIXwfnCVPGlQk/k5giakcKsuxCObBRu6DSm9opw/O6slWbJdghQM4bBg=="
+    },
+    {
+      "path": "node_modules/expo/node_modules/picomatch",
+      "before": null,
+      "after": "4.0.7",
+      "integrity": "sha512-qcJu88Q2IWqJsDD529JKMdwGm/dvInW4HvQnRwiH9JtihJvzGOscDtHE3x1pBKeUOTysQ8kVmLnJ2kJu7yhcGA=="
+    },
+    {
+      "path": "node_modules/expo/node_modules/ws",
+      "before": null,
+      "after": "8.22.0",
+      "integrity": "sha512-Ydggc987+RO0AnWtZ/7Wq9FtNvcrL1b/RO0ud9mWjUPgDrsAAwQSF51sm2hm1XofbU/4jkpGEsLFsZZxU+1DOg=="
+    },
+    {
+      "path": "node_modules/fb-watchman",
+      "before": "2.0.2",
+      "after": "2.0.4",
+      "integrity": "sha512-tGQtaoYisPDriJBN0mT5yZSyNETnJGA1gTYxaVRAE5KUO3LI9kPUc9WIu8JXcxaIci+faIKlzXqXyPgrmubtBQ=="
+    },
+    {
+      "path": "node_modules/fdir",
+      "before": "6.5.0",
+      "after": null,
+      "integrity": null
+    },
+    {
+      "path": "node_modules/flow-estree",
+      "before": null,
+      "after": "0.331.0",
+      "integrity": "sha512-FVLYkSL/ITb/QXBEQvNWPjPooRGswuUtGOwrH+puSlMDneNkxy640+FZsk/TfKL+b7Wbw/Fg9FTUv2bMQDpj2w=="
+    },
+    {
+      "path": "node_modules/flow-parser",
+      "before": null,
+      "after": "0.331.0",
+      "integrity": "sha512-vEZcHIlnKeN8JSVtYFczj8sWJfHIJOkz+YG00O/oul/Bete+t1ZhTi+O6JRRLFYvGW+yJkZ0YgL16iStnbkUqQ=="
+    },
+    {
+      "path": "node_modules/fontfaceobserver",
+      "before": "2.3.0",
+      "after": null,
+      "integrity": null
+    },
+    {
+      "path": "node_modules/hermes-compiler",
+      "before": "250829098.0.10",
+      "after": "260318099.0.4",
+      "integrity": "sha512-8odcPFkPC82HlqCl0C5QI9mBN4rEAT+IAo55sJhzwKw//K3qZloiv3ex6J2O8CuBbhdmkJozfidNsset2KH25w=="
+    },
+    {
+      "path": "node_modules/hermes-estree",
+      "before": "0.33.3",
+      "after": "0.36.1",
+      "integrity": "sha512-guv1nQ6IJ7S83NRFPWc3SA7IBZrdNC9kapwOq6uXvF4wP+sDCgjzQbKPCoyYmoyZRzztF/n/c36l/rccCZSiCw=="
+    },
+    {
+      "path": "node_modules/hermes-parser",
+      "before": "0.33.3",
+      "after": "0.36.1",
+      "integrity": "sha512-GApNk4zLHi2UWoWZZkx7LNCOSzLSc5lB55pZ/PhK7ycFeg7u5LcF88p/WbpIi1XUDtE0MpHE3uRR3u3KB7TjSQ=="
+    },
+    {
+      "path": "node_modules/image-size",
+      "before": "1.2.1",
+      "after": null,
+      "integrity": null
+    },
+    {
+      "path": "node_modules/is-core-module",
+      "before": "2.16.2",
+      "after": "2.17.0",
+      "integrity": "sha512-J/vG0zBCbIKOQFfufSwyXdMrsohyJIUNkrnmo6WZGzoM7tr/lsbfW5b2BvisL6zsyMzK9UxV9L6c7AoFbyXHOA=="
+    },
+    {
+      "path": "node_modules/jest-util/node_modules/picomatch",
+      "before": "2.3.2",
+      "after": null,
+      "integrity": null
+    },
+    {
+      "path": "node_modules/lighthouse-logger",
+      "before": "1.4.2",
+      "after": null,
+      "integrity": null
+    },
+    {
+      "path": "node_modules/lighthouse-logger/node_modules/debug",
+      "before": "2.6.9",
+      "after": null,
+      "integrity": null
+    },
+    {
+      "path": "node_modules/lighthouse-logger/node_modules/ms",
+      "before": "2.0.0",
+      "after": null,
+      "integrity": null
+    },
+    {
+      "path": "node_modules/lightningcss",
+      "before": "1.32.0",
+      "after": "1.33.0",
+      "integrity": "sha512-WkUDrojuJs0xkgGf2udWxa3yGBRxPtxUkB79i6aCZLRgc7PM8fZe9TosfPDcvEpQZbuFASnHYmRLBLUbmLOIIA=="
+    },
+    {
+      "path": "node_modules/lightningcss-android-arm64",
+      "before": "1.32.0",
+      "after": "1.33.0",
+      "integrity": "sha512-gEpRTalKdosp4Bb8qWtc2iOgE5SeIHlpS1up9bFq2wAyYhl1UdTObYiHe98zEM9SQvSoqQZ1IQD0JNpg3Ml5pg=="
+    },
+    {
+      "path": "node_modules/lightningcss-darwin-arm64",
+      "before": "1.32.0",
+      "after": "1.33.0",
+      "integrity": "sha512-Sciaz8eenNTKn9b3t7+xr0ipTp9YxKQY4npwQ3mrRuL0BAVHBLyZxofhaKBAVtzmtRZ/zTyo0/to4B1uWG/Djg=="
+    },
+    {
+      "path": "node_modules/lightningcss-darwin-x64",
+      "before": "1.32.0",
+      "after": "1.33.0",
+      "integrity": "sha512-Z5UPAxzrjlWNNyGy6i65cJzzvgJ5D3T6wMvs+gWpY9d7qRhANrxqAp6LhxIgZhWEw18RfJTGcRxjuLIBr+m8XQ=="
+    },
+    {
+      "path": "node_modules/lightningcss-freebsd-x64",
+      "before": "1.32.0",
+      "after": "1.33.0",
+      "integrity": "sha512-QQM/Ti/hQajJwCY+RiWuCZ9sdtI/XQk7nDK5vC8kkdwixezOlDgvDx7+RT+QjK6FcFT4MpsuoBnHIo/O3StRRg=="
+    },
+    {
+      "path": "node_modules/lightningcss-linux-arm-gnueabihf",
+      "before": "1.32.0",
+      "after": "1.33.0",
+      "integrity": "sha512-N7FVBe6iS24MlM6R/4RBTxGhQheZGs7tiQ9U32UtF75NzP5Q7xWPRqLBCKxlRQRk3rY1jCIPLzx7WzOhuUIRLQ=="
+    },
+    {
+      "path": "node_modules/lightningcss-linux-arm64-gnu",
+      "before": "1.32.0",
+      "after": "1.33.0",
+      "integrity": "sha512-j2v/itmy4HlNxlc6voKXYgBqNi0Ng2LShg4z7GufpEgs05P+2suBVyi9I6YHq5uoVFx9ETin3eCEhLVyXGQnKg=="
+    },
+    {
+      "path": "node_modules/lightningcss-linux-arm64-musl",
+      "before": "1.32.0",
+      "after": "1.33.0",
+      "integrity": "sha512-yiO5ROMuYQgXbC60yjZU5CYSFZGKXL0HFATXt9mHJn1+zW55oCtMI9NfcVhYLMFDL7gV7oBPon/EmMMGg2OvtQ=="
+    },
+    {
+      "path": "node_modules/lightningcss-linux-x64-gnu",
+      "before": "1.32.0",
+      "after": "1.33.0",
+      "integrity": "sha512-ar+Ju7LmcN0Jo4FpL4hpFybwNG9/3A/Br5KW2n2jyODg3MEZXaDYADdemoNS+BDNfMgKvylJLj4S5tyRActuAg=="
+    },
+    {
+      "path": "node_modules/lightningcss-linux-x64-musl",
+      "before": "1.32.0",
+      "after": "1.33.0",
+      "integrity": "sha512-RYiYbkokw0trfKqqzfF55lginwEPrD3OJDfTuJzFs1MK6iFnDenaz1fqLLtX4ITG3OktJQXOeTaw1awrBAlZPw=="
+    },
+    {
+      "path": "node_modules/lightningcss-win32-arm64-msvc",
+      "before": "1.32.0",
+      "after": "1.33.0",
+      "integrity": "sha512-1K+MPfLSFVpphzpdbfkhlWk6wBrTObBzS2T6db10PNOZgR9GoVsAWzwNyuhUYYbTp23j+4RrncfujZ4uAzXvwA=="
+    },
+    {
+      "path": "node_modules/lightningcss-win32-x64-msvc",
+      "before": "1.32.0",
+      "after": "1.33.0",
+      "integrity": "sha512-OlEICDx/Xl0FqSp4bry8zFnCvGpig3Gl4gCquvYwHuqJKEC1+n9NgDniFvqHGmMv1ZkqDJrDqKKSykTDX+ehuA=="
+    },
+    {
+      "path": "node_modules/log-symbols/node_modules/escape-string-regexp",
+      "before": "1.0.5",
+      "after": null,
+      "integrity": null
+    },
+    {
+      "path": "node_modules/marky",
+      "before": "1.3.0",
+      "after": null,
+      "integrity": null
+    },
+    {
+      "path": "node_modules/metro",
+      "before": "0.84.4",
+      "after": "0.87.1",
+      "integrity": "sha512-1oyLU9elM7hPAsKIqKooEekwxiuWr27+MZBhUROPhzcbXhMDxK64GPF/hCXwBZVp1F89ODavCrBmJtLx9WtBoQ=="
+    },
+    {
+      "path": "node_modules/metro-babel-transformer",
+      "before": "0.84.4",
+      "after": "0.87.1",
+      "integrity": "sha512-orvRIGpb0yK1yMbk5YP3dhVKjmoxUkRB9fdltGJxNppEqus/1tFpNuf9KnGFR3Qjg0izoUrJ4z6WgoBvdkXPrA=="
+    },
+    {
+      "path": "node_modules/metro-babel-transformer/node_modules/hermes-estree",
+      "before": "0.35.0",
+      "after": null,
+      "integrity": null
+    },
+    {
+      "path": "node_modules/metro-babel-transformer/node_modules/hermes-parser",
+      "before": "0.35.0",
+      "after": null,
+      "integrity": null
+    },
+    {
+      "path": "node_modules/metro-cache",
+      "before": "0.84.4",
+      "after": "0.87.1",
+      "integrity": "sha512-juNPaj0Xi5tkLp8imXqvbSnEIijwKG36m7OiFFVJMqEkiURwAjkMFVek3/xpix1+LVQqO7kjVp3PvuvIM61mKQ=="
+    },
+    {
+      "path": "node_modules/metro-cache-key",
+      "before": "0.84.4",
+      "after": "0.87.1",
+      "integrity": "sha512-scqVVPMA2c+RVO12I3wyMDp5xCkRPLsyrcG4Qc3xfU5JR0EW/0sz2tjty+5UjMUtG09uiM1KYQ8HjWg7OQXHtw=="
+    },
+    {
+      "path": "node_modules/metro-config",
+      "before": "0.84.4",
+      "after": "0.87.1",
+      "integrity": "sha512-NmkDlc/qZAdo5gTkVTuO2AKE/khemRKRH5IA+SKfqUBJigI5GqZ5TOXhmEokhlkAqzjt8dyzKhzI6FHvXoXaTQ=="
+    },
+    {
+      "path": "node_modules/metro-core",
+      "before": "0.84.4",
+      "after": "0.87.1",
+      "integrity": "sha512-xizzky/4+c/Mkznege8OW05j7bSdM39VPoEps61Se4+hf32UQujmbvLvIE9+UnP6kNEPVomk0Fw8NsBK9iRQmw=="
+    },
+    {
+      "path": "node_modules/metro-file-map",
+      "before": "0.84.4",
+      "after": "0.87.1",
+      "integrity": "sha512-9sPuNCojC3pS4vj+ZPY7FXmHGpdJeckXuKXQrDAfJvZc60AF8owRFTkI8XdwlwrmPIB2w++KraK9FMEXvC4wJw=="
+    },
+    {
+      "path": "node_modules/metro-minify-terser",
+      "before": "0.84.4",
+      "after": "0.87.1",
+      "integrity": "sha512-YK4k1oO1wV48hfE+Nbw2rJCnAgeabzrgT/xH5ha5n9gbK4p3HYFC898cERUiyTl9vRh58CNTiXRc88f7y6PfKg=="
+    },
+    {
+      "path": "node_modules/metro-resolver",
+      "before": "0.84.4",
+      "after": "0.87.1",
+      "integrity": "sha512-FXH/brY69wT6sPxaSW8BhMmDGD/6irmBr/cL4rUi+VWwqR3pbvdcfUOfyjcHucgQ7pe5IW3xJY21eHKLVKNumQ=="
+    },
+    {
+      "path": "node_modules/metro-runtime",
+      "before": "0.84.4",
+      "after": "0.87.1",
+      "integrity": "sha512-kjeuSvInsM6OzBjkCQsWxnkrKZFMKtnkCl38oXWRI9lDGs2L9hGs9Tak9sQYJ9h3gtDujneB7wZio+irgqJKDw=="
+    },
+    {
+      "path": "node_modules/metro-source-map",
+      "before": "0.84.4",
+      "after": "0.87.1",
+      "integrity": "sha512-Bqpm0PBGdy53pigIJb4HRF7QxD2pUOdgSmVh/4AWbP635kSCv+Y6ltVxUZgSnzS/QbSmzyCGijmRPlXMj2/qHw=="
+    },
+    {
+      "path": "node_modules/metro-symbolicate",
+      "before": "0.84.4",
+      "after": "0.87.1",
+      "integrity": "sha512-rcGvwabrg0lbXGRGRKl14PY3My3+dkno2jZYhdJEuH2DmjTtTkV5bYwgto4JtV/Lbe+sXE6GO1UGg654430uow=="
+    },
+    {
+      "path": "node_modules/metro-transform-plugins",
+      "before": "0.84.4",
+      "after": "0.87.1",
+      "integrity": "sha512-qMiJ/x+VfqumFJJSefKS6nj8uojzC29b2/aK8vlMuFABIqGjDucICEOXd2Yt6k/XMFAgAcaJvShUOT0HLyYaPw=="
+    },
+    {
+      "path": "node_modules/metro-transform-worker",
+      "before": "0.84.4",
+      "after": "0.87.1",
+      "integrity": "sha512-VOzs3OV405FuOLYdAhqA2wsn1F9lvueDVxMDLvCKaQ44U+yknIqphJ9eMjjsGwLDZiJq9sW3DMLhjD27JxQgqQ=="
+    },
+    {
+      "path": "node_modules/metro/node_modules/accepts",
+      "before": "2.0.0",
+      "after": null,
+      "integrity": null
+    },
+    {
+      "path": "node_modules/metro/node_modules/ci-info",
+      "before": "2.0.0",
+      "after": null,
+      "integrity": null
+    },
+    {
+      "path": "node_modules/metro/node_modules/hermes-estree",
+      "before": "0.35.0",
+      "after": null,
+      "integrity": null
+    },
+    {
+      "path": "node_modules/metro/node_modules/hermes-parser",
+      "before": "0.35.0",
+      "after": null,
+      "integrity": null
+    },
+    {
+      "path": "node_modules/metro/node_modules/mime-types",
+      "before": "3.0.2",
+      "after": null,
+      "integrity": null
+    },
+    {
+      "path": "node_modules/metro/node_modules/negotiator",
+      "before": "1.0.0",
+      "after": null,
+      "integrity": null
+    },
+    {
+      "path": "node_modules/metro/node_modules/ws",
+      "before": "7.5.11",
+      "after": null,
+      "integrity": null
+    },
+    {
+      "path": "node_modules/micromatch/node_modules/picomatch",
+      "before": "2.3.2",
+      "after": null,
+      "integrity": null
+    },
+    {
+      "path": "node_modules/mime-types",
+      "before": "2.1.35",
+      "after": "3.0.2",
+      "integrity": "sha512-Lbgzdk0h4juoQ9fCKXW4by0UJqj+nOOrI9MJ1sSj4nI8aI2eo1qmvQEie4VD1glsS250n15LsWsYtCugiStS5A=="
+    },
+    {
+      "path": "node_modules/mime-types/node_modules/mime-db",
+      "before": "1.52.0",
+      "after": null,
+      "integrity": null
+    },
+    {
+      "path": "node_modules/minimatch",
+      "before": "10.2.5",
+      "after": "10.2.6",
+      "integrity": "sha512-vpLQEs+VLCr1nU0BXS07maYoFwlDAH0gngQuuttxIwutDFEMHq2blX+8vpgxDdK3J1PwjCJiep77OitTZ4Ll1A=="
+    },
+    {
+      "path": "node_modules/mkdirp",
+      "before": "1.0.4",
+      "after": null,
+      "integrity": null
+    },
+    {
+      "path": "node_modules/multitars",
+      "before": "1.0.0",
+      "after": "1.0.2",
+      "integrity": "sha512-6GwVw5eLi9sThdtlS4PKwC7yRLaf45pYhIEzKBHdKxi+YOXGKFX8acIniH+Uh/+k9mS2lQOupTccjoe5r0/1IQ=="
+    },
+    {
+      "path": "node_modules/negotiator",
+      "before": "0.6.3",
+      "after": "1.1.0",
+      "integrity": "sha512-NMPBRMJgiQHjbd8phG3Vebdx4kZ1H121rbl5IkMqeOsahptB9BKo/d7oJ3zTXqTgagn2bWlNSXkh0QUGM31RYg=="
+    },
+    {
+      "path": "node_modules/noxcturnal",
+      "before": null,
+      "after": "0.1.5",
+      "integrity": "sha512-X/HQXJP/xn7LVQ4z1E4La0NHSl5UHdtJPG6ky4r2/Xgb7k79nGDJgBXk7I5f1V2vInWjlSCM14oSB0cUxwZS/Q=="
+    },
+    {
+      "path": "node_modules/ob1",
+      "before": "0.84.4",
+      "after": "0.87.1",
+      "integrity": "sha512-i8iA8uij0g1YQzS8uOJPSRCgwDjO9warIHUAu1Fqj877Wc3wlfxDYBioYWgKTBF2+URVJttyDWSEpmd99nlvtQ=="
+    },
+    {
+      "path": "node_modules/open",
+      "before": "7.4.2",
+      "after": "8.4.2",
+      "integrity": "sha512-7x81NCL719oNbsq/3mh+hVrAWmFuEYUqrq/Iw3kUzH8ReypT9QQ0BLoJS7/G9k6N81XjW4qHWtjWwe/9eLy1EQ=="
+    },
+    {
+      "path": "node_modules/ora/node_modules/ansi-regex",
+      "before": null,
+      "after": "4.1.1",
+      "integrity": "sha512-ILlv4k/3f6vfQ4OoP2AGvirOktlQ98ZEL1k9FaQjxa3L1abBgbuTDAdPOpvbGncC0BTVQrl+OM8xZGK6tWXt7g=="
+    },
+    {
+      "path": "node_modules/ora/node_modules/escape-string-regexp",
+      "before": "1.0.5",
+      "after": null,
+      "integrity": null
+    },
+    {
+      "path": "node_modules/ora/node_modules/strip-ansi",
+      "before": null,
+      "after": "5.2.0",
+      "integrity": "sha512-DuRs1gKbBqsMKIZlrffwlug8MHkcnpjs5VPmL1PAh+mA30U0DTotfDZ0d2UUsXpPmPmMMJ6W773MaA3J+lbiWA=="
+    },
+    {
+      "path": "node_modules/path-scurry/node_modules/lru-cache",
+      "before": "11.5.1",
+      "after": "11.5.3",
+      "integrity": "sha512-U4N8FgzmWxc8k1VH8Kr6lQg18U7Fjvby6wXHVRX/ZZ7IwWbRMgrRbP0Wrb5q5NVinryp4SQampHKdvtecItxUg=="
+    },
+    {
+      "path": "node_modules/picomatch",
+      "before": "4.0.4",
+      "after": "2.3.2",
+      "integrity": "sha512-V7+vQEJ06Z+c5tSye8S+nHUfI51xoXIXjHQ99cQtKUkQqqO1kO/KCJUfZXuB47h/YBlDhah2H3hdUGXn8ie0oA=="
+    },
+    {
+      "path": "node_modules/queue",
+      "before": "6.0.2",
+      "after": null,
+      "integrity": null
+    },
+    {
+      "path": "node_modules/react",
+      "before": "19.2.3",
+      "after": "19.3.0",
+      "integrity": "sha512-E8LUcbtBWt20bbl2YoHfx4ZDBdxVTfOKtCZn9cDSJ4l6/nuoApcpIBcj47t2wZoVX8g2ZHuMHbiShgCR1T5Sog=="
+    },
+    {
+      "path": "node_modules/react-devtools-core/node_modules/ws",
+      "before": "7.5.11",
+      "after": null,
+      "integrity": null
+    },
+    {
+      "path": "node_modules/react-native",
+      "before": "0.85.3",
+      "after": "0.88.0",
+      "integrity": "sha512-v/wee0nYWcammMYBnSat/e3WY/5iaf9YQOMcBrfKT/wPApPPlHp94hgZovBtwhMuthR01yc/8cGn0FpFTE/C4A=="
+    },
+    {
+      "path": "node_modules/react-native-safe-area-context",
+      "before": "5.7.0",
+      "after": "5.10.1",
+      "integrity": "sha512-ax0T3cAHQIhuAjDQpJ9C1Le96aRiM9PF+Kmgg7Y8+mD7QJMEIx04cG0eG3EGUTdvymgOkCrkakgZFwuOIuNQGw=="
+    },
+    {
+      "path": "node_modules/react-native-svg",
+      "before": "15.15.4",
+      "after": "15.16.0",
+      "integrity": "sha512-uh8yktufYeRU3W9Omi8+SPyLF9BVN4JmLflSgc9oOcKkSKk/S5JUmmTjKZq/L8GHfQUtCvcu/W6X4xhEfBBAjQ=="
+    },
+    {
+      "path": "node_modules/react-native/node_modules/commander",
+      "before": "12.1.0",
+      "after": null,
+      "integrity": null
+    },
+    {
+      "path": "node_modules/react-native/node_modules/flow-estree",
+      "before": null,
+      "after": "0.327.0",
+      "integrity": "sha512-f9vK751YUzD0qaHSpKc5/qQM6gqOlgGS+4ZRqTNcZOpVqn3mC55yEQ6dUG2K1eaVm5FbKkz9CFWe6XNvrkQFQg=="
+    },
+    {
+      "path": "node_modules/react-native/node_modules/flow-parser",
+      "before": null,
+      "after": "0.327.0",
+      "integrity": "sha512-/MYZ5hXWf5ozpbdfUDmazMgQXviLxWEiRLH3MppEGDdW0itRVqmB5UaU7QX+SBCDNiq+gEesSVn8nlxmPDyDkw=="
+    },
+    {
+      "path": "node_modules/react-native/node_modules/ws",
+      "before": "7.5.11",
+      "after": null,
+      "integrity": null
+    },
+    {
+      "path": "node_modules/regenerate",
+      "before": "1.4.2",
+      "after": "1.5.0",
+      "integrity": "sha512-1s+CxXjJ71i7LNVy8nYwg47XV4y6lAnOEhsMtSKq3WpmPfhl9LuKlTqKIn/3yUpE8lBz+W+TT88Bxyhnr0U4yw=="
+    },
+    {
+      "path": "node_modules/regenerate-unicode-properties",
+      "before": "10.2.2",
+      "after": "10.3.0",
+      "integrity": "sha512-9ns8odR8e9q3otKeHj3DE80jZYKg6zVeZKE+zQmRKXFoVUcuiTGeO6iusDhPRoIQQPVPRvH+SfBhrTud4eczuw=="
+    },
+    {
+      "path": "node_modules/regexpu-core",
+      "before": "6.4.0",
+      "after": "6.5.3",
+      "integrity": "sha512-E8VgUoSK+LMQrLboDxavm76MTBGrQhx9RiNuomRmYnZ10Uw12HrI8fkxOOncktb2hBpzIZ9SV/347euQHG5z+g=="
+    },
+    {
+      "path": "node_modules/regjsparser",
+      "before": "0.13.2",
+      "after": "0.13.4",
+      "integrity": "sha512-EWV80YgFaVgFrjGCAsV7oybp4GOxbls5RzBg8OB0nKEVXsBJR1JlV8Di1JhCROg3MzTfe1RI8yitIm1eOs68iA=="
+    },
+    {
+      "path": "node_modules/resolve",
+      "before": "1.22.12",
+      "after": "1.22.13",
+      "integrity": "sha512-Dj/cW9zBV2aRj6XzCxuGIs3ESZKv02jixne3q6jFZYZ3/Tg09gHHviSMDL4kObh9pqSahdRHEnDoaP2gn8YLhA=="
+    },
+    {
+      "path": "node_modules/sandbox-cli-detector",
+      "before": null,
+      "after": "0.2.0",
+      "integrity": "sha512-4lyHX0ZU0AZKwjgZ1InxZAa3PNpyEb8rOQ+Zss1ReYmhNzW0Q+h1zE5nvniXN0HaAWZaZE1zgVNEirb0R7LmNg=="
+    },
+    {
+      "path": "node_modules/sax",
+      "before": "1.6.0",
+      "after": "1.6.1",
+      "integrity": "sha512-42tBVwLWnaQvW5zc4HbZrTuWccECCZfBi92FDuwtqxasH+JbPB3/FOKb1m222K42R4WxuxzzMsTswfzgtSu64Q=="
+    },
+    {
+      "path": "node_modules/scheduler",
+      "before": "0.27.0",
+      "after": "0.28.0",
+      "integrity": "sha512-juorfCmIkIw8tT+p5BXSm6PJjQF/ycEYmKyzURCIt/RaZIhL+PulbQ9Yu2z1HdOJDdqDTlxA1+xKBmHXJsczAw=="
+    },
+    {
+      "path": "node_modules/simple-plist/node_modules/bplist-parser",
+      "before": "0.3.1",
+      "after": null,
+      "integrity": null
+    },
+    {
+      "path": "node_modules/string-width/node_modules/strip-ansi",
+      "before": "6.0.1",
+      "after": null,
+      "integrity": null
+    },
+    {
+      "path": "node_modules/strip-ansi",
+      "before": "5.2.0",
+      "after": "6.0.1",
+      "integrity": "sha512-Y38VPSHcqkFrCpFnQ9vuSXmquuv5oXOKpGeT6aGrr3o3Gc9AlVa6JBfUSOCnbxGGZF+/0ooI7KrPuUSztUdU5A=="
+    },
+    {
+      "path": "node_modules/strip-ansi/node_modules/ansi-regex",
+      "before": "4.1.1",
+      "after": null,
+      "integrity": null
+    },
+    {
+      "path": "node_modules/terser",
+      "before": "5.48.0",
+      "after": "5.51.2",
+      "integrity": "sha512-bWnjSNscmuI+GJze6ZupnHP8G/cTcsJF+bXCeQknk2SHQsgbNJnLrqiH9jZ2W4STPVXH2mDKKRX3iwPhc9Cn/Q=="
+    },
+    {
+      "path": "node_modules/tinyglobby/node_modules/fdir",
+      "before": null,
+      "after": "6.5.0",
+      "integrity": "sha512-tIbYtZbucOs0BRGqPJkshJUYdL+SDH7dVM8gjy+ERp3WAUjLEFJE+02kanyHtwjWOnwrKYBiwAmM0p4kLJAnXg=="
+    },
+    {
+      "path": "node_modules/tinyglobby/node_modules/picomatch",
+      "before": null,
+      "after": "4.0.7",
+      "integrity": "sha512-qcJu88Q2IWqJsDD529JKMdwGm/dvInW4HvQnRwiH9JtihJvzGOscDtHE3x1pBKeUOTysQ8kVmLnJ2kJu7yhcGA=="
+    },
+    {
+      "path": "node_modules/undici-types",
+      "before": "8.3.0",
+      "after": "8.9.0",
+      "integrity": "sha512-KTDyRTYX8sWmKXAikPHHSyc63CRPETMctyjKFupcC6OBLXT3xsN0e9aF7m+mIXutFWpUXuedtowG7iLOzp0kQg=="
+    },
+    {
+      "path": "node_modules/warn-once",
+      "before": "0.1.1",
+      "after": null,
+      "integrity": null
+    },
+    {
+      "path": "node_modules/whatwg-url-minimum",
+      "before": "0.1.2",
+      "after": "0.2.0",
+      "integrity": "sha512-BtjXU1caNcCFfETP2DhqSeVPfRDl2MTUitI107RE34rJXjR/izfUtR5IoTFOK1WqjNLXbbeqaCH/mQAOLjpc8g=="
+    },
+    {
+      "path": "node_modules/wrap-ansi/node_modules/strip-ansi",
+      "before": "6.0.1",
+      "after": null,
+      "integrity": null
+    },
+    {
+      "path": "node_modules/ws",
+      "before": "8.21.0",
+      "after": "7.5.13",
+      "integrity": "sha512-rsKI6xDBFVf4r/x8XyChGK04QR/XHroxs/jUcoWvtEZM8TPU/X/uIY9B1CsSzYws9ZJb/6bbBu7dPhFW00CAoA=="
+    },
+    {
+      "path": "node_modules/yaml",
+      "before": "2.9.0",
+      "after": null,
+      "integrity": null
+    }
+  ],
+  "audits": {
+    "registry": "https://registry.npmjs.org",
+    "scope": "Complete mobile npm dependency tree; findings include build tools and are not all device runtime paths",
+    "before": {
+      "info": 0,
+      "low": 0,
+      "moderate": 7,
+      "high": 17,
+      "critical": 0,
+      "total": 24
+    },
+    "intermediate": {
+      "info": 0,
+      "low": 0,
+      "moderate": 7,
+      "high": 15,
+      "critical": 0,
+      "total": 22
+    },
+    "after": {
+      "info": 0,
+      "low": 0,
+      "moderate": 7,
+      "high": 15,
+      "critical": 0,
+      "total": 22
+    },
+    "remaining": {
+      "@expo/cli": {
+        "severity": "high",
+        "isDirect": false,
+        "range": "<=0.0.0-canary-20231123-1b19f96-4 || >=0.0.1-canary-20231125-d600e44",
+        "via": [
+          "@expo/code-signing-certificates",
+          "@expo/config",
+          "@expo/config-plugins",
+          "@expo/inline-modules",
+          "@expo/metro",
+          "@expo/metro-config",
+          "@expo/prebuild-config",
+          "node-forge"
+        ]
+      },
+      "@expo/code-signing-certificates": {
+        "severity": "high",
+        "isDirect": false,
+        "range": "*",
+        "via": [
+          "node-forge"
+        ]
+      },
+      "@expo/config": {
+        "severity": "moderate",
+        "isDirect": false,
+        "range": "<=0.0.1-canary-20240418-8d74597 || >=3.3.23-alpha.0",
+        "via": [
+          "@expo/config-plugins"
+        ]
+      },
+      "@expo/config-plugins": {
+        "severity": "moderate",
+        "isDirect": false,
+        "range": "*",
+        "via": [
+          "xcode"
+        ]
+      },
+      "@expo/inline-modules": {
+        "severity": "moderate",
+        "isDirect": false,
+        "range": ">=0.0.2-canary-20260409-6fc2991",
+        "via": [
+          "@expo/config-plugins"
+        ]
+      },
+      "@expo/local-build-cache-provider": {
+        "severity": "moderate",
+        "isDirect": false,
+        "range": "*",
+        "via": [
+          "@expo/config"
+        ]
+      },
+      "@expo/metro": {
+        "severity": "high",
+        "isDirect": false,
+        "range": "*",
+        "via": [
+          "metro",
+          "metro-config",
+          "metro-file-map",
+          "metro-transform-worker"
+        ]
+      },
+      "@expo/metro-config": {
+        "severity": "high",
+        "isDirect": false,
+        "range": "<=0.0.1-canary-20240418-8d74597 || >=0.1.49-alpha.0",
+        "via": [
+          "@expo/config",
+          "@expo/metro"
+        ]
+      },
+      "@expo/prebuild-config": {
+        "severity": "moderate",
+        "isDirect": false,
+        "range": "*",
+        "via": [
+          "@expo/config",
+          "@expo/config-plugins"
+        ]
+      },
+      "@react-native/community-cli-plugin": {
+        "severity": "high",
+        "isDirect": false,
+        "range": "*",
+        "via": [
+          "metro"
+        ]
+      },
+      "@react-native/virtualized-lists": {
+        "severity": "high",
+        "isDirect": false,
+        "range": ">=0.85.0-nightly-20260108-1236b6be4",
+        "via": [
+          "react-native"
+        ]
+      },
+      "braces": {
+        "severity": "high",
+        "isDirect": false,
+        "range": "*",
+        "via": [
+          {
+            "source": 1240992,
+            "name": "braces",
+            "dependency": "braces",
+            "title": "braces vulnerable to stack-exhaustion denial of service through deeply nested patterns",
+            "url": "https://github.com/advisories/GHSA-vfj7-8cjw-p6xm",
+            "severity": "high",
+            "cwe": [
+              "CWE-674"
+            ],
+            "cvss": {
+              "score": 7.5,
+              "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H"
+            },
+            "range": "<=3.0.3"
+          }
+        ]
+      },
+      "expo": {
+        "severity": "high",
+        "isDirect": true,
+        "range": ">=45.0.0-beta.1",
+        "via": [
+          "@expo/cli",
+          "@expo/config",
+          "@expo/config-plugins",
+          "@expo/local-build-cache-provider",
+          "@expo/metro",
+          "@expo/metro-config"
+        ]
+      },
+      "metro": {
+        "severity": "high",
+        "isDirect": false,
+        "range": ">=0.71.0",
+        "via": [
+          "metro-config",
+          "metro-file-map",
+          "metro-transform-worker"
+        ]
+      },
+      "metro-config": {
+        "severity": "high",
+        "isDirect": false,
+        "range": ">=0.71.0",
+        "via": [
+          "metro"
+        ]
+      },
+      "metro-file-map": {
+        "severity": "high",
+        "isDirect": false,
+        "range": "*",
+        "via": [
+          "micromatch"
+        ]
+      },
+      "metro-transform-worker": {
+        "severity": "high",
+        "isDirect": false,
+        "range": ">=0.71.0",
+        "via": [
+          "metro"
+        ]
+      },
+      "micromatch": {
+        "severity": "high",
+        "isDirect": false,
+        "range": ">=0.2.0",
+        "via": [
+          "braces"
+        ]
+      },
+      "node-forge": {
+        "severity": "high",
+        "isDirect": false,
+        "range": "*",
+        "via": [
+          {
+            "source": 1240912,
+            "name": "node-forge",
+            "dependency": "node-forge",
+            "title": "node-forge RSA PKCS#1 v1.5 signature verification accepts extra nested DigestAlgorithm elements",
+            "url": "https://github.com/advisories/GHSA-86w9-cpqp-85rv",
+            "severity": "high",
+            "cwe": [
+              "CWE-347"
+            ],
+            "cvss": {
+              "score": 7.5,
+              "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:H/A:N"
+            },
+            "range": "<=1.4.0"
+          }
+        ]
+      },
+      "react-native": {
+        "severity": "high",
+        "isDirect": true,
+        "range": ">=0.73.0-nightly-20230506-1af868c52",
+        "via": [
+          "@react-native/community-cli-plugin",
+          "@react-native/virtualized-lists"
+        ]
+      },
+      "uuid": {
+        "severity": "moderate",
+        "isDirect": false,
+        "range": "<11.1.1",
+        "via": [
+          {
+            "source": 1119441,
+            "name": "uuid",
+            "dependency": "uuid",
+            "title": "uuid: Missing buffer bounds check in v3/v5/v6 when buf is provided",
+            "url": "https://github.com/advisories/GHSA-w5hq-g745-h8pq",
+            "severity": "moderate",
+            "cwe": [
+              "CWE-787",
+              "CWE-1285"
+            ],
+            "cvss": {
+              "score": 7.5,
+              "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:H/A:N"
+            },
+            "range": "<11.1.1"
+          }
+        ]
+      },
+      "xcode": {
+        "severity": "moderate",
+        "isDirect": false,
+        "range": ">=0.9.2",
+        "via": [
+          "uuid"
+        ]
+      }
+    }
+  },
+  "changes": [
+    "SDK58 native package/React combination and explicit supported Node engines",
+    "requestIdleCallback sorting with bounded dispatch, cancellation and unmount cleanup",
+    "Current public list token API; undefined indices cannot replace the saved video anchor",
+    "App activity uses active boolean with existing null initial fallback",
+    "One Expo status bar owner with current supported style API",
+    "expo-system-ui satisfies prebuild dark appearance requirement",
+    "Windows CMake object path bound 250 via persistent config plugin; release R8 remains enabled",
+    "SDK compatibility checks in core CI and both release verification/build paths"
+  ],
+  "validation": {
+    "typecheck": "exit 0 with default strict RN API; no legacy deep-import opt-out",
+    "installCheck": "Dependencies are up to date",
+    "doctor": "20/20, expo-doctor1.21.5",
+    "regressions": [
+      {
+        "name": "verify:mobile-playback-adapter",
+        "exit": 0,
+        "log": ".tmp/refactor-tests/r8-mobile-sdk/sdk58-verify-mobile-playback-adapter.log"
+      },
+      {
+        "name": "verify:mobile-player",
+        "exit": 0,
+        "log": ".tmp/refactor-tests/r8-mobile-sdk/sdk58-verify-mobile-player.log"
+      },
+      {
+        "name": "verify:mobile-player-panels",
+        "exit": 0,
+        "log": ".tmp/refactor-tests/r8-mobile-sdk/sdk58-verify-mobile-player-panels.log"
+      },
+      {
+        "name": "verify:mobile-input-accessibility",
+        "exit": 0,
+        "log": ".tmp/refactor-tests/r8-mobile-sdk/sdk58-verify-mobile-input-accessibility.log"
+      },
+      {
+        "name": "verify:mobile-transcode",
+        "exit": 0,
+        "log": ".tmp/refactor-tests/r8-mobile-sdk/sdk58-verify-mobile-transcode.log"
+      },
+      {
+        "name": "verify:mobile-multi-device",
+        "exit": 0,
+        "log": ".tmp/refactor-tests/r8-mobile-sdk/sdk58-verify-mobile-multi-device.log"
+      },
+      {
+        "name": "verify:mobile-navigation",
+        "exit": 0,
+        "log": ".tmp/refactor-tests/r8-mobile-sdk/sdk58-verify-mobile-navigation.log"
+      },
+      {
+        "name": "verify:dependency-security-mobile",
+        "exit": 0,
+        "log": ".tmp/refactor-tests/r8-mobile-sdk/sdk58-verify-dependency-security-mobile.log"
+      },
+      {
+        "name": "verify:mobile-correctness",
+        "exit": 0,
+        "log": ".tmp/refactor-tests/r8-mobile-sdk/sdk58-verify-mobile-correctness.log"
+      },
+      {
+        "name": "verify:mobile-accessibility",
+        "exit": 0,
+        "log": ".tmp/refactor-tests/r8-mobile-sdk/sdk58-verify-mobile-accessibility.log"
+      },
+      {
+        "name": "verify:library-query",
+        "exit": 0,
+        "log": ".tmp/refactor-tests/r8-mobile-sdk/sdk58-verify-library-query.log"
+      }
+    ],
+    "bundles": [
+      {
+        "platform": "android",
+        "bytes": 3090008,
+        "modules": 2565,
+        "reactVersion": "19.3.0",
+        "sharedContracts": true
+      },
+      {
+        "platform": "ios",
+        "bytes": 3085200,
+        "modules": 2567,
+        "reactVersion": "19.3.0",
+        "sharedContracts": true
+      }
+    ],
+    "sortBehavior": "Latest rapid selection reaches real HTTP query; superseded date request absent; unmount cancels queued work",
+    "native": {
+      "date": "2026-10-19T11:27:52.905Z",
+      "success": true,
+      "serial": "emulator-5580",
+      "app": "com.wallpaperplayer.mobile.qa.sdk58",
+      "sdk": 58,
+      "abi": "x86_64",
+      "checks": [
+        "native CameraView permission/open/cancel succeeded with AVD emulated cameras, not host camera",
+        "production pairing/approval and authenticated library loaded",
+        "native Expo Video loaded authenticated H264; video-area tap paused it and accessible play action appeared",
+        "native screen-orientation entered landscape; Android back restored portrait",
+        "saved device restored after force-stop; SecureStore credentials authenticated library again"
+      ],
+      "originalDisplay": {
+        "size": "Physical size: 1080x2340\r\n",
+        "density": "Physical density: 440\r\n",
+        "font": "1.0"
+      },
+      "apk": "E:\\wp-sdk58-qa-c4c02030\\mobile\\android\\app\\build\\outputs\\apk\\release\\app-release.apk",
+      "serverBeforeRestart": {
+        "POST /v1/pairing/claim 200": 2,
+        "GET /v1/info 200": 1,
+        "GET /v1/auth 200": 1,
+        "POST /v1/library/query 200": 1,
+        "GET /v1/videos/video_0IE_dcOZNqfUzxO0mzwbNLULyQOBVA5R/thumbnail 200": 1,
+        "GET /v1/playback/video_0IE_dcOZNqfUzxO0mzwbNLULyQOBVA5R 200": 1,
+        "GET /v1/videos/video_0IE_dcOZNqfUzxO0mzwbNLULyQOBVA5R/stream 200": 1,
+        "GET /v1/videos/video_0IE_dcOZNqfUzxO0mzwbNLULyQOBVA5R/stream 206": 2,
+        "PUT /v1/playback/video_0IE_dcOZNqfUzxO0mzwbNLULyQOBVA5R 200": 2
+      },
+      "serverAfterRestart": {
+        "POST /v1/pairing/claim 200": 2,
+        "GET /v1/info 200": 3,
+        "GET /v1/auth 200": 3,
+        "POST /v1/library/query 200": 3,
+        "GET /v1/videos/video_0IE_dcOZNqfUzxO0mzwbNLULyQOBVA5R/thumbnail 200": 3,
+        "GET /v1/playback/video_0IE_dcOZNqfUzxO0mzwbNLULyQOBVA5R 200": 1,
+        "GET /v1/videos/video_0IE_dcOZNqfUzxO0mzwbNLULyQOBVA5R/stream 200": 1,
+        "GET /v1/videos/video_0IE_dcOZNqfUzxO0mzwbNLULyQOBVA5R/stream 206": 2,
+        "PUT /v1/playback/video_0IE_dcOZNqfUzxO0mzwbNLULyQOBVA5R 200": 2,
+        "GET /v1/library/revision 200": 1
+      },
+      "displayRestored": true,
+      "stage": "E:\\wp-sdk58-qa-c4c02030",
+      "gradle": {
+        "version": "9.4.1",
+        "source": "https://services.gradle.org/distributions/gradle-9.4.1-bin.zip",
+        "sha256": "2ab2958f2a1e51120c326cad6f385153bb11ee93b3c216c5fccebfdfbb7ec6cb",
+        "matched": true
+      },
+      "buildResult": "BUILD SUCCESSFUL in 4m 12s",
+      "tasks": "387 actionable tasks: 323 executed, 64 up-to-date",
+      "java": "JDK21",
+      "compileApi": 37,
+      "targetApi": 36,
+      "minApi": 24,
+      "emulatorApi": 36,
+      "optimizedRelease": true,
+      "apkBytes": 35945277,
+      "apkSha256": "cb208b6c0e0de6c950fd1406e971e51d865d0fbadec2ac52ddc1198827db416b",
+      "bundle": {
+        "entry": "assets/index.android.bundle",
+        "bytes": 3090008,
+        "header": "C6-1F-BC-03-C1-03-19-1F-63-00-00-00-5C-37-BD-79"
+      },
+      "signing": {
+        "production": false,
+        "identity": "Android Debug test key",
+        "certificateSha256": "fac61745dc0903786fb9ede62a962b399f7348f0bb6f899b8332667591033b9c"
+      },
+      "mapping": {
+        "bytes": 89242480,
+        "sha256": "3bb2bce05adc554d31e9f11b5785fdff4dc663f7bf530bd68a90348b83952ea8"
+      },
+      "sourceDigests": [
+        {
+          "path": "mobile/src/AppNavigator.tsx",
+          "sha256": "c4cacc8f12f40bb6f89910fafd2b26682e91a5dacd580d4f7860deea5f0a96ab"
+        },
+        {
+          "path": "mobile/src/components/AccessibleModal.tsx",
+          "sha256": "f079bdc22b1033b504c7dfff3f5a6693f82448e73d0b7c1ef7d4535910409232"
+        },
+        {
+          "path": "mobile/src/components/ConnectionStatus.tsx",
+          "sha256": "b003b9e5a379c16a6a98246fbdcd075a443f17b3ac928303c1b5c00dc1699084"
+        },
+        {
+          "path": "mobile/src/components/DeviceCard.tsx",
+          "sha256": "bc313ccc5608ef747bd37f1dd9c2ed50881f7617cb940cf4c89d23d824319efa"
+        },
+        {
+          "path": "mobile/src/components/MobileUpdateCard.tsx",
+          "sha256": "2b79b588e59af400c07dfb2ff9298e7c2df7beceba550b4dcfad7b3e40fd88e6"
+        },
+        {
+          "path": "mobile/src/components/PrimaryButton.tsx",
+          "sha256": "529b4278bede821dac7ef60b0a3edd31d860b54a37f3f988bb7b66e8a5c9da78"
+        },
+        {
+          "path": "mobile/src/components/VideoCard.tsx",
+          "sha256": "a9bbd50f4118921017453717ca05628191e2303c73e9da4758158f8fed5ac4e6"
+        },
+        {
+          "path": "mobile/src/components/player/FavoriteAnimation.tsx",
+          "sha256": "5a56203540c22bede23a9cc0d2b9502b4b04e84f5e9db9e4ff2c3e58932499f3"
+        },
+        {
+          "path": "mobile/src/components/player/NativeVideoPlayer.tsx",
+          "sha256": "60b2f7bd7aaa8c096f66f272346bf466309b4c50636fb6ce2b8ecc97d2765760"
+        },
+        {
+          "path": "mobile/src/components/player/PlaybackProgress.tsx",
+          "sha256": "23f42929df31c7404922728b780c909824ca5031d744b32f8cb6c72a3e798161"
+        },
+        {
+          "path": "mobile/src/components/player/PlayerControls.tsx",
+          "sha256": "8110761189ae66461b323207a023ef42359346c095331e4ad614cd75e6693d64"
+        },
+        {
+          "path": "mobile/src/components/player/PlayerMoreSheet.tsx",
+          "sha256": "7caa11645220f5abf3309af74a7a55f413bfc9f2e10825e68aae1dd8e6189909"
+        },
+        {
+          "path": "mobile/src/components/player/PlayerSheetFrame.tsx",
+          "sha256": "6d2646becf3a509139d7a1fbe0b22409ce05d394fd13fb5fb629bddbdba4c5d1"
+        },
+        {
+          "path": "mobile/src/components/player/TagEditorSheet.tsx",
+          "sha256": "f992a6a1a873c1846e2d1534201fda7c9c718a45f2fa2917dfadfe1c2bdbd69b"
+        },
+        {
+          "path": "mobile/src/components/player/TranscodingStatus.tsx",
+          "sha256": "7650aa5676ba7207dd9a8b5958891fad121792808180dd804bd5fa91c5ccc35a"
+        },
+        {
+          "path": "mobile/src/components/player/VideoActionBar.tsx",
+          "sha256": "6877ee74eaf6a131ecaea08911cb243cb9a322e97918cd364afde31cbdb35126"
+        },
+        {
+          "path": "mobile/src/components/player/VideoAnalysisSheet.tsx",
+          "sha256": "3a07d4302fc8898bcbcddf2f1e65fb44e017d7fdb8bc08acefe9475731cee8be"
+        },
+        {
+          "path": "mobile/src/components/player/VideoErrorState.tsx",
+          "sha256": "0b3fe20834c23a1c17a91dbd56d85641076f48b8f6f27cf0d68bbebe15d2b8a8"
+        },
+        {
+          "path": "mobile/src/components/player/VideoFeedItem.tsx",
+          "sha256": "e84cdbb575a63aad27338a761d18f04c3f3ed0ff1fb9938107b2e8564b4f1096"
+        },
+        {
+          "path": "mobile/src/components/player/VideoInfo.tsx",
+          "sha256": "8623dad3272bc25b677fbc006531416f47970cdce2d4d424ece2bac96fb44a00"
+        },
+        {
+          "path": "mobile/src/components/player/VideoOverlay.tsx",
+          "sha256": "48ab547045366f65eed4fb97fae10298f2265c86104e872d2b8696eb6419eb7d"
+        },
+        {
+          "path": "mobile/src/hooks/useAccessibilityPreferences.ts",
+          "sha256": "9ecef850963d7728949e5f407cf9541c6e33a6152218deaaa642a49610d0f522"
+        },
+        {
+          "path": "mobile/src/hooks/useAdaptiveVideoGrid.ts",
+          "sha256": "df3fa9bb5c2b7f61610b75e1cc18f01946e75af636a09cf252afc041ca017a75"
+        },
+        {
+          "path": "mobile/src/hooks/usePageActivity.ts",
+          "sha256": "9f4fc53e137436d5ba7d1b1f9141704e4e06ad9fbd5957e89b75ed175bbe6488"
+        },
+        {
+          "path": "mobile/src/hooks/usePlayerSheet.ts",
+          "sha256": "4ecef34ef84429505859affb6cff760295a67e78425a328a481721871fe64c24"
+        },
+        {
+          "path": "mobile/src/hooks/useTagEditorDraft.ts",
+          "sha256": "849a05bd3a0007dd654bd9d8ed88ff59f3382bab5bec288d96bd070eba8f79a6"
+        },
+        {
+          "path": "mobile/src/persistence/device-caches.ts",
+          "sha256": "7c0ac5e84b93def4753a3ebcd4cff0a399621aa4e802f83d5ff7a827991c5e9a"
+        },
+        {
+          "path": "mobile/src/persistence/devices.ts",
+          "sha256": "8b7c272bf9a247a6ae9d8cfe5e0b044ff841c0bec6359d321163f2acb0dd4afe"
+        },
+        {
+          "path": "mobile/src/persistence/library-pages.ts",
+          "sha256": "3fce3a0db05a666f263eb43343589a454c8a349b1f9164481b0fb12f75d0ecf2"
+        },
+        {
+          "path": "mobile/src/persistence/library.ts",
+          "sha256": "88bfce93935d4dcd9a83a0e4ec027046023531b723714f061ef10dd10a594ffd"
+        },
+        {
+          "path": "mobile/src/persistence/playback.ts",
+          "sha256": "42713d2a4256e66827ff9a0b05ce585641dde0577138a1af0e69af9e19e54611"
+        },
+        {
+          "path": "mobile/src/persistence/settings.ts",
+          "sha256": "3e46562751a3097173d0e84663f14bc48e766c9563107a167aefcce0579576c6"
+        },
+        {
+          "path": "mobile/src/screens/DeviceListScreen.tsx",
+          "sha256": "acf368835b8e282f0467f7a106fd25e1509e79a3b5c316c989d40d623fb0a474"
+        },
+        {
+          "path": "mobile/src/screens/LibraryScreen.tsx",
+          "sha256": "5d769956d52b2950c56c178ffdb87674676fce5bf0a85a98c4e1330bab6989a7"
+        },
+        {
+          "path": "mobile/src/screens/PairDeviceScreen.tsx",
+          "sha256": "a650b766de43696aac20c4a96cb7211a1d9dbaa2cf9afb4fbe8e5644443f3e6d"
+        },
+        {
+          "path": "mobile/src/screens/PlayerScreen.tsx",
+          "sha256": "03dfee072cef5fab56880cf5fe40e502f60c1e7bef02ed3a6dd1431c54726f85"
+        },
+        {
+          "path": "mobile/src/screens/SearchScreen.tsx",
+          "sha256": "bbad53393267d3975b431a13ded312fe59c92e518faf463551c42c665a45f192"
+        },
+        {
+          "path": "mobile/src/screens/player/playerLayout.ts",
+          "sha256": "7f404440fb8dfd9fd4cdb38c7d7cd13b9c2ae680dad7a0d5e82b93216cabb1c7"
+        },
+        {
+          "path": "mobile/src/screens/player/playerUtils.ts",
+          "sha256": "c1528ca7891e5833dc927a9b7fc5e8fd5eed351ab42a29d6dc30ab35a8c22533"
+        },
+        {
+          "path": "mobile/src/services/api.ts",
+          "sha256": "b1170edcd5b411ac5177fcf21e74b20690a5fbcefc79051613ee8d24229f9fe3"
+        },
+        {
+          "path": "mobile/src/services/connection-manager.ts",
+          "sha256": "10c9010241c4c2c7d53fc5f3b297950408c4aeb0f8590ff61913d5e648769dde"
+        },
+        {
+          "path": "mobile/src/services/library-events.ts",
+          "sha256": "93227515880311a54c1727a35448e23032ffae8a801c7b5bd999144f32514e44"
+        },
+        {
+          "path": "mobile/src/services/library-query.ts",
+          "sha256": "d7bffaeae89fd3f0a7361c14efce6ec21b004141c43bce1a53b76e826792d621"
+        },
+        {
+          "path": "mobile/src/services/library-repository.ts",
+          "sha256": "7302e068dbbab4a436270d257491f72213ebb3893f3b32c089e057571f317734"
+        },
+        {
+          "path": "mobile/src/services/navigation-store.ts",
+          "sha256": "4a75384ca416ba71c8668403a109829c2248dcfacc84126064800b40dd1d27e7"
+        },
+        {
+          "path": "mobile/src/services/orientation.ts",
+          "sha256": "0ce889c5f0337412fdc84c335d4d398840a8ccab2fee84eadd1f8bca7990be02"
+        },
+        {
+          "path": "mobile/src/services/pairing.ts",
+          "sha256": "e15eb8dcc88f43c3651987370f03d1b26e892864d673318af174f6b68fb07075"
+        },
+        {
+          "path": "mobile/src/services/playback-adapter.ts",
+          "sha256": "3e69f586a9a46d190bb7001463e4886b09733a43b468d3b313d0249c04faa283"
+        },
+        {
+          "path": "mobile/src/services/tag-editing.ts",
+          "sha256": "591af878c712e4fe526ef967d77825dd157bd2f9de838f42d1df66f41c1edb6e"
+        },
+        {
+          "path": "mobile/src/services/task-observer.ts",
+          "sha256": "4a388aa10ea2867969d41b34ab2a9624ccf29719329d23e80d1f07eebe4cb642"
+        },
+        {
+          "path": "mobile/src/services/updates.ts",
+          "sha256": "a0adcb396dbd54e218a5e7f7343ef17d8923104c2dd60ee0cb2c56a7b0175013"
+        },
+        {
+          "path": "mobile/src/theme-context.tsx",
+          "sha256": "70ee91fb42dddf0cc81d14d3d95d7f22493cb286874d15bc388bf3b46054772d"
+        },
+        {
+          "path": "mobile/src/theme.ts",
+          "sha256": "9b9a2d4e76d609b2fb2bed18c999d8be2d232720323191c62f2b39c530b0641a"
+        },
+        {
+          "path": "mobile/src/types.ts",
+          "sha256": "24bac51f5ce1bc913c57f5805185737d6cc92af05049f1dd169d5cd792f49d1e"
+        },
+        {
+          "path": "mobile/src/utils/url.ts",
+          "sha256": "ddbf305c3932482cd7af23e2f0f6d01b51d8a35824cec501f06bc425a34aead6"
+        },
+        {
+          "path": "mobile/plugins/with-cleartext-traffic.js",
+          "sha256": "abe73ff604ee2fed39d81cd58b66b49adb4ef45a7ba08229eea5925b1593f179"
+        },
+        {
+          "path": "mobile/plugins/with-windows-cmake-paths.js",
+          "sha256": "5473e7a1a23f3ea9ed7942e60223afacb1d0294384859899da57af68ab7ac275"
+        },
+        {
+          "path": "mobile/App.tsx",
+          "sha256": "2255f80d1c032dc139ba9b1b54f3310bbca34c341ac6fc53b2f8f3eccccc0d81"
+        },
+        {
+          "path": "mobile/package.json",
+          "sha256": "1e678e09e6d66aa14a7a0667a0c330c3c393302928f6de3b7e7270e9a0a34c41"
+        },
+        {
+          "path": "mobile/package-lock.json",
+          "sha256": "c2f66e3b7843593d6cc5ea6552c40d1de3ede36c448a3c47ea7ac3cdb7d968d9"
+        },
+        {
+          "path": "mobile/metro.config.js",
+          "sha256": "ed13b2c5c51bb5066f4e765f93445ed73cd4eebde5f513c7d74369732294105e"
+        },
+        {
+          "path": "mobile/tsconfig.json",
+          "sha256": "ef64b467fa9eee0931da2d8888e146d8b9aa277c3d771c1c37ec4b277cf26203"
+        },
+        {
+          "path": "packages/contracts/dist/index.d.ts",
+          "sha256": "70fe20ec736e996b75a46ee355b125669da5cee2ad0388f6b6f156d4a3017e4d"
+        },
+        {
+          "path": "packages/contracts/dist/index.js",
+          "sha256": "6fd89ec15d078d06f85781f98d2c8e9dd4815586539ec255cd40662f23c99ef3"
+        },
+        {
+          "path": "packages/contracts/dist/schema.d.ts",
+          "sha256": "72e7865d7f010b0c4c7bc72bb08dc0b88e43177e74f7053400497b5fe91d3770"
+        },
+        {
+          "path": "packages/contracts/dist/schema.js",
+          "sha256": "6b889492fa4260b6ef309bd8823813802ddb38b71dbc162c0359441819dfc91b"
+        },
+        {
+          "path": "packages/contracts/dist/settings-feed.d.ts",
+          "sha256": "d111c15b37ea6f1d0967eeb799a423a4a09adbe3ebc0339f3977acb18363ee28"
+        },
+        {
+          "path": "packages/contracts/dist/settings-feed.js",
+          "sha256": "d3de55971030b50e35ee4f8e70ebdd1c65a3353553f211aea31e6bf58e98424c"
+        },
+        {
+          "path": "packages/contracts/package.json",
+          "sha256": "caacf7b4a6a770186fd6765f25d2b10e46f81f41c66d861b67e3e44a837ce08f"
+        },
+        {
+          "path": "packages/contracts/src/index.ts",
+          "sha256": "23ecb23d50d0b6cba74eed99238c20205c70d56a62ca5a7c0350db088a0e7af1"
+        },
+        {
+          "path": "packages/contracts/src/schema.ts",
+          "sha256": "46f3cb5aaf929e8a455bd7a151cfce63915af534092ff0075bc998ba31cf35b7"
+        },
+        {
+          "path": "packages/contracts/src/settings-feed.ts",
+          "sha256": "8266d590aa5b9b2ac6bfa2a72fb4f9a269cd9e29de0de4cdf76832f7805342f6"
+        },
+        {
+          "path": "packages/contracts/tsconfig.json",
+          "sha256": "30e5e6740fbe29b3983d6f4dc01f1e145ee81ec95c5d0a79a59ad6dd297531d2"
+        },
+        {
+          "path": "packages/domain/dist/index.d.ts",
+          "sha256": "85710e7819cb78865ef1b2af3c256d23d7d420008e76020dd04ce5c57b91fc8f"
+        },
+        {
+          "path": "packages/domain/dist/index.js",
+          "sha256": "e16a487dbda471e000a1d37a362583167d20f8020c5a017ca81fadfad36a4bdb"
+        },
+        {
+          "path": "packages/domain/package.json",
+          "sha256": "daf3324204bab2539ec92a09b401da82f1f60b82164944c04d148d8f2d6218a1"
+        },
+        {
+          "path": "packages/domain/src/index.ts",
+          "sha256": "ba59e7a5e015bcecd29e791fabdc0acbc9c8dd9cda7a6d6a2cdf783f87a4a6fa"
+        },
+        {
+          "path": "packages/domain/tsconfig.json",
+          "sha256": "30e5e6740fbe29b3983d6f4dc01f1e145ee81ec95c5d0a79a59ad6dd297531d2"
+        }
+      ],
+      "appConfig": {
+        "originalSha256": "326d496a86ba0b28d4f4fc3b3e645cedb784a1b07523c955005877414477e9dd",
+        "qaSha256": "ed2bba4a501aee08779a43db095d51177cabc4a91a8457c00e0f69e2114f064e",
+        "onlyOverrides": [
+          "name",
+          "android.package"
+        ]
+      },
+      "prebuildRegeneration": {
+        "sourcePluginBound": 250,
+        "freshBlockRegenerated": true,
+        "repeatIdempotent": true,
+        "appGradleSha256": "9348f48bc10fac06a71e082499896f98d88fe93bb9d4c7eef2131ca61e79c08a",
+        "identicalToSuccessfulApkBuild": true
+      },
+      "captures": [
+        {
+          "path": "docs/evidence/r8-sdk58-player-paused.png",
+          "sha256": "71ccd6234b5e3870f6ef594a616029f17c373c2e3539f4f798e6058e186d5d1a"
+        },
+        {
+          "path": "docs/evidence/r8-sdk58-player-landscape.png",
+          "sha256": "84f0dfc12b549429f6ccbdcee4248027e8b193f309b18568113e2758c1ca75a5"
+        },
+        {
+          "path": "docs/evidence/r8-sdk58-library-restored.png",
+          "sha256": "9284e3894712d0b90c08991be0fb7e6b0e23d28416419943d70222662efa28ec"
+        }
+      ],
+      "fixtureScope": "Own loopback production desktop server/private profile, generated silent H264, separate QA app on owned AVD with emulated cameras and no host audio/webcam",
+      "serverCounts": {
+        "requests": {
+          "POST /v1/pairing/claim 200": 2,
+          "GET /v1/info 200": 3,
+          "GET /v1/auth 200": 3,
+          "POST /v1/library/query 200": 3,
+          "GET /v1/videos/video_0IE_dcOZNqfUzxO0mzwbNLULyQOBVA5R/thumbnail 200": 3,
+          "GET /v1/playback/video_0IE_dcOZNqfUzxO0mzwbNLULyQOBVA5R 200": 1,
+          "GET /v1/videos/video_0IE_dcOZNqfUzxO0mzwbNLULyQOBVA5R/stream 200": 1,
+          "GET /v1/videos/video_0IE_dcOZNqfUzxO0mzwbNLULyQOBVA5R/stream 206": 2,
+          "PUT /v1/playback/video_0IE_dcOZNqfUzxO0mzwbNLULyQOBVA5R 200": 2,
+          "GET /v1/library/revision 200": 1
+        },
+        "approvals": 1,
+        "devices": 1,
+        "playbackRecords": 1
+      }
+    }
+  },
+  "dataPreservation": {
+    "preservedFallbackFiles": [
+      [
+        "analysis-results\\G086 Bronya分析结果2026-06-22_20-00-44.json",
+        "01db5f778601802471791e416b40c3ac8f96248e4542b78a867eaee77dd265e4"
+      ],
+      [
+        "downloads\\aria2.session",
+        "bbe9d72e7e5001c01f3a012fa73e5d35b6d53b9e76e08190bba58973ce1ba9bc"
+      ],
+      [
+        "llama-server-err.log",
+        "5744b9bb378569a3a4f664b62aad9a4b0025cd7d419cba73b793fb62cb737f42"
+      ],
+      [
+        "llama-server-out.log",
+        "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      ],
+      [
+        "remote-identity.json",
+        "0abcd8df9c1443a348b050b5abe28ac419ecef717ddf31a0daa680f153061324"
+      ],
+      [
+        "scan-index\\029fa92465c3409cba74ce3db6b927dfec0d4f581b12122975041a32ab324e8a.json",
+        "33b1310886821b4f01322041a561c8a6b4ed10aa351772effb396e7b1b547cfd"
+      ],
+      [
+        "scan-index\\06cf5926d93db3cc7b30882ee7dbecb69d51ce4e00de7901de3d48b866f9afc3.json",
+        "274848604327a2f96f0d152b9f23a7b4e5470fdd67c744e1c181e86c2d284059"
+      ],
+      [
+        "scan-index\\0e65747e6e0fc76a1e0c86e951c35d6c7392c184ba6cb43724d7d58856ff212a.json",
+        "3ac45a0678e6ed4554fe1f315f923d999b0311096acd3c9394e3d85826d37db9"
+      ],
+      [
+        "scan-index\\114890f3437dd45b34313ba38d9d3c36a09701d5d672bf8abd7af8c922db61af.json",
+        "3796d21463d2b2418c485565780e9628a50ab4f1a69d8faeadec1eb70a9af290"
+      ],
+      [
+        "scan-index\\1465f8e823323fe9c4383abb5a38c9e17fc550dd44cd2f14fd7f7242bc309e12.json",
+        "1be5fefdb59d8af06de2a6be0eeb0025a96253d719de1e0daced6f1fe35cdde0"
+      ],
+      [
+        "scan-index\\153bae098b5d3524553fcf4d8cbb1eacef2471314948819d043b26cebe199e14.json",
+        "689305d629290f70b40c5ea8454db685486f87be218b38da7aa4f0594a1d1cb8"
+      ],
+      [
+        "scan-index\\165f4a9a9309a7ac323647e9acefd754a66c6295cab7db6bdb50830914bf0d68.json",
+        "5b0738883aee24ac7e17fc108a221e395380d2bae6a32f3ba3f70606e4b27ebe"
+      ],
+      [
+        "scan-index\\1db67e5d68a60a19388b0338ed1ee18c2a2bcd0025ab168a1d69920c929bd647.json",
+        "b19f9d1c96db4b9106b2a28058ab1c33f4d3edc45fa693126cad0efe48cd44dd"
+      ],
+      [
+        "scan-index\\3032598f9f4655037a67986db404cfbf60011a2ca84a1e6edcec794c7deab956.json",
+        "db1c59c38bb8ba2122afad18a73d956ec55d4580f4cad17f365b37b71d7e3db8"
+      ],
+      [
+        "scan-index\\358da0698a4692a8052707f22ba2b9c94b5c4e73080d12c721e622b66a80614c.json",
+        "f1fb6fbd25b3d96027a86d6c797b162a74c95544c04f64470ed733ddbc8983ee"
+      ],
+      [
+        "scan-index\\5eb5da5dcf86cb8c66f674df75935c030f8e12d86b6373ebcdaa3d7aba7eb672.json",
+        "489328dc3fa24223d6db18869658db5d01f915838ba97532de8193f8bedc6f93"
+      ],
+      [
+        "scan-index\\5f59f687750abe3eb7d55cdb1aa86cb802bf22f3b00e3bb369f77a7ef2584d06.json",
+        "ae2763e5e5553a4eb759576c8f26efcffc9ef5aa741ddd6aad78b2e33716a719"
+      ],
+      [
+        "scan-index\\602ae02092dd5e362dec6b88bd5afb39f14c218b3e0f0fbd52e5a8d09eddeb0d.json",
+        "cd75909f0b53f3d449d479531d62f3ff1bb3144eb918086cc7a25d05816c2a7d"
+      ],
+      [
+        "scan-index\\664a4a47b45908fdfdf2d6bb5ec7024e41699d7dd2af4110f2889d4eac6dd2d7.json",
+        "64835ce867a827d40088ce1b9c8e4e19cb996d0df4c2e676cbb215cf38868556"
+      ],
+      [
+        "scan-index\\6a4b7a95d1ae5d67f63cc87a4f3486c0a22c35af457355ae63f4303d7bdbcaa1.json",
+        "7ab98d842e31b5da1227cf6e00d98e3e32287c53b0965f3e8a964dbc9e982b20"
+      ],
+      [
+        "scan-index\\6c2bfaa6b9f2b41ef00e065bab2a6d71c599e2ce76cc3f5939228ecc7b8be650.json",
+        "33dd4002ba26ea91ef1c97f264ef0337dd78b37d06f03a538f514ee0809c5107"
+      ],
+      [
+        "scan-index\\703cb3b91afdc3a4a39fb95f9d0c0289fe6dcdab34f10425d71858a05164ce3b.json",
+        "217ca6aa5c2c3b721795e93c7cb5d819317fa55546fee842c81420f84c353fe8"
+      ],
+      [
+        "scan-index\\85bd705cb26d94f80943f15877c1c71cc9f9a665c0bf24f8ab568b0b6bacf550.json",
+        "d4bb5033f4315903b0083789b87e09f4e06cb294a17313439f21987dd0b3a527"
+      ],
+      [
+        "scan-index\\87720e2b63644af82253d5ec9ace977d27e42c03a6033c6811af6c6094928e09.json",
+        "2b01b9760b6e8f5605fd9bb0cbc74e6f248c0bec7428982ce0dbb848c1f6e589"
+      ],
+      [
+        "scan-index\\959e88efa835995e2afff87fc4257966a41b7f45da19d44dc3369ba0d88599c9.json",
+        "bec93346f2dfbf0938b593658fd80e43a9be33b0bd4a0f7bcbf9a8997198ba9e"
+      ],
+      [
+        "scan-index\\9d7bcef01cadb37f1a59d31b708084c192007deea8564d134dcc473b0605201c.json",
+        "04d6bfae12cdb3e73f828813477825cd39dc803c37893be82455ecebe7734312"
+      ],
+      [
+        "scan-index\\a02253e6f623d27dfaa6674be31d9b43fc3d9b2c6bcda125418f1c3dd2a25709.json",
+        "90f629426a02dbbe9d60c7ad0c28090bd77a96693fcd1187b5215eda49184b86"
+      ],
+      [
+        "scan-index\\a17738a5c4b4bc1ce4358ecff69b8e44a1e1a33a7511d9a11eddecd94b9e58cd.json",
+        "a1fd92c4c4c8b9bbfeb105da251cc5230f16f1f68edf7cf909a468da0c242d99"
+      ],
+      [
+        "scan-index\\c53e2ac468d9387f39255a1ee9893eba1abe325ab086dea0025a18d1ef67e75f.json",
+        "2042c353b3e1c29eb236d1a1dfce79afdb85839f40f02f0b70d521eff607e6bb"
+      ],
+      [
+        "scan-index\\cb702390842effe5e6e22e77acbda7b2bbea77ed51a5c07e66c3c5d8d0bc15bf.json",
+        "718b65c8b9b80caa3c5d34bc3244f750cd8243dc4b8743f637c3b12dbbbbda4a"
+      ],
+      [
+        "scan-index\\cbf568b1144651ce061c2dc94a347128724334dd45ac2dd4ebf6890d74c66251.json",
+        "e22fd608a0197ea15fdbd8e3320b49d60e518bb4054b74ffb7504cd8e6035134"
+      ],
+      [
+        "scan-index\\d6cd75e4bc356e88ed2b4c2272c32263e568d67a07b4017d73b22e09c23e8306.json",
+        "d3ccf77f170934b4987c22301d34abbb8b7646d45af03f575057804e4c892629"
+      ],
+      [
+        "scan-index\\db34a207b303445fed1e9654c8e68883c93c5123070913181f89844225e4636a.json",
+        "81149ad6956bdb73b468e88036ef043043faecd14d34901ba5eaa49b775d3a72"
+      ],
+      [
+        "scan-index\\de13066bd94cc789543a5fa9e6100f3297df42c5dd715cccf10b11383b6f1d68.json",
+        "d2ac7243b636179c0e35727cb899a4f608b7c044d759e6b6a52c8f501a3a6945"
+      ],
+      [
+        "scan-index\\eba7ad116c30f43341d30f06e5f9efe510565b2a31a16c0eccab8fc4c303e6bc.json",
+        "636392edc5a9f41da4b70492833939eac890636623ab957400a7118bba472fc7"
+      ],
+      [
+        "scan-index\\f16070f230607bf79853b98a8c462b8e7b854deeb16fe246ba6c9d783c9b2832.json",
+        "becff49c6c81b5dfd4688bbb272be352a8821ce42120b45282ea86c65f6378c2"
+      ],
+      [
+        "scan-index\\f408135604349a60c1b7caa1d60757de692af100c4518e5588f38b619995f186.json",
+        "b894250b5d420a09b89350f33103a5d08edb5fc3d20f3cddf7604ed1fcb9df3a"
+      ],
+      [
+        "scan-index\\f7b0c1004febecbe36453be10ef2ddc2523e5b92f4af5f318ce1049990e93053.json",
+        "77f2b4ded7202b828e8a6e281d549eecd1e79aea4030dfb2a7d918202ab090c5"
+      ],
+      [
+        "scan-index\\f892c389d585d65dff3d06f6c86d3355dc90100c808a4f80da22b2f7e81865ba.json",
+        "b0f007ba8b4249849d726eee7a9fec6cf5926742e62d3cb833bd464423af520e"
+      ],
+      [
+        "scan-index\\fc41c7e68e94b6f115983997d8498353a4f8f41b61fc91662dd84affe70fc9fb.json",
+        "fa79531cd58ae0323d29102813386358d2e599ecb63902231ed73e264196abdc"
+      ],
+      [
+        "settings.json",
+        "6fb990f7edfe0707bb48b8bed65455cc2a521d33e028b45ce77f98b6a466a0d5"
+      ],
+      [
+        "video-metadata-cache.json",
+        "616205b2e97a75ea8842d3b4f6f3de778fc545493659d45e5c0139c6d7087f47"
+      ]
+    ],
+    "settingsSha256": "6fb990f7edfe0707bb48b8bed65455cc2a521d33e028b45ce77f98b6a466a0d5",
+    "originalNativeFoldersNotGenerated": true,
+    "fixtureStopped": true,
+    "displayRestored": true,
+    "gradleGuard": "absent/empty; runtime verifiers use the data guard; typecheck does not import app runtime modules"
+  },
+  "verificationCorrections": [
+    "PowerShell5 ANSI source reads changed to explicit UTF8 while preparing the owned QA stage",
+    "SDK58 default CMake object path bound 1024 exceeded Windows Ninja limits; 220 could not fit generated base directory/hash/name; 250 compiled successfully without changing OS policy or skipping native modules",
+    "UIAutomator live progress ticker needs screenshot capture before pause; long native text input uses a bounded 240s timeout"
+  ],
+  "limitations": [
+    "22 full-tree mobile audit findings remain",
+    "First camera permission Activity backgrounds the app and cancels the pending scan intent under existing lifecycle policy; permission was granted and native scanner opened/cancelled after another tap on retry; one-tap first authorization UX remains open",
+    "No physical Android/arm64 hardware decode or sustained performance budget",
+    "No production signing or signed upgrade-install acceptance",
+    "No iOS native/Xcode27/scene/resizable-window acceptance; Hermes iOS export is not that proof",
+    "No remote CI dispatch, publication or replacement of historical release artifacts; other R6/R7/R8 tasks remain open"
+  ],
+  "sources": [
+    "https://docs.expo.dev/workflow/upgrading-expo-sdk-walkthrough/",
+    "https://expo.dev/changelog/sdk-57",
+    "https://expo.dev/changelog/sdk-58",
+    "https://cmake.org/cmake/help/latest/variable/CMAKE_OBJECT_PATH_MAX.html"
+  ],
+  "rawEvidence": ".tmp/refactor-tests/r8-mobile-sdk"
+}

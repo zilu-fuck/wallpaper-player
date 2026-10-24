@@ -1,12 +1,44 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="zh-CN" class="splash-workbench-pending">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#070a11">
+  <link rel="icon" type="image/svg+xml" href="/src/assets/app-icon.svg">
   <title>视频画廊</title>
+  <script type="module" src="./src/splash-boot.js"></script>
+  <link rel="stylesheet" href="./src/styles/splash.css">
 </head>
 <body>
   <div id="root"></div>
+  <div id="app-splash" class="splash" role="status" aria-label="视频画廊正在启动">
+    <div class="splash-scene">
+      <div class="splash-halo" aria-hidden="true"></div><div class="splash-grid" aria-hidden="true"></div>
+      <div class="splash-meta splash-meta-top" aria-hidden="true"><span>WALLPAPER / VIDEO GALLERY</span><span>EVERY FRAME MATTERS.</span></div>
+      <div class="splash-mark" aria-hidden="true"><div class="splash-tilt">
+        <img src="/src/assets/app-icon.svg" width="232" height="232" alt="" draggable="false">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024">
+  <defs>
+    <linearGradient id="splash-neon" x1="24" y1="24" x2="1000" y2="1000" gradientUnits="userSpaceOnUse"><stop stop-color="#00f2fe"/><stop offset=".5" stop-color="#4facfe"/><stop offset="1" stop-color="#b429f9"/></linearGradient>
+    <path id="splash-outline-cw" pathLength="100" d="M512 24H768A232 232 0 0 1 1000 256V768A232 232 0 0 1 768 1000H256A232 232 0 0 1 24 768V256A232 232 0 0 1 256 24Z"/>
+    <path id="splash-outline-ccw" pathLength="100" d="M512 24H256A232 232 0 0 0 24 256V768A232 232 0 0 0 256 1000H768A232 232 0 0 0 1000 768V256A232 232 0 0 0 768 24Z"/>
+  </defs>
+  <g class="splash-ghost"><use href="#splash-outline-cw"/><rect x="222" y="222" width="272" height="272" rx="76"/><rect x="530" y="222" width="272" height="272" rx="76"/><rect x="222" y="530" width="272" height="272" rx="76"/><rect x="530" y="530" width="272" height="272" rx="76"/></g>
+  <use class="splash-trace" href="#splash-outline-cw"/><use class="splash-trace" href="#splash-outline-ccw"/>
+  <g fill="none" stroke="url(#splash-neon)" stroke-linecap="round" stroke-linejoin="round">
+    <rect class="splash-tile" pathLength="100" x="222" y="222" width="272" height="272" rx="76"/>
+    <rect class="splash-tile" pathLength="100" x="530" y="222" width="272" height="272" rx="76"/>
+    <rect class="splash-tile" pathLength="100" x="222" y="530" width="272" height="272" rx="76"/>
+    <rect class="splash-tile" pathLength="100" x="530" y="530" width="272" height="272" rx="76"/>
+    <path class="splash-tile" pathLength="100" d="M628 597V735L746 666Z"/>
+  </g>
+  <use class="splash-laser" href="#splash-outline-cw"/><use class="splash-laser" href="#splash-outline-ccw"/></svg>
+      </div></div>
+      <div class="splash-brand"><h1 class="splash-title">视频画廊</h1><p class="splash-caption">WALLPAPER PLAYER · 每一帧，皆是热爱</p><div class="splash-bar" aria-hidden="true"></div></div>
+      <div class="splash-meta splash-meta-bottom" aria-hidden="true"><span>INITIALIZING YOUR GALLERY</span><span>浏览 / 发现 / 播放</span></div>
+    </div>
+  </div>
+  <button id="app-splash-replay" class="splash-replay" type="button" aria-label="重播开屏动画"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 10a9 9 0 1 1 2 8M3 4v6h6"/></svg>重播开屏</button>
   <script type="module" src="./src/main.jsx"></script>
 </body>
 </html>

@@ -1,0 +1,240 @@
+{
+  "date": "2026-10-15T09:10:27.250Z",
+  "command": "npm run verify:library-performance -- --in-process-gpu --no-sandbox",
+  "outcome": "failed desktop startup budget",
+  "budgetMs": 2000,
+  "fixture": "10k local 24-byte MP4 headers, actual main/preload/production React and hidden Chromium, no decoder",
+  "desktopInteractiveSamplesMs": [
+    2117.6006999999954,
+    1890.6625000000058,
+    1962.7859000000026
+  ],
+  "mainRequiredSamplesMs": [
+    651.4473999999999,
+    577.8801000000001,
+    557.1659
+  ],
+  "firstCardsSamplesMs": [
+    1612.9213,
+    1407.9283,
+    1464.4948
+  ],
+  "queryP95Ms": 36.44130000000223,
+  "searchP95Ms": 35.60030000000188,
+  "eventLoopP95Ms": 22.446079,
+  "interpretation": "One of three samples exceeded 2 seconds. Early main require and native window phases were also slower than prior runs; cause is not established. This failure is retained independently of any later rerun.",
+  "confirmationBeforeOptimization": {
+    "size": 10000,
+    "fixture": "24-byte MP4 headers on local disk; real scanner/settings/HTTP; no decoder or native UI",
+    "coldScanMs": 9150.957600000002,
+    "firstQueryMs": 694.3846999999987,
+    "queryP95Ms": 35.56659999999829,
+    "searchP95Ms": 30.788699999997334,
+    "responseP95Bytes": 137625,
+    "revisionMs": 4.184900000000198,
+    "eventLoopP95Ms": 23.511039,
+    "snapshotBuilds": 1,
+    "hotIndexedFirstPageMs": 4825.237300000001,
+    "count": 10000,
+    "desktopWarmupMs": 1833.3912000000055,
+    "desktopInteractiveMs": 2143.5541000000085,
+    "desktopSamples": [
+      {
+        "desktopInteractiveMs": 2143.5541000000085,
+        "firstPageCards": 100,
+        "filteredCards": 1,
+        "searchHandled": true,
+        "progressiveScan": true,
+        "phases": {
+          "mainRequiredMs": 575.1526000000001,
+          "nativeReadyMs": 636.6756,
+          "windowCreatedMs": 802.7810000000002,
+          "documentLoadedMs": 1102.8365000000001,
+          "scanStartMs": 1192.1568,
+          "scanEndMs": 1423.6255,
+          "scanCount": 131,
+          "firstCardsMs": 1600.2467000000001
+        }
+      },
+      {
+        "desktopInteractiveMs": 1890.5654000000068,
+        "firstPageCards": 100,
+        "filteredCards": 1,
+        "searchHandled": true,
+        "progressiveScan": true,
+        "phases": {
+          "mainRequiredMs": 547.0268,
+          "nativeReadyMs": 607.2507,
+          "windowCreatedMs": 748.3667,
+          "documentLoadedMs": 986.9078,
+          "scanStartMs": 1085.3778,
+          "scanEndMs": 1262.6173000000001,
+          "scanCount": 131,
+          "firstCardsMs": 1401.6805
+        }
+      },
+      {
+        "desktopInteractiveMs": 1812.656999999992,
+        "firstPageCards": 100,
+        "filteredCards": 1,
+        "searchHandled": true,
+        "progressiveScan": true,
+        "phases": {
+          "mainRequiredMs": 521.108,
+          "nativeReadyMs": 578.1581000000001,
+          "windowCreatedMs": 733.8169,
+          "documentLoadedMs": 959.3300999999999,
+          "scanStartMs": 1044.8033,
+          "scanEndMs": 1218.7804999999998,
+          "scanCount": 131,
+          "firstCardsMs": 1350.6176
+        }
+      }
+    ]
+  },
+  "productChange": "Permission consumers capture detached directory/privateDirectory arrays without cloning unrelated settings. Fresh realpath and permission change checks remain.",
+  "afterMinimalSnapshotsBeforeLazyUpdater": {
+    "size": 10000,
+    "fixture": "24-byte MP4 headers on local disk; real scanner/settings/HTTP; no decoder or native UI",
+    "coldScanMs": 11933.775299999998,
+    "firstQueryMs": 917.2037000000018,
+    "queryP95Ms": 51.44510000000446,
+    "searchP95Ms": 25.582399999999325,
+    "responseP95Bytes": 137582,
+    "revisionMs": 7.53179999999702,
+    "eventLoopP95Ms": 22.429695,
+    "snapshotBuilds": 1,
+    "hotIndexedFirstPageMs": 6639.1696999999995,
+    "count": 10000,
+    "desktopWarmupMs": 8730.020499999999,
+    "desktopInteractiveMs": 2363.623800000001,
+    "desktopSamples": [
+      {
+        "desktopInteractiveMs": 2363.623800000001,
+        "firstPageCards": 100,
+        "filteredCards": 1,
+        "searchHandled": true,
+        "progressiveScan": true,
+        "phases": {
+          "mainRequiredMs": 658.1448999999999,
+          "nativeReadyMs": 711.6836,
+          "windowCreatedMs": 892.2631,
+          "documentLoadedMs": 1207.6578,
+          "scanStartMs": 1311.5605,
+          "scanEndMs": 1512.6667000000002,
+          "scanCount": 131,
+          "firstCardsMs": 1698.2594
+        }
+      },
+      {
+        "desktopInteractiveMs": 2143.833700000003,
+        "firstPageCards": 100,
+        "filteredCards": 1,
+        "searchHandled": true,
+        "progressiveScan": true,
+        "phases": {
+          "mainRequiredMs": 593.6675,
+          "nativeReadyMs": 653.3192999999999,
+          "windowCreatedMs": 823.769,
+          "documentLoadedMs": 1097.2296,
+          "scanStartMs": 1201.5494999999999,
+          "scanEndMs": 1400.498,
+          "scanCount": 131,
+          "firstCardsMs": 1570.4762
+        }
+      },
+      {
+        "desktopInteractiveMs": 1927.820200000002,
+        "firstPageCards": 100,
+        "filteredCards": 1,
+        "searchHandled": true,
+        "progressiveScan": true,
+        "phases": {
+          "mainRequiredMs": 570.4307,
+          "nativeReadyMs": 632.0074,
+          "windowCreatedMs": 784.5788,
+          "documentLoadedMs": 1019.5243,
+          "scanStartMs": 1096.5502999999999,
+          "scanEndMs": 1259.9965,
+          "scanCount": 131,
+          "firstCardsMs": 1415.8493
+        }
+      }
+    ]
+  },
+  "updaterImportProbe": {
+    "environment": "actual isolated Electron import main/updater; includes dependencies; no setup or network",
+    "beforeMs": 1162.6847999999998,
+    "afterMs": 53.24649999999997
+  },
+  "afterLazyUpdater": {
+    "size": 10000,
+    "fixture": "24-byte MP4 headers on local disk; real scanner/settings/HTTP; no decoder or native UI",
+    "coldScanMs": 8834.138500000001,
+    "firstQueryMs": 654.9386999999988,
+    "queryP95Ms": 20.390400000000227,
+    "searchP95Ms": 16.97940000000017,
+    "responseP95Bytes": 137554,
+    "revisionMs": 12.36409999999887,
+    "eventLoopP95Ms": 19.791871,
+    "snapshotBuilds": 1,
+    "hotIndexedFirstPageMs": 4505.9994,
+    "count": 10000,
+    "desktopWarmupMs": 2436.0225000000064,
+    "desktopInteractiveMs": 1696.3345000000045,
+    "desktopSamples": [
+      {
+        "desktopInteractiveMs": 1696.3345000000045,
+        "firstPageCards": 100,
+        "filteredCards": 1,
+        "searchHandled": true,
+        "progressiveScan": true,
+        "phases": {
+          "mainRequiredMs": 314.36379999999997,
+          "nativeReadyMs": 368.83680000000004,
+          "windowCreatedMs": 515.4852,
+          "documentLoadedMs": 751.8711,
+          "scanStartMs": 820.5354000000001,
+          "scanEndMs": 986.5580000000001,
+          "scanCount": 131,
+          "firstCardsMs": 1143.6172000000001
+        }
+      },
+      {
+        "desktopInteractiveMs": 1618.2593999999954,
+        "firstPageCards": 100,
+        "filteredCards": 1,
+        "searchHandled": true,
+        "progressiveScan": true,
+        "phases": {
+          "mainRequiredMs": 290.58430000000004,
+          "nativeReadyMs": 347.79540000000003,
+          "windowCreatedMs": 507.04580000000004,
+          "documentLoadedMs": 724.9213,
+          "scanStartMs": 799.4608000000001,
+          "scanEndMs": 951.0415,
+          "scanCount": 131,
+          "firstCardsMs": 1100.5074
+        }
+      },
+      {
+        "desktopInteractiveMs": 1468.7837,
+        "firstPageCards": 100,
+        "filteredCards": 1,
+        "searchHandled": true,
+        "progressiveScan": true,
+        "phases": {
+          "mainRequiredMs": 273.3637,
+          "nativeReadyMs": 318.95680000000004,
+          "windowCreatedMs": 445.26980000000003,
+          "documentLoadedMs": 645.8439,
+          "scanStartMs": 722.4934,
+          "scanEndMs": 874.3669000000001,
+          "scanCount": 131,
+          "firstCardsMs": 1016.4350000000001
+        }
+      }
+    ]
+  },
+  "finalBudgetOutcome": "Passed the existing verifier: p95 is the maximum of three scored samples after one separate warmup. Warmup remains above 2 seconds; broader cold-start stability is unproven."
+}

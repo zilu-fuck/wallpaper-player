@@ -1,0 +1,2557 @@
+{
+  "date": "2026-10-19T08:15:05.959Z",
+  "stage": "R7 batch 18: scoped user-media transactions and typed tag path preparation",
+  "environment": {
+    "node": "24.14.0",
+    "v8": "13.6.233.17-node.41",
+    "platform": "win32",
+    "arch": "x64",
+    "osRelease": "10.0.26300",
+    "cpu": "AMD Ryzen 7 5800X 8-Core Processor             ",
+    "electron": "35.7.5"
+  },
+  "sourceDigests": {
+    "main/settings.js": "80582a98c58a09076f439332300be0a39d4b9df8ce5bbe8cc9e50fbb0631d853",
+    "main/repositories/user-media.js": "3049437c334259acaed84e16b52a29d81f3e0f777b3bfa7f3cc4d1c95de3c2b8",
+    "main/repositories/tag-state.js": "046376c6bb56d3251c6f4a1d80c8e0273eeeac247b5d8031209787ace1852065",
+    "main/application/media-mutations.js": "da1d0a81ec7afaa6c1da34ac0e8f4e75feeee760195b5dd4ece267f9d4971eb3",
+    "main/application/media-mutation-paths.js": "13fad00c9960895dd22fbfaf4139eb44cbd9e7b6db9c3fffda6b83545f3a0293",
+    "main/remote/handlers/network-resources.js": "75121b4b0bd47dc60467008bbb0a7bfcc12b7ee61997cd4f1acf97885704a1b8",
+    "main/remote/media-mutations.js": "76ea043d52a84d980b1b0ff683553cd304da1aa21c806c7d165b54beda11b2aa",
+    "main/paths.js": "3422ec30987c55308fea878739efec3f6ad8f4cf132e157d042a037061dc671b",
+    "main/security/media-access.js": "c5263dcdc6cfd1c4486774061ddae6764ea4a6abcc84b4972497dd7c296f9bac",
+    "main/application/settings-json.js": "b051646df7c453b943e1c51f0e58a23caaea1c06b8d4fe243c476e86bfeb60ba",
+    "main/application/settings-json-worker.js": "13bb2ffad8358b1a0f57f819d7a3b2bfc9cf6d942cb82d9be4408db424a481ec",
+    "main/application/settings-broadcast.js": "f7137590c14a6e3c4fa4217fe318f90d5072942b1d206c2d5d50e4a97e38281e",
+    "main/ipc/settings.js": "de7fca92a59b29f8149f869bec5799bbbe8998a611844b28d027fae84e7035ad",
+    "main/ipc/media-data.js": "23dc622bb90bdbed724c5bdb86aecaa095a4ee4a1a4312b3387728d179b91300",
+    "preload.js": "b4a725252f0b0a6ecd2afec36084678984a975b795c363ee2cd09f6fbdff22c6",
+    "src/services/settings-client.js": "36c2fe66bd85f54bb4e89445fadf8f1c704a0bc271d79fe5f0b6eadd5f1ffdb1",
+    "src/api/media.ts": "c63e9606db06783225a634a278624ea3ba0a4fb9541624cffb105e1c0ff44e73",
+    "src/hooks/useAppState.js": "26bd3629c0ebfeeed7a394ff90f0b4a1bdace96a1f110ee097cae405ed420a05",
+    "src/hooks/useAppController.js": "8708aac4dff9f3815db09d96f40e09f44f9bcffbd4ad26b136cfcd6cbd6562c3",
+    "src/hooks/useFavorites.js": "8ab483bb36c39a82c53d3b86f06932df28e7b0b67279a33d489bded6b8d9f2e4",
+    "src/hooks/useTagEditor.js": "1779628a8d9755d29a18f63e714a5b23dc1ba18c5b18c90d3a1459ec0510128d",
+    "scripts/verify-media-fields.js": "d15310d8d25db53a47a7bbd971a467c3c1cfc732cbf8de102ae670c459207605",
+    "scripts/verify-media-fields-cost.js": "649a40745085ba507b4f85ec87c043e655844ffdd33cf0c7d9a11cd68c1396d3",
+    "scripts/verify-media-mutation-path-lifecycle.js": "2e0fd37f5aaed3b88bc91733f708c2826bfdf26d799fac89bd067fa959f817a1",
+    "scripts/verify-packaged-contracts.js": "ff376a21cb0b834776852ddf032ab43568d177dfbf168d485686f994e1b9a610",
+    "scripts/verify-remote-library-flow.js": "0176657c89d96a3b434d376849e3b8550b28e76617d8ecd6b5a7e5188143add4",
+    "package.json": "a0e2cbc2129cc3dc2567e9a155218523f4deb522e3c2790fc74091ca82aa4ef7",
+    ".github/workflows/ci.yml": "1ff0f565fa9e9c26fd6701385b7592988e78cbe77fe74cb779d8b2042f8703b1",
+    "docs/refactor-progress.md": "9c645083ec9cd886872d592949d3b52ff9b596cdb113bf3e3301cde1af05916c",
+    "docs/desktop-mobile-review-and-refactor-plan.md": "293b46c2c7109c69aa1caa808a241e7c016d00c0d1dcc316030a5d1c64c0a2a4",
+    "docs/protocol-contracts.md": "6164446d9210ac8c2075860d0f7c79a230ffef89d0303903f0d4105297d5ecf7"
+  },
+  "inputArtifacts": {
+    "before": {
+      "file": ".tmp/refactor-tests/media-fields-before.json",
+      "sha256": "fbe28defd85f5daba1a3aff57fef2a8db44d57fd3f637e484fb5232336c9a617"
+    },
+    "series": {
+      "file": ".tmp/refactor-tests/media-fields-series-final.json",
+      "sha256": "fd27fba4513d29ac3a24146896deb40ee8194de864fb6080693b2c2712e42a30"
+    },
+    "lifecycle": {
+      "file": ".tmp/refactor-tests/media-fields-lifecycle.json",
+      "sha256": "76822997cef1999e6de7f5c3aaca60b75752f6eaec732f5d35a6d7b4100a2ec2"
+    },
+    "paths": {
+      "file": ".tmp/refactor-tests/media-mutation-path-lifecycle.json",
+      "sha256": "acde8098a76096bd8325d840750d88e230eb1bbe6600f4738586ee1374b30490"
+    },
+    "worker": {
+      "file": ".tmp/refactor-tests/settings-json-lifecycle.json",
+      "sha256": "3a22eb7254b7fdd7b2cdcf58fcb8eae70273b2815003632e350813c4ba7457e0"
+    },
+    "patches": {
+      "file": ".tmp/refactor-tests/settings-patch-lifecycle.json",
+      "sha256": "1df4854839f86ec871c3079618d3e88068711ebe68dafd44df042712f6550b25"
+    },
+    "replies": {
+      "file": ".tmp/refactor-tests/settings-replies-lifecycle.json",
+      "sha256": "3d984275e555066d6f47b19cebbb3e6a63c250aa6658b25f941a53a30caa92e9"
+    },
+    "feed": {
+      "file": ".tmp/refactor-tests/settings-feed-lifecycle.json",
+      "sha256": "e0eb1bc596bffabd334560e79ea142b60532edea72278fade4ab8f377e6a5a74"
+    },
+    "native": {
+      "file": ".tmp/refactor-tests/settings-feed-electron.json",
+      "sha256": "32626d75701e1bc2c4407e8e1e47d16b5f996a2bbbe6821aaae600c71ff1faec"
+    },
+    "appUI": {
+      "file": ".tmp/refactor-tests/settings-replies-app-ui.json",
+      "sha256": "6f52c0a9fab048345f812b47b88d799caec7575720b322556a3fc71cbe020008"
+    },
+    "initialBefore": {
+      "file": ".tmp/refactor-tests/media-fields-cost-Qh4b0A/result.json",
+      "sha256": "57d5c100ec5f1f883c827b6bc76f625c9e87a74d89b12efaef7cd225627b47a1"
+    },
+    "initialAfter": {
+      "file": ".tmp/refactor-tests/media-fields-cost-nuXdcZ/result.json",
+      "sha256": "4b6b798e67b0fdc6f70ebe7631b6611cbbbb4cf6422ed37d2d7e151ed5833043"
+    },
+    "previousDelivery": {
+      "file": "docs/evidence/r7-settings-replies.json",
+      "sha256": "ccfb515fab107c5656d16749b28c5b281a8f4a2c2721c4cba7673f69bb31f46d"
+    },
+    "isolationIncident": {
+      "file": ".tmp/refactor-tests/media-fields-isolation-incident.json",
+      "sha256": "ad9d39dbab0b1262267703968576851cbbc10ded6a0d9e002498399bfe276591"
+    },
+    "isolationRerun": {
+      "file": ".tmp/refactor-tests/remote-library-isolation.json",
+      "sha256": "fde472534435165ff4b2b69f017bca4e5973fded41a5622dce0107491674d6d6"
+    }
+  },
+  "capturedBefore": {
+    "date": "2026-10-19T08:00:52.632Z",
+    "fixture": ".tmp\\refactor-tests\\media-fields-before-qlCd0x",
+    "sourceDigests": {
+      "main/settings.js": "277c5e9597bddf8583608a588daea3210f4cb9f49dff6b8e89bc41d977feeb45",
+      "main/application/media-mutations.js": "d818e77b93c16cc1b5ca7113dd910f9ff14009011598edbf3bade6a3c500a49c",
+      "main/application/media-mutation-paths.js": "aadf4ee7550a6d0335a63dae337e62fb641a8780645eb9399f18a205ff994666",
+      "main/remote/handlers/network-resources.js": "6def64b5048635019b6d0c54c1b39ec65726bd1798952e3566811a1312b1ba6c"
+    }
+  },
+  "replayScope": "Captured settings then network helper then media-path preparation then media service are hash-verified, compiled at their production filenames and installed in that dependency order into only the isolated benchmark process require cache. Compatible dependencies current. No production file swapping. Final benchmark asserts >=10000 non-path IO for the captured canonical workload, zero for current, and >=10240 actual path IO for both legacy workloads.",
+  "implementation": [
+    "Logical user-media operation repository limits callback fields and allowed patches while retaining the same serialized durable JSON commit chain.",
+    "Field/preparation arrays captured before queueing; latest selected fields cloned after async preparation. Default callers retain full snapshots and complete legacy results.",
+    "Path preparation reads detached key names/favorite values, not unrelated tag values or progress/configuration.",
+    "Known file/workshop/URL/network URL identifiers never go through filesystem path resolution; legacy filesystem keys and decoded favorite target paths still do.",
+    "Network list/ID defaults use networkResources-only detached snapshots; explicit settings argument remains compatible."
+  ],
+  "metrics": [
+    {
+      "operation": "canonical tag read",
+      "before": {
+        "millisecondsMedian": 255.2283,
+        "millisecondsMax": 292.4048999999999,
+        "maxHeartbeatGapMs": 16.5236000000001,
+        "fullStateParses": [
+          2
+        ],
+        "asyncRealpathCalls": [
+          10006
+        ],
+        "nonPathRealpathCalls": [
+          10001
+        ],
+        "synchronousRealpathCalls": [
+          0
+        ],
+        "maximumActiveRealpath": 8,
+        "mainParsedCharacters": [
+          1596019,
+          1596019
+        ]
+      },
+      "after": {
+        "millisecondsMedian": 12.316800000000057,
+        "millisecondsMax": 13.444400000000087,
+        "maxHeartbeatGapMs": 9.892200000000003,
+        "fullStateParses": [
+          0
+        ],
+        "asyncRealpathCalls": [
+          5
+        ],
+        "nonPathRealpathCalls": [
+          0
+        ],
+        "synchronousRealpathCalls": [
+          0
+        ],
+        "maximumActiveRealpath": 1,
+        "mainParsedCharacters": [
+          744914,
+          744914
+        ]
+      }
+    },
+    {
+      "operation": "canonical tag replace",
+      "before": {
+        "millisecondsMedian": 299.42809999999986,
+        "millisecondsMax": 308.93359999999984,
+        "maxHeartbeatGapMs": 26.301999999999907,
+        "fullStateParses": [
+          2
+        ],
+        "asyncRealpathCalls": [
+          10006
+        ],
+        "nonPathRealpathCalls": [
+          10001
+        ],
+        "synchronousRealpathCalls": [
+          0
+        ],
+        "maximumActiveRealpath": 8,
+        "mainParsedCharacters": [
+          1596019,
+          1596163
+        ]
+      },
+      "after": {
+        "millisecondsMedian": 73.649,
+        "millisecondsMax": 77.90280000000007,
+        "maxHeartbeatGapMs": 20.382100000000037,
+        "fullStateParses": [
+          0
+        ],
+        "asyncRealpathCalls": [
+          5
+        ],
+        "nonPathRealpathCalls": [
+          0
+        ],
+        "synchronousRealpathCalls": [
+          0
+        ],
+        "maximumActiveRealpath": 1,
+        "mainParsedCharacters": [
+          744939,
+          745011
+        ]
+      }
+    },
+    {
+      "operation": "favorite with unrelated data",
+      "before": {
+        "millisecondsMedian": 26.64960000000019,
+        "millisecondsMax": 41.75770000000011,
+        "maxHeartbeatGapMs": 16.04449999999997,
+        "fullStateParses": [
+          2
+        ],
+        "asyncRealpathCalls": [
+          6
+        ],
+        "nonPathRealpathCalls": [
+          1
+        ],
+        "synchronousRealpathCalls": [
+          0
+        ],
+        "maximumActiveRealpath": 2,
+        "mainParsedCharacters": [
+          1596163,
+          1596405
+        ]
+      },
+      "after": {
+        "millisecondsMedian": 17.789199999999937,
+        "millisecondsMax": 20.369300000000067,
+        "maxHeartbeatGapMs": 15.755800000000022,
+        "fullStateParses": [
+          0
+        ],
+        "asyncRealpathCalls": [
+          5
+        ],
+        "nonPathRealpathCalls": [
+          0
+        ],
+        "synchronousRealpathCalls": [
+          0
+        ],
+        "maximumActiveRealpath": 1,
+        "mainParsedCharacters": [
+          259,
+          501
+        ]
+      }
+    },
+    {
+      "operation": "network tag read",
+      "before": {
+        "millisecondsMedian": 14.301699999999983,
+        "millisecondsMax": 16.52619999999979,
+        "maxHeartbeatGapMs": 16.511099999999715,
+        "fullStateParses": [
+          4
+        ],
+        "asyncRealpathCalls": [
+          0
+        ],
+        "nonPathRealpathCalls": [
+          0
+        ],
+        "synchronousRealpathCalls": [
+          0
+        ],
+        "maximumActiveRealpath": 0,
+        "mainParsedCharacters": [
+          3192360,
+          3192360
+        ]
+      },
+      "after": {
+        "millisecondsMedian": 7.502899999999954,
+        "millisecondsMax": 9.416899999999941,
+        "maxHeartbeatGapMs": 9.395899999999983,
+        "fullStateParses": [
+          0
+        ],
+        "asyncRealpathCalls": [
+          0
+        ],
+        "nonPathRealpathCalls": [
+          0
+        ],
+        "synchronousRealpathCalls": [
+          0
+        ],
+        "maximumActiveRealpath": 0,
+        "mainParsedCharacters": [
+          745203,
+          745203
+        ]
+      }
+    },
+    {
+      "operation": "10240 legacy tag read",
+      "before": {
+        "millisecondsMedian": 491.93629999999985,
+        "millisecondsMax": 500.0279999999998,
+        "maxHeartbeatGapMs": 11.285899999999856,
+        "fullStateParses": [
+          2
+        ],
+        "asyncRealpathCalls": [
+          10246
+        ],
+        "nonPathRealpathCalls": [
+          1
+        ],
+        "synchronousRealpathCalls": [
+          0
+        ],
+        "maximumActiveRealpath": 8,
+        "mainParsedCharacters": [
+          2219263,
+          2219263
+        ]
+      },
+      "after": {
+        "millisecondsMedian": 486.42049999999995,
+        "millisecondsMax": 522.1993,
+        "maxHeartbeatGapMs": 16.103900000000067,
+        "fullStateParses": [
+          0
+        ],
+        "asyncRealpathCalls": [
+          10245
+        ],
+        "nonPathRealpathCalls": [
+          0
+        ],
+        "synchronousRealpathCalls": [
+          0
+        ],
+        "maximumActiveRealpath": 8,
+        "mainParsedCharacters": [
+          1056415,
+          1056415
+        ]
+      }
+    }
+  ],
+  "costSeries": {
+    "date": "2026-10-19T08:06:35.866Z",
+    "conditions": "Three alternating captured-before/current independent processes run sequentially after all targeted verification completed. Three observations per operation per process. No other verification launched during measurements.",
+    "runs": [
+      {
+        "date": "2026-10-19T08:06:17.144Z",
+        "fixture": ".tmp\\refactor-tests\\media-fields-cost-4bkp84",
+        "before": true,
+        "sourceDigests": {
+          "main/settings.js": "277c5e9597bddf8583608a588daea3210f4cb9f49dff6b8e89bc41d977feeb45",
+          "main/remote/handlers/network-resources.js": "6def64b5048635019b6d0c54c1b39ec65726bd1798952e3566811a1312b1ba6c",
+          "main/application/media-mutation-paths.js": "aadf4ee7550a6d0335a63dae337e62fb641a8780645eb9399f18a205ff994666",
+          "main/application/media-mutations.js": "d818e77b93c16cc1b5ca7113dd910f9ff14009011598edbf3bade6a3c500a49c"
+        },
+        "results": [
+          {
+            "name": "canonical tag read",
+            "observations": [
+              {
+                "milliseconds": 291.77200000000005,
+                "maxHeartbeatGapMs": 8.757200000000012,
+                "mainJsonParses": 3,
+                "mainParsedCharacters": 1596019,
+                "fullStateParses": 2,
+                "asyncRealpathCalls": 10006,
+                "nonPathRealpathCalls": 10001,
+                "synchronousRealpathCalls": 0,
+                "maximumActiveRealpath": 8
+              },
+              {
+                "milliseconds": 253.83120000000008,
+                "maxHeartbeatGapMs": 7.2232000000001335,
+                "mainJsonParses": 3,
+                "mainParsedCharacters": 1596019,
+                "fullStateParses": 2,
+                "asyncRealpathCalls": 10006,
+                "nonPathRealpathCalls": 10001,
+                "synchronousRealpathCalls": 0,
+                "maximumActiveRealpath": 8
+              },
+              {
+                "milliseconds": 255.2283,
+                "maxHeartbeatGapMs": 8.482999999999947,
+                "mainJsonParses": 3,
+                "mainParsedCharacters": 1596019,
+                "fullStateParses": 2,
+                "asyncRealpathCalls": 10006,
+                "nonPathRealpathCalls": 10001,
+                "synchronousRealpathCalls": 0,
+                "maximumActiveRealpath": 8
+              }
+            ]
+          },
+          {
+            "name": "canonical tag replace",
+            "observations": [
+              {
+                "milliseconds": 304.9875000000002,
+                "maxHeartbeatGapMs": 25.91820000000007,
+                "mainJsonParses": 3,
+                "mainParsedCharacters": 1596019,
+                "fullStateParses": 2,
+                "asyncRealpathCalls": 10006,
+                "nonPathRealpathCalls": 10001,
+                "synchronousRealpathCalls": 0,
+                "maximumActiveRealpath": 8
+              },
+              {
+                "milliseconds": 294.9821999999999,
+                "maxHeartbeatGapMs": 15.58809999999994,
+                "mainJsonParses": 3,
+                "mainParsedCharacters": 1596163,
+                "fullStateParses": 2,
+                "asyncRealpathCalls": 10006,
+                "nonPathRealpathCalls": 10001,
+                "synchronousRealpathCalls": 0,
+                "maximumActiveRealpath": 8
+              },
+              {
+                "milliseconds": 299.3588,
+                "maxHeartbeatGapMs": 19.756999999999607,
+                "mainJsonParses": 3,
+                "mainParsedCharacters": 1596163,
+                "fullStateParses": 2,
+                "asyncRealpathCalls": 10006,
+                "nonPathRealpathCalls": 10001,
+                "synchronousRealpathCalls": 0,
+                "maximumActiveRealpath": 8
+              }
+            ]
+          },
+          {
+            "name": "favorite with unrelated data",
+            "observations": [
+              {
+                "milliseconds": 24.855199999999968,
+                "maxHeartbeatGapMs": 10.268000000000029,
+                "mainJsonParses": 3,
+                "mainParsedCharacters": 1596163,
+                "fullStateParses": 2,
+                "asyncRealpathCalls": 6,
+                "nonPathRealpathCalls": 1,
+                "synchronousRealpathCalls": 0,
+                "maximumActiveRealpath": 2
+              },
+              {
+                "milliseconds": 41.75770000000011,
+                "maxHeartbeatGapMs": 10.553300000000036,
+                "mainJsonParses": 3,
+                "mainParsedCharacters": 1596405,
+                "fullStateParses": 2,
+                "asyncRealpathCalls": 6,
+                "nonPathRealpathCalls": 1,
+                "synchronousRealpathCalls": 0,
+                "maximumActiveRealpath": 2
+              },
+              {
+                "milliseconds": 27.278299999999945,
+                "maxHeartbeatGapMs": 16.04449999999997,
+                "mainJsonParses": 3,
+                "mainParsedCharacters": 1596163,
+                "fullStateParses": 2,
+                "asyncRealpathCalls": 6,
+                "nonPathRealpathCalls": 1,
+                "synchronousRealpathCalls": 0,
+                "maximumActiveRealpath": 2
+              }
+            ]
+          },
+          {
+            "name": "network tag read",
+            "observations": [
+              {
+                "milliseconds": 15.805699999999888,
+                "maxHeartbeatGapMs": 15.790099999999711,
+                "mainJsonParses": 4,
+                "mainParsedCharacters": 3192360,
+                "fullStateParses": 4,
+                "asyncRealpathCalls": 0,
+                "nonPathRealpathCalls": 0,
+                "synchronousRealpathCalls": 0,
+                "maximumActiveRealpath": 0
+              },
+              {
+                "milliseconds": 14.140899999999874,
+                "maxHeartbeatGapMs": 14.127399999999852,
+                "mainJsonParses": 4,
+                "mainParsedCharacters": 3192360,
+                "fullStateParses": 4,
+                "asyncRealpathCalls": 0,
+                "nonPathRealpathCalls": 0,
+                "synchronousRealpathCalls": 0,
+                "maximumActiveRealpath": 0
+              },
+              {
+                "milliseconds": 14.268300000000181,
+                "maxHeartbeatGapMs": 14.254100000000108,
+                "mainJsonParses": 4,
+                "mainParsedCharacters": 3192360,
+                "fullStateParses": 4,
+                "asyncRealpathCalls": 0,
+                "nonPathRealpathCalls": 0,
+                "synchronousRealpathCalls": 0,
+                "maximumActiveRealpath": 0
+              }
+            ]
+          },
+          {
+            "name": "10240 legacy tag read",
+            "observations": [
+              {
+                "milliseconds": 491.93629999999985,
+                "maxHeartbeatGapMs": 10.382799999999861,
+                "mainJsonParses": 3,
+                "mainParsedCharacters": 2219263,
+                "fullStateParses": 2,
+                "asyncRealpathCalls": 10246,
+                "nonPathRealpathCalls": 1,
+                "synchronousRealpathCalls": 0,
+                "maximumActiveRealpath": 8
+              },
+              {
+                "milliseconds": 480.3932,
+                "maxHeartbeatGapMs": 10.603999999999814,
+                "mainJsonParses": 3,
+                "mainParsedCharacters": 2219263,
+                "fullStateParses": 2,
+                "asyncRealpathCalls": 10246,
+                "nonPathRealpathCalls": 1,
+                "synchronousRealpathCalls": 0,
+                "maximumActiveRealpath": 8
+              },
+              {
+                "milliseconds": 481.5086000000001,
+                "maxHeartbeatGapMs": 11.221999999999753,
+                "mainJsonParses": 3,
+                "mainParsedCharacters": 2219263,
+                "fullStateParses": 2,
+                "asyncRealpathCalls": 10246,
+                "nonPathRealpathCalls": 1,
+                "synchronousRealpathCalls": 0,
+                "maximumActiveRealpath": 8
+              }
+            ]
+          }
+        ],
+        "conditions": "Actual media service, production settings/worker, 10000 mixed canonical/URL keys plus 10000 unrelated progress records; separate 10240 legacy path keys, 1280 file headers and eight actual junctions. Three sequential observations per operation per process. No renderer, IPC transport, decoder, physical phone, P95 or cold start claim."
+      },
+      {
+        "date": "2026-10-19T08:06:20.214Z",
+        "fixture": ".tmp\\refactor-tests\\media-fields-cost-8UbtRz",
+        "before": false,
+        "sourceDigests": {
+          "main/settings.js": "80582a98c58a09076f439332300be0a39d4b9df8ce5bbe8cc9e50fbb0631d853",
+          "main/remote/handlers/network-resources.js": "75121b4b0bd47dc60467008bbb0a7bfcc12b7ee61997cd4f1acf97885704a1b8",
+          "main/application/media-mutation-paths.js": "13fad00c9960895dd22fbfaf4139eb44cbd9e7b6db9c3fffda6b83545f3a0293",
+          "main/application/media-mutations.js": "da1d0a81ec7afaa6c1da34ac0e8f4e75feeee760195b5dd4ece267f9d4971eb3",
+          "main/repositories/user-media.js": "3049437c334259acaed84e16b52a29d81f3e0f777b3bfa7f3cc4d1c95de3c2b8"
+        },
+        "results": [
+          {
+            "name": "canonical tag read",
+            "observations": [
+              {
+                "milliseconds": 13.444400000000087,
+                "maxHeartbeatGapMs": 9.533800000000042,
+                "mainJsonParses": 3,
+                "mainParsedCharacters": 744914,
+                "fullStateParses": 0,
+                "asyncRealpathCalls": 5,
+                "nonPathRealpathCalls": 0,
+                "synchronousRealpathCalls": 0,
+                "maximumActiveRealpath": 1
+              },
+              {
+                "milliseconds": 12.606699999999933,
+                "maxHeartbeatGapMs": 9.892200000000003,
+                "mainJsonParses": 3,
+                "mainParsedCharacters": 744914,
+                "fullStateParses": 0,
+                "asyncRealpathCalls": 5,
+                "nonPathRealpathCalls": 0,
+                "synchronousRealpathCalls": 0,
+                "maximumActiveRealpath": 1
+              },
+              {
+                "milliseconds": 12.416900000000055,
+                "maxHeartbeatGapMs": 9.605699999999956,
+                "mainJsonParses": 3,
+                "mainParsedCharacters": 744914,
+                "fullStateParses": 0,
+                "asyncRealpathCalls": 5,
+                "nonPathRealpathCalls": 0,
+                "synchronousRealpathCalls": 0,
+                "maximumActiveRealpath": 1
+              }
+            ]
+          },
+          {
+            "name": "canonical tag replace",
+            "observations": [
+              {
+                "milliseconds": 77.90280000000007,
+                "maxHeartbeatGapMs": 20.382100000000037,
+                "mainJsonParses": 3,
+                "mainParsedCharacters": 744939,
+                "fullStateParses": 0,
+                "asyncRealpathCalls": 5,
+                "nonPathRealpathCalls": 0,
+                "synchronousRealpathCalls": 0,
+                "maximumActiveRealpath": 1
+              },
+              {
+                "milliseconds": 77.42010000000005,
+                "maxHeartbeatGapMs": 18.86189999999999,
+                "mainJsonParses": 3,
+                "mainParsedCharacters": 745011,
+                "fullStateParses": 0,
+                "asyncRealpathCalls": 5,
+                "nonPathRealpathCalls": 0,
+                "synchronousRealpathCalls": 0,
+                "maximumActiveRealpath": 1
+              },
+              {
+                "milliseconds": 63.489900000000034,
+                "maxHeartbeatGapMs": 19.645299999999907,
+                "mainJsonParses": 3,
+                "mainParsedCharacters": 745011,
+                "fullStateParses": 0,
+                "asyncRealpathCalls": 5,
+                "nonPathRealpathCalls": 0,
+                "synchronousRealpathCalls": 0,
+                "maximumActiveRealpath": 1
+              }
+            ]
+          },
+          {
+            "name": "favorite with unrelated data",
+            "observations": [
+              {
+                "milliseconds": 17.347600000000057,
+                "maxHeartbeatGapMs": 13.183100000000081,
+                "mainJsonParses": 4,
+                "mainParsedCharacters": 259,
+                "fullStateParses": 0,
+                "asyncRealpathCalls": 5,
+                "nonPathRealpathCalls": 0,
+                "synchronousRealpathCalls": 0,
+                "maximumActiveRealpath": 1
+              },
+              {
+                "milliseconds": 17.41840000000002,
+                "maxHeartbeatGapMs": 12.265800000000013,
+                "mainJsonParses": 4,
+                "mainParsedCharacters": 501,
+                "fullStateParses": 0,
+                "asyncRealpathCalls": 5,
+                "nonPathRealpathCalls": 0,
+                "synchronousRealpathCalls": 0,
+                "maximumActiveRealpath": 1
+              },
+              {
+                "milliseconds": 20.369300000000067,
+                "maxHeartbeatGapMs": 9.390499999999975,
+                "mainJsonParses": 4,
+                "mainParsedCharacters": 259,
+                "fullStateParses": 0,
+                "asyncRealpathCalls": 5,
+                "nonPathRealpathCalls": 0,
+                "synchronousRealpathCalls": 0,
+                "maximumActiveRealpath": 1
+              }
+            ]
+          },
+          {
+            "name": "network tag read",
+            "observations": [
+              {
+                "milliseconds": 9.416899999999941,
+                "maxHeartbeatGapMs": 9.395899999999983,
+                "mainJsonParses": 4,
+                "mainParsedCharacters": 745203,
+                "fullStateParses": 0,
+                "asyncRealpathCalls": 0,
+                "nonPathRealpathCalls": 0,
+                "synchronousRealpathCalls": 0,
+                "maximumActiveRealpath": 0
+              },
+              {
+                "milliseconds": 7.502899999999954,
+                "maxHeartbeatGapMs": 7.486599999999953,
+                "mainJsonParses": 4,
+                "mainParsedCharacters": 745203,
+                "fullStateParses": 0,
+                "asyncRealpathCalls": 0,
+                "nonPathRealpathCalls": 0,
+                "synchronousRealpathCalls": 0,
+                "maximumActiveRealpath": 0
+              },
+              {
+                "milliseconds": 8.63639999999998,
+                "maxHeartbeatGapMs": 8.615999999999985,
+                "mainJsonParses": 4,
+                "mainParsedCharacters": 745203,
+                "fullStateParses": 0,
+                "asyncRealpathCalls": 0,
+                "nonPathRealpathCalls": 0,
+                "synchronousRealpathCalls": 0,
+                "maximumActiveRealpath": 0
+              }
+            ]
+          },
+          {
+            "name": "10240 legacy tag read",
+            "observations": [
+              {
+                "milliseconds": 498.77690000000007,
+                "maxHeartbeatGapMs": 15.722499999999854,
+                "mainJsonParses": 3,
+                "mainParsedCharacters": 1056415,
+                "fullStateParses": 0,
+                "asyncRealpathCalls": 10245,
+                "nonPathRealpathCalls": 0,
+                "synchronousRealpathCalls": 0,
+                "maximumActiveRealpath": 8
+              },
+              {
+                "milliseconds": 485.6905999999999,
+                "maxHeartbeatGapMs": 15.592599999999948,
+                "mainJsonParses": 3,
+                "mainParsedCharacters": 1056415,
+                "fullStateParses": 0,
+                "asyncRealpathCalls": 10245,
+                "nonPathRealpathCalls": 0,
+                "synchronousRealpathCalls": 0,
+                "maximumActiveRealpath": 8
+              },
+              {
+                "milliseconds": 503.5469000000003,
+                "maxHeartbeatGapMs": 16.103900000000067,
+                "mainJsonParses": 3,
+                "mainParsedCharacters": 1056415,
+                "fullStateParses": 0,
+                "asyncRealpathCalls": 10245,
+                "nonPathRealpathCalls": 0,
+                "synchronousRealpathCalls": 0,
+                "maximumActiveRealpath": 8
+              }
+            ]
+          }
+        ],
+        "conditions": "Actual media service, production settings/worker, 10000 mixed canonical/URL keys plus 10000 unrelated progress records; separate 10240 legacy path keys, 1280 file headers and eight actual junctions. Three sequential observations per operation per process. No renderer, IPC transport, decoder, physical phone, P95 or cold start claim."
+      },
+      {
+        "date": "2026-10-19T08:06:25.006Z",
+        "fixture": ".tmp\\refactor-tests\\media-fields-cost-W5ufyK",
+        "before": true,
+        "sourceDigests": {
+          "main/settings.js": "277c5e9597bddf8583608a588daea3210f4cb9f49dff6b8e89bc41d977feeb45",
+          "main/remote/handlers/network-resources.js": "6def64b5048635019b6d0c54c1b39ec65726bd1798952e3566811a1312b1ba6c",
+          "main/application/media-mutation-paths.js": "aadf4ee7550a6d0335a63dae337e62fb641a8780645eb9399f18a205ff994666",
+          "main/application/media-mutations.js": "d818e77b93c16cc1b5ca7113dd910f9ff14009011598edbf3bade6a3c500a49c"
+        },
+        "results": [
+          {
+            "name": "canonical tag read",
+            "observations": [
+              {
+                "milliseconds": 292.4048999999999,
+                "maxHeartbeatGapMs": 16.036100000000033,
+                "mainJsonParses": 3,
+                "mainParsedCharacters": 1596019,
+                "fullStateParses": 2,
+                "asyncRealpathCalls": 10006,
+                "nonPathRealpathCalls": 10001,
+                "synchronousRealpathCalls": 0,
+                "maximumActiveRealpath": 8
+              },
+              {
+                "milliseconds": 264.5508,
+                "maxHeartbeatGapMs": 8.080600000000004,
+                "mainJsonParses": 3,
+                "mainParsedCharacters": 1596019,
+                "fullStateParses": 2,
+                "asyncRealpathCalls": 10006,
+                "nonPathRealpathCalls": 10001,
+                "synchronousRealpathCalls": 0,
+                "maximumActiveRealpath": 8
+              },
+              {
+                "milliseconds": 251.98929999999996,
+                "maxHeartbeatGapMs": 7.126899999999978,
+                "mainJsonParses": 3,
+                "mainParsedCharacters": 1596019,
+                "fullStateParses": 2,
+                "asyncRealpathCalls": 10006,
+                "nonPathRealpathCalls": 10001,
+                "synchronousRealpathCalls": 0,
+                "maximumActiveRealpath": 8
+              }
+            ]
+          },
+          {
+            "name": "canonical tag replace",
+            "observations": [
+              {
+                "milliseconds": 308.93359999999984,
+                "maxHeartbeatGapMs": 21.614499999999907,
+                "mainJsonParses": 3,
+                "mainParsedCharacters": 1596019,
+                "fullStateParses": 2,
+                "asyncRealpathCalls": 10006,
+                "nonPathRealpathCalls": 10001,
+                "synchronousRealpathCalls": 0,
+                "maximumActiveRealpath": 8
+              },
+              {
+                "milliseconds": 299.42809999999986,
+                "maxHeartbeatGapMs": 19.78060000000005,
+                "mainJsonParses": 3,
+                "mainParsedCharacters": 1596163,
+                "fullStateParses": 2,
+                "asyncRealpathCalls": 10006,
+                "nonPathRealpathCalls": 10001,
+                "synchronousRealpathCalls": 0,
+                "maximumActiveRealpath": 8
+              },
+              {
+                "milliseconds": 292.5804000000003,
+                "maxHeartbeatGapMs": 15.773599999999988,
+                "mainJsonParses": 3,
+                "mainParsedCharacters": 1596163,
+                "fullStateParses": 2,
+                "asyncRealpathCalls": 10006,
+                "nonPathRealpathCalls": 10001,
+                "synchronousRealpathCalls": 0,
+                "maximumActiveRealpath": 8
+              }
+            ]
+          },
+          {
+            "name": "favorite with unrelated data",
+            "observations": [
+              {
+                "milliseconds": 25.646899999999732,
+                "maxHeartbeatGapMs": 10.35799999999972,
+                "mainJsonParses": 3,
+                "mainParsedCharacters": 1596163,
+                "fullStateParses": 2,
+                "asyncRealpathCalls": 6,
+                "nonPathRealpathCalls": 1,
+                "synchronousRealpathCalls": 0,
+                "maximumActiveRealpath": 2
+              },
+              {
+                "milliseconds": 26.64960000000019,
+                "maxHeartbeatGapMs": 9.453300000000127,
+                "mainJsonParses": 3,
+                "mainParsedCharacters": 1596405,
+                "fullStateParses": 2,
+                "asyncRealpathCalls": 6,
+                "nonPathRealpathCalls": 1,
+                "synchronousRealpathCalls": 0,
+                "maximumActiveRealpath": 2
+              },
+              {
+                "milliseconds": 28.05729999999994,
+                "maxHeartbeatGapMs": 13.26150000000007,
+                "mainJsonParses": 3,
+                "mainParsedCharacters": 1596163,
+                "fullStateParses": 2,
+                "asyncRealpathCalls": 6,
+                "nonPathRealpathCalls": 1,
+                "synchronousRealpathCalls": 0,
+                "maximumActiveRealpath": 2
+              }
+            ]
+          },
+          {
+            "name": "network tag read",
+            "observations": [
+              {
+                "milliseconds": 15.914099999999962,
+                "maxHeartbeatGapMs": 15.895799999999781,
+                "mainJsonParses": 4,
+                "mainParsedCharacters": 3192360,
+                "fullStateParses": 4,
+                "asyncRealpathCalls": 0,
+                "nonPathRealpathCalls": 0,
+                "synchronousRealpathCalls": 0,
+                "maximumActiveRealpath": 0
+              },
+              {
+                "milliseconds": 14.301699999999983,
+                "maxHeartbeatGapMs": 14.289499999999862,
+                "mainJsonParses": 4,
+                "mainParsedCharacters": 3192360,
+                "fullStateParses": 4,
+                "asyncRealpathCalls": 0,
+                "nonPathRealpathCalls": 0,
+                "synchronousRealpathCalls": 0,
+                "maximumActiveRealpath": 0
+              },
+              {
+                "milliseconds": 14.289200000000164,
+                "maxHeartbeatGapMs": 14.271000000000186,
+                "mainJsonParses": 4,
+                "mainParsedCharacters": 3192360,
+                "fullStateParses": 4,
+                "asyncRealpathCalls": 0,
+                "nonPathRealpathCalls": 0,
+                "synchronousRealpathCalls": 0,
+                "maximumActiveRealpath": 0
+              }
+            ]
+          },
+          {
+            "name": "10240 legacy tag read",
+            "observations": [
+              {
+                "milliseconds": 492.99109999999973,
+                "maxHeartbeatGapMs": 11.190000000000055,
+                "mainJsonParses": 3,
+                "mainParsedCharacters": 2219263,
+                "fullStateParses": 2,
+                "asyncRealpathCalls": 10246,
+                "nonPathRealpathCalls": 1,
+                "synchronousRealpathCalls": 0,
+                "maximumActiveRealpath": 8
+              },
+              {
+                "milliseconds": 500.0279999999998,
+                "maxHeartbeatGapMs": 11.066899999999805,
+                "mainJsonParses": 3,
+                "mainParsedCharacters": 2219263,
+                "fullStateParses": 2,
+                "asyncRealpathCalls": 10246,
+                "nonPathRealpathCalls": 1,
+                "synchronousRealpathCalls": 0,
+                "maximumActiveRealpath": 8
+              },
+              {
+                "milliseconds": 497.68169999999964,
+                "maxHeartbeatGapMs": 10.640199999999822,
+                "mainJsonParses": 3,
+                "mainParsedCharacters": 2219263,
+                "fullStateParses": 2,
+                "asyncRealpathCalls": 10246,
+                "nonPathRealpathCalls": 1,
+                "synchronousRealpathCalls": 0,
+                "maximumActiveRealpath": 8
+              }
+            ]
+          }
+        ],
+        "conditions": "Actual media service, production settings/worker, 10000 mixed canonical/URL keys plus 10000 unrelated progress records; separate 10240 legacy path keys, 1280 file headers and eight actual junctions. Three sequential observations per operation per process. No renderer, IPC transport, decoder, physical phone, P95 or cold start claim."
+      },
+      {
+        "date": "2026-10-19T08:06:27.994Z",
+        "fixture": ".tmp\\refactor-tests\\media-fields-cost-LWBKMu",
+        "before": false,
+        "sourceDigests": {
+          "main/settings.js": "80582a98c58a09076f439332300be0a39d4b9df8ce5bbe8cc9e50fbb0631d853",
+          "main/remote/handlers/network-resources.js": "75121b4b0bd47dc60467008bbb0a7bfcc12b7ee61997cd4f1acf97885704a1b8",
+          "main/application/media-mutation-paths.js": "13fad00c9960895dd22fbfaf4139eb44cbd9e7b6db9c3fffda6b83545f3a0293",
+          "main/application/media-mutations.js": "da1d0a81ec7afaa6c1da34ac0e8f4e75feeee760195b5dd4ece267f9d4971eb3",
+          "main/repositories/user-media.js": "3049437c334259acaed84e16b52a29d81f3e0f777b3bfa7f3cc4d1c95de3c2b8"
+        },
+        "results": [
+          {
+            "name": "canonical tag read",
+            "observations": [
+              {
+                "milliseconds": 12.639599999999973,
+                "maxHeartbeatGapMs": 9.567800000000034,
+                "mainJsonParses": 3,
+                "mainParsedCharacters": 744914,
+                "fullStateParses": 0,
+                "asyncRealpathCalls": 5,
+                "nonPathRealpathCalls": 0,
+                "synchronousRealpathCalls": 0,
+                "maximumActiveRealpath": 1
+              },
+              {
+                "milliseconds": 10.98090000000002,
+                "maxHeartbeatGapMs": 8.376899999999978,
+                "mainJsonParses": 3,
+                "mainParsedCharacters": 744914,
+                "fullStateParses": 0,
+                "asyncRealpathCalls": 5,
+                "nonPathRealpathCalls": 0,
+                "synchronousRealpathCalls": 0,
+                "maximumActiveRealpath": 1
+              },
+              {
+                "milliseconds": 10.977500000000077,
+                "maxHeartbeatGapMs": 8.498100000000022,
+                "mainJsonParses": 3,
+                "mainParsedCharacters": 744914,
+                "fullStateParses": 0,
+                "asyncRealpathCalls": 5,
+                "nonPathRealpathCalls": 0,
+                "synchronousRealpathCalls": 0,
+                "maximumActiveRealpath": 1
+              }
+            ]
+          },
+          {
+            "name": "canonical tag replace",
+            "observations": [
+              {
+                "milliseconds": 73.649,
+                "maxHeartbeatGapMs": 19.99279999999999,
+                "mainJsonParses": 3,
+                "mainParsedCharacters": 744939,
+                "fullStateParses": 0,
+                "asyncRealpathCalls": 5,
+                "nonPathRealpathCalls": 0,
+                "synchronousRealpathCalls": 0,
+                "maximumActiveRealpath": 1
+              },
+              {
+                "milliseconds": 74.08299999999997,
+                "maxHeartbeatGapMs": 19.86329999999998,
+                "mainJsonParses": 3,
+                "mainParsedCharacters": 745011,
+                "fullStateParses": 0,
+                "asyncRealpathCalls": 5,
+                "nonPathRealpathCalls": 0,
+                "synchronousRealpathCalls": 0,
+                "maximumActiveRealpath": 1
+              },
+              {
+                "milliseconds": 60.618799999999965,
+                "maxHeartbeatGapMs": 18.5077,
+                "mainJsonParses": 3,
+                "mainParsedCharacters": 745011,
+                "fullStateParses": 0,
+                "asyncRealpathCalls": 5,
+                "nonPathRealpathCalls": 0,
+                "synchronousRealpathCalls": 0,
+                "maximumActiveRealpath": 1
+              }
+            ]
+          },
+          {
+            "name": "favorite with unrelated data",
+            "observations": [
+              {
+                "milliseconds": 16.56389999999999,
+                "maxHeartbeatGapMs": 9.069399999999973,
+                "mainJsonParses": 4,
+                "mainParsedCharacters": 259,
+                "fullStateParses": 0,
+                "asyncRealpathCalls": 5,
+                "nonPathRealpathCalls": 0,
+                "synchronousRealpathCalls": 0,
+                "maximumActiveRealpath": 1
+              },
+              {
+                "milliseconds": 18.33929999999998,
+                "maxHeartbeatGapMs": 8.066100000000006,
+                "mainJsonParses": 4,
+                "mainParsedCharacters": 501,
+                "fullStateParses": 0,
+                "asyncRealpathCalls": 5,
+                "nonPathRealpathCalls": 0,
+                "synchronousRealpathCalls": 0,
+                "maximumActiveRealpath": 1
+              },
+              {
+                "milliseconds": 18.248199999999997,
+                "maxHeartbeatGapMs": 11.438900000000103,
+                "mainJsonParses": 4,
+                "mainParsedCharacters": 259,
+                "fullStateParses": 0,
+                "asyncRealpathCalls": 5,
+                "nonPathRealpathCalls": 0,
+                "synchronousRealpathCalls": 0,
+                "maximumActiveRealpath": 1
+              }
+            ]
+          },
+          {
+            "name": "network tag read",
+            "observations": [
+              {
+                "milliseconds": 8.838899999999967,
+                "maxHeartbeatGapMs": 8.819699999999898,
+                "mainJsonParses": 4,
+                "mainParsedCharacters": 745203,
+                "fullStateParses": 0,
+                "asyncRealpathCalls": 0,
+                "nonPathRealpathCalls": 0,
+                "synchronousRealpathCalls": 0,
+                "maximumActiveRealpath": 0
+              },
+              {
+                "milliseconds": 7.141700000000014,
+                "maxHeartbeatGapMs": 7.128000000000043,
+                "mainJsonParses": 4,
+                "mainParsedCharacters": 745203,
+                "fullStateParses": 0,
+                "asyncRealpathCalls": 0,
+                "nonPathRealpathCalls": 0,
+                "synchronousRealpathCalls": 0,
+                "maximumActiveRealpath": 0
+              },
+              {
+                "milliseconds": 7.502100000000041,
+                "maxHeartbeatGapMs": 7.485500000000002,
+                "mainJsonParses": 4,
+                "mainParsedCharacters": 745203,
+                "fullStateParses": 0,
+                "asyncRealpathCalls": 0,
+                "nonPathRealpathCalls": 0,
+                "synchronousRealpathCalls": 0,
+                "maximumActiveRealpath": 0
+              }
+            ]
+          },
+          {
+            "name": "10240 legacy tag read",
+            "observations": [
+              {
+                "milliseconds": 491.42229999999995,
+                "maxHeartbeatGapMs": 15.904199999999946,
+                "mainJsonParses": 3,
+                "mainParsedCharacters": 1056415,
+                "fullStateParses": 0,
+                "asyncRealpathCalls": 10245,
+                "nonPathRealpathCalls": 0,
+                "synchronousRealpathCalls": 0,
+                "maximumActiveRealpath": 8
+              },
+              {
+                "milliseconds": 486.42049999999995,
+                "maxHeartbeatGapMs": 15.41560000000004,
+                "mainJsonParses": 3,
+                "mainParsedCharacters": 1056415,
+                "fullStateParses": 0,
+                "asyncRealpathCalls": 10245,
+                "nonPathRealpathCalls": 0,
+                "synchronousRealpathCalls": 0,
+                "maximumActiveRealpath": 8
+              },
+              {
+                "milliseconds": 482.77690000000007,
+                "maxHeartbeatGapMs": 15.130100000000311,
+                "mainJsonParses": 3,
+                "mainParsedCharacters": 1056415,
+                "fullStateParses": 0,
+                "asyncRealpathCalls": 10245,
+                "nonPathRealpathCalls": 0,
+                "synchronousRealpathCalls": 0,
+                "maximumActiveRealpath": 8
+              }
+            ]
+          }
+        ],
+        "conditions": "Actual media service, production settings/worker, 10000 mixed canonical/URL keys plus 10000 unrelated progress records; separate 10240 legacy path keys, 1280 file headers and eight actual junctions. Three sequential observations per operation per process. No renderer, IPC transport, decoder, physical phone, P95 or cold start claim."
+      },
+      {
+        "date": "2026-10-19T08:06:32.718Z",
+        "fixture": ".tmp\\refactor-tests\\media-fields-cost-sUu3BU",
+        "before": true,
+        "sourceDigests": {
+          "main/settings.js": "277c5e9597bddf8583608a588daea3210f4cb9f49dff6b8e89bc41d977feeb45",
+          "main/remote/handlers/network-resources.js": "6def64b5048635019b6d0c54c1b39ec65726bd1798952e3566811a1312b1ba6c",
+          "main/application/media-mutation-paths.js": "aadf4ee7550a6d0335a63dae337e62fb641a8780645eb9399f18a205ff994666",
+          "main/application/media-mutations.js": "d818e77b93c16cc1b5ca7113dd910f9ff14009011598edbf3bade6a3c500a49c"
+        },
+        "results": [
+          {
+            "name": "canonical tag read",
+            "observations": [
+              {
+                "milliseconds": 290.73090000000013,
+                "maxHeartbeatGapMs": 16.5236000000001,
+                "mainJsonParses": 3,
+                "mainParsedCharacters": 1596019,
+                "fullStateParses": 2,
+                "asyncRealpathCalls": 10006,
+                "nonPathRealpathCalls": 10001,
+                "synchronousRealpathCalls": 0,
+                "maximumActiveRealpath": 8
+              },
+              {
+                "milliseconds": 254.43810000000008,
+                "maxHeartbeatGapMs": 7.716799999999921,
+                "mainJsonParses": 3,
+                "mainParsedCharacters": 1596019,
+                "fullStateParses": 2,
+                "asyncRealpathCalls": 10006,
+                "nonPathRealpathCalls": 10001,
+                "synchronousRealpathCalls": 0,
+                "maximumActiveRealpath": 8
+              },
+              {
+                "milliseconds": 244.32389999999987,
+                "maxHeartbeatGapMs": 7.031399999999849,
+                "mainJsonParses": 3,
+                "mainParsedCharacters": 1596019,
+                "fullStateParses": 2,
+                "asyncRealpathCalls": 10006,
+                "nonPathRealpathCalls": 10001,
+                "synchronousRealpathCalls": 0,
+                "maximumActiveRealpath": 8
+              }
+            ]
+          },
+          {
+            "name": "canonical tag replace",
+            "observations": [
+              {
+                "milliseconds": 300.80009999999993,
+                "maxHeartbeatGapMs": 26.301999999999907,
+                "mainJsonParses": 3,
+                "mainParsedCharacters": 1596019,
+                "fullStateParses": 2,
+                "asyncRealpathCalls": 10006,
+                "nonPathRealpathCalls": 10001,
+                "synchronousRealpathCalls": 0,
+                "maximumActiveRealpath": 8
+              },
+              {
+                "milliseconds": 293.96849999999995,
+                "maxHeartbeatGapMs": 15.73129999999992,
+                "mainJsonParses": 3,
+                "mainParsedCharacters": 1596163,
+                "fullStateParses": 2,
+                "asyncRealpathCalls": 10006,
+                "nonPathRealpathCalls": 10001,
+                "synchronousRealpathCalls": 0,
+                "maximumActiveRealpath": 8
+              },
+              {
+                "milliseconds": 302.9409999999998,
+                "maxHeartbeatGapMs": 20.858799999999974,
+                "mainJsonParses": 3,
+                "mainParsedCharacters": 1596163,
+                "fullStateParses": 2,
+                "asyncRealpathCalls": 10006,
+                "nonPathRealpathCalls": 10001,
+                "synchronousRealpathCalls": 0,
+                "maximumActiveRealpath": 8
+              }
+            ]
+          },
+          {
+            "name": "favorite with unrelated data",
+            "observations": [
+              {
+                "milliseconds": 27.37009999999964,
+                "maxHeartbeatGapMs": 13.88969999999972,
+                "mainJsonParses": 3,
+                "mainParsedCharacters": 1596163,
+                "fullStateParses": 2,
+                "asyncRealpathCalls": 6,
+                "nonPathRealpathCalls": 1,
+                "synchronousRealpathCalls": 0,
+                "maximumActiveRealpath": 2
+              },
+              {
+                "milliseconds": 26.378099999999904,
+                "maxHeartbeatGapMs": 13.192299999999705,
+                "mainJsonParses": 3,
+                "mainParsedCharacters": 1596405,
+                "fullStateParses": 2,
+                "asyncRealpathCalls": 6,
+                "nonPathRealpathCalls": 1,
+                "synchronousRealpathCalls": 0,
+                "maximumActiveRealpath": 2
+              },
+              {
+                "milliseconds": 25.696400000000267,
+                "maxHeartbeatGapMs": 7.608999999999924,
+                "mainJsonParses": 3,
+                "mainParsedCharacters": 1596163,
+                "fullStateParses": 2,
+                "asyncRealpathCalls": 6,
+                "nonPathRealpathCalls": 1,
+                "synchronousRealpathCalls": 0,
+                "maximumActiveRealpath": 2
+              }
+            ]
+          },
+          {
+            "name": "network tag read",
+            "observations": [
+              {
+                "milliseconds": 16.52619999999979,
+                "maxHeartbeatGapMs": 16.511099999999715,
+                "mainJsonParses": 4,
+                "mainParsedCharacters": 3192360,
+                "fullStateParses": 4,
+                "asyncRealpathCalls": 0,
+                "nonPathRealpathCalls": 0,
+                "synchronousRealpathCalls": 0,
+                "maximumActiveRealpath": 0
+              },
+              {
+                "milliseconds": 14.291499999999814,
+                "maxHeartbeatGapMs": 14.279700000000048,
+                "mainJsonParses": 4,
+                "mainParsedCharacters": 3192360,
+                "fullStateParses": 4,
+                "asyncRealpathCalls": 0,
+                "nonPathRealpathCalls": 0,
+                "synchronousRealpathCalls": 0,
+                "maximumActiveRealpath": 0
+              },
+              {
+                "milliseconds": 14.49519999999984,
+                "maxHeartbeatGapMs": 14.480000000000018,
+                "mainJsonParses": 4,
+                "mainParsedCharacters": 3192360,
+                "fullStateParses": 4,
+                "asyncRealpathCalls": 0,
+                "nonPathRealpathCalls": 0,
+                "synchronousRealpathCalls": 0,
+                "maximumActiveRealpath": 0
+              }
+            ]
+          },
+          {
+            "name": "10240 legacy tag read",
+            "observations": [
+              {
+                "milliseconds": 488.1135999999997,
+                "maxHeartbeatGapMs": 11.285899999999856,
+                "mainJsonParses": 3,
+                "mainParsedCharacters": 2219263,
+                "fullStateParses": 2,
+                "asyncRealpathCalls": 10246,
+                "nonPathRealpathCalls": 1,
+                "synchronousRealpathCalls": 0,
+                "maximumActiveRealpath": 8
+              },
+              {
+                "milliseconds": 479.7392,
+                "maxHeartbeatGapMs": 10.850200000000314,
+                "mainJsonParses": 3,
+                "mainParsedCharacters": 2219263,
+                "fullStateParses": 2,
+                "asyncRealpathCalls": 10246,
+                "nonPathRealpathCalls": 1,
+                "synchronousRealpathCalls": 0,
+                "maximumActiveRealpath": 8
+              },
+              {
+                "milliseconds": 498.5157999999997,
+                "maxHeartbeatGapMs": 10.513899999999921,
+                "mainJsonParses": 3,
+                "mainParsedCharacters": 2219263,
+                "fullStateParses": 2,
+                "asyncRealpathCalls": 10246,
+                "nonPathRealpathCalls": 1,
+                "synchronousRealpathCalls": 0,
+                "maximumActiveRealpath": 8
+              }
+            ]
+          }
+        ],
+        "conditions": "Actual media service, production settings/worker, 10000 mixed canonical/URL keys plus 10000 unrelated progress records; separate 10240 legacy path keys, 1280 file headers and eight actual junctions. Three sequential observations per operation per process. No renderer, IPC transport, decoder, physical phone, P95 or cold start claim."
+      },
+      {
+        "date": "2026-10-19T08:06:35.756Z",
+        "fixture": ".tmp\\refactor-tests\\media-fields-cost-6hOGVC",
+        "before": false,
+        "sourceDigests": {
+          "main/settings.js": "80582a98c58a09076f439332300be0a39d4b9df8ce5bbe8cc9e50fbb0631d853",
+          "main/remote/handlers/network-resources.js": "75121b4b0bd47dc60467008bbb0a7bfcc12b7ee61997cd4f1acf97885704a1b8",
+          "main/application/media-mutation-paths.js": "13fad00c9960895dd22fbfaf4139eb44cbd9e7b6db9c3fffda6b83545f3a0293",
+          "main/application/media-mutations.js": "da1d0a81ec7afaa6c1da34ac0e8f4e75feeee760195b5dd4ece267f9d4971eb3",
+          "main/repositories/user-media.js": "3049437c334259acaed84e16b52a29d81f3e0f777b3bfa7f3cc4d1c95de3c2b8"
+        },
+        "results": [
+          {
+            "name": "canonical tag read",
+            "observations": [
+              {
+                "milliseconds": 12.316800000000057,
+                "maxHeartbeatGapMs": 9.454800000000091,
+                "mainJsonParses": 3,
+                "mainParsedCharacters": 744914,
+                "fullStateParses": 0,
+                "asyncRealpathCalls": 5,
+                "nonPathRealpathCalls": 0,
+                "synchronousRealpathCalls": 0,
+                "maximumActiveRealpath": 1
+              },
+              {
+                "milliseconds": 12.054500000000075,
+                "maxHeartbeatGapMs": 8.948300000000017,
+                "mainJsonParses": 3,
+                "mainParsedCharacters": 744914,
+                "fullStateParses": 0,
+                "asyncRealpathCalls": 5,
+                "nonPathRealpathCalls": 0,
+                "synchronousRealpathCalls": 0,
+                "maximumActiveRealpath": 1
+              },
+              {
+                "milliseconds": 11.01640000000009,
+                "maxHeartbeatGapMs": 8.5,
+                "mainJsonParses": 3,
+                "mainParsedCharacters": 744914,
+                "fullStateParses": 0,
+                "asyncRealpathCalls": 5,
+                "nonPathRealpathCalls": 0,
+                "synchronousRealpathCalls": 0,
+                "maximumActiveRealpath": 1
+              }
+            ]
+          },
+          {
+            "name": "canonical tag replace",
+            "observations": [
+              {
+                "milliseconds": 71.61869999999999,
+                "maxHeartbeatGapMs": 18.45830000000001,
+                "mainJsonParses": 3,
+                "mainParsedCharacters": 744939,
+                "fullStateParses": 0,
+                "asyncRealpathCalls": 5,
+                "nonPathRealpathCalls": 0,
+                "synchronousRealpathCalls": 0,
+                "maximumActiveRealpath": 1
+              },
+              {
+                "milliseconds": 75.19079999999997,
+                "maxHeartbeatGapMs": 20.22860000000003,
+                "mainJsonParses": 3,
+                "mainParsedCharacters": 745011,
+                "fullStateParses": 0,
+                "asyncRealpathCalls": 5,
+                "nonPathRealpathCalls": 0,
+                "synchronousRealpathCalls": 0,
+                "maximumActiveRealpath": 1
+              },
+              {
+                "milliseconds": 61.46370000000002,
+                "maxHeartbeatGapMs": 19.717899999999986,
+                "mainJsonParses": 3,
+                "mainParsedCharacters": 745011,
+                "fullStateParses": 0,
+                "asyncRealpathCalls": 5,
+                "nonPathRealpathCalls": 0,
+                "synchronousRealpathCalls": 0,
+                "maximumActiveRealpath": 1
+              }
+            ]
+          },
+          {
+            "name": "favorite with unrelated data",
+            "observations": [
+              {
+                "milliseconds": 16.679300000000012,
+                "maxHeartbeatGapMs": 11.802400000000034,
+                "mainJsonParses": 4,
+                "mainParsedCharacters": 259,
+                "fullStateParses": 0,
+                "asyncRealpathCalls": 5,
+                "nonPathRealpathCalls": 0,
+                "synchronousRealpathCalls": 0,
+                "maximumActiveRealpath": 1
+              },
+              {
+                "milliseconds": 17.789199999999937,
+                "maxHeartbeatGapMs": 13.481599999999958,
+                "mainJsonParses": 4,
+                "mainParsedCharacters": 501,
+                "fullStateParses": 0,
+                "asyncRealpathCalls": 5,
+                "nonPathRealpathCalls": 0,
+                "synchronousRealpathCalls": 0,
+                "maximumActiveRealpath": 1
+              },
+              {
+                "milliseconds": 19.814700000000016,
+                "maxHeartbeatGapMs": 15.755800000000022,
+                "mainJsonParses": 4,
+                "mainParsedCharacters": 259,
+                "fullStateParses": 0,
+                "asyncRealpathCalls": 5,
+                "nonPathRealpathCalls": 0,
+                "synchronousRealpathCalls": 0,
+                "maximumActiveRealpath": 1
+              }
+            ]
+          },
+          {
+            "name": "network tag read",
+            "observations": [
+              {
+                "milliseconds": 8.47709999999995,
+                "maxHeartbeatGapMs": 8.458999999999946,
+                "mainJsonParses": 4,
+                "mainParsedCharacters": 745203,
+                "fullStateParses": 0,
+                "asyncRealpathCalls": 0,
+                "nonPathRealpathCalls": 0,
+                "synchronousRealpathCalls": 0,
+                "maximumActiveRealpath": 0
+              },
+              {
+                "milliseconds": 7.285900000000083,
+                "maxHeartbeatGapMs": 7.269600000000082,
+                "mainJsonParses": 4,
+                "mainParsedCharacters": 745203,
+                "fullStateParses": 0,
+                "asyncRealpathCalls": 0,
+                "nonPathRealpathCalls": 0,
+                "synchronousRealpathCalls": 0,
+                "maximumActiveRealpath": 0
+              },
+              {
+                "milliseconds": 6.849500000000035,
+                "maxHeartbeatGapMs": 6.830300000000079,
+                "mainJsonParses": 4,
+                "mainParsedCharacters": 745203,
+                "fullStateParses": 0,
+                "asyncRealpathCalls": 0,
+                "nonPathRealpathCalls": 0,
+                "synchronousRealpathCalls": 0,
+                "maximumActiveRealpath": 0
+              }
+            ]
+          },
+          {
+            "name": "10240 legacy tag read",
+            "observations": [
+              {
+                "milliseconds": 522.1993,
+                "maxHeartbeatGapMs": 15.60550000000012,
+                "mainJsonParses": 3,
+                "mainParsedCharacters": 1056415,
+                "fullStateParses": 0,
+                "asyncRealpathCalls": 10245,
+                "nonPathRealpathCalls": 0,
+                "synchronousRealpathCalls": 0,
+                "maximumActiveRealpath": 8
+              },
+              {
+                "milliseconds": 484.53679999999986,
+                "maxHeartbeatGapMs": 15.809999999999945,
+                "mainJsonParses": 3,
+                "mainParsedCharacters": 1056415,
+                "fullStateParses": 0,
+                "asyncRealpathCalls": 10245,
+                "nonPathRealpathCalls": 0,
+                "synchronousRealpathCalls": 0,
+                "maximumActiveRealpath": 8
+              },
+              {
+                "milliseconds": 484.99609999999984,
+                "maxHeartbeatGapMs": 16.03740000000016,
+                "mainJsonParses": 3,
+                "mainParsedCharacters": 1056415,
+                "fullStateParses": 0,
+                "asyncRealpathCalls": 10245,
+                "nonPathRealpathCalls": 0,
+                "synchronousRealpathCalls": 0,
+                "maximumActiveRealpath": 8
+              }
+            ]
+          }
+        ],
+        "conditions": "Actual media service, production settings/worker, 10000 mixed canonical/URL keys plus 10000 unrelated progress records; separate 10240 legacy path keys, 1280 file headers and eight actual junctions. Three sequential observations per operation per process. No renderer, IPC transport, decoder, physical phone, P95 or cold start claim."
+      }
+    ]
+  },
+  "interpretation": {
+    "sample": "Three alternating before/current independent processes; three observations per operation per process, nine pooled per version/operation.",
+    "workload": "10000 mixed file/workshop/URL tag identifiers plus one real target file and 10000 unrelated progress records; separate 10240 path keys across 1280 file headers/eight real Windows junctions. Actual main repository/service/worker/filesystem. No renderer, IPC transport or decoder.",
+    "observed": "Modern tag reads and replacements lost 10001 mistaken namespace-to-path resolutions. Favorite/network operations avoid unrelated config snapshots. Legacy tag latency did not materially improve and its maximum heartbeat was worse in these samples.",
+    "jsonCounts": "Whole-state parses identify full configuration roots. Zero does not mean zero JSON parsing or zero full tag-field copies. Parsed character totals count JavaScript input string lengths in controlled main JSON.parse, not UTF-8 bytes or worker allocations.",
+    "excluded": "Initial development before/after fixture results retained but excluded from final series. Final counter recognizes resolved identifier paths, and captured dependency ordering is explicit; final assertions validate this.",
+    "notEstablished": "Cold startup, long-run P95, renderer input latency, native decoding contention, peak/PSS/long-run memory or full release readiness."
+  },
+  "lifecycle": {
+    "date": "2026-10-19T08:04:45.160Z",
+    "fixture": ".tmp\\refactor-tests\\media-fields-hx6yII",
+    "passed": [
+      "queued field and preparation selections are captured before caller mutation",
+      "logical media preparation owns detached key names while callbacks see only operation fields",
+      "logical operation boundary rejects unrelated writes and unsupported map/operation names",
+      "read-only selected callbacks and legacy complete results cannot mutate committed state",
+      "actual favorite/tag/CAS/replay/bulk/network/progress services avoid unrelated configuration snapshots",
+      "canonical namespaces skip filesystem work while actual legacy aliases retain order and migrate on write",
+      "selected callbacks re-read the latest fields after asynchronous preparation",
+      "failed replacement never publishes selected changes and later operations recover"
+    ],
+    "sourceDigests": {
+      "main/settings.js": "80582a98c58a09076f439332300be0a39d4b9df8ce5bbe8cc9e50fbb0631d853",
+      "main/repositories/user-media.js": "3049437c334259acaed84e16b52a29d81f3e0f777b3bfa7f3cc4d1c95de3c2b8",
+      "main/application/media-mutations.js": "da1d0a81ec7afaa6c1da34ac0e8f4e75feeee760195b5dd4ece267f9d4971eb3",
+      "main/application/media-mutation-paths.js": "13fad00c9960895dd22fbfaf4139eb44cbd9e7b6db9c3fffda6b83545f3a0293",
+      "main/remote/handlers/network-resources.js": "75121b4b0bd47dc60467008bbb0a7bfcc12b7ee61997cd4f1acf97885704a1b8"
+    },
+    "conditions": "Actual repository/service/settings worker and filesystem with 10000 mixed canonical keys, real legacy junction and synthetic video header. Field/callback gates and JSON parse guard controlled. No native decode or physical-device performance claim."
+  },
+  "pathLifecycle": {
+    "date": "2026-10-19T08:02:28.245Z",
+    "fixture": ".tmp\\refactor-tests\\mutation-path-lifecycle-GU5vs9",
+    "legacyMaximum": 8,
+    "targetResolutionMaximum": 8,
+    "authenticatedPlaybackWhileBlockedMs": 3.625,
+    "mappedDriveChecked": true,
+    "passed": [
+      "key-set reprepare",
+      "latest CAS rejection",
+      "flush joins preparation and retry",
+      "current desktop lock",
+      "partial deleted target",
+      "bounded ordered target resolution",
+      "retargeted root rejected",
+      "retargeted original alias rejected",
+      "three-attempt limit and recovery",
+      "network-only preparation skips local IO",
+      "read preserves background write failure",
+      "actual Windows subst read and legacy removal"
+    ],
+    "conditions": "Production service/settings/scanner and authenticated HTTP, real local files and junctions; only async realpath timing is controlled. Metadata scheduler paused. No decoder or physical-phone performance claim."
+  },
+  "workerRegression": {
+    "date": "2026-10-19T08:02:26.710Z",
+    "fixture": ".tmp\\refactor-tests\\settings-json-lifecycle-wWFMhp",
+    "passed": [
+      "worker snapshot and returned fields have separate ownership",
+      "seed mismatch, JSON canonical semantics and serialization error recovery",
+      "configured byte budget rejects before publication and recovers",
+      "single active job and graceful close wait for actual worker completion",
+      "forced close terminates only the owned thread before releasing the job",
+      "unexpected thread exit and malformed response recover after thread exit",
+      "deadline terminates a live blocked worker and later requests recover",
+      "idle worker does not keep an otherwise completed Node process alive",
+      "idle retirement releases the owned thread and later reseeds from current state",
+      "ordinary production patch sends changed fields and preserves input/result/cache ownership",
+      "value-only result and worker failure never publish or replace the durable file",
+      "synchronous changes during worker preparation rebase and flush together",
+      "custom property-key JSON, special keys and directory callback ownership stay compatible",
+      "path rebase compares the encoded durable snapshot before scheduling a follow-up write"
+    ],
+    "sourceDigests": {
+      "main/settings.js": "80582a98c58a09076f439332300be0a39d4b9df8ce5bbe8cc9e50fbb0631d853",
+      "main/application/settings-json.js": "b051646df7c453b943e1c51f0e58a23caaea1c06b8d4fe243c476e86bfeb60ba",
+      "main/application/settings-json-worker.js": "13bb2ffad8358b1a0f57f819d7a3b2bfc9cf6d942cb82d9be4408db424a481ec",
+      "main/application/media-mutations.js": "da1d0a81ec7afaa6c1da34ac0e8f4e75feeee760195b5dd4ece267f9d4971eb3",
+      "main/remote/media-mutations.js": "76ea043d52a84d980b1b0ff683553cd304da1aa21c806c7d165b54beda11b2aa",
+      "main/index.js": "81a0f85e42439421d6d976012f4b5ff01ccb21aa8155487541cf9bd35e0701dc"
+    }
+  },
+  "patchRegression": {
+    "date": "2026-10-19T08:02:26.917Z",
+    "fixture": ".tmp\\refactor-tests\\settings-patch-lifecycle-swjUBQ",
+    "passed": [
+      "detached initial/provider defaults",
+      "patch-only intent",
+      "cache unchanged before rename",
+      "sync field/plugin rebase",
+      "observer/result/callback/input isolation after commit",
+      "in-flight input cannot change durable intent",
+      "queued input captured at call",
+      "snapshot stamps",
+      "failed custom merge does not mutate cache or notify",
+      "explicit undefined reset",
+      "unrelated patch preserves path config",
+      "actual policy re-resolves retargeted root",
+      "explicit path patch normalizes current root"
+    ],
+    "conditions": "Production settings and media policy, actual atomic file writes and real directory junction/symlink. Rename delay/failure controlled; no renderer/native performance claim."
+  },
+  "replyRegression": {
+    "date": "2026-10-19T08:02:27.927Z",
+    "fixture": ".tmp\\refactor-tests\\settings-replies-PQ2onw",
+    "passed": [
+      "normal version acknowledgment uses the already observed feed without a full read",
+      "missing final broadcast recovers from the acknowledgment with one authoritative read",
+      "concurrent media acknowledgments share a recovery read and old acknowledgments preserve new state",
+      "malformed or unreachable acknowledgment cannot spin, silently succeed or mutate confirmed state",
+      "failed persistence rolls back intent and retired save acknowledgments cannot publish",
+      "legacy save API retains complete snapshot behavior without the reply option",
+      "production IPC opt-in returns detached commit versions including no-op and rejects invalid options before writes",
+      "media IPC preserves tag CAS/replay, bulk partial failure and legacy replies while version replies omit full settings",
+      "save sanitation reads selected fields, preserves directory policy and isolates custom sanitizer inputs",
+      "failed disk replacement cannot return a success version or publish a new snapshot"
+    ],
+    "sourceDigests": {
+      "main/settings.js": "80582a98c58a09076f439332300be0a39d4b9df8ce5bbe8cc9e50fbb0631d853",
+      "main/ipc/settings.js": "de7fca92a59b29f8149f869bec5799bbbe8998a611844b28d027fae84e7035ad",
+      "main/ipc/media-data.js": "23dc622bb90bdbed724c5bdb86aecaa095a4ee4a1a4312b3387728d179b91300",
+      "main/application/media-mutations.js": "da1d0a81ec7afaa6c1da34ac0e8f4e75feeee760195b5dd4ece267f9d4971eb3",
+      "preload.js": "b4a725252f0b0a6ecd2afec36084678984a975b795c363ee2cd09f6fbdff22c6",
+      "src/services/settings-client.js": "36c2fe66bd85f54bb4e89445fadf8f1c704a0bc271d79fe5f0b6eadd5f1ffdb1",
+      "src/api/media.ts": "c63e9606db06783225a634a278624ea3ba0a4fb9541624cffb105e1c0ff44e73",
+      "src/hooks/useAppState.js": "26bd3629c0ebfeeed7a394ff90f0b4a1bdace96a1f110ee097cae405ed420a05",
+      "src/hooks/useAppController.js": "8708aac4dff9f3815db09d96f40e09f44f9bcffbd4ad26b136cfcd6cbd6562c3",
+      "src/hooks/useFavorites.js": "8ab483bb36c39a82c53d3b86f06932df28e7b0b67279a33d489bded6b8d9f2e4",
+      "src/hooks/useTagEditor.js": "1779628a8d9755d29a18f63e714a5b23dc1ba18c5b18c90d3a1459ec0510128d",
+      "packages/contracts/src/settings-feed.ts": "8266d590aa5b9b2ac6bfa2a72fb4f9a269cd9e29de0de4cdf76832f7805342f6"
+    },
+    "conditions": "Actual production settings, JSON worker and IPC handlers under controlled registration; production SettingsClient through module harness. Native frame/preload/App checks are separate."
+  },
+  "feedRegression": {
+    "date": "2026-10-19T08:04:45.032Z",
+    "fixture": ".tmp\\refactor-tests\\settings-feed-yxiVoh",
+    "passed": [
+      "shared schema protects metadata, special keys and map ordering",
+      "initial feed reads coalesce and a pre-reply event triggers one fresh baseline",
+      "entity changes preserve unchanged references and optimistic intent rejects stale full acknowledgments",
+      "lost/out-of-order messages coalesce recovery and fresh baselines bound invalid-clock retries",
+      "private fields and malformed map order cannot partially mutate confirmed settings",
+      "retired reads do not publish after disposal and current recovery failures stay visible",
+      "negotiated broadcasts carry one entity and keep a stable feed for multiple readers",
+      "field and playback reads avoid full snapshots while keeping detached values",
+      "legacy listeners coexist and stale unsubscribe messages cannot disable newer listeners",
+      "unannounced version changes recover with a full snapshot and privacy changes stay redacted",
+      "failed commits and retired frame scopes cannot emit state"
+    ],
+    "sourceDigests": {
+      "main/settings.js": "80582a98c58a09076f439332300be0a39d4b9df8ce5bbe8cc9e50fbb0631d853",
+      "main/application/settings-broadcast.js": "f7137590c14a6e3c4fa4217fe318f90d5072942b1d206c2d5d50e4a97e38281e",
+      "main/application/settings-json.js": "b051646df7c453b943e1c51f0e58a23caaea1c06b8d4fe243c476e86bfeb60ba",
+      "main/application/settings-json-worker.js": "13bb2ffad8358b1a0f57f819d7a3b2bfc9cf6d942cb82d9be4408db424a481ec",
+      "src/services/settings-client.js": "36c2fe66bd85f54bb4e89445fadf8f1c704a0bc271d79fe5f0b6eadd5f1ffdb1",
+      "src/hooks/useAppState.js": "26bd3629c0ebfeeed7a394ff90f0b4a1bdace96a1f110ee097cae405ed420a05",
+      "src/utils/share-json.js": "91392d99af0dbc903522f41b35b1f7a4beb2bd8947251fb95f9c7873523b52a4",
+      "preload.js": "b4a725252f0b0a6ecd2afec36084678984a975b795c363ee2cd09f6fbdff22c6",
+      "packages/contracts/src/settings-feed.ts": "8266d590aa5b9b2ac6bfa2a72fb4f9a269cd9e29de0de4cdf76832f7805342f6"
+    },
+    "conditions": "Actual production settings, worker, publisher and renderer SettingsClient. Renderer hooks loaded through controlled harness and main-frame scope injected here; actual Electron frame/preload verification is separate."
+  },
+  "actualElectron": {
+    "date": "2026-10-19T08:04:47.486Z",
+    "fixture": ".tmp\\refactor-tests\\settings-feed-ui-egSQgV",
+    "passed": [
+      "production sandbox preload and SettingsClient receive only narrow actual Electron events",
+      "legacy full subscriptions coexist and unsubscribe without changing current consumers",
+      "a lost native event produces one authoritative full resync",
+      "foreign navigation cannot read or receive settings and an authorized reload gets a fresh feed",
+      "production SettingsClient requests version-only durable save replies without an extra full read",
+      "a version acknowledgment repairs a lost final save event with one authoritative full read",
+      "production media adapters use small version replies, recover a lost last event and preserve tag replay, bulk and legacy reads"
+    ],
+    "ordinary": [
+      {
+        "channel": "settings-patched",
+        "kind": "settings-patch-v1",
+        "bytes": 271,
+        "feedId": "9bb1a670-df1a-473e-b335-5967f5a6a362",
+        "mapKeys": {}
+      },
+      {
+        "channel": "settings-patched",
+        "kind": "settings-patch-v1",
+        "bytes": 525,
+        "feedId": "9bb1a670-df1a-473e-b335-5967f5a6a362",
+        "mapKeys": {
+          "playbackStates": [
+            "fixture-video"
+          ]
+        }
+      },
+      {
+        "channel": "settings-patched",
+        "kind": "settings-patch-v1",
+        "bytes": 312,
+        "feedId": "9bb1a670-df1a-473e-b335-5967f5a6a362",
+        "mapKeys": {
+          "customTags": [
+            "file-7"
+          ]
+        }
+      }
+    ],
+    "replies": [
+      {
+        "channel": "save-settings",
+        "bytes": 97,
+        "hasSettings": false,
+        "version": {
+          "epoch": "51a9fa06-0783-4112-9d08-c86d95923d76",
+          "revision": 12
+        }
+      },
+      {
+        "channel": "save-settings",
+        "bytes": 97,
+        "hasSettings": false,
+        "version": {
+          "epoch": "51a9fa06-0783-4112-9d08-c86d95923d76",
+          "revision": 13
+        }
+      },
+      {
+        "channel": "media-set-favorite",
+        "bytes": 247,
+        "hasSettings": false,
+        "version": {
+          "epoch": "51a9fa06-0783-4112-9d08-c86d95923d76",
+          "revision": 14
+        }
+      },
+      {
+        "channel": "media-set-favorite",
+        "bytes": 248,
+        "hasSettings": false,
+        "version": {
+          "epoch": "51a9fa06-0783-4112-9d08-c86d95923d76",
+          "revision": 15
+        }
+      },
+      {
+        "channel": "media-get-tags",
+        "bytes": 220,
+        "hasSettings": false,
+        "version": {
+          "epoch": "51a9fa06-0783-4112-9d08-c86d95923d76",
+          "revision": 15
+        }
+      },
+      {
+        "channel": "media-set-tags",
+        "bytes": 321,
+        "hasSettings": false,
+        "version": {
+          "epoch": "51a9fa06-0783-4112-9d08-c86d95923d76",
+          "revision": 16
+        }
+      },
+      {
+        "channel": "media-set-tags",
+        "bytes": 320,
+        "hasSettings": false,
+        "version": {
+          "epoch": "51a9fa06-0783-4112-9d08-c86d95923d76",
+          "revision": 16
+        }
+      },
+      {
+        "channel": "media-append-tags",
+        "bytes": 358,
+        "hasSettings": false,
+        "version": {
+          "epoch": "51a9fa06-0783-4112-9d08-c86d95923d76",
+          "revision": 17
+        }
+      }
+    ],
+    "sourceDigests": {
+      "main/settings.js": "80582a98c58a09076f439332300be0a39d4b9df8ce5bbe8cc9e50fbb0631d853",
+      "main/application/settings-broadcast.js": "f7137590c14a6e3c4fa4217fe318f90d5072942b1d206c2d5d50e4a97e38281e",
+      "main/ipc/settings.js": "de7fca92a59b29f8149f869bec5799bbbe8998a611844b28d027fae84e7035ad",
+      "main/ipc/media-data.js": "23dc622bb90bdbed724c5bdb86aecaa095a4ee4a1a4312b3387728d179b91300",
+      "main/application/media-mutations.js": "da1d0a81ec7afaa6c1da34ac0e8f4e75feeee760195b5dd4ece267f9d4971eb3",
+      "main/security/ipc-sender.js": "da80398dd786f6a7b6c737fbd2e3f0de9b581584fb5c3f81a16b44a12e570b1a",
+      "preload.js": "b4a725252f0b0a6ecd2afec36084678984a975b795c363ee2cd09f6fbdff22c6",
+      "src/api/media.ts": "c63e9606db06783225a634a278624ea3ba0a4fb9541624cffb105e1c0ff44e73",
+      "src/services/settings-client.js": "36c2fe66bd85f54bb4e89445fadf8f1c704a0bc271d79fe5f0b6eadd5f1ffdb1",
+      "src/utils/share-json.js": "91392d99af0dbc903522f41b35b1f7a4beb2bd8947251fb95f9c7873523b52a4",
+      "packages/contracts/dist/settings-feed.js": "d3de55971030b50e35ee4f8e70ebdd1c65a3353553f211aea31e6bf58e98424c"
+    },
+    "conditions": "Actual hidden Electron, production sandbox preload, guarded IPC and freshly bundled SettingsClient. 10000 generated tags, no decoder. JSON payload size is not IPC wire size or native latency/P95."
+  },
+  "rebuiltAppUI": {
+    "date": "2026-10-19T08:04:52.398Z",
+    "passed": [
+      "rebuilt production App uses version acknowledgments with queued intent and old reply isolation",
+      "actual settings disk failure shows a visible error and retry succeeds",
+      "actual favorite hook recovers a lost last event with one feed read",
+      "actual tag editor recovers a lost last event with one feed read and closes after reconciliation"
+    ],
+    "mediaReplies": [
+      {
+        "channel": "media-set-favorite",
+        "version": {
+          "epoch": "5be210b7-062c-4192-befb-c8eddcc75abf",
+          "revision": 8
+        },
+        "bytes": 218,
+        "hasSettings": false
+      },
+      {
+        "channel": "media-get-tags",
+        "version": {
+          "epoch": "5be210b7-062c-4192-befb-c8eddcc75abf",
+          "revision": 8
+        },
+        "bytes": 219,
+        "hasSettings": false
+      },
+      {
+        "channel": "media-set-tags",
+        "version": {
+          "epoch": "5be210b7-062c-4192-befb-c8eddcc75abf",
+          "revision": 9
+        },
+        "bytes": 297,
+        "hasSettings": false
+      }
+    ],
+    "sourceDigests": {
+      "main/settings.js": "80582a98c58a09076f439332300be0a39d4b9df8ce5bbe8cc9e50fbb0631d853",
+      "main/ipc/settings.js": "de7fca92a59b29f8149f869bec5799bbbe8998a611844b28d027fae84e7035ad",
+      "main/ipc/media-data.js": "23dc622bb90bdbed724c5bdb86aecaa095a4ee4a1a4312b3387728d179b91300",
+      "preload.js": "b4a725252f0b0a6ecd2afec36084678984a975b795c363ee2cd09f6fbdff22c6",
+      "src/services/settings-client.js": "36c2fe66bd85f54bb4e89445fadf8f1c704a0bc271d79fe5f0b6eadd5f1ffdb1",
+      "src/hooks/useAppState.js": "26bd3629c0ebfeeed7a394ff90f0b4a1bdace96a1f110ee097cae405ed420a05",
+      "src/hooks/useAppController.js": "8708aac4dff9f3815db09d96f40e09f44f9bcffbd4ad26b136cfcd6cbd6562c3",
+      "src/hooks/useFavorites.js": "8ab483bb36c39a82c53d3b86f06932df28e7b0b67279a33d489bded6b8d9f2e4",
+      "src/hooks/useTagEditor.js": "1779628a8d9755d29a18f63e714a5b23dc1ba18c5b18c90d3a1459ec0510128d",
+      "src/api/media.ts": "c63e9606db06783225a634a278624ea3ba0a4fb9541624cffb105e1c0ff44e73"
+    },
+    "conditions": "Actual rebuilt production App, guarded IPC and preload in hidden Electron with synthetic video headers. UI clicks via executeJavaScript, no decode or physical device."
+  },
+  "frontendReuse": {
+    "from": "docs/evidence/r7-settings-replies.json",
+    "unchangedSourceDigests": {
+      "preload.js": "b4a725252f0b0a6ecd2afec36084678984a975b795c363ee2cd09f6fbdff22c6",
+      "src/electronAPI.d.ts": "e65d79c8fa1eb6aabebcba897a89add74074ce0c81953e64f34c41235b33fa20",
+      "src/api/media.ts": "c63e9606db06783225a634a278624ea3ba0a4fb9541624cffb105e1c0ff44e73",
+      "src/services/settings-client.js": "36c2fe66bd85f54bb4e89445fadf8f1c704a0bc271d79fe5f0b6eadd5f1ffdb1",
+      "src/hooks/useAppState.js": "26bd3629c0ebfeeed7a394ff90f0b4a1bdace96a1f110ee097cae405ed420a05",
+      "src/hooks/useAppController.js": "8708aac4dff9f3815db09d96f40e09f44f9bcffbd4ad26b136cfcd6cbd6562c3",
+      "src/hooks/useFavorites.js": "8ab483bb36c39a82c53d3b86f06932df28e7b0b67279a33d489bded6b8d9f2e4",
+      "src/hooks/useTagEditor.js": "1779628a8d9755d29a18f63e714a5b23dc1ba18c5b18c90d3a1459ec0510128d",
+      "packages/contracts/src/index.ts": "23ecb23d50d0b6cba74eed99238c20205c70d56a62ca5a7c0350db088a0e7af1",
+      "packages/contracts/src/settings-feed.ts": "8266d590aa5b9b2ac6bfa2a72fb4f9a269cd9e29de0de4cdf76832f7805342f6",
+      "packages/contracts/dist/index.js": "6fd89ec15d078d06f85781f98d2c8e9dd4815586539ec255cd40662f23c99ef3",
+      "packages/contracts/dist/index.d.ts": "70fe20ec736e996b75a46ee355b125669da5cee2ad0388f6b6f156d4a3017e4d",
+      "packages/contracts/dist/settings-feed.js": "d3de55971030b50e35ee4f8e70ebdd1c65a3353553f211aea31e6bf58e98424c",
+      "packages/contracts/dist/settings-feed.d.ts": "d111c15b37ea6f1d0967eeb799a423a4a09adbe3ebc0339f3977acb18363ee28"
+    },
+    "buildArtifacts": {
+      "dist/index.html": "a8ce3a4905de0541cf29d78fa875e705bb2cd0e3dac7c649f03cbc4767fde28c",
+      "dist/assets/index-BhcHHf6w.js": "4d7477025f4dae76812095e8b22790fa7329f4da2c3f70b4c32db9e55408a60e"
+    },
+    "conditions": "No renderer/mobile JS, preload or shared-contract edits in this batch. Prior built desktop artifacts have matching hashes; current production main modules were loaded by native App tests. No fresh mobile bundle export claimed."
+  },
+  "packagedVerification": {
+    "command": "npm run verify:packaged-contracts -- --in-process-gpu --no-sandbox",
+    "exitCode": 0,
+    "newModule": "main/repositories/user-media.js",
+    "scope": "Corrected 2026-10-19: this checkpoint staged the new user-media module but only executed the generic settings transaction and media path preparation in Electron/ASAR. It did not directly execute the user-media repository. The later R8 settings-recovery batch adds actual archived repository and recovery-helper calls.",
+    "scopeCorrection": {
+      "date": "2026-10-19",
+      "reason": "Prior wording overstated execution of the scoped media repository; observations and performance data unchanged.",
+      "followup": "docs/evidence/r8-settings-recovery.json"
+    }
+  },
+  "physicalDevices": {
+    "checked": "2026-10-19 local afternoon",
+    "command": "adb devices -l",
+    "connected": [],
+    "observation": "Default Android SDK adb started its daemon and returned an empty device list. No physical-phone decode/rotation/contention/PSS measurements were run."
+  },
+  "verification": [
+    {
+      "command": "npm run verify:media-fields",
+      "exitCode": 0,
+      "scope": "Targeted local acceptance only; desktop player intentional sender-denied cases are expected."
+    },
+    {
+      "command": "npm run verify:media-mutations",
+      "exitCode": 0,
+      "scope": "Targeted local acceptance only; desktop player intentional sender-denied cases are expected."
+    },
+    {
+      "command": "npm run verify:tag-conflicts",
+      "exitCode": 0,
+      "scope": "Targeted local acceptance only; desktop player intentional sender-denied cases are expected."
+    },
+    {
+      "command": "node scripts/verify-media-mutation-path-lifecycle.js",
+      "exitCode": 0,
+      "scope": "Targeted local acceptance only; desktop player intentional sender-denied cases are expected."
+    },
+    {
+      "command": "node scripts/verify-settings-json-lifecycle.js",
+      "exitCode": 0,
+      "scope": "Targeted local acceptance only; desktop player intentional sender-denied cases are expected."
+    },
+    {
+      "command": "node scripts/verify-settings-patch-lifecycle.js",
+      "exitCode": 0,
+      "scope": "Targeted local acceptance only; desktop player intentional sender-denied cases are expected."
+    },
+    {
+      "command": "npm run verify:settings-replies",
+      "exitCode": 0,
+      "scope": "Targeted local acceptance only; desktop player intentional sender-denied cases are expected."
+    },
+    {
+      "command": "npm run verify:settings-feed",
+      "exitCode": 0,
+      "scope": "Targeted local acceptance only; desktop player intentional sender-denied cases are expected."
+    },
+    {
+      "command": "npm run verify:settings-snapshots",
+      "exitCode": 0,
+      "scope": "Targeted local acceptance only; desktop player intentional sender-denied cases are expected."
+    },
+    {
+      "command": "npm run verify:mobile-correctness",
+      "exitCode": 0,
+      "scope": "Targeted local acceptance only; desktop player intentional sender-denied cases are expected."
+    },
+    {
+      "command": "npm run verify:remote-api",
+      "exitCode": 0,
+      "scope": "Targeted local acceptance only; desktop player intentional sender-denied cases are expected."
+    },
+    {
+      "command": "npm run verify:remote-library",
+      "exitCode": 0,
+      "scope": "Targeted local acceptance only; desktop player intentional sender-denied cases are expected."
+    },
+    {
+      "command": "npm run verify:contracts",
+      "exitCode": 0,
+      "scope": "Targeted local acceptance only; desktop player intentional sender-denied cases are expected."
+    },
+    {
+      "command": "npm run verify:electron-api",
+      "exitCode": 0,
+      "scope": "Targeted local acceptance only; desktop player intentional sender-denied cases are expected."
+    },
+    {
+      "command": "npm run verify:packaged-contracts -- --in-process-gpu --no-sandbox",
+      "exitCode": 0,
+      "scope": "Targeted local acceptance only; desktop player intentional sender-denied cases are expected."
+    },
+    {
+      "command": "npm run verify:shutdown-persistence",
+      "exitCode": 0,
+      "scope": "Targeted local acceptance only; desktop player intentional sender-denied cases are expected."
+    },
+    {
+      "command": "npm run verify:desktop-player",
+      "exitCode": 0,
+      "scope": "Targeted local acceptance only; desktop player intentional sender-denied cases are expected."
+    },
+    {
+      "command": "CI YAML/media-fields gate",
+      "exitCode": 0,
+      "scope": "Targeted local acceptance only; desktop player intentional sender-denied cases are expected."
+    },
+    {
+      "command": "git diff --check with CRLF handling",
+      "exitCode": 0,
+      "scope": "Targeted local acceptance only; desktop player intentional sender-denied cases are expected."
+    }
+  ],
+  "isolation": {
+    "file": ".tmp-wallpaper-player/settings.json",
+    "observedSha256": "6fb990f7edfe0707bb48b8bed65455cc2a521d33e028b45ce77f98b6a466a0d5",
+    "incident": {
+      "date": "2026-10-19T08:12:48.267Z",
+      "test": "scripts/verify-remote-library-flow.js",
+      "previousSettingsHash": "d50a7b59c1c5a3b8424e24202d4dc001c783d1a4cb70507f21add47ace61e59a",
+      "currentSettingsHash": "6fb990f7edfe0707bb48b8bed65455cc2a521d33e028b45ce77f98b6a466a0d5",
+      "cause": "Existing test imported network-resources before process.chdir(tempRoot), pinning Node fallback data to the project. Its later temporary cwd was ineffective.",
+      "observedNewWrites": [
+        {
+          "file": "remote-identity.json",
+          "bytes": 566,
+          "modified": "2026-10-19T08:04:50.288Z",
+          "sha256": "0abcd8df9c1443a348b050b5abe28ac419ecef717ddf31a0daa680f153061324"
+        },
+        {
+          "file": "scan-index/d6cd75e4bc356e88ed2b4c2272c32263e568d67a07b4017d73b22e09c23e8306.json",
+          "bytes": 2804,
+          "modified": "2026-10-19T08:04:47.852Z",
+          "sha256": "d3ccf77f170934b4987c22301d34abbb8b7646d45af03f575057804e4c892629"
+        },
+        {
+          "file": "settings.json",
+          "bytes": 22291,
+          "modified": "2026-10-19T08:04:50.283Z",
+          "sha256": "6fb990f7edfe0707bb48b8bed65455cc2a521d33e028b45ce77f98b6a466a0d5"
+        },
+        {
+          "file": "video-metadata-cache.json",
+          "bytes": 39687,
+          "modified": "2026-10-19T08:04:48.146Z",
+          "sha256": "616205b2e97a75ea8842d3b4f6f3de778fc545493659d45e5c0139c6d7087f47"
+        }
+      ],
+      "transcodeScope": "The same test created/force-cleared transcode cache through this fallback. Prior cache inventory was not captured; any preexisting removed files cannot be reconstructed from this observation.",
+      "priorContents": "No pre-test content backup captured for settings/identity/metadata/index. Do not speculate restoration.",
+      "scope": "Project Node fallback only; test did not target ordinary Electron app.getPath(userData). Current files retained.",
+      "observedFileCount": 42,
+      "postIncidentInventory": [
+        {
+          "file": "analysis-results/G086 Bronya分析结果2026-06-22_20-00-44.json",
+          "bytes": 3873,
+          "modified": "2026-06-22T12:00:44.678Z",
+          "sha256": "01db5f778601802471791e416b40c3ac8f96248e4542b78a867eaee77dd265e4"
+        },
+        {
+          "file": "downloads/aria2.session",
+          "bytes": 2428,
+          "modified": "2026-06-28T06:04:42.338Z",
+          "sha256": "bbe9d72e7e5001c01f3a012fa73e5d35b6d53b9e76e08190bba58973ce1ba9bc"
+        },
+        {
+          "file": "llama-server-err.log",
+          "bytes": 87774,
+          "modified": "2026-06-22T11:38:24.425Z",
+          "sha256": "5744b9bb378569a3a4f664b62aad9a4b0025cd7d419cba73b793fb62cb737f42"
+        },
+        {
+          "file": "llama-server-out.log",
+          "bytes": 0,
+          "modified": "2026-06-22T11:22:25.111Z",
+          "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        },
+        {
+          "file": "remote-identity.json",
+          "bytes": 566,
+          "modified": "2026-10-19T08:04:50.288Z",
+          "sha256": "0abcd8df9c1443a348b050b5abe28ac419ecef717ddf31a0daa680f153061324"
+        },
+        {
+          "file": "scan-index/029fa92465c3409cba74ce3db6b927dfec0d4f581b12122975041a32ab324e8a.json",
+          "bytes": 3642,
+          "modified": "2026-08-12T03:24:22.657Z",
+          "sha256": "33b1310886821b4f01322041a561c8a6b4ed10aa351772effb396e7b1b547cfd"
+        },
+        {
+          "file": "scan-index/06cf5926d93db3cc7b30882ee7dbecb69d51ce4e00de7901de3d48b866f9afc3.json",
+          "bytes": 2804,
+          "modified": "2026-10-18T14:24:18.704Z",
+          "sha256": "274848604327a2f96f0d152b9f23a7b4e5470fdd67c744e1c181e86c2d284059"
+        },
+        {
+          "file": "scan-index/0e65747e6e0fc76a1e0c86e951c35d6c7392c184ba6cb43724d7d58856ff212a.json",
+          "bytes": 3544,
+          "modified": "2026-08-12T03:35:55.221Z",
+          "sha256": "3ac45a0678e6ed4554fe1f315f923d999b0311096acd3c9394e3d85826d37db9"
+        },
+        {
+          "file": "scan-index/114890f3437dd45b34313ba38d9d3c36a09701d5d672bf8abd7af8c922db61af.json",
+          "bytes": 2804,
+          "modified": "2026-10-14T10:56:18.119Z",
+          "sha256": "3796d21463d2b2418c485565780e9628a50ab4f1a69d8faeadec1eb70a9af290"
+        },
+        {
+          "file": "scan-index/1465f8e823323fe9c4383abb5a38c9e17fc550dd44cd2f14fd7f7242bc309e12.json",
+          "bytes": 3644,
+          "modified": "2026-08-12T04:40:37.308Z",
+          "sha256": "1be5fefdb59d8af06de2a6be0eeb0025a96253d719de1e0daced6f1fe35cdde0"
+        },
+        {
+          "file": "scan-index/153bae098b5d3524553fcf4d8cbb1eacef2471314948819d043b26cebe199e14.json",
+          "bytes": 3542,
+          "modified": "2026-08-12T04:41:01.763Z",
+          "sha256": "689305d629290f70b40c5ea8454db685486f87be218b38da7aa4f0594a1d1cb8"
+        },
+        {
+          "file": "scan-index/165f4a9a9309a7ac323647e9acefd754a66c6295cab7db6bdb50830914bf0d68.json",
+          "bytes": 3648,
+          "modified": "2026-10-14T07:32:27.716Z",
+          "sha256": "5b0738883aee24ac7e17fc108a221e395380d2bae6a32f3ba3f70606e4b27ebe"
+        },
+        {
+          "file": "scan-index/1db67e5d68a60a19388b0338ed1ee18c2a2bcd0025ab168a1d69920c929bd647.json",
+          "bytes": 3648,
+          "modified": "2026-10-14T03:32:16.694Z",
+          "sha256": "b19f9d1c96db4b9106b2a28058ab1c33f4d3edc45fa693126cad0efe48cd44dd"
+        },
+        {
+          "file": "scan-index/3032598f9f4655037a67986db404cfbf60011a2ca84a1e6edcec794c7deab956.json",
+          "bytes": 2806,
+          "modified": "2026-10-15T10:00:12.968Z",
+          "sha256": "db1c59c38bb8ba2122afad18a73d956ec55d4580f4cad17f365b37b71d7e3db8"
+        },
+        {
+          "file": "scan-index/358da0698a4692a8052707f22ba2b9c94b5c4e73080d12c721e622b66a80614c.json",
+          "bytes": 2804,
+          "modified": "2026-10-14T10:54:07.638Z",
+          "sha256": "f1fb6fbd25b3d96027a86d6c797b162a74c95544c04f64470ed733ddbc8983ee"
+        },
+        {
+          "file": "scan-index/5eb5da5dcf86cb8c66f674df75935c030f8e12d86b6373ebcdaa3d7aba7eb672.json",
+          "bytes": 2804,
+          "modified": "2026-10-14T08:36:37.070Z",
+          "sha256": "489328dc3fa24223d6db18869658db5d01f915838ba97532de8193f8bedc6f93"
+        },
+        {
+          "file": "scan-index/5f59f687750abe3eb7d55cdb1aa86cb802bf22f3b00e3bb369f77a7ef2584d06.json",
+          "bytes": 3308,
+          "modified": "2026-08-12T03:34:01.717Z",
+          "sha256": "ae2763e5e5553a4eb759576c8f26efcffc9ef5aa741ddd6aad78b2e33716a719"
+        },
+        {
+          "file": "scan-index/602ae02092dd5e362dec6b88bd5afb39f14c218b3e0f0fbd52e5a8d09eddeb0d.json",
+          "bytes": 2804,
+          "modified": "2026-10-18T15:38:11.229Z",
+          "sha256": "cd75909f0b53f3d449d479531d62f3ff1bb3144eb918086cc7a25d05816c2a7d"
+        },
+        {
+          "file": "scan-index/664a4a47b45908fdfdf2d6bb5ec7024e41699d7dd2af4110f2889d4eac6dd2d7.json",
+          "bytes": 3644,
+          "modified": "2026-10-14T02:49:44.851Z",
+          "sha256": "64835ce867a827d40088ce1b9c8e4e19cb996d0df4c2e676cbb215cf38868556"
+        },
+        {
+          "file": "scan-index/6a4b7a95d1ae5d67f63cc87a4f3486c0a22c35af457355ae63f4303d7bdbcaa1.json",
+          "bytes": 3644,
+          "modified": "2026-10-14T08:22:54.750Z",
+          "sha256": "7ab98d842e31b5da1227cf6e00d98e3e32287c53b0965f3e8a964dbc9e982b20"
+        },
+        {
+          "file": "scan-index/6c2bfaa6b9f2b41ef00e065bab2a6d71c599e2ce76cc3f5939228ecc7b8be650.json",
+          "bytes": 2804,
+          "modified": "2026-10-15T10:22:55.063Z",
+          "sha256": "33dd4002ba26ea91ef1c97f264ef0337dd78b37d06f03a538f514ee0809c5107"
+        },
+        {
+          "file": "scan-index/703cb3b91afdc3a4a39fb95f9d0c0289fe6dcdab34f10425d71858a05164ce3b.json",
+          "bytes": 3648,
+          "modified": "2026-08-12T03:33:11.406Z",
+          "sha256": "217ca6aa5c2c3b721795e93c7cb5d819317fa55546fee842c81420f84c353fe8"
+        },
+        {
+          "file": "scan-index/85bd705cb26d94f80943f15877c1c71cc9f9a665c0bf24f8ab568b0b6bacf550.json",
+          "bytes": 2806,
+          "modified": "2026-10-15T10:51:51.275Z",
+          "sha256": "d4bb5033f4315903b0083789b87e09f4e06cb294a17313439f21987dd0b3a527"
+        },
+        {
+          "file": "scan-index/87720e2b63644af82253d5ec9ace977d27e42c03a6033c6811af6c6094928e09.json",
+          "bytes": 2802,
+          "modified": "2026-10-15T10:03:51.587Z",
+          "sha256": "2b01b9760b6e8f5605fd9bb0cbc74e6f248c0bec7428982ce0dbb848c1f6e589"
+        },
+        {
+          "file": "scan-index/959e88efa835995e2afff87fc4257966a41b7f45da19d44dc3369ba0d88599c9.json",
+          "bytes": 3542,
+          "modified": "2026-08-12T03:34:22.283Z",
+          "sha256": "bec93346f2dfbf0938b593658fd80e43a9be33b0bd4a0f7bcbf9a8997198ba9e"
+        },
+        {
+          "file": "scan-index/9d7bcef01cadb37f1a59d31b708084c192007deea8564d134dcc473b0605201c.json",
+          "bytes": 3646,
+          "modified": "2026-08-12T03:36:36.341Z",
+          "sha256": "04d6bfae12cdb3e73f828813477825cd39dc803c37893be82455ecebe7734312"
+        },
+        {
+          "file": "scan-index/a02253e6f623d27dfaa6674be31d9b43fc3d9b2c6bcda125418f1c3dd2a25709.json",
+          "bytes": 3646,
+          "modified": "2026-10-14T08:03:01.073Z",
+          "sha256": "90f629426a02dbbe9d60c7ad0c28090bd77a96693fcd1187b5215eda49184b86"
+        },
+        {
+          "file": "scan-index/a17738a5c4b4bc1ce4358ecff69b8e44a1e1a33a7511d9a11eddecd94b9e58cd.json",
+          "bytes": 3648,
+          "modified": "2026-10-14T04:07:54.143Z",
+          "sha256": "a1fd92c4c4c8b9bbfeb105da251cc5230f16f1f68edf7cf909a468da0c242d99"
+        },
+        {
+          "file": "scan-index/c53e2ac468d9387f39255a1ee9893eba1abe325ab086dea0025a18d1ef67e75f.json",
+          "bytes": 2804,
+          "modified": "2026-10-15T10:02:06.638Z",
+          "sha256": "2042c353b3e1c29eb236d1a1dfce79afdb85839f40f02f0b70d521eff607e6bb"
+        },
+        {
+          "file": "scan-index/cb702390842effe5e6e22e77acbda7b2bbea77ed51a5c07e66c3c5d8d0bc15bf.json",
+          "bytes": 3648,
+          "modified": "2026-08-12T03:19:01.890Z",
+          "sha256": "718b65c8b9b80caa3c5d34bc3244f750cd8243dc4b8743f637c3b12dbbbbda4a"
+        },
+        {
+          "file": "scan-index/cbf568b1144651ce061c2dc94a347128724334dd45ac2dd4ebf6890d74c66251.json",
+          "bytes": 2806,
+          "modified": "2026-10-14T09:15:14.699Z",
+          "sha256": "e22fd608a0197ea15fdbd8e3320b49d60e518bb4054b74ffb7504cd8e6035134"
+        },
+        {
+          "file": "scan-index/d6cd75e4bc356e88ed2b4c2272c32263e568d67a07b4017d73b22e09c23e8306.json",
+          "bytes": 2804,
+          "modified": "2026-10-19T08:04:47.852Z",
+          "sha256": "d3ccf77f170934b4987c22301d34abbb8b7646d45af03f575057804e4c892629"
+        },
+        {
+          "file": "scan-index/db34a207b303445fed1e9654c8e68883c93c5123070913181f89844225e4636a.json",
+          "bytes": 3648,
+          "modified": "2026-08-09T05:59:47.361Z",
+          "sha256": "81149ad6956bdb73b468e88036ef043043faecd14d34901ba5eaa49b775d3a72"
+        },
+        {
+          "file": "scan-index/de13066bd94cc789543a5fa9e6100f3297df42c5dd715cccf10b11383b6f1d68.json",
+          "bytes": 3648,
+          "modified": "2026-09-12T10:05:07.070Z",
+          "sha256": "d2ac7243b636179c0e35727cb899a4f608b7c044d759e6b6a52c8f501a3a6945"
+        },
+        {
+          "file": "scan-index/eba7ad116c30f43341d30f06e5f9efe510565b2a31a16c0eccab8fc4c303e6bc.json",
+          "bytes": 3646,
+          "modified": "2026-08-12T04:39:48.135Z",
+          "sha256": "636392edc5a9f41da4b70492833939eac890636623ab957400a7118bba472fc7"
+        },
+        {
+          "file": "scan-index/f16070f230607bf79853b98a8c462b8e7b854deeb16fe246ba6c9d783c9b2832.json",
+          "bytes": 3644,
+          "modified": "2026-08-09T06:03:03.740Z",
+          "sha256": "becff49c6c81b5dfd4688bbb272be352a8821ce42120b45282ea86c65f6378c2"
+        },
+        {
+          "file": "scan-index/f408135604349a60c1b7caa1d60757de692af100c4518e5588f38b619995f186.json",
+          "bytes": 3646,
+          "modified": "2026-10-14T08:00:43.515Z",
+          "sha256": "b894250b5d420a09b89350f33103a5d08edb5fc3d20f3cddf7604ed1fcb9df3a"
+        },
+        {
+          "file": "scan-index/f7b0c1004febecbe36453be10ef2ddc2523e5b92f4af5f318ce1049990e93053.json",
+          "bytes": 3646,
+          "modified": "2026-10-14T07:44:25.698Z",
+          "sha256": "77f2b4ded7202b828e8a6e281d549eecd1e79aea4030dfb2a7d918202ab090c5"
+        },
+        {
+          "file": "scan-index/f892c389d585d65dff3d06f6c86d3355dc90100c808a4f80da22b2f7e81865ba.json",
+          "bytes": 3644,
+          "modified": "2026-10-14T06:09:44.554Z",
+          "sha256": "b0f007ba8b4249849d726eee7a9fec6cf5926742e62d3cb833bd464423af520e"
+        },
+        {
+          "file": "scan-index/fc41c7e68e94b6f115983997d8498353a4f8f41b61fc91662dd84affe70fc9fb.json",
+          "bytes": 3646,
+          "modified": "2026-08-12T03:35:44.011Z",
+          "sha256": "fa79531cd58ae0323d29102813386358d2e599ecb63902231ed73e264196abdc"
+        },
+        {
+          "file": "settings.json",
+          "bytes": 22291,
+          "modified": "2026-10-19T08:04:50.283Z",
+          "sha256": "6fb990f7edfe0707bb48b8bed65455cc2a521d33e028b45ce77f98b6a466a0d5"
+        },
+        {
+          "file": "video-metadata-cache.json",
+          "bytes": 39687,
+          "modified": "2026-10-19T08:04:48.146Z",
+          "sha256": "616205b2e97a75ea8842d3b4f6f3de778fc545493659d45e5c0139c6d7087f47"
+        }
+      ]
+    },
+    "correctedRerun": {
+      "date": "2026-10-19T08:14:02.337Z",
+      "fixture": "C:\\Users\\s1897\\AppData\\Local\\Temp\\wallpaper-player-library-flow-S5p4cA",
+      "verifiedUserData": "C:\\Users\\s1897\\AppData\\Local\\Temp\\wallpaper-player-library-flow-S5p4cA\\.tmp-wallpaper-player",
+      "preservedFallbackFiles": [
+        [
+          "analysis-results\\G086 Bronya分析结果2026-06-22_20-00-44.json",
+          "01db5f778601802471791e416b40c3ac8f96248e4542b78a867eaee77dd265e4"
+        ],
+        [
+          "downloads\\aria2.session",
+          "bbe9d72e7e5001c01f3a012fa73e5d35b6d53b9e76e08190bba58973ce1ba9bc"
+        ],
+        [
+          "llama-server-err.log",
+          "5744b9bb378569a3a4f664b62aad9a4b0025cd7d419cba73b793fb62cb737f42"
+        ],
+        [
+          "llama-server-out.log",
+          "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        ],
+        [
+          "remote-identity.json",
+          "0abcd8df9c1443a348b050b5abe28ac419ecef717ddf31a0daa680f153061324"
+        ],
+        [
+          "scan-index\\029fa92465c3409cba74ce3db6b927dfec0d4f581b12122975041a32ab324e8a.json",
+          "33b1310886821b4f01322041a561c8a6b4ed10aa351772effb396e7b1b547cfd"
+        ],
+        [
+          "scan-index\\06cf5926d93db3cc7b30882ee7dbecb69d51ce4e00de7901de3d48b866f9afc3.json",
+          "274848604327a2f96f0d152b9f23a7b4e5470fdd67c744e1c181e86c2d284059"
+        ],
+        [
+          "scan-index\\0e65747e6e0fc76a1e0c86e951c35d6c7392c184ba6cb43724d7d58856ff212a.json",
+          "3ac45a0678e6ed4554fe1f315f923d999b0311096acd3c9394e3d85826d37db9"
+        ],
+        [
+          "scan-index\\114890f3437dd45b34313ba38d9d3c36a09701d5d672bf8abd7af8c922db61af.json",
+          "3796d21463d2b2418c485565780e9628a50ab4f1a69d8faeadec1eb70a9af290"
+        ],
+        [
+          "scan-index\\1465f8e823323fe9c4383abb5a38c9e17fc550dd44cd2f14fd7f7242bc309e12.json",
+          "1be5fefdb59d8af06de2a6be0eeb0025a96253d719de1e0daced6f1fe35cdde0"
+        ],
+        [
+          "scan-index\\153bae098b5d3524553fcf4d8cbb1eacef2471314948819d043b26cebe199e14.json",
+          "689305d629290f70b40c5ea8454db685486f87be218b38da7aa4f0594a1d1cb8"
+        ],
+        [
+          "scan-index\\165f4a9a9309a7ac323647e9acefd754a66c6295cab7db6bdb50830914bf0d68.json",
+          "5b0738883aee24ac7e17fc108a221e395380d2bae6a32f3ba3f70606e4b27ebe"
+        ],
+        [
+          "scan-index\\1db67e5d68a60a19388b0338ed1ee18c2a2bcd0025ab168a1d69920c929bd647.json",
+          "b19f9d1c96db4b9106b2a28058ab1c33f4d3edc45fa693126cad0efe48cd44dd"
+        ],
+        [
+          "scan-index\\3032598f9f4655037a67986db404cfbf60011a2ca84a1e6edcec794c7deab956.json",
+          "db1c59c38bb8ba2122afad18a73d956ec55d4580f4cad17f365b37b71d7e3db8"
+        ],
+        [
+          "scan-index\\358da0698a4692a8052707f22ba2b9c94b5c4e73080d12c721e622b66a80614c.json",
+          "f1fb6fbd25b3d96027a86d6c797b162a74c95544c04f64470ed733ddbc8983ee"
+        ],
+        [
+          "scan-index\\5eb5da5dcf86cb8c66f674df75935c030f8e12d86b6373ebcdaa3d7aba7eb672.json",
+          "489328dc3fa24223d6db18869658db5d01f915838ba97532de8193f8bedc6f93"
+        ],
+        [
+          "scan-index\\5f59f687750abe3eb7d55cdb1aa86cb802bf22f3b00e3bb369f77a7ef2584d06.json",
+          "ae2763e5e5553a4eb759576c8f26efcffc9ef5aa741ddd6aad78b2e33716a719"
+        ],
+        [
+          "scan-index\\602ae02092dd5e362dec6b88bd5afb39f14c218b3e0f0fbd52e5a8d09eddeb0d.json",
+          "cd75909f0b53f3d449d479531d62f3ff1bb3144eb918086cc7a25d05816c2a7d"
+        ],
+        [
+          "scan-index\\664a4a47b45908fdfdf2d6bb5ec7024e41699d7dd2af4110f2889d4eac6dd2d7.json",
+          "64835ce867a827d40088ce1b9c8e4e19cb996d0df4c2e676cbb215cf38868556"
+        ],
+        [
+          "scan-index\\6a4b7a95d1ae5d67f63cc87a4f3486c0a22c35af457355ae63f4303d7bdbcaa1.json",
+          "7ab98d842e31b5da1227cf6e00d98e3e32287c53b0965f3e8a964dbc9e982b20"
+        ],
+        [
+          "scan-index\\6c2bfaa6b9f2b41ef00e065bab2a6d71c599e2ce76cc3f5939228ecc7b8be650.json",
+          "33dd4002ba26ea91ef1c97f264ef0337dd78b37d06f03a538f514ee0809c5107"
+        ],
+        [
+          "scan-index\\703cb3b91afdc3a4a39fb95f9d0c0289fe6dcdab34f10425d71858a05164ce3b.json",
+          "217ca6aa5c2c3b721795e93c7cb5d819317fa55546fee842c81420f84c353fe8"
+        ],
+        [
+          "scan-index\\85bd705cb26d94f80943f15877c1c71cc9f9a665c0bf24f8ab568b0b6bacf550.json",
+          "d4bb5033f4315903b0083789b87e09f4e06cb294a17313439f21987dd0b3a527"
+        ],
+        [
+          "scan-index\\87720e2b63644af82253d5ec9ace977d27e42c03a6033c6811af6c6094928e09.json",
+          "2b01b9760b6e8f5605fd9bb0cbc74e6f248c0bec7428982ce0dbb848c1f6e589"
+        ],
+        [
+          "scan-index\\959e88efa835995e2afff87fc4257966a41b7f45da19d44dc3369ba0d88599c9.json",
+          "bec93346f2dfbf0938b593658fd80e43a9be33b0bd4a0f7bcbf9a8997198ba9e"
+        ],
+        [
+          "scan-index\\9d7bcef01cadb37f1a59d31b708084c192007deea8564d134dcc473b0605201c.json",
+          "04d6bfae12cdb3e73f828813477825cd39dc803c37893be82455ecebe7734312"
+        ],
+        [
+          "scan-index\\a02253e6f623d27dfaa6674be31d9b43fc3d9b2c6bcda125418f1c3dd2a25709.json",
+          "90f629426a02dbbe9d60c7ad0c28090bd77a96693fcd1187b5215eda49184b86"
+        ],
+        [
+          "scan-index\\a17738a5c4b4bc1ce4358ecff69b8e44a1e1a33a7511d9a11eddecd94b9e58cd.json",
+          "a1fd92c4c4c8b9bbfeb105da251cc5230f16f1f68edf7cf909a468da0c242d99"
+        ],
+        [
+          "scan-index\\c53e2ac468d9387f39255a1ee9893eba1abe325ab086dea0025a18d1ef67e75f.json",
+          "2042c353b3e1c29eb236d1a1dfce79afdb85839f40f02f0b70d521eff607e6bb"
+        ],
+        [
+          "scan-index\\cb702390842effe5e6e22e77acbda7b2bbea77ed51a5c07e66c3c5d8d0bc15bf.json",
+          "718b65c8b9b80caa3c5d34bc3244f750cd8243dc4b8743f637c3b12dbbbbda4a"
+        ],
+        [
+          "scan-index\\cbf568b1144651ce061c2dc94a347128724334dd45ac2dd4ebf6890d74c66251.json",
+          "e22fd608a0197ea15fdbd8e3320b49d60e518bb4054b74ffb7504cd8e6035134"
+        ],
+        [
+          "scan-index\\d6cd75e4bc356e88ed2b4c2272c32263e568d67a07b4017d73b22e09c23e8306.json",
+          "d3ccf77f170934b4987c22301d34abbb8b7646d45af03f575057804e4c892629"
+        ],
+        [
+          "scan-index\\db34a207b303445fed1e9654c8e68883c93c5123070913181f89844225e4636a.json",
+          "81149ad6956bdb73b468e88036ef043043faecd14d34901ba5eaa49b775d3a72"
+        ],
+        [
+          "scan-index\\de13066bd94cc789543a5fa9e6100f3297df42c5dd715cccf10b11383b6f1d68.json",
+          "d2ac7243b636179c0e35727cb899a4f608b7c044d759e6b6a52c8f501a3a6945"
+        ],
+        [
+          "scan-index\\eba7ad116c30f43341d30f06e5f9efe510565b2a31a16c0eccab8fc4c303e6bc.json",
+          "636392edc5a9f41da4b70492833939eac890636623ab957400a7118bba472fc7"
+        ],
+        [
+          "scan-index\\f16070f230607bf79853b98a8c462b8e7b854deeb16fe246ba6c9d783c9b2832.json",
+          "becff49c6c81b5dfd4688bbb272be352a8821ce42120b45282ea86c65f6378c2"
+        ],
+        [
+          "scan-index\\f408135604349a60c1b7caa1d60757de692af100c4518e5588f38b619995f186.json",
+          "b894250b5d420a09b89350f33103a5d08edb5fc3d20f3cddf7604ed1fcb9df3a"
+        ],
+        [
+          "scan-index\\f7b0c1004febecbe36453be10ef2ddc2523e5b92f4af5f318ce1049990e93053.json",
+          "77f2b4ded7202b828e8a6e281d549eecd1e79aea4030dfb2a7d918202ab090c5"
+        ],
+        [
+          "scan-index\\f892c389d585d65dff3d06f6c86d3355dc90100c808a4f80da22b2f7e81865ba.json",
+          "b0f007ba8b4249849d726eee7a9fec6cf5926742e62d3cb833bd464423af520e"
+        ],
+        [
+          "scan-index\\fc41c7e68e94b6f115983997d8498353a4f8f41b61fc91662dd84affe70fc9fb.json",
+          "fa79531cd58ae0323d29102813386358d2e599ecb63902231ed73e264196abdc"
+        ],
+        [
+          "settings.json",
+          "6fb990f7edfe0707bb48b8bed65455cc2a521d33e028b45ce77f98b6a466a0d5"
+        ],
+        [
+          "video-metadata-cache.json",
+          "616205b2e97a75ea8842d3b4f6f3de778fc545493659d45e5c0139c6d7087f47"
+        ]
+      ],
+      "conditions": "Fixture entered before any production import; user-data assertion before writes and full project fallback content hash inventory unchanged after the production HTTP library/transcode/pairing test."
+    },
+    "status": "Existing remote-library verifier imported a main dependency before changing cwd and modified project Node fallback settings/identity/metadata/index and used its transcode cache. Pre-write contents/cache inventory not captured. Current files retained, no speculative restoration/deletion. Fixed the test to enter/assert fixture before every production import and preserve a full fallback content inventory. New media-fields tests themselves assert fixture paths and hashes. Junction fixtures retained."
+  },
+  "limits": [
+    "Old path keys remain bounded but individually re-resolved; no cached assumption removes fresh alias/permission checks. Legacy workload remains about 0.49 seconds.",
+    "Tag callback fields still include whole tag/revision tables and writes still normalize/encode complete fields/file. Single-entity map transactions and indexing/migration remain future work.",
+    "Initial/recovery/legacy full settings returns and other IPC responses remain; complete configuration/progress repository responsibility separation is not claimed.",
+    "Selected-field callback API does not provide a new crash or cross-file transaction guarantee; original synchronous rebase/follow-up-write semantics retained.",
+    "R6 physical decode/contention/rotation/PSS; R7 remaining repository/feature/type/cold-stability work; R8 dependency/migration/recovery/signing/update/TLS remain open."
+  ]
+}

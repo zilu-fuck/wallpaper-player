@@ -1,0 +1,3413 @@
+{
+  "date": "2026-10-23T02:17:13.756Z",
+  "stage": "R8 SDK58 recommended patches and test-signed native upgrade-install",
+  "previousEvidence": "docs/evidence/r8-forge-backport.json",
+  "previousNative": "docs/evidence/r8-expo58.json",
+  "productionDeliveryAccepted": false,
+  "environment": {
+    "node": "v24.14.0",
+    "platform": "win32",
+    "arch": "x64"
+  },
+  "dependencies": {
+    "before": {
+      "@react-native-async-storage/async-storage": "2.2.0",
+      "expo": "58.0.14",
+      "expo-camera": "~58.0.10",
+      "expo-clipboard": "~58.0.3",
+      "expo-screen-orientation": "~58.0.3",
+      "expo-secure-store": "~58.0.2",
+      "expo-status-bar": "~58.0.3",
+      "expo-video": "~58.0.11",
+      "lucide-react-native": "^1.21.0",
+      "react": "19.3.0",
+      "react-native": "0.88.0",
+      "react-native-safe-area-context": "~5.10.1",
+      "react-native-svg": "15.16.0",
+      "expo-system-ui": "~58.0.6"
+    },
+    "after": {
+      "@react-native-async-storage/async-storage": "2.2.0",
+      "expo": "58.0.17",
+      "expo-camera": "~58.0.12",
+      "expo-clipboard": "~58.0.4",
+      "expo-screen-orientation": "~58.0.3",
+      "expo-secure-store": "~58.0.2",
+      "expo-status-bar": "~58.0.4",
+      "expo-video": "~58.0.12",
+      "lucide-react-native": "^1.21.0",
+      "react": "19.3.0",
+      "react-native": "0.88.0",
+      "react-native-safe-area-context": "~5.10.1",
+      "react-native-svg": "15.16.0",
+      "expo-system-ui": "~58.0.6"
+    },
+    "changedLockPaths": 41,
+    "changedVersionPaths": 41,
+    "lockChanges": [
+      {
+        "path": "node_modules/@expo/config",
+        "before": {
+          "version": "58.0.6",
+          "resolved": "https://registry.npmjs.org/@expo/config/-/config-58.0.6.tgz",
+          "integrity": "sha512-PT1qv4s/R5A/NxXb4efGlFsYF5Consi7F8xSsJBAN090EGDr6U1EDQGOijFqzDc3JA2epD8zjKLJLOVB9YOewg==",
+          "license": "MIT",
+          "dependencies": {
+            "@expo/config-plugins": "~58.0.9",
+            "@expo/config-types": "^58.0.3",
+            "@expo/json-file": "^11.2.1",
+            "@expo/platforms": "^58.0.1",
+            "@expo/require-utils": "^58.0.4",
+            "deepmerge": "^4.3.1",
+            "getenv": "^2.0.0",
+            "glob": "^13.0.0",
+            "resolve-workspace-root": "^2.0.0",
+            "semver": "^7.7.4",
+            "slugify": "^1.3.4"
+          }
+        },
+        "after": {
+          "version": "58.0.7",
+          "resolved": "https://registry.npmjs.org/@expo/config/-/config-58.0.7.tgz",
+          "integrity": "sha512-FzpIEDVLNHNeztnWxvg1Oh6WJQwd5nXBgZILrrE9rG7GPjWBf3KbFr4qpqLe/QUeyuzPhHyfIbxMMUjiRBBgCQ==",
+          "license": "MIT",
+          "dependencies": {
+            "@expo/config-plugins": "~58.0.10",
+            "@expo/config-types": "^58.0.3",
+            "@expo/json-file": "^11.2.1",
+            "@expo/platforms": "^58.0.1",
+            "@expo/require-utils": "^58.0.4",
+            "deepmerge": "^4.3.1",
+            "getenv": "^2.0.0",
+            "glob": "^13.0.0",
+            "resolve-workspace-root": "^2.0.0",
+            "semver": "^7.7.4",
+            "slugify": "^1.3.4"
+          }
+        }
+      },
+      {
+        "path": "node_modules/@expo/config-plugins",
+        "before": {
+          "version": "58.0.9",
+          "resolved": "https://registry.npmjs.org/@expo/config-plugins/-/config-plugins-58.0.9.tgz",
+          "integrity": "sha512-HyP7V1QgDxeHcOEh4qQH7cfK7cI7wNp0y9lszAu98SRYCshhDbwB9gWpFfnpX1GQUtgiqG4Hvgh1z3ntcGwAjw==",
+          "license": "MIT",
+          "dependencies": {
+            "@expo/config-types": "^58.0.3",
+            "@expo/json-file": "~11.2.1",
+            "@expo/plist": "^0.10.1",
+            "@expo/require-utils": "^58.0.4",
+            "@expo/sdk-runtime-versions": "^1.0.1",
+            "chalk": "^4.1.2",
+            "debug": "^4.3.5",
+            "getenv": "^2.0.0",
+            "glob": "^13.0.0",
+            "semver": "^7.7.4",
+            "slugify": "^1.6.6",
+            "xcode": "^3.0.1",
+            "xml2js": "0.6.0"
+          }
+        },
+        "after": {
+          "version": "58.0.10",
+          "resolved": "https://registry.npmjs.org/@expo/config-plugins/-/config-plugins-58.0.10.tgz",
+          "integrity": "sha512-oW0geRREubSsqV2d0EwkK0rRcAoB7a68CnJx7s8Al33HoTtEg7KLTQNcKlSTmmwoUESQQvAmzNqAZy4ajuCBKA==",
+          "license": "MIT",
+          "dependencies": {
+            "@expo/config-types": "^58.0.3",
+            "@expo/json-file": "~11.2.1",
+            "@expo/plist": "^0.10.1",
+            "@expo/require-utils": "^58.0.4",
+            "@expo/sdk-runtime-versions": "^1.0.1",
+            "chalk": "^4.1.2",
+            "debug": "^4.3.5",
+            "getenv": "^2.0.0",
+            "glob": "^13.0.0",
+            "semver": "^7.7.4",
+            "slugify": "^1.6.6",
+            "xcode": "^4.0.0",
+            "xml2js": "0.6.0"
+          }
+        }
+      },
+      {
+        "path": "node_modules/@expo/env",
+        "before": {
+          "version": "2.5.2",
+          "resolved": "https://registry.npmjs.org/@expo/env/-/env-2.5.2.tgz",
+          "integrity": "sha512-z8kCvBVJpd2S20a+Ab1otQgz8sJLeR7CXDTsuAMcNbYFsK10Fdhfb7rx9Ys1vvlbijnY55eZhQvJACajc1IjBQ==",
+          "license": "MIT",
+          "dependencies": {
+            "chalk": "^4.0.0",
+            "debug": "^4.3.4",
+            "getenv": "^2.0.0"
+          },
+          "engines": {
+            "node": ">=20.12.0"
+          }
+        },
+        "after": {
+          "version": "2.5.3",
+          "resolved": "https://registry.npmjs.org/@expo/env/-/env-2.5.3.tgz",
+          "integrity": "sha512-dBGu8BAfvUcXvG4HvYth+EhcHEsdC+/fT6HTH/zFvvwfp50LG6uzpzT8TXObwEq/t2B/rvAMV5OolxQ46LWXHg==",
+          "license": "MIT",
+          "dependencies": {
+            "chalk": "^4.0.0",
+            "debug": "^4.3.4",
+            "getenv": "^2.0.0"
+          },
+          "engines": {
+            "node": ">=20.12.0"
+          }
+        }
+      },
+      {
+        "path": "node_modules/@expo/fingerprint",
+        "before": {
+          "version": "0.21.5",
+          "resolved": "https://registry.npmjs.org/@expo/fingerprint/-/fingerprint-0.21.5.tgz",
+          "integrity": "sha512-4ngc+aPgMK56sYc47tfabmoaNdP7OvPBOH7QPgN3riSYM0Ev+KwsGRDius5jBBwjCI9ADp7IpjJEK9xlRYjjvA==",
+          "license": "MIT",
+          "dependencies": {
+            "@expo/env": "^2.5.2",
+            "@expo/spawn-async": "^1.8.0",
+            "arg": "^5.0.2",
+            "chalk": "^4.1.2",
+            "debug": "^4.3.4",
+            "getenv": "^2.0.0",
+            "glob": "^13.0.0",
+            "ignore": "^5.3.1",
+            "minimatch": "^10.2.2",
+            "resolve-from": "^5.0.0",
+            "semver": "^7.7.4"
+          },
+          "bin": {
+            "fingerprint": "bin/cli.js"
+          }
+        },
+        "after": {
+          "version": "0.21.6",
+          "resolved": "https://registry.npmjs.org/@expo/fingerprint/-/fingerprint-0.21.6.tgz",
+          "integrity": "sha512-EKh7ak+SYwXjvX/4P7BcyeLxip2z9KAsnN/55VP10g8H1Ua4Dm/BgLAhgBcbzbsYretYmNEynAcf9oKCK9pjxA==",
+          "license": "MIT",
+          "dependencies": {
+            "@expo/env": "^2.5.3",
+            "@expo/spawn-async": "^1.8.0",
+            "arg": "^5.0.2",
+            "chalk": "^4.1.2",
+            "debug": "^4.3.4",
+            "getenv": "^2.0.0",
+            "glob": "^13.0.0",
+            "ignore": "^5.3.1",
+            "minimatch": "^10.2.2",
+            "resolve-from": "^5.0.0",
+            "semver": "^7.7.4"
+          },
+          "bin": {
+            "fingerprint": "bin/cli.js"
+          }
+        }
+      },
+      {
+        "path": "node_modules/@expo/inline-modules",
+        "before": {
+          "version": "0.2.6",
+          "resolved": "https://registry.npmjs.org/@expo/inline-modules/-/inline-modules-0.2.6.tgz",
+          "integrity": "sha512-S8PK3wx6ogwunoQ7pqdPbklQGtXloeWTAOzWJ9yIL7xHFxvnI/Ryj0phA3KEGCMlaKZjaCP1h/3s7n/ueErRgQ==",
+          "license": "MIT",
+          "dependencies": {
+            "@expo/config-plugins": "~58.0.9"
+          }
+        },
+        "after": {
+          "version": "0.2.7",
+          "resolved": "https://registry.npmjs.org/@expo/inline-modules/-/inline-modules-0.2.7.tgz",
+          "integrity": "sha512-jjVtmz1LDhohT19U1fwMSL1kVUVZ9ewHdlEoDwSoZd3QELpyUR54nL677nHUbz0nNA5eh/zk38nByi03T06rLg==",
+          "license": "MIT",
+          "dependencies": {
+            "@expo/config-plugins": "~58.0.10"
+          }
+        }
+      },
+      {
+        "path": "node_modules/@expo/local-build-cache-provider",
+        "before": {
+          "version": "58.0.6",
+          "resolved": "https://registry.npmjs.org/@expo/local-build-cache-provider/-/local-build-cache-provider-58.0.6.tgz",
+          "integrity": "sha512-AJk3pslFNlwRMbUbfvxhu6CPA9U7A+JPb88VS/uWkG/S/QMJL90Iw4sPVfG4BOKfRUNkB8ipl432Dr4txjSMKw==",
+          "license": "MIT",
+          "dependencies": {
+            "@expo/config": "~58.0.6",
+            "chalk": "^4.1.2"
+          }
+        },
+        "after": {
+          "version": "58.0.7",
+          "resolved": "https://registry.npmjs.org/@expo/local-build-cache-provider/-/local-build-cache-provider-58.0.7.tgz",
+          "integrity": "sha512-RlpFBiduGKpcltNMDVMCEx+YfxsmMVORh5dOuJ1ntdq8igiJv1Qg9nIpRWqFuHL8iY70woRIqG8Ov/txJuHONA==",
+          "license": "MIT",
+          "dependencies": {
+            "@expo/config": "~58.0.7",
+            "chalk": "^4.1.2"
+          }
+        }
+      },
+      {
+        "path": "node_modules/@expo/modules-macros-win32-arm64",
+        "before": {
+          "version": "0.20.0",
+          "resolved": "https://registry.npmjs.org/@expo/modules-macros-win32-arm64/-/modules-macros-win32-arm64-0.20.0.tgz",
+          "integrity": "sha512-7B57gc7+TeygPcK8fLYlEhJbbvaPh+JBzex11YIYZrSzbFhz7Q+Z37fSdAfp4EsfCswJNcX0S6wpkgSlVNefVw==",
+          "cpu": [
+            "arm64"
+          ],
+          "license": "MIT",
+          "optional": true,
+          "os": [
+            "win32"
+          ]
+        },
+        "after": {
+          "version": "0.22.0",
+          "resolved": "https://registry.npmjs.org/@expo/modules-macros-win32-arm64/-/modules-macros-win32-arm64-0.22.0.tgz",
+          "integrity": "sha512-nLDXRGZWKNERzP4zH9LdfdZ3jvPBQcQE7LX5UnWW4cnDE/GoiVyUKdXQFK+KRnMD6We5gxqhIOU6SLj74h6fHA==",
+          "cpu": [
+            "arm64"
+          ],
+          "license": "MIT",
+          "optional": true,
+          "os": [
+            "win32"
+          ]
+        }
+      },
+      {
+        "path": "node_modules/@expo/modules-macros-win32-x64",
+        "before": {
+          "version": "0.20.0",
+          "resolved": "https://registry.npmjs.org/@expo/modules-macros-win32-x64/-/modules-macros-win32-x64-0.20.0.tgz",
+          "integrity": "sha512-BM5a2U2tCyHzmtiSEY70KPsts82Mfy1bHSZ7AUbg6z9LcnxuThxJlcH85/SV5eFbhrPfgDBAG/WAncyZCvKvyA==",
+          "cpu": [
+            "x64"
+          ],
+          "license": "MIT",
+          "optional": true,
+          "os": [
+            "win32"
+          ]
+        },
+        "after": {
+          "version": "0.22.0",
+          "resolved": "https://registry.npmjs.org/@expo/modules-macros-win32-x64/-/modules-macros-win32-x64-0.22.0.tgz",
+          "integrity": "sha512-IT5/YsBTj2gnfNlxDfv3sC51rBudiSHbPFBKoPBbpwmTCMcQg1rmWVdUoiy7LLC48NNzm86wyMxHpSI5lkW1Gg==",
+          "cpu": [
+            "x64"
+          ],
+          "license": "MIT",
+          "optional": true,
+          "os": [
+            "win32"
+          ]
+        }
+      },
+      {
+        "path": "node_modules/@expo/prebuild-config",
+        "before": {
+          "version": "58.0.14",
+          "resolved": "https://registry.npmjs.org/@expo/prebuild-config/-/prebuild-config-58.0.14.tgz",
+          "integrity": "sha512-2wVzVDfXjRB3LzUbW5shOM/A+6eUUCfR+2bpZiWRBBZBtZP2HA5Zq1YgCio1tDqMGAHf2NQQDhvy/Rz1U6aC3A==",
+          "license": "MIT",
+          "dependencies": {
+            "@expo/config": "~58.0.6",
+            "@expo/config-plugins": "~58.0.9",
+            "@expo/config-types": "^58.0.3",
+            "@expo/image-utils": "^0.12.5",
+            "@expo/json-file": "^11.2.1",
+            "@react-native/normalize-colors": "0.88.0",
+            "debug": "^4.3.1",
+            "expo-modules-autolinking": "~58.0.13",
+            "resolve-from": "^5.0.0",
+            "semver": "^7.7.4"
+          }
+        },
+        "after": {
+          "version": "58.0.15",
+          "resolved": "https://registry.npmjs.org/@expo/prebuild-config/-/prebuild-config-58.0.15.tgz",
+          "integrity": "sha512-1qvYdhCRO3iu2iPtTNhVTetk5U3Cmby/MMDQmunFQ94jyrbtpLyb9PvU6bvvRdzoaC7PZbHp3Xvlwtx+Webx9A==",
+          "license": "MIT",
+          "dependencies": {
+            "@expo/config": "~58.0.7",
+            "@expo/config-plugins": "~58.0.10",
+            "@expo/config-types": "^58.0.3",
+            "@expo/image-utils": "^0.12.5",
+            "@expo/json-file": "^11.2.1",
+            "@react-native/normalize-colors": "0.88.0",
+            "debug": "^4.3.1",
+            "expo-modules-autolinking": "~58.0.14",
+            "resolve-from": "^5.0.0",
+            "semver": "^7.7.4"
+          }
+        }
+      },
+      {
+        "path": "node_modules/@noxcturnal/noxcturnal-darwin-arm64",
+        "before": {
+          "version": "0.1.5",
+          "resolved": "https://registry.npmjs.org/@noxcturnal/noxcturnal-darwin-arm64/-/noxcturnal-darwin-arm64-0.1.5.tgz",
+          "integrity": "sha512-hQgDaWxKYln83Uk1Hh4Liju9AvGoYh4aLd4A1ou3lGn5hxzhW2uO+z3mERtWk6BMGVazvi/yUXtp9x3IlaWyhA==",
+          "cpu": [
+            "arm64"
+          ],
+          "license": "MIT",
+          "optional": true,
+          "os": [
+            "darwin"
+          ],
+          "engines": {
+            "node": ">=18"
+          }
+        },
+        "after": {
+          "version": "0.1.8",
+          "resolved": "https://registry.npmjs.org/@noxcturnal/noxcturnal-darwin-arm64/-/noxcturnal-darwin-arm64-0.1.8.tgz",
+          "integrity": "sha512-IaKvOx7pb7nr+OQ4rm6VKO4z4a7BfqBrvxcDYfvtOHRq9yVylrph0crkWJRgxskGlaBrLMrNiWYHvFqrd0hRSA==",
+          "cpu": [
+            "arm64"
+          ],
+          "license": "MIT",
+          "optional": true,
+          "os": [
+            "darwin"
+          ],
+          "engines": {
+            "node": ">=18"
+          }
+        }
+      },
+      {
+        "path": "node_modules/@noxcturnal/noxcturnal-darwin-x64",
+        "before": {
+          "version": "0.1.5",
+          "resolved": "https://registry.npmjs.org/@noxcturnal/noxcturnal-darwin-x64/-/noxcturnal-darwin-x64-0.1.5.tgz",
+          "integrity": "sha512-I57zR8QF7Xam+4nGD5UoIODsw0VjkVyn51iDBL3CMaDR5Lh1OxXwKZMYKtv3CtQl+RSDsMfmXBEqGYLE8lIPHg==",
+          "cpu": [
+            "x64"
+          ],
+          "license": "MIT",
+          "optional": true,
+          "os": [
+            "darwin"
+          ],
+          "engines": {
+            "node": ">=18"
+          }
+        },
+        "after": {
+          "version": "0.1.8",
+          "resolved": "https://registry.npmjs.org/@noxcturnal/noxcturnal-darwin-x64/-/noxcturnal-darwin-x64-0.1.8.tgz",
+          "integrity": "sha512-Fb6Ak5vvDvrroakL+wqN+YWB4QdrPSkqaZEE2vM2xEacFozsCckzx3cDzSeA1uFOK52LPEzY5n9ylkGDjw5WcQ==",
+          "cpu": [
+            "x64"
+          ],
+          "license": "MIT",
+          "optional": true,
+          "os": [
+            "darwin"
+          ],
+          "engines": {
+            "node": ">=18"
+          }
+        }
+      },
+      {
+        "path": "node_modules/@noxcturnal/noxcturnal-linux-arm64-gnu",
+        "before": {
+          "version": "0.1.5",
+          "resolved": "https://registry.npmjs.org/@noxcturnal/noxcturnal-linux-arm64-gnu/-/noxcturnal-linux-arm64-gnu-0.1.5.tgz",
+          "integrity": "sha512-gVH4XJPh8RdrdjjlU0dKeielQt/FXfvqhr8IEWEf3VeNtQs8l2rPzFPdqS0uwLWQYHLBGgB0LkuOil1KKYx1gQ==",
+          "cpu": [
+            "arm64"
+          ],
+          "license": "MIT",
+          "optional": true,
+          "os": [
+            "linux"
+          ],
+          "engines": {
+            "node": ">=18"
+          }
+        },
+        "after": {
+          "version": "0.1.8",
+          "resolved": "https://registry.npmjs.org/@noxcturnal/noxcturnal-linux-arm64-gnu/-/noxcturnal-linux-arm64-gnu-0.1.8.tgz",
+          "integrity": "sha512-P0zDdjt1Y3bhi790BJBLV84CRTFedHouV11VQMu8kiCgc+Y+fxVnmob2D6DBvyk8INdTnfxz4cXUMA7DgG9Qxg==",
+          "cpu": [
+            "arm64"
+          ],
+          "license": "MIT",
+          "optional": true,
+          "os": [
+            "linux"
+          ],
+          "engines": {
+            "node": ">=18"
+          }
+        }
+      },
+      {
+        "path": "node_modules/@noxcturnal/noxcturnal-linux-arm64-musl",
+        "before": {
+          "version": "0.1.5",
+          "resolved": "https://registry.npmjs.org/@noxcturnal/noxcturnal-linux-arm64-musl/-/noxcturnal-linux-arm64-musl-0.1.5.tgz",
+          "integrity": "sha512-rzQ075fcHZ+ebsELussRjnW8WBMy1RuLdS8wSqBGhdVlPR7/NaSyoWkNxnVDT8sEO26xjqGoW/o/08ghBzr/zA==",
+          "cpu": [
+            "arm64"
+          ],
+          "license": "MIT",
+          "optional": true,
+          "os": [
+            "linux"
+          ],
+          "engines": {
+            "node": ">=18"
+          }
+        },
+        "after": {
+          "version": "0.1.8",
+          "resolved": "https://registry.npmjs.org/@noxcturnal/noxcturnal-linux-arm64-musl/-/noxcturnal-linux-arm64-musl-0.1.8.tgz",
+          "integrity": "sha512-Pd6DMObIX0Brh4Sj/kon9F0766Fw7DKjVLrjptITcmeE44jKJAWNihPC3dTbgkgb/9Q2inp0VGLFRW19+073bQ==",
+          "cpu": [
+            "arm64"
+          ],
+          "license": "MIT",
+          "optional": true,
+          "os": [
+            "linux"
+          ],
+          "engines": {
+            "node": ">=18"
+          }
+        }
+      },
+      {
+        "path": "node_modules/@noxcturnal/noxcturnal-linux-x64-gnu",
+        "before": {
+          "version": "0.1.5",
+          "resolved": "https://registry.npmjs.org/@noxcturnal/noxcturnal-linux-x64-gnu/-/noxcturnal-linux-x64-gnu-0.1.5.tgz",
+          "integrity": "sha512-X5O0lXMrv8HGOGoXDB1PG0Hjt7Rl+MJA+seR2NecQvUAAw2gzDvF/unCV5sqTAVeHfXhBHEFGkLenHZSD44efg==",
+          "cpu": [
+            "x64"
+          ],
+          "license": "MIT",
+          "optional": true,
+          "os": [
+            "linux"
+          ],
+          "engines": {
+            "node": ">=18"
+          }
+        },
+        "after": {
+          "version": "0.1.8",
+          "resolved": "https://registry.npmjs.org/@noxcturnal/noxcturnal-linux-x64-gnu/-/noxcturnal-linux-x64-gnu-0.1.8.tgz",
+          "integrity": "sha512-gPAYMhvQmN1BOK5fPII9f3TGtUaR71fCFsKNFoYsiTMs8MidFkkkSvSpawDNubgFMBqYaO38mKtKAW1AuXCnMw==",
+          "cpu": [
+            "x64"
+          ],
+          "license": "MIT",
+          "optional": true,
+          "os": [
+            "linux"
+          ],
+          "engines": {
+            "node": ">=18"
+          }
+        }
+      },
+      {
+        "path": "node_modules/@noxcturnal/noxcturnal-linux-x64-musl",
+        "before": {
+          "version": "0.1.5",
+          "resolved": "https://registry.npmjs.org/@noxcturnal/noxcturnal-linux-x64-musl/-/noxcturnal-linux-x64-musl-0.1.5.tgz",
+          "integrity": "sha512-fkQIQHRxqldNXVmjxfeCvGOiLhLU9SLBw1As02pMA2xjyiZfiXcUn4SUrZ92ciGnyCS8/XMbx+nZSxgEc3qDPw==",
+          "cpu": [
+            "x64"
+          ],
+          "license": "MIT",
+          "optional": true,
+          "os": [
+            "linux"
+          ],
+          "engines": {
+            "node": ">=18"
+          }
+        },
+        "after": {
+          "version": "0.1.8",
+          "resolved": "https://registry.npmjs.org/@noxcturnal/noxcturnal-linux-x64-musl/-/noxcturnal-linux-x64-musl-0.1.8.tgz",
+          "integrity": "sha512-dhQuKKN75YTCgjjh/txGBP6Lc2L9/HMqyeBEMLWkyFlq1u2OC0j8HeGQtzKjP5cnLiibrn0JgcuLJqDSklxuMg==",
+          "cpu": [
+            "x64"
+          ],
+          "license": "MIT",
+          "optional": true,
+          "os": [
+            "linux"
+          ],
+          "engines": {
+            "node": ">=18"
+          }
+        }
+      },
+      {
+        "path": "node_modules/@noxcturnal/noxcturnal-win32-arm64-msvc",
+        "before": {
+          "version": "0.1.5",
+          "resolved": "https://registry.npmjs.org/@noxcturnal/noxcturnal-win32-arm64-msvc/-/noxcturnal-win32-arm64-msvc-0.1.5.tgz",
+          "integrity": "sha512-baeH5m/vM1nf0J2UkW8cfgiVogpM0gRO9b4PZWknXQPbv5+k+0N5sGOYl/UAO2q72qYb3Xbiu7eD8c4A2kR2SA==",
+          "cpu": [
+            "arm64"
+          ],
+          "license": "MIT",
+          "optional": true,
+          "os": [
+            "win32"
+          ],
+          "engines": {
+            "node": ">=18"
+          }
+        },
+        "after": {
+          "version": "0.1.8",
+          "resolved": "https://registry.npmjs.org/@noxcturnal/noxcturnal-win32-arm64-msvc/-/noxcturnal-win32-arm64-msvc-0.1.8.tgz",
+          "integrity": "sha512-ltg2UV1I/hdux6rPSF0RTlh2V2F7NXuqp3AdbwAGexEqxbXFdy2tw2hwmsUrCbIgwrXsjlijpgsOl5JEXRc84w==",
+          "cpu": [
+            "arm64"
+          ],
+          "license": "MIT",
+          "optional": true,
+          "os": [
+            "win32"
+          ],
+          "engines": {
+            "node": ">=18"
+          }
+        }
+      },
+      {
+        "path": "node_modules/@noxcturnal/noxcturnal-win32-x64-msvc",
+        "before": {
+          "version": "0.1.5",
+          "resolved": "https://registry.npmjs.org/@noxcturnal/noxcturnal-win32-x64-msvc/-/noxcturnal-win32-x64-msvc-0.1.5.tgz",
+          "integrity": "sha512-2faDMzom8pCG/s/uR4Czh1atz4KohI85AaSmA2vtAuVnCq+nLL4Viys3A5vUlNz9MNBmTNFxzXyF2Z5HtfxXLg==",
+          "cpu": [
+            "x64"
+          ],
+          "license": "MIT",
+          "optional": true,
+          "os": [
+            "win32"
+          ],
+          "engines": {
+            "node": ">=18"
+          }
+        },
+        "after": {
+          "version": "0.1.8",
+          "resolved": "https://registry.npmjs.org/@noxcturnal/noxcturnal-win32-x64-msvc/-/noxcturnal-win32-x64-msvc-0.1.8.tgz",
+          "integrity": "sha512-A39bKv270jJnC5NN6mAy46E2d3LPywjrbmNJhgckPQNldV9acTYUKZcySCYeLgP/2yAVUh3UFSjo84pFX2npVw==",
+          "cpu": [
+            "x64"
+          ],
+          "license": "MIT",
+          "optional": true,
+          "os": [
+            "win32"
+          ],
+          "engines": {
+            "node": ">=18"
+          }
+        }
+      },
+      {
+        "path": "node_modules/expo",
+        "before": {
+          "version": "58.0.14",
+          "resolved": "https://registry.npmjs.org/expo/-/expo-58.0.14.tgz",
+          "integrity": "sha512-M05O++KRgG4NA6kQ9AP60kbN8xqHJ6S8uTXdtkeiwcGVIYzdu2kaUXJyraVturvePO/Mf4PWa0C9+JggrHITwA==",
+          "license": "MIT",
+          "dependencies": {
+            "@babel/runtime": "^7.20.0",
+            "@expo/cli": "^58.1.11",
+            "@expo/config": "~58.0.6",
+            "@expo/config-plugins": "~58.0.9",
+            "@expo/devtools": "~58.0.2",
+            "@expo/dom-webview": "~58.0.2",
+            "@expo/fingerprint": "^0.21.5",
+            "@expo/local-build-cache-provider": "^58.0.6",
+            "@expo/log-box": "^58.0.12",
+            "@expo/log-box-utils": "^58.0.2",
+            "@expo/metro": "~58.0.0",
+            "@expo/metro-config": "~58.0.14",
+            "@ungap/structured-clone": "^1.3.0",
+            "babel-preset-expo": "~58.0.17",
+            "expo-asset": "~58.0.16",
+            "expo-constants": "~58.0.12",
+            "expo-file-system": "~58.0.9",
+            "expo-font": "~58.0.8",
+            "expo-keep-awake": "~58.0.3",
+            "expo-modules-autolinking": "~58.0.13",
+            "expo-modules-core": "~58.0.22",
+            "pretty-format": "^29.7.0",
+            "react-refresh": "^0.14.2",
+            "whatwg-url-minimum": "^0.2.0"
+          },
+          "bin": {
+            "expo": "bin/cli",
+            "expo-modules-autolinking": "bin/autolinking",
+            "fingerprint": "bin/fingerprint"
+          },
+          "engines": {
+            "node": "^22.13.0 || ^24.3.0 || ^26.0.0 || >=27.0.0"
+          },
+          "peerDependencies": {
+            "@expo/dom-webview": "*",
+            "@expo/metro-runtime": "*",
+            "react": "*",
+            "react-dom": "*",
+            "react-native": "*",
+            "react-native-web": "*",
+            "react-native-webview": "*"
+          },
+          "peerDependenciesMeta": {
+            "@expo/dom-webview": {
+              "optional": true
+            },
+            "@expo/metro-runtime": {
+              "optional": true
+            },
+            "react-dom": {
+              "optional": true
+            },
+            "react-native-web": {
+              "optional": true
+            },
+            "react-native-webview": {
+              "optional": true
+            }
+          }
+        },
+        "after": {
+          "version": "58.0.17",
+          "resolved": "https://registry.npmjs.org/expo/-/expo-58.0.17.tgz",
+          "integrity": "sha512-IFH8ExamRC2m7La8q/RiBaZ3dcHga2fuMPQzRXsagS7w2sLDwwExEpZWT9Mr+30A13xEuXAHxZD3zmtgetzvHw==",
+          "license": "MIT",
+          "dependencies": {
+            "@babel/runtime": "^7.20.0",
+            "@expo/cli": "^58.1.14",
+            "@expo/config": "~58.0.7",
+            "@expo/config-plugins": "~58.0.10",
+            "@expo/devtools": "~58.0.2",
+            "@expo/dom-webview": "~58.0.2",
+            "@expo/fingerprint": "^0.21.6",
+            "@expo/local-build-cache-provider": "^58.0.7",
+            "@expo/log-box": "^58.0.13",
+            "@expo/log-box-utils": "^58.0.2",
+            "@expo/metro": "~58.0.0",
+            "@expo/metro-config": "~58.0.16",
+            "@ungap/structured-clone": "^1.3.0",
+            "babel-preset-expo": "~58.0.19",
+            "expo-asset": "~58.0.18",
+            "expo-constants": "~58.0.13",
+            "expo-file-system": "~58.0.10",
+            "expo-font": "~58.0.9",
+            "expo-keep-awake": "~58.0.3",
+            "expo-modules-autolinking": "~58.0.14",
+            "expo-modules-cli": "~0.3.1",
+            "expo-modules-core": "~58.0.24",
+            "pretty-format": "^29.7.0",
+            "react-refresh": "^0.14.2",
+            "whatwg-url-minimum": "^0.2.0"
+          },
+          "bin": {
+            "expo": "bin/cli",
+            "expo-modules": "bin/modules",
+            "expo-modules-autolinking": "bin/autolinking",
+            "fingerprint": "bin/fingerprint"
+          },
+          "engines": {
+            "node": "^22.13.0 || ^24.3.0 || ^26.0.0 || >=27.0.0"
+          },
+          "peerDependencies": {
+            "@expo/dom-webview": "*",
+            "@expo/metro-runtime": "*",
+            "react": "*",
+            "react-dom": "*",
+            "react-native": "*",
+            "react-native-web": "*",
+            "react-native-webview": "*"
+          },
+          "peerDependenciesMeta": {
+            "@expo/dom-webview": {
+              "optional": true
+            },
+            "@expo/metro-runtime": {
+              "optional": true
+            },
+            "react-dom": {
+              "optional": true
+            },
+            "react-native-web": {
+              "optional": true
+            },
+            "react-native-webview": {
+              "optional": true
+            }
+          }
+        }
+      },
+      {
+        "path": "node_modules/expo-camera",
+        "before": {
+          "version": "58.0.10",
+          "resolved": "https://registry.npmjs.org/expo-camera/-/expo-camera-58.0.10.tgz",
+          "integrity": "sha512-QXs93Kd2oZO2VuiCUPPHZgzUIPazdURx9Mse+i03U+74K5Vy7FT1F4ONp21w91aTIp1NbWtmJAcJNjSnTE+5bQ==",
+          "license": "MIT",
+          "dependencies": {
+            "barcode-detector": "^3.0.0"
+          },
+          "peerDependencies": {
+            "expo": "*",
+            "react": "*",
+            "react-native": "*",
+            "react-native-web": "*"
+          },
+          "peerDependenciesMeta": {
+            "react-native-web": {
+              "optional": true
+            }
+          }
+        },
+        "after": {
+          "version": "58.0.12",
+          "resolved": "https://registry.npmjs.org/expo-camera/-/expo-camera-58.0.12.tgz",
+          "integrity": "sha512-2tqW97u6T9CUBDYc3VSrKj0BBXDYKyBOSjqOSiqidVkJMm/iKy4hngitTu7EMi2EqELqh90bGUkOeqhpYfBsdg==",
+          "license": "MIT",
+          "dependencies": {
+            "barcode-detector": "^3.0.0"
+          },
+          "peerDependencies": {
+            "expo": "*",
+            "react": "*",
+            "react-native": "*",
+            "react-native-web": "*"
+          },
+          "peerDependenciesMeta": {
+            "react-native-web": {
+              "optional": true
+            }
+          }
+        }
+      },
+      {
+        "path": "node_modules/expo-clipboard",
+        "before": {
+          "version": "58.0.3",
+          "resolved": "https://registry.npmjs.org/expo-clipboard/-/expo-clipboard-58.0.3.tgz",
+          "integrity": "sha512-OglmYYTXecF9dti5sOYJS9lXAJpk6VDNqFvOLTm9fRdUjQj2D6UQV7q00jNZbRpf0ztMxlQSassUnzngn9wmvQ==",
+          "license": "MIT",
+          "peerDependencies": {
+            "expo": "*",
+            "react": "*",
+            "react-native": "*"
+          }
+        },
+        "after": {
+          "version": "58.0.4",
+          "resolved": "https://registry.npmjs.org/expo-clipboard/-/expo-clipboard-58.0.4.tgz",
+          "integrity": "sha512-b2eEJMwdWXLTrmrkg/otsmL2OV6s9D90tytSNBsY87UswrWf6JwxcB2OaWegyUWD9XnvtBVNeVK7lej0zZh+5A==",
+          "license": "MIT",
+          "peerDependencies": {
+            "expo": "*",
+            "react": "*",
+            "react-native": "*"
+          }
+        }
+      },
+      {
+        "path": "node_modules/expo-modules-autolinking",
+        "before": {
+          "version": "58.0.13",
+          "resolved": "https://registry.npmjs.org/expo-modules-autolinking/-/expo-modules-autolinking-58.0.13.tgz",
+          "integrity": "sha512-uzLFoTnAKabUdITvzRqWTvFkZsOdRPEXj7AEMAuBEhA2kGhqaBDa2EOWqPXVay0QJVoZuIQaEEgPGAXN1dPuYg==",
+          "license": "MIT",
+          "dependencies": {
+            "@expo/platforms": "^58.0.1",
+            "@expo/require-utils": "^58.0.4",
+            "@expo/spawn-async": "^1.8.0",
+            "chalk": "^4.1.0",
+            "commander": "^7.2.0"
+          },
+          "bin": {
+            "expo-modules-autolinking": "bin/expo-modules-autolinking.js"
+          }
+        },
+        "after": {
+          "version": "58.0.14",
+          "resolved": "https://registry.npmjs.org/expo-modules-autolinking/-/expo-modules-autolinking-58.0.14.tgz",
+          "integrity": "sha512-KlSVwfggAUM7Y+c4msfLr9r73nkrnkKi7iJ3D9fz7ayaqhAiHR7vd7I2hHj+R6hSTyLyJQuCttmjEfs1N2Mp2w==",
+          "license": "MIT",
+          "dependencies": {
+            "@expo/platforms": "^58.0.1",
+            "@expo/require-utils": "^58.0.4",
+            "@expo/spawn-async": "^1.8.0",
+            "chalk": "^4.1.0",
+            "commander": "^7.2.0"
+          },
+          "bin": {
+            "expo-modules-autolinking": "bin/expo-modules-autolinking.js"
+          }
+        }
+      },
+      {
+        "path": "node_modules/expo-modules-core",
+        "before": {
+          "version": "58.0.22",
+          "resolved": "https://registry.npmjs.org/expo-modules-core/-/expo-modules-core-58.0.22.tgz",
+          "integrity": "sha512-T3YJYziFkF4JlGDpX4zCl91oIxz1Skq5sp1LFVO+GL/BARSIXk013QWGdRZrvt+wMxoVaql5dpOdPdP5q2+0jQ==",
+          "license": "MIT",
+          "dependencies": {
+            "expo-modules-jsi": "~58.0.15",
+            "expo-modules-macros": "0.20.0",
+            "invariant": "^2.2.4"
+          },
+          "peerDependencies": {
+            "react": "*",
+            "react-native": "*",
+            "react-native-worklets": ">=0.13.0"
+          },
+          "peerDependenciesMeta": {
+            "react-native-worklets": {
+              "optional": true
+            }
+          }
+        },
+        "after": {
+          "version": "58.0.24",
+          "resolved": "https://registry.npmjs.org/expo-modules-core/-/expo-modules-core-58.0.24.tgz",
+          "integrity": "sha512-RrE6FEWHJWpyazngFj2ZtpGrgf0sDWsl0Pa6TxHP9VD+Ns0Fju6E831d9nDary0PnGlGLHY31nJqfurOd2uEbg==",
+          "license": "MIT",
+          "dependencies": {
+            "expo-modules-jsi": "~58.0.17",
+            "expo-modules-macros": "0.22.0",
+            "invariant": "^2.2.4"
+          },
+          "peerDependencies": {
+            "react": "*",
+            "react-native": "*",
+            "react-native-worklets": ">=0.13.0"
+          },
+          "peerDependenciesMeta": {
+            "react-native-worklets": {
+              "optional": true
+            }
+          }
+        }
+      },
+      {
+        "path": "node_modules/expo-modules-jsi",
+        "before": {
+          "version": "58.0.15",
+          "resolved": "https://registry.npmjs.org/expo-modules-jsi/-/expo-modules-jsi-58.0.15.tgz",
+          "integrity": "sha512-PsjYgL4KWtvBqWH242r0wbP99VjgHkHCpkPCekO7nzb+ulkDNyrNnhysxa0TcNpfRTNLetmCUaLs9t4CcoquZQ==",
+          "license": "MIT",
+          "peerDependencies": {
+            "react-native": "*"
+          }
+        },
+        "after": {
+          "version": "58.0.17",
+          "resolved": "https://registry.npmjs.org/expo-modules-jsi/-/expo-modules-jsi-58.0.17.tgz",
+          "integrity": "sha512-pGIj40nf3roqUvCkRbeEJ40ROouyOAdlP3tLWRTci6julMd+FlmCL8UIb6p7TQMODxb8fV2O5VM+QdUd+MPI9A==",
+          "license": "MIT",
+          "peerDependencies": {
+            "react-native": "*"
+          }
+        }
+      },
+      {
+        "path": "node_modules/expo-modules-macros",
+        "before": {
+          "version": "0.20.0",
+          "resolved": "https://registry.npmjs.org/expo-modules-macros/-/expo-modules-macros-0.20.0.tgz",
+          "integrity": "sha512-Ekgb5c9LQPM9CPnmDZdeWcOa1eBbCDUGrgdN5lIFNH2GWDUf9doeAOK7IqQOOVviamy37eIp5FW+N1zyrIwzoA==",
+          "license": "MIT",
+          "optionalDependencies": {
+            "@expo/modules-macros-win32-arm64": "0.20.0",
+            "@expo/modules-macros-win32-x64": "0.20.0"
+          }
+        },
+        "after": {
+          "version": "0.22.0",
+          "resolved": "https://registry.npmjs.org/expo-modules-macros/-/expo-modules-macros-0.22.0.tgz",
+          "integrity": "sha512-IHY+FkILfG19qsyf9G/z7dcWVgsyqdkWsvvob3n5nWKa2meCCAGeEjp42N68fG8Ta6dn/bsceuma7uh2i6ho9g==",
+          "license": "MIT",
+          "optionalDependencies": {
+            "@expo/modules-macros-linux-arm64": "0.22.0",
+            "@expo/modules-macros-linux-x64": "0.22.0",
+            "@expo/modules-macros-win32-arm64": "0.22.0",
+            "@expo/modules-macros-win32-x64": "0.22.0"
+          }
+        }
+      },
+      {
+        "path": "node_modules/expo-status-bar",
+        "before": {
+          "version": "58.0.3",
+          "resolved": "https://registry.npmjs.org/expo-status-bar/-/expo-status-bar-58.0.3.tgz",
+          "integrity": "sha512-+GMLHLA81LB+/m2DteQAN7kvH8unVj3zYGSj8D6Csf+mCrc4P6jJwaSbrz17qTizzEIJ5lv6SuU9Zfyy2vSNoQ==",
+          "license": "MIT",
+          "peerDependencies": {
+            "expo": "*",
+            "react": "*",
+            "react-native": "*"
+          }
+        },
+        "after": {
+          "version": "58.0.4",
+          "resolved": "https://registry.npmjs.org/expo-status-bar/-/expo-status-bar-58.0.4.tgz",
+          "integrity": "sha512-e6JJHziSSNb1v1VSzmDrAPf6GFoPRdVOIDrTCcK3bHfbJEAZGZ3YZXfqlorZtUFDT0z6NcjaZf0mPWifJZcqew==",
+          "license": "MIT",
+          "peerDependencies": {
+            "expo": "*",
+            "react": "*",
+            "react-native": "*"
+          }
+        }
+      },
+      {
+        "path": "node_modules/expo-video",
+        "before": {
+          "version": "58.0.11",
+          "resolved": "https://registry.npmjs.org/expo-video/-/expo-video-58.0.11.tgz",
+          "integrity": "sha512-fCQE63LFMFbI9K+o/DNDtVM8MfmYp1PzfUUXMcajILPLuEw+j1C7Wp03vvZnIwwOUSubXJZmxDYSXBIHBnJmag==",
+          "license": "MIT",
+          "peerDependencies": {
+            "expo": "*",
+            "react": "*",
+            "react-native": "*"
+          }
+        },
+        "after": {
+          "version": "58.0.12",
+          "resolved": "https://registry.npmjs.org/expo-video/-/expo-video-58.0.12.tgz",
+          "integrity": "sha512-OmtZXbzlM1evzf29/WHOGm7fpdvUB/BjTRiJyHDKEftTVeAoUI5GLkQ/gmzXfyWrYXNOPomxIQ3dxgiIcDf98Q==",
+          "license": "MIT",
+          "peerDependencies": {
+            "expo": "*",
+            "react": "*",
+            "react-native": "*"
+          }
+        }
+      },
+      {
+        "path": "node_modules/expo/node_modules/@expo/cli",
+        "before": {
+          "version": "58.1.11",
+          "resolved": "https://registry.npmjs.org/@expo/cli/-/cli-58.1.11.tgz",
+          "integrity": "sha512-wkFTSLXXYqLkRT5oy4DnLuTOtbFIu3qTiXHSHkFSqUBTHiE92y3bOIwM3UN7Y1ys18qVJge8lXjezaEfsHmijQ==",
+          "license": "MIT",
+          "dependencies": {
+            "@expo/code-signing-certificates": "^0.0.7",
+            "@expo/config": "~58.0.6",
+            "@expo/config-plugins": "~58.0.9",
+            "@expo/devcert": "^1.2.2",
+            "@expo/env": "~2.5.2",
+            "@expo/image-utils": "^0.12.5",
+            "@expo/inline-modules": "^0.2.6",
+            "@expo/json-file": "^11.2.1",
+            "@expo/log-box": "^58.0.12",
+            "@expo/log-box-utils": "^58.0.2",
+            "@expo/metro": "~58.0.0",
+            "@expo/metro-config": "58.0.14",
+            "@expo/metro-file-map": "^58.0.5",
+            "@expo/osascript": "^2.8.1",
+            "@expo/package-manager": "^1.14.2",
+            "@expo/platforms": "^58.0.1",
+            "@expo/plist": "^0.10.1",
+            "@expo/prebuild-config": "^58.0.14",
+            "@expo/require-utils": "^58.0.4",
+            "@expo/router-server": "^58.0.14",
+            "@expo/schema-utils": "^58.0.2",
+            "@expo/spawn-async": "^1.8.0",
+            "@expo/ws-tunnel": "^2.0.1",
+            "@expo/xcpretty": "^4.4.6",
+            "@react-native/asset-utils": "0.88.0",
+            "@react-native/dev-middleware": "0.88.0",
+            "@react-native/js-polyfills": "0.88.0",
+            "2g": "^1.0.1",
+            "accepts": "^1.3.8",
+            "agent-cli-detector": "0.1.7",
+            "arg": "^5.0.2",
+            "bplist-creator": "0.1.0",
+            "bplist-parser": "^0.3.1",
+            "chalk": "^4.0.0",
+            "ci-info": "^3.3.0",
+            "compression": "^1.7.4",
+            "connect": "^3.7.0",
+            "dnssd-advertise": "^1.1.6",
+            "expo-server": "^58.0.5",
+            "fetch-nodeshim": "^0.4.10",
+            "getenv": "^2.0.0",
+            "glob": "^13.0.0",
+            "lan-network": "^0.2.1",
+            "multitars": "^1.0.2",
+            "node-forge": "^1.4.0",
+            "npm-package-arg": "^11.0.0",
+            "ora": "^3.4.0",
+            "picomatch": "^4.0.4",
+            "pretty-format": "^29.7.0",
+            "progress": "^2.0.3",
+            "prompts": "^2.3.2",
+            "resolve-from": "^5.0.0",
+            "sandbox-cli-detector": "^0.2.0",
+            "semver": "^7.7.4",
+            "send": "^0.19.0",
+            "slugify": "^1.3.4",
+            "stacktrace-parser": "^0.1.10",
+            "structured-headers": "^0.4.1",
+            "terminal-link": "^2.1.1",
+            "toqr": "^0.1.1",
+            "wrap-ansi": "^7.0.0",
+            "ws": "^8.12.1",
+            "zod": "^3.25.76"
+          },
+          "bin": {
+            "expo-internal": "bin/cli.js"
+          },
+          "peerDependencies": {
+            "expo": "*",
+            "expo-router": "*",
+            "react-native": "*"
+          },
+          "peerDependenciesMeta": {
+            "expo-router": {
+              "optional": true
+            },
+            "react-native": {
+              "optional": true
+            }
+          }
+        },
+        "after": {
+          "version": "58.1.14",
+          "resolved": "https://registry.npmjs.org/@expo/cli/-/cli-58.1.14.tgz",
+          "integrity": "sha512-Qrpkhb9XrQn+wuxaOVR0hh0dLzeFZjGZHC9Jz86hPsexPzP+/mnMigRoWVaeEP8q7b3Hsr98gozL5d94DzFOBw==",
+          "license": "MIT",
+          "dependencies": {
+            "@expo/code-signing-certificates": "^0.0.7",
+            "@expo/config": "~58.0.7",
+            "@expo/config-plugins": "~58.0.10",
+            "@expo/devcert": "^1.2.2",
+            "@expo/env": "~2.5.3",
+            "@expo/image-utils": "^0.12.5",
+            "@expo/inline-modules": "^0.2.7",
+            "@expo/json-file": "^11.2.1",
+            "@expo/log-box": "^58.0.13",
+            "@expo/log-box-utils": "^58.0.2",
+            "@expo/metro": "~58.0.0",
+            "@expo/metro-config": "58.0.16",
+            "@expo/metro-file-map": "^58.0.5",
+            "@expo/osascript": "^2.8.1",
+            "@expo/package-manager": "^1.14.2",
+            "@expo/platforms": "^58.0.1",
+            "@expo/plist": "^0.10.1",
+            "@expo/prebuild-config": "^58.0.15",
+            "@expo/require-utils": "^58.0.4",
+            "@expo/router-server": "^58.0.16",
+            "@expo/schema-utils": "^58.0.2",
+            "@expo/spawn-async": "^1.8.0",
+            "@expo/ws-tunnel": "^2.0.1",
+            "@expo/xcpretty": "^4.4.6",
+            "@react-native/asset-utils": "0.88.0",
+            "@react-native/dev-middleware": "0.88.0",
+            "@react-native/js-polyfills": "0.88.0",
+            "2g": "^1.0.1",
+            "accepts": "^1.3.8",
+            "agent-cli-detector": "0.1.7",
+            "arg": "^5.0.2",
+            "bplist-creator": "0.1.0",
+            "bplist-parser": "^0.3.1",
+            "chalk": "^4.0.0",
+            "ci-info": "^3.3.0",
+            "compression": "^1.7.4",
+            "connect": "^3.7.0",
+            "dnssd-advertise": "^1.1.6",
+            "expo-server": "^58.0.5",
+            "fetch-nodeshim": "^0.4.10",
+            "getenv": "^2.0.0",
+            "glob": "^13.0.0",
+            "lan-network": "^0.2.1",
+            "multitars": "^1.0.2",
+            "node-forge": "^1.4.0",
+            "npm-package-arg": "^11.0.0",
+            "ora": "^3.4.0",
+            "picomatch": "^4.0.4",
+            "pretty-format": "^29.7.0",
+            "progress": "^2.0.3",
+            "prompts": "^2.3.2",
+            "resolve-from": "^5.0.0",
+            "sandbox-cli-detector": "^0.2.0",
+            "semver": "^7.7.4",
+            "send": "^0.19.0",
+            "slugify": "^1.3.4",
+            "stacktrace-parser": "^0.1.10",
+            "structured-headers": "^0.4.1",
+            "terminal-link": "^2.1.1",
+            "toqr": "^0.1.1",
+            "wrap-ansi": "^7.0.0",
+            "ws": "^8.12.1",
+            "zod": "^3.25.76"
+          },
+          "bin": {
+            "expo-internal": "bin/cli.js"
+          },
+          "peerDependencies": {
+            "expo": "*",
+            "expo-router": "*",
+            "react-native": "*"
+          },
+          "peerDependenciesMeta": {
+            "expo-router": {
+              "optional": true
+            },
+            "react-native": {
+              "optional": true
+            }
+          }
+        }
+      },
+      {
+        "path": "node_modules/expo/node_modules/@expo/cli/node_modules/@expo/router-server",
+        "before": {
+          "version": "58.0.14",
+          "resolved": "https://registry.npmjs.org/@expo/router-server/-/router-server-58.0.14.tgz",
+          "integrity": "sha512-RSzQYMA+Tv2eTemhjhzpx8+hL+pMC30JTVqAWrk5AZwht+OgaKZar/gHmj4iJf7n3rq+GG6KujrkKF9xAXLz2w==",
+          "license": "MIT",
+          "dependencies": {
+            "debug": "^4.3.4"
+          },
+          "peerDependencies": {
+            "@expo/metro-runtime": "^58.0.14",
+            "expo": "*",
+            "expo-constants": "^58.0.12",
+            "expo-font": "^58.0.8",
+            "expo-router": "*",
+            "expo-server": "^58.0.5",
+            "react": "*",
+            "react-dom": "*",
+            "react-server-dom-webpack": "~19.0.1 || ~19.1.2 || ~19.2.1 || ~19.3.0"
+          },
+          "peerDependenciesMeta": {
+            "@expo/metro-runtime": {
+              "optional": true
+            },
+            "expo-router": {
+              "optional": true
+            },
+            "react-dom": {
+              "optional": true
+            },
+            "react-server-dom-webpack": {
+              "optional": true
+            }
+          }
+        },
+        "after": {
+          "version": "58.0.16",
+          "resolved": "https://registry.npmjs.org/@expo/router-server/-/router-server-58.0.16.tgz",
+          "integrity": "sha512-pBts7H/ntTcmJnn/2T2Wfpm2XNu+yp7FVJbB9iKG+pqEDqH7PEFpts1Ju80OXQHL1sDQKhUVMe0TCNp+tclp1w==",
+          "license": "MIT",
+          "dependencies": {
+            "debug": "^4.3.4"
+          },
+          "peerDependencies": {
+            "@expo/metro-runtime": "^58.0.15",
+            "expo": "*",
+            "expo-constants": "^58.0.13",
+            "expo-font": "^58.0.9",
+            "expo-router": "*",
+            "expo-server": "^58.0.5",
+            "react": "*",
+            "react-dom": "*",
+            "react-server-dom-webpack": "~19.0.1 || ~19.1.2 || ~19.2.1 || ~19.3.0"
+          },
+          "peerDependenciesMeta": {
+            "@expo/metro-runtime": {
+              "optional": true
+            },
+            "expo-router": {
+              "optional": true
+            },
+            "react-dom": {
+              "optional": true
+            },
+            "react-server-dom-webpack": {
+              "optional": true
+            }
+          }
+        }
+      },
+      {
+        "path": "node_modules/expo/node_modules/@expo/log-box",
+        "before": {
+          "version": "58.0.12",
+          "resolved": "https://registry.npmjs.org/@expo/log-box/-/log-box-58.0.12.tgz",
+          "integrity": "sha512-IzDYoFY2iUsmSDvl1V7YUM7UkCPDyMVS4e4a38c2LnFc1A3WGMUiQh+vsHLYTPKjIelu4r7/u4V7Gxtfa0oJgA==",
+          "license": "MIT",
+          "dependencies": {
+            "@expo/dom-webview": "^58.0.2",
+            "@expo/log-box-utils": "^58.0.2",
+            "anser": "^1.4.9",
+            "stacktrace-parser": "^0.1.10"
+          },
+          "peerDependencies": {
+            "@expo/dom-webview": "^58.0.2",
+            "expo": "*",
+            "react": "*",
+            "react-native": "*"
+          },
+          "peerDependenciesMeta": {
+            "expo": {
+              "optional": true
+            }
+          }
+        },
+        "after": {
+          "version": "58.0.13",
+          "resolved": "https://registry.npmjs.org/@expo/log-box/-/log-box-58.0.13.tgz",
+          "integrity": "sha512-Cl9qc77nWjQVivUI5/OCPSEP8s20EtbK3Ivy5ayy+uHO0Cf+XatatWfTvKiHO38VOpT2ywlROzZb4XZyxZUZ1Q==",
+          "license": "MIT",
+          "dependencies": {
+            "@expo/dom-webview": "^58.0.2",
+            "@expo/log-box-utils": "^58.0.2",
+            "anser": "^1.4.9",
+            "stacktrace-parser": "^0.1.10"
+          },
+          "peerDependencies": {
+            "@expo/dom-webview": "^58.0.2",
+            "expo": "*",
+            "react": "*",
+            "react-native": "*"
+          },
+          "peerDependenciesMeta": {
+            "expo": {
+              "optional": true
+            }
+          }
+        }
+      },
+      {
+        "path": "node_modules/expo/node_modules/@expo/metro-config",
+        "before": {
+          "version": "58.0.14",
+          "resolved": "https://registry.npmjs.org/@expo/metro-config/-/metro-config-58.0.14.tgz",
+          "integrity": "sha512-UDUMAJwYGEzaB26ejMLG/IOVzwKDbHzoODBf3FZeRS94kk9jDf1dWE1VMX6bLBLoiflxXwqrMWiH0Fvz3gZ9YQ==",
+          "license": "MIT",
+          "dependencies": {
+            "@babel/code-frame": "^7.20.0",
+            "@babel/core": "^7.20.0",
+            "@babel/generator": "^7.20.5",
+            "@expo/config": "~58.0.6",
+            "@expo/env": "~2.5.2",
+            "@expo/json-file": "~11.2.1",
+            "@expo/metro": "~58.0.0",
+            "@expo/platforms": "^58.0.1",
+            "@expo/require-utils": "^58.0.4",
+            "@expo/spawn-async": "^1.8.0",
+            "@jridgewell/gen-mapping": "^0.3.13",
+            "@jridgewell/remapping": "^2.3.5",
+            "@jridgewell/sourcemap-codec": "^1.5.5",
+            "@jridgewell/trace-mapping": "^0.3.31",
+            "@react-native/js-polyfills": "0.88.0",
+            "2g": "^1.0.1",
+            "browserslist": "^4.25.0",
+            "chalk": "^4.1.0",
+            "debug": "^4.3.2",
+            "getenv": "^2.0.0",
+            "glob": "^13.0.0",
+            "hermes-parser": "^0.36.0",
+            "jsc-safe-url": "^0.2.4",
+            "lightningcss": "^1.30.1",
+            "noxcturnal": "^0.1.0",
+            "picomatch": "^4.0.4",
+            "postcss": "^8.5.23",
+            "resolve-from": "^5.0.0"
+          },
+          "peerDependencies": {
+            "expo": "*"
+          },
+          "peerDependenciesMeta": {
+            "expo": {
+              "optional": true
+            }
+          }
+        },
+        "after": {
+          "version": "58.0.16",
+          "resolved": "https://registry.npmjs.org/@expo/metro-config/-/metro-config-58.0.16.tgz",
+          "integrity": "sha512-njvkkNGe2joPmIwoquGTmlmt24q4zYfQs0AIEh5XAyK7o6oVIB/t5EjS4j3f+P6v+ib9U7vxmo62T5+/Dy2pcg==",
+          "license": "MIT",
+          "dependencies": {
+            "@babel/code-frame": "^7.20.0",
+            "@babel/core": "^7.20.0",
+            "@babel/generator": "^7.20.5",
+            "@expo/config": "~58.0.7",
+            "@expo/env": "~2.5.3",
+            "@expo/json-file": "~11.2.1",
+            "@expo/metro": "~58.0.0",
+            "@expo/platforms": "^58.0.1",
+            "@expo/require-utils": "^58.0.4",
+            "@expo/spawn-async": "^1.8.0",
+            "@jridgewell/gen-mapping": "^0.3.13",
+            "@jridgewell/remapping": "^2.3.5",
+            "@jridgewell/sourcemap-codec": "^1.5.5",
+            "@jridgewell/trace-mapping": "^0.3.31",
+            "@react-native/js-polyfills": "0.88.0",
+            "2g": "^1.0.1",
+            "browserslist": "^4.25.0",
+            "chalk": "^4.1.0",
+            "debug": "^4.3.2",
+            "getenv": "^2.0.0",
+            "glob": "^13.0.0",
+            "hermes-parser": "^0.36.0",
+            "jsc-safe-url": "^0.2.4",
+            "lightningcss": "^1.30.1",
+            "noxcturnal": "^0.1.8",
+            "picomatch": "^4.0.4",
+            "postcss": "^8.5.23",
+            "resolve-from": "^5.0.0"
+          },
+          "peerDependencies": {
+            "expo": "*"
+          },
+          "peerDependenciesMeta": {
+            "expo": {
+              "optional": true
+            }
+          }
+        }
+      },
+      {
+        "path": "node_modules/expo/node_modules/babel-preset-expo",
+        "before": {
+          "version": "58.0.17",
+          "resolved": "https://registry.npmjs.org/babel-preset-expo/-/babel-preset-expo-58.0.17.tgz",
+          "integrity": "sha512-Rrqc/Z5Idc4bG2/PrEh725t3kvuAc7jUKCJ+wZVU9KXk2bKSdqAniXxQa8aph9aHdv4h5sGKLpMXMaMNz/4+Og==",
+          "license": "MIT",
+          "dependencies": {
+            "@babel/generator": "^7.20.5",
+            "@babel/helper-module-imports": "^7.25.9",
+            "@babel/plugin-proposal-decorators": "^7.12.9",
+            "@babel/plugin-proposal-export-default-from": "^7.24.7",
+            "@babel/plugin-syntax-dynamic-import": "^7.8.3",
+            "@babel/plugin-syntax-export-default-from": "^7.24.7",
+            "@babel/plugin-syntax-nullish-coalescing-operator": "^7.8.3",
+            "@babel/plugin-syntax-optional-chaining": "^7.8.3",
+            "@babel/plugin-transform-async-generator-functions": "^7.25.4",
+            "@babel/plugin-transform-async-to-generator": "^7.24.7",
+            "@babel/plugin-transform-block-scoping": "^7.25.0",
+            "@babel/plugin-transform-class-properties": "^7.25.4",
+            "@babel/plugin-transform-class-static-block": "^7.27.1",
+            "@babel/plugin-transform-classes": "^7.25.4",
+            "@babel/plugin-transform-destructuring": "^7.24.8",
+            "@babel/plugin-transform-export-namespace-from": "^7.25.9",
+            "@babel/plugin-transform-flow-strip-types": "^7.25.2",
+            "@babel/plugin-transform-for-of": "^7.24.7",
+            "@babel/plugin-transform-logical-assignment-operators": "^7.24.7",
+            "@babel/plugin-transform-modules-commonjs": "^7.24.8",
+            "@babel/plugin-transform-named-capturing-groups-regex": "^7.24.7",
+            "@babel/plugin-transform-nullish-coalescing-operator": "^7.24.7",
+            "@babel/plugin-transform-object-rest-spread": "^7.24.7",
+            "@babel/plugin-transform-optional-catch-binding": "^7.24.7",
+            "@babel/plugin-transform-optional-chaining": "^7.24.8",
+            "@babel/plugin-transform-parameters": "^7.24.7",
+            "@babel/plugin-transform-private-methods": "^7.24.7",
+            "@babel/plugin-transform-private-property-in-object": "^7.24.7",
+            "@babel/plugin-transform-react-display-name": "^7.24.7",
+            "@babel/plugin-transform-react-jsx": "^7.28.6",
+            "@babel/plugin-transform-react-jsx-development": "^7.27.1",
+            "@babel/plugin-transform-react-pure-annotations": "^7.27.1",
+            "@babel/plugin-transform-runtime": "^7.24.7",
+            "@babel/plugin-transform-typescript": "^7.25.2",
+            "@babel/plugin-transform-unicode-regex": "^7.24.7",
+            "@babel/preset-typescript": "^7.23.0",
+            "@react-native/babel-plugin-codegen": "0.88.0",
+            "babel-plugin-react-compiler": "^1.0.0",
+            "babel-plugin-react-native-web": "~0.21.4",
+            "babel-plugin-syntax-hermes-parser": "^0.36.0",
+            "babel-plugin-transform-flow-enums": "^0.0.2",
+            "debug": "^4.3.4"
+          },
+          "peerDependencies": {
+            "@babel/runtime": "^7.20.0",
+            "expo": "*",
+            "expo-widgets": "^58.0.20",
+            "react-refresh": ">=0.14.0 <1.0.0"
+          },
+          "peerDependenciesMeta": {
+            "@babel/runtime": {
+              "optional": true
+            },
+            "expo": {
+              "optional": true
+            },
+            "expo-widgets": {
+              "optional": true
+            }
+          }
+        },
+        "after": {
+          "version": "58.0.19",
+          "resolved": "https://registry.npmjs.org/babel-preset-expo/-/babel-preset-expo-58.0.19.tgz",
+          "integrity": "sha512-vla5Ga5RCH+L+DhrVZCNf1V481iYNxJtlIq/O0OIj9PcZORv0oLu1SIrUO7ZkzCA1fR5wMEtjhqAQUpvRbpWWw==",
+          "license": "MIT",
+          "dependencies": {
+            "@babel/generator": "^7.20.5",
+            "@babel/helper-module-imports": "^7.25.9",
+            "@babel/plugin-proposal-decorators": "^7.12.9",
+            "@babel/plugin-proposal-export-default-from": "^7.24.7",
+            "@babel/plugin-syntax-dynamic-import": "^7.8.3",
+            "@babel/plugin-syntax-export-default-from": "^7.24.7",
+            "@babel/plugin-syntax-nullish-coalescing-operator": "^7.8.3",
+            "@babel/plugin-syntax-optional-chaining": "^7.8.3",
+            "@babel/plugin-transform-async-generator-functions": "^7.25.4",
+            "@babel/plugin-transform-async-to-generator": "^7.24.7",
+            "@babel/plugin-transform-block-scoping": "^7.25.0",
+            "@babel/plugin-transform-class-properties": "^7.25.4",
+            "@babel/plugin-transform-class-static-block": "^7.27.1",
+            "@babel/plugin-transform-classes": "^7.25.4",
+            "@babel/plugin-transform-destructuring": "^7.24.8",
+            "@babel/plugin-transform-export-namespace-from": "^7.25.9",
+            "@babel/plugin-transform-flow-strip-types": "^7.25.2",
+            "@babel/plugin-transform-for-of": "^7.24.7",
+            "@babel/plugin-transform-logical-assignment-operators": "^7.24.7",
+            "@babel/plugin-transform-modules-commonjs": "^7.24.8",
+            "@babel/plugin-transform-named-capturing-groups-regex": "^7.24.7",
+            "@babel/plugin-transform-nullish-coalescing-operator": "^7.24.7",
+            "@babel/plugin-transform-object-rest-spread": "^7.24.7",
+            "@babel/plugin-transform-optional-catch-binding": "^7.24.7",
+            "@babel/plugin-transform-optional-chaining": "^7.24.8",
+            "@babel/plugin-transform-parameters": "^7.24.7",
+            "@babel/plugin-transform-private-methods": "^7.24.7",
+            "@babel/plugin-transform-private-property-in-object": "^7.24.7",
+            "@babel/plugin-transform-react-display-name": "^7.24.7",
+            "@babel/plugin-transform-react-jsx": "^7.28.6",
+            "@babel/plugin-transform-react-jsx-development": "^7.27.1",
+            "@babel/plugin-transform-react-pure-annotations": "^7.27.1",
+            "@babel/plugin-transform-runtime": "^7.24.7",
+            "@babel/plugin-transform-typescript": "^7.25.2",
+            "@babel/plugin-transform-unicode-regex": "^7.24.7",
+            "@babel/preset-typescript": "^7.23.0",
+            "@react-native/babel-plugin-codegen": "0.88.0",
+            "babel-plugin-react-compiler": "^1.0.0",
+            "babel-plugin-react-native-web": "~0.21.4",
+            "babel-plugin-syntax-hermes-parser": "^0.36.0",
+            "babel-plugin-transform-flow-enums": "^0.0.2",
+            "debug": "^4.3.4"
+          },
+          "peerDependencies": {
+            "@babel/runtime": "^7.20.0",
+            "expo": "*",
+            "expo-widgets": "^58.0.22",
+            "react-refresh": ">=0.14.0 <1.0.0"
+          },
+          "peerDependenciesMeta": {
+            "@babel/runtime": {
+              "optional": true
+            },
+            "expo": {
+              "optional": true
+            },
+            "expo-widgets": {
+              "optional": true
+            }
+          }
+        }
+      },
+      {
+        "path": "node_modules/expo/node_modules/expo-asset",
+        "before": {
+          "version": "58.0.16",
+          "resolved": "https://registry.npmjs.org/expo-asset/-/expo-asset-58.0.16.tgz",
+          "integrity": "sha512-beR3uusLA+rFo+6Ug0L7FPR4b6y/37VwtYW2Jig/i+3Co+oyYCTnvVuFPWhb05W9TOZRxdHUEI569fVKIgtYAA==",
+          "license": "MIT",
+          "dependencies": {
+            "@expo/image-utils": "^0.12.5",
+            "expo-constants": "~58.0.12"
+          },
+          "peerDependencies": {
+            "expo": "*",
+            "react": "*",
+            "react-native": "*"
+          }
+        },
+        "after": {
+          "version": "58.0.18",
+          "resolved": "https://registry.npmjs.org/expo-asset/-/expo-asset-58.0.18.tgz",
+          "integrity": "sha512-Cc49mpDd81hIIKw1DVDkL52a/S6MJlHLA+LirUHNR7qJJfopoHrSypg9rRuqvCUVW7/JKvXKqbFX43NynpVzmg==",
+          "license": "MIT",
+          "dependencies": {
+            "@expo/image-utils": "^0.12.5",
+            "expo-constants": "~58.0.13"
+          },
+          "peerDependencies": {
+            "expo": "*",
+            "react": "*",
+            "react-native": "*"
+          }
+        }
+      },
+      {
+        "path": "node_modules/expo/node_modules/expo-constants",
+        "before": {
+          "version": "58.0.12",
+          "resolved": "https://registry.npmjs.org/expo-constants/-/expo-constants-58.0.12.tgz",
+          "integrity": "sha512-d3/dsps32nU4m6YJQbXQ1dIfn58GxfmJjTnZ0WtnhdSHTdG/oVsOakLqYRlX/FaLUKkQOSHXMf7hyCx+2a/HSQ==",
+          "license": "MIT",
+          "dependencies": {
+            "@expo/env": "~2.5.2",
+            "@expo/require-utils": "^58.0.4"
+          },
+          "peerDependencies": {
+            "expo": "*",
+            "react-native": "*"
+          }
+        },
+        "after": {
+          "version": "58.0.13",
+          "resolved": "https://registry.npmjs.org/expo-constants/-/expo-constants-58.0.13.tgz",
+          "integrity": "sha512-zUj1rcnYg0O2wKF9L32ToEtFujc5OkslZJ4lWeg+fEwoPMLVwldn6kdEkX8zx31KgSwF94Ey1mIFdFX8Brp73Q==",
+          "license": "MIT",
+          "dependencies": {
+            "@expo/env": "~2.5.3",
+            "@expo/require-utils": "^58.0.4"
+          },
+          "peerDependencies": {
+            "expo": "*",
+            "react-native": "*"
+          }
+        }
+      },
+      {
+        "path": "node_modules/expo/node_modules/expo-file-system",
+        "before": {
+          "version": "58.0.9",
+          "resolved": "https://registry.npmjs.org/expo-file-system/-/expo-file-system-58.0.9.tgz",
+          "integrity": "sha512-JT0km3Wa+wDz/7Rli8ifreoMnmk68ulf/uaWzRA26xm/4K+jGTY+cDhnboRmpmXUCBkED6uqxWmNoXjaVU9VUw==",
+          "license": "MIT",
+          "peerDependencies": {
+            "expo": "*",
+            "react-native": "*"
+          }
+        },
+        "after": {
+          "version": "58.0.10",
+          "resolved": "https://registry.npmjs.org/expo-file-system/-/expo-file-system-58.0.10.tgz",
+          "integrity": "sha512-n0M7amp/Bv9TAqVfTWq1zGykmQJWiPzDePZIKp8YYKkVvY7N65bo96sMBQlHkhAyW4I1B6MZABnybliy5DXQig==",
+          "license": "MIT",
+          "peerDependencies": {
+            "expo": "*",
+            "react-native": "*"
+          }
+        }
+      },
+      {
+        "path": "node_modules/expo/node_modules/expo-font",
+        "before": {
+          "version": "58.0.8",
+          "resolved": "https://registry.npmjs.org/expo-font/-/expo-font-58.0.8.tgz",
+          "integrity": "sha512-i9HKj/ljdmmjLamYQEkI4wXJB9+ap7AG5CpCqK/bgwwy45y5T8+1lpNbYgRXE7aQgmDjPpzd09wX6dOZkHfrxg==",
+          "license": "MIT",
+          "peerDependencies": {
+            "expo": "*",
+            "react": "*",
+            "react-native": "*"
+          }
+        },
+        "after": {
+          "version": "58.0.9",
+          "resolved": "https://registry.npmjs.org/expo-font/-/expo-font-58.0.9.tgz",
+          "integrity": "sha512-C8sIeVA2NBb76xqqnQ6eVzfXezAfKJC4qVGU9ukKM4KXdLtkhH5bRCvRSc6qUFUmrcNoM3RjI78SEH3lhigRSg==",
+          "license": "MIT",
+          "peerDependencies": {
+            "expo": "*",
+            "react": "*",
+            "react-native": "*"
+          }
+        }
+      },
+      {
+        "path": "node_modules/noxcturnal",
+        "before": {
+          "version": "0.1.5",
+          "resolved": "https://registry.npmjs.org/noxcturnal/-/noxcturnal-0.1.5.tgz",
+          "integrity": "sha512-X/HQXJP/xn7LVQ4z1E4La0NHSl5UHdtJPG6ky4r2/Xgb7k79nGDJgBXk7I5f1V2vInWjlSCM14oSB0cUxwZS/Q==",
+          "license": "MIT",
+          "dependencies": {
+            "@babel/code-frame": "^7.20.0",
+            "@oxc-project/types": "0.154.0"
+          },
+          "engines": {
+            "node": ">=18"
+          },
+          "optionalDependencies": {
+            "@noxcturnal/noxcturnal-darwin-arm64": "0.1.5",
+            "@noxcturnal/noxcturnal-darwin-x64": "0.1.5",
+            "@noxcturnal/noxcturnal-linux-arm64-gnu": "0.1.5",
+            "@noxcturnal/noxcturnal-linux-arm64-musl": "0.1.5",
+            "@noxcturnal/noxcturnal-linux-x64-gnu": "0.1.5",
+            "@noxcturnal/noxcturnal-linux-x64-musl": "0.1.5",
+            "@noxcturnal/noxcturnal-win32-arm64-msvc": "0.1.5",
+            "@noxcturnal/noxcturnal-win32-x64-msvc": "0.1.5"
+          }
+        },
+        "after": {
+          "version": "0.1.8",
+          "resolved": "https://registry.npmjs.org/noxcturnal/-/noxcturnal-0.1.8.tgz",
+          "integrity": "sha512-oeyzgpWW2rnWFEdmXpRRBMLqwEfAhoypOBwaU5/BS3iizvmg8Hld+kxONLxifyHi2NJ1v6de2skIifN5mNzIVw==",
+          "license": "MIT",
+          "dependencies": {
+            "@babel/code-frame": "^7.20.0",
+            "@oxc-project/types": "0.154.0"
+          },
+          "engines": {
+            "node": ">=18"
+          },
+          "optionalDependencies": {
+            "@noxcturnal/noxcturnal-darwin-arm64": "0.1.8",
+            "@noxcturnal/noxcturnal-darwin-x64": "0.1.8",
+            "@noxcturnal/noxcturnal-linux-arm64-gnu": "0.1.8",
+            "@noxcturnal/noxcturnal-linux-arm64-musl": "0.1.8",
+            "@noxcturnal/noxcturnal-linux-x64-gnu": "0.1.8",
+            "@noxcturnal/noxcturnal-linux-x64-musl": "0.1.8",
+            "@noxcturnal/noxcturnal-win32-arm64-msvc": "0.1.8",
+            "@noxcturnal/noxcturnal-win32-x64-msvc": "0.1.8"
+          }
+        }
+      },
+      {
+        "path": "node_modules/uuid",
+        "before": {
+          "version": "11.1.1",
+          "resolved": "https://registry.npmjs.org/uuid/-/uuid-11.1.1.tgz",
+          "integrity": "sha512-vIYxrBCC/N/K+Js3qSN88go7kIfNPssr/hHCesKCQNAjmgvYS2oqr69kIufEG+O4+PfezOH4EbIeHCfFov8ZgQ==",
+          "funding": [
+            "https://github.com/sponsors/broofa",
+            "https://github.com/sponsors/ctavan"
+          ],
+          "license": "MIT",
+          "bin": {
+            "uuid": "dist/esm/bin/uuid"
+          }
+        },
+        "after": null
+      },
+      {
+        "path": "node_modules/xcode",
+        "before": {
+          "version": "3.0.1",
+          "resolved": "https://registry.npmjs.org/xcode/-/xcode-3.0.1.tgz",
+          "integrity": "sha512-kCz5k7J7XbJtjABOvkc5lJmkiDh8VhjVCGNiqdKCscmVpdVUpEAyXv1xmCLkQJ5dsHqx3IPO4XW+NTDhU/fatA==",
+          "license": "Apache-2.0",
+          "dependencies": {
+            "simple-plist": "^1.1.0",
+            "uuid": "^7.0.3"
+          },
+          "engines": {
+            "node": ">=10.0.0"
+          }
+        },
+        "after": {
+          "version": "4.0.0",
+          "resolved": "https://registry.npmjs.org/xcode/-/xcode-4.0.0.tgz",
+          "integrity": "sha512-dDaoWzc9EP2fp9FS9PVZUkyvFxY4y1TOV9pcKaKLk++Ei/qb97XDFEVP7GnW7Osii/TzVABJ0jq2F+9/lq0TVA==",
+          "license": "Apache-2.0",
+          "dependencies": {
+            "simple-plist": "^1.3.1"
+          },
+          "engines": {
+            "node": ">=14.17.0"
+          }
+        }
+      },
+      {
+        "path": "node_modules/@expo/modules-macros-linux-arm64",
+        "before": null,
+        "after": {
+          "version": "0.22.0",
+          "resolved": "https://registry.npmjs.org/@expo/modules-macros-linux-arm64/-/modules-macros-linux-arm64-0.22.0.tgz",
+          "integrity": "sha512-FGXyxpZMEJ4pDPCeCBjfBjftCbk03P/1Rf6UkFoL22joqu4XXt+XUsjfTzyKBzP9pAXL39FVdbNClwk529CEEQ==",
+          "cpu": [
+            "arm64"
+          ],
+          "license": "MIT",
+          "optional": true,
+          "os": [
+            "linux"
+          ]
+        }
+      },
+      {
+        "path": "node_modules/@expo/modules-macros-linux-x64",
+        "before": null,
+        "after": {
+          "version": "0.22.0",
+          "resolved": "https://registry.npmjs.org/@expo/modules-macros-linux-x64/-/modules-macros-linux-x64-0.22.0.tgz",
+          "integrity": "sha512-4yN4cZTCUWkq1Olr0/lA57gFan8+MEo7K3K0cx0bB3TUEqHgL/hyJN79vQKXlp9NWTnOxO7J5uwqMQkQwfh6aw==",
+          "cpu": [
+            "x64"
+          ],
+          "license": "MIT",
+          "optional": true,
+          "os": [
+            "linux"
+          ]
+        }
+      },
+      {
+        "path": "node_modules/expo-modules-cli",
+        "before": null,
+        "after": {
+          "version": "0.3.1",
+          "resolved": "https://registry.npmjs.org/expo-modules-cli/-/expo-modules-cli-0.3.1.tgz",
+          "integrity": "sha512-dRLz4GMRi6lETbE729xFVforu9VI2hQ+YLMtVXfukHMjm6KposDOlJGCdYoZpB6oLVMK/NShc1q9v/u4yr1dkA==",
+          "license": "MIT",
+          "dependencies": {
+            "arg": "^5.0.2"
+          },
+          "bin": {
+            "expo-modules": "bin/expo-modules.js"
+          },
+          "engines": {
+            "node": "^22.13.0 || ^24.3.0 || ^26.0.0 || >=27.0.0"
+          }
+        }
+      }
+    ],
+    "installedChanges": [
+      {
+        "path": "node_modules/@expo/config",
+        "version": "58.0.7",
+        "packageSha256": "105dc4128af484252816e2f289fabad1ff848b26da0d64acb3f094af13083427"
+      },
+      {
+        "path": "node_modules/@expo/config-plugins",
+        "version": "58.0.10",
+        "packageSha256": "839530fc53933d783114c08a83cd8fe8ba3ddacbd99632c67b5841bb8e739c0b"
+      },
+      {
+        "path": "node_modules/@expo/env",
+        "version": "2.5.3",
+        "packageSha256": "f0ab90fd40e4edf477f453567d245229dde2efb89895db959c7dd5e951a8022f"
+      },
+      {
+        "path": "node_modules/@expo/fingerprint",
+        "version": "0.21.6",
+        "packageSha256": "6a6d210fac61546d6305dc7b926a30a06ff82b104024b66e3632f92125ee7f72"
+      },
+      {
+        "path": "node_modules/@expo/inline-modules",
+        "version": "0.2.7",
+        "packageSha256": "63fc144ddcc0bde052295e9baaee293a69ff6a1d56bd5c049b952ca9c8a775c9"
+      },
+      {
+        "path": "node_modules/@expo/local-build-cache-provider",
+        "version": "58.0.7",
+        "packageSha256": "5f9318f39a124b1bc3f1d43b5b242656159b91fdaa0288d5d7e6d293aadbc2ac"
+      },
+      {
+        "path": "node_modules/@expo/modules-macros-win32-arm64",
+        "optionalPlatformPackageAbsent": true
+      },
+      {
+        "path": "node_modules/@expo/modules-macros-win32-x64",
+        "version": "0.22.0",
+        "packageSha256": "4a2057bc859913a7feae92ca4519a33c8c021b3dea1e15d3e7e841953ac8ada1"
+      },
+      {
+        "path": "node_modules/@expo/prebuild-config",
+        "version": "58.0.15",
+        "packageSha256": "ffea708e11463b41c4d5854c65cc666001c1488e691c8ae4ac7bffc997f488d7"
+      },
+      {
+        "path": "node_modules/@noxcturnal/noxcturnal-darwin-arm64",
+        "optionalPlatformPackageAbsent": true
+      },
+      {
+        "path": "node_modules/@noxcturnal/noxcturnal-darwin-x64",
+        "optionalPlatformPackageAbsent": true
+      },
+      {
+        "path": "node_modules/@noxcturnal/noxcturnal-linux-arm64-gnu",
+        "optionalPlatformPackageAbsent": true
+      },
+      {
+        "path": "node_modules/@noxcturnal/noxcturnal-linux-arm64-musl",
+        "optionalPlatformPackageAbsent": true
+      },
+      {
+        "path": "node_modules/@noxcturnal/noxcturnal-linux-x64-gnu",
+        "optionalPlatformPackageAbsent": true
+      },
+      {
+        "path": "node_modules/@noxcturnal/noxcturnal-linux-x64-musl",
+        "optionalPlatformPackageAbsent": true
+      },
+      {
+        "path": "node_modules/@noxcturnal/noxcturnal-win32-arm64-msvc",
+        "optionalPlatformPackageAbsent": true
+      },
+      {
+        "path": "node_modules/@noxcturnal/noxcturnal-win32-x64-msvc",
+        "version": "0.1.8",
+        "packageSha256": "bf585aedac3903479805c9a4bafe357933e996ec085c3dd19e6d4f44627574cb"
+      },
+      {
+        "path": "node_modules/expo",
+        "version": "58.0.17",
+        "packageSha256": "7424d7f47dbdadf57f33120db7be1e1340c279600d475de4cf4d0d6b0c0b256d"
+      },
+      {
+        "path": "node_modules/expo-camera",
+        "version": "58.0.12",
+        "packageSha256": "7759d9840b133706bae5dbea4d3f9c041aa6f5084aad4901ef2069f36c3e4d77"
+      },
+      {
+        "path": "node_modules/expo-clipboard",
+        "version": "58.0.4",
+        "packageSha256": "5730ba76319b21e144eee7ad6e97de6d3e706eea977191bf9ff70fca15c43547"
+      },
+      {
+        "path": "node_modules/expo-modules-autolinking",
+        "version": "58.0.14",
+        "packageSha256": "5d00a78bb5f6c86d54d7e5643529763784157de4114acc969664498275415462"
+      },
+      {
+        "path": "node_modules/expo-modules-core",
+        "version": "58.0.24",
+        "packageSha256": "f1567c8587431e3e419ac2e41d5df76e37ba9579183af793b33058826e572b32"
+      },
+      {
+        "path": "node_modules/expo-modules-jsi",
+        "version": "58.0.17",
+        "packageSha256": "c651e12c5c7fbe417150f66d963132c6c08ba098629f1b182e7ab279ab3ba57e"
+      },
+      {
+        "path": "node_modules/expo-modules-macros",
+        "version": "0.22.0",
+        "packageSha256": "7bb15a11c950b51a0bc006e0b9e0d6d4d665b6d8587f33640ad2ce08466616b3"
+      },
+      {
+        "path": "node_modules/expo-status-bar",
+        "version": "58.0.4",
+        "packageSha256": "8d18508afaea5f3de3dc99aa837fd4acc385b176506812200cebc2ba9fa7d133"
+      },
+      {
+        "path": "node_modules/expo-video",
+        "version": "58.0.12",
+        "packageSha256": "010b9760b01ca87e628af8b49388d0dad7ef90de12f613e10839a63146a8625c"
+      },
+      {
+        "path": "node_modules/expo/node_modules/@expo/cli",
+        "version": "58.1.14",
+        "packageSha256": "85a1d6cddeec3b258657a86e690d8bb93d4e3a6917e639ac5abce423596ab7c7"
+      },
+      {
+        "path": "node_modules/expo/node_modules/@expo/cli/node_modules/@expo/router-server",
+        "version": "58.0.16",
+        "packageSha256": "7a53cebf37ddf3735c94dc6ab02ef3f3c6b0f6d84294f4226cfc7634da1fb318"
+      },
+      {
+        "path": "node_modules/expo/node_modules/@expo/log-box",
+        "version": "58.0.13",
+        "packageSha256": "05bf9b1026b45097b775050a20a752f091b66d92c99d52273155fe3ff4dfe4e1"
+      },
+      {
+        "path": "node_modules/expo/node_modules/@expo/metro-config",
+        "version": "58.0.16",
+        "packageSha256": "094d4b0e66b210702b68fb9611b79521e8a05fe6ed6b90825957c57644329f71"
+      },
+      {
+        "path": "node_modules/expo/node_modules/babel-preset-expo",
+        "version": "58.0.19",
+        "packageSha256": "9e17a6494a961238f2b914f639b7e58b12ab3a587ac579184452eb8c7a5ecf0f"
+      },
+      {
+        "path": "node_modules/expo/node_modules/expo-asset",
+        "version": "58.0.18",
+        "packageSha256": "1d3d0bd22c3316779e99253e10bc8c11f68b4d17b8f7a2a4aa9d50939c2379c2"
+      },
+      {
+        "path": "node_modules/expo/node_modules/expo-constants",
+        "version": "58.0.13",
+        "packageSha256": "b1a13b0a908b2403d09bfe59921a19727002f2e265dd053384943f84e3ae8649"
+      },
+      {
+        "path": "node_modules/expo/node_modules/expo-file-system",
+        "version": "58.0.10",
+        "packageSha256": "b4895782ed78a1012c9154009248abdcec2053d5736c15b2283359ff901c2fb6"
+      },
+      {
+        "path": "node_modules/expo/node_modules/expo-font",
+        "version": "58.0.9",
+        "packageSha256": "f8e9ccd38f7d07bed710c67a876c41da91782df14f491965e28512c90c6474d9"
+      },
+      {
+        "path": "node_modules/noxcturnal",
+        "version": "0.1.8",
+        "packageSha256": "eb8693ee36076654b01ecab95683c05197958426a5f181aa034e3ab2c9632f6a"
+      },
+      {
+        "path": "node_modules/xcode",
+        "version": "4.0.0",
+        "packageSha256": "f0d64ec24040be0a59568306b25312f34896065afa27ca1fdd386c54c1ccc531"
+      },
+      {
+        "path": "node_modules/@expo/modules-macros-linux-arm64",
+        "optionalPlatformPackageAbsent": true
+      },
+      {
+        "path": "node_modules/@expo/modules-macros-linux-x64",
+        "optionalPlatformPackageAbsent": true
+      },
+      {
+        "path": "node_modules/expo-modules-cli",
+        "version": "0.3.1",
+        "packageSha256": "e612b1813ae8a5f154c8a97933dd900f606ed158ff23c14947835de55ed41a1c"
+      }
+    ],
+    "desktopUnchanged": [
+      {
+        "path": "package.json",
+        "sha256": "077ed2bb7cd2ba6583fd74dfa83c23cc1efc5a22b3df3e23d9c5186f36270054"
+      },
+      {
+        "path": "package-lock.json",
+        "sha256": "7366f3a5de4b9fbbafdea8a1febbc35828fa788fe006635b87727d559f4d149a"
+      }
+    ],
+    "xcode": {
+      "before": "3.0.1",
+      "after": "4.0.0",
+      "uuidDependencyRemoved": true,
+      "scopedOverrideRetired": true,
+      "consumer": "Expo/config-plugins -> xcode4.0.0 -> node:crypto.randomUUID",
+      "consumerSha256": "3333b63bcfab7c83b62c34129492c99dce7015e4cc4f7deacd943864cef17031"
+    },
+    "forgeBackport": {
+      "unchanged": true,
+      "version": "1.4.0",
+      "sha256": "c8faa8c5791709964268836ba90d3f7ac47311fccc0b6b52b6fc09f2a34112fd",
+      "normalInstallReapplied": true
+    },
+    "compatibility": {
+      "source": "expo@58.0.17 bundledNativeModules.json",
+      "registryIntegrity": "sha512-IFH8ExamRC2m7La8q/RiBaZ3dcHga2fuMPQzRXsagS7w2sLDwwExEpZWT9Mr+30A13xEuXAHxZD3zmtgetzvHw==",
+      "nativeAbiRequiresRebuild": true,
+      "core": "58.0.24",
+      "jsi": "58.0.17"
+    }
+  },
+  "validation": {
+    "typecheck": {
+      "exitCode": 0,
+      "log": ".tmp/refactor-tests/r8-sdk58-patches/typecheck.log"
+    },
+    "installCheck": true,
+    "doctor": "20/20",
+    "npmLsAll": true,
+    "mobileDependencyConsumers": {
+      "passed": true,
+      "log": ".tmp/refactor-tests/r8-sdk58-patches/security.log",
+      "scope": "retained full Forge/installer/plist/shell/YAML checks; current Xcode UUID generation without retired uuid package"
+    },
+    "xcode": {
+      "date": "2026-10-23T02:10:52.672Z",
+      "success": true,
+      "scope": "Actual Expo iOS Xcode mod/compiler and SDK58 template, not Xcode build/signing",
+      "template": {
+        "version": "expo-template-bare-minimum@58.0.23",
+        "originalPbxSha256": "f6eed93f64de44b00c841b565232cdfd24c7922943ddc9eb859ac740f178edaa"
+      },
+      "modifiedPbxSha256": "58e0255df674d0b863fc5aa628d15c7d52d73b5590428a587cc8c447b3fd6fae",
+      "newIdentifiers": 5,
+      "swiftSourceAdded": true,
+      "resourceAdded": true,
+      "buildPhaseAdded": true,
+      "sceneTemplatePresent": true,
+      "serializationRoundtrip": true,
+      "noShellPhaseExecuted": true,
+      "fixture": "E:\\wallpaper播放器\\.tmp\\refactor-tests\\r8-sdk58-patches\\xcode-cng-6Vgyuk"
+    },
+    "regressions": [
+      {
+        "log": ".tmp/refactor-tests/r8-sdk58-patches/mobile-correctness.log",
+        "test": "mobile-correctness",
+        "exitCode": 0
+      },
+      {
+        "log": ".tmp/refactor-tests/r8-sdk58-patches/mobile-player-structure.log",
+        "test": "mobile-player-structure",
+        "exitCode": 0
+      },
+      {
+        "log": ".tmp/refactor-tests/r8-sdk58-patches/mobile-playback-adapter.log",
+        "test": "mobile-playback-adapter",
+        "exitCode": 0
+      },
+      {
+        "log": ".tmp/refactor-tests/r8-sdk58-patches/mobile-player-panels.log",
+        "test": "mobile-player-panels",
+        "exitCode": 0
+      },
+      {
+        "log": ".tmp/refactor-tests/r8-sdk58-patches/mobile-input-accessibility.log",
+        "test": "mobile-input-accessibility",
+        "exitCode": 0
+      },
+      {
+        "log": ".tmp/refactor-tests/r8-sdk58-patches/mobile-accessibility.log",
+        "test": "mobile-accessibility",
+        "exitCode": 0
+      },
+      {
+        "log": ".tmp/refactor-tests/r8-sdk58-patches/mobile-navigation.log",
+        "test": "mobile-navigation",
+        "exitCode": 0
+      },
+      {
+        "log": ".tmp/refactor-tests/r8-sdk58-patches/mobile-multi-device.log",
+        "test": "mobile-multi-device",
+        "exitCode": 0
+      },
+      {
+        "log": ".tmp/refactor-tests/r8-sdk58-patches/remote-library-flow.log",
+        "test": "remote-library-flow",
+        "exitCode": 0
+      },
+      {
+        "log": ".tmp/refactor-tests/r8-sdk58-patches/privacy-passwords.log",
+        "test": "privacy-passwords",
+        "exitCode": 0
+      },
+      {
+        "log": ".tmp/refactor-tests/r8-sdk58-patches/updater-startup.log",
+        "test": "updater-startup",
+        "exitCode": 0
+      }
+    ],
+    "bundles": [
+      {
+        "platform": "android",
+        "bytes": 3093068,
+        "modules": 2566,
+        "reactVersion": "19.3.0",
+        "sharedContracts": true,
+        "excludedBuildOnlyAdvisories": [
+          "braces",
+          "node-forge"
+        ]
+      },
+      {
+        "platform": "ios",
+        "bytes": 3088260,
+        "modules": 2568,
+        "reactVersion": "19.3.0",
+        "sharedContracts": true,
+        "excludedBuildOnlyAdvisories": [
+          "braces",
+          "node-forge"
+        ]
+      }
+    ],
+    "native": {
+      "date": "2026-10-23T02:11:16.0397076Z",
+      "apk": "E:\\wp58p-602d6c14\\mobile\\android\\app\\build\\outputs\\apk\\release\\app-release.apk",
+      "sha256": "41b76681ca25e59f695d55534f5099eefe066c13e32950e4861ec338bb55891d",
+      "bytes": 35964737,
+      "appId": "com.wallpaperplayer.mobile.qa.sdk58",
+      "versionCode": 6,
+      "versionName": "0.1.4",
+      "certificateSha256": "fac61745dc0903786fb9ede62a962b399f7348f0bb6f899b8332667591033b9c",
+      "abi": "x86_64",
+      "minSdk": "24",
+      "targetSdk": "36",
+      "hermes": {
+        "magic": "C6-1F-BC-03-C1-03-19-1F",
+        "bytes": 3093068
+      },
+      "r8Mapping": {
+        "path": "E:\\wp58p-602d6c14\\mobile\\android\\app\\build\\outputs\\mapping\\release\\mapping.txt",
+        "sha256": "3bb2bce05adc554d31e9f11b5785fdff4dc663f7bf530bd68a90348b83952ea8",
+        "bytes": 89242480
+      },
+      "productionSigned": false,
+      "stage": "E:\\wp58p-602d6c14",
+      "java": "C:\\Program Files\\Java\\jdk-21",
+      "gradle": "9.4.1",
+      "compileApi": 37,
+      "emulatorApi": 36,
+      "buildResult": "BUILD SUCCESSFUL in 6m 29s; 387 executed tasks",
+      "optimizedRelease": true,
+      "before": {
+        "date": "2026-10-23T02:05:50.640Z",
+        "mode": "before",
+        "success": true,
+        "app": "com.wallpaperplayer.mobile.qa.sdk58",
+        "checks": [
+          "Installed APK hash verified; retained device credentials authenticated a fresh protected library request without pairing"
+        ],
+        "originalDisplay": {
+          "size": "Physical size: 1080x2340",
+          "density": "Physical density: 440",
+          "font": "1.0"
+        },
+        "installedVersionCode": 5,
+        "cameraPermissionGranted": true,
+        "installedApkSha256": "cb208b6c0e0de6c950fd1406e971e51d865d0fbadec2ac52ddc1198827db416b",
+        "apk": "E:\\wp-sdk58-qa-c4c02030\\mobile\\android\\app\\build\\outputs\\apk\\release\\app-release.apk",
+        "authenticated": {
+          "startedAt": "2026-10-23T02:01:06.196Z",
+          "requests": {
+            "GET /v1/info 200": 2,
+            "GET /v1/auth 200": 2,
+            "POST /v1/library/query 200": 1,
+            "GET /v1/videos/video_0IE_dcOZNqfUzxO0mzwbNLULyQOBVA5R/thumbnail 200": 1,
+            "GET /v1/library/revision 200": 1
+          },
+          "unexpectedPairingRequests": 0,
+          "devices": [
+            "mobile_mvf684a0_bkwdroi1yzr_xkwhdt8vjik"
+          ],
+          "playback": [
+            {
+              "position": 5.552999973297119,
+              "updatedAt": 1792409339511,
+              "revision": 2
+            }
+          ]
+        },
+        "displayRestored": true
+      },
+      "after": {
+        "date": "2026-10-23T02:10:08.435Z",
+        "mode": "after",
+        "success": true,
+        "app": "com.wallpaperplayer.mobile.qa.sdk58",
+        "checks": [
+          "Installed APK hash verified; retained device credentials authenticated a fresh protected library request without pairing",
+          "Updated native video decoded/paused H264, entered actual landscape and returned to portrait",
+          "Updated CameraView opened and cancelled with retained permission and AVD emulated camera",
+          "Post-upgrade restart reauthenticated with the same binding; new playback checkpoint acknowledged"
+        ],
+        "originalDisplay": {
+          "size": "Physical size: 1080x2340",
+          "density": "Physical density: 440",
+          "font": "1.0"
+        },
+        "installedVersionCode": 6,
+        "cameraPermissionGranted": true,
+        "installedApkSha256": "41b76681ca25e59f695d55534f5099eefe066c13e32950e4861ec338bb55891d",
+        "apk": "E:\\wp58p-602d6c14\\mobile\\android\\app\\build\\outputs\\apk\\release\\app-release.apk",
+        "authenticated": {
+          "startedAt": "2026-10-23T02:01:06.196Z",
+          "requests": {
+            "GET /v1/info 200": 4,
+            "GET /v1/auth 200": 4,
+            "POST /v1/library/query 200": 2,
+            "GET /v1/videos/video_0IE_dcOZNqfUzxO0mzwbNLULyQOBVA5R/thumbnail 200": 2,
+            "GET /v1/library/revision 200": 2
+          },
+          "unexpectedPairingRequests": 0,
+          "devices": [
+            "mobile_mvf684a0_bkwdroi1yzr_xkwhdt8vjik"
+          ],
+          "playback": [
+            {
+              "position": 5.552999973297119,
+              "updatedAt": 1792409339511,
+              "revision": 2
+            }
+          ]
+        },
+        "final": {
+          "startedAt": "2026-10-23T02:01:06.196Z",
+          "requests": {
+            "GET /v1/info 200": 7,
+            "GET /v1/auth 200": 7,
+            "POST /v1/library/query 200": 4,
+            "GET /v1/videos/video_0IE_dcOZNqfUzxO0mzwbNLULyQOBVA5R/thumbnail 200": 4,
+            "GET /v1/library/revision 200": 3,
+            "GET /v1/playback/video_0IE_dcOZNqfUzxO0mzwbNLULyQOBVA5R 200": 1,
+            "GET /v1/videos/video_0IE_dcOZNqfUzxO0mzwbNLULyQOBVA5R/stream 200": 1,
+            "GET /v1/videos/video_0IE_dcOZNqfUzxO0mzwbNLULyQOBVA5R/stream 206": 2,
+            "PUT /v1/playback/video_0IE_dcOZNqfUzxO0mzwbNLULyQOBVA5R 200": 3
+          },
+          "unexpectedPairingRequests": 0,
+          "devices": [
+            "mobile_mvf684a0_bkwdroi1yzr_xkwhdt8vjik"
+          ],
+          "playback": [
+            {
+              "position": 9.786999702453613,
+              "updatedAt": 1792721450159,
+              "revision": 5
+            }
+          ]
+        },
+        "displayRestored": true
+      },
+      "sourceDigests": [
+        {
+          "path": "mobile/App.tsx",
+          "sha256": "2255f80d1c032dc139ba9b1b54f3310bbca34c341ac6fc53b2f8f3eccccc0d81"
+        },
+        {
+          "path": "mobile/metro.config.js",
+          "sha256": "ed13b2c5c51bb5066f4e765f93445ed73cd4eebde5f513c7d74369732294105e"
+        },
+        {
+          "path": "mobile/package-lock.json",
+          "sha256": "3ec79a6d47c6fda299304ccaecb5304596900e5c45740ea90ec22e228fecf45a"
+        },
+        {
+          "path": "mobile/package.json",
+          "sha256": "1ce981a25f1254563d86081ceed97647db0107425c21031b64c5c00801ae1a2e"
+        },
+        {
+          "path": "mobile/patches/dependency-patches.json",
+          "sha256": "0789eb347af1d4b1cea7f75d3662f50559ff06dbc1d3732e23c4840be8dedb77"
+        },
+        {
+          "path": "mobile/plugins/with-cleartext-traffic.js",
+          "sha256": "abe73ff604ee2fed39d81cd58b66b49adb4ef45a7ba08229eea5925b1593f179"
+        },
+        {
+          "path": "mobile/plugins/with-windows-cmake-paths.js",
+          "sha256": "5473e7a1a23f3ea9ed7942e60223afacb1d0294384859899da57af68ab7ac275"
+        },
+        {
+          "path": "mobile/scripts/apply-dependency-patches.cjs",
+          "sha256": "75c44291b1b3777be9ad53a165c97b4c89ecd6b751529ca77676d62a01bea6b6"
+        },
+        {
+          "path": "mobile/src/AppNavigator.tsx",
+          "sha256": "c4cacc8f12f40bb6f89910fafd2b26682e91a5dacd580d4f7860deea5f0a96ab"
+        },
+        {
+          "path": "mobile/src/components/AccessibleModal.tsx",
+          "sha256": "f079bdc22b1033b504c7dfff3f5a6693f82448e73d0b7c1ef7d4535910409232"
+        },
+        {
+          "path": "mobile/src/components/ConnectionStatus.tsx",
+          "sha256": "b003b9e5a379c16a6a98246fbdcd075a443f17b3ac928303c1b5c00dc1699084"
+        },
+        {
+          "path": "mobile/src/components/DeviceCard.tsx",
+          "sha256": "bc313ccc5608ef747bd37f1dd9c2ed50881f7617cb940cf4c89d23d824319efa"
+        },
+        {
+          "path": "mobile/src/components/MobileUpdateCard.tsx",
+          "sha256": "2b79b588e59af400c07dfb2ff9298e7c2df7beceba550b4dcfad7b3e40fd88e6"
+        },
+        {
+          "path": "mobile/src/components/PrimaryButton.tsx",
+          "sha256": "529b4278bede821dac7ef60b0a3edd31d860b54a37f3f988bb7b66e8a5c9da78"
+        },
+        {
+          "path": "mobile/src/components/VideoCard.tsx",
+          "sha256": "a9bbd50f4118921017453717ca05628191e2303c73e9da4758158f8fed5ac4e6"
+        },
+        {
+          "path": "mobile/src/components/player/FavoriteAnimation.tsx",
+          "sha256": "5a56203540c22bede23a9cc0d2b9502b4b04e84f5e9db9e4ff2c3e58932499f3"
+        },
+        {
+          "path": "mobile/src/components/player/NativeVideoPlayer.tsx",
+          "sha256": "60b2f7bd7aaa8c096f66f272346bf466309b4c50636fb6ce2b8ecc97d2765760"
+        },
+        {
+          "path": "mobile/src/components/player/PlaybackProgress.tsx",
+          "sha256": "23f42929df31c7404922728b780c909824ca5031d744b32f8cb6c72a3e798161"
+        },
+        {
+          "path": "mobile/src/components/player/PlayerControls.tsx",
+          "sha256": "8110761189ae66461b323207a023ef42359346c095331e4ad614cd75e6693d64"
+        },
+        {
+          "path": "mobile/src/components/player/PlayerMoreSheet.tsx",
+          "sha256": "7caa11645220f5abf3309af74a7a55f413bfc9f2e10825e68aae1dd8e6189909"
+        },
+        {
+          "path": "mobile/src/components/player/PlayerSheetFrame.tsx",
+          "sha256": "6d2646becf3a509139d7a1fbe0b22409ce05d394fd13fb5fb629bddbdba4c5d1"
+        },
+        {
+          "path": "mobile/src/components/player/TagEditorSheet.tsx",
+          "sha256": "f992a6a1a873c1846e2d1534201fda7c9c718a45f2fa2917dfadfe1c2bdbd69b"
+        },
+        {
+          "path": "mobile/src/components/player/TranscodingStatus.tsx",
+          "sha256": "7650aa5676ba7207dd9a8b5958891fad121792808180dd804bd5fa91c5ccc35a"
+        },
+        {
+          "path": "mobile/src/components/player/VideoActionBar.tsx",
+          "sha256": "6877ee74eaf6a131ecaea08911cb243cb9a322e97918cd364afde31cbdb35126"
+        },
+        {
+          "path": "mobile/src/components/player/VideoAnalysisSheet.tsx",
+          "sha256": "3a07d4302fc8898bcbcddf2f1e65fb44e017d7fdb8bc08acefe9475731cee8be"
+        },
+        {
+          "path": "mobile/src/components/player/VideoErrorState.tsx",
+          "sha256": "0b3fe20834c23a1c17a91dbd56d85641076f48b8f6f27cf0d68bbebe15d2b8a8"
+        },
+        {
+          "path": "mobile/src/components/player/VideoFeedItem.tsx",
+          "sha256": "e84cdbb575a63aad27338a761d18f04c3f3ed0ff1fb9938107b2e8564b4f1096"
+        },
+        {
+          "path": "mobile/src/components/player/VideoInfo.tsx",
+          "sha256": "8623dad3272bc25b677fbc006531416f47970cdce2d4d424ece2bac96fb44a00"
+        },
+        {
+          "path": "mobile/src/components/player/VideoOverlay.tsx",
+          "sha256": "48ab547045366f65eed4fb97fae10298f2265c86104e872d2b8696eb6419eb7d"
+        },
+        {
+          "path": "mobile/src/hooks/useAccessibilityPreferences.ts",
+          "sha256": "9ecef850963d7728949e5f407cf9541c6e33a6152218deaaa642a49610d0f522"
+        },
+        {
+          "path": "mobile/src/hooks/useAdaptiveVideoGrid.ts",
+          "sha256": "df3fa9bb5c2b7f61610b75e1cc18f01946e75af636a09cf252afc041ca017a75"
+        },
+        {
+          "path": "mobile/src/hooks/usePageActivity.ts",
+          "sha256": "9f4fc53e137436d5ba7d1b1f9141704e4e06ad9fbd5957e89b75ed175bbe6488"
+        },
+        {
+          "path": "mobile/src/hooks/usePlayerSheet.ts",
+          "sha256": "4ecef34ef84429505859affb6cff760295a67e78425a328a481721871fe64c24"
+        },
+        {
+          "path": "mobile/src/hooks/useTagEditorDraft.ts",
+          "sha256": "849a05bd3a0007dd654bd9d8ed88ff59f3382bab5bec288d96bd070eba8f79a6"
+        },
+        {
+          "path": "mobile/src/persistence/device-caches.ts",
+          "sha256": "7c0ac5e84b93def4753a3ebcd4cff0a399621aa4e802f83d5ff7a827991c5e9a"
+        },
+        {
+          "path": "mobile/src/persistence/devices.ts",
+          "sha256": "8b7c272bf9a247a6ae9d8cfe5e0b044ff841c0bec6359d321163f2acb0dd4afe"
+        },
+        {
+          "path": "mobile/src/persistence/library-pages.ts",
+          "sha256": "3fce3a0db05a666f263eb43343589a454c8a349b1f9164481b0fb12f75d0ecf2"
+        },
+        {
+          "path": "mobile/src/persistence/library.ts",
+          "sha256": "88bfce93935d4dcd9a83a0e4ec027046023531b723714f061ef10dd10a594ffd"
+        },
+        {
+          "path": "mobile/src/persistence/playback.ts",
+          "sha256": "42713d2a4256e66827ff9a0b05ce585641dde0577138a1af0e69af9e19e54611"
+        },
+        {
+          "path": "mobile/src/persistence/settings.ts",
+          "sha256": "3e46562751a3097173d0e84663f14bc48e766c9563107a167aefcce0579576c6"
+        },
+        {
+          "path": "mobile/src/screens/DeviceListScreen.tsx",
+          "sha256": "acf368835b8e282f0467f7a106fd25e1509e79a3b5c316c989d40d623fb0a474"
+        },
+        {
+          "path": "mobile/src/screens/LibraryScreen.tsx",
+          "sha256": "5d769956d52b2950c56c178ffdb87674676fce5bf0a85a98c4e1330bab6989a7"
+        },
+        {
+          "path": "mobile/src/screens/PairDeviceScreen.tsx",
+          "sha256": "a650b766de43696aac20c4a96cb7211a1d9dbaa2cf9afb4fbe8e5644443f3e6d"
+        },
+        {
+          "path": "mobile/src/screens/PlayerScreen.tsx",
+          "sha256": "03dfee072cef5fab56880cf5fe40e502f60c1e7bef02ed3a6dd1431c54726f85"
+        },
+        {
+          "path": "mobile/src/screens/SearchScreen.tsx",
+          "sha256": "bbad53393267d3975b431a13ded312fe59c92e518faf463551c42c665a45f192"
+        },
+        {
+          "path": "mobile/src/screens/player/playerLayout.ts",
+          "sha256": "7f404440fb8dfd9fd4cdb38c7d7cd13b9c2ae680dad7a0d5e82b93216cabb1c7"
+        },
+        {
+          "path": "mobile/src/screens/player/playerUtils.ts",
+          "sha256": "c1528ca7891e5833dc927a9b7fc5e8fd5eed351ab42a29d6dc30ab35a8c22533"
+        },
+        {
+          "path": "mobile/src/services/api.ts",
+          "sha256": "b1170edcd5b411ac5177fcf21e74b20690a5fbcefc79051613ee8d24229f9fe3"
+        },
+        {
+          "path": "mobile/src/services/connection-manager.ts",
+          "sha256": "10c9010241c4c2c7d53fc5f3b297950408c4aeb0f8590ff61913d5e648769dde"
+        },
+        {
+          "path": "mobile/src/services/library-events.ts",
+          "sha256": "93227515880311a54c1727a35448e23032ffae8a801c7b5bd999144f32514e44"
+        },
+        {
+          "path": "mobile/src/services/library-query.ts",
+          "sha256": "d7bffaeae89fd3f0a7361c14efce6ec21b004141c43bce1a53b76e826792d621"
+        },
+        {
+          "path": "mobile/src/services/library-repository.ts",
+          "sha256": "7302e068dbbab4a436270d257491f72213ebb3893f3b32c089e057571f317734"
+        },
+        {
+          "path": "mobile/src/services/navigation-store.ts",
+          "sha256": "4a75384ca416ba71c8668403a109829c2248dcfacc84126064800b40dd1d27e7"
+        },
+        {
+          "path": "mobile/src/services/orientation.ts",
+          "sha256": "0ce889c5f0337412fdc84c335d4d398840a8ccab2fee84eadd1f8bca7990be02"
+        },
+        {
+          "path": "mobile/src/services/pairing.ts",
+          "sha256": "e15eb8dcc88f43c3651987370f03d1b26e892864d673318af174f6b68fb07075"
+        },
+        {
+          "path": "mobile/src/services/playback-adapter.ts",
+          "sha256": "3e69f586a9a46d190bb7001463e4886b09733a43b468d3b313d0249c04faa283"
+        },
+        {
+          "path": "mobile/src/services/tag-editing.ts",
+          "sha256": "591af878c712e4fe526ef967d77825dd157bd2f9de838f42d1df66f41c1edb6e"
+        },
+        {
+          "path": "mobile/src/services/task-observer.ts",
+          "sha256": "4a388aa10ea2867969d41b34ab2a9624ccf29719329d23e80d1f07eebe4cb642"
+        },
+        {
+          "path": "mobile/src/services/updates.ts",
+          "sha256": "a0adcb396dbd54e218a5e7f7343ef17d8923104c2dd60ee0cb2c56a7b0175013"
+        },
+        {
+          "path": "mobile/src/theme-context.tsx",
+          "sha256": "70ee91fb42dddf0cc81d14d3d95d7f22493cb286874d15bc388bf3b46054772d"
+        },
+        {
+          "path": "mobile/src/theme.ts",
+          "sha256": "9b9a2d4e76d609b2fb2bed18c999d8be2d232720323191c62f2b39c530b0641a"
+        },
+        {
+          "path": "mobile/src/types.ts",
+          "sha256": "24bac51f5ce1bc913c57f5805185737d6cc92af05049f1dd169d5cd792f49d1e"
+        },
+        {
+          "path": "mobile/src/utils/url.ts",
+          "sha256": "ddbf305c3932482cd7af23e2f0f6d01b51d8a35824cec501f06bc425a34aead6"
+        },
+        {
+          "path": "mobile/tsconfig.json",
+          "sha256": "ef64b467fa9eee0931da2d8888e146d8b9aa277c3d771c1c37ec4b277cf26203"
+        },
+        {
+          "path": "packages/contracts/dist/index.d.ts",
+          "sha256": "70fe20ec736e996b75a46ee355b125669da5cee2ad0388f6b6f156d4a3017e4d"
+        },
+        {
+          "path": "packages/contracts/dist/index.js",
+          "sha256": "6fd89ec15d078d06f85781f98d2c8e9dd4815586539ec255cd40662f23c99ef3"
+        },
+        {
+          "path": "packages/contracts/dist/schema.d.ts",
+          "sha256": "72e7865d7f010b0c4c7bc72bb08dc0b88e43177e74f7053400497b5fe91d3770"
+        },
+        {
+          "path": "packages/contracts/dist/schema.js",
+          "sha256": "6b889492fa4260b6ef309bd8823813802ddb38b71dbc162c0359441819dfc91b"
+        },
+        {
+          "path": "packages/contracts/dist/settings-feed.d.ts",
+          "sha256": "d111c15b37ea6f1d0967eeb799a423a4a09adbe3ebc0339f3977acb18363ee28"
+        },
+        {
+          "path": "packages/contracts/dist/settings-feed.js",
+          "sha256": "d3de55971030b50e35ee4f8e70ebdd1c65a3353553f211aea31e6bf58e98424c"
+        },
+        {
+          "path": "packages/contracts/package.json",
+          "sha256": "caacf7b4a6a770186fd6765f25d2b10e46f81f41c66d861b67e3e44a837ce08f"
+        },
+        {
+          "path": "packages/contracts/src/index.ts",
+          "sha256": "23ecb23d50d0b6cba74eed99238c20205c70d56a62ca5a7c0350db088a0e7af1"
+        },
+        {
+          "path": "packages/contracts/src/schema.ts",
+          "sha256": "46f3cb5aaf929e8a455bd7a151cfce63915af534092ff0075bc998ba31cf35b7"
+        },
+        {
+          "path": "packages/contracts/src/settings-feed.ts",
+          "sha256": "8266d590aa5b9b2ac6bfa2a72fb4f9a269cd9e29de0de4cdf76832f7805342f6"
+        },
+        {
+          "path": "packages/contracts/tsconfig.json",
+          "sha256": "30e5e6740fbe29b3983d6f4dc01f1e145ee81ec95c5d0a79a59ad6dd297531d2"
+        },
+        {
+          "path": "packages/domain/dist/index.d.ts",
+          "sha256": "85710e7819cb78865ef1b2af3c256d23d7d420008e76020dd04ce5c57b91fc8f"
+        },
+        {
+          "path": "packages/domain/dist/index.js",
+          "sha256": "e16a487dbda471e000a1d37a362583167d20f8020c5a017ca81fadfad36a4bdb"
+        },
+        {
+          "path": "packages/domain/package.json",
+          "sha256": "daf3324204bab2539ec92a09b401da82f1f60b82164944c04d148d8f2d6218a1"
+        },
+        {
+          "path": "packages/domain/src/index.ts",
+          "sha256": "ba59e7a5e015bcecd29e791fabdc0acbc9c8dd9cda7a6d6a2cdf783f87a4a6fa"
+        },
+        {
+          "path": "packages/domain/tsconfig.json",
+          "sha256": "30e5e6740fbe29b3983d6f4dc01f1e145ee81ec95c5d0a79a59ad6dd297531d2"
+        }
+      ],
+      "unchangedPreviousCodeInputs": 76,
+      "sourceSnapshot": {
+        "frozenAt": "2026-10-23T01:57:08.6288766Z",
+        "currentWorkspaceDrift": [
+          {
+            "path": "mobile/App.tsx",
+            "nativeBuildSha256": "2255f80d1c032dc139ba9b1b54f3310bbca34c341ac6fc53b2f8f3eccccc0d81",
+            "currentWorkspaceSha256": "8d6020d9a5d8f29e40af70858a1ab68f427b972aa437f9818f1ff35e42744ddf"
+          },
+          {
+            "path": "mobile/src/components/ConnectionStatus.tsx",
+            "nativeBuildSha256": "b003b9e5a379c16a6a98246fbdcd075a443f17b3ac928303c1b5c00dc1699084",
+            "currentWorkspaceSha256": "ab5df341fd74bc85fdbc540e3864c88a13e2fde18c9ed8902e1b6dd42f65949c"
+          },
+          {
+            "path": "mobile/src/components/DeviceCard.tsx",
+            "nativeBuildSha256": "bc313ccc5608ef747bd37f1dd9c2ed50881f7617cb940cf4c89d23d824319efa",
+            "currentWorkspaceSha256": "dc13469e3bb9c9e3f7f96be2e824bed1f35ddc29bcfd88ffc697124d6917bb1f"
+          },
+          {
+            "path": "mobile/src/components/MobileUpdateCard.tsx",
+            "nativeBuildSha256": "2b79b588e59af400c07dfb2ff9298e7c2df7beceba550b4dcfad7b3e40fd88e6",
+            "currentWorkspaceSha256": "a5de054d744c7acfe71b5693157ccb4f4e7b5c73f0ee5271b0ee9c7395b99b61"
+          },
+          {
+            "path": "mobile/src/components/PrimaryButton.tsx",
+            "nativeBuildSha256": "529b4278bede821dac7ef60b0a3edd31d860b54a37f3f988bb7b66e8a5c9da78",
+            "currentWorkspaceSha256": "d7ad67eb39c8000fd84fc161700bb6693922f82531a2cff7fa4d97d58467cf5e"
+          },
+          {
+            "path": "mobile/src/components/VideoCard.tsx",
+            "nativeBuildSha256": "a9bbd50f4118921017453717ca05628191e2303c73e9da4758158f8fed5ac4e6",
+            "currentWorkspaceSha256": "0993217d42740cb084ef0a0929bcc5f5a0ed6ee003dd740b74a1e28e771833e2"
+          },
+          {
+            "path": "mobile/src/screens/DeviceListScreen.tsx",
+            "nativeBuildSha256": "acf368835b8e282f0467f7a106fd25e1509e79a3b5c316c989d40d623fb0a474",
+            "currentWorkspaceSha256": "7ac18ad9ad29d0802061722eb54eace8ac48c92800cbfc96c3f10422558f0aa5"
+          },
+          {
+            "path": "mobile/src/screens/SearchScreen.tsx",
+            "nativeBuildSha256": "bbad53393267d3975b431a13ded312fe59c92e518faf463551c42c665a45f192",
+            "currentWorkspaceSha256": "c40b62ff93f988bf101ed7fe7e06d8d04be5d054df7587ffb31d7dd098f7df9f"
+          },
+          {
+            "path": "mobile/src/theme.ts",
+            "nativeBuildSha256": "9b9a2d4e76d609b2fb2bed18c999d8be2d232720323191c62f2b39c530b0641a",
+            "currentWorkspaceSha256": "e8e09073d90f92cb7885b9d2558373f21faf166a1b7d9dcb4561551abb062b1a"
+          }
+        ],
+        "newWorkspaceInputs": [],
+        "ownership": "User confirmed DeepSeek is concurrently optimizing the frontend. Those changes are preserved and excluded from this native APK acceptance.",
+        "validationScope": "The built/installed APK and native UI evidence use the isolated stage snapshot. Hermes and behavior checks completed before the concurrent frontend edits; this phase does not claim current frontend/native acceptance."
+      },
+      "appConfig": {
+        "originalSha256": "326d496a86ba0b28d4f4fc3b3e645cedb784a1b07523c955005877414477e9dd",
+        "qaSha256": "13254aced2a96181999110386eb0c9f476dacb58c8bd71498a59504bfcac569f",
+        "onlyOverrides": [
+          "name",
+          "android.package",
+          "android.versionCode"
+        ]
+      },
+      "captures": [
+        {
+          "path": "docs/evidence/r8-sdk58-patches-player-paused.png",
+          "sha256": "188151072fb1d353c3a9d7c89b1d44af9f98e2edc3dc9e72ea6c5998f767b63d"
+        },
+        {
+          "path": "docs/evidence/r8-sdk58-patches-player-landscape.png",
+          "sha256": "3453c4065cfe7a9a2a056ca8503e1dc1c343c4d0fa8c8fb27391efef4dd1adba"
+        },
+        {
+          "path": "docs/evidence/r8-sdk58-patches-library-restored.png",
+          "sha256": "48349346ab6a49206c4ff9f9539e0eaff4170879e28aa03a451021dde99f5617"
+        }
+      ],
+      "fixtureScope": "Retained owned API36 AVD and original isolated desktop QA profile, actual old/new installed APK hash checks and package manager upgrade 5 -> 6. Same test signing key, same binding, fresh protected library requests, no pairing/claim approval, and new acknowledged checkpoint after upgrade. Silent synthetic H264 and emulated camera only.",
+      "clipboard": "Native module loaded with the application; host/device clipboard contents were not read or written. Clipboard API behavior and iOS-only changes were not directly tested."
+    }
+  },
+  "audit": {
+    "registry": "https://registry.npmjs.org",
+    "totals": {
+      "info": 0,
+      "low": 0,
+      "moderate": 0,
+      "high": 15,
+      "critical": 0,
+      "total": 15
+    },
+    "vulnerabilities": {
+      "@expo/cli": {
+        "name": "@expo/cli",
+        "severity": "high",
+        "isDirect": false,
+        "via": [
+          "@expo/code-signing-certificates",
+          "@expo/metro",
+          "@expo/metro-config",
+          "node-forge"
+        ],
+        "effects": [
+          "expo"
+        ],
+        "range": "<=0.0.0-canary-20231123-1b19f96-4 || >=0.0.1-canary-20231125-d600e44",
+        "nodes": [
+          "node_modules/expo/node_modules/@expo/cli"
+        ],
+        "fixAvailable": {
+          "name": "expo",
+          "version": "44.0.6",
+          "isSemVerMajor": true
+        }
+      },
+      "@expo/code-signing-certificates": {
+        "name": "@expo/code-signing-certificates",
+        "severity": "high",
+        "isDirect": false,
+        "via": [
+          "node-forge"
+        ],
+        "effects": [],
+        "range": "*",
+        "nodes": [
+          "node_modules/@expo/code-signing-certificates"
+        ],
+        "fixAvailable": true
+      },
+      "@expo/metro": {
+        "name": "@expo/metro",
+        "severity": "high",
+        "isDirect": false,
+        "via": [
+          "metro",
+          "metro-config",
+          "metro-file-map",
+          "metro-transform-worker"
+        ],
+        "effects": [
+          "@expo/cli",
+          "@expo/metro-config",
+          "expo"
+        ],
+        "range": "*",
+        "nodes": [
+          "node_modules/@expo/metro"
+        ],
+        "fixAvailable": {
+          "name": "expo",
+          "version": "44.0.6",
+          "isSemVerMajor": true
+        }
+      },
+      "@expo/metro-config": {
+        "name": "@expo/metro-config",
+        "severity": "high",
+        "isDirect": false,
+        "via": [
+          "@expo/metro"
+        ],
+        "effects": [
+          "expo"
+        ],
+        "range": ">=0.21.0-canary-20250630-547cd82",
+        "nodes": [
+          "node_modules/expo/node_modules/@expo/metro-config"
+        ],
+        "fixAvailable": {
+          "name": "expo",
+          "version": "44.0.6",
+          "isSemVerMajor": true
+        }
+      },
+      "@react-native/community-cli-plugin": {
+        "name": "@react-native/community-cli-plugin",
+        "severity": "high",
+        "isDirect": false,
+        "via": [
+          "metro"
+        ],
+        "effects": [
+          "react-native"
+        ],
+        "range": "*",
+        "nodes": [
+          "node_modules/@react-native/community-cli-plugin"
+        ],
+        "fixAvailable": {
+          "name": "react-native",
+          "version": "0.72.17",
+          "isSemVerMajor": true
+        }
+      },
+      "@react-native/virtualized-lists": {
+        "name": "@react-native/virtualized-lists",
+        "severity": "high",
+        "isDirect": false,
+        "via": [
+          "react-native"
+        ],
+        "effects": [
+          "react-native"
+        ],
+        "range": ">=0.85.0-nightly-20260108-1236b6be4",
+        "nodes": [
+          "node_modules/@react-native/virtualized-lists"
+        ],
+        "fixAvailable": {
+          "name": "react-native",
+          "version": "0.72.17",
+          "isSemVerMajor": true
+        }
+      },
+      "braces": {
+        "name": "braces",
+        "severity": "high",
+        "isDirect": false,
+        "via": [
+          {
+            "source": 1240992,
+            "name": "braces",
+            "dependency": "braces",
+            "title": "braces vulnerable to stack-exhaustion denial of service through deeply nested patterns",
+            "url": "https://github.com/advisories/GHSA-vfj7-8cjw-p6xm",
+            "severity": "high",
+            "cwe": [
+              "CWE-674"
+            ],
+            "cvss": {
+              "score": 7.5,
+              "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H"
+            },
+            "range": "<=3.0.3"
+          }
+        ],
+        "effects": [
+          "micromatch"
+        ],
+        "range": "*",
+        "nodes": [
+          "node_modules/braces"
+        ],
+        "fixAvailable": {
+          "name": "expo",
+          "version": "44.0.6",
+          "isSemVerMajor": true
+        }
+      },
+      "expo": {
+        "name": "expo",
+        "severity": "high",
+        "isDirect": true,
+        "via": [
+          "@expo/cli",
+          "@expo/metro",
+          "@expo/metro-config"
+        ],
+        "effects": [],
+        "range": ">=45.0.0-beta.1",
+        "nodes": [
+          "node_modules/expo"
+        ],
+        "fixAvailable": {
+          "name": "expo",
+          "version": "44.0.6",
+          "isSemVerMajor": true
+        }
+      },
+      "metro": {
+        "name": "metro",
+        "severity": "high",
+        "isDirect": false,
+        "via": [
+          "metro-config",
+          "metro-file-map",
+          "metro-transform-worker"
+        ],
+        "effects": [
+          "@react-native/community-cli-plugin",
+          "metro-config",
+          "metro-transform-worker"
+        ],
+        "range": ">=0.71.0",
+        "nodes": [
+          "node_modules/metro"
+        ],
+        "fixAvailable": {
+          "name": "react-native",
+          "version": "0.72.17",
+          "isSemVerMajor": true
+        }
+      },
+      "metro-config": {
+        "name": "metro-config",
+        "severity": "high",
+        "isDirect": false,
+        "via": [
+          "metro"
+        ],
+        "effects": [],
+        "range": ">=0.71.0",
+        "nodes": [
+          "node_modules/metro-config"
+        ],
+        "fixAvailable": true
+      },
+      "metro-file-map": {
+        "name": "metro-file-map",
+        "severity": "high",
+        "isDirect": false,
+        "via": [
+          "micromatch"
+        ],
+        "effects": [
+          "@expo/metro",
+          "metro"
+        ],
+        "range": "*",
+        "nodes": [
+          "node_modules/metro-file-map"
+        ],
+        "fixAvailable": {
+          "name": "expo",
+          "version": "44.0.6",
+          "isSemVerMajor": true
+        }
+      },
+      "metro-transform-worker": {
+        "name": "metro-transform-worker",
+        "severity": "high",
+        "isDirect": false,
+        "via": [
+          "metro"
+        ],
+        "effects": [],
+        "range": ">=0.71.0",
+        "nodes": [
+          "node_modules/metro-transform-worker"
+        ],
+        "fixAvailable": true
+      },
+      "micromatch": {
+        "name": "micromatch",
+        "severity": "high",
+        "isDirect": false,
+        "via": [
+          "braces"
+        ],
+        "effects": [
+          "metro-file-map"
+        ],
+        "range": ">=0.2.0",
+        "nodes": [
+          "node_modules/micromatch"
+        ],
+        "fixAvailable": {
+          "name": "expo",
+          "version": "44.0.6",
+          "isSemVerMajor": true
+        }
+      },
+      "node-forge": {
+        "name": "node-forge",
+        "severity": "high",
+        "isDirect": false,
+        "via": [
+          {
+            "source": 1240912,
+            "name": "node-forge",
+            "dependency": "node-forge",
+            "title": "node-forge RSA PKCS#1 v1.5 signature verification accepts extra nested DigestAlgorithm elements",
+            "url": "https://github.com/advisories/GHSA-86w9-cpqp-85rv",
+            "severity": "high",
+            "cwe": [
+              "CWE-347"
+            ],
+            "cvss": {
+              "score": 7.5,
+              "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:H/A:N"
+            },
+            "range": "<=1.4.0"
+          }
+        ],
+        "effects": [
+          "@expo/cli",
+          "@expo/code-signing-certificates"
+        ],
+        "range": "*",
+        "nodes": [
+          "node_modules/node-forge"
+        ],
+        "fixAvailable": {
+          "name": "expo",
+          "version": "44.0.6",
+          "isSemVerMajor": true
+        }
+      },
+      "react-native": {
+        "name": "react-native",
+        "severity": "high",
+        "isDirect": true,
+        "via": [
+          "@react-native/community-cli-plugin",
+          "@react-native/virtualized-lists"
+        ],
+        "effects": [
+          "@react-native/virtualized-lists"
+        ],
+        "range": ">=0.73.0-nightly-20230506-1af868c52",
+        "nodes": [
+          "node_modules/react-native"
+        ],
+        "fixAvailable": {
+          "name": "react-native",
+          "version": "0.72.17",
+          "isSemVerMajor": true
+        }
+      }
+    },
+    "mirrorFailure": "Configured npmmirror audit endpoint returned 404 NOT_IMPLEMENTED; retained diagnostic log, then explicitly retried official registry. Audit findings remain reported despite local Forge backport."
+  },
+  "dataPreservation": {
+    "preservedFallbackFiles": [
+      [
+        "analysis-results\\G086 Bronya分析结果2026-06-22_20-00-44.json",
+        "01db5f778601802471791e416b40c3ac8f96248e4542b78a867eaee77dd265e4"
+      ],
+      [
+        "downloads\\aria2.session",
+        "bbe9d72e7e5001c01f3a012fa73e5d35b6d53b9e76e08190bba58973ce1ba9bc"
+      ],
+      [
+        "llama-server-err.log",
+        "5744b9bb378569a3a4f664b62aad9a4b0025cd7d419cba73b793fb62cb737f42"
+      ],
+      [
+        "llama-server-out.log",
+        "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      ],
+      [
+        "remote-identity.json",
+        "0abcd8df9c1443a348b050b5abe28ac419ecef717ddf31a0daa680f153061324"
+      ],
+      [
+        "scan-index\\029fa92465c3409cba74ce3db6b927dfec0d4f581b12122975041a32ab324e8a.json",
+        "33b1310886821b4f01322041a561c8a6b4ed10aa351772effb396e7b1b547cfd"
+      ],
+      [
+        "scan-index\\06cf5926d93db3cc7b30882ee7dbecb69d51ce4e00de7901de3d48b866f9afc3.json",
+        "274848604327a2f96f0d152b9f23a7b4e5470fdd67c744e1c181e86c2d284059"
+      ],
+      [
+        "scan-index\\0e65747e6e0fc76a1e0c86e951c35d6c7392c184ba6cb43724d7d58856ff212a.json",
+        "3ac45a0678e6ed4554fe1f315f923d999b0311096acd3c9394e3d85826d37db9"
+      ],
+      [
+        "scan-index\\114890f3437dd45b34313ba38d9d3c36a09701d5d672bf8abd7af8c922db61af.json",
+        "3796d21463d2b2418c485565780e9628a50ab4f1a69d8faeadec1eb70a9af290"
+      ],
+      [
+        "scan-index\\1465f8e823323fe9c4383abb5a38c9e17fc550dd44cd2f14fd7f7242bc309e12.json",
+        "1be5fefdb59d8af06de2a6be0eeb0025a96253d719de1e0daced6f1fe35cdde0"
+      ],
+      [
+        "scan-index\\153bae098b5d3524553fcf4d8cbb1eacef2471314948819d043b26cebe199e14.json",
+        "689305d629290f70b40c5ea8454db685486f87be218b38da7aa4f0594a1d1cb8"
+      ],
+      [
+        "scan-index\\165f4a9a9309a7ac323647e9acefd754a66c6295cab7db6bdb50830914bf0d68.json",
+        "5b0738883aee24ac7e17fc108a221e395380d2bae6a32f3ba3f70606e4b27ebe"
+      ],
+      [
+        "scan-index\\1db67e5d68a60a19388b0338ed1ee18c2a2bcd0025ab168a1d69920c929bd647.json",
+        "b19f9d1c96db4b9106b2a28058ab1c33f4d3edc45fa693126cad0efe48cd44dd"
+      ],
+      [
+        "scan-index\\3032598f9f4655037a67986db404cfbf60011a2ca84a1e6edcec794c7deab956.json",
+        "db1c59c38bb8ba2122afad18a73d956ec55d4580f4cad17f365b37b71d7e3db8"
+      ],
+      [
+        "scan-index\\358da0698a4692a8052707f22ba2b9c94b5c4e73080d12c721e622b66a80614c.json",
+        "f1fb6fbd25b3d96027a86d6c797b162a74c95544c04f64470ed733ddbc8983ee"
+      ],
+      [
+        "scan-index\\5eb5da5dcf86cb8c66f674df75935c030f8e12d86b6373ebcdaa3d7aba7eb672.json",
+        "489328dc3fa24223d6db18869658db5d01f915838ba97532de8193f8bedc6f93"
+      ],
+      [
+        "scan-index\\5f59f687750abe3eb7d55cdb1aa86cb802bf22f3b00e3bb369f77a7ef2584d06.json",
+        "ae2763e5e5553a4eb759576c8f26efcffc9ef5aa741ddd6aad78b2e33716a719"
+      ],
+      [
+        "scan-index\\602ae02092dd5e362dec6b88bd5afb39f14c218b3e0f0fbd52e5a8d09eddeb0d.json",
+        "cd75909f0b53f3d449d479531d62f3ff1bb3144eb918086cc7a25d05816c2a7d"
+      ],
+      [
+        "scan-index\\664a4a47b45908fdfdf2d6bb5ec7024e41699d7dd2af4110f2889d4eac6dd2d7.json",
+        "64835ce867a827d40088ce1b9c8e4e19cb996d0df4c2e676cbb215cf38868556"
+      ],
+      [
+        "scan-index\\6a4b7a95d1ae5d67f63cc87a4f3486c0a22c35af457355ae63f4303d7bdbcaa1.json",
+        "7ab98d842e31b5da1227cf6e00d98e3e32287c53b0965f3e8a964dbc9e982b20"
+      ],
+      [
+        "scan-index\\6c2bfaa6b9f2b41ef00e065bab2a6d71c599e2ce76cc3f5939228ecc7b8be650.json",
+        "33dd4002ba26ea91ef1c97f264ef0337dd78b37d06f03a538f514ee0809c5107"
+      ],
+      [
+        "scan-index\\703cb3b91afdc3a4a39fb95f9d0c0289fe6dcdab34f10425d71858a05164ce3b.json",
+        "217ca6aa5c2c3b721795e93c7cb5d819317fa55546fee842c81420f84c353fe8"
+      ],
+      [
+        "scan-index\\85bd705cb26d94f80943f15877c1c71cc9f9a665c0bf24f8ab568b0b6bacf550.json",
+        "d4bb5033f4315903b0083789b87e09f4e06cb294a17313439f21987dd0b3a527"
+      ],
+      [
+        "scan-index\\87720e2b63644af82253d5ec9ace977d27e42c03a6033c6811af6c6094928e09.json",
+        "2b01b9760b6e8f5605fd9bb0cbc74e6f248c0bec7428982ce0dbb848c1f6e589"
+      ],
+      [
+        "scan-index\\959e88efa835995e2afff87fc4257966a41b7f45da19d44dc3369ba0d88599c9.json",
+        "bec93346f2dfbf0938b593658fd80e43a9be33b0bd4a0f7bcbf9a8997198ba9e"
+      ],
+      [
+        "scan-index\\9d7bcef01cadb37f1a59d31b708084c192007deea8564d134dcc473b0605201c.json",
+        "04d6bfae12cdb3e73f828813477825cd39dc803c37893be82455ecebe7734312"
+      ],
+      [
+        "scan-index\\a02253e6f623d27dfaa6674be31d9b43fc3d9b2c6bcda125418f1c3dd2a25709.json",
+        "90f629426a02dbbe9d60c7ad0c28090bd77a96693fcd1187b5215eda49184b86"
+      ],
+      [
+        "scan-index\\a17738a5c4b4bc1ce4358ecff69b8e44a1e1a33a7511d9a11eddecd94b9e58cd.json",
+        "a1fd92c4c4c8b9bbfeb105da251cc5230f16f1f68edf7cf909a468da0c242d99"
+      ],
+      [
+        "scan-index\\c53e2ac468d9387f39255a1ee9893eba1abe325ab086dea0025a18d1ef67e75f.json",
+        "2042c353b3e1c29eb236d1a1dfce79afdb85839f40f02f0b70d521eff607e6bb"
+      ],
+      [
+        "scan-index\\cb702390842effe5e6e22e77acbda7b2bbea77ed51a5c07e66c3c5d8d0bc15bf.json",
+        "718b65c8b9b80caa3c5d34bc3244f750cd8243dc4b8743f637c3b12dbbbbda4a"
+      ],
+      [
+        "scan-index\\cbf568b1144651ce061c2dc94a347128724334dd45ac2dd4ebf6890d74c66251.json",
+        "e22fd608a0197ea15fdbd8e3320b49d60e518bb4054b74ffb7504cd8e6035134"
+      ],
+      [
+        "scan-index\\d6cd75e4bc356e88ed2b4c2272c32263e568d67a07b4017d73b22e09c23e8306.json",
+        "d3ccf77f170934b4987c22301d34abbb8b7646d45af03f575057804e4c892629"
+      ],
+      [
+        "scan-index\\db34a207b303445fed1e9654c8e68883c93c5123070913181f89844225e4636a.json",
+        "81149ad6956bdb73b468e88036ef043043faecd14d34901ba5eaa49b775d3a72"
+      ],
+      [
+        "scan-index\\de13066bd94cc789543a5fa9e6100f3297df42c5dd715cccf10b11383b6f1d68.json",
+        "d2ac7243b636179c0e35727cb899a4f608b7c044d759e6b6a52c8f501a3a6945"
+      ],
+      [
+        "scan-index\\eba7ad116c30f43341d30f06e5f9efe510565b2a31a16c0eccab8fc4c303e6bc.json",
+        "636392edc5a9f41da4b70492833939eac890636623ab957400a7118bba472fc7"
+      ],
+      [
+        "scan-index\\f16070f230607bf79853b98a8c462b8e7b854deeb16fe246ba6c9d783c9b2832.json",
+        "becff49c6c81b5dfd4688bbb272be352a8821ce42120b45282ea86c65f6378c2"
+      ],
+      [
+        "scan-index\\f408135604349a60c1b7caa1d60757de692af100c4518e5588f38b619995f186.json",
+        "b894250b5d420a09b89350f33103a5d08edb5fc3d20f3cddf7604ed1fcb9df3a"
+      ],
+      [
+        "scan-index\\f7b0c1004febecbe36453be10ef2ddc2523e5b92f4af5f318ce1049990e93053.json",
+        "77f2b4ded7202b828e8a6e281d549eecd1e79aea4030dfb2a7d918202ab090c5"
+      ],
+      [
+        "scan-index\\f892c389d585d65dff3d06f6c86d3355dc90100c808a4f80da22b2f7e81865ba.json",
+        "b0f007ba8b4249849d726eee7a9fec6cf5926742e62d3cb833bd464423af520e"
+      ],
+      [
+        "scan-index\\fc41c7e68e94b6f115983997d8498353a4f8f41b61fc91662dd84affe70fc9fb.json",
+        "fa79531cd58ae0323d29102813386358d2e599ecb63902231ed73e264196abdc"
+      ],
+      [
+        "settings.json",
+        "6fb990f7edfe0707bb48b8bed65455cc2a521d33e028b45ce77f98b6a466a0d5"
+      ],
+      [
+        "video-metadata-cache.json",
+        "616205b2e97a75ea8842d3b4f6f3de778fc545493659d45e5c0139c6d7087f47"
+      ]
+    ],
+    "settingsSha256": "6fb990f7edfe0707bb48b8bed65455cc2a521d33e028b45ce77f98b6a466a0d5",
+    "guardReports": [],
+    "originalNativeAppConfigUnchanged": true,
+    "noOriginalAndroidGenerated": true,
+    "serverFlushedAndStopped": true,
+    "ownedAvdStopped": true,
+    "displayRestored": true,
+    "noReleaseArtifactReplaced": true,
+    "noPublishingOrRemoteCI": true
+  },
+  "remaining": [
+    "braces build-tool advisory and complete dependency input-path review",
+    "first camera permission prompt currently requires a second scan tap",
+    "physical arm64 Android and long-duration decode/resource budgets",
+    "production signing and production upgrade-install",
+    "iOS native build/signing/scene and resize acceptance",
+    "rebuild and revalidate the concurrent DeepSeek frontend after its completion",
+    "remaining R6/R7/R8 implementation and delivery gates"
+  ],
+  "rawDirectory": ".tmp/refactor-tests/r8-sdk58-patches",
+  "rawDigests": [
+    {
+      "path": ".tmp/refactor-tests/r8-sdk58-patches/baseline.json",
+      "sha256": "bc86ecd545bf79c2e991ddd6dceb576a6920469d5ccd3f0c0d7a269fd8ab610a"
+    },
+    {
+      "path": ".tmp/refactor-tests/r8-sdk58-patches/install.log",
+      "sha256": "e9e9d4000b2c59e130eb3e27a57e65651e5846282c8da527ad86e81176de419e"
+    },
+    {
+      "path": ".tmp/refactor-tests/r8-sdk58-patches/lock-final.log",
+      "sha256": "50e2c7aede69c6490d5020ec809a70d1ee36387d6da702abe06de7fd2ddd32b2"
+    },
+    {
+      "path": ".tmp/refactor-tests/r8-sdk58-patches/install-check.log",
+      "sha256": "3b47e85d27d2de36267a75ebb6564b5e4f839e57a0b0b01556af9427b198f899"
+    },
+    {
+      "path": ".tmp/refactor-tests/r8-sdk58-patches/doctor.log",
+      "sha256": "c79ae5a1bfe4212c576db1ffd44dcbab6fd76675622d8b263414d6a8b08120a9"
+    },
+    {
+      "path": ".tmp/refactor-tests/r8-sdk58-patches/typecheck.log",
+      "sha256": "1e0f0490123b26a1e922ddceb0d3a75f1acc55b8dbd07d5c200b38c8cde87737"
+    },
+    {
+      "path": ".tmp/refactor-tests/r8-sdk58-patches/security.log",
+      "sha256": "df890b695a02a751696486c90d9704e6e6ecd8e022b83b0d7da129165331e4ed"
+    },
+    {
+      "path": ".tmp/refactor-tests/r8-sdk58-patches/npm-ls.json",
+      "sha256": "8e06cbd2c68b0c6a759f1354c63b8e48cefaf03cccfeea0eeae391c51683bcc8"
+    },
+    {
+      "path": ".tmp/refactor-tests/r8-sdk58-patches/npm-ls-stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": ".tmp/refactor-tests/r8-sdk58-patches/audit.json",
+      "sha256": "8b1f55a7b20bd9c3df88d6f5040d73527be696f6cfd378f9951b97d47e36f3df"
+    },
+    {
+      "path": ".tmp/refactor-tests/r8-sdk58-patches/audit-stderr.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": ".tmp/refactor-tests/r8-sdk58-patches/audit-mirror-error.log",
+      "sha256": "4f83bba77fd52dc72de9401e2f1ee8cbc1edc24aecc534c587236fdd8e4ec8c3"
+    },
+    {
+      "path": ".tmp/refactor-tests/r8-sdk58-patches/gradle.log",
+      "sha256": "15d3fbb3c4b446cd4d74340094034bf62ffb9a565898cc8f8fbc3554a72480d6"
+    },
+    {
+      "path": ".tmp/refactor-tests/r8-sdk58-patches/prebuild.log",
+      "sha256": "1ff0b7732bfb1420a89f3887489c14f8012bd1addaadd7669315c1e433a9c74b"
+    },
+    {
+      "path": ".tmp/refactor-tests/r8-sdk58-patches/stage-backport.log",
+      "sha256": "7db93d8e4de3d91ddaf839ba09dd049ecef35702e99a1bb919e269c8ce4a866d"
+    },
+    {
+      "path": ".tmp/refactor-tests/r8-sdk58-patches/bundles.json",
+      "sha256": "8f078736ecaa2a0baa9f6a415c899d71a419c0853651b0b8ee431177c7a89594"
+    },
+    {
+      "path": ".tmp/refactor-tests/r8-sdk58-patches/bundles.log",
+      "sha256": "bff0b1ed05b26021cdd8f6afc48f07d5d03310c23d6026d4121593bb72277c2d"
+    },
+    {
+      "path": ".tmp/refactor-tests/r8-sdk58-patches/xcode-cng-result.json",
+      "sha256": "b793108e4e9f750234225fac18f307ff81801a669e18d17bbc1f5c27eb4a645d"
+    },
+    {
+      "path": ".tmp/refactor-tests/r8-sdk58-patches/xcode.log",
+      "sha256": "8aa647da43c3247c90f0b26d14493b13eb1996e737b150a55d5b079b00f7c187"
+    },
+    {
+      "path": ".tmp/refactor-tests/r8-sdk58-patches/before-result.json",
+      "sha256": "18a2ddf7e674aa35d8a81614fd71bf9946464f44ad0c8ba75cbd100041c3d3c9"
+    },
+    {
+      "path": ".tmp/refactor-tests/r8-sdk58-patches/after-result.json",
+      "sha256": "f40954dc52c9ce86bbdd2673f28ef33caee2d0a3a7fa09f975368fe479ba9378"
+    },
+    {
+      "path": ".tmp/refactor-tests/r8-sdk58-patches/apk-metadata.json",
+      "sha256": "53123d1f2d0e9a48d64bdecedb8f2c483fb3796b75e1a05e708acd0157f802d6"
+    },
+    {
+      "path": ".tmp/refactor-tests/r8-sdk58-patches/signature.log",
+      "sha256": "0dca0bd63f9b00136034a276fb94fd91b42ee4f1978d496cf8a31bc1669c574f"
+    },
+    {
+      "path": ".tmp/refactor-tests/r8-sdk58-patches/badging.log",
+      "sha256": "c424f86c3a647456f4d565f1d637d98373405d4e19c5cb9ceb2f660ffa611c44"
+    },
+    {
+      "path": ".tmp/refactor-tests/r8-sdk58-patches/teardown.json",
+      "sha256": "1dd12c6845f56da5d16cd5310750fd660ac5f04f98b73336d9385acdb7083104"
+    },
+    {
+      "path": ".tmp/refactor-tests/r8-sdk58-patches/server.log",
+      "sha256": "b2a7b716688349b48fc4694908a6364e6652879f477ee6291e462d136628f56a"
+    },
+    {
+      "path": ".tmp/refactor-tests/r8-sdk58-patches/server-stats.json",
+      "sha256": "5d225ed08a43104ec0a65476805cb7a1556070b212f6006b0d2624805bc00d14"
+    },
+    {
+      "path": ".tmp/refactor-tests/r8-sdk58-patches/native-ui.cjs",
+      "sha256": "039a39331d62c24bfa53e2e861a36e8da88fdeee4df50424f26fbaa5b1226969"
+    },
+    {
+      "path": ".tmp/refactor-tests/r8-sdk58-patches/verify-xcode.cjs",
+      "sha256": "20c03834683aae6bb8d1c4b21910ba1141e8a5bde269fdc2a7d9970082a2113c"
+    },
+    {
+      "path": ".tmp/refactor-tests/r8-sdk58-patches/stage.ps1",
+      "sha256": "331fd59ea618aaf38e6ba57c4c27f8a9c1b41ef237892bb9e49fb07f979bd165"
+    },
+    {
+      "path": ".tmp/refactor-tests/r8-sdk58-patches/apk-metadata.ps1",
+      "sha256": "2c3877c305684620fe45053092f239fe87978973759893ba8f6b9aae11008f65"
+    },
+    {
+      "path": ".tmp/refactor-tests/r8-sdk58-patches/finalize-evidence.cjs",
+      "sha256": "c337c5e9fcd88a82b7a7ef5d29169420b93eaab1b3fd56ffd6aa25345ae0cada"
+    },
+    {
+      "path": ".tmp/refactor-tests/r8-sdk58-patches/mobile-correctness.log",
+      "sha256": "b19049dfcba582c794394586a2e1a84a6713f1a6dad7796f9fb7cdd41f5eade0"
+    },
+    {
+      "path": ".tmp/refactor-tests/r8-sdk58-patches/mobile-player-structure.log",
+      "sha256": "e8437cefcae7f6e224423bce76717c99cb3570cad42b22310467d6818f1ccfa2"
+    },
+    {
+      "path": ".tmp/refactor-tests/r8-sdk58-patches/mobile-playback-adapter.log",
+      "sha256": "79d176ffda4393c4d2746983d127410aa425aeb3ff5de7ac90c3ea6b1cdf1c01"
+    },
+    {
+      "path": ".tmp/refactor-tests/r8-sdk58-patches/mobile-player-panels.log",
+      "sha256": "f05f63c81d0d7d2955b0a1e259f4af3d39aa9e55130d508cbd404befd3457769"
+    },
+    {
+      "path": ".tmp/refactor-tests/r8-sdk58-patches/mobile-input-accessibility.log",
+      "sha256": "10dc7e5d44bec5606b55632d87413a9ec0eb46c242b324cb504b330b9fa3c585"
+    },
+    {
+      "path": ".tmp/refactor-tests/r8-sdk58-patches/mobile-accessibility.log",
+      "sha256": "d0949be85abb905a754a6c69c81575377cd06b1fd25bd3e41cc6c054eb25715c"
+    },
+    {
+      "path": ".tmp/refactor-tests/r8-sdk58-patches/mobile-navigation.log",
+      "sha256": "aa26c3db6048bc984e1838b38b60550daa762a078b6b88362ca6d9836c5c491d"
+    },
+    {
+      "path": ".tmp/refactor-tests/r8-sdk58-patches/mobile-multi-device.log",
+      "sha256": "f57830224242e20050000667336a991734ecf16c03572f4c2d7dcfc188a6075d"
+    },
+    {
+      "path": ".tmp/refactor-tests/r8-sdk58-patches/remote-library-flow.log",
+      "sha256": "05e4ca6e55b0bd88bde9f6997de3d63fe595cbb5ee7c0c7ddc24b1bee7f2edec"
+    },
+    {
+      "path": ".tmp/refactor-tests/r8-sdk58-patches/privacy-passwords.log",
+      "sha256": "0845e031f3d2fcc51efcac317866b7286ada3014f602fee248b973c897fa10e2"
+    },
+    {
+      "path": ".tmp/refactor-tests/r8-sdk58-patches/updater-startup.log",
+      "sha256": "cddf70e7733b245fbc1c19da80e4fd72223132f4948bdefdf03ebc0bbb10a313"
+    },
+    {
+      "path": "mobile/package.json",
+      "sha256": "1ce981a25f1254563d86081ceed97647db0107425c21031b64c5c00801ae1a2e"
+    },
+    {
+      "path": "mobile/package-lock.json",
+      "sha256": "3ec79a6d47c6fda299304ccaecb5304596900e5c45740ea90ec22e228fecf45a"
+    },
+    {
+      "path": "mobile/patches/dependency-patches.json",
+      "sha256": "0789eb347af1d4b1cea7f75d3662f50559ff06dbc1d3732e23c4840be8dedb77"
+    },
+    {
+      "path": "mobile/scripts/apply-dependency-patches.cjs",
+      "sha256": "75c44291b1b3777be9ad53a165c97b4c89ecd6b751529ca77676d62a01bea6b6"
+    },
+    {
+      "path": "scripts/verify-dependency-security.js",
+      "sha256": "bc7e523cddac499be60b7f9bf35393aea3509d9ccbe74dcfe0aa9331accd5461"
+    },
+    {
+      "path": "scripts/verify-node-forge.js",
+      "sha256": "277dcc6e40a3a18a059caa0683149abf4a158277f679c59a40a1ff43f2eb8559"
+    },
+    {
+      "path": "scripts/verify-dependency-patches.js",
+      "sha256": "d3853daf565db1205fae3c1d9c3ad59aa4a1c39d9a3da586b3800972d80b850d"
+    },
+    {
+      "path": "scripts/verify-mobile-bundles.js",
+      "sha256": "bf1d2bdf84fdb14992c6160423c7591e3d5ed71ee409f2092384acb2f466abb7"
+    }
+  ]
+}

@@ -1,6 +1,6 @@
 const { createPluginRegistry } = require('./registry')
 const { loadOfficialPluginImplementation } = require('./builtin')
-const { loadSettings, removePluginSettings, saveSettings } = require('../settings')
+const { loadSettingsFields, removePluginSettings, saveSettings } = require('../settings')
 const {
   listExternalPluginManifests,
   installExternalPlugin,
@@ -12,9 +12,10 @@ const { createCoreCapabilities } = require('./capabilities')
 
 const pluginRegistry = createPluginRegistry()
 let coreCapabilityDisposers = []
+let setupGeneration = 0, disposalPromise = null
 
 function snapshotPluginSettings(pluginId) {
-  const plugins = loadSettings().plugins || {}
+  const plugins = loadSettingsFields(['plugins']).plugins || {}
   const id = String(pluginId || '').trim()
   if (!id || !Object.hasOwn(plugins, id)) {
     return { exists: false, state: null }
@@ -47,22 +48,31 @@ function registerCoreCapabilities() {
 }
 
 async function setupPlugins() {
+  if (disposalPromise) await disposalPromise
+  const generation = setupGeneration
+  const manifests = await listExternalPluginManifests()
+  if (generation !== setupGeneration) throw Object.assign(new Error('插件服务正在关闭'), { code: 'plugin_service_stopping' })
   registerCoreCapabilities()
-  const plugins = (await listExternalPluginManifests()).map(loadOfficialPluginImplementation)
+  const plugins = manifests.map(loadOfficialPluginImplementation)
   return pluginRegistry.setup(plugins)
 }
 
-async function disposePlugins() {
-  await pluginRegistry.dispose()
-  for (const disposer of [...coreCapabilityDisposers].reverse()) {
-    try {
-      disposer()
-    } catch {}
-  }
-  coreCapabilityDisposers = []
+function disposePlugins() {
+  if (disposalPromise) return disposalPromise
+  setupGeneration++
+  disposalPromise = (async () => {
+    await pluginRegistry.dispose()
+    for (const disposer of [...coreCapabilityDisposers].reverse()) {
+      try { disposer() } catch {}
+    }
+    coreCapabilityDisposers = []
+  })().finally(() => { disposalPromise = null })
+  return disposalPromise
 }
 
-async function installPlugin(sourcePath) {
+function installPlugin(sourcePath) { return pluginRegistry.runLifecycle(() => installPluginNow(sourcePath)) }
+
+async function installPluginNow(sourcePath) {
   const transaction = await installExternalPlugin(sourcePath)
   const { manifest } = transaction
   const existing = pluginRegistry.getPlugin(manifest.id)
@@ -94,7 +104,9 @@ async function installPlugin(sourcePath) {
   }
 }
 
-async function uninstallPlugin(pluginId) {
+function uninstallPlugin(pluginId) { return pluginRegistry.runLifecycle(() => uninstallPluginNow(pluginId)) }
+
+async function uninstallPluginNow(pluginId) {
   const plugin = pluginRegistry.getPlugin(pluginId)
   if (!plugin) return { success: false, error: '插件不存在' }
   await uninstallExternalPlugin(plugin.id, { directoryName: plugin.installDirectoryName })

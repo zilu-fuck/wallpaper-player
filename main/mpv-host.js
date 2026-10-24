@@ -5,6 +5,7 @@ let hostWindow = null
 let pendingBounds = null
 let mainWindow = null
 let detachMainWindowListeners = null
+let presentationRequested = false
 
 function clearMainWindowListeners() {
   if (typeof detachMainWindowListeners === 'function') {
@@ -25,31 +26,39 @@ function setMpvHostMainWindow(win) {
   }
 
   const sync = () => syncMpvHostWindowBounds()
-  const hide = () => hideMpvHostWindow()
+  const hide = () => {
+    if (hostWindow && !hostWindow.isDestroyed()) hostWindow.hide()
+  }
+  const restore = () => {
+    if (presentationRequested) showMpvHostWindow()
+    else syncMpvHostWindowBounds()
+  }
   const destroy = () => destroyMpvHostWindow()
 
   mainWindow.on('move', sync)
   mainWindow.on('resize', sync)
-  mainWindow.on('show', sync)
-  mainWindow.on('restore', sync)
+  mainWindow.on('show', restore)
+  mainWindow.on('restore', restore)
   mainWindow.on('maximize', sync)
   mainWindow.on('unmaximize', sync)
   mainWindow.on('enter-full-screen', sync)
   mainWindow.on('leave-full-screen', sync)
   mainWindow.on('hide', hide)
+  mainWindow.on('minimize', hide)
   mainWindow.once('closed', destroy)
 
   detachMainWindowListeners = () => {
     if (!mainWindow) return
     mainWindow.removeListener('move', sync)
     mainWindow.removeListener('resize', sync)
-    mainWindow.removeListener('show', sync)
-    mainWindow.removeListener('restore', sync)
+    mainWindow.removeListener('show', restore)
+    mainWindow.removeListener('restore', restore)
     mainWindow.removeListener('maximize', sync)
     mainWindow.removeListener('unmaximize', sync)
     mainWindow.removeListener('enter-full-screen', sync)
     mainWindow.removeListener('leave-full-screen', sync)
     mainWindow.removeListener('hide', hide)
+    mainWindow.removeListener('minimize', hide)
     mainWindow.removeListener('closed', destroy)
   }
 }
@@ -67,10 +76,10 @@ function normalizeBounds(bounds) {
   }
 
   return {
-    x: Math.round(x),
-    y: Math.round(y),
-    width: Math.max(1, Math.round(width)),
-    height: Math.max(1, Math.round(height))
+    x,
+    y,
+    width: Math.max(1, width),
+    height: Math.max(1, height)
   }
 }
 
@@ -94,11 +103,18 @@ function getAbsoluteBounds() {
   if (!win || win.isDestroyed() || !pendingBounds) return null
 
   const contentBounds = win.getContentBounds()
+  // Renderer bounds are CSS pixels; native window bounds use screen DIP.
+  const zoom = win.webContents.getZoomFactor()
+  const left = Math.max(0, Math.ceil(pendingBounds.x * zoom))
+  const top = Math.max(0, Math.ceil(pendingBounds.y * zoom))
+  const right = Math.min(contentBounds.width, Math.floor((pendingBounds.x + pendingBounds.width) * zoom))
+  const bottom = Math.min(contentBounds.height, Math.floor((pendingBounds.y + pendingBounds.height) * zoom))
+  if (right <= left || bottom <= top) return null
   return {
-    x: Math.round(contentBounds.x + pendingBounds.x),
-    y: Math.round(contentBounds.y + pendingBounds.y),
-    width: Math.max(1, Math.round(pendingBounds.width)),
-    height: Math.max(1, Math.round(pendingBounds.height))
+    x: contentBounds.x + left,
+    y: contentBounds.y + top,
+    width: right - left,
+    height: bottom - top
   }
 }
 
@@ -154,10 +170,19 @@ function syncMpvHostWindowBounds() {
   if (!win || win.isDestroyed()) return false
 
   const bounds = getAbsoluteBounds()
-  if (!bounds) return false
+  if (!bounds) {
+    win.hide()
+    return false
+  }
 
   win.setBounds(bounds, false)
+  if (!canPresentHost()) win.hide()
   return true
+}
+
+function canPresentHost() {
+  const win = mainWindow || getMainWindow()
+  return Boolean(win && !win.isDestroyed() && win.isVisible() && !win.isMinimized())
 }
 
 function setMpvHostBounds(bounds) {
@@ -177,19 +202,20 @@ function setMpvHostBounds(bounds) {
 }
 
 function showMpvHostWindow() {
+  presentationRequested = true
   const win = ensureMpvHostWindow()
   if (!win) return false
 
   if (!syncMpvHostWindowBounds()) return false
+  if (!canPresentHost()) return true
   if (!win.isVisible()) {
-    win.show()
-  } else if (typeof win.focus === 'function') {
-    win.focus()
+    win.showInactive()
   }
   return true
 }
 
 function hideMpvHostWindow(clearBounds = false) {
+  presentationRequested = false
   if (clearBounds) pendingBounds = null
   if (!hostWindow || hostWindow.isDestroyed()) return false
   hostWindow.hide()
@@ -197,6 +223,7 @@ function hideMpvHostWindow(clearBounds = false) {
 }
 
 function destroyMpvHostWindow() {
+  presentationRequested = false
   pendingBounds = null
   clearMainWindowListeners()
 

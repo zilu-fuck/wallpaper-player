@@ -1,0 +1,1098 @@
+{
+  "date": "2026-10-15T12:01:51.241Z",
+  "phase": "R7 batch 9: desktop workspace and mobile library accessibility",
+  "sourceSha256": {
+    "src/App.jsx": "f711e8393ff71777daae8209ecd81ab77de64c6000f64cdfb53a9531c2a75337",
+    "src/components/Sidebar.jsx": "fa308198d208019e256fec7b1a216ef46e6cf528c790ea993aa8c703a011ee80",
+    "src/components/RightDock.jsx": "85eb642089e4c1420459a03961f4bd619b279b388af50340ffda3be2e831d2d2",
+    "src/components/Gallery.jsx": "db932442ac56ceec824a82378fbe5989ef6181dd3bc99c7ad11141f4db9e67c5",
+    "src/hooks/useMediaQuery.js": "848c50b7ca49b9609880a43f382b4407cfa6a3cecaacbab6ee2d7613fdff5886",
+    "src/hooks/useOverlayFocus.js": "89f6ee7da09bacbfef2d4da0da58b976f2bebc3c9b14970084f6dec93d3afa84",
+    "src/styles/base.css": "c849967671e90c1b6492ef0067bfbea1b08d793e61987d42578f64d1c1978c3e",
+    "src/styles/gallery.css": "980dd26f3c3726f7d85de4722972bcca9eb3a60930ec0fbc8cb86f1834dcd787",
+    "src/styles/responsive.css": "820a1a99e2d12b44536380d3dc8cd848e6118d5102f57d2d465f4982795aa83b",
+    "src/index.css": "21f67120bc102168e81a4c768967f4736fa650e4c484c6fdd2cafde0ff2c374a",
+    "mobile/src/hooks/useAdaptiveVideoGrid.ts": "09cc6dcb3560b34a7d3e54f504676edd044840ca0e2349837c5f23779e28f019",
+    "mobile/src/components/AccessibleModal.tsx": "508cc62d80cff065d4a0211041fecaea85e35279877f72f339df4d27c8360e1b",
+    "mobile/src/components/VideoCard.tsx": "a9bbd50f4118921017453717ca05628191e2303c73e9da4758158f8fed5ac4e6",
+    "mobile/src/components/PrimaryButton.tsx": "529b4278bede821dac7ef60b0a3edd31d860b54a37f3f988bb7b66e8a5c9da78",
+    "mobile/src/screens/LibraryScreen.tsx": "848ec00e10f7627bfe15a335515960387ffe56493b458e42dfc5046079385f03",
+    "mobile/src/screens/SearchScreen.tsx": "bbad53393267d3975b431a13ded312fe59c92e518faf463551c42c665a45f192",
+    "mobile/src/theme.ts": "9b9a2d4e76d609b2fb2bed18c999d8be2d232720323191c62f2b39c530b0641a",
+    "scripts/verify-responsive-layout.js": "4440a13cf97766fe3a6d2799b6ffbea261ae3020bba4c14ee696fbb07483874b",
+    "scripts/verify-mobile-accessibility.js": "6c5cf1d7dba834befc3e6ad4581d012128a3c8d433e34f79d2cf7dd1da4b476f",
+    "scripts/verify-mobile-bundles.js": "44aa70fc00108f63564099fd2dd3c71ca530c9b74a12444ef611bc626251e8bf",
+    "scripts/verify-library-screen-behavior.js": "f35f4e3353497f49fbac0ff813dcc74e5e200ae87d41145d194faf731f6f6a8d",
+    "scripts/verify-mobile-player-behavior.js": "5308a3084b89b3c0e991440c34a0ec90721a687edc181756c3abc569e16433d4",
+    "package.json": "80e6ae8b7a01198d07c00c4e93f9ed155b23e3d6873e22a4a061db88a94598c0",
+    ".github/workflows/ci.yml": "0314646e4ed4daa3d1d65b41b5be9bd42364d0977ea27501f2ec1da0636af0e1",
+    "docs/refactor-progress.md": "cc11f832bee7edb9920f15a4a101449ef2428046ea6e8f0268eb6836cb7726fd",
+    "docs/desktop-mobile-review-and-refactor-plan.md": "ef082fc32d4143b023716fb78cd29327745485f99d777647bd84b93a07d1f69c",
+    "docs/mobile-real-device-qa.md": "d94673dae8ba52fa02fdc1797dc770cbaf3c6106be0e735ce803720b99102bb7"
+  },
+  "builtDesktopSha256": {
+    "dist/index.html": "a7b32704188125d823bde045dbbe25f5cc11b5e66e8badd072b04b8f00dfe606",
+    "dist/assets/AISearchPanel-BQAtNveJ.js": "4e49805c440af7dbbba3ebbfd3b54b061b397b248e4b34cce6ed7bfe96a4fce7",
+    "dist/assets/DownloadCenter-Cc-M-OJ3.js": "19caed9fe5e4c462fb0ad7e5edabe92cff7d3caec0be834de2ee1905112f35e8",
+    "dist/assets/index-cvjPEc3-.js": "6d67d0c19709efb50a8dc8f9dff9976eb27f580dd5756aebc8949f8b8e5b857d",
+    "dist/assets/index-sBnJh8hk.css": "1744fd69f512707b39d84621d55cc000103856b49ca48c6a6c20f67db04fd529",
+    "dist/assets/NetworkResourceLibrary-BChRc7RF.js": "837c3ade7398412b28c1be7dec00b5d7ae483e917b2bf668c1b1f298b35bd154",
+    "dist/assets/Settings-LgDj1JMJ.js": "4f7a62ff7c02733ceaf9fd1981b7991b9a262223d5d308d4306e419d1d176284",
+    "dist/assets/useDownloadStateObserver-BpBV6WGF.js": "2e86bea250dda063744db1f7a2cdc8c4eea96eeea3d4997691edbe4212902442",
+    "dist/assets/VideoAnalysisSidebar-D1EscfVE.js": "a3767dc46ac0db0a405236af7fc37f994c0330ff578682bd568f7893c6c998da"
+  },
+  "environment": {
+    "platform": "win32",
+    "node": "v24.14.0",
+    "electronPackage": "35.7.5",
+    "electronTestArgs": [
+      "--in-process-gpu",
+      "--no-sandbox"
+    ],
+    "productionAndCiDefaultsChanged": false,
+    "fixture": "32 real local files containing 24-byte MP4 headers; isolated userData and actual production renderer/preload/guarded IPC. No media decoder performance claim.",
+    "pageZoom": "24 cases: content widths 1024/1280/1920, page zoom 1/1.25/1.5/2, dark/light. Does not validate OS DPI or multiple monitors.",
+    "screenshotReadiness": "Hidden window; temporary animation/transition suppression, two animation frames, 250 ms plus committed breakpoint snapshots before captures. Product reduced-motion check removes the temporary stylesheet and uses actual Chromium media emulation."
+  },
+  "desktop": {
+    "before": {
+      "date": "2026-10-15T11:09:39.723Z",
+      "results": [
+        {
+          "theme": "dark",
+          "width": 1024,
+          "zoom": 1,
+          "cssWidth": 1024,
+          "cssHeight": 900,
+          "searchVisible": true,
+          "navigationVisible": true,
+          "mainOverflow": false,
+          "headerOverflow": false,
+          "cards": 32
+        },
+        {
+          "theme": "dark",
+          "width": 1024,
+          "zoom": 1.25,
+          "cssWidth": 819,
+          "cssHeight": 720,
+          "searchVisible": false,
+          "navigationVisible": false,
+          "mainOverflow": false,
+          "headerOverflow": false,
+          "cards": 32
+        },
+        {
+          "theme": "dark",
+          "width": 1024,
+          "zoom": 1.5,
+          "cssWidth": 683,
+          "cssHeight": 600,
+          "searchVisible": false,
+          "navigationVisible": false,
+          "mainOverflow": false,
+          "headerOverflow": false,
+          "cards": 32
+        },
+        {
+          "theme": "dark",
+          "width": 1024,
+          "zoom": 2,
+          "cssWidth": 512,
+          "cssHeight": 450,
+          "searchVisible": false,
+          "navigationVisible": false,
+          "mainOverflow": false,
+          "headerOverflow": false,
+          "cards": 32
+        },
+        {
+          "theme": "dark",
+          "width": 1280,
+          "zoom": 1,
+          "cssWidth": 1280,
+          "cssHeight": 900,
+          "searchVisible": true,
+          "navigationVisible": true,
+          "mainOverflow": false,
+          "headerOverflow": false,
+          "cards": 32
+        },
+        {
+          "theme": "dark",
+          "width": 1280,
+          "zoom": 1.25,
+          "cssWidth": 1024,
+          "cssHeight": 720,
+          "searchVisible": true,
+          "navigationVisible": true,
+          "mainOverflow": false,
+          "headerOverflow": false,
+          "cards": 32
+        },
+        {
+          "theme": "dark",
+          "width": 1280,
+          "zoom": 1.5,
+          "cssWidth": 853,
+          "cssHeight": 600,
+          "searchVisible": false,
+          "navigationVisible": false,
+          "mainOverflow": false,
+          "headerOverflow": false,
+          "cards": 32
+        },
+        {
+          "theme": "dark",
+          "width": 1280,
+          "zoom": 2,
+          "cssWidth": 640,
+          "cssHeight": 450,
+          "searchVisible": false,
+          "navigationVisible": false,
+          "mainOverflow": false,
+          "headerOverflow": false,
+          "cards": 32
+        },
+        {
+          "theme": "dark",
+          "width": 1920,
+          "zoom": 1,
+          "cssWidth": 1920,
+          "cssHeight": 900,
+          "searchVisible": true,
+          "navigationVisible": true,
+          "mainOverflow": false,
+          "headerOverflow": false,
+          "cards": 32
+        },
+        {
+          "theme": "dark",
+          "width": 1920,
+          "zoom": 1.25,
+          "cssWidth": 1536,
+          "cssHeight": 720,
+          "searchVisible": true,
+          "navigationVisible": true,
+          "mainOverflow": false,
+          "headerOverflow": false,
+          "cards": 32
+        },
+        {
+          "theme": "dark",
+          "width": 1920,
+          "zoom": 1.5,
+          "cssWidth": 1280,
+          "cssHeight": 600,
+          "searchVisible": true,
+          "navigationVisible": true,
+          "mainOverflow": false,
+          "headerOverflow": false,
+          "cards": 32
+        },
+        {
+          "theme": "dark",
+          "width": 1920,
+          "zoom": 2,
+          "cssWidth": 960,
+          "cssHeight": 450,
+          "searchVisible": true,
+          "navigationVisible": true,
+          "mainOverflow": false,
+          "headerOverflow": false,
+          "cards": 32
+        },
+        {
+          "theme": "light",
+          "width": 1024,
+          "zoom": 1,
+          "cssWidth": 1024,
+          "cssHeight": 900,
+          "searchVisible": true,
+          "navigationVisible": true,
+          "mainOverflow": false,
+          "headerOverflow": false,
+          "cards": 32
+        },
+        {
+          "theme": "light",
+          "width": 1024,
+          "zoom": 1.25,
+          "cssWidth": 819,
+          "cssHeight": 720,
+          "searchVisible": false,
+          "navigationVisible": false,
+          "mainOverflow": false,
+          "headerOverflow": false,
+          "cards": 32
+        },
+        {
+          "theme": "light",
+          "width": 1024,
+          "zoom": 1.5,
+          "cssWidth": 683,
+          "cssHeight": 600,
+          "searchVisible": false,
+          "navigationVisible": false,
+          "mainOverflow": false,
+          "headerOverflow": false,
+          "cards": 32
+        },
+        {
+          "theme": "light",
+          "width": 1024,
+          "zoom": 2,
+          "cssWidth": 512,
+          "cssHeight": 450,
+          "searchVisible": false,
+          "navigationVisible": false,
+          "mainOverflow": false,
+          "headerOverflow": false,
+          "cards": 32
+        },
+        {
+          "theme": "light",
+          "width": 1280,
+          "zoom": 1,
+          "cssWidth": 1280,
+          "cssHeight": 900,
+          "searchVisible": true,
+          "navigationVisible": true,
+          "mainOverflow": false,
+          "headerOverflow": false,
+          "cards": 32
+        },
+        {
+          "theme": "light",
+          "width": 1280,
+          "zoom": 1.25,
+          "cssWidth": 1024,
+          "cssHeight": 720,
+          "searchVisible": true,
+          "navigationVisible": true,
+          "mainOverflow": false,
+          "headerOverflow": false,
+          "cards": 32
+        },
+        {
+          "theme": "light",
+          "width": 1280,
+          "zoom": 1.5,
+          "cssWidth": 853,
+          "cssHeight": 600,
+          "searchVisible": false,
+          "navigationVisible": false,
+          "mainOverflow": false,
+          "headerOverflow": false,
+          "cards": 32
+        },
+        {
+          "theme": "light",
+          "width": 1280,
+          "zoom": 2,
+          "cssWidth": 640,
+          "cssHeight": 450,
+          "searchVisible": false,
+          "navigationVisible": false,
+          "mainOverflow": false,
+          "headerOverflow": false,
+          "cards": 32
+        },
+        {
+          "theme": "light",
+          "width": 1920,
+          "zoom": 1,
+          "cssWidth": 1920,
+          "cssHeight": 900,
+          "searchVisible": true,
+          "navigationVisible": true,
+          "mainOverflow": false,
+          "headerOverflow": false,
+          "cards": 32
+        },
+        {
+          "theme": "light",
+          "width": 1920,
+          "zoom": 1.25,
+          "cssWidth": 1536,
+          "cssHeight": 720,
+          "searchVisible": true,
+          "navigationVisible": true,
+          "mainOverflow": false,
+          "headerOverflow": false,
+          "cards": 32
+        },
+        {
+          "theme": "light",
+          "width": 1920,
+          "zoom": 1.5,
+          "cssWidth": 1280,
+          "cssHeight": 600,
+          "searchVisible": true,
+          "navigationVisible": true,
+          "mainOverflow": false,
+          "headerOverflow": false,
+          "cards": 32
+        },
+        {
+          "theme": "light",
+          "width": 1920,
+          "zoom": 2,
+          "cssWidth": 960,
+          "cssHeight": 450,
+          "searchVisible": true,
+          "navigationVisible": true,
+          "mainOverflow": false,
+          "headerOverflow": false,
+          "cards": 32
+        }
+      ],
+      "failures": [
+        {
+          "theme": "dark",
+          "width": 1024,
+          "zoom": 1.25,
+          "key": "searchVisible"
+        },
+        {
+          "theme": "dark",
+          "width": 1024,
+          "zoom": 1.25,
+          "key": "navigationVisible"
+        },
+        {
+          "theme": "dark",
+          "width": 1024,
+          "zoom": 1.5,
+          "key": "searchVisible"
+        },
+        {
+          "theme": "dark",
+          "width": 1024,
+          "zoom": 1.5,
+          "key": "navigationVisible"
+        },
+        {
+          "theme": "dark",
+          "width": 1024,
+          "zoom": 2,
+          "key": "searchVisible"
+        },
+        {
+          "theme": "dark",
+          "width": 1024,
+          "zoom": 2,
+          "key": "navigationVisible"
+        },
+        {
+          "theme": "dark",
+          "width": 1280,
+          "zoom": 1.5,
+          "key": "searchVisible"
+        },
+        {
+          "theme": "dark",
+          "width": 1280,
+          "zoom": 1.5,
+          "key": "navigationVisible"
+        },
+        {
+          "theme": "dark",
+          "width": 1280,
+          "zoom": 2,
+          "key": "searchVisible"
+        },
+        {
+          "theme": "dark",
+          "width": 1280,
+          "zoom": 2,
+          "key": "navigationVisible"
+        },
+        {
+          "theme": "light",
+          "width": 1024,
+          "zoom": 1.25,
+          "key": "searchVisible"
+        },
+        {
+          "theme": "light",
+          "width": 1024,
+          "zoom": 1.25,
+          "key": "navigationVisible"
+        },
+        {
+          "theme": "light",
+          "width": 1024,
+          "zoom": 1.5,
+          "key": "searchVisible"
+        },
+        {
+          "theme": "light",
+          "width": 1024,
+          "zoom": 1.5,
+          "key": "navigationVisible"
+        },
+        {
+          "theme": "light",
+          "width": 1024,
+          "zoom": 2,
+          "key": "searchVisible"
+        },
+        {
+          "theme": "light",
+          "width": 1024,
+          "zoom": 2,
+          "key": "navigationVisible"
+        },
+        {
+          "theme": "light",
+          "width": 1280,
+          "zoom": 1.5,
+          "key": "searchVisible"
+        },
+        {
+          "theme": "light",
+          "width": 1280,
+          "zoom": 1.5,
+          "key": "navigationVisible"
+        },
+        {
+          "theme": "light",
+          "width": 1280,
+          "zoom": 2,
+          "key": "searchVisible"
+        },
+        {
+          "theme": "light",
+          "width": 1280,
+          "zoom": 2,
+          "key": "navigationVisible"
+        }
+      ]
+    },
+    "after": {
+      "date": "2026-10-15T11:59:05.426Z",
+      "results": [
+        {
+          "theme": "dark",
+          "width": 1024,
+          "zoom": 1,
+          "cssWidth": 1024,
+          "cssHeight": 900,
+          "searchVisible": true,
+          "navigationVisible": true,
+          "mainOverflow": false,
+          "headerOverflow": false,
+          "cards": 32
+        },
+        {
+          "theme": "dark",
+          "width": 1024,
+          "zoom": 1.25,
+          "cssWidth": 819,
+          "cssHeight": 720,
+          "searchVisible": true,
+          "navigationVisible": true,
+          "mainOverflow": false,
+          "headerOverflow": false,
+          "cards": 32
+        },
+        {
+          "theme": "dark",
+          "width": 1024,
+          "zoom": 1.5,
+          "cssWidth": 683,
+          "cssHeight": 600,
+          "searchVisible": true,
+          "navigationVisible": true,
+          "mainOverflow": false,
+          "headerOverflow": false,
+          "cards": 32
+        },
+        {
+          "theme": "dark",
+          "width": 1024,
+          "zoom": 2,
+          "cssWidth": 512,
+          "cssHeight": 450,
+          "searchVisible": true,
+          "navigationVisible": true,
+          "mainOverflow": false,
+          "headerOverflow": false,
+          "cards": 32
+        },
+        {
+          "theme": "dark",
+          "width": 1280,
+          "zoom": 1,
+          "cssWidth": 1280,
+          "cssHeight": 900,
+          "searchVisible": true,
+          "navigationVisible": true,
+          "mainOverflow": false,
+          "headerOverflow": false,
+          "cards": 32
+        },
+        {
+          "theme": "dark",
+          "width": 1280,
+          "zoom": 1.25,
+          "cssWidth": 1024,
+          "cssHeight": 720,
+          "searchVisible": true,
+          "navigationVisible": true,
+          "mainOverflow": false,
+          "headerOverflow": false,
+          "cards": 32
+        },
+        {
+          "theme": "dark",
+          "width": 1280,
+          "zoom": 1.5,
+          "cssWidth": 853,
+          "cssHeight": 600,
+          "searchVisible": true,
+          "navigationVisible": true,
+          "mainOverflow": false,
+          "headerOverflow": false,
+          "cards": 32
+        },
+        {
+          "theme": "dark",
+          "width": 1280,
+          "zoom": 2,
+          "cssWidth": 640,
+          "cssHeight": 450,
+          "searchVisible": true,
+          "navigationVisible": true,
+          "mainOverflow": false,
+          "headerOverflow": false,
+          "cards": 32
+        },
+        {
+          "theme": "dark",
+          "width": 1920,
+          "zoom": 1,
+          "cssWidth": 1920,
+          "cssHeight": 900,
+          "searchVisible": true,
+          "navigationVisible": true,
+          "mainOverflow": false,
+          "headerOverflow": false,
+          "cards": 32
+        },
+        {
+          "theme": "dark",
+          "width": 1920,
+          "zoom": 1.25,
+          "cssWidth": 1536,
+          "cssHeight": 720,
+          "searchVisible": true,
+          "navigationVisible": true,
+          "mainOverflow": false,
+          "headerOverflow": false,
+          "cards": 32
+        },
+        {
+          "theme": "dark",
+          "width": 1920,
+          "zoom": 1.5,
+          "cssWidth": 1280,
+          "cssHeight": 600,
+          "searchVisible": true,
+          "navigationVisible": true,
+          "mainOverflow": false,
+          "headerOverflow": false,
+          "cards": 32
+        },
+        {
+          "theme": "dark",
+          "width": 1920,
+          "zoom": 2,
+          "cssWidth": 960,
+          "cssHeight": 450,
+          "searchVisible": true,
+          "navigationVisible": true,
+          "mainOverflow": false,
+          "headerOverflow": false,
+          "cards": 32
+        },
+        {
+          "theme": "light",
+          "width": 1024,
+          "zoom": 1,
+          "cssWidth": 1024,
+          "cssHeight": 900,
+          "searchVisible": true,
+          "navigationVisible": true,
+          "mainOverflow": false,
+          "headerOverflow": false,
+          "cards": 32
+        },
+        {
+          "theme": "light",
+          "width": 1024,
+          "zoom": 1.25,
+          "cssWidth": 819,
+          "cssHeight": 720,
+          "searchVisible": true,
+          "navigationVisible": true,
+          "mainOverflow": false,
+          "headerOverflow": false,
+          "cards": 32
+        },
+        {
+          "theme": "light",
+          "width": 1024,
+          "zoom": 1.5,
+          "cssWidth": 683,
+          "cssHeight": 600,
+          "searchVisible": true,
+          "navigationVisible": true,
+          "mainOverflow": false,
+          "headerOverflow": false,
+          "cards": 32
+        },
+        {
+          "theme": "light",
+          "width": 1024,
+          "zoom": 2,
+          "cssWidth": 512,
+          "cssHeight": 450,
+          "searchVisible": true,
+          "navigationVisible": true,
+          "mainOverflow": false,
+          "headerOverflow": false,
+          "cards": 32
+        },
+        {
+          "theme": "light",
+          "width": 1280,
+          "zoom": 1,
+          "cssWidth": 1280,
+          "cssHeight": 900,
+          "searchVisible": true,
+          "navigationVisible": true,
+          "mainOverflow": false,
+          "headerOverflow": false,
+          "cards": 32
+        },
+        {
+          "theme": "light",
+          "width": 1280,
+          "zoom": 1.25,
+          "cssWidth": 1024,
+          "cssHeight": 720,
+          "searchVisible": true,
+          "navigationVisible": true,
+          "mainOverflow": false,
+          "headerOverflow": false,
+          "cards": 32
+        },
+        {
+          "theme": "light",
+          "width": 1280,
+          "zoom": 1.5,
+          "cssWidth": 853,
+          "cssHeight": 600,
+          "searchVisible": true,
+          "navigationVisible": true,
+          "mainOverflow": false,
+          "headerOverflow": false,
+          "cards": 32
+        },
+        {
+          "theme": "light",
+          "width": 1280,
+          "zoom": 2,
+          "cssWidth": 640,
+          "cssHeight": 450,
+          "searchVisible": true,
+          "navigationVisible": true,
+          "mainOverflow": false,
+          "headerOverflow": false,
+          "cards": 32
+        },
+        {
+          "theme": "light",
+          "width": 1920,
+          "zoom": 1,
+          "cssWidth": 1920,
+          "cssHeight": 900,
+          "searchVisible": true,
+          "navigationVisible": true,
+          "mainOverflow": false,
+          "headerOverflow": false,
+          "cards": 32
+        },
+        {
+          "theme": "light",
+          "width": 1920,
+          "zoom": 1.25,
+          "cssWidth": 1536,
+          "cssHeight": 720,
+          "searchVisible": true,
+          "navigationVisible": true,
+          "mainOverflow": false,
+          "headerOverflow": false,
+          "cards": 32
+        },
+        {
+          "theme": "light",
+          "width": 1920,
+          "zoom": 1.5,
+          "cssWidth": 1280,
+          "cssHeight": 600,
+          "searchVisible": true,
+          "navigationVisible": true,
+          "mainOverflow": false,
+          "headerOverflow": false,
+          "cards": 32
+        },
+        {
+          "theme": "light",
+          "width": 1920,
+          "zoom": 2,
+          "cssWidth": 960,
+          "cssHeight": 450,
+          "searchVisible": true,
+          "navigationVisible": true,
+          "mainOverflow": false,
+          "headerOverflow": false,
+          "cards": 32
+        }
+      ],
+      "failures": [],
+      "behavior": {
+        "navigation": {
+          "focusWrap": true,
+          "backgroundInert": true,
+          "escapeAndFocusReturn": true,
+          "directoryHitTest": true
+        },
+        "preferencePreserved": true,
+        "settings": [
+          {
+            "page": "基础设置",
+            "withinViewport": true,
+            "overflow": false
+          },
+          {
+            "page": "手机访问",
+            "withinViewport": true,
+            "overflow": false
+          },
+          {
+            "page": "插件管理",
+            "withinViewport": true,
+            "overflow": false
+          },
+          {
+            "page": "系统状态",
+            "withinViewport": true,
+            "overflow": false
+          }
+        ],
+        "dock": {
+          "width": 376,
+          "withinViewport": true,
+          "overflow": false,
+          "backgroundInert": true
+        },
+        "reducedMotion": {
+          "matches": true,
+          "transition": "1e-05s",
+          "animation": "1e-05s"
+        }
+      }
+    },
+    "baselineFailingCases": 10,
+    "beforeProvenance": "Captured from the existing production dist before UI edits. Before-build source digests were not captured; before results and raw screenshots are retained as observations, not byte-exact source provenance.",
+    "visualQa": "Before/after dark/light, compact navigation and dock screenshots inspected. Inspection found a short-viewport directory section squeezed out by flex allocation; final layout uses whole-panel scrolling and checks the first directory with browser hit-testing. Keyboard directory actions are visible on focus."
+  },
+  "mobile": {
+    "date": "2026-10-15T11:48:52.583Z",
+    "matrix": [
+      {
+        "width": 280,
+        "fontScale": 1,
+        "columns": 1,
+        "cardWidth": 260
+      },
+      {
+        "width": 280,
+        "fontScale": 1.3,
+        "columns": 1,
+        "cardWidth": 260
+      },
+      {
+        "width": 280,
+        "fontScale": 2,
+        "columns": 1,
+        "cardWidth": 260
+      },
+      {
+        "width": 280,
+        "fontScale": 2.5,
+        "columns": 1,
+        "cardWidth": 260
+      },
+      {
+        "width": 320,
+        "fontScale": 1,
+        "columns": 1,
+        "cardWidth": 300
+      },
+      {
+        "width": 320,
+        "fontScale": 1.3,
+        "columns": 1,
+        "cardWidth": 300
+      },
+      {
+        "width": 320,
+        "fontScale": 2,
+        "columns": 1,
+        "cardWidth": 300
+      },
+      {
+        "width": 320,
+        "fontScale": 2.5,
+        "columns": 1,
+        "cardWidth": 300
+      },
+      {
+        "width": 360,
+        "fontScale": 1,
+        "columns": 2,
+        "cardWidth": 165
+      },
+      {
+        "width": 360,
+        "fontScale": 1.3,
+        "columns": 1,
+        "cardWidth": 340
+      },
+      {
+        "width": 360,
+        "fontScale": 2,
+        "columns": 1,
+        "cardWidth": 340
+      },
+      {
+        "width": 360,
+        "fontScale": 2.5,
+        "columns": 1,
+        "cardWidth": 340
+      },
+      {
+        "width": 400,
+        "fontScale": 1,
+        "columns": 2,
+        "cardWidth": 185
+      },
+      {
+        "width": 400,
+        "fontScale": 1.3,
+        "columns": 1,
+        "cardWidth": 380
+      },
+      {
+        "width": 400,
+        "fontScale": 2,
+        "columns": 1,
+        "cardWidth": 380
+      },
+      {
+        "width": 400,
+        "fontScale": 2.5,
+        "columns": 1,
+        "cardWidth": 380
+      },
+      {
+        "width": 768,
+        "fontScale": 1,
+        "columns": 4,
+        "cardWidth": 179
+      },
+      {
+        "width": 768,
+        "fontScale": 1.3,
+        "columns": 3,
+        "cardWidth": 242
+      },
+      {
+        "width": 768,
+        "fontScale": 2,
+        "columns": 2,
+        "cardWidth": 369
+      },
+      {
+        "width": 768,
+        "fontScale": 2.5,
+        "columns": 1,
+        "cardWidth": 748
+      },
+      {
+        "width": 1024,
+        "fontScale": 1,
+        "columns": 4,
+        "cardWidth": 243
+      },
+      {
+        "width": 1024,
+        "fontScale": 1.3,
+        "columns": 4,
+        "cardWidth": 243
+      },
+      {
+        "width": 1024,
+        "fontScale": 2,
+        "columns": 3,
+        "cardWidth": 328
+      },
+      {
+        "width": 1024,
+        "fontScale": 2.5,
+        "columns": 2,
+        "cardWidth": 497
+      }
+    ],
+    "conditions": "Production React hooks/components with native views/list scrolling controlled by the harness. Validates layout arithmetic, anchor ownership, row-index conversion, retries and teardown, button semantics and Modal wiring; not native Yoga/VoiceOver/TalkBack/device rendering evidence.",
+    "paletteContrast": {
+      "dark": {
+        "minimumOrdinaryTextOnOpaqueSurfaces": 5.495727761545648,
+        "onAccent": 5.896341773749801
+      },
+      "light": {
+        "minimumOrdinaryTextOnOpaqueSurfaces": 4.953289527763239,
+        "onAccent": 6.3104242106891
+      }
+    },
+    "reactNative": "0.85.3",
+    "flatListImplementationSha256": "25c2e353f4e46fc128b0a3a1653ed685fb48a13c59482d052f64f92dc4009d1e",
+    "scrollModel": "A visible video ID is mapped to the current multi-column row index. Each layout/focus generation has up to six attempts. Query changes, user drag, page deactivation and unmount cancel follow-up work. Native list measurement and physical anchor restoration remain pending.",
+    "nativeRenderingAcceptance": false,
+    "nativeReaderAcceptance": false,
+    "scope": "Library/search and common card/button/theme/modal. Other mobile pages and player accessibility/reduced-motion remain incomplete."
+  },
+  "mobileBundles": {
+    "verifier": [
+      {
+        "platform": "android",
+        "bytes": 3092768,
+        "modules": 2509,
+        "reactVersion": "19.2.3",
+        "sharedContracts": true
+      },
+      {
+        "platform": "ios",
+        "bytes": 3089180,
+        "modules": 2513,
+        "reactVersion": "19.2.3",
+        "sharedContracts": true
+      }
+    ],
+    "files": [
+      {
+        "platform": "android",
+        "bytes": 3092768,
+        "sha256": "ff9197a68fdf5090a63b306eb697b472e78bfcefb3448500ee572e3d7192998c",
+        "sourceMapSha256": "c0d84c8ee67f6de588b00f7c05cc83b5d4e4c66f050abaf852803e92844185a0"
+      },
+      {
+        "platform": "ios",
+        "bytes": 3089180,
+        "sha256": "09e22e283a984647a44a5f815f2468c10278ab6c29274668939cba9cc7261cbb",
+        "sourceMapSha256": "07ecff81df345ccccc920b1ca44cd6d0abebc7cb8c77ee3b9ee015493b7473f9"
+      }
+    ],
+    "sourceVerification": "Both actual Hermes exports and later inspect-only verification match current shared contracts, single React runtime and newly added mobile modules through source-map content digests. No APK/IPA signing, install or native UI acceptance."
+  },
+  "screenshots": [
+    {
+      "path": "docs/evidence/r7-responsive-ui/before-dark.png",
+      "sha256": "87abc3a7eb498f83bc266957127c27f1c044edb8ee1946291149cafde0fc9816"
+    },
+    {
+      "path": "docs/evidence/r7-responsive-ui/before-light.png",
+      "sha256": "33f37d33ab761de83448dcea1931541077c7c43be7206fc928b3dffa0039162d"
+    },
+    {
+      "path": "docs/evidence/r7-responsive-ui/after-dark.png",
+      "sha256": "a1e3157342f2399e54b2f0fb36d9852607251b5199995739f9f906d64b56612d"
+    },
+    {
+      "path": "docs/evidence/r7-responsive-ui/after-light.png",
+      "sha256": "93ccd2caa2735e267ab195882b8574fe087868b77e991c0b810f74cd305d803b"
+    },
+    {
+      "path": "docs/evidence/r7-responsive-ui/navigation.png",
+      "sha256": "c0409e0a63a748db51e33681425cad7e80ea97a8b263928291e46e4d09f380a5"
+    },
+    {
+      "path": "docs/evidence/r7-responsive-ui/dock.png",
+      "sha256": "81855abf5988d85b07dfe1bdf2b9c3f27051fec3a4ab45f293922de7cb648067"
+    }
+  ],
+  "verification": [
+    {
+      "command": "npm run build",
+      "exitCode": 0
+    },
+    {
+      "command": "npm run typecheck",
+      "cwd": "mobile",
+      "exitCode": 0
+    },
+    {
+      "command": "npm run verify:responsive-layout -- --in-process-gpu --no-sandbox",
+      "exitCode": 0
+    },
+    {
+      "command": "npm run verify:mobile-accessibility",
+      "exitCode": 0
+    },
+    {
+      "command": "npm run verify:library-query",
+      "exitCode": 0
+    },
+    {
+      "command": "npm run verify:settings-panels -- --in-process-gpu --no-sandbox",
+      "exitCode": 0
+    },
+    {
+      "command": "npm run verify:mobile-navigation",
+      "exitCode": 0
+    },
+    {
+      "command": "npm run verify:mobile-correctness",
+      "exitCode": 0
+    },
+    {
+      "command": "npm run verify:electron-api",
+      "exitCode": 0,
+      "methods": 127,
+      "channels": 115
+    },
+    {
+      "command": "npm run verify:mobile-bundles",
+      "exitCode": 0
+    },
+    {
+      "command": "npm run verify:mobile-bundles -- --inspect-only",
+      "exitCode": 0
+    },
+    {
+      "command": "git diff --check",
+      "exitCode": 0
+    }
+  ],
+  "pending": [
+    "Physical Android/iOS Yoga layout, OS large fonts, cutouts/keyboard/rotation, TalkBack/VoiceOver, and native scroll-anchor restoration; adb device list was empty and emulator executable was absent at the standard SDK path during this turn",
+    "Windows OS DPI/multi-monitor and installed/portable device matrix",
+    "Remaining device/pairing/player and other feature panel accessibility and reduced motion; complete contrast audit including transparent/image/error surfaces",
+    "Further feature/CSS decomposition, typed entrypoints, remaining synchronous IO/serialization and first-start stability recorded in R7 batch 8",
+    "R6 decoder/contention/long-session memory and R8 dependency, crash-recovery, signing/update/TLS/native delivery"
+  ]
+}

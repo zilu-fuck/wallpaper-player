@@ -9,12 +9,19 @@ const IPC = {
   GENERATE_THUMBNAIL: 'generate-thumbnail',
   GET_THUMBNAIL_URL: 'get-thumbnail-url',
   GENERATE_PREVIEW_FRAME: 'generate-preview-frame',
+  CANCEL_MEDIA_WORK: 'cancel-media-work',
   GET_VIDEO_METADATA: 'get-video-metadata',
+  MEDIA_SET_FAVORITE: 'media-set-favorite',
+  MEDIA_SET_TAGS: 'media-set-tags',
+  MEDIA_GET_TAGS: 'media-get-tags',
+  MEDIA_APPEND_TAGS: 'media-append-tags',
   CHECK_FFMPEG: 'check-ffmpeg',
   GET_APP_VERSION: 'get-app-version',
 
   // 设置
   GET_SETTINGS: 'get-settings',
+  GET_SETTINGS_FEED: 'settings-get-feed',
+  SETTINGS_LEGACY_LISTENER: 'settings-legacy-listener',
   SAVE_SETTINGS: 'save-settings',
 
   // 网络资源
@@ -48,6 +55,7 @@ const IPC = {
   // 隐私
   PRIVACY_SET_PASSWORD: 'privacy-set-password',
   PRIVACY_UNLOCK: 'privacy-unlock',
+  PRIVACY_LOCK: 'privacy-lock',
 
   // 远程访问（手机端）
   REMOTE_GET_STATE: 'remote-get-state',
@@ -60,6 +68,14 @@ const IPC = {
   REMOTE_REMOVE_PAIRED_DEVICE: 'remote-remove-paired-device',
   REMOTE_APPROVE_PAIRING_REQUEST: 'remote-approve-pairing-request',
   REMOTE_REJECT_PAIRING_REQUEST: 'remote-reject-pairing-request',
+
+  // 窗口外壳（自绘标题栏）
+  WINDOW_GET_STATE: 'window-get-state',
+  WINDOW_MINIMIZE: 'window-minimize',
+  WINDOW_TOGGLE_MAXIMIZE: 'window-toggle-maximize',
+  WINDOW_CLOSE: 'window-close',
+  WINDOW_CLOSE_DECIDE: 'window-close-decide',
+  APP_ASK_REPLY: 'app-ask-reply',
 
   // 文件与目录
   SELECT_DIRECTORY: 'select-directory',
@@ -87,12 +103,15 @@ const IPC = {
   MPV_STOP: 'mpv-stop',
   MPV_GET_STATE: 'mpv-get-state',
   MPV_COMMAND: 'mpv-command',
+  PLAYER_ACTION: 'player-action',
   SELECT_MPV_PATH: 'select-mpv-path'
 }
 
 // 主进程 → 渲染进程事件通道
 const EVENT = {
   SETTINGS_CHANGED: 'settings-changed',
+  SETTINGS_PATCHED: 'settings-patched',
+  PRIVACY_STATE_CHANGED: 'privacy-state-changed',
   REMOTE_ACCESS_STATE: 'remote-access-state',
   REMOTE_PLAY_ON_DESKTOP: 'remote-play-on-desktop',
   PLAYER_SHORTCUT: 'player-shortcut',
@@ -100,7 +119,10 @@ const EVENT = {
   MPV_STATE: 'mpv-state',
   MPV_ENDED: 'mpv-ended',
   MPV_ERROR: 'mpv-error',
-  MPV_DOWNLOAD_PROGRESS: 'mpv-download-progress'
+  MPV_DOWNLOAD_PROGRESS: 'mpv-download-progress',
+  WINDOW_MAXIMIZED_CHANGED: 'window-maximized-changed',
+  WINDOW_CLOSE_PROMPT: 'window-close-prompt',
+  APP_ASK: 'app-ask'
 }
 
 module.exports = { IPC, EVENT }

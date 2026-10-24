@@ -3,9 +3,13 @@ const fs = require('fs')
 const os = require('os')
 const path = require('path')
 const { app } = require('electron')
+require('./test-data-guard.cjs')
+app.disableHardwareAcceleration()
 
 const projectRoot = path.resolve(__dirname, '..')
 const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'wallpaper-player-external-plugin-'))
+app.setPath('userData', path.join(tempRoot, 'user-data'))
+app.setPath('sessionData', path.join(tempRoot, 'session'))
 const sourceRoot = path.join(tempRoot, 'source-plugin')
 const brokenRoot = path.join(tempRoot, 'broken-plugin')
 const officialCollisionRoot = path.join(tempRoot, 'official-collision-plugin')
@@ -19,7 +23,6 @@ const pathLeakRoot = path.join(tempRoot, 'path-leak-plugin')
   const failingReplacementRoot = path.join(tempRoot, 'failing-replacement-plugin')
 
 async function main() {
-  app.setPath('userData', path.join(tempRoot, 'user-data'))
   fs.mkdirSync(sourceRoot, { recursive: true })
   fs.writeFileSync(path.join(sourceRoot, 'plugin.json'), JSON.stringify({
     manifestVersion: 1,
@@ -262,6 +265,19 @@ async function main() {
     /官方插件包校验失败/
   )
 
+  const zipDirectory = path.join(tempRoot, "中文' & $literal")
+  fs.mkdirSync(zipDirectory)
+  const zipPath = path.join(zipDirectory, "插件' & $literal.zip")
+  fs.writeFileSync(path.join(sourceRoot, '.env.example'), 'literal fixture configuration')
+  await require(path.join(projectRoot, 'main/exec')).execFileAsync('powershell.exe', ['-NoLogo', '-NoProfile', '-NonInteractive', '-Command',
+    "$ErrorActionPreference='Stop'; Add-Type -AssemblyName System.IO.Compression.FileSystem; [IO.Compression.ZipFile]::CreateFromDirectory($env:WP_TEST_ZIP_SOURCE,$env:WP_TEST_ZIP_OUTPUT,[IO.Compression.CompressionLevel]::Optimal,$true)"],
+  { env: { ...process.env, WP_TEST_ZIP_SOURCE: sourceRoot, WP_TEST_ZIP_OUTPUT: zipPath }, timeout: 30000 })
+  const fromZip = await installPlugin(zipPath)
+  assert.strictEqual(fromZip.success, true, fromZip.error)
+  assert.strictEqual(fs.readFileSync(path.join(pluginsDir, 'sample.external/.env.example'), 'utf8'), 'literal fixture configuration')
+  assert.strictEqual((await uninstallPlugin('sample.external')).success, true)
+  assert.strictEqual(pluginRegistry.getPlugin('sample.external'), null)
+
   const installed = await installPlugin(sourceRoot)
   assert.strictEqual(installed.success, true, installed.error)
   assert.strictEqual(installed.plugin.id, 'sample.external')
@@ -416,23 +432,26 @@ async function main() {
 
 async function invokePluginRoute(match, urlPath) {
   const chunks = []
-  const req = {
+  const { EventEmitter } = require('events')
+  const req = Object.assign(new EventEmitter(), {
     method: 'GET',
     headers: {},
-    on() {},
     setEncoding() {}
-  }
-  const res = {
+  })
+  const res = Object.assign(new EventEmitter(), {
     status: 0,
     headers: {},
     writeHead(status, headers) {
       this.status = status
       this.headers = headers
+      this.headersSent = true
     },
     end(chunk) {
       if (chunk) chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(String(chunk)))
+      this.writableEnded = this.writableFinished = true
+      this.emit('finish')
     }
-  }
+  })
   await match.route.handler(req, res, {
     params: match.params,
     url: new URL(urlPath, 'http://127.0.0.1')
@@ -444,14 +463,13 @@ async function invokePluginRoute(match, urlPath) {
   }
 }
 
-app.whenReady()
-  .then(main)
-  .finally(() => {
-    fs.rmSync(tempRoot, { recursive: true, force: true })
-    app.quit()
-  })
-  .catch((error) => {
-    console.error(error)
-    process.exitCode = 1
-    app.quit()
-  })
+app.whenReady().then(main).then(() => finish(0), error => { console.error(error); finish(1) })
+async function finish(code) {
+  try {
+    await require(path.join(projectRoot, 'main/plugins')).disposePlugins()
+    const settings = require(path.join(projectRoot, 'main/settings'))
+    await settings.flushSettingsWrites(); await settings.disposeSettingsSerialization({ cancel: true })
+  } catch (error) { console.error(error); code = 1 }
+  console.log('Retained isolated plugin fixture: ' + tempRoot)
+  app.exit(code)
+}

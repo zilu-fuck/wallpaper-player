@@ -4,7 +4,12 @@ mobile/.expo/
 mobile/android/
 mobile/ios/
 dist/
+!packages/contracts/dist/
+!packages/contracts/dist/**
+!packages/domain/dist/
+!packages/domain/dist/**
 release/
+.release/
 vendor/
 thumbnails/
 settings.json

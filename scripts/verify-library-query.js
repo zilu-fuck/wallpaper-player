@@ -1,0 +1,68 @@
+const assert=require('assert'), fs=require('fs'), path=require('path');
+const {requestJson,claimDevice,removeTempRootWithRetry}=require('./verify-helpers');
+const root=path.resolve(__dirname,'..'),parent=path.join(root,'.tmp/refactor-tests');fs.mkdirSync(parent,{recursive:true});
+const fixture=fs.mkdtempSync(path.join(parent,'library-query-'));process.chdir(fixture);
+const settings=require(path.join(root,'main/settings')),scanner=require(path.join(root,'main/scanner'));
+const {createMediaMutationService,savePlaybackRecord}=require(path.join(root,'main/application/media-mutations'));
+const identity=require(path.join(root,'main/remote/identity'));
+const {createRemoteServer}=require(path.join(root,'main/remote/server'));
+const {getDirectoryId}=require(path.join(root,'main/remote/video-index'));
+const {getLibraryDiagnostics}=require(path.join(root,'main/remote/handlers/library'));
+let server;
+async function main(){
+ await require('./verify-desktop-library-query').verifyDesktopLibraryQuery();
+ const directory=path.join(fixture,'library'),child=path.join(directory,'child');fs.mkdirSync(child,{recursive:true});
+ for(let i=0;i<245;i++)fs.writeFileSync(path.join(i>=200?child:directory,`Clip-${i}.mp4`),'query-fixture');
+ await settings.saveSettingsAndFlush({directories:[directory,child],defaultDirectory:directory});
+ const videos=(await scanner.scanWithCache(directory,true)).videos;
+ const target=videos.find(v=>v.name==='Clip-240'),other=videos.find(v=>v.name==='Clip-239');
+ const mutations=createMediaMutationService();
+ await mutations.setFavorite(target,true);await mutations.setFavorite(other,true);
+ await mutations.setVideoTags(target,['Include','Unique-240']);await mutations.setVideoTags(other,['Include','Exclude']);
+ await mutations.appendTagsBulk([other],Array.from({length:110},(_,index)=>'Paged-'+index));
+ server=createRemoteServer({port:0});await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));
+ const endpoint=`http://127.0.0.1:${server.address().port}`;
+ const pair=await claimDevice({baseUrl:endpoint,clientId:'query-phone',...identity});
+ const headers={Authorization:'Bearer '+pair.token};
+ const authBuilds=getLibraryDiagnostics().builds;
+ const authorization=await requestJson(endpoint+'/v1/auth',{headers});assert.strictEqual(authorization.status,200);assert.strictEqual(authorization.data.authorized,true);
+ assert.strictEqual(getLibraryDiagnostics().builds,authBuilds,'authorization probe must not construct the media library');
+ assert.strictEqual((await requestJson(endpoint+'/v1/auth')).status,401);
+ const query=body=>requestJson(endpoint+'/v1/library/query',{method:'POST',headers,body:JSON.stringify(body)});
+ const first=await query({limit:100});assert.strictEqual(first.status,200);assert.strictEqual(first.data.count,245);assert.strictEqual(first.data.items.length,100);
+ const ids=new Set(first.data.items.map(i=>i.id));let cursor=first.data.nextCursor;
+ while(cursor){const page=await query({limit:100,cursor});assert.strictEqual(page.status,200);assert.strictEqual(page.data.revision,first.data.revision);
+ for(const item of page.data.items){assert.ok(!ids.has(item.id));ids.add(item.id)}cursor=page.data.nextCursor}
+ assert.strictEqual(ids.size,245,'overlapping roots must not duplicate pagination');
+ const matched=await query({directoryId:getDirectoryId(child),favorite:true,includeTags:[{type:'custom',name:'INCLUDE'}],excludeTags:[{type:'custom',name:'Exclude'}],query:'Clip-240',sort:'name',limit:10});
+ assert.strictEqual(matched.data.matchedCount,1);assert.strictEqual(matched.data.items[0].name,'Clip-240');
+ assert.strictEqual(matched.data.aggregationScope,'visible-library');
+ const childOnly=await query({directoryId:getDirectoryId(child),limit:100});assert.strictEqual(childOnly.data.matchedCount,45);
+ const parentSearch=await query({directoryId:getDirectoryId(directory),query:'library',limit:100});assert.strictEqual(parentSearch.data.matchedCount,245);
+ assert.strictEqual((await query({query:'Unique-240',limit:10})).data.matchedCount,1,'search must include records beyond the first page');
+ assert.strictEqual((await query({includeTags:[{type:'system',name:'Include'}],limit:10})).data.matchedCount,0,'custom/system tags must remain distinct');
+ assert.strictEqual((await query({favorite:false,limit:500})).data.matchedCount,243);
+ const changedQuery=await query({query:'Clip',limit:100,cursor:first.data.nextCursor});assert.strictEqual(changedQuery.status,400);
+ const invalid=await query({limit:100,cursor:first.data.nextCursor.slice(0,-2)+'XX'});assert.strictEqual(invalid.status,400);
+ const unicode=await query({limit:100,cursor:first.data.nextCursor.split('.')[0]+'.'+'é'.repeat(43)});assert.strictEqual(unicode.status,400);
+ const initialDiagnostics=getLibraryDiagnostics();await savePlaybackRecord(target.fullPath,{position:40});
+ const revision=await requestJson(endpoint+'/v1/library/revision',{headers});assert.strictEqual(revision.data.revision,first.data.revision);
+ assert.strictEqual(getLibraryDiagnostics().builds,initialDiagnostics.builds);
+ await mutations.appendTagsBulk([target],['changed']);
+ const stale=await query({limit:100,cursor:first.data.nextCursor});assert.strictEqual(stale.status,409);assert.strictEqual(stale.data.error.code,'cursor_stale');
+ assert.ok(stale.data.error.currentLibraryRevision);
+ const fresh=await query({limit:100});assert.notStrictEqual(fresh.data.revision,first.data.revision);
+ const categories=await requestJson(endpoint+'/v1/library/categories?type=custom',{headers});assert.strictEqual(categories.status,200);
+ assert.strictEqual(categories.data.items.find(c=>c.name==='Include').count,2,'category counts must count unique visible records');
+ const otherPair=await claimDevice({baseUrl:endpoint,clientId:'other-query-phone',...identity});
+ const cross=await requestJson(endpoint+'/v1/library/query',{method:'POST',headers:{Authorization:'Bearer '+otherPair.token},body:JSON.stringify({limit:100,cursor:fresh.data.nextCursor})});
+ assert.strictEqual(cross.status,400,'cursor must remain bound to the authenticated device');
+ await require('./verify-mobile-library-pages').verifyMobileLibraryPages({endpoint,token:pair.token,video:target,
+   mutate:(video,tags)=>mutations.appendTagsBulk([video],tags)});
+ await require('./verify-library-screen-behavior').verifyLibraryScreen({endpoint,token:pair.token});
+ await require('./verify-scan-index-consistency').verifyScanIndexConsistency({directory,scanner,query});
+ console.log('library query passed: full-library search/composed typed filters, natural order, overlapping roots, unique statistics, signed device/query/revision cursors, independent progress and category paging');
+}
+main().catch(e=>{console.error(e);process.exitCode=1}).finally(async()=>{if(server){server.closeAllConnections();await new Promise(r=>server.close(r))}
+ await scanner.waitForBackgroundScanRefreshes();scanner.unwatchAllDirectories();await settings.flushSettingsWrites();process.chdir(root);
+ assert.strictEqual(path.dirname(path.resolve(fixture)),parent);assert.ok(path.basename(fixture).startsWith('library-query-'));await removeTempRootWithRetry(fixture)});

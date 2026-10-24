@@ -1,12 +1,15 @@
-const { dialog, ipcMain } = require('electron')
-const { execFileSync } = require('child_process')
+const { dialog } = require('electron')
+const { ipcMain: appIpcMain } = require('../security/ipc')
+const { execFileTreeAsync } = require('../exec')
+const { mediaScheduler } = require('../application/resource-scheduler')
+const { mediaWorkService } = require('../application/media-work-service')
 const path = require('path')
 const { IPC, EVENT } = require('../ipc-channels')
 const { isMpvExecutablePath, pathKey } = require('../paths')
 const {
-  addSessionAllowedFile,
-  getPlaybackState,
-  loadSettings,
+  sessionAllowedFiles,
+  getPlaybackStateKey,
+  readPlaybackState,
   sessionAllowedMpvPaths
 } = require('../settings')
 const { assertAllowedVideoPath } = require('../scanner')
@@ -41,103 +44,55 @@ const MPV_COMMANDS = new Set([
   'screenshot'
 ])
 
-function registerPlayerIpc() {
-  ipcMain.handle(IPC.MPV_PLAY_URL, async (_event, url, options = {}) => {
-    try {
-      const settings = loadSettings()
-      const resource = options?.temporary === true
-        ? await resolveNetworkResourcePlayback({ url, title: options?.title, kind: options?.kind }, { refresh: true })
-        : await resolveKnownNetworkResourcePlayback({ url, title: options?.title }, { settings })
+const { createPlayerService } = require('../application/player-service')
+const playerService = createPlayerService({
+  manager: mpvManager, getMainWindow, resolveMpvPath, readPlaybackState, setMediaPlaybackActive,
+  async resolveLocal(target, senderId, context) {
+    const resolved = await assertAllowedVideoPath(target, { ...context, audience: 'desktop', senderId })
+    sessionAllowedFiles.add(getPlaybackStateKey(resolved)); return resolved
+  },
+  resolveNetwork: (request, context) => request.temporary
+    ? resolveNetworkResourcePlayback({ url: request.target, title: request.title, kind: request.kind }, { ...context, refresh: true })
+    : resolveKnownNetworkResourcePlayback({ url: request.target, title: request.title }, context)
+})
+function playerFailure(error) { return { success: false, code: error.code || 'player_failed',
+  error: error.code === 'stale_session' ? '播放会话已替换' : error.code === 'player_stop_timeout'
+    ? '无法确认旧播放器已退出，请稍后重试' : error.message || '播放失败', retryable: false } }
 
-      const mpvPath = await resolveMpvPath()
-      if (!mpvPath) {
-        return { success: false, error: 'mpv 未安装' }
-      }
-
-      const playOptions = options && typeof options === 'object' ? options : {}
-      const resume = playOptions.resume === false
-        ? false
-        : getPlaybackState(settings.playbackStates, resource.url)
-      setMediaPlaybackActive(true)
-      await mpvManager.play(resource.playbackUrl || resource.url, {
-        hostBounds: playOptions.hostBounds,
-        playlist: [resource.playbackUrl || resource.url],
-        playlistIndex: 0,
-        resume,
-        httpHeaders: resource.httpHeaders
-      })
-      return { success: true }
-    } catch (err) {
-      setMediaPlaybackActive(false)
-      return { success: false, error: err.message }
-    }
+function registerPlayerIpc(ipcMain = appIpcMain) {
+  ipcMain.handle(IPC.PLAYER_ACTION, async (event, request) => {
+    try { return await playerService.action(event, request) } catch (error) { return playerFailure(error) }
+  })
+  ipcMain.handle(IPC.MPV_PLAY_URL, async (event, url, options = {}) => {
+    try { return await playerService.legacyLoad(event, url, options, 'network') } catch (error) { return playerFailure(error) }
   })
 
-  ipcMain.handle(IPC.CHECK_MPV, async () => {
-    const mpvPath = await resolveMpvPath()
-    if (mpvPath) {
-      try {
-        const stdout = execFileSync(mpvPath, ['--version'], { timeout: 5000, encoding: 'utf-8', stdio: 'pipe' })
-        const versionLine = stdout.split(/\r?\n/).find(line => line.trim()) || 'unknown'
-        return { available: true, path: mpvPath, version: versionLine }
-      } catch {
-        return { available: false, path: mpvPath, version: 'unknown' }
-      }
-    }
-    return { available: false, path: null }
+  ipcMain.handle(IPC.CHECK_MPV, async event => {
+    try {
+      return await mediaWorkService.run(event, undefined, signal => mediaScheduler.enqueue({
+        type: 'mpv-status', resources: { prepare: 1 }, priority: 60, signal, timeoutMs: 15000 }, async context => {
+        const mpvPath = await resolveMpvPath(context); context.throwIfAborted()
+        if (!mpvPath) return { available: false, path: null }
+        const { stdout } = await execFileTreeAsync(mpvPath, ['--version'], { timeout: 5000, signal: context.signal, maxBuffer: 128 * 1024 })
+        context.throwIfAborted()
+        return { available: true, path: mpvPath, version: stdout.split(/\r?\n/).find(line => line.trim()) || 'unknown' }
+      }))
+    } catch { return { available: false, path: null, version: 'unknown' } }
   })
 
-  ipcMain.handle(IPC.DOWNLOAD_MPV, async () => {
+  ipcMain.handle(IPC.DOWNLOAD_MPV, async (event, requestId) => {
     try {
-      const mpvPath = await mpvManager.download((progress) => {
-        const win = getMainWindow()
-        if (win && !win.isDestroyed()) {
-          win.webContents.send(EVENT.MPV_DOWNLOAD_PROGRESS, progress)
-        }
-      })
+      const mpvPath = await mediaWorkService.run(event, requestId, signal => mpvManager.download(progress => {
+        if (!event.sender.isDestroyed()) event.sender.send(EVENT.MPV_DOWNLOAD_PROGRESS, { ...progress, requestId })
+      }, { signal }))
       return { success: true, path: mpvPath }
     } catch (err) {
       return { success: false, error: err.message }
     }
   })
 
-  ipcMain.handle(IPC.MPV_PLAY, async (_event, filePath, options = {}) => {
-    try {
-      const resolvedPath = await assertAllowedVideoPath(filePath)
-      addSessionAllowedFile(resolvedPath)
-      const mpvPath = await resolveMpvPath()
-      if (!mpvPath) {
-        return { success: false, error: 'mpv 未安装' }
-      }
-
-      const settings = loadSettings()
-      const playOptions = options && typeof options === 'object' ? options : {}
-      const playlist = []
-      if (Array.isArray(playOptions.playlist)) {
-        for (const item of playOptions.playlist) {
-          try {
-            playlist.push(await assertAllowedVideoPath(item))
-          } catch {}
-        }
-      }
-      const playlistIndex = Number.isInteger(Number(playOptions.playlistIndex))
-        ? Number(playOptions.playlistIndex)
-        : undefined
-      const resume = playOptions.resume === false
-        ? false
-        : getPlaybackState(settings.playbackStates, resolvedPath)
-      setMediaPlaybackActive(true)
-      await mpvManager.play(resolvedPath, {
-        hostBounds: playOptions.hostBounds,
-        playlist,
-        playlistIndex,
-        resume
-      })
-      return { success: true }
-    } catch (err) {
-      setMediaPlaybackActive(false)
-      return { success: false, error: err.message }
-    }
+  ipcMain.handle(IPC.MPV_PLAY, async (event, filePath, options = {}) => {
+    try { return await playerService.legacyLoad(event, filePath, options, 'local') } catch (error) { return playerFailure(error) }
   })
 
   ipcMain.handle(IPC.MPV_SET_HOST_BOUNDS, async (_event, bounds) => {
@@ -148,10 +103,8 @@ function registerPlayerIpc() {
     }
   })
 
-  ipcMain.handle(IPC.MPV_STOP, async () => {
-    mpvManager.stop()
-    setMediaPlaybackActive(false)
-    return { success: true }
+  ipcMain.handle(IPC.MPV_STOP, async (event) => {
+    try { return await playerService.legacyStop(event) } catch (error) { return playerFailure(error) }
   })
 
   ipcMain.handle(IPC.MPV_GET_STATE, async () => {

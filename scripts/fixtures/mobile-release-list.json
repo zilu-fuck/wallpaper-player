@@ -1,0 +1,194 @@
+[
+  {
+    "draft": false,
+    "prerelease": false,
+    "tag_name": "v1.5.1",
+    "name": "Wallpaper Player 1.5.1",
+    "published_at": "2026-08-12T03:33:45Z",
+    "assets": []
+  },
+  {
+    "draft": false,
+    "prerelease": false,
+    "tag_name": "v1.5.0",
+    "name": "Wallpaper Player 1.5.0",
+    "published_at": "2026-08-12T03:00:17Z",
+    "assets": []
+  },
+  {
+    "draft": false,
+    "prerelease": false,
+    "tag_name": "v1.4.0",
+    "name": "Wallpaper Player 1.4.0",
+    "published_at": "2026-06-28T13:44:05Z",
+    "assets": [
+      {
+        "name": "wallpaper-player-mobile-0.1.4-arm64-release.apk",
+        "size": 40710234,
+        "state": "uploaded",
+        "digest": "sha256:f7e46638aa17f66ce68c9c96484909667af7e720bcc63fdc4f46ced39cbaec22",
+        "browser_download_url": "https://github.com/zilu-fuck/wallpaper-player/releases/download/v1.4.0/wallpaper-player-mobile-0.1.4-arm64-release.apk"
+      }
+    ]
+  },
+  {
+    "draft": false,
+    "prerelease": false,
+    "tag_name": "v1.3.3",
+    "name": "Wallpaper Player 1.3.3",
+    "published_at": "2026-06-25T10:57:01Z",
+    "assets": [
+      {
+        "name": "wallpaper-player-mobile-0.1.3-arm64-release.apk",
+        "size": 102625511,
+        "state": "uploaded",
+        "digest": "sha256:0d8f850b6be09f15d150efe9dc5c55d49f4e69f1cfd112ffb01f032435a7f7c5",
+        "browser_download_url": "https://github.com/zilu-fuck/wallpaper-player/releases/download/v1.3.3/wallpaper-player-mobile-0.1.3-arm64-release.apk"
+      }
+    ]
+  },
+  {
+    "draft": false,
+    "prerelease": false,
+    "tag_name": "v1.3.2",
+    "name": "Wallpaper Player v1.3.2",
+    "published_at": "2026-06-24T16:54:24Z",
+    "assets": []
+  },
+  {
+    "draft": false,
+    "prerelease": false,
+    "tag_name": "v1.3.1",
+    "name": "Wallpaper Player v1.3.1",
+    "published_at": "2026-06-24T12:33:06Z",
+    "assets": []
+  },
+  {
+    "draft": false,
+    "prerelease": false,
+    "tag_name": "v1.3.0",
+    "name": "Wallpaper Player 1.3.0",
+    "published_at": "2026-06-24T11:28:55Z",
+    "assets": [
+      {
+        "name": "wallpaper-player-mobile-0.1.3-arm64-release.apk",
+        "size": 102625511,
+        "state": "uploaded",
+        "digest": "sha256:0d8f850b6be09f15d150efe9dc5c55d49f4e69f1cfd112ffb01f032435a7f7c5",
+        "browser_download_url": "https://github.com/zilu-fuck/wallpaper-player/releases/download/v1.3.0/wallpaper-player-mobile-0.1.3-arm64-release.apk"
+      }
+    ]
+  },
+  {
+    "draft": false,
+    "prerelease": false,
+    "tag_name": "v1.2.5",
+    "name": "Wallpaper Player 1.2.5",
+    "published_at": "2026-06-23T18:28:01Z",
+    "assets": [
+      {
+        "name": "wallpaper-player-mobile-0.1.3-arm64-release.apk",
+        "size": 102625511,
+        "state": "uploaded",
+        "digest": "sha256:0d8f850b6be09f15d150efe9dc5c55d49f4e69f1cfd112ffb01f032435a7f7c5",
+        "browser_download_url": "https://github.com/zilu-fuck/wallpaper-player/releases/download/v1.2.5/wallpaper-player-mobile-0.1.3-arm64-release.apk"
+      }
+    ]
+  },
+  {
+    "draft": false,
+    "prerelease": false,
+    "tag_name": "v1.2.4",
+    "name": "Wallpaper Player 1.2.4",
+    "published_at": "2026-06-23T07:31:53Z",
+    "assets": []
+  },
+  {
+    "draft": false,
+    "prerelease": false,
+    "tag_name": "v1.2.3",
+    "name": "Wallpaper Player 1.2.3（特殊版本）",
+    "published_at": "2026-06-22T14:20:46Z",
+    "assets": [
+      {
+        "name": "wallpaper-player-mobile-0.1.2-arm64-release.apk",
+        "size": 102614631,
+        "state": "uploaded",
+        "digest": "sha256:9a171a7730e3d1e4b15593c7161bbd7bfbb5ef41250e70fc645c5d6e9150ebab",
+        "browser_download_url": "https://github.com/zilu-fuck/wallpaper-player/releases/download/v1.2.3/wallpaper-player-mobile-0.1.2-arm64-release.apk"
+      }
+    ]
+  },
+  {
+    "draft": false,
+    "prerelease": false,
+    "tag_name": "v1.2.2",
+    "name": "Wallpaper Player 1.2.2",
+    "published_at": "2026-06-21T08:41:34Z",
+    "assets": [
+      {
+        "name": "wallpaper-player-mobile-0.1.1-arm64-release.apk",
+        "size": 40676898,
+        "state": "uploaded",
+        "digest": "sha256:ea38567dfac09e7530cc6c3d549db03a7abab7d26f57d16f0a2cc2dd3881bbfa",
+        "browser_download_url": "https://github.com/zilu-fuck/wallpaper-player/releases/download/v1.2.2/wallpaper-player-mobile-0.1.1-arm64-release.apk"
+      }
+    ]
+  },
+  {
+    "draft": false,
+    "prerelease": false,
+    "tag_name": "v1.2.1",
+    "name": "Wallpaper Player 1.2.1",
+    "published_at": "2026-06-20T18:30:27Z",
+    "assets": [
+      {
+        "name": "wallpaper-player-mobile-0.1.0-arm64-release.apk",
+        "size": 40665162,
+        "state": "uploaded",
+        "digest": "sha256:4962adbefe884dfded9d1b5f9d02f5ab63b65f26fc32ac9152f9f8157260ec56",
+        "browser_download_url": "https://github.com/zilu-fuck/wallpaper-player/releases/download/v1.2.1/wallpaper-player-mobile-0.1.0-arm64-release.apk"
+      }
+    ]
+  },
+  {
+    "draft": false,
+    "prerelease": false,
+    "tag_name": "v1.2.0",
+    "name": "Wallpaper Player 1.2.0",
+    "published_at": "2026-06-20T05:44:13Z",
+    "assets": []
+  },
+  {
+    "draft": false,
+    "prerelease": false,
+    "tag_name": "v1.1.2",
+    "name": "Wallpaper Player 1.1.2",
+    "published_at": "2026-06-18T13:11:04Z",
+    "assets": []
+  },
+  {
+    "draft": false,
+    "prerelease": false,
+    "tag_name": "v1.1.1",
+    "name": "Wallpaper Player 1.1.1",
+    "published_at": "2026-06-18T12:09:46Z",
+    "assets": []
+  },
+  {
+    "draft": false,
+    "prerelease": false,
+    "tag_name": "v1.1.0",
+    "name": "Wallpaper Player 1.1.0",
+    "published_at": "2026-06-18T10:40:10Z",
+    "assets": []
+  },
+  {
+    "draft": false,
+    "prerelease": false,
+    "tag_name": "v1.0.0",
+    "name": "Wallpaper Player 1.0.0",
+    "published_at": "2026-06-18T07:26:43Z",
+    "assets": []
+  }
+]

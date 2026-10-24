@@ -1,0 +1,1763 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-10-23T09:44:46.883Z",
+  "phase": "Astra SVG review, local production Windows1.5.1 packages and uninstrumented portable smoke",
+  "goalStatus": "active",
+  "previousGoalTurn": "progress",
+  "previousEvidence": "docs/evidence/r8-windows-frontend.json",
+  "requested": "让astra看看svg图标，看看有没有什么能够修改美化的，没有的话就接入正式包",
+  "review": {
+    "model": "gpt-6-astra",
+    "readOnly": true,
+    "desktopAndMobile": true,
+    "conclusion": "Keep the existing icon system and layout; only round video-analysis SVG caps/joins to reveal the two .01-length dot paths",
+    "record": ".tmp/refactor-tests/r8-svg-formal/astra-review.md",
+    "mobilePlayerBasis": "Source review; mobile library/settings and desktop library/player had recorded screenshots",
+    "productionFilesChanged": [
+      "src/components/RightDock.jsx"
+    ],
+    "dependencyOrLayoutChanges": false
+  },
+  "visualVerification": {
+    "method": "Transpile actual before/after RightDock JSX and render its SVG in Electron44 at20px and80px in dark/light panels",
+    "preview": ".tmp/refactor-tests/r8-svg-formal/comparison.png",
+    "beforeSvg": ".tmp/refactor-tests/r8-svg-formal/icon-before.svg",
+    "afterSvg": ".tmp/refactor-tests/r8-svg-formal/icon-after.svg",
+    "humanInspected": true,
+    "unclippedViewport": {
+      "visible": true,
+      "bounds": {
+        "x": 560,
+        "y": 326,
+        "width": 800,
+        "height": 380
+      },
+      "page": {
+        "width": 784,
+        "height": 341,
+        "svg": 8
+      }
+    }
+  },
+  "build": {
+    "passed": true,
+    "directory": "E:\\wallpaper播放器\\release\\windows-1.5.1-e1dfa8de-fc21-4143-bb95-02234b158364",
+    "version": "1.5.1",
+    "productionSourceChanges": [
+      "src/components/RightDock.jsx"
+    ],
+    "qaWrapperAbsent": true,
+    "archive": {
+      "file": "E:\\wallpaper播放器\\release\\windows-1.5.1-e1dfa8de-fc21-4143-bb95-02234b158364\\win-unpacked\\resources\\app.asar",
+      "bytes": 16414643,
+      "sha256": "6085a306e34a1342396d97eb2130d6f48cb66375d56c85636c30664d117ad202",
+      "sha512": "ybpeVdAg95OgLmu340SCpNRz4mCpvIVcgc/Op9M7R5eVSJH2iVPpUvT6fY4FFS9JmTu9jrPp1K63n1uevGBF9g=="
+    },
+    "embedded": [
+      "main/application/confirm.js",
+      "main/application/download-service.js",
+      "main/application/download-tasks.js",
+      "main/application/extract-mpv.ps1",
+      "main/application/library-service.js",
+      "main/application/media-mutation-paths.js",
+      "main/application/media-mutations.js",
+      "main/application/media-work-service.js",
+      "main/application/mpv-installer.js",
+      "main/application/mpv-version-cache.js",
+      "main/application/player-service.js",
+      "main/application/resource-scheduler.js",
+      "main/application/settings-broadcast.js",
+      "main/application/settings-json-worker.js",
+      "main/application/settings-json.js",
+      "main/application/settings-startup.js",
+      "main/application/transcode-service.js",
+      "main/constants.js",
+      "main/download-manager.js",
+      "main/download-xunlei.js",
+      "main/exec.js",
+      "main/index.js",
+      "main/ip-utils.js",
+      "main/ipc/app-dialogs.js",
+      "main/ipc/downloads.js",
+      "main/ipc/files.js",
+      "main/ipc/media-data.js",
+      "main/ipc/media.js",
+      "main/ipc/network-resource-service.js",
+      "main/ipc/network-resources.js",
+      "main/ipc/player.js",
+      "main/ipc/plugins.js",
+      "main/ipc/privacy.js",
+      "main/ipc/remote.js",
+      "main/ipc/settings.js",
+      "main/ipc/updater.js",
+      "main/ipc/window-shell.js",
+      "main/ipc-channels.js",
+      "main/ipc.js",
+      "main/media-pressure.js",
+      "main/mpv-host.js",
+      "main/mpv-integration.js",
+      "main/mpv.js",
+      "main/network-resource-parser.js",
+      "main/paths.js",
+      "main/plugins/builtin.js",
+      "main/plugins/capabilities.js",
+      "main/plugins/core-api.js",
+      "main/plugins/index.js",
+      "main/plugins/loader.js",
+      "main/plugins/manifest.js",
+      "main/plugins/official.js",
+      "main/plugins/registry.js",
+      "main/portable-user-data.js",
+      "main/process-lifecycle.js",
+      "main/rate-limiter.js",
+      "main/remote/handlers/desktop.js",
+      "main/remote/handlers/info.js",
+      "main/remote/handlers/library.js",
+      "main/remote/handlers/media.js",
+      "main/remote/handlers/network-resources.js",
+      "main/remote/handlers/tags.js",
+      "main/remote/handlers/transcode.js",
+      "main/remote/http-utils.js",
+      "main/remote/identity.js",
+      "main/remote/index.js",
+      "main/remote/json-responses.js",
+      "main/remote/media-mutations.js",
+      "main/remote/network.js",
+      "main/remote/request-lifecycle.js",
+      "main/remote/server.js",
+      "main/remote/streaming.js",
+      "main/remote/transcode-cache.js",
+      "main/remote/transcode.js",
+      "main/remote/video-index.js",
+      "main/repositories/settings-file.js",
+      "main/repositories/tag-state.js",
+      "main/repositories/user-media.js",
+      "main/scanner.js",
+      "main/security/ipc-sender.js",
+      "main/security/ipc.js",
+      "main/security/media-access.js",
+      "main/security/privacy-password.js",
+      "main/settings.js",
+      "main/thumbnail.js",
+      "main/updater.js",
+      "main/user-data.js",
+      "main/video-metadata.js",
+      "main/window.js",
+      "main/ytdlp-service.js",
+      "dist/assets/AISearchPanel-gPt7ro3g.js",
+      "dist/assets/DownloadCenter-BxzwI8a6.js",
+      "dist/assets/index-CH5v2A3_.js",
+      "dist/assets/index-D3ud8mIE.css",
+      "dist/assets/NetworkResourceLibrary-BmqYQtpP.js",
+      "dist/assets/Settings-aTAUW9bo.js",
+      "dist/assets/useDownloadStateObserver-BoPJxw84.js",
+      "dist/assets/VideoAnalysisSidebar-DWYC5P59.js",
+      "dist/index.html",
+      "packages/contracts/dist/index.js",
+      "packages/contracts/dist/schema.js",
+      "packages/contracts/dist/settings-feed.js",
+      "packages/contracts/package.json",
+      "packages/domain/dist/index.js",
+      "packages/domain/package.json",
+      "main.js",
+      "preload.js"
+    ],
+    "vendor": [
+      "vendor/aria2/aria2c.exe",
+      "vendor/aria2/AUTHORS",
+      "vendor/aria2/ChangeLog",
+      "vendor/aria2/COPYING",
+      "vendor/aria2/LICENSE.OpenSSL",
+      "vendor/aria2/NEWS",
+      "vendor/aria2/README.html",
+      "vendor/aria2/README.mingw",
+      "vendor/ffmpeg/bin/ffmpeg.exe",
+      "vendor/ffmpeg/bin/ffplay.exe",
+      "vendor/ffmpeg/bin/ffprobe.exe",
+      "vendor/ffmpeg/LICENSE",
+      "vendor/ffmpeg/presets/libvpx-1080p.ffpreset",
+      "vendor/ffmpeg/presets/libvpx-1080p50_60.ffpreset",
+      "vendor/ffmpeg/presets/libvpx-360p.ffpreset",
+      "vendor/ffmpeg/presets/libvpx-720p.ffpreset",
+      "vendor/ffmpeg/presets/libvpx-720p50_60.ffpreset",
+      "vendor/ffmpeg/README.txt",
+      "vendor/mpv/mpv-register.bat",
+      "vendor/mpv/mpv-unregister.bat",
+      "vendor/mpv/mpv.com",
+      "vendor/mpv/mpv.exe",
+      "vendor/mpv/vulkan-1.dll",
+      "vendor/yt-dlp/yt-dlp.exe"
+    ],
+    "assets": [
+      {
+        "file": "Wallpaper-Player-Setup-1.5.1.exe",
+        "role": "installer",
+        "bytes": 232013950,
+        "sha256": "c403b055c4df5a052825606dded00c81d9f11ddc0ac18e8bee57afe5bab66e57",
+        "sha512": "RYKsrQg+WabOU049YF682bdm9ZAzMdB7nL5njdJs6zhL3lkd1q7A3NkwOg7FJEiCoTSDZzu/49eD09jdxnFjow==",
+        "bootstrapArch": "ia32",
+        "productVersion": "1.5.1",
+        "signing": {
+          "status": "NotSigned",
+          "certificateSha256": null
+        }
+      },
+      {
+        "file": "Wallpaper-Player-1.5.1.exe",
+        "role": "portable",
+        "bytes": 231789817,
+        "sha256": "4cb8586d6e0c029d96397cd7444439dce1a751c6e866473593e132217bb3b886",
+        "sha512": "wtCoUQQb2W2k9DufeXOPbots7SGHziQOuzmAO1+b0JmeR0eiX0RLu1vvrEI9jV+CPCTa1519pP9yt1bX2IHxVA==",
+        "bootstrapArch": "ia32",
+        "productVersion": "1.5.1",
+        "signing": {
+          "status": "NotSigned",
+          "certificateSha256": null
+        }
+      },
+      {
+        "file": "Wallpaper-Player-Setup-1.5.1.exe.blockmap",
+        "role": "blockmap",
+        "bytes": 241888,
+        "sha256": "4edea21d4c5b65f3e5d89e6f89d277ca841eadbcdeadce2b5fa47810ea897c52",
+        "sha512": "rbkx3cRfjU3k6XsLU264TZymV5HGG0EShqAJE2yCBljcs5HPNHSYvEnwuM741ZJtXx2flvokDSLvZzTmbrzBvg=="
+      },
+      {
+        "file": "latest.yml",
+        "role": "desktop-update-metadata",
+        "bytes": 361,
+        "sha256": "5231a9e059f07152afa8d8ca566552002f8d2508a2916d4a990e774cdc49de64",
+        "sha512": "L8YjkIlzGnt7gvHGOYyHArbK7omZ4j1ym07WCgrc/wIWgDho3A5ih82TEQjoGT3YsnzRvoSagu//A5mMCRAkPQ=="
+      },
+      {
+        "file": "Wallpaper-Player-Plugin-video-analysis-1.0.0.zip",
+        "source": "plugins/Wallpaper-Player-Plugin-video-analysis-1.0.0.zip",
+        "role": "plugin",
+        "pluginId": "video-analysis",
+        "version": "1.0.0",
+        "bytes": 570218532,
+        "sha256": "365c2f5ccbec6afe7df5ce4b5c5df1699728cac113884abd48898d8209a5502a",
+        "sha512": "5W7hIMUaK+frnE+0/87KhyfC6BKbFTT2R3GgW+TCtG7Z037HNRooT/RVGrJTOMq5eDFEBHKhlSiVZQ9vMI838w=="
+      },
+      {
+        "file": "Wallpaper-Player-Plugin-ai-search-0.1.0.zip",
+        "source": "plugins/Wallpaper-Player-Plugin-ai-search-0.1.0.zip",
+        "role": "plugin",
+        "pluginId": "ai-search",
+        "version": "0.1.0",
+        "bytes": 2955069,
+        "sha256": "464e129ebb9a4731fff800c26c6e4c94ddbe33fbd1699486c166d9e112a97fc8",
+        "sha512": "rKd4RQyHFHEIADm+H3KQddNRMuu2UbSuiK4OK+hkfrp3JV36mLcSdLA0UNlAPW+7L5X1xi5kiTVNPmq1lDzOKw=="
+      },
+      {
+        "file": "Wallpaper-Player-Plugin-agent-bridge-0.1.0.zip",
+        "source": "plugins/Wallpaper-Player-Plugin-agent-bridge-0.1.0.zip",
+        "role": "plugin",
+        "pluginId": "agent-bridge",
+        "version": "0.1.0",
+        "bytes": 1093,
+        "sha256": "9f499408c282a144ffe411648d476fd4e36bd010c6e8974be3b9fd16460bed1a",
+        "sha512": "W5qWvlCSHQT8RlE31UF1e06dN3162tSZVhs7nqyFBhFLJdcN7Z8rE2WDw6ZMjQIygO89K/Xbuev/TJY+ImfSqg=="
+      }
+    ],
+    "originalData": 42,
+    "historicalArtifacts": 8,
+    "oldQaArtifactsPreserved": true,
+    "releasePublished": false
+  },
+  "signatures": [
+    {
+      "file": "Wallpaper-Player-Setup-1.5.1.exe",
+      "status": "NotSigned"
+    },
+    {
+      "file": "Wallpaper-Player-1.5.1.exe",
+      "status": "NotSigned"
+    },
+    {
+      "file": "win-unpacked\\Wallpaper Player.exe",
+      "status": "NotSigned"
+    }
+  ],
+  "officialIdentity": {
+    "version": "1.5.1",
+    "packageName": "wallpaper-player",
+    "appId": "com.wallpaper.player",
+    "qaWrapperAbsent": true
+  },
+  "packaging": {
+    "localOnly": true,
+    "signed": false,
+    "published": false,
+    "runtimeSource": "Pinned local Electron44.9.0 selected by builder CLI override; default download path remains unaccepted",
+    "noProductionVersionBump": true,
+    "androidBuiltInThisPhase": false
+  },
+  "smoke": {
+    "passed": true,
+    "source": ".tmp/refactor-tests/r8-svg-formal/formal-smoke-resumed.json",
+    "uninstrumentedProductionArchiveVerifiedBeforeInteraction": true,
+    "runningArchiveSha256": "6085a306e34a1342396d97eb2130d6f48cb66375d56c85636c30664d117ad202",
+    "steps": [
+      "current-uninstrumented-production-ui",
+      "favorite",
+      "real-mpv-pause-seek-and-decoded-frame",
+      "player-closed"
+    ],
+    "isolation": "Copy of the exact production portable, explicit fresh user-data-dir and its own Data; real production main/preload/App/vendor, no IPC fixtures or QA entry",
+    "nativeFrameComparison": {
+      "passed": true,
+      "initialPosition": 1.25,
+      "targetPosition": 11,
+      "best": {
+        "frame": 264,
+        "time": 11,
+        "normalizedMeanAbsoluteError": 0.008846671886347132
+      },
+      "old": {
+        "frame": 30,
+        "time": 1.25,
+        "normalizedMeanAbsoluteError": 0.049913829883805376
+      },
+      "comparedFrames": 14,
+      "width": 640,
+      "height": 360,
+      "method": "Decode native PNG and own H264 source to RGB24; compare pre-seek frame and target ±0.25s frames"
+    },
+    "settingsAfterExit": {
+      "theme": "dark",
+      "favoriteCount": 1,
+      "playbackPosition": 11
+    },
+    "firstDriverFailure": "The selector also matched the renderer with the same debugging flag. Failure retained; exclude --type children, verify the live main PID/profile/archive and finish against that same live process. No restart or data rollback.",
+    "limits": "Isolated short production portable flow; production installer identity was not installed over an existing user installation. No public publish, signing, older production migration, long-run or other-device claim."
+  },
+  "closure": {
+    "ownedProcesses": 0,
+    "originalDataFiles": 42,
+    "historicalPublicArtifacts": 8,
+    "retainedOldQaFiles": 16,
+    "retainedLatestQaFiles": 8,
+    "syntheticDataRetained": true
+  },
+  "sourceHashes": [
+    {
+      "file": "package.json",
+      "sha256": "fcd512143632ffa8df2b4cd48f7a9de27dd19e7fdfd687fd9abbed9ae46ef1a4"
+    },
+    {
+      "file": "package-lock.json",
+      "sha256": "7366f3a5de4b9fbbafdea8a1febbc35828fa788fe006635b87727d559f4d149a"
+    },
+    {
+      "file": "main.js",
+      "sha256": "7198acda5739a568d7c868e07637e69ee1833bf7f734e2c851ef04d95caf13c3"
+    },
+    {
+      "file": "preload.js",
+      "sha256": "9218ea6fcd12ececd559dfc15711ad8386dafc95faad6983390c8b94eb886b6d"
+    },
+    {
+      "file": "build/installer.nsh",
+      "sha256": "5be03d9a320bf24ff82c42994df946521ac3fa7f9a2a9130d120753ee68654c1"
+    },
+    {
+      "file": "scripts/package-win.js",
+      "sha256": "c471aff232f4961aa45d412d6f71557cc8330463972a17c3ce416bd1b09c50a0"
+    },
+    {
+      "file": "main/plugins/official-package-integrity.json",
+      "sha256": "f4d4eb803b29d8973924db4867941f0213dda679ca0e764f2b683f730b305f65"
+    },
+    {
+      "file": "src/api/electronAPI.js",
+      "sha256": "9ad135125f27a3094b3e7793d851f75125b1512ec52425c609e87aff8624979b"
+    },
+    {
+      "file": "src/api/events.js",
+      "sha256": "fd4b6fef379788729bf73b1256117c062cdd24094e4577e2afd8d3f32dc8bdea"
+    },
+    {
+      "file": "src/api/media.ts",
+      "sha256": "3c717e32598a2fc6f4ce0ceaa70b52d3f773e409c7e45fd4053ce91916ab51ab"
+    },
+    {
+      "file": "src/api/player.ts",
+      "sha256": "d8adf14cfbce2c0cdb7d7fe58af5c2b6902c714e15a4101cc5ebac864a049df9"
+    },
+    {
+      "file": "src/App.jsx",
+      "sha256": "817a61768f13b14f9a1287022b17eb26ae5319cd4d4be6557f69fb37b7cf5dd9"
+    },
+    {
+      "file": "src/components/AISearchPanel.jsx",
+      "sha256": "bbefbc80f59e1f898587b75adc79d3bf2c4e669f0684757c91086bf37c688e2a"
+    },
+    {
+      "file": "src/components/AppDialog.jsx",
+      "sha256": "98a86943b944fa802ffbfb3d3c50603afc490a7ddbb271dd2952175f63d1dbfd"
+    },
+    {
+      "file": "src/components/AppProvider.jsx",
+      "sha256": "a63fb0a09960fd0cc0dfea586096c0b9a6f214002d4f8f59b7e3e3aa8d9b6f6f"
+    },
+    {
+      "file": "src/components/CloseConfirm.jsx",
+      "sha256": "1fba468db54911f6935dc72eae86fdf65173c0120e1027486fb5def5c6777dcb"
+    },
+    {
+      "file": "src/components/DownloadCenter.jsx",
+      "sha256": "c7641bb5bf5c94c56a05eed77bfbd391a53ec5b8e5aaf41667d2c79b5962e90b"
+    },
+    {
+      "file": "src/components/Gallery.jsx",
+      "sha256": "db932442ac56ceec824a82378fbe5989ef6181dd3bc99c7ad11141f4db9e67c5"
+    },
+    {
+      "file": "src/components/InitializationNotice.jsx",
+      "sha256": "35037545238bcb5f106793d9cc457a5168ea3431c6bf5cd83b946c0e10aeeb6a"
+    },
+    {
+      "file": "src/components/NetworkResourceLibrary.jsx",
+      "sha256": "2f2d03369782ff9071569514ebd20288565e749d02eb8a129bf2734cf60c3a8d"
+    },
+    {
+      "file": "src/components/player/PlayerAnalysisStatus.jsx",
+      "sha256": "e1b6a615efc84348d9968e2e07884be39ac18019fc39f3f14ffe15e683bc706b"
+    },
+    {
+      "file": "src/components/player/playerFormat.js",
+      "sha256": "f09ddc254d716034a0a80c76458c66dc39ded00d41f054b63642ca7722652493"
+    },
+    {
+      "file": "src/components/player/PlayerProgressPreview.jsx",
+      "sha256": "a7b7f85680e70d4ace7ac29437b623bd8ec518fbf234b5d4b550c734b4275962"
+    },
+    {
+      "file": "src/components/player/PlayerToolbarMenu.jsx",
+      "sha256": "d287e4a92cafda901bbe276adf3e2f85042878856d4f8428130aabd67f1dc36a"
+    },
+    {
+      "file": "src/components/RightDock.jsx",
+      "sha256": "bedfe8fd53e751fdee2a13dfe8d8e1cf698ac01f39f2c360dc13129fe01c1343"
+    },
+    {
+      "file": "src/components/settings/AiSearchPluginSettings.jsx",
+      "sha256": "c3f0f419a9991d13f3488c08a33276614b13e84aef7dd14a20b0c040692700d7"
+    },
+    {
+      "file": "src/components/settings/BasicSettingsSections.jsx",
+      "sha256": "3600707d75e6a0858d5b8e4d7cd90ea83e5a0294ca3de343730184b8e741329f"
+    },
+    {
+      "file": "src/components/settings/PluginManagementPage.jsx",
+      "sha256": "231dc0e453f9ae7bb2c542974327fc28e6fcdf4fc5bda483829f347635281cff"
+    },
+    {
+      "file": "src/components/settings/RemoteAccessSection.jsx",
+      "sha256": "26a772e89883f6337e82d20be7fe9213afd9d9e3f87d72924bb3b9ae00ec22dc"
+    },
+    {
+      "file": "src/components/settings/SettingsFooter.jsx",
+      "sha256": "6020a606ead7e4fdf03aa894775a9cafdc41574a18ee95063b20ad2530a34989"
+    },
+    {
+      "file": "src/components/settings/SettingsHeader.jsx",
+      "sha256": "b3a039ccca8ce0f5a06cbb6d3c88ea5be0de153c6e44728e883531f32877d7c4"
+    },
+    {
+      "file": "src/components/settings/StatusSettingsSections.jsx",
+      "sha256": "c47c50ecc86041fa25a55438ad421e82af965c235249cbf69363709eb0b56c47"
+    },
+    {
+      "file": "src/components/settings/VideoAnalysisPluginSettings.jsx",
+      "sha256": "b5706c4eb8e6a75f907fa4558b97872740c804ecff797137b6b08de4d2151767"
+    },
+    {
+      "file": "src/components/Settings.jsx",
+      "sha256": "3685230e73310c12acac4a2f31addb32c06baf9eef148d205ee6ea4f15d58427"
+    },
+    {
+      "file": "src/components/Sidebar.jsx",
+      "sha256": "fa308198d208019e256fec7b1a216ef46e6cf528c790ea993aa8c703a011ee80"
+    },
+    {
+      "file": "src/components/TagEditor.jsx",
+      "sha256": "fe62f4c3a37de642bd7c2d527dbf498f1649d72dec2f05862db61a9371f6ebd5"
+    },
+    {
+      "file": "src/components/UpdateNotice.jsx",
+      "sha256": "3f30bcded191bcdbd642bb7f1914c82352443d5de18e30fd2b414a34b18f0e76"
+    },
+    {
+      "file": "src/components/VideoAnalysisPanel.jsx",
+      "sha256": "a748346f6fbee25e5eebf418f29d1c12ffa7b8664a0c5f494f7e6ec8af772590"
+    },
+    {
+      "file": "src/components/VideoAnalysisSidebar.jsx",
+      "sha256": "b2fa88fdff878332b7fd95afa862b25922d198e8065deff78e761a04199c96f7"
+    },
+    {
+      "file": "src/components/VideoCard.jsx",
+      "sha256": "a10ff61f36dcbb6e36168c3f72b2bbc6cb266f392cd92950a486825a80ed9fa0"
+    },
+    {
+      "file": "src/components/VideoPlayer.jsx",
+      "sha256": "74bcfa67c85a9f7e11862292de2d9985cf4dd002487644290d96c2592209aaf8"
+    },
+    {
+      "file": "src/components/WindowChrome.jsx",
+      "sha256": "7124777acf001c0bc4f833f6667bd9bb3141d2f2fe60c3fb7d57923af162da86"
+    },
+    {
+      "file": "src/context/AppContext.js",
+      "sha256": "194b08ef1749fbd49a9416e049ca332c5e661d1d2297ad0e2bf66aa1a8cec710"
+    },
+    {
+      "file": "src/electronAPI.d.ts",
+      "sha256": "e6e3033078e631b7c1b6691eb618f5fd8b4d660529f6daa85b7463e38cec22fb"
+    },
+    {
+      "file": "src/hooks/useAppController.js",
+      "sha256": "8708aac4dff9f3815db09d96f40e09f44f9bcffbd4ad26b136cfcd6cbd6562c3"
+    },
+    {
+      "file": "src/hooks/useAppInitialization.js",
+      "sha256": "2b33273b3be836b56472d5ac75f4667d1b168a59921bfd4e03f5c774b797e771"
+    },
+    {
+      "file": "src/hooks/useAppState.js",
+      "sha256": "26bd3629c0ebfeeed7a394ff90f0b4a1bdace96a1f110ee097cae405ed420a05"
+    },
+    {
+      "file": "src/hooks/useDownloadStateObserver.js",
+      "sha256": "ca52eddd183596e065b72b79c69dd0016e591d2deb7ff5993b8573a83f8b3d24"
+    },
+    {
+      "file": "src/hooks/useDownloadSubmission.js",
+      "sha256": "a9831966d43d970adc91fb38152239cdbe9678321a8de42b736ac1fbb6cca39a"
+    },
+    {
+      "file": "src/hooks/useFavorites.js",
+      "sha256": "8ab483bb36c39a82c53d3b86f06932df28e7b0b67279a33d489bded6b8d9f2e4"
+    },
+    {
+      "file": "src/hooks/useMediaQuery.js",
+      "sha256": "848c50b7ca49b9609880a43f382b4407cfa6a3cecaacbab6ee2d7613fdff5886"
+    },
+    {
+      "file": "src/hooks/useMpvInstaller.js",
+      "sha256": "d0b5c2e3610fbf154d8f3cdfc53c9e2f374260f2b6e12ca4692d7da85e276643"
+    },
+    {
+      "file": "src/hooks/useOverlayFocus.js",
+      "sha256": "89f6ee7da09bacbfef2d4da0da58b976f2bebc3c9b14970084f6dec93d3afa84"
+    },
+    {
+      "file": "src/hooks/usePlayer.js",
+      "sha256": "a235e54aef7cd95e0280b0ad0723fe8423e838ca881786dad5cec64ec4b797db"
+    },
+    {
+      "file": "src/hooks/usePlayerResources.js",
+      "sha256": "c3257ce350a67401df00a2825a7a7b49d58a584ed86926154e1f6e635d82c195"
+    },
+    {
+      "file": "src/hooks/usePluginSettings.js",
+      "sha256": "858eabcfbef4ff92ea3b67629126945ac41dd891fd632ef2ae43f78387d899ba"
+    },
+    {
+      "file": "src/hooks/useRemoteSettings.js",
+      "sha256": "89685bcf6944ec2c8c174895ddf955145df7e782155c2a61bbf3a0a91a6c3e68"
+    },
+    {
+      "file": "src/hooks/useScan.js",
+      "sha256": "ad5b946b54f30936afe43db15eb24d947f4750952c0d36fe0aecb2a73e0360f1"
+    },
+    {
+      "file": "src/hooks/useTagEditor.js",
+      "sha256": "1779628a8d9755d29a18f63e714a5b23dc1ba18c5b18c90d3a1459ec0510128d"
+    },
+    {
+      "file": "src/hooks/useVideoAnalysisSettings.js",
+      "sha256": "0ed7a9736d2cd387f9a4a84259385023ab5d926f9ef4c2aed824cf4090ee25bd"
+    },
+    {
+      "file": "src/hooks/useVideoAnalysisTasks.js",
+      "sha256": "cd2f222c029dd0bc90d1a4351b1f7d07b4a308da9b01b76d77a4509a3d06c05b"
+    },
+    {
+      "file": "src/hooks/useVideoFilter.js",
+      "sha256": "ea3df12a643f9c2e46463886ea9cea16bccbedeb405b2e0d64016551c517ae34"
+    },
+    {
+      "file": "src/index.css",
+      "sha256": "72c7a0a7dec07e096729e76013178d5824dc169de9b1732d2bbd37cff3692daa"
+    },
+    {
+      "file": "src/main.jsx",
+      "sha256": "c05158e22a401977e571d0f3bde48613b4665873b41913e853c806b485d27098"
+    },
+    {
+      "file": "src/services/analysis-settings.js",
+      "sha256": "5e8237e9fee173d6cb8069895753b5c5aa353930f760e88e5908644d7755091e"
+    },
+    {
+      "file": "src/services/analysis-task-events.js",
+      "sha256": "b18738b1ea2d138c1804ced18eb2a7dd864ebadc4aebd3ef3b608ce77a22cf9f"
+    },
+    {
+      "file": "src/services/app-initialization.js",
+      "sha256": "67a4ba53a96b59abb49afb65ce3e0bb6cfdb1324f7fa26b5008c45cb974530ec"
+    },
+    {
+      "file": "src/services/controller-store.js",
+      "sha256": "9ddd68bed1cdb82b68e8dac1201e02b6ff08b956a468879e07267465175b0aef"
+    },
+    {
+      "file": "src/services/download-state-observer.js",
+      "sha256": "fe33100bf5803c1883d07e4b9ba3e676fafecbd4a30f989e805fd35e852699dc"
+    },
+    {
+      "file": "src/services/download-submission.js",
+      "sha256": "1ecb52aaf14f468bbfa4b33a05110ea2d758d80dd98067ce7655bb3ed4844eb6"
+    },
+    {
+      "file": "src/services/player-resources.js",
+      "sha256": "1ca413cf04c27252bc8132869a26561eb91c7dbe0c29e11784eb7c2d956c9404"
+    },
+    {
+      "file": "src/services/plugin-settings.js",
+      "sha256": "97b6bbf473f96ee0564b8d3d61b6c418a2841f15cacc41bd0b366e10485c5029"
+    },
+    {
+      "file": "src/services/remote-settings.js",
+      "sha256": "6b29a7da37994c459a24a32b7393b8e25d06ecfb85018ab224340b6e68d0cc0e"
+    },
+    {
+      "file": "src/services/settings-client.js",
+      "sha256": "179da3cde8b857cb5a0bdbfbd839e62b6bc7ba9b1db2906444ea027a08d11a74"
+    },
+    {
+      "file": "src/services/settings-operations.js",
+      "sha256": "8e71c2bce87ba2ff95a95ee7e5d57316f1c512b505a40d3ecf4f5b2152ad95ad"
+    },
+    {
+      "file": "src/services/settings-state.js",
+      "sha256": "686096b069a8cc8c1d124579c8c9c901a50ccaad0acd80eb81e7e2e17e0b182a"
+    },
+    {
+      "file": "src/services/splash.js",
+      "sha256": "1cce43d37eb6af739c0b446dba40e91b4b3b53faea5c041d9f41d64dd0e7bf4b"
+    },
+    {
+      "file": "src/splash-boot.js",
+      "sha256": "23385eef8ebc1a1bd6c2c710293010cfca3c9d616e3c08539399ec91409a3125"
+    },
+    {
+      "file": "src/styles/analysis.css",
+      "sha256": "ae68b403257efebf3cc9f6c62f8bd7f95f37683d0f2eebe13294d3f95c1b9d60"
+    },
+    {
+      "file": "src/styles/base.css",
+      "sha256": "5eb23e32a8bc3345cad87db9929c3b0261ecfc4782630e57d66a11c4f9d8163c"
+    },
+    {
+      "file": "src/styles/close-confirm.css",
+      "sha256": "6a921e1202289d82b0e2928be79aa277205859f2928acef328ec11afc2af8072"
+    },
+    {
+      "file": "src/styles/dock-downloads-ai.css",
+      "sha256": "0a6030db31d4c6966f91684bf0e6811efa25bcfbd4b44207d1d2b8a8bd5960da"
+    },
+    {
+      "file": "src/styles/gallery.css",
+      "sha256": "e65e9921c8e365abcae628e3eb42e5ded67ba0d5e65944bafd41729b0980cddb"
+    },
+    {
+      "file": "src/styles/player-v3.css",
+      "sha256": "560fba56e4e1ba0d2defdd7c4f586f26cae8ec397ed1474fcf51e878844fc669"
+    },
+    {
+      "file": "src/styles/player.css",
+      "sha256": "ba9260eec64833909048de059318369f67cba5752ddcbf7033a23beecedeafe8"
+    },
+    {
+      "file": "src/styles/responsive.css",
+      "sha256": "820a1a99e2d12b44536380d3dc8cd848e6118d5102f57d2d465f4982795aa83b"
+    },
+    {
+      "file": "src/styles/settings.css",
+      "sha256": "eab75b627609395deff2f9afc3edd4d42df1952fbd97820a44b446c1804af49a"
+    },
+    {
+      "file": "src/styles/sidebar.css",
+      "sha256": "858a5209f275b91cf6648a917b2e508b70960209fa6c9ee0557aa7f17c70c9fe"
+    },
+    {
+      "file": "src/styles/window-chrome.css",
+      "sha256": "64c84cfd1d6da2453b70f35d6619f18def5f4bdb7b8665c02cdaea374a6f7e05"
+    },
+    {
+      "file": "src/utils/directories.js",
+      "sha256": "6c7764a4c796b22b72cbd84da79a390a057db36b889ff679d19226aeac1fd15e"
+    },
+    {
+      "file": "src/utils/share-json.js",
+      "sha256": "91392d99af0dbc903522f41b35b1f7a4beb2bd8947251fb95f9c7873523b52a4"
+    },
+    {
+      "file": "mobile/src/AppNavigator.tsx",
+      "sha256": "c4cacc8f12f40bb6f89910fafd2b26682e91a5dacd580d4f7860deea5f0a96ab"
+    },
+    {
+      "file": "mobile/src/components/AccessibleModal.tsx",
+      "sha256": "f079bdc22b1033b504c7dfff3f5a6693f82448e73d0b7c1ef7d4535910409232"
+    },
+    {
+      "file": "mobile/src/components/ConnectionStatus.tsx",
+      "sha256": "ab5df341fd74bc85fdbc540e3864c88a13e2fde18c9ed8902e1b6dd42f65949c"
+    },
+    {
+      "file": "mobile/src/components/DeviceCard.tsx",
+      "sha256": "dc13469e3bb9c9e3f7f96be2e824bed1f35ddc29bcfd88ffc697124d6917bb1f"
+    },
+    {
+      "file": "mobile/src/components/MobileUpdateCard.tsx",
+      "sha256": "3990f814f210ef0b8081a76e9e59d029d106f895b4cfe2b19cfe1be787345fb8"
+    },
+    {
+      "file": "mobile/src/components/player/FavoriteAnimation.tsx",
+      "sha256": "5a56203540c22bede23a9cc0d2b9502b4b04e84f5e9db9e4ff2c3e58932499f3"
+    },
+    {
+      "file": "mobile/src/components/player/NativeVideoPlayer.tsx",
+      "sha256": "60b2f7bd7aaa8c096f66f272346bf466309b4c50636fb6ce2b8ecc97d2765760"
+    },
+    {
+      "file": "mobile/src/components/player/PlaybackProgress.tsx",
+      "sha256": "23f42929df31c7404922728b780c909824ca5031d744b32f8cb6c72a3e798161"
+    },
+    {
+      "file": "mobile/src/components/player/PlayerControls.tsx",
+      "sha256": "8110761189ae66461b323207a023ef42359346c095331e4ad614cd75e6693d64"
+    },
+    {
+      "file": "mobile/src/components/player/PlayerMoreSheet.tsx",
+      "sha256": "7caa11645220f5abf3309af74a7a55f413bfc9f2e10825e68aae1dd8e6189909"
+    },
+    {
+      "file": "mobile/src/components/player/PlayerSheetFrame.tsx",
+      "sha256": "6d2646becf3a509139d7a1fbe0b22409ce05d394fd13fb5fb629bddbdba4c5d1"
+    },
+    {
+      "file": "mobile/src/components/player/TagEditorSheet.tsx",
+      "sha256": "f992a6a1a873c1846e2d1534201fda7c9c718a45f2fa2917dfadfe1c2bdbd69b"
+    },
+    {
+      "file": "mobile/src/components/player/TranscodingStatus.tsx",
+      "sha256": "7650aa5676ba7207dd9a8b5958891fad121792808180dd804bd5fa91c5ccc35a"
+    },
+    {
+      "file": "mobile/src/components/player/VideoActionBar.tsx",
+      "sha256": "6877ee74eaf6a131ecaea08911cb243cb9a322e97918cd364afde31cbdb35126"
+    },
+    {
+      "file": "mobile/src/components/player/VideoAnalysisSheet.tsx",
+      "sha256": "3a07d4302fc8898bcbcddf2f1e65fb44e017d7fdb8bc08acefe9475731cee8be"
+    },
+    {
+      "file": "mobile/src/components/player/VideoErrorState.tsx",
+      "sha256": "0b3fe20834c23a1c17a91dbd56d85641076f48b8f6f27cf0d68bbebe15d2b8a8"
+    },
+    {
+      "file": "mobile/src/components/player/VideoFeedItem.tsx",
+      "sha256": "e84cdbb575a63aad27338a761d18f04c3f3ed0ff1fb9938107b2e8564b4f1096"
+    },
+    {
+      "file": "mobile/src/components/player/VideoInfo.tsx",
+      "sha256": "8623dad3272bc25b677fbc006531416f47970cdce2d4d424ece2bac96fb44a00"
+    },
+    {
+      "file": "mobile/src/components/player/VideoOverlay.tsx",
+      "sha256": "48ab547045366f65eed4fb97fae10298f2265c86104e872d2b8696eb6419eb7d"
+    },
+    {
+      "file": "mobile/src/components/PrimaryButton.tsx",
+      "sha256": "d7ad67eb39c8000fd84fc161700bb6693922f82531a2cff7fa4d97d58467cf5e"
+    },
+    {
+      "file": "mobile/src/components/VideoCard.tsx",
+      "sha256": "0993217d42740cb084ef0a0929bcc5f5a0ed6ee003dd740b74a1e28e771833e2"
+    },
+    {
+      "file": "mobile/src/hooks/useAccessibilityPreferences.ts",
+      "sha256": "9ecef850963d7728949e5f407cf9541c6e33a6152218deaaa642a49610d0f522"
+    },
+    {
+      "file": "mobile/src/hooks/useAdaptiveVideoGrid.ts",
+      "sha256": "df3fa9bb5c2b7f61610b75e1cc18f01946e75af636a09cf252afc041ca017a75"
+    },
+    {
+      "file": "mobile/src/hooks/usePageActivity.ts",
+      "sha256": "9f4fc53e137436d5ba7d1b1f9141704e4e06ad9fbd5957e89b75ed175bbe6488"
+    },
+    {
+      "file": "mobile/src/hooks/usePlayerSheet.ts",
+      "sha256": "4ecef34ef84429505859affb6cff760295a67e78425a328a481721871fe64c24"
+    },
+    {
+      "file": "mobile/src/hooks/useTagEditorDraft.ts",
+      "sha256": "849a05bd3a0007dd654bd9d8ed88ff59f3382bab5bec288d96bd070eba8f79a6"
+    },
+    {
+      "file": "mobile/src/persistence/device-caches.ts",
+      "sha256": "7c0ac5e84b93def4753a3ebcd4cff0a399621aa4e802f83d5ff7a827991c5e9a"
+    },
+    {
+      "file": "mobile/src/persistence/devices.ts",
+      "sha256": "8ae8324b8a271d432b07fa391eee9afdc428f43f1c8fac9fb8916adbd6f14d36"
+    },
+    {
+      "file": "mobile/src/persistence/library-pages.ts",
+      "sha256": "3fce3a0db05a666f263eb43343589a454c8a349b1f9164481b0fb12f75d0ecf2"
+    },
+    {
+      "file": "mobile/src/persistence/library.ts",
+      "sha256": "88bfce93935d4dcd9a83a0e4ec027046023531b723714f061ef10dd10a594ffd"
+    },
+    {
+      "file": "mobile/src/persistence/playback.ts",
+      "sha256": "42713d2a4256e66827ff9a0b05ce585641dde0577138a1af0e69af9e19e54611"
+    },
+    {
+      "file": "mobile/src/persistence/settings.ts",
+      "sha256": "3e46562751a3097173d0e84663f14bc48e766c9563107a167aefcce0579576c6"
+    },
+    {
+      "file": "mobile/src/screens/DeviceListScreen.tsx",
+      "sha256": "7ac18ad9ad29d0802061722eb54eace8ac48c92800cbfc96c3f10422558f0aa5"
+    },
+    {
+      "file": "mobile/src/screens/LibraryScreen.tsx",
+      "sha256": "52e44ec8e379e53bf5185db49edd1d37b2fef1eb31bf688c2c499a7cf283a1f6"
+    },
+    {
+      "file": "mobile/src/screens/PairDeviceScreen.tsx",
+      "sha256": "ded13b7343674b93771510137c6098e03d9898cd3ec2490eb386bb5540a154c4"
+    },
+    {
+      "file": "mobile/src/screens/player/playerLayout.ts",
+      "sha256": "7f404440fb8dfd9fd4cdb38c7d7cd13b9c2ae680dad7a0d5e82b93216cabb1c7"
+    },
+    {
+      "file": "mobile/src/screens/player/playerUtils.ts",
+      "sha256": "c1528ca7891e5833dc927a9b7fc5e8fd5eed351ab42a29d6dc30ab35a8c22533"
+    },
+    {
+      "file": "mobile/src/screens/PlayerScreen.tsx",
+      "sha256": "03dfee072cef5fab56880cf5fe40e502f60c1e7bef02ed3a6dd1431c54726f85"
+    },
+    {
+      "file": "mobile/src/screens/SearchScreen.tsx",
+      "sha256": "c40b62ff93f988bf101ed7fe7e06d8d04be5d054df7587ffb31d7dd098f7df9f"
+    },
+    {
+      "file": "mobile/src/services/active-device-context.ts",
+      "sha256": "10042da861eca926e14db332e2393de5dfa6ea1b727056444eefb3f2a02b29a5"
+    },
+    {
+      "file": "mobile/src/services/api.ts",
+      "sha256": "92c6dd8c797ba5e96fc250973c4181a888b162c1abc18408411d62160c5233f0"
+    },
+    {
+      "file": "mobile/src/services/connection-manager.ts",
+      "sha256": "3f92c54fad30daeab135ecea44896935f663bc0c43b578481d3c7223698b444e"
+    },
+    {
+      "file": "mobile/src/services/legacy-mobile-releases.json",
+      "sha256": "e846affb95cffef73ad1dbc638e56400b249e62eab8ba5fece819ddab132e517"
+    },
+    {
+      "file": "mobile/src/services/library-events.ts",
+      "sha256": "93227515880311a54c1727a35448e23032ffae8a801c7b5bd999144f32514e44"
+    },
+    {
+      "file": "mobile/src/services/library-query.ts",
+      "sha256": "d7bffaeae89fd3f0a7361c14efce6ec21b004141c43bce1a53b76e826792d621"
+    },
+    {
+      "file": "mobile/src/services/library-repository.ts",
+      "sha256": "7302e068dbbab4a436270d257491f72213ebb3893f3b32c089e057571f317734"
+    },
+    {
+      "file": "mobile/src/services/navigation-store.ts",
+      "sha256": "53d18e5557f1e6f0e2b30f1b656754b7356ade19159efcc4add0a2c722cbd5e0"
+    },
+    {
+      "file": "mobile/src/services/orientation.ts",
+      "sha256": "0ce889c5f0337412fdc84c335d4d398840a8ccab2fee84eadd1f8bca7990be02"
+    },
+    {
+      "file": "mobile/src/services/pairing.ts",
+      "sha256": "e15eb8dcc88f43c3651987370f03d1b26e892864d673318af174f6b68fb07075"
+    },
+    {
+      "file": "mobile/src/services/playback-adapter.ts",
+      "sha256": "3e69f586a9a46d190bb7001463e4886b09733a43b468d3b313d0249c04faa283"
+    },
+    {
+      "file": "mobile/src/services/tag-editing.ts",
+      "sha256": "591af878c712e4fe526ef967d77825dd157bd2f9de838f42d1df66f41c1edb6e"
+    },
+    {
+      "file": "mobile/src/services/task-observer.ts",
+      "sha256": "4a388aa10ea2867969d41b34ab2a9624ccf29719329d23e80d1f07eebe4cb642"
+    },
+    {
+      "file": "mobile/src/services/update-environment.ts",
+      "sha256": "adc0fe1c6f2f45c4a57a8ae9f18c95a00b42487683804981d9143329ef05acf6"
+    },
+    {
+      "file": "mobile/src/services/update-manifest.ts",
+      "sha256": "609f326ccffbc7dbcc227b6314e5ca31d4a938957934786f1f7fa42649e22831"
+    },
+    {
+      "file": "mobile/src/services/update-server-context.ts",
+      "sha256": "29ebd3afcb946840b51025907a1bb895e80419112cfc92c85013c8ef7687d704"
+    },
+    {
+      "file": "mobile/src/services/updates.ts",
+      "sha256": "7da81705108f39f413861a866f27851185410756fa63c3cb275e0aa4d7b29265"
+    },
+    {
+      "file": "mobile/src/theme-context.tsx",
+      "sha256": "70ee91fb42dddf0cc81d14d3d95d7f22493cb286874d15bc388bf3b46054772d"
+    },
+    {
+      "file": "mobile/src/theme.ts",
+      "sha256": "29dcefcae5aaada51e04c2b1dae8418a16553f16317e0dbf6d2a75c332d91997"
+    },
+    {
+      "file": "mobile/src/types.ts",
+      "sha256": "24bac51f5ce1bc913c57f5805185737d6cc92af05049f1dd169d5cd792f49d1e"
+    },
+    {
+      "file": "mobile/src/utils/url.ts",
+      "sha256": "ddbf305c3932482cd7af23e2f0f6d01b51d8a35824cec501f06bc425a34aead6"
+    }
+  ],
+  "sourceInputs": ".tmp/refactor-tests/r8-svg-formal/source-inputs.json",
+  "preservation": {
+    "sourcesAndCurrentDist": "All entries in the preceding splash evidence still match",
+    "sourceHashes": [
+      {
+        "file": "src/splash-boot.js",
+        "sha256": "23385eef8ebc1a1bd6c2c710293010cfca3c9d616e3c08539399ec91409a3125"
+      },
+      {
+        "file": "src/services/splash.js",
+        "sha256": "1cce43d37eb6af739c0b446dba40e91b4b3b53faea5c041d9f41d64dd0e7bf4b"
+      },
+      {
+        "file": "src/main.jsx",
+        "sha256": "c05158e22a401977e571d0f3bde48613b4665873b41913e853c806b485d27098"
+      },
+      {
+        "file": "index.html",
+        "sha256": "1657deac2d11df32ee05cc04963820f95bf5e9a046e17cfa8464a636cce257c4"
+      },
+      {
+        "file": "scripts/verify-splash-clock.js",
+        "sha256": "75d9e940af0361ce8ec4d2d4e02ac512875436a98333cbaace9624416821b32e"
+      },
+      {
+        "file": "scripts/verify-splash-ui.js",
+        "sha256": "1bdaeb67e5f9538eb064cc43d4132016a84bfbf118fdf2cc25c12542ada6595e"
+      },
+      {
+        "file": "package.json",
+        "sha256": "fcd512143632ffa8df2b4cd48f7a9de27dd19e7fdfd687fd9abbed9ae46ef1a4"
+      },
+      {
+        "file": "package-lock.json",
+        "sha256": "7366f3a5de4b9fbbafdea8a1febbc35828fa788fe006635b87727d559f4d149a"
+      },
+      {
+        "file": ".github/workflows/ci.yml",
+        "sha256": "191250ab284685142f3767f9fba317e889f038c68f68c4eb9f62e7738440461a"
+      }
+    ],
+    "distHashes": [
+      {
+        "file": "dist/assets/AISearchPanel-CCF-T9RT.js",
+        "sha256": "89eb897aebb7ca41ee2f1181feefd0a0b2b30cd28dfc7b7633c871701fe13e6c"
+      },
+      {
+        "file": "dist/assets/DownloadCenter-DB2WIRzg.js",
+        "sha256": "987de2913c32e40ca82d1d3a9dd26cee4b8ca20dbc47a2f9308fb3787b42b236"
+      },
+      {
+        "file": "dist/assets/index-BVR_swH7.js",
+        "sha256": "cea68f5fc406b1d88592ebb3e9742a8001067c70b91c2ef344d158acc2ab7adc"
+      },
+      {
+        "file": "dist/assets/index-D3ud8mIE.css",
+        "sha256": "b9c1a73ac887ab83201f054e4698ba3f50e4217f1e1499f1fcb0e6b23131f88b"
+      },
+      {
+        "file": "dist/assets/NetworkResourceLibrary-ClU5UPaA.js",
+        "sha256": "8b38281db46350b6e32f8514d1c7ce3036f2f3e720863daf4df907df5420d15a"
+      },
+      {
+        "file": "dist/assets/Settings-D0_LgHOD.js",
+        "sha256": "ce20ec331dee755693bca6a35babc5fc52e3f1244ce61ee558aad927dfbcd8f8"
+      },
+      {
+        "file": "dist/assets/useDownloadStateObserver-C1C4Z8S3.js",
+        "sha256": "11c0785f1d37f163a644b46765df5a2e146fe759e7bce8c5138a0e1546b55826"
+      },
+      {
+        "file": "dist/assets/VideoAnalysisSidebar-CufdLX3F.js",
+        "sha256": "6736ae86804f145b2c6c604e45e1dec2a0d6d5722b0543addb7748bf3df28056"
+      },
+      {
+        "file": "dist/index.html",
+        "sha256": "deef168a4384b8b395dbfabcee85e1619fb6d97ab7271a48e1d58eba404759f1"
+      }
+    ],
+    "originalFallbackFiles": [
+      {
+        "file": ".tmp-wallpaper-player/analysis-results/G086 Bronya分析结果2026-06-22_20-00-44.json",
+        "bytes": 3873,
+        "sha256": "01db5f778601802471791e416b40c3ac8f96248e4542b78a867eaee77dd265e4",
+        "sha512": "iyw4/Gr6XPWtLoQ9c+6Y4MfSAkwIJ5GEXlylTSgcauA7JdITUqkvviqngOcXtmt0/acatShPvnKSYPYQS4i7Gw=="
+      },
+      {
+        "file": ".tmp-wallpaper-player/downloads/aria2.session",
+        "bytes": 2428,
+        "sha256": "bbe9d72e7e5001c01f3a012fa73e5d35b6d53b9e76e08190bba58973ce1ba9bc",
+        "sha512": "kUeLdSNzgAIPCflk0SjGHwcnPI0onGBAaWNfOWR5mIirAx8P8X5NsaKcuLcanGTkbao6rDlYwv7IkTgAO9IDSw=="
+      },
+      {
+        "file": ".tmp-wallpaper-player/llama-server-err.log",
+        "bytes": 87774,
+        "sha256": "5744b9bb378569a3a4f664b62aad9a4b0025cd7d419cba73b793fb62cb737f42",
+        "sha512": "ZnN0RcBburL6Ar6DvnUg0DSfCPYsKYjnYEas3nHGA5qdG7eXIh4U5vUPxKG8YLizNa7WQQb5kQV0lv/WGbknvw=="
+      },
+      {
+        "file": ".tmp-wallpaper-player/llama-server-out.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "sha512": "z4PhNX7vuL3xVChQ1m2AB9Yg5AULVxXcg/SpIdNs6c5H0NE8XYXysP+DGNKHfuwvY7kxvUdBeoGlODJ6+SfaPg=="
+      },
+      {
+        "file": ".tmp-wallpaper-player/remote-identity.json",
+        "bytes": 566,
+        "sha256": "0abcd8df9c1443a348b050b5abe28ac419ecef717ddf31a0daa680f153061324",
+        "sha512": "XvbFfKC+cCrSnQH/oJMKUFaEalXRT7nfaUR+/x5+PU2zpJAupUIQXIA1l82Fqgb/FrOSVKPPBcZqrkF6ns7qWw=="
+      },
+      {
+        "file": ".tmp-wallpaper-player/scan-index/029fa92465c3409cba74ce3db6b927dfec0d4f581b12122975041a32ab324e8a.json",
+        "bytes": 3642,
+        "sha256": "33b1310886821b4f01322041a561c8a6b4ed10aa351772effb396e7b1b547cfd",
+        "sha512": "5EiJNPPQONupaa7Sh+Sg71Y+rVxn0lfb60Yh9efMOD3utOoQoj49EeQxjkdAHBfMporaGhtWpL7/E58686/zew=="
+      },
+      {
+        "file": ".tmp-wallpaper-player/scan-index/06cf5926d93db3cc7b30882ee7dbecb69d51ce4e00de7901de3d48b866f9afc3.json",
+        "bytes": 2804,
+        "sha256": "274848604327a2f96f0d152b9f23a7b4e5470fdd67c744e1c181e86c2d284059",
+        "sha512": "SfqtOuo1zybHY9rNSzVPEY8GX8ze3//TDKguB+bnjwnkeuVpuQVj2Vty2ylkDHPMjPXmp0jUt68R9zoI+4GX0w=="
+      },
+      {
+        "file": ".tmp-wallpaper-player/scan-index/0e65747e6e0fc76a1e0c86e951c35d6c7392c184ba6cb43724d7d58856ff212a.json",
+        "bytes": 3544,
+        "sha256": "3ac45a0678e6ed4554fe1f315f923d999b0311096acd3c9394e3d85826d37db9",
+        "sha512": "JgrxWZh+aE0Nin+UuLG8ox8+HknyXbJTVUwtv1hCfiFDKIt6NGjqeAY2VvlkIwFriM2ckV6ivxe3Y/gML3K55Q=="
+      },
+      {
+        "file": ".tmp-wallpaper-player/scan-index/114890f3437dd45b34313ba38d9d3c36a09701d5d672bf8abd7af8c922db61af.json",
+        "bytes": 2804,
+        "sha256": "3796d21463d2b2418c485565780e9628a50ab4f1a69d8faeadec1eb70a9af290",
+        "sha512": "HhTKLIOn4KVc35dqiq1C8/vgYqjsy283HCb5hf059Oxtbv5JDDvFX04oTo2bELF3+lKXVphJ6unFDntwFAZ2mQ=="
+      },
+      {
+        "file": ".tmp-wallpaper-player/scan-index/1465f8e823323fe9c4383abb5a38c9e17fc550dd44cd2f14fd7f7242bc309e12.json",
+        "bytes": 3644,
+        "sha256": "1be5fefdb59d8af06de2a6be0eeb0025a96253d719de1e0daced6f1fe35cdde0",
+        "sha512": "CpOFNP0GX5osz0op032Dd7FLmQAOzPuyE93/eojg+9ByVjB+EYnL+lRCNtYYpHKtgUDa70CsKgqsKmj9zrvYjw=="
+      },
+      {
+        "file": ".tmp-wallpaper-player/scan-index/153bae098b5d3524553fcf4d8cbb1eacef2471314948819d043b26cebe199e14.json",
+        "bytes": 3542,
+        "sha256": "689305d629290f70b40c5ea8454db685486f87be218b38da7aa4f0594a1d1cb8",
+        "sha512": "8kerKuwc+cRXh4AudNWIRGsiyRbNQ8/zxsYjznmUe+rNeNL/WnHBot6q/4Vuw2UNi4TyHXw8m0V0MBn46xYkSA=="
+      },
+      {
+        "file": ".tmp-wallpaper-player/scan-index/165f4a9a9309a7ac323647e9acefd754a66c6295cab7db6bdb50830914bf0d68.json",
+        "bytes": 3648,
+        "sha256": "5b0738883aee24ac7e17fc108a221e395380d2bae6a32f3ba3f70606e4b27ebe",
+        "sha512": "GZ7tj7mlwK/O89WI8ML7AjmqLVxdj5e7mYbY14b0R/bjfpE9QZCEPFWI7PzE1Qgd0cUausDqYOydvmZlpzZGEg=="
+      },
+      {
+        "file": ".tmp-wallpaper-player/scan-index/1db67e5d68a60a19388b0338ed1ee18c2a2bcd0025ab168a1d69920c929bd647.json",
+        "bytes": 3648,
+        "sha256": "b19f9d1c96db4b9106b2a28058ab1c33f4d3edc45fa693126cad0efe48cd44dd",
+        "sha512": "vrUy+UuWCJRS4x5JPcvCK5+TjuF5mjdMCEjabdWa9LC7tHyQxtzDHRZml+sMMTD97TLeiKrAoJXOZD0Nis7/PA=="
+      },
+      {
+        "file": ".tmp-wallpaper-player/scan-index/3032598f9f4655037a67986db404cfbf60011a2ca84a1e6edcec794c7deab956.json",
+        "bytes": 2806,
+        "sha256": "db1c59c38bb8ba2122afad18a73d956ec55d4580f4cad17f365b37b71d7e3db8",
+        "sha512": "HVNYzoort16/Ncksp7jBnqk5WCQZJa4KO8eaE0ahR40LJw5m05O/JyT4YGKP1eQfiLxzahH9JX78x69NcGb/jg=="
+      },
+      {
+        "file": ".tmp-wallpaper-player/scan-index/358da0698a4692a8052707f22ba2b9c94b5c4e73080d12c721e622b66a80614c.json",
+        "bytes": 2804,
+        "sha256": "f1fb6fbd25b3d96027a86d6c797b162a74c95544c04f64470ed733ddbc8983ee",
+        "sha512": "rysp1c9kbIPLesxhSgtiIrnJ83hfhytNyyNk0uH6e7GdN/vMbOiHlE642t1ZXqJTauM2hfzPz2e8rL/nP2JdRQ=="
+      },
+      {
+        "file": ".tmp-wallpaper-player/scan-index/5eb5da5dcf86cb8c66f674df75935c030f8e12d86b6373ebcdaa3d7aba7eb672.json",
+        "bytes": 2804,
+        "sha256": "489328dc3fa24223d6db18869658db5d01f915838ba97532de8193f8bedc6f93",
+        "sha512": "T8qvhLmNGsRKWXxfl4Gtw8GwUFVG5yADJG77jBAw7k4f2VWaKPNrLLpNloWUbAjc07irh5+8XbgOBV9XZftm0A=="
+      },
+      {
+        "file": ".tmp-wallpaper-player/scan-index/5f59f687750abe3eb7d55cdb1aa86cb802bf22f3b00e3bb369f77a7ef2584d06.json",
+        "bytes": 3308,
+        "sha256": "ae2763e5e5553a4eb759576c8f26efcffc9ef5aa741ddd6aad78b2e33716a719",
+        "sha512": "0g+ToYRbljDXBhGZZKZcofBZ+hEyEgd0rmuhucc707de8aCvJ5oNX0d74t8MZbS9EKgJ0tRmDrbYpkPcLjoGLg=="
+      },
+      {
+        "file": ".tmp-wallpaper-player/scan-index/602ae02092dd5e362dec6b88bd5afb39f14c218b3e0f0fbd52e5a8d09eddeb0d.json",
+        "bytes": 2804,
+        "sha256": "cd75909f0b53f3d449d479531d62f3ff1bb3144eb918086cc7a25d05816c2a7d",
+        "sha512": "/4Odv2/hdYwttrHPlYyGSedfSREkrg8GsABmSmYCLRSdfMf1X5p3/0ojSEOGXzX8ZeJNvo706Z1EIe+7zwq35g=="
+      },
+      {
+        "file": ".tmp-wallpaper-player/scan-index/664a4a47b45908fdfdf2d6bb5ec7024e41699d7dd2af4110f2889d4eac6dd2d7.json",
+        "bytes": 3644,
+        "sha256": "64835ce867a827d40088ce1b9c8e4e19cb996d0df4c2e676cbb215cf38868556",
+        "sha512": "NVP/GLwJxIW5cfXNSvpnzFyWtmDeu4DzE63wNyLSWFA1nfhwqkcYqVc0+SIKigFFGQqzLt+tHGpUA6eRZPGgkw=="
+      },
+      {
+        "file": ".tmp-wallpaper-player/scan-index/6a4b7a95d1ae5d67f63cc87a4f3486c0a22c35af457355ae63f4303d7bdbcaa1.json",
+        "bytes": 3644,
+        "sha256": "7ab98d842e31b5da1227cf6e00d98e3e32287c53b0965f3e8a964dbc9e982b20",
+        "sha512": "NyiKXbyq1oe6J2npG624E+HF+rCXCdRYs6Il4Ef0gzTtslMoRsfE+DLoPapLYHQSW6U8ExbHQTcwAnDM0U9wqQ=="
+      },
+      {
+        "file": ".tmp-wallpaper-player/scan-index/6c2bfaa6b9f2b41ef00e065bab2a6d71c599e2ce76cc3f5939228ecc7b8be650.json",
+        "bytes": 2804,
+        "sha256": "33dd4002ba26ea91ef1c97f264ef0337dd78b37d06f03a538f514ee0809c5107",
+        "sha512": "F+Ey+/oGXuwgd17lgc1XOAv8Z72NWNqPxumGRLqvou3fyWyHxy2LmBHssjF4dOjZtkNQn//W6Cw/iqQaDi1mOQ=="
+      },
+      {
+        "file": ".tmp-wallpaper-player/scan-index/703cb3b91afdc3a4a39fb95f9d0c0289fe6dcdab34f10425d71858a05164ce3b.json",
+        "bytes": 3648,
+        "sha256": "217ca6aa5c2c3b721795e93c7cb5d819317fa55546fee842c81420f84c353fe8",
+        "sha512": "IUU53piv+yx2nQR68jiDyzrLOW1IAUZbbp7T+GWa1ccecbCAnTooc+xE5NS8IcdbmoCyoaJTQ/obZvI8F3u1ug=="
+      },
+      {
+        "file": ".tmp-wallpaper-player/scan-index/85bd705cb26d94f80943f15877c1c71cc9f9a665c0bf24f8ab568b0b6bacf550.json",
+        "bytes": 2806,
+        "sha256": "d4bb5033f4315903b0083789b87e09f4e06cb294a17313439f21987dd0b3a527",
+        "sha512": "NrfeVgZKaLZ30q5dyBAvCcDZkgicLHIvehVasAO2XXOZZTCWIIRy3nHfXkQmhANQK3YKmTpqnaKrs4GBI6h5nA=="
+      },
+      {
+        "file": ".tmp-wallpaper-player/scan-index/87720e2b63644af82253d5ec9ace977d27e42c03a6033c6811af6c6094928e09.json",
+        "bytes": 2802,
+        "sha256": "2b01b9760b6e8f5605fd9bb0cbc74e6f248c0bec7428982ce0dbb848c1f6e589",
+        "sha512": "iCCi1mNzPOVPyR1cbkBM7AxK/MkwbFER9KR2S0aBAAndRi0T+hVSA0cZ9M9vmDPyjWHgrfGjXb+btYMs44Cd1Q=="
+      },
+      {
+        "file": ".tmp-wallpaper-player/scan-index/959e88efa835995e2afff87fc4257966a41b7f45da19d44dc3369ba0d88599c9.json",
+        "bytes": 3542,
+        "sha256": "bec93346f2dfbf0938b593658fd80e43a9be33b0bd4a0f7bcbf9a8997198ba9e",
+        "sha512": "dQAtg3U7P2g5MYh7BExWdhxBNOsAzhiI/T8QULgKXtsXMNOS6Wz8FFuvvbDEsYEVfidJyTx7XDcM1TNba/snpw=="
+      },
+      {
+        "file": ".tmp-wallpaper-player/scan-index/9d7bcef01cadb37f1a59d31b708084c192007deea8564d134dcc473b0605201c.json",
+        "bytes": 3646,
+        "sha256": "04d6bfae12cdb3e73f828813477825cd39dc803c37893be82455ecebe7734312",
+        "sha512": "mmyVIHPDUxg0J1fw4absJBT8pxXVxGydWULDVqoGgZ/T6n2K+HT+MPsDPC4Q4fzt42I9w93/WkKClNUeKsQBEg=="
+      },
+      {
+        "file": ".tmp-wallpaper-player/scan-index/a02253e6f623d27dfaa6674be31d9b43fc3d9b2c6bcda125418f1c3dd2a25709.json",
+        "bytes": 3646,
+        "sha256": "90f629426a02dbbe9d60c7ad0c28090bd77a96693fcd1187b5215eda49184b86",
+        "sha512": "fG5aIsYjKTh7Jkzn4jXeCKXo7MkJ1MI81w7aVbEp0wp6+hDwsZxg1sDGGEVFKjyaLFL03yzuCSwzSWpm0RaOdg=="
+      },
+      {
+        "file": ".tmp-wallpaper-player/scan-index/a17738a5c4b4bc1ce4358ecff69b8e44a1e1a33a7511d9a11eddecd94b9e58cd.json",
+        "bytes": 3648,
+        "sha256": "a1fd92c4c4c8b9bbfeb105da251cc5230f16f1f68edf7cf909a468da0c242d99",
+        "sha512": "F5HdrOrZUO8fIHS1o89eF7h/7ML40JlbFL20LjQjJ6QyZV1sM7mgbHMrrhmwBmPW7jD9SSG9DJU8RixzIRb4pA=="
+      },
+      {
+        "file": ".tmp-wallpaper-player/scan-index/c53e2ac468d9387f39255a1ee9893eba1abe325ab086dea0025a18d1ef67e75f.json",
+        "bytes": 2804,
+        "sha256": "2042c353b3e1c29eb236d1a1dfce79afdb85839f40f02f0b70d521eff607e6bb",
+        "sha512": "q+AwWtox8bz3pRPCOQJbIhLMae2jHK2MpFgVQOOFSbY2eK9wXc+JsZVZhcuZriT9T6O3virpdZjldWTted0Www=="
+      },
+      {
+        "file": ".tmp-wallpaper-player/scan-index/cb702390842effe5e6e22e77acbda7b2bbea77ed51a5c07e66c3c5d8d0bc15bf.json",
+        "bytes": 3648,
+        "sha256": "718b65c8b9b80caa3c5d34bc3244f750cd8243dc4b8743f637c3b12dbbbbda4a",
+        "sha512": "VwI5kOJHT0HBNfNf53S8wPNjIKD0E1xyayfBFLo7R9GrCm+JAChnXDUD6GVWERfnX/o+g8v1KUXIc6RYwVmZSg=="
+      },
+      {
+        "file": ".tmp-wallpaper-player/scan-index/cbf568b1144651ce061c2dc94a347128724334dd45ac2dd4ebf6890d74c66251.json",
+        "bytes": 2806,
+        "sha256": "e22fd608a0197ea15fdbd8e3320b49d60e518bb4054b74ffb7504cd8e6035134",
+        "sha512": "R+e155qYNIEMMkhu21Nr6saous6xPVus16OS660Z33iA457ArcVOPLhrvG4WJ0zuO30PXvrIgNBH1K82vrgnDQ=="
+      },
+      {
+        "file": ".tmp-wallpaper-player/scan-index/d6cd75e4bc356e88ed2b4c2272c32263e568d67a07b4017d73b22e09c23e8306.json",
+        "bytes": 2804,
+        "sha256": "d3ccf77f170934b4987c22301d34abbb8b7646d45af03f575057804e4c892629",
+        "sha512": "RqfvOli86TmrbwzJg6/0qmhbU+xZfSXhyRoUE3CglspacMmAObLy0iVsbsLa6XNu3LmUWLcwPLHb+u8dPh4DkQ=="
+      },
+      {
+        "file": ".tmp-wallpaper-player/scan-index/db34a207b303445fed1e9654c8e68883c93c5123070913181f89844225e4636a.json",
+        "bytes": 3648,
+        "sha256": "81149ad6956bdb73b468e88036ef043043faecd14d34901ba5eaa49b775d3a72",
+        "sha512": "XX9oIcBnulsAfGyi3UgTmRmy0XKAlHrsFNcW2LUSpKGIpLXeRcNfUij50lShTYa6Ng+LTQMCVKrjrmH8GYlMAg=="
+      },
+      {
+        "file": ".tmp-wallpaper-player/scan-index/de13066bd94cc789543a5fa9e6100f3297df42c5dd715cccf10b11383b6f1d68.json",
+        "bytes": 3648,
+        "sha256": "d2ac7243b636179c0e35727cb899a4f608b7c044d759e6b6a52c8f501a3a6945",
+        "sha512": "/iBjVcHVkmDBH0UfuUv7GFI7zmWhQwiurz/Q5x8id5LLqaDcLdWEjCcgyR6lyob3aW56aY/2hxTjNHPUh1Z0kg=="
+      },
+      {
+        "file": ".tmp-wallpaper-player/scan-index/eba7ad116c30f43341d30f06e5f9efe510565b2a31a16c0eccab8fc4c303e6bc.json",
+        "bytes": 3646,
+        "sha256": "636392edc5a9f41da4b70492833939eac890636623ab957400a7118bba472fc7",
+        "sha512": "+ZUzFXtHhbC1NoZ6p6668vkdiHbZam7+MUDiSkmJY7VPe8u4nXV1DyhmCatQr+7PKNKljbBUXV0KJua57UUx/A=="
+      },
+      {
+        "file": ".tmp-wallpaper-player/scan-index/f16070f230607bf79853b98a8c462b8e7b854deeb16fe246ba6c9d783c9b2832.json",
+        "bytes": 3644,
+        "sha256": "becff49c6c81b5dfd4688bbb272be352a8821ce42120b45282ea86c65f6378c2",
+        "sha512": "551Jsgf2K8+PezP3FuKxD517yMnQKj+S9Ao6VIZ3gkkvhsbABUL8u2lnMgM7bxHhRlv7bUILXp9nQ2ku2Wj9BQ=="
+      },
+      {
+        "file": ".tmp-wallpaper-player/scan-index/f408135604349a60c1b7caa1d60757de692af100c4518e5588f38b619995f186.json",
+        "bytes": 3646,
+        "sha256": "b894250b5d420a09b89350f33103a5d08edb5fc3d20f3cddf7604ed1fcb9df3a",
+        "sha512": "xheXBso55dwHEgykAvfDZf4n/26SCAP7fAyW0+BzsBmCJ+kcBgURcjEGCeYNaqTQqihKydkgsGs46ew8DHyERg=="
+      },
+      {
+        "file": ".tmp-wallpaper-player/scan-index/f7b0c1004febecbe36453be10ef2ddc2523e5b92f4af5f318ce1049990e93053.json",
+        "bytes": 3646,
+        "sha256": "77f2b4ded7202b828e8a6e281d549eecd1e79aea4030dfb2a7d918202ab090c5",
+        "sha512": "l/iSSuhoNjz2tFcSPobHYiXReYIlJaCmkLixky5HUeo+x272kifGGRjKSUukapRVTnvVQybUWX45ju2TN7gcew=="
+      },
+      {
+        "file": ".tmp-wallpaper-player/scan-index/f892c389d585d65dff3d06f6c86d3355dc90100c808a4f80da22b2f7e81865ba.json",
+        "bytes": 3644,
+        "sha256": "b0f007ba8b4249849d726eee7a9fec6cf5926742e62d3cb833bd464423af520e",
+        "sha512": "Fs2lK+N0GU/ztNoqj/OAFg2rQzejqj+cdVpT5Q1w52Tp4KZKJNwMi4VyEKTGTbDwOTj/opUURVbIaFzdTeVJpg=="
+      },
+      {
+        "file": ".tmp-wallpaper-player/scan-index/fc41c7e68e94b6f115983997d8498353a4f8f41b61fc91662dd84affe70fc9fb.json",
+        "bytes": 3646,
+        "sha256": "fa79531cd58ae0323d29102813386358d2e599ecb63902231ed73e264196abdc",
+        "sha512": "snnACJ0NqnrAILRdOeWbzApt189/MsfL+hNou4uzRTPDa2NELP3D44teP3+gIe3arlc7mcdslaPIlyO8XtDHSg=="
+      },
+      {
+        "file": ".tmp-wallpaper-player/settings.json",
+        "bytes": 22291,
+        "sha256": "6fb990f7edfe0707bb48b8bed65455cc2a521d33e028b45ce77f98b6a466a0d5",
+        "sha512": "5ZkzZzpz3QlA05Qeu4IOhPuUYVIAuCnMfvzvH0loMSNBo58NFt578k3Q+wWhPLsHh5hjfxeh1Db0boZ00WSsaA=="
+      },
+      {
+        "file": ".tmp-wallpaper-player/video-metadata-cache.json",
+        "bytes": 39687,
+        "sha256": "616205b2e97a75ea8842d3b4f6f3de778fc545493659d45e5c0139c6d7087f47",
+        "sha512": "vImCz/hAu8kdmXwFXl6Atw2rREaBoO44lHfPhdDlXBJrHxMC0PIO7KzRlV7WM5IaAfPT3aE7Dgtvr2NmHiUT4Q=="
+      }
+    ],
+    "retainedPublicArtifacts": [
+      {
+        "file": "release/Wallpaper-Player-Setup-1.4.0.exe",
+        "bytes": 204165215,
+        "sha256": "ebea8ed1eda6529d98edf8937645236826e1120cffd5e79ad3ffea50da1351c8",
+        "sha512": "+1/EwHV0Iu01FqWY7JOXtJ7aRDavagF0wIz0aEoA4ZnULIxkWi68Ys9pXK/8xjrsr6OGIivw5hj7NW58ql/Wrw=="
+      },
+      {
+        "file": "release/Wallpaper-Player-1.4.0.exe",
+        "bytes": 203941071,
+        "sha256": "23fcd04385d3b895259711f00983c7fec5fefce1834fce2cc8e2c469fdcd6f14",
+        "sha512": "bRFR1d7pmRUeRVtX7FToivqxdNaac16ot4NbB/uMOMj9VNnhHnEbVLXG1RUR5N8DJXy12/6aUYZwpnakGyxGxA=="
+      },
+      {
+        "file": "release/Wallpaper-Player-Setup-1.4.0.exe.blockmap",
+        "bytes": 212662,
+        "sha256": "725f928d1ff169d97633f85175878ecab838d0707864a35be60634ba9e2abd7e",
+        "sha512": "hlfYqOfkaDWX0+sorrDPuJH4QHRibVyuDhBeokDrfe1w78XM1Vh2UjsMRVmtGv4t2aRg3uh781h+TQ6RfJW9FA=="
+      },
+      {
+        "file": "release/latest.yml",
+        "bytes": 361,
+        "sha256": "4f5c80d6597d12f99f6b9aa2f6b64ad6b89b84b43b49cfc6204dd8651ed1edb9",
+        "sha512": "F/zeGav7F4QoOW6ZDET2h/9JHcnPf4ZMD2QmkQqM2BF4ZNUAFUetG2ncaDAAUx1kFzPNHXaD2bv3oGIb5Uq07w=="
+      },
+      {
+        "file": "release/plugins/Wallpaper-Player-Plugin-video-analysis-1.0.0.zip",
+        "bytes": 570209084,
+        "sha256": "552847152007d463424d43971778f40545b95139830dd15cc76957de59b4baa1",
+        "sha512": "LVbf4akQEqnAWSanp4f4obrc1ZY+td2XHD8b/IDoRZ28IbVLWP2nGuMOgafC2jaOziVa31WuyZYAAEfbmH912Q=="
+      },
+      {
+        "file": "release/plugins/Wallpaper-Player-Plugin-ai-search-0.1.0.zip",
+        "bytes": 2955538,
+        "sha256": "83f0949f361f03a78f78496c9b15510b0c6f8fb0581cea9bf8b94724faa7d781",
+        "sha512": "tyJjoVTN9JitDPVFx2+Lv01fzo5Bik3ELcl64iyxz5QBl7YSmTvJXT3MGyyVlkD1I+BO8tPtbHqtpQ8koXuatw=="
+      },
+      {
+        "file": "release/plugins/Wallpaper-Player-Plugin-agent-bridge-0.1.0.zip",
+        "bytes": 1093,
+        "sha256": "9f499408c282a144ffe411648d476fd4e36bd010c6e8974be3b9fd16460bed1a",
+        "sha512": "W5qWvlCSHQT8RlE31UF1e06dN3162tSZVhs7nqyFBhFLJdcN7Z8rE2WDw6ZMjQIygO89K/Xbuev/TJY+ImfSqg=="
+      },
+      {
+        "file": "mobile/dist/wallpaper-player-mobile-0.1.4-arm64-release.apk",
+        "bytes": 40710234,
+        "sha256": "f7e46638aa17f66ce68c9c96484909667af7e720bcc63fdc4f46ced39cbaec22",
+        "sha512": "TVvLeuH/1CXDXpspYbDHt8xwcX76SAe134l24lPwQkAGhg2FGJgUWumA2KeVmQ2sCePdONcklROdfjANnJ7lKg=="
+      }
+    ],
+    "retainedWindowsQaFiles": [
+      {
+        "file": "E:\\wallpaper播放器\\.tmp\\refactor-tests\\r8-windows-delivery\\中文交付 QA' & $workspace\\release\\windows-9.9.0-61373658-ea43-4520-8bed-87db7f536e2d\\win-unpacked\\resources\\app.asar",
+        "sha256": "427351fb6c16371385e2195b04f5fb400d2c40d7667237af9cea95e1ab1d4027"
+      },
+      {
+        "file": "E:\\wallpaper播放器\\.tmp\\refactor-tests\\r8-windows-delivery\\中文交付 QA' & $workspace\\release\\windows-9.9.0-61373658-ea43-4520-8bed-87db7f536e2d\\Wallpaper-Player-Setup-9.9.0.exe",
+        "sha256": "c7238a04247d708e7136d2f1656602f7e1474fcb8a78536b73644ad453481447"
+      },
+      {
+        "file": "E:\\wallpaper播放器\\.tmp\\refactor-tests\\r8-windows-delivery\\中文交付 QA' & $workspace\\release\\windows-9.9.0-61373658-ea43-4520-8bed-87db7f536e2d\\Wallpaper-Player-9.9.0.exe",
+        "sha256": "d647127d493ecabfb1236d53bfe86fa69953dd72a06fad2c69800d6c8c00b83b"
+      },
+      {
+        "file": "E:\\wallpaper播放器\\.tmp\\refactor-tests\\r8-windows-delivery\\中文交付 QA' & $workspace\\release\\windows-9.9.0-61373658-ea43-4520-8bed-87db7f536e2d\\Wallpaper-Player-Setup-9.9.0.exe.blockmap",
+        "sha256": "9ade0b7c8e1a58aa0992c90bb102bf7a51b2013151fb6cdfad92936902c8fb27"
+      },
+      {
+        "file": "E:\\wallpaper播放器\\.tmp\\refactor-tests\\r8-windows-delivery\\中文交付 QA' & $workspace\\release\\windows-9.9.0-61373658-ea43-4520-8bed-87db7f536e2d\\latest.yml",
+        "sha256": "87dde4a0150d4493806e27e9129f39c1e35bad9751977c3fac5d7ee3441dc458"
+      },
+      {
+        "file": "E:\\wallpaper播放器\\.tmp\\refactor-tests\\r8-windows-delivery\\中文交付 QA' & $workspace\\release\\windows-9.9.0-61373658-ea43-4520-8bed-87db7f536e2d\\plugins\\Wallpaper-Player-Plugin-video-analysis-1.0.0.zip",
+        "sha256": "643e43176233506fba5051729521bd19ea2a72d12553cc9408ff4881b6c1fe99"
+      },
+      {
+        "file": "E:\\wallpaper播放器\\.tmp\\refactor-tests\\r8-windows-delivery\\中文交付 QA' & $workspace\\release\\windows-9.9.0-61373658-ea43-4520-8bed-87db7f536e2d\\plugins\\Wallpaper-Player-Plugin-ai-search-0.1.0.zip",
+        "sha256": "464e129ebb9a4731fff800c26c6e4c94ddbe33fbd1699486c166d9e112a97fc8"
+      },
+      {
+        "file": "E:\\wallpaper播放器\\.tmp\\refactor-tests\\r8-windows-delivery\\中文交付 QA' & $workspace\\release\\windows-9.9.0-61373658-ea43-4520-8bed-87db7f536e2d\\plugins\\Wallpaper-Player-Plugin-agent-bridge-0.1.0.zip",
+        "sha256": "9f499408c282a144ffe411648d476fd4e36bd010c6e8974be3b9fd16460bed1a"
+      },
+      {
+        "file": "E:\\wallpaper播放器\\.tmp\\refactor-tests\\r8-windows-delivery\\中文交付 QA' & $workspace\\release\\windows-9.9.1-10620f4d-1401-4182-aa75-0de284854712\\win-unpacked\\resources\\app.asar",
+        "sha256": "8c0a744d4d96017039e0cb5b8d08f5a7f01e7940c375403ba211a1ee68f143d5"
+      },
+      {
+        "file": "E:\\wallpaper播放器\\.tmp\\refactor-tests\\r8-windows-delivery\\中文交付 QA' & $workspace\\release\\windows-9.9.1-10620f4d-1401-4182-aa75-0de284854712\\Wallpaper-Player-Setup-9.9.1.exe",
+        "sha256": "0c0e287be61175bd1eecfcd6ebd49d1aab1e101524b89a9c34d5a5659caa4a14"
+      },
+      {
+        "file": "E:\\wallpaper播放器\\.tmp\\refactor-tests\\r8-windows-delivery\\中文交付 QA' & $workspace\\release\\windows-9.9.1-10620f4d-1401-4182-aa75-0de284854712\\Wallpaper-Player-9.9.1.exe",
+        "sha256": "c30925a0bcd135180702d6ecde1f81bdd1107ca8ac5755a43506670d81d8933f"
+      },
+      {
+        "file": "E:\\wallpaper播放器\\.tmp\\refactor-tests\\r8-windows-delivery\\中文交付 QA' & $workspace\\release\\windows-9.9.1-10620f4d-1401-4182-aa75-0de284854712\\Wallpaper-Player-Setup-9.9.1.exe.blockmap",
+        "sha256": "8d9c6ced517b1767d9d56bc493b5f7174a3ce772e60ed1363a40513855e40156"
+      },
+      {
+        "file": "E:\\wallpaper播放器\\.tmp\\refactor-tests\\r8-windows-delivery\\中文交付 QA' & $workspace\\release\\windows-9.9.1-10620f4d-1401-4182-aa75-0de284854712\\latest.yml",
+        "sha256": "c239727c8585a197b63bbfa1f360fa334cece173f86c965569596ae34ecd50bd"
+      },
+      {
+        "file": "E:\\wallpaper播放器\\.tmp\\refactor-tests\\r8-windows-delivery\\中文交付 QA' & $workspace\\release\\windows-9.9.1-10620f4d-1401-4182-aa75-0de284854712\\plugins\\Wallpaper-Player-Plugin-video-analysis-1.0.0.zip",
+        "sha256": "643e43176233506fba5051729521bd19ea2a72d12553cc9408ff4881b6c1fe99"
+      },
+      {
+        "file": "E:\\wallpaper播放器\\.tmp\\refactor-tests\\r8-windows-delivery\\中文交付 QA' & $workspace\\release\\windows-9.9.1-10620f4d-1401-4182-aa75-0de284854712\\plugins\\Wallpaper-Player-Plugin-ai-search-0.1.0.zip",
+        "sha256": "464e129ebb9a4731fff800c26c6e4c94ddbe33fbd1699486c166d9e112a97fc8"
+      },
+      {
+        "file": "E:\\wallpaper播放器\\.tmp\\refactor-tests\\r8-windows-delivery\\中文交付 QA' & $workspace\\release\\windows-9.9.1-10620f4d-1401-4182-aa75-0de284854712\\plugins\\Wallpaper-Player-Plugin-agent-bridge-0.1.0.zip",
+        "sha256": "9f499408c282a144ffe411648d476fd4e36bd010c6e8974be3b9fd16460bed1a"
+      }
+    ],
+    "originalCount": 42,
+    "historicalArtifacts": 8,
+    "retainedWindowsQaCount": 16
+  },
+  "previousQa": {
+    "passed": true,
+    "inputs": 334,
+    "embedded": [
+      "main/application/confirm.js",
+      "main/application/download-service.js",
+      "main/application/download-tasks.js",
+      "main/application/extract-mpv.ps1",
+      "main/application/library-service.js",
+      "main/application/media-mutation-paths.js",
+      "main/application/media-mutations.js",
+      "main/application/media-work-service.js",
+      "main/application/mpv-installer.js",
+      "main/application/mpv-version-cache.js",
+      "main/application/player-service.js",
+      "main/application/resource-scheduler.js",
+      "main/application/settings-broadcast.js",
+      "main/application/settings-json-worker.js",
+      "main/application/settings-json.js",
+      "main/application/settings-startup.js",
+      "main/application/transcode-service.js",
+      "main/constants.js",
+      "main/download-manager.js",
+      "main/download-xunlei.js",
+      "main/exec.js",
+      "main/index.js",
+      "main/ip-utils.js",
+      "main/ipc/app-dialogs.js",
+      "main/ipc/downloads.js",
+      "main/ipc/files.js",
+      "main/ipc/media-data.js",
+      "main/ipc/media.js",
+      "main/ipc/network-resource-service.js",
+      "main/ipc/network-resources.js",
+      "main/ipc/player.js",
+      "main/ipc/plugins.js",
+      "main/ipc/privacy.js",
+      "main/ipc/remote.js",
+      "main/ipc/settings.js",
+      "main/ipc/updater.js",
+      "main/ipc/window-shell.js",
+      "main/ipc-channels.js",
+      "main/ipc.js",
+      "main/media-pressure.js",
+      "main/mpv-host.js",
+      "main/mpv-integration.js",
+      "main/mpv.js",
+      "main/network-resource-parser.js",
+      "main/paths.js",
+      "main/plugins/builtin.js",
+      "main/plugins/capabilities.js",
+      "main/plugins/core-api.js",
+      "main/plugins/index.js",
+      "main/plugins/loader.js",
+      "main/plugins/manifest.js",
+      "main/plugins/official.js",
+      "main/plugins/registry.js",
+      "main/portable-user-data.js",
+      "main/process-lifecycle.js",
+      "main/rate-limiter.js",
+      "main/remote/handlers/desktop.js",
+      "main/remote/handlers/info.js",
+      "main/remote/handlers/library.js",
+      "main/remote/handlers/media.js",
+      "main/remote/handlers/network-resources.js",
+      "main/remote/handlers/tags.js",
+      "main/remote/handlers/transcode.js",
+      "main/remote/http-utils.js",
+      "main/remote/identity.js",
+      "main/remote/index.js",
+      "main/remote/json-responses.js",
+      "main/remote/media-mutations.js",
+      "main/remote/network.js",
+      "main/remote/request-lifecycle.js",
+      "main/remote/server.js",
+      "main/remote/streaming.js",
+      "main/remote/transcode-cache.js",
+      "main/remote/transcode.js",
+      "main/remote/video-index.js",
+      "main/repositories/settings-file.js",
+      "main/repositories/tag-state.js",
+      "main/repositories/user-media.js",
+      "main/scanner.js",
+      "main/security/ipc-sender.js",
+      "main/security/ipc.js",
+      "main/security/media-access.js",
+      "main/security/privacy-password.js",
+      "main/settings.js",
+      "main/thumbnail.js",
+      "main/updater.js",
+      "main/user-data.js",
+      "main/video-metadata.js",
+      "main/window.js",
+      "main/ytdlp-service.js",
+      "dist/assets/AISearchPanel-CCF-T9RT.js",
+      "dist/assets/DownloadCenter-DB2WIRzg.js",
+      "dist/assets/index-BVR_swH7.js",
+      "dist/assets/index-D3ud8mIE.css",
+      "dist/assets/NetworkResourceLibrary-ClU5UPaA.js",
+      "dist/assets/Settings-D0_LgHOD.js",
+      "dist/assets/useDownloadStateObserver-C1C4Z8S3.js",
+      "dist/assets/VideoAnalysisSidebar-CufdLX3F.js",
+      "dist/index.html",
+      "packages/contracts/dist/index.js",
+      "packages/contracts/dist/schema.js",
+      "packages/contracts/dist/settings-feed.js",
+      "packages/contracts/package.json",
+      "packages/domain/dist/index.js",
+      "packages/domain/package.json",
+      "production-main.js",
+      "preload.js"
+    ],
+    "vendor": [
+      "vendor/aria2/aria2c.exe",
+      "vendor/aria2/AUTHORS",
+      "vendor/aria2/ChangeLog",
+      "vendor/aria2/COPYING",
+      "vendor/aria2/LICENSE.OpenSSL",
+      "vendor/aria2/NEWS",
+      "vendor/aria2/README.html",
+      "vendor/aria2/README.mingw",
+      "vendor/ffmpeg/bin/ffmpeg.exe",
+      "vendor/ffmpeg/bin/ffplay.exe",
+      "vendor/ffmpeg/bin/ffprobe.exe",
+      "vendor/ffmpeg/LICENSE",
+      "vendor/ffmpeg/presets/libvpx-1080p.ffpreset",
+      "vendor/ffmpeg/presets/libvpx-1080p50_60.ffpreset",
+      "vendor/ffmpeg/presets/libvpx-360p.ffpreset",
+      "vendor/ffmpeg/presets/libvpx-720p.ffpreset",
+      "vendor/ffmpeg/presets/libvpx-720p50_60.ffpreset",
+      "vendor/ffmpeg/README.txt",
+      "vendor/mpv/mpv-register.bat",
+      "vendor/mpv/mpv-unregister.bat",
+      "vendor/mpv/mpv.com",
+      "vendor/mpv/mpv.exe",
+      "vendor/mpv/vulkan-1.dll",
+      "vendor/yt-dlp/yt-dlp.exe"
+    ],
+    "qa": [
+      {
+        "file": "main.js",
+        "sha256": "b89b75f7dfe24eb901ed9fba151c0f5685b271fe325e419fb3d35c172b94eb48"
+      },
+      {
+        "file": "qa-trace.cjs",
+        "sha256": "355e8e30529d21450db6b92ec506fa2d86bcdec2f0e4f166c5a4125a3890e4c5"
+      }
+    ],
+    "archive": {
+      "file": "E:\\wallpaper播放器\\.tmp\\refactor-tests\\r8-windows-frontend\\完整前端 QA' & $source\\release\\windows-9.9.2-4e546600-f339-433e-9da2-4d9d00fe7ae0\\win-unpacked\\resources\\app.asar",
+      "bytes": 16426057,
+      "sha256": "9df97d65479046c8bc156ff5bf9ab2ed8cdd584529783eec34285febde9cd801",
+      "sha512": "IlpETDh/xAIh1f/zIIA/UpnNS18Zl621LQI1SiwMM/yDF9EBe1NLaYmbI7XFc2c+KnTgVKQXv7sVRBRA4Px/XA=="
+    },
+    "assets": [
+      {
+        "file": "Wallpaper-Player-Setup-9.9.2.exe",
+        "role": "installer",
+        "bytes": 232017112,
+        "sha256": "1d301aa3fdf98031389fca185640aea83d2a9a08b0b9c7d6019a05cfd6bbcb2c",
+        "sha512": "Cgy3si6zqoTlZD8cb/ln5ADXH/ul5mDGJENm2XZOwnzN8nvsh0lP/vbqxdeFw8H1ryN/RXypyeqUC+4KVNvlOA==",
+        "bootstrapArch": "ia32",
+        "productVersion": "9.9.2",
+        "signing": {
+          "status": "NotSigned",
+          "certificateSha256": null
+        }
+      },
+      {
+        "file": "Wallpaper-Player-9.9.2.exe",
+        "role": "portable",
+        "bytes": 231793038,
+        "sha256": "60e1c79cce0fc40a7c09aed8e2cbe5c058ff58da6054f29a5335532cf6986513",
+        "sha512": "gwYfZ28enxtpOW3veg6nfTHXkJ25dvjHghR3xTL8JE/JJapqn3VOVRxjyDi2Yrn0HIHBz0y+bHTpaDXYv3GEBg==",
+        "bootstrapArch": "ia32",
+        "productVersion": "9.9.2",
+        "signing": {
+          "status": "NotSigned",
+          "certificateSha256": null
+        }
+      },
+      {
+        "file": "Wallpaper-Player-Setup-9.9.2.exe.blockmap",
+        "role": "blockmap",
+        "bytes": 241676,
+        "sha256": "2c0cbcae4a07a671936d0719a31198f3005bd974408a56c6069a9418c17f8aa2",
+        "sha512": "87cnUVhegbka5KkcouQmNWVpyADXLl739tooZXYGwrOQgm6b0Ia0CERFABAc4JlvxxdxsxiObw9F8kHJZMxjVQ=="
+      },
+      {
+        "file": "latest.yml",
+        "role": "desktop-update-metadata",
+        "bytes": 361,
+        "sha256": "019cb1f39d0b2c6f2b67f4d059acd874f46dfbcbb293823f2edff2f8482c9a9d",
+        "sha512": "5STG3ofMvzm5CGcvWxs+b2WqadSJ+83JUhcmmNuX5/2eQZkfgyrBoQ7E4tXZaoYrEguBxC0attlMfkLQWviw+A=="
+      },
+      {
+        "file": "Wallpaper-Player-Plugin-video-analysis-1.0.0.zip",
+        "source": "plugins/Wallpaper-Player-Plugin-video-analysis-1.0.0.zip",
+        "role": "plugin",
+        "pluginId": "video-analysis",
+        "version": "1.0.0",
+        "bytes": 569697618,
+        "sha256": "643e43176233506fba5051729521bd19ea2a72d12553cc9408ff4881b6c1fe99",
+        "sha512": "qHV7a56DKFlIDatnwa5XMIpDYWUwyaGeSSNTzZ2X09v/wcBzNaXxrPSM+e1BHvwfSxn0lEM/JbRcQZCreVt1ZA=="
+      },
+      {
+        "file": "Wallpaper-Player-Plugin-ai-search-0.1.0.zip",
+        "source": "plugins/Wallpaper-Player-Plugin-ai-search-0.1.0.zip",
+        "role": "plugin",
+        "pluginId": "ai-search",
+        "version": "0.1.0",
+        "bytes": 2955069,
+        "sha256": "464e129ebb9a4731fff800c26c6e4c94ddbe33fbd1699486c166d9e112a97fc8",
+        "sha512": "rKd4RQyHFHEIADm+H3KQddNRMuu2UbSuiK4OK+hkfrp3JV36mLcSdLA0UNlAPW+7L5X1xi5kiTVNPmq1lDzOKw=="
+      },
+      {
+        "file": "Wallpaper-Player-Plugin-agent-bridge-0.1.0.zip",
+        "source": "plugins/Wallpaper-Player-Plugin-agent-bridge-0.1.0.zip",
+        "role": "plugin",
+        "pluginId": "agent-bridge",
+        "version": "0.1.0",
+        "bytes": 1093,
+        "sha256": "9f499408c282a144ffe411648d476fd4e36bd010c6e8974be3b9fd16460bed1a",
+        "sha512": "W5qWvlCSHQT8RlE31UF1e06dN3162tSZVhs7nqyFBhFLJdcN7Z8rE2WDw6ZMjQIygO89K/Xbuev/TJY+ImfSqg=="
+      }
+    ],
+    "directory": "E:\\wallpaper播放器\\.tmp\\refactor-tests\\r8-windows-frontend\\完整前端 QA' & $source\\release\\windows-9.9.2-4e546600-f339-433e-9da2-4d9d00fe7ae0",
+    "originalData": 42,
+    "historicalArtifacts": 8,
+    "previousWindowsQaFiles": 16,
+    "frontendPreserved": 144
+  },
+  "rawEvidence": [
+    {
+      "file": ".tmp/refactor-tests/r8-svg-formal/astra-review.md",
+      "sha256": "a3438a0e2869e8b8d13350d721018c4b9392b0feeb1e79afef2d33285b92da36"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-svg-formal/baseline.json",
+      "sha256": "d91b92cf70298076ecd8b3e8f6105f690515c17a0a89d7ead04779056028134b"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-svg-formal/build-verification.json",
+      "sha256": "dc3b3a08a6bd9fdcccfb2e2be9f9e3f76f98eb09242a2797a3ccea6794cfe356"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-svg-formal/build.cjs",
+      "sha256": "fa90a5520a7fab615ee967610372912fe3083d6d2f85c39548a39c809ba4cb40"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-svg-formal/build.json",
+      "sha256": "70f3cbbf9f7778adb4c7661e714bd7ab45339f6f4056f51bbcbc3a31dfcd05ad"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-svg-formal/builder.live.log",
+      "sha256": "dfe272adc40ee79997f684caa22ffe60c4b628769b0689d17226dccae683be74"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-svg-formal/builder.live.log.process.json",
+      "sha256": "0a5f7bdae915ff6f3d312a814d46417023bfbca9f9eca10b3eea7c21ad927db3"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-svg-formal/comparison.html",
+      "sha256": "f5d4618c46d990ce61fde12b15c0efe56a5e9544a0e97942ea6aa5ceb4974b60"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-svg-formal/comparison.png",
+      "sha256": "e99fa5b706e879e7d135d5cfa950ea825c32333b34b1f63322b246afc099fcb5"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-svg-formal/finalize.cjs",
+      "sha256": "be918da6ccb0450ccd011ba9255ad16a634950669a00c7972807d5879a9b3bbb"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-svg-formal/formal-library.png",
+      "sha256": "43ca5d44a2d406ed09f82a41ae7fc18186f0b26109fc927c77caddb7c151b217"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-svg-formal/formal-process-error.log",
+      "sha256": "3490f0446af8effe94555c86ae029c0c4e8e4c854ba91e56531623d4e7f962b0"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-svg-formal/formal-resumed-process.log",
+      "sha256": "122060b174c48bcdde622d3a4e03d4ac925063470ea5be94696172ea6ab0f3d7"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-svg-formal/formal-smoke-resumed.json",
+      "sha256": "af4e72459d719ffd261a8d00f8deeadab86a525573b6677f5174d4e51939e6c2"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-svg-formal/formal-smoke.json",
+      "sha256": "5d72e33a7086f08cd7f384e328e7e9f76aef83898857f371d980f93115fb460c"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-svg-formal/icon-after.svg",
+      "sha256": "ddd7e6e51be6637203f2c912033022b51bb74fbd33946abe8af1c1a1b7168623"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-svg-formal/icon-before.svg",
+      "sha256": "5bb3e4eb43cc4d54ceb8ced59396a68f76539dc3eee4948172440e392b74eddc"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-svg-formal/prepare.cjs",
+      "sha256": "2b351ba80a7997d10f548c7a3016e7703eea6cc78a089ee954c20b4af3a691cc"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-svg-formal/preview-first-failure.json",
+      "sha256": "d19b476874fe8cbae08607fbac2b35cefbf55b4e6b1c9a75fe68f374b5df1035"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-svg-formal/preview-second-failure.json",
+      "sha256": "e7ed234dce92c6cfe4162743dd2c77719a5dc0899aade88267f2bc91ae202660"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-svg-formal/preview-state.json",
+      "sha256": "1300c8f4fd4828fbbc8a31659c5b42a44c37922d3e9a49af326886b952297ebe"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-svg-formal/preview.cjs",
+      "sha256": "e7d63ba58dbb175dae83916010595dc6877f40773549ce6b8bcad9b6a52c5642"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-svg-formal/resume-config.json",
+      "sha256": "3b8270d4e24f989143916d4cb6f2ce420c234f4e21cc276bc53cafe02542cf35"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-svg-formal/RightDock-before.jsx",
+      "sha256": "85eb642089e4c1420459a03961f4bd619b279b388af50340ffda3be2e831d2d2"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-svg-formal/setup.json",
+      "sha256": "693dd61207b9d20bf371608535325a6ad412d8b0577189ff9ee7d4c09786e623"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-svg-formal/signatures.json",
+      "sha256": "3b8832bda8dd83fe1cbee019e969699d00c3dbb0f42b80e0aa857a3591f96779"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-svg-formal/smoke.cjs",
+      "sha256": "936bc11fd7db23caa9659931d567e8d777155e27163fd35b314b5a168d78f73d"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-svg-formal/source-inputs.json",
+      "sha256": "35c770ba7d8402b8bc9b280be5337fa15ce383cde9e9d6ce2d6097fbda2b6d4d"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-svg-formal/verify-build.cjs",
+      "sha256": "44bf2f779a8aded4b14de2adb6e1c47590e21872342712cc35799a0c7e4bc1d7"
+    }
+  ],
+  "themeAnomaly": {
+    "status": "open",
+    "unexplainedDriftInCurrentQaOrFormalSmoke": false,
+    "originalFailureRetained": true,
+    "causalFixClaimed": false
+  },
+  "remaining": [
+    "Original R6/R7/R8 goal is active: isolated historical theme drift, longer UI and resource budgets, physical Android/native iOS/LAN",
+    "Production signing and Android identity/version migration, older production upgrades, other Windows versions/displays and interactive NSIS wizard",
+    "Cloud build/publish only under a separately authorized release scope"
+  ]
+}

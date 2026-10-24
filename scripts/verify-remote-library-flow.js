@@ -3,6 +3,7 @@ const fs = require('fs')
 const http = require('http')
 const os = require('os')
 const path = require('path')
+const crypto = require('crypto')
 const {
   claimDevice: claimDeviceShared,
   createFixtureImage,
@@ -15,6 +16,24 @@ const {
 
 const projectRoot = path.resolve(__dirname, '..')
 const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'wallpaper-player-library-flow-'))
+const fallbackRoot = path.join(projectRoot, '.tmp-wallpaper-player')
+function fallbackInventory() {
+  const files = []
+  function visit(directory) {
+    for (const entry of fs.readdirSync(directory, { withFileTypes: true })) {
+      const file = path.join(directory, entry.name)
+      assert.ok(!entry.isSymbolicLink(), 'fallback guard does not follow symbolic links')
+      if (entry.isDirectory()) visit(file)
+      else if (entry.isFile()) files.push([path.relative(fallbackRoot, file), crypto.createHash('sha256').update(fs.readFileSync(file)).digest('hex')])
+    }
+  }
+  if (fs.existsSync(fallbackRoot)) visit(fallbackRoot)
+  return files.sort(([left], [right]) => left.localeCompare(right))
+}
+const fallbackBefore = fallbackInventory()
+// Enter the fixture before the first production import, including pure-looking helpers.
+process.chdir(tempRoot)
+assert.strictEqual(require(path.join(projectRoot, 'main', 'user-data')).getUserDataDir(), path.join(tempRoot, '.tmp-wallpaper-player'))
 const libraryDir = path.join(tempRoot, 'library')
 const videoPath = path.join(libraryDir, 'sample-video.mp4')
 const incompatibleVideoPath = path.join(libraryDir, 'vp9-opus-sample.mkv')
@@ -78,7 +97,7 @@ async function waitForTranscodeReady(baseUrl, videoId, token, quality = 'compati
     headers: { Authorization: `Bearer ${token}` }
   })
   assert.strictEqual(started.status, 202)
-  assert.ok(['running', 'ready'].includes(started.data.status), 'transcode should start or use ready cache')
+  assert.ok(['queued', 'running', 'ready'].includes(started.data.status), 'transcode should be admitted or use ready cache: ' + JSON.stringify({ status: started.data.status, error: started.data.error }))
 
   for (let attempt = 0; attempt < 30; attempt += 1) {
     const current = await requestJson(statusUrl, {
@@ -736,6 +755,14 @@ async function main() {
 main()
   .finally(async () => {
     process.chdir(projectRoot)
+    const fallbackAfter = fallbackInventory()
+    assert.deepStrictEqual(fallbackAfter, fallbackBefore, 'remote library verifier must not change project fallback files')
+    const evidenceRoot = path.join(projectRoot, '.tmp', 'refactor-tests')
+    fs.mkdirSync(evidenceRoot, { recursive: true })
+    fs.writeFileSync(path.join(evidenceRoot, 'remote-library-isolation.json'), JSON.stringify({
+      date: new Date().toISOString(), fixture: tempRoot, verifiedUserData: path.join(tempRoot, '.tmp-wallpaper-player'),
+      preservedFallbackFiles: fallbackAfter, conditions: 'Fixture entered before any production import; user-data assertion before writes and full project fallback content hash inventory unchanged after the production HTTP library/transcode/pairing test.'
+    }, null, 2))
     await removeTempRootWithRetry(tempRoot)
   })
   .catch(error => {

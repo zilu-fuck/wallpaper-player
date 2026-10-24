@@ -1,7 +1,7 @@
 const path = require('path')
-const { execFileSync } = require('child_process')
-const { execFileAsync } = require('./exec')
-const { getResourcePath, isExistingFile } = require('./paths')
+const fsp = require('fs/promises')
+const { execFileAsync, execFileTreeAsync } = require('./exec')
+const { getResourcePath } = require('./paths')
 const { isPrivateOrLocalHostname } = require('./ip-utils')
 
 const DEFAULT_TIMEOUT_MS = 45000
@@ -13,6 +13,12 @@ let detectedYtDlpPath = null
 let detectError = ''
 let detectPromise = null
 let lastProxyState = null
+let windowsProxy = null, proxyCheckedAt = 0
+const checkSignal = options => {
+  options.throwIfAborted?.()
+  if (options.signal?.aborted) throw options.signal.reason
+  if (options.deadlineAt && Date.now() >= options.deadlineAt) throw Object.assign(new Error('解析准备超过最长等待时间'), { code: 'task_timeout', status: 504 })
+}
 
 function escapeRegExp(value) {
   return String(value || '').replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
@@ -48,29 +54,31 @@ function getCandidatePaths() {
   ].filter(Boolean)
 }
 
-async function canRunCommand(command) {
+async function canRunCommand(command, options = {}) {
   try {
     await execFileAsync(command, ['--version'], {
-      timeout: 3000,
+      timeout: Math.max(1, Math.min(3000, (options.deadlineAt || Infinity) - Date.now())), signal: options.signal,
       windowsHide: true,
       encoding: 'utf8'
     })
     return true
-  } catch {
+  } catch (error) {
+    checkSignal(options)
     return false
   }
 }
 
-async function detectYtDlp(refresh = false) {
+async function detectYtDlp(refresh = false, options = {}) {
+  checkSignal(options)
   if (!refresh && detectedYtDlpPath) return detectedYtDlpPath
-  if (detectPromise) return detectPromise
+  if (!options.signal && detectPromise) return detectPromise
 
-  detectPromise = (async () => {
-    detectedYtDlpPath = null
+  const work = (async () => {
     detectError = ''
     const tried = new Set()
 
     for (const candidate of getCandidatePaths()) {
+      checkSignal(options)
       const normalized = String(candidate || '').trim()
       if (!normalized || tried.has(normalized)) continue
       tried.add(normalized)
@@ -78,25 +86,29 @@ async function detectYtDlp(refresh = false) {
       const looksLikePath = path.isAbsolute(normalized) || normalized.includes(path.sep) || normalized.includes('/')
       if (looksLikePath) {
         const resolved = path.resolve(normalized)
-        if (isExistingFile(resolved)) {
+        const exists = await fsp.stat(resolved).then(stat => stat.isFile(), () => false)
+        checkSignal(options)
+        if (exists) {
           detectedYtDlpPath = resolved
           return detectedYtDlpPath
         }
         continue
       }
 
-      if (await canRunCommand(normalized)) {
+      if (await canRunCommand(normalized, options)) {
+        checkSignal(options)
         detectedYtDlpPath = normalized
         return detectedYtDlpPath
       }
     }
 
+    checkSignal(options)
+    detectedYtDlpPath = null
     detectError = '未检测到 yt-dlp。请执行 npm run prepare-vendor，或把 yt-dlp 加入 PATH。'
     return null
-  })().finally(() => {
-    detectPromise = null
-  })
-
+  })()
+  if (options.signal) return work
+  detectPromise = work.finally(() => { detectPromise = null })
   return detectPromise
 }
 
@@ -107,20 +119,7 @@ function getProxyFromEnv() {
   return proxy ? { source: 'environment', proxy } : null
 }
 
-function queryRegistryValue(name) {
-  if (process.platform !== 'win32') return ''
-  try {
-    const output = execFileSync('reg', ['query', WINDOWS_INTERNET_SETTINGS_KEY, '/v', name], {
-      windowsHide: true,
-      encoding: 'utf8',
-      timeout: 1500
-    })
-    const line = output.split(/\r?\n/).find(item => item.includes(name))
-    return line?.replace(/^.*REG_\w+\s+/, '').trim() || ''
-  } catch {
-    return ''
-  }
-}
+const registryValue = (output, name) => output.split(/\r?\n/).find(item => item.trim().startsWith(name + ' '))?.replace(/^.*REG_\w+\s+/, '').trim() || ''
 
 function normalizeProxyUrl(value) {
   const raw = String(value || '').trim()
@@ -151,13 +150,20 @@ function pickWindowsProxyServer(value) {
   return ''
 }
 
-function getWindowsProxy() {
+async function getWindowsProxy(options = {}) {
   if (process.platform !== 'win32') return null
-  const enabled = /0x1$/i.test(queryRegistryValue('ProxyEnable'))
-  if (!enabled) return null
-  const proxy = pickWindowsProxyServer(queryRegistryValue('ProxyServer'))
-  const override = queryRegistryValue('ProxyOverride')
-  return proxy ? { source: 'windows', proxy, override } : null
+  checkSignal(options)
+  if (!options.refresh && Date.now() - proxyCheckedAt < 30000) return windowsProxy
+  try {
+    const { stdout } = await execFileTreeAsync(path.join(process.env.SystemRoot || 'C:\\Windows', 'System32/reg.exe'),
+      ['query', WINDOWS_INTERNET_SETTINGS_KEY], { timeout: 1500, signal: options.signal, maxBuffer: 128 * 1024 })
+    checkSignal(options)
+    const enabled = /0x1$/i.test(registryValue(stdout, 'ProxyEnable'))
+    const proxy = enabled ? pickWindowsProxyServer(registryValue(stdout, 'ProxyServer')) : ''
+    windowsProxy = proxy ? { source: 'windows', proxy, override: registryValue(stdout, 'ProxyOverride') } : null
+    proxyCheckedAt = Date.now()
+  } catch { checkSignal(options); windowsProxy = null; proxyCheckedAt = Date.now() }
+  return windowsProxy
 }
 
 function isBypassedByWindowsOverride(url, override) {
@@ -184,12 +190,19 @@ function shouldBypassProxy(url, proxy) {
 }
 
 function getSystemProxy(url = '') {
-  const proxy = getProxyFromEnv() || getWindowsProxy()
+  const proxy = getProxyFromEnv() || windowsProxy
   const bypassed = Boolean(proxy && url && shouldBypassProxy(url, proxy))
   lastProxyState = proxy && !bypassed
     ? { enabled: true, source: proxy.source, proxy: proxy.proxy, bypassed: false }
     : { enabled: false, source: proxy?.source || '', proxy: '', bypassed }
   return lastProxyState
+}
+
+async function getSystemProxyAsync(url = '', options = {}) {
+  checkSignal(options)
+  if (!getProxyFromEnv() && (!url || !isPrivateOrLocalHostname(getHostname(url)))) await getWindowsProxy(options)
+  checkSignal(options)
+  return getSystemProxy(url)
 }
 
 function getProcessEnv(proxyState) {
@@ -391,13 +404,17 @@ function sanitizeErrorMessage(value) {
 }
 
 async function parseWithYtDlp(url, options = {}) {
-  const ytdlpPath = await detectYtDlp()
+  options = { ...options, deadlineAt: Math.min(options.deadlineAt || Infinity, Date.now() + (options.timeoutMs || DEFAULT_TIMEOUT_MS)) }
+  checkSignal(options)
+  const ytdlpPath = await detectYtDlp(false, options)
+  checkSignal(options)
   if (!ytdlpPath) {
     throw new Error(detectError || '未检测到 yt-dlp')
   }
 
   const targetUrl = String(url || '').trim()
-  const proxyState = getSystemProxy(targetUrl)
+  const proxyState = await getSystemProxyAsync(targetUrl, options)
+  checkSignal(options)
   const args = [
     '--dump-single-json',
     '--no-warnings',
@@ -418,8 +435,8 @@ async function parseWithYtDlp(url, options = {}) {
 
   let stdout
   try {
-    const result = await execFileAsync(ytdlpPath, args, {
-      timeout: options.timeoutMs || DEFAULT_TIMEOUT_MS,
+    const result = await execFileTreeAsync(ytdlpPath, args, {
+      timeout: Math.max(1, Math.min(options.timeoutMs || DEFAULT_TIMEOUT_MS, (options.deadlineAt || Infinity) - Date.now())), signal: options.signal,
       maxBuffer: 24 * 1024 * 1024,
       windowsHide: true,
       encoding: 'utf8',
@@ -427,6 +444,7 @@ async function parseWithYtDlp(url, options = {}) {
     })
     stdout = result.stdout
   } catch (err) {
+    checkSignal(options)
     throw new Error(cleanYtDlpError(err))
   }
 
@@ -459,5 +477,6 @@ module.exports = {
   detectYtDlp,
   getYtDlpStatus,
   getSystemProxy,
+  getSystemProxyAsync,
   parseWithYtDlp
 }

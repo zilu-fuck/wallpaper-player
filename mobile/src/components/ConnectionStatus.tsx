@@ -25,12 +25,14 @@ const createStyles = (colors: ReturnType<typeof useTheme>['colors']) => StyleShe
     gap: 8
   },
   dot: {
-    width: 8,
-    height: 8,
+    width: 7,
+    height: 7,
     borderRadius: 4
   },
   text: {
     color: colors.muted,
-    fontSize: 13
+    fontSize: 13,
+    fontWeight: '600',
+    letterSpacing: 0.2
   }
 })

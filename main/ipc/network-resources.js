@@ -1,5 +1,7 @@
-const { ipcMain } = require('electron')
+const { ipcMain: appIpcMain } = require('../security/ipc')
 const { IPC } = require('../ipc-channels')
+const { mediaWorkService } = require('../application/media-work-service')
+const { mediaScheduler } = require('../application/resource-scheduler')
 const {
   enrichNetworkResource,
   normalizeNetworkResourceInput,
@@ -11,10 +13,14 @@ const {
   sanitizeSettingsForRenderer
 } = require('../settings')
 
-function registerNetworkResourceIpc() {
-  ipcMain.handle(IPC.NETWORK_RESOURCE_ADD, async (_event, input) => {
+function registerNetworkResourceIpc(ipcMain = appIpcMain) {
+  const prepare = (event, input, operation) => mediaWorkService.run(event, input?.requestId, signal => mediaScheduler.enqueue({
+    type: 'network-operation', resources: { prepare: 1 }, signal, priority: 80, timeoutMs: 45000 }, operation))
+  ipcMain.handle(IPC.NETWORK_RESOURCE_ADD, async (event, input) => {
     try {
-      const resource = await enrichNetworkResource(normalizeNetworkResourceInput(input))
+      return await prepare(event, input, async context => {
+      const resource = await enrichNetworkResource(normalizeNetworkResourceInput(input), context)
+      context.throwIfAborted()
       const settings = loadSettings()
       const current = Array.isArray(settings.networkResources) ? settings.networkResources : []
       const exists = current.some(item => String(item.url).toLowerCase() === resource.url.toLowerCase())
@@ -23,18 +29,21 @@ function registerNetworkResourceIpc() {
         : [resource, ...current]
       const saved = await saveSettingsAndFlush({ networkResources: next })
       return { success: true, resource, settings: sanitizeSettingsForRenderer(saved) }
+      })
     } catch (err) {
       return { success: false, error: err.message }
     }
   })
 
-  ipcMain.handle(IPC.NETWORK_RESOURCE_UPDATE, async (_event, input = {}) => {
+  ipcMain.handle(IPC.NETWORK_RESOURCE_UPDATE, async (event, input = {}) => {
     try {
+      return await prepare(event, input, async context => {
       const id = String(input.id || '').trim()
       if (!id) {
         return { success: false, error: '未选择要修改的网络资源' }
       }
-      const resource = await enrichNetworkResource(normalizeNetworkResourceInput(input))
+      const resource = await enrichNetworkResource(normalizeNetworkResourceInput(input), context)
+      context.throwIfAborted()
       const settings = loadSettings()
       const current = Array.isArray(settings.networkResources) ? settings.networkResources : []
       const index = current.findIndex(item => String(item.id || '') === id)
@@ -62,15 +71,18 @@ function registerNetworkResourceIpc() {
       next[index] = updated
       const saved = await saveSettingsAndFlush({ networkResources: next })
       return { success: true, resource: updated, settings: sanitizeSettingsForRenderer(saved) }
+      })
     } catch (err) {
       return { success: false, error: err.message }
     }
   })
 
-  ipcMain.handle(IPC.NETWORK_RESOURCE_RESOLVE, async (_event, input = {}) => {
+  ipcMain.handle(IPC.NETWORK_RESOURCE_RESOLVE, async (event, input = {}) => {
     try {
-      const resource = await resolveKnownNetworkResourcePlayback(input)
-      return { success: true, resource }
+      return await prepare(event, input, async context => {
+        const resource = await resolveKnownNetworkResourcePlayback(input, context)
+        context.throwIfAborted(); return { success: true, resource }
+      })
     } catch (err) {
       return { success: false, error: err.message }
     }

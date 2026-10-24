@@ -1,5 +1,7 @@
 
-/* ─── Sidebar（玻璃面板） ─── */
+/* ─── Sidebar（玻璃面板） ───
+   侧栏背后没有滚动内容，backdrop-filter 在这里纯属浪费：
+   换成「实色渐变 + 一条内侧高光」，观感一致但少一层全高模糊。 */
 .sidebar {
   width: var(--sidebar-width);
   flex: 0 0 var(--sidebar-width);
@@ -7,15 +9,19 @@
   position: relative;
   display: flex;
   flex-direction: column;
-  background: linear-gradient(180deg, var(--glass-bg) 0%, var(--glass-bg-soft) 100%);
-  backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
-  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.035) 0%, rgba(255, 255, 255, 0.012) 100%),
+    color-mix(in srgb, var(--bg-primary) 72%, transparent);
   border-right: 1px solid var(--glass-border);
-  box-shadow: inset -1px 0 0 var(--glass-highlight), inset 0 1px 0 var(--glass-highlight);
+  box-shadow: inset -1px 0 0 var(--glass-highlight);
   overflow: hidden;
   contain: layout paint;
-  will-change: flex-basis;
   transition: flex-basis 0.24s var(--ease-out), width 0.24s var(--ease-out);
+}
+
+.app.theme-light .sidebar {
+  background: rgba(255, 255, 255, 0.78);
+  box-shadow: inset -1px 0 0 #fff;
 }
 
 .sidebar::before {
@@ -92,6 +98,11 @@
   color: var(--accent);
   flex-shrink: 0;
   filter: drop-shadow(0 0 6px var(--accent-glow));
+}
+
+.sidebar-title img {
+  display: block;
+  flex-shrink: 0;
 }
 
 .sidebar-toggle-btn {
@@ -214,7 +225,7 @@
   color: var(--text-secondary);
   cursor: pointer;
   text-align: left;
-  box-shadow: inset 0 1px 0 var(--glass-highlight), var(--shadow-sm);
+  box-shadow: inset 0 1px 0 var(--glass-highlight);
   transition: background var(--transition), color var(--transition), border-color var(--transition), transform var(--transition-fast), box-shadow var(--transition);
 }
 
@@ -229,7 +240,7 @@
 .sidebar-network-entry.active {
   color: var(--text-primary);
   background: var(--accent-soft);
-  border-color: rgba(34, 211, 238, 0.35);
+  border-color: rgba(45, 212, 234, 0.35);
   box-shadow: inset 0 1px 0 var(--glass-highlight), 0 0 18px var(--accent-glow);
 }
 
@@ -294,7 +305,7 @@
   padding: 9px 10px;
   border-radius: var(--radius-md);
   cursor: pointer;
-  transition: background var(--transition), transform var(--transition-fast), box-shadow var(--transition);
+  transition: background var(--transition), color var(--transition), box-shadow var(--transition);
   position: relative;
 }
 
@@ -317,7 +328,7 @@
 }
 
 .sidebar-dir-item.active {
-  background: var(--accent-soft);
+  background: linear-gradient(90deg, rgba(45, 212, 234, 0.16), rgba(45, 212, 234, 0.04));
   box-shadow: inset 0 1px 0 var(--glass-highlight);
 }
 
@@ -407,7 +418,7 @@
   border: 1px solid var(--glass-border-strong);
   border-radius: var(--radius-xl);
   background:
-    linear-gradient(180deg, rgba(34, 211, 238, 0.07), transparent 96px),
+    linear-gradient(180deg, rgba(45, 212, 234, 0.07), transparent 96px),
     var(--glass-bg);
   backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
   -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturate));
@@ -500,7 +511,7 @@
   border-radius: 12px;
   background: var(--accent-soft);
   color: var(--accent);
-  box-shadow: inset 0 0 0 1px rgba(34, 211, 238, 0.22), 0 0 14px var(--accent-glow);
+  box-shadow: inset 0 0 0 1px rgba(45, 212, 234, 0.22), 0 0 14px var(--accent-glow);
 }
 
 .resource-option-copy {
@@ -573,9 +584,9 @@
 .resource-dialog-note {
   margin: 0 2px;
   padding: 10px 12px;
-  border: 1px solid rgba(34, 211, 238, 0.2);
+  border: 1px solid rgba(45, 212, 234, 0.2);
   border-radius: var(--radius-md);
-  background: rgba(34, 211, 238, 0.07);
+  background: rgba(45, 212, 234, 0.07);
   color: var(--text-secondary);
   font-size: 12px;
   line-height: 1.5;
@@ -1018,7 +1029,7 @@
 }
 
 .sidebar-category-item.active .sidebar-category-check {
-  border-color: rgba(34, 211, 238, 0.5);
+  border-color: rgba(45, 212, 234, 0.5);
   background: var(--glass-bg);
   color: var(--accent);
 }
@@ -1040,7 +1051,7 @@
 
 .sidebar-category-item.active .sidebar-category-count {
   color: var(--accent);
-  border-color: rgba(34, 211, 238, 0.35);
+  border-color: rgba(45, 212, 234, 0.35);
   background: var(--glass-bg);
 }
 
@@ -1124,7 +1135,21 @@
 .sidebar-icon-btn.active {
   color: var(--accent);
   background: var(--accent-soft);
-  box-shadow: 0 0 14px var(--accent-glow);
+  box-shadow: 0 0 0 1px rgba(45, 212, 234, 0.22), 0 0 16px var(--accent-glow);
+}
+
+/* 收起态的活动条目：左侧一道细光条，减少发光面积 */
+.sidebar-icon-btn.active::before {
+  content: '';
+  position: absolute;
+  left: -7px;
+  top: 50%;
+  width: 3px;
+  height: 18px;
+  transform: translateY(-50%);
+  border-radius: 0 3px 3px 0;
+  background: var(--accent-grad);
+  box-shadow: 0 0 8px var(--accent-glow);
 }
 
 .sidebar-icon-badge {
@@ -1139,11 +1164,11 @@
   justify-content: center;
   border-radius: var(--radius-pill);
   background: var(--accent-grad);
-  color: #04121a;
+  color: var(--accent-contrast);
   font-size: 9px;
   font-weight: 700;
   line-height: 1;
-  box-shadow: 0 0 0 2px var(--bg-primary), 0 0 10px var(--accent-glow);
+  box-shadow: 0 0 0 2px var(--bg-primary);
 }
 
 .sidebar-settings-btn {

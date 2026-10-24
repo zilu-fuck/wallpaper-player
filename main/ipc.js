@@ -1,6 +1,7 @@
 const { registerDownloadIpc } = require('./ipc/downloads')
 const { registerFileIpc } = require('./ipc/files')
 const { registerMediaIpc } = require('./ipc/media')
+const { registerMediaDataIpc } = require('./ipc/media-data')
 const { registerNetworkResourceIpc } = require('./ipc/network-resources')
 const { registerPlayerIpc } = require('./ipc/player')
 const { registerPluginIpc } = require('./ipc/plugins')
@@ -8,9 +9,12 @@ const { registerPrivacyIpc } = require('./ipc/privacy')
 const { registerRemoteIpc } = require('./ipc/remote')
 const { registerSettingsIpc } = require('./ipc/settings')
 const { registerUpdaterIpc } = require('./ipc/updater')
+const { registerWindowIpc } = require('./ipc/window-shell')
+const { registerAppDialogIpc } = require('./ipc/app-dialogs')
 
 function setupIPC() {
   registerMediaIpc()
+  registerMediaDataIpc()
   registerSettingsIpc()
   registerPluginIpc()
   registerNetworkResourceIpc()
@@ -20,6 +24,8 @@ function setupIPC() {
   registerPlayerIpc()
   registerUpdaterIpc()
   registerRemoteIpc()
+  registerWindowIpc()
+  registerAppDialogIpc()
 }
 
 module.exports = { setupIPC }

@@ -1,4 +1,5 @@
-const { app, ipcMain } = require('electron')
+const { app } = require('electron')
+const { ipcMain: appIpcMain } = require('../security/ipc')
 const { IPC } = require('../ipc-channels')
 const { isPortableApp } = require('../paths')
 const {
@@ -10,7 +11,7 @@ const {
   setUpdateState
 } = require('../updater')
 
-function registerUpdaterIpc() {
+function registerUpdaterIpc(ipcMain = appIpcMain) {
   ipcMain.handle(IPC.UPDATER_GET_STATUS, async () => getUpdateState())
 
   ipcMain.handle(IPC.UPDATER_CHECK, async () => {

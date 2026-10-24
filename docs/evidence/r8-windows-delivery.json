@@ -1,0 +1,2538 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-10-23T08:13:22.868Z",
+  "phase": "R8 Windows NSIS and portable delivery mechanics with current full frontend",
+  "previousEvidence": "docs/evidence/r8-frontend-integration.json",
+  "previousGoalTurn": "progress",
+  "status": "Core delivery mechanics accepted; full UI acceptance remains open",
+  "goalStatus": "active",
+  "isolation": {
+    "date": "2026-10-23T06:57:29.648Z",
+    "id": "6ff01dc4",
+    "guid": "e124289d-08cc-466f-85e6-9048edf7e551",
+    "root": "E:\\wallpaper播放器",
+    "base": "E:/wpd-6ff01dc4",
+    "source": "E:\\wallpaper播放器\\.tmp\\refactor-tests\\r8-windows-delivery\\中文交付 QA' & $workspace",
+    "buildBase": "E:\\wpd-6ff01dc4\\build",
+    "appId": "com.wallpaper.player.qa.delivery.6ff01dc4",
+    "executable": "WallpaperDeliveryQA-6ff01dc4.exe",
+    "productName": "Wallpaper Delivery QA 6ff01dc4",
+    "versions": [
+      "9.9.0",
+      "9.9.1"
+    ],
+    "installDirectory": "E:\\wpd-6ff01dc4\\中文安装 QA' & $app",
+    "portableDirectory": "E:\\wpd-6ff01dc4\\中文便携 QA' & $portable",
+    "movedPortableDirectory": "E:\\wpd-6ff01dc4\\迁移便携 QA' & $portable",
+    "purpose": "Local QA only: actual full renderer/backend/vendor, separate installer identity and synthetic data",
+    "profile": "C:\\Users\\s1897\\AppData\\Roaming\\Wallpaper Delivery QA 6ff01dc4",
+    "syntheticProfilesOnly": true,
+    "noProductionIdentityUsed": true,
+    "actualMainAndRendererAndVendor": true,
+    "testVersionsShareTheSameCurrentProductionCode": true,
+    "qaEntry": "Wraps the byte-identical original main.js, hides/captures its window, controls only QA preferences, runs the actual paired token verifier, auto-acknowledges the production fallback notification request and exits through normal shutdown",
+    "updater": "QA-only generic loopback URL and disposeUpdater after startup; no public update request or publish",
+    "signing": "No signing credentials used; no signing identity claimed",
+    "nativeUiAcceptanceScope": "Windows11 Pro build26300 x64 only, silent per-user QA install; interactive wizard/finish page and native fallback dialog pixels not verified"
+  },
+  "builds": [
+    {
+      "version": "9.9.0",
+      "directory": "E:\\wallpaper播放器\\.tmp\\refactor-tests\\r8-windows-delivery\\中文交付 QA' & $workspace\\release\\windows-9.9.0-61373658-ea43-4520-8bed-87db7f536e2d",
+      "archive": {
+        "file": "E:\\wallpaper播放器\\.tmp\\refactor-tests\\r8-windows-delivery\\中文交付 QA' & $workspace\\release\\windows-9.9.0-61373658-ea43-4520-8bed-87db7f536e2d\\win-unpacked\\resources\\app.asar",
+        "bytes": 16421273,
+        "sha256": "427351fb6c16371385e2195b04f5fb400d2c40d7667237af9cea95e1ab1d4027",
+        "sha512": "S98oEx7QwSVnVfa64rl2sFNLabVvSQaEH6VBc6dLtUOwbryyiqcgS7+sMo9QwA1WExgH/G6UDbY97bYz1fDZ5w=="
+      },
+      "embedded": [
+        "main/application/confirm.js",
+        "main/application/download-service.js",
+        "main/application/download-tasks.js",
+        "main/application/extract-mpv.ps1",
+        "main/application/library-service.js",
+        "main/application/media-mutation-paths.js",
+        "main/application/media-mutations.js",
+        "main/application/media-work-service.js",
+        "main/application/mpv-installer.js",
+        "main/application/mpv-version-cache.js",
+        "main/application/player-service.js",
+        "main/application/resource-scheduler.js",
+        "main/application/settings-broadcast.js",
+        "main/application/settings-json-worker.js",
+        "main/application/settings-json.js",
+        "main/application/settings-startup.js",
+        "main/application/transcode-service.js",
+        "main/constants.js",
+        "main/download-manager.js",
+        "main/download-xunlei.js",
+        "main/exec.js",
+        "main/index.js",
+        "main/ip-utils.js",
+        "main/ipc/app-dialogs.js",
+        "main/ipc/downloads.js",
+        "main/ipc/files.js",
+        "main/ipc/media-data.js",
+        "main/ipc/media.js",
+        "main/ipc/network-resource-service.js",
+        "main/ipc/network-resources.js",
+        "main/ipc/player.js",
+        "main/ipc/plugins.js",
+        "main/ipc/privacy.js",
+        "main/ipc/remote.js",
+        "main/ipc/settings.js",
+        "main/ipc/updater.js",
+        "main/ipc/window-shell.js",
+        "main/ipc-channels.js",
+        "main/ipc.js",
+        "main/media-pressure.js",
+        "main/mpv-host.js",
+        "main/mpv-integration.js",
+        "main/mpv.js",
+        "main/network-resource-parser.js",
+        "main/paths.js",
+        "main/plugins/builtin.js",
+        "main/plugins/capabilities.js",
+        "main/plugins/core-api.js",
+        "main/plugins/index.js",
+        "main/plugins/loader.js",
+        "main/plugins/manifest.js",
+        "main/plugins/official.js",
+        "main/plugins/registry.js",
+        "main/portable-user-data.js",
+        "main/process-lifecycle.js",
+        "main/rate-limiter.js",
+        "main/remote/handlers/desktop.js",
+        "main/remote/handlers/info.js",
+        "main/remote/handlers/library.js",
+        "main/remote/handlers/media.js",
+        "main/remote/handlers/network-resources.js",
+        "main/remote/handlers/tags.js",
+        "main/remote/handlers/transcode.js",
+        "main/remote/http-utils.js",
+        "main/remote/identity.js",
+        "main/remote/index.js",
+        "main/remote/json-responses.js",
+        "main/remote/media-mutations.js",
+        "main/remote/network.js",
+        "main/remote/request-lifecycle.js",
+        "main/remote/server.js",
+        "main/remote/streaming.js",
+        "main/remote/transcode-cache.js",
+        "main/remote/transcode.js",
+        "main/remote/video-index.js",
+        "main/repositories/settings-file.js",
+        "main/repositories/tag-state.js",
+        "main/repositories/user-media.js",
+        "main/scanner.js",
+        "main/security/ipc-sender.js",
+        "main/security/ipc.js",
+        "main/security/media-access.js",
+        "main/security/privacy-password.js",
+        "main/settings.js",
+        "main/thumbnail.js",
+        "main/updater.js",
+        "main/user-data.js",
+        "main/video-metadata.js",
+        "main/window.js",
+        "main/ytdlp-service.js",
+        "dist/assets/AISearchPanel-Derv9tjW.js",
+        "dist/assets/DownloadCenter-BH-U7POv.js",
+        "dist/assets/index-C_g4wCja.js",
+        "dist/assets/index-D3ud8mIE.css",
+        "dist/assets/NetworkResourceLibrary-B8YAyUPq.js",
+        "dist/assets/Settings-CXXjVVFm.js",
+        "dist/assets/useDownloadStateObserver-Ctmc9mdZ.js",
+        "dist/assets/VideoAnalysisSidebar-D74pJEyj.js",
+        "dist/index.html",
+        "packages/contracts/dist/index.js",
+        "packages/contracts/dist/schema.js",
+        "packages/contracts/dist/settings-feed.js",
+        "packages/contracts/package.json",
+        "packages/domain/dist/index.js",
+        "packages/domain/package.json",
+        "production-main.js",
+        "preload.js"
+      ],
+      "vendor": [
+        "vendor/aria2/aria2c.exe",
+        "vendor/aria2/AUTHORS",
+        "vendor/aria2/ChangeLog",
+        "vendor/aria2/COPYING",
+        "vendor/aria2/LICENSE.OpenSSL",
+        "vendor/aria2/NEWS",
+        "vendor/aria2/README.html",
+        "vendor/aria2/README.mingw",
+        "vendor/ffmpeg/bin/ffmpeg.exe",
+        "vendor/ffmpeg/bin/ffplay.exe",
+        "vendor/ffmpeg/bin/ffprobe.exe",
+        "vendor/ffmpeg/LICENSE",
+        "vendor/ffmpeg/presets/libvpx-1080p.ffpreset",
+        "vendor/ffmpeg/presets/libvpx-1080p50_60.ffpreset",
+        "vendor/ffmpeg/presets/libvpx-360p.ffpreset",
+        "vendor/ffmpeg/presets/libvpx-720p.ffpreset",
+        "vendor/ffmpeg/presets/libvpx-720p50_60.ffpreset",
+        "vendor/ffmpeg/README.txt",
+        "vendor/mpv/mpv-register.bat",
+        "vendor/mpv/mpv-unregister.bat",
+        "vendor/mpv/mpv.com",
+        "vendor/mpv/mpv.exe",
+        "vendor/mpv/vulkan-1.dll",
+        "vendor/yt-dlp/yt-dlp.exe"
+      ],
+      "wrapperHash": "2df7774c775c639a599c1e243dfa62fd04556aa29a845000bd08c281668f22b2",
+      "assets": [
+        {
+          "file": "Wallpaper-Player-Setup-9.9.0.exe",
+          "role": "installer",
+          "bytes": 232015905,
+          "sha256": "c7238a04247d708e7136d2f1656602f7e1474fcb8a78536b73644ad453481447",
+          "sha512": "ciO2WV/RMn7YSfKuRTZuJOAsaNROd9SWlusfjEz8pcDe/a6aGayUyv9iEh0CUKc+JvBZPvzmxaWR5gLEqeFE4A==",
+          "bootstrapArch": "ia32",
+          "productVersion": "9.9.0",
+          "signing": {
+            "status": "NotSigned",
+            "certificateSha256": null
+          }
+        },
+        {
+          "file": "Wallpaper-Player-9.9.0.exe",
+          "role": "portable",
+          "bytes": 231791812,
+          "sha256": "d647127d493ecabfb1236d53bfe86fa69953dd72a06fad2c69800d6c8c00b83b",
+          "sha512": "8xwoR9CzNRLIJ2GoWz0P7Lzb+dm+UzdscgUdptmYwdglgiv3DyXdVK1giJQOGBa/GSgNn8RLGUAts2A2lF5QPA==",
+          "bootstrapArch": "ia32",
+          "productVersion": "9.9.0",
+          "signing": {
+            "status": "NotSigned",
+            "certificateSha256": null
+          }
+        },
+        {
+          "file": "Wallpaper-Player-Setup-9.9.0.exe.blockmap",
+          "role": "blockmap",
+          "bytes": 241756,
+          "sha256": "9ade0b7c8e1a58aa0992c90bb102bf7a51b2013151fb6cdfad92936902c8fb27",
+          "sha512": "1y4joD0rwK1AWJ9bxJx+nZJXKIUu6lwlvnQcMnpoYTz2dASRHTT4pF14jHI4+eJqjfFsu0MiiwN1USYnNNiVkQ=="
+        },
+        {
+          "file": "latest.yml",
+          "role": "desktop-update-metadata",
+          "bytes": 361,
+          "sha256": "87dde4a0150d4493806e27e9129f39c1e35bad9751977c3fac5d7ee3441dc458",
+          "sha512": "C4kEb9HMYXxrF4aMjkh68gd8tUrvgII3ZF++ntDgEJ2ZDESgLChBQZ29h7AHV3xGD56JWarQeNzRaho8+7WbeQ=="
+        },
+        {
+          "file": "Wallpaper-Player-Plugin-video-analysis-1.0.0.zip",
+          "source": "plugins/Wallpaper-Player-Plugin-video-analysis-1.0.0.zip",
+          "role": "plugin",
+          "pluginId": "video-analysis",
+          "version": "1.0.0",
+          "bytes": 569697618,
+          "sha256": "643e43176233506fba5051729521bd19ea2a72d12553cc9408ff4881b6c1fe99",
+          "sha512": "qHV7a56DKFlIDatnwa5XMIpDYWUwyaGeSSNTzZ2X09v/wcBzNaXxrPSM+e1BHvwfSxn0lEM/JbRcQZCreVt1ZA=="
+        },
+        {
+          "file": "Wallpaper-Player-Plugin-ai-search-0.1.0.zip",
+          "source": "plugins/Wallpaper-Player-Plugin-ai-search-0.1.0.zip",
+          "role": "plugin",
+          "pluginId": "ai-search",
+          "version": "0.1.0",
+          "bytes": 2955069,
+          "sha256": "464e129ebb9a4731fff800c26c6e4c94ddbe33fbd1699486c166d9e112a97fc8",
+          "sha512": "rKd4RQyHFHEIADm+H3KQddNRMuu2UbSuiK4OK+hkfrp3JV36mLcSdLA0UNlAPW+7L5X1xi5kiTVNPmq1lDzOKw=="
+        },
+        {
+          "file": "Wallpaper-Player-Plugin-agent-bridge-0.1.0.zip",
+          "source": "plugins/Wallpaper-Player-Plugin-agent-bridge-0.1.0.zip",
+          "role": "plugin",
+          "pluginId": "agent-bridge",
+          "version": "0.1.0",
+          "bytes": 1093,
+          "sha256": "9f499408c282a144ffe411648d476fd4e36bd010c6e8974be3b9fd16460bed1a",
+          "sha512": "W5qWvlCSHQT8RlE31UF1e06dN3162tSZVhs7nqyFBhFLJdcN7Z8rE2WDw6ZMjQIygO89K/Xbuev/TJY+ImfSqg=="
+        }
+      ]
+    },
+    {
+      "version": "9.9.1",
+      "directory": "E:\\wallpaper播放器\\.tmp\\refactor-tests\\r8-windows-delivery\\中文交付 QA' & $workspace\\release\\windows-9.9.1-10620f4d-1401-4182-aa75-0de284854712",
+      "archive": {
+        "file": "E:\\wallpaper播放器\\.tmp\\refactor-tests\\r8-windows-delivery\\中文交付 QA' & $workspace\\release\\windows-9.9.1-10620f4d-1401-4182-aa75-0de284854712\\win-unpacked\\resources\\app.asar",
+        "bytes": 16421273,
+        "sha256": "8c0a744d4d96017039e0cb5b8d08f5a7f01e7940c375403ba211a1ee68f143d5",
+        "sha512": "aNB9PRvzgWsELSFDcWwi8HAIFybtlFOvNWypGRbL65I3Gsfu1EipEIQveZsyKkxg2y6hREvXeSmw87ahYnee6A=="
+      },
+      "embedded": [
+        "main/application/confirm.js",
+        "main/application/download-service.js",
+        "main/application/download-tasks.js",
+        "main/application/extract-mpv.ps1",
+        "main/application/library-service.js",
+        "main/application/media-mutation-paths.js",
+        "main/application/media-mutations.js",
+        "main/application/media-work-service.js",
+        "main/application/mpv-installer.js",
+        "main/application/mpv-version-cache.js",
+        "main/application/player-service.js",
+        "main/application/resource-scheduler.js",
+        "main/application/settings-broadcast.js",
+        "main/application/settings-json-worker.js",
+        "main/application/settings-json.js",
+        "main/application/settings-startup.js",
+        "main/application/transcode-service.js",
+        "main/constants.js",
+        "main/download-manager.js",
+        "main/download-xunlei.js",
+        "main/exec.js",
+        "main/index.js",
+        "main/ip-utils.js",
+        "main/ipc/app-dialogs.js",
+        "main/ipc/downloads.js",
+        "main/ipc/files.js",
+        "main/ipc/media-data.js",
+        "main/ipc/media.js",
+        "main/ipc/network-resource-service.js",
+        "main/ipc/network-resources.js",
+        "main/ipc/player.js",
+        "main/ipc/plugins.js",
+        "main/ipc/privacy.js",
+        "main/ipc/remote.js",
+        "main/ipc/settings.js",
+        "main/ipc/updater.js",
+        "main/ipc/window-shell.js",
+        "main/ipc-channels.js",
+        "main/ipc.js",
+        "main/media-pressure.js",
+        "main/mpv-host.js",
+        "main/mpv-integration.js",
+        "main/mpv.js",
+        "main/network-resource-parser.js",
+        "main/paths.js",
+        "main/plugins/builtin.js",
+        "main/plugins/capabilities.js",
+        "main/plugins/core-api.js",
+        "main/plugins/index.js",
+        "main/plugins/loader.js",
+        "main/plugins/manifest.js",
+        "main/plugins/official.js",
+        "main/plugins/registry.js",
+        "main/portable-user-data.js",
+        "main/process-lifecycle.js",
+        "main/rate-limiter.js",
+        "main/remote/handlers/desktop.js",
+        "main/remote/handlers/info.js",
+        "main/remote/handlers/library.js",
+        "main/remote/handlers/media.js",
+        "main/remote/handlers/network-resources.js",
+        "main/remote/handlers/tags.js",
+        "main/remote/handlers/transcode.js",
+        "main/remote/http-utils.js",
+        "main/remote/identity.js",
+        "main/remote/index.js",
+        "main/remote/json-responses.js",
+        "main/remote/media-mutations.js",
+        "main/remote/network.js",
+        "main/remote/request-lifecycle.js",
+        "main/remote/server.js",
+        "main/remote/streaming.js",
+        "main/remote/transcode-cache.js",
+        "main/remote/transcode.js",
+        "main/remote/video-index.js",
+        "main/repositories/settings-file.js",
+        "main/repositories/tag-state.js",
+        "main/repositories/user-media.js",
+        "main/scanner.js",
+        "main/security/ipc-sender.js",
+        "main/security/ipc.js",
+        "main/security/media-access.js",
+        "main/security/privacy-password.js",
+        "main/settings.js",
+        "main/thumbnail.js",
+        "main/updater.js",
+        "main/user-data.js",
+        "main/video-metadata.js",
+        "main/window.js",
+        "main/ytdlp-service.js",
+        "dist/assets/AISearchPanel-Derv9tjW.js",
+        "dist/assets/DownloadCenter-BH-U7POv.js",
+        "dist/assets/index-C_g4wCja.js",
+        "dist/assets/index-D3ud8mIE.css",
+        "dist/assets/NetworkResourceLibrary-B8YAyUPq.js",
+        "dist/assets/Settings-CXXjVVFm.js",
+        "dist/assets/useDownloadStateObserver-Ctmc9mdZ.js",
+        "dist/assets/VideoAnalysisSidebar-D74pJEyj.js",
+        "dist/index.html",
+        "packages/contracts/dist/index.js",
+        "packages/contracts/dist/schema.js",
+        "packages/contracts/dist/settings-feed.js",
+        "packages/contracts/package.json",
+        "packages/domain/dist/index.js",
+        "packages/domain/package.json",
+        "production-main.js",
+        "preload.js"
+      ],
+      "vendor": [
+        "vendor/aria2/aria2c.exe",
+        "vendor/aria2/AUTHORS",
+        "vendor/aria2/ChangeLog",
+        "vendor/aria2/COPYING",
+        "vendor/aria2/LICENSE.OpenSSL",
+        "vendor/aria2/NEWS",
+        "vendor/aria2/README.html",
+        "vendor/aria2/README.mingw",
+        "vendor/ffmpeg/bin/ffmpeg.exe",
+        "vendor/ffmpeg/bin/ffplay.exe",
+        "vendor/ffmpeg/bin/ffprobe.exe",
+        "vendor/ffmpeg/LICENSE",
+        "vendor/ffmpeg/presets/libvpx-1080p.ffpreset",
+        "vendor/ffmpeg/presets/libvpx-1080p50_60.ffpreset",
+        "vendor/ffmpeg/presets/libvpx-360p.ffpreset",
+        "vendor/ffmpeg/presets/libvpx-720p.ffpreset",
+        "vendor/ffmpeg/presets/libvpx-720p50_60.ffpreset",
+        "vendor/ffmpeg/README.txt",
+        "vendor/mpv/mpv-register.bat",
+        "vendor/mpv/mpv-unregister.bat",
+        "vendor/mpv/mpv.com",
+        "vendor/mpv/mpv.exe",
+        "vendor/mpv/vulkan-1.dll",
+        "vendor/yt-dlp/yt-dlp.exe"
+      ],
+      "wrapperHash": "2df7774c775c639a599c1e243dfa62fd04556aa29a845000bd08c281668f22b2",
+      "assets": [
+        {
+          "file": "Wallpaper-Player-Setup-9.9.1.exe",
+          "role": "installer",
+          "bytes": 232015845,
+          "sha256": "0c0e287be61175bd1eecfcd6ebd49d1aab1e101524b89a9c34d5a5659caa4a14",
+          "sha512": "4jmCGRuTPdr1JV0a43IRlYDnqKokxwOxxjiV5BypsNEoD8II+/Ptclyeo/Q27z11FM525KaaUB63esnPFe48fw==",
+          "bootstrapArch": "ia32",
+          "productVersion": "9.9.1",
+          "signing": {
+            "status": "NotSigned",
+            "certificateSha256": null
+          }
+        },
+        {
+          "file": "Wallpaper-Player-9.9.1.exe",
+          "role": "portable",
+          "bytes": 231791762,
+          "sha256": "c30925a0bcd135180702d6ecde1f81bdd1107ca8ac5755a43506670d81d8933f",
+          "sha512": "A86Byf1udBzXJBhkj/AJd29xTFIuTZFBGkj0X55UvhULHrc4SpWR2TMNvx5mQsrXS4lAEctpx8+SbQZa887YaA==",
+          "bootstrapArch": "ia32",
+          "productVersion": "9.9.1",
+          "signing": {
+            "status": "NotSigned",
+            "certificateSha256": null
+          }
+        },
+        {
+          "file": "Wallpaper-Player-Setup-9.9.1.exe.blockmap",
+          "role": "blockmap",
+          "bytes": 241738,
+          "sha256": "8d9c6ced517b1767d9d56bc493b5f7174a3ce772e60ed1363a40513855e40156",
+          "sha512": "xreRQoSyWLzTHhd548hVZWAT5DoM/ZUrJrKIT1bVgq0vUXEN3+aSOSJg0Uq4GD4KBvsBw6UTPdVLKKbSSzj/nw=="
+        },
+        {
+          "file": "latest.yml",
+          "role": "desktop-update-metadata",
+          "bytes": 361,
+          "sha256": "c239727c8585a197b63bbfa1f360fa334cece173f86c965569596ae34ecd50bd",
+          "sha512": "TR/qc543DD43Wqa+5udjYJrVZFpfWMgQ8P3pr0ruysDJGWMc9rPEQPP4o9JNj0FmawjQvg0qJ2t+05doGnrxbQ=="
+        },
+        {
+          "file": "Wallpaper-Player-Plugin-video-analysis-1.0.0.zip",
+          "source": "plugins/Wallpaper-Player-Plugin-video-analysis-1.0.0.zip",
+          "role": "plugin",
+          "pluginId": "video-analysis",
+          "version": "1.0.0",
+          "bytes": 569697618,
+          "sha256": "643e43176233506fba5051729521bd19ea2a72d12553cc9408ff4881b6c1fe99",
+          "sha512": "qHV7a56DKFlIDatnwa5XMIpDYWUwyaGeSSNTzZ2X09v/wcBzNaXxrPSM+e1BHvwfSxn0lEM/JbRcQZCreVt1ZA=="
+        },
+        {
+          "file": "Wallpaper-Player-Plugin-ai-search-0.1.0.zip",
+          "source": "plugins/Wallpaper-Player-Plugin-ai-search-0.1.0.zip",
+          "role": "plugin",
+          "pluginId": "ai-search",
+          "version": "0.1.0",
+          "bytes": 2955069,
+          "sha256": "464e129ebb9a4731fff800c26c6e4c94ddbe33fbd1699486c166d9e112a97fc8",
+          "sha512": "rKd4RQyHFHEIADm+H3KQddNRMuu2UbSuiK4OK+hkfrp3JV36mLcSdLA0UNlAPW+7L5X1xi5kiTVNPmq1lDzOKw=="
+        },
+        {
+          "file": "Wallpaper-Player-Plugin-agent-bridge-0.1.0.zip",
+          "source": "plugins/Wallpaper-Player-Plugin-agent-bridge-0.1.0.zip",
+          "role": "plugin",
+          "pluginId": "agent-bridge",
+          "version": "0.1.0",
+          "bytes": 1093,
+          "sha256": "9f499408c282a144ffe411648d476fd4e36bd010c6e8974be3b9fd16460bed1a",
+          "sha512": "W5qWvlCSHQT8RlE31UF1e06dN3162tSZVhs7nqyFBhFLJdcN7Z8rE2WDw6ZMjQIygO89K/Xbuev/TJY+ImfSqg=="
+        }
+      ]
+    }
+  ],
+  "compiledPerVersion": 107,
+  "vendorFilesPerVersion": 24,
+  "frozenInputFiles": 334,
+  "publicAssetCountPerVersion": 7,
+  "coreAndRendererSourceMatchedAtVerification": true,
+  "dependencyAcquisition": {
+    "runtime": "Pinned actual Electron44.9.0 already installed by the dependency; selected with QA-only electronDist after default download/unpack waiting",
+    "defaultDownloadPathAccepted": false,
+    "actualNsisCompilerAndResourcesDownloaded": true,
+    "noRuntimeOrVendorFixturesSubstituted": true,
+    "recovery": "First diagnostic helper exit raised require-is-undefined and stopped only its QA builder; original stage/plugins retained. A streaming retry was explicitly stopped at the default Electron download/unpack wait, then the exact pinned local runtime was selected and both real distributions completed",
+    "retainedFirstStage": "E:/wpd-6ff01dc4/build/run-HKGJhX",
+    "laterOwnedStageCleanedByProductionPackager": true
+  },
+  "windowsRuntime": {
+    "passed": true,
+    "cases": [
+      {
+        "name": "installed-v1",
+        "passed": true,
+        "version": "9.9.0",
+        "report": "installed-v1.report.json",
+        "pid": 36168,
+        "profile": "C:\\Users\\s1897\\AppData\\Roaming\\Wallpaper Delivery QA 6ff01dc4",
+        "fallback": false
+      },
+      {
+        "name": "installed-v2-upgrade",
+        "passed": true,
+        "version": "9.9.1",
+        "report": "installed-v2-upgrade.report.json",
+        "pid": 44208,
+        "profile": "C:\\Users\\s1897\\AppData\\Roaming\\Wallpaper Delivery QA 6ff01dc4",
+        "fallback": false
+      },
+      {
+        "name": "installed-single-instance",
+        "passed": true,
+        "primary": 47692,
+        "duplicate": 34148,
+        "events": 1
+      },
+      {
+        "name": "uninstall-keeps-profile",
+        "passed": true,
+        "registryRemoved": true,
+        "executableRemoved": true,
+        "profileRetained": true
+      },
+      {
+        "name": "installed-v2-reinstall",
+        "passed": true,
+        "version": "9.9.1",
+        "report": "installed-v2-reinstall.report.json",
+        "pid": 42260,
+        "profile": "C:\\Users\\s1897\\AppData\\Roaming\\Wallpaper Delivery QA 6ff01dc4",
+        "fallback": false
+      },
+      {
+        "name": "portable-v1",
+        "passed": true,
+        "version": "9.9.0",
+        "report": "portable-v1.report.json",
+        "pid": 428,
+        "profile": "E:\\wpd-6ff01dc4\\中文便携 QA' & $portable\\Data",
+        "fallback": false
+      },
+      {
+        "name": "portable-v2-upgrade",
+        "passed": true,
+        "version": "9.9.1",
+        "report": "portable-v2-upgrade.report.json",
+        "pid": 41176,
+        "profile": "E:\\wpd-6ff01dc4\\中文便携 QA' & $portable\\Data",
+        "fallback": false
+      },
+      {
+        "name": "portable-v2-moved",
+        "passed": true,
+        "version": "9.9.1",
+        "report": "portable-v2-moved.report.json",
+        "pid": 25628,
+        "profile": "E:\\wpd-6ff01dc4\\迁移便携 QA' & $portable\\Data",
+        "fallback": false
+      },
+      {
+        "name": "portable-v2-unwritable-data",
+        "passed": true,
+        "version": "9.9.1",
+        "report": "portable-v2-unwritable-data.report.json",
+        "pid": 44600,
+        "profile": "C:\\Users\\s1897\\AppData\\Roaming\\Wallpaper Delivery QA 6ff01dc4",
+        "fallback": true
+      },
+      {
+        "name": "unwritable-data-protected",
+        "passed": true,
+        "files": 98,
+        "bytesUnchanged": true,
+        "realWindowsAcl": true,
+        "fallbackNotice": "Production native dialog request captured and automatically acknowledged by QA wrapper; native pixels not tested"
+      },
+      {
+        "name": "portable-v2-restored-data",
+        "passed": true,
+        "version": "9.9.1",
+        "profile": "E:\\wpd-6ff01dc4\\迁移便携 QA' & $portable\\Data",
+        "report": "portable-v2-restored-data.report.json",
+        "existingProfileWriteAccessRestored": true
+      },
+      {
+        "name": "restored-data-no-auto-migration",
+        "passed": true,
+        "originalPortableTheme": "dark",
+        "fallbackTheme": "light"
+      }
+    ],
+    "primaryReports": [
+      {
+        "case": "installed-v1",
+        "file": "installed-v1.report.json",
+        "version": "9.9.0",
+        "userData": "C:\\Users\\s1897\\AppData\\Roaming\\Wallpaper Delivery QA 6ff01dc4",
+        "sessionData": "C:\\Users\\s1897\\AppData\\Roaming\\Wallpaper Delivery QA 6ff01dc4",
+        "runtime": {
+          "electron": "44.9.0",
+          "chrome": "152.0.7977.167",
+          "node": "24.22.0",
+          "arch": "x64"
+        },
+        "authorization": {
+          "authorized": true,
+          "type": "paired",
+          "deviceId": "qa-phone"
+        },
+        "identity": {
+          "deviceId": "pc_delivery_installed",
+          "pairedDevices": [
+            {
+              "id": "qa-phone",
+              "tokenHash": "e4b2759278a19ba03737448c26598fa42d7ceca698266f165f2d9e20eeb5c242"
+            }
+          ],
+          "machineSecretHash": "911e9fbfb55f8017d7e89992ba36b2b933f731c5d844e53e12d89e9668334834",
+          "accessTokenHash": "6da7c87a56824a3c1d2d4ec0f7234a5a6db9df63c21515df00e4a6579827bec4"
+        },
+        "beforeTheme": "dark",
+        "afterTheme": "light",
+        "fallback": null,
+        "nativeDialogs": []
+      },
+      {
+        "case": "installed-v2-upgrade",
+        "file": "installed-v2-upgrade.report.json",
+        "version": "9.9.1",
+        "userData": "C:\\Users\\s1897\\AppData\\Roaming\\Wallpaper Delivery QA 6ff01dc4",
+        "sessionData": "C:\\Users\\s1897\\AppData\\Roaming\\Wallpaper Delivery QA 6ff01dc4",
+        "runtime": {
+          "electron": "44.9.0",
+          "chrome": "152.0.7977.167",
+          "node": "24.22.0",
+          "arch": "x64"
+        },
+        "authorization": {
+          "authorized": true,
+          "type": "paired",
+          "deviceId": "qa-phone"
+        },
+        "identity": {
+          "deviceId": "pc_delivery_installed",
+          "pairedDevices": [
+            {
+              "id": "qa-phone",
+              "tokenHash": "e4b2759278a19ba03737448c26598fa42d7ceca698266f165f2d9e20eeb5c242"
+            }
+          ],
+          "machineSecretHash": "911e9fbfb55f8017d7e89992ba36b2b933f731c5d844e53e12d89e9668334834",
+          "accessTokenHash": "6da7c87a56824a3c1d2d4ec0f7234a5a6db9df63c21515df00e4a6579827bec4"
+        },
+        "beforeTheme": "light",
+        "afterTheme": "dark",
+        "fallback": null,
+        "nativeDialogs": []
+      },
+      {
+        "case": "installed-v2-reinstall",
+        "file": "installed-v2-reinstall.report.json",
+        "version": "9.9.1",
+        "userData": "C:\\Users\\s1897\\AppData\\Roaming\\Wallpaper Delivery QA 6ff01dc4",
+        "sessionData": "C:\\Users\\s1897\\AppData\\Roaming\\Wallpaper Delivery QA 6ff01dc4",
+        "runtime": {
+          "electron": "44.9.0",
+          "chrome": "152.0.7977.167",
+          "node": "24.22.0",
+          "arch": "x64"
+        },
+        "authorization": {
+          "authorized": true,
+          "type": "paired",
+          "deviceId": "qa-phone"
+        },
+        "identity": {
+          "deviceId": "pc_delivery_installed",
+          "pairedDevices": [
+            {
+              "id": "qa-phone",
+              "tokenHash": "e4b2759278a19ba03737448c26598fa42d7ceca698266f165f2d9e20eeb5c242"
+            }
+          ],
+          "machineSecretHash": "911e9fbfb55f8017d7e89992ba36b2b933f731c5d844e53e12d89e9668334834",
+          "accessTokenHash": "6da7c87a56824a3c1d2d4ec0f7234a5a6db9df63c21515df00e4a6579827bec4"
+        },
+        "beforeTheme": "dark",
+        "afterTheme": "dark",
+        "fallback": null,
+        "nativeDialogs": []
+      },
+      {
+        "case": "portable-v1",
+        "file": "portable-v1.report.json",
+        "version": "9.9.0",
+        "userData": "E:\\wpd-6ff01dc4\\中文便携 QA' & $portable\\Data",
+        "sessionData": "E:\\wpd-6ff01dc4\\中文便携 QA' & $portable\\Data",
+        "runtime": {
+          "electron": "44.9.0",
+          "chrome": "152.0.7977.167",
+          "node": "24.22.0",
+          "arch": "x64"
+        },
+        "authorization": {
+          "authorized": true,
+          "type": "paired",
+          "deviceId": "qa-phone"
+        },
+        "identity": {
+          "deviceId": "pc_delivery_portable",
+          "pairedDevices": [
+            {
+              "id": "qa-phone",
+              "tokenHash": "729063ff30cd082f02ed279140f347b5781b372f8a192aaeec8ade38efc0767d"
+            }
+          ],
+          "machineSecretHash": "c22df3de727b224573588b06ae2e12f091108b1dc8f3571f7e6243c59858c4ef",
+          "accessTokenHash": "bf15de42efb0e232a1f7de8e80f6a0bd5ddf5f8a24251c1a83e4fd49ea34d313"
+        },
+        "beforeTheme": "dark",
+        "afterTheme": "light",
+        "fallback": null,
+        "nativeDialogs": []
+      },
+      {
+        "case": "portable-v2-upgrade",
+        "file": "portable-v2-upgrade.report.json",
+        "version": "9.9.1",
+        "userData": "E:\\wpd-6ff01dc4\\中文便携 QA' & $portable\\Data",
+        "sessionData": "E:\\wpd-6ff01dc4\\中文便携 QA' & $portable\\Data",
+        "runtime": {
+          "electron": "44.9.0",
+          "chrome": "152.0.7977.167",
+          "node": "24.22.0",
+          "arch": "x64"
+        },
+        "authorization": {
+          "authorized": true,
+          "type": "paired",
+          "deviceId": "qa-phone"
+        },
+        "identity": {
+          "deviceId": "pc_delivery_portable",
+          "pairedDevices": [
+            {
+              "id": "qa-phone",
+              "tokenHash": "729063ff30cd082f02ed279140f347b5781b372f8a192aaeec8ade38efc0767d"
+            }
+          ],
+          "machineSecretHash": "c22df3de727b224573588b06ae2e12f091108b1dc8f3571f7e6243c59858c4ef",
+          "accessTokenHash": "bf15de42efb0e232a1f7de8e80f6a0bd5ddf5f8a24251c1a83e4fd49ea34d313"
+        },
+        "beforeTheme": "light",
+        "afterTheme": "dark",
+        "fallback": null,
+        "nativeDialogs": []
+      },
+      {
+        "case": "portable-v2-moved",
+        "file": "portable-v2-moved.report.json",
+        "version": "9.9.1",
+        "userData": "E:\\wpd-6ff01dc4\\迁移便携 QA' & $portable\\Data",
+        "sessionData": "E:\\wpd-6ff01dc4\\迁移便携 QA' & $portable\\Data",
+        "runtime": {
+          "electron": "44.9.0",
+          "chrome": "152.0.7977.167",
+          "node": "24.22.0",
+          "arch": "x64"
+        },
+        "authorization": {
+          "authorized": true,
+          "type": "paired",
+          "deviceId": "qa-phone"
+        },
+        "identity": {
+          "deviceId": "pc_delivery_portable",
+          "pairedDevices": [
+            {
+              "id": "qa-phone",
+              "tokenHash": "729063ff30cd082f02ed279140f347b5781b372f8a192aaeec8ade38efc0767d"
+            }
+          ],
+          "machineSecretHash": "c22df3de727b224573588b06ae2e12f091108b1dc8f3571f7e6243c59858c4ef",
+          "accessTokenHash": "bf15de42efb0e232a1f7de8e80f6a0bd5ddf5f8a24251c1a83e4fd49ea34d313"
+        },
+        "beforeTheme": "dark",
+        "afterTheme": "dark",
+        "fallback": null,
+        "nativeDialogs": []
+      },
+      {
+        "case": "portable-v2-unwritable-data",
+        "file": "portable-v2-unwritable-data.report.json",
+        "version": "9.9.1",
+        "userData": "C:\\Users\\s1897\\AppData\\Roaming\\Wallpaper Delivery QA 6ff01dc4",
+        "sessionData": "C:\\Users\\s1897\\AppData\\Roaming\\Wallpaper Delivery QA 6ff01dc4",
+        "runtime": {
+          "electron": "44.9.0",
+          "chrome": "152.0.7977.167",
+          "node": "24.22.0",
+          "arch": "x64"
+        },
+        "authorization": {
+          "authorized": true,
+          "type": "paired",
+          "deviceId": "qa-phone"
+        },
+        "identity": {
+          "deviceId": "pc_delivery_installed",
+          "pairedDevices": [
+            {
+              "id": "qa-phone",
+              "tokenHash": "e4b2759278a19ba03737448c26598fa42d7ceca698266f165f2d9e20eeb5c242"
+            }
+          ],
+          "machineSecretHash": "911e9fbfb55f8017d7e89992ba36b2b933f731c5d844e53e12d89e9668334834",
+          "accessTokenHash": "6da7c87a56824a3c1d2d4ec0f7234a5a6db9df63c21515df00e4a6579827bec4"
+        },
+        "beforeTheme": "dark",
+        "afterTheme": "light",
+        "fallback": {
+          "portable": true,
+          "fallback": true,
+          "requestedPath": "E:\\wpd-6ff01dc4\\迁移便携 QA' & $portable\\Data",
+          "fallbackPath": "C:\\Users\\s1897\\AppData\\Roaming\\Wallpaper Delivery QA 6ff01dc4",
+          "error": "EPERM: operation not permitted, open 'E:\\wpd-6ff01dc4\\迁移便携 QA' & $portable\\Data\\.write-probe-39996-d1315324'"
+        },
+        "nativeDialogs": [
+          {
+            "type": "warning",
+            "title": "便携数据目录不可写",
+            "message": "已改用系统数据目录保存本次数据",
+            "detail": "便携目录：E:\\wpd-6ff01dc4\\迁移便携 QA' & $portable\\Data\n系统目录：C:\\Users\\s1897\\AppData\\Roaming\\Wallpaper Delivery QA 6ff01dc4\n\n便携目录恢复可写后，数据不会自动迁回。",
+            "buttons": [
+              "知道了"
+            ],
+            "defaultId": 0,
+            "cancelId": 0,
+            "checkboxChecked": false,
+            "noLink": true
+          }
+        ]
+      },
+      {
+        "case": "portable-v2-restored-data",
+        "file": "portable-v2-restored-data.report.json",
+        "version": "9.9.1",
+        "userData": "E:\\wpd-6ff01dc4\\迁移便携 QA' & $portable\\Data",
+        "sessionData": "E:\\wpd-6ff01dc4\\迁移便携 QA' & $portable\\Data",
+        "runtime": {
+          "electron": "44.9.0",
+          "chrome": "152.0.7977.167",
+          "node": "24.22.0",
+          "arch": "x64"
+        },
+        "authorization": {
+          "authorized": true,
+          "type": "paired",
+          "deviceId": "qa-phone"
+        },
+        "identity": {
+          "deviceId": "pc_delivery_portable",
+          "pairedDevices": [
+            {
+              "id": "qa-phone",
+              "tokenHash": "729063ff30cd082f02ed279140f347b5781b372f8a192aaeec8ade38efc0767d"
+            }
+          ],
+          "machineSecretHash": "c22df3de727b224573588b06ae2e12f091108b1dc8f3571f7e6243c59858c4ef",
+          "accessTokenHash": "bf15de42efb0e232a1f7de8e80f6a0bd5ddf5f8a24251c1a83e4fd49ea34d313"
+        },
+        "beforeTheme": "dark",
+        "afterTheme": "dark",
+        "fallback": null,
+        "nativeDialogs": []
+      }
+    ],
+    "operations": [
+      {
+        "pid": 47192,
+        "target": "E:\\wpd-6ff01dc4\\中文安装 QA' & $app",
+        "exitCode": 0,
+        "action": "install"
+      },
+      {
+        "exitCode": 0,
+        "target": "E:\\wpd-6ff01dc4\\中文安装 QA' & $app",
+        "action": "uninstall",
+        "pid": 43004
+      },
+      {
+        "exitCode": 0,
+        "target": "E:\\wpd-6ff01dc4\\中文安装 QA' & $app",
+        "pid": 44312,
+        "action": "install"
+      },
+      {
+        "target": "E:\\wpd-6ff01dc4\\中文安装 QA' & $app",
+        "pid": 46684,
+        "exitCode": 0,
+        "action": "uninstall"
+      }
+    ],
+    "versions": [
+      "9.9.0",
+      "9.9.1"
+    ],
+    "freshPairedAuthorizationChecks": 8,
+    "settingsAndIdentityAndPlaybackRetained": true,
+    "dataProtection": {
+      "name": "unwritable-data-protected",
+      "passed": true,
+      "files": 98,
+      "bytesUnchanged": true,
+      "realWindowsAcl": true,
+      "fallbackNotice": "Production native dialog request captured and automatically acknowledged by QA wrapper; native pixels not tested"
+    },
+    "aclRestore": {
+      "path": "E:\\wpd-6ff01dc4\\迁移便携 QA' & $portable\\Data",
+      "ownerAndGroupPreserved": true,
+      "originalSddl": "O:S-1-5-21-1157453773-117038174-1161155136-1001G:S-1-5-21-1157453773-117038174-1161155136-1001D:(A;ID;FA;;;BA)(A;OICIIOID;GA;;;BA)(A;ID;FA;;;SY)(A;OICIIOID;GA;;;SY)(A;ID;0x1301bf;;;AU)(A;OICIIOID;SDGXGWGR;;;AU)(A;ID;0x1200a9;;;BU)(A;OICIIOID;GXGR;;;BU)",
+      "onlyAutoInheritedFlagMayNormalize": true,
+      "restoredSddl": "O:S-1-5-21-1157453773-117038174-1161155136-1001G:S-1-5-21-1157453773-117038174-1161155136-1001D:AI(A;ID;FA;;;BA)(A;OICIIOID;GA;;;BA)(A;ID;FA;;;SY)(A;OICIIOID;GA;;;SY)(A;ID;0x1301bf;;;AU)(A;OICIIOID;SDGXGWGR;;;AU)(A;ID;0x1200a9;;;BU)(A;OICIIOID;GXGR;;;BU)",
+      "identicalDaclBytes": true
+    },
+    "effectiveWriteAccessAfterRestore": true,
+    "fallbackNotice": "Actual production notify request and its text/paths observed; native modal is automatically acknowledged by the QA entry, so its pixels/interaction are outside acceptance",
+    "verificationSplit": "First ten assertions completed on the same final artifacts; only Windows DACL auto-inheritance metadata normalization required a separate restoration and final data/uninstall check",
+    "installedProfileRetained": true,
+    "portableDataRetained": true,
+    "finalRegistryAbsent": true
+  },
+  "bundledTools": [
+    {
+      "file": "ffmpeg/bin/ffmpeg.exe",
+      "sha256": "228d7a8556258de907fdb55f36850078ebc7680b84ec30d84ea02e99bec1d1eb",
+      "version": "ffmpeg version 8.1.1-essentials_build-www.gyan.dev Copyright (c) 2000-2026 the FFmpeg developers"
+    },
+    {
+      "file": "aria2/aria2c.exe",
+      "sha256": "be2099c214f63a3cb4954b09a0becd6e2e34660b886d4c898d260febfe9d70c2",
+      "version": "aria2 version 1.37.0"
+    },
+    {
+      "file": "yt-dlp/yt-dlp.exe",
+      "sha256": "3a48cb955d55c8821b60ccbdbbc6f61bc958f2f3d3b7ad5eaf3d83a543293a27",
+      "version": "2026.06.09"
+    },
+    {
+      "file": "mpv/mpv.exe",
+      "sha256": "6145e63f026451a764077d53fd60860ec9f5c2bc76dcd6e62a88967ac375453d",
+      "version": "mpv v0.41.0-dev-g41f6a6450 Copyright © 2000-2025 mpv/MPlayer/mplayer2 projects"
+    }
+  ],
+  "os": {
+    "Caption": "Microsoft Windows 11 专业版",
+    "Version": "10.0.26300",
+    "BuildNumber": "26300",
+    "OSArchitecture": "64 位"
+  },
+  "closure": {
+    "registry": {
+      "HKLM\\Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\e124289d-08cc-466f-85e6-9048edf7e551": false,
+      "HKLM\\Software\\e124289d-08cc-466f-85e6-9048edf7e551": false,
+      "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\e124289d-08cc-466f-85e6-9048edf7e551": false,
+      "HKCU\\Software\\e124289d-08cc-466f-85e6-9048edf7e551": false
+    },
+    "qaProcesses": 0,
+    "portableVersionRestored": "9.9.1",
+    "portableTheme": "dark",
+    "fallbackTheme": "light",
+    "aclRestored": true
+  },
+  "renderer": {
+    "completedScreenshots": [
+      {
+        "version": "9.9.0",
+        "file": ".tmp/refactor-tests/r8-windows-delivery/desktop-complete-9.9.0.png",
+        "before": {
+          "favorite": true,
+          "cards": 1,
+          "splash": false,
+          "theme": "dark"
+        }
+      },
+      {
+        "version": "9.9.1",
+        "file": ".tmp/refactor-tests/r8-windows-delivery/desktop-complete-9.9.1.png",
+        "before": {
+          "favorite": true,
+          "cards": 1,
+          "splash": false,
+          "theme": "dark"
+        }
+      }
+    ],
+    "actualFavoriteCommandAndPortableReplacement": {
+      "passed": true,
+      "cases": [
+        {
+          "version": "9.9.0",
+          "passed": true,
+          "before": {
+            "favorite": true,
+            "cards": 1,
+            "splash": false,
+            "theme": "dark"
+          },
+          "favoriteAfter": true,
+          "favoriteKey": "file:RTpcd3BkLTZmZjAxZGM0XG1lZGlhXGRlbGl2ZXJ5LWNsaXAubXA0",
+          "screenshot": "E:\\wallpaper播放器\\.tmp\\refactor-tests\\r8-windows-delivery\\desktop-complete-9.9.0.png",
+          "settingsTheme": "dark",
+          "debugPort": 62062,
+          "artifact": {
+            "file": "E:\\wallpaper播放器\\.tmp\\refactor-tests\\r8-windows-delivery\\中文交付 QA' & $workspace\\release\\windows-9.9.0-61373658-ea43-4520-8bed-87db7f536e2d\\Wallpaper-Player-9.9.0.exe",
+            "bytes": 231791812,
+            "sha256": "d647127d493ecabfb1236d53bfe86fa69953dd72a06fad2c69800d6c8c00b83b",
+            "sha512": "8xwoR9CzNRLIJ2GoWz0P7Lzb+dm+UzdscgUdptmYwdglgiv3DyXdVK1giJQOGBa/GSgNn8RLGUAts2A2lF5QPA=="
+          }
+        },
+        {
+          "version": "9.9.1",
+          "passed": true,
+          "before": {
+            "favorite": true,
+            "cards": 1,
+            "splash": false,
+            "theme": "dark"
+          },
+          "favoriteAfter": true,
+          "favoriteKey": "file:RTpcd3BkLTZmZjAxZGM0XG1lZGlhXGRlbGl2ZXJ5LWNsaXAubXA0",
+          "screenshot": "E:\\wallpaper播放器\\.tmp\\refactor-tests\\r8-windows-delivery\\desktop-complete-9.9.1.png",
+          "settingsTheme": "dark",
+          "debugPort": 53726,
+          "artifact": {
+            "file": "E:\\wallpaper播放器\\.tmp\\refactor-tests\\r8-windows-delivery\\中文交付 QA' & $workspace\\release\\windows-9.9.1-10620f4d-1401-4182-aa75-0de284854712\\Wallpaper-Player-9.9.1.exe",
+            "bytes": 231791762,
+            "sha256": "c30925a0bcd135180702d6ecde1f81bdd1107ca8ac5755a43506670d81d8933f",
+            "sha512": "A86Byf1udBzXJBhkj/AJd29xTFIuTZFBGkj0X55UvhULHrc4SpWR2TMNvx5mQsrXS4lAEctpx8+SbQZa887YaA=="
+          }
+        }
+      ],
+      "scope": "The same final v1/v2 portable artifacts, production UI and favorite command after splash removal; no changes to packaged source, local-only browser CDP while QA process lives"
+    },
+    "coldStartLegacyFavorite": [
+      {
+        "passed": true,
+        "cases": [
+          {
+            "version": "9.9.0",
+            "passed": true,
+            "before": {
+              "favorite": false,
+              "cards": 1,
+              "splash": false,
+              "theme": "dark"
+            },
+            "favoriteAfter": true,
+            "favoriteKey": "file:RTpcd3BkLTZmZjAxZGM0XG1lZGlhXGRlbGl2ZXJ5LWNsaXAubXA0",
+            "screenshot": "E:\\wallpaper播放器\\.tmp\\refactor-tests\\r8-windows-delivery\\desktop-cold-9.9.0.png",
+            "settingsTheme": "dark",
+            "debugPort": 58722,
+            "artifact": {
+              "file": "E:\\wallpaper播放器\\.tmp\\refactor-tests\\r8-windows-delivery\\中文交付 QA' & $workspace\\release\\windows-9.9.0-61373658-ea43-4520-8bed-87db7f536e2d\\Wallpaper-Player-9.9.0.exe",
+              "bytes": 231791812,
+              "sha256": "d647127d493ecabfb1236d53bfe86fa69953dd72a06fad2c69800d6c8c00b83b",
+              "sha512": "8xwoR9CzNRLIJ2GoWz0P7Lzb+dm+UzdscgUdptmYwdglgiv3DyXdVK1giJQOGBa/GSgNn8RLGUAts2A2lF5QPA=="
+            }
+          }
+        ],
+        "scope": "The same final v1/v2 portable artifacts, production UI and favorite command after splash removal; no changes to packaged source, local-only browser CDP while QA process lives"
+      },
+      {
+        "passed": true,
+        "cases": [
+          {
+            "version": "9.9.1",
+            "passed": true,
+            "before": {
+              "favorite": false,
+              "cards": 1,
+              "splash": false,
+              "theme": "dark"
+            },
+            "favoriteAfter": true,
+            "favoriteKey": "file:RTpcd3BkLTZmZjAxZGM0XG1lZGlhXGRlbGl2ZXJ5LWNsaXAubXA0",
+            "screenshot": "E:\\wallpaper播放器\\.tmp\\refactor-tests\\r8-windows-delivery\\desktop-cold-9.9.1.png",
+            "settingsTheme": "dark",
+            "debugPort": 58103,
+            "artifact": {
+              "file": "E:\\wallpaper播放器\\.tmp\\refactor-tests\\r8-windows-delivery\\中文交付 QA' & $workspace\\release\\windows-9.9.1-10620f4d-1401-4182-aa75-0de284854712\\Wallpaper-Player-9.9.1.exe",
+              "bytes": 231791762,
+              "sha256": "c30925a0bcd135180702d6ecde1f81bdd1107ca8ac5755a43506670d81d8933f",
+              "sha512": "A86Byf1udBzXJBhkj/AJd29xTFIuTZFBGkj0X55UvhULHrc4SpWR2TMNvx5mQsrXS4lAEctpx8+SbQZa887YaA=="
+            }
+          }
+        ],
+        "scope": "The same final v1/v2 portable artifacts, production UI and favorite command after splash removal; no changes to packaged source, local-only browser CDP while QA process lives"
+      }
+    ],
+    "mainWriteTrace": {
+      "passed": true,
+      "trace": {
+        "beforeDuplicate": {
+          "schemaVersion": 1,
+          "theme": "dark",
+          "directories": [
+            "E:\\wpd-6ff01dc4\\media"
+          ],
+          "privateDirectories": [],
+          "defaultDirectory": "E:\\wpd-6ff01dc4\\media",
+          "favorites": [
+            "e:\\wpd-6ff01dc4\\media\\delivery-clip.mp4"
+          ],
+          "customTags": {},
+          "customTagRevisions": {},
+          "hiddenTags": [],
+          "networkResources": [],
+          "downloadDirectories": [],
+          "playbackStates": {
+            "e:\\wpd-6ff01dc4\\media\\delivery-clip.mp4": {
+              "position": 0.5,
+              "volume": 100,
+              "speed": 1,
+              "muted": false,
+              "audioId": null,
+              "subtitleId": null,
+              "subtitleVisible": true,
+              "subtitleScale": 1,
+              "loopMode": "off",
+              "abLoopA": null,
+              "abLoopB": null,
+              "updatedAt": 1,
+              "revision": 0,
+              "writers": {}
+            }
+          },
+          "playbackMode": "order",
+          "privacy": {
+            "passwordSet": false
+          },
+          "remoteAccess": {
+            "enabled": false,
+            "port": 38127,
+            "keepRunningInTray": false,
+            "allowLegacyToken": false
+          },
+          "windowClose": {
+            "mode": "exit",
+            "rememberedAction": "",
+            "rememberedDate": ""
+          },
+          "plugins": {},
+          "_settingsVersion": {
+            "epoch": "51056ede-4936-4ddc-9e0b-0dd2dc0cc7bd",
+            "revision": 1
+          }
+        },
+        "afterDuplicate": {
+          "schemaVersion": 1,
+          "theme": "dark",
+          "directories": [
+            "E:\\wpd-6ff01dc4\\media"
+          ],
+          "privateDirectories": [],
+          "defaultDirectory": "E:\\wpd-6ff01dc4\\media",
+          "favorites": [
+            "e:\\wpd-6ff01dc4\\media\\delivery-clip.mp4"
+          ],
+          "customTags": {},
+          "customTagRevisions": {},
+          "hiddenTags": [],
+          "networkResources": [],
+          "downloadDirectories": [],
+          "playbackStates": {
+            "e:\\wpd-6ff01dc4\\media\\delivery-clip.mp4": {
+              "position": 0.5,
+              "volume": 100,
+              "speed": 1,
+              "muted": false,
+              "audioId": null,
+              "subtitleId": null,
+              "subtitleVisible": true,
+              "subtitleScale": 1,
+              "loopMode": "off",
+              "abLoopA": null,
+              "abLoopB": null,
+              "updatedAt": 1,
+              "revision": 0,
+              "writers": {}
+            }
+          },
+          "playbackMode": "order",
+          "privacy": {
+            "passwordSet": false
+          },
+          "remoteAccess": {
+            "enabled": false,
+            "port": 38127,
+            "keepRunningInTray": false,
+            "allowLegacyToken": false
+          },
+          "windowClose": {
+            "mode": "exit",
+            "rememberedAction": "",
+            "rememberedDate": ""
+          },
+          "plugins": {},
+          "_settingsVersion": {
+            "epoch": "51056ede-4936-4ddc-9e0b-0dd2dc0cc7bd",
+            "revision": 1
+          }
+        },
+        "beforeFavorite": {
+          "schemaVersion": 1,
+          "theme": "dark",
+          "directories": [
+            "E:\\wpd-6ff01dc4\\media"
+          ],
+          "privateDirectories": [],
+          "defaultDirectory": "E:\\wpd-6ff01dc4\\media",
+          "favorites": [
+            "e:\\wpd-6ff01dc4\\media\\delivery-clip.mp4"
+          ],
+          "customTags": {},
+          "customTagRevisions": {},
+          "hiddenTags": [],
+          "networkResources": [],
+          "downloadDirectories": [],
+          "playbackStates": {
+            "e:\\wpd-6ff01dc4\\media\\delivery-clip.mp4": {
+              "position": 0.5,
+              "volume": 100,
+              "speed": 1,
+              "muted": false,
+              "audioId": null,
+              "subtitleId": null,
+              "subtitleVisible": true,
+              "subtitleScale": 1,
+              "loopMode": "off",
+              "abLoopA": null,
+              "abLoopB": null,
+              "updatedAt": 1,
+              "revision": 0,
+              "writers": {}
+            }
+          },
+          "playbackMode": "order",
+          "privacy": {
+            "passwordSet": false
+          },
+          "remoteAccess": {
+            "enabled": false,
+            "port": 38127,
+            "keepRunningInTray": false,
+            "allowLegacyToken": false
+          },
+          "windowClose": {
+            "mode": "exit",
+            "rememberedAction": "",
+            "rememberedDate": ""
+          },
+          "plugins": {},
+          "_settingsVersion": {
+            "epoch": "51056ede-4936-4ddc-9e0b-0dd2dc0cc7bd",
+            "revision": 1
+          }
+        },
+        "afterFavorite": {
+          "schemaVersion": 1,
+          "theme": "dark",
+          "directories": [
+            "E:\\wpd-6ff01dc4\\media"
+          ],
+          "privateDirectories": [],
+          "defaultDirectory": "E:\\wpd-6ff01dc4\\media",
+          "favorites": [
+            "file:RTpcd3BkLTZmZjAxZGM0XG1lZGlhXGRlbGl2ZXJ5LWNsaXAubXA0"
+          ],
+          "customTags": {},
+          "customTagRevisions": {},
+          "hiddenTags": [],
+          "networkResources": [],
+          "downloadDirectories": [],
+          "playbackStates": {
+            "e:\\wpd-6ff01dc4\\media\\delivery-clip.mp4": {
+              "position": 0.5,
+              "volume": 100,
+              "speed": 1,
+              "muted": false,
+              "audioId": null,
+              "subtitleId": null,
+              "subtitleVisible": true,
+              "subtitleScale": 1,
+              "loopMode": "off",
+              "abLoopA": null,
+              "abLoopB": null,
+              "updatedAt": 1,
+              "revision": 0,
+              "writers": {}
+            }
+          },
+          "playbackMode": "order",
+          "privacy": {
+            "passwordSet": false
+          },
+          "remoteAccess": {
+            "enabled": false,
+            "port": 38127,
+            "keepRunningInTray": false,
+            "allowLegacyToken": false
+          },
+          "windowClose": {
+            "mode": "exit",
+            "rememberedAction": "",
+            "rememberedDate": ""
+          },
+          "plugins": {},
+          "_settingsVersion": {
+            "epoch": "51056ede-4936-4ddc-9e0b-0dd2dc0cc7bd",
+            "revision": 2
+          }
+        },
+        "afterSettled": {
+          "schemaVersion": 1,
+          "theme": "dark",
+          "directories": [
+            "E:\\wpd-6ff01dc4\\media"
+          ],
+          "privateDirectories": [],
+          "defaultDirectory": "E:\\wpd-6ff01dc4\\media",
+          "favorites": [
+            "file:RTpcd3BkLTZmZjAxZGM0XG1lZGlhXGRlbGl2ZXJ5LWNsaXAubXA0"
+          ],
+          "customTags": {},
+          "customTagRevisions": {},
+          "hiddenTags": [],
+          "networkResources": [],
+          "downloadDirectories": [],
+          "playbackStates": {
+            "e:\\wpd-6ff01dc4\\media\\delivery-clip.mp4": {
+              "position": 0.5,
+              "volume": 100,
+              "speed": 1,
+              "muted": false,
+              "audioId": null,
+              "subtitleId": null,
+              "subtitleVisible": true,
+              "subtitleScale": 1,
+              "loopMode": "off",
+              "abLoopA": null,
+              "abLoopB": null,
+              "updatedAt": 1,
+              "revision": 0,
+              "writers": {}
+            }
+          },
+          "playbackMode": "order",
+          "privacy": {
+            "passwordSet": false
+          },
+          "remoteAccess": {
+            "enabled": false,
+            "port": 38127,
+            "keepRunningInTray": false,
+            "allowLegacyToken": false
+          },
+          "windowClose": {
+            "mode": "exit",
+            "rememberedAction": "",
+            "rememberedDate": ""
+          },
+          "plugins": {},
+          "_settingsVersion": {
+            "epoch": "51056ede-4936-4ddc-9e0b-0dd2dc0cc7bd",
+            "revision": 2
+          }
+        },
+        "main": [
+          {
+            "at": 1792742646177,
+            "kind": "trace-ready",
+            "theme": "dark",
+            "diskTheme": "dark"
+          },
+          {
+            "at": 1792742663544,
+            "kind": "ipc-start",
+            "theme": "dark",
+            "diskTheme": "dark",
+            "channel": "media-set-favorite",
+            "inputKeys": [
+              "id",
+              "playbackKey",
+              "name",
+              "fileName",
+              "fullPath",
+              "extension",
+              "size",
+              "modified",
+              "fileModified",
+              "group",
+              "tags",
+              "wallpaperType",
+              "previewPath",
+              "workshopId",
+              "workshopUpdatedAt",
+              "workshopUrl",
+              "favoriteKey",
+              "description",
+              "media"
+            ]
+          },
+          {
+            "at": 1792742663550,
+            "kind": "worker-encode",
+            "theme": "dark",
+            "diskTheme": "dark",
+            "id": "5979f5a0-9a27-4e60-afa0-5757f0398e4f",
+            "baseId": null,
+            "seedTheme": "dark",
+            "keys": [
+              "favorites"
+            ],
+            "themeChanges": []
+          },
+          {
+            "at": 1792742663571,
+            "kind": "worker-result",
+            "theme": "dark",
+            "diskTheme": "dark",
+            "id": "5979f5a0-9a27-4e60-afa0-5757f0398e4f",
+            "encodedTheme": "dark"
+          },
+          {
+            "at": 1792742663575,
+            "kind": "settings-notification",
+            "theme": "dark",
+            "diskTheme": "dark",
+            "snapshotTheme": "dark"
+          },
+          {
+            "at": 1792742663581,
+            "kind": "ipc-end",
+            "theme": "dark",
+            "diskTheme": "dark",
+            "channel": "media-set-favorite",
+            "success": true
+          }
+        ]
+      },
+      "browserPort": 52246,
+      "nodePort": 52247
+    },
+    "unresolvedThemeAnomaly": {
+      "status": "open; root cause not determined",
+      "firstReport": ".tmp/refactor-tests/r8-windows-delivery/visual-9.9.0.report.json",
+      "screenshot": ".tmp/refactor-tests/r8-windows-delivery/desktop-full-9.9.0.png",
+      "observed": "One supplementary v1 GUI run began with dark settings and ended with light after a favorite action; original report and image retained",
+      "subsequentChecks": "Both versions passed controlled full UI checks, both passed cold startup from dark primary/light backup with a legacy favorite, and a main-process trace observed only a favorites IPC/worker patch with dark seed/result/disk/cache",
+      "reproducedAfterInstrumentation": false,
+      "productionFixApplied": false,
+      "next": "Trace before the first settings load and vary first-interaction timing, without pre-saving theme or weakening the assertion"
+    },
+    "confirmedSplashClockDefect": {
+      "date": "2026-10-23T08:10:38.751Z",
+      "confirmedDefect": true,
+      "sources": [
+        "src/splash-boot.js",
+        "src/services/splash.js"
+      ],
+      "startClock": "performance.now",
+      "comparisonClock": "Date.now",
+      "start": 1000,
+      "monotonicNow": 1100,
+      "minimumVisibleMs": 640,
+      "expectedRemainingMs": 540,
+      "actualRemainingMs": 0,
+      "scope": "Executes both current production modules in a controlled browser-like VM; deterministic clock mismatch proof, no source edits",
+      "status": "requires-fix"
+    },
+    "fullRendererAccepted": false
+  },
+  "testCorrections": [
+    "Read InstallLocation from the separate Software/GUID registration, not the Uninstall key",
+    "Force UTF8 PowerShell stdout for Unicode registry/path comparisons",
+    "Windows normalizes DACL AutoInherited metadata on restoration; compare exact DACL bytes, owner/group and all other flags, then verify effective file writes",
+    "Native screenshots require splash removal; early capture images were retained and are not used as full UI acceptance",
+    "ASAR library paths use the native separator; packaging intentionally excludes type declarations; source hashing allows empty source/data files",
+    "One main trace initially selected about:blank before the ready signal; subsequent trace fetched the loaded page after readiness"
+  ],
+  "preservation": {
+    "originalFallbackFiles": [
+      {
+        "file": ".tmp-wallpaper-player/analysis-results/G086 Bronya分析结果2026-06-22_20-00-44.json",
+        "bytes": 3873,
+        "sha256": "01db5f778601802471791e416b40c3ac8f96248e4542b78a867eaee77dd265e4",
+        "sha512": "iyw4/Gr6XPWtLoQ9c+6Y4MfSAkwIJ5GEXlylTSgcauA7JdITUqkvviqngOcXtmt0/acatShPvnKSYPYQS4i7Gw=="
+      },
+      {
+        "file": ".tmp-wallpaper-player/downloads/aria2.session",
+        "bytes": 2428,
+        "sha256": "bbe9d72e7e5001c01f3a012fa73e5d35b6d53b9e76e08190bba58973ce1ba9bc",
+        "sha512": "kUeLdSNzgAIPCflk0SjGHwcnPI0onGBAaWNfOWR5mIirAx8P8X5NsaKcuLcanGTkbao6rDlYwv7IkTgAO9IDSw=="
+      },
+      {
+        "file": ".tmp-wallpaper-player/llama-server-err.log",
+        "bytes": 87774,
+        "sha256": "5744b9bb378569a3a4f664b62aad9a4b0025cd7d419cba73b793fb62cb737f42",
+        "sha512": "ZnN0RcBburL6Ar6DvnUg0DSfCPYsKYjnYEas3nHGA5qdG7eXIh4U5vUPxKG8YLizNa7WQQb5kQV0lv/WGbknvw=="
+      },
+      {
+        "file": ".tmp-wallpaper-player/llama-server-out.log",
+        "bytes": 0,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "sha512": "z4PhNX7vuL3xVChQ1m2AB9Yg5AULVxXcg/SpIdNs6c5H0NE8XYXysP+DGNKHfuwvY7kxvUdBeoGlODJ6+SfaPg=="
+      },
+      {
+        "file": ".tmp-wallpaper-player/remote-identity.json",
+        "bytes": 566,
+        "sha256": "0abcd8df9c1443a348b050b5abe28ac419ecef717ddf31a0daa680f153061324",
+        "sha512": "XvbFfKC+cCrSnQH/oJMKUFaEalXRT7nfaUR+/x5+PU2zpJAupUIQXIA1l82Fqgb/FrOSVKPPBcZqrkF6ns7qWw=="
+      },
+      {
+        "file": ".tmp-wallpaper-player/scan-index/029fa92465c3409cba74ce3db6b927dfec0d4f581b12122975041a32ab324e8a.json",
+        "bytes": 3642,
+        "sha256": "33b1310886821b4f01322041a561c8a6b4ed10aa351772effb396e7b1b547cfd",
+        "sha512": "5EiJNPPQONupaa7Sh+Sg71Y+rVxn0lfb60Yh9efMOD3utOoQoj49EeQxjkdAHBfMporaGhtWpL7/E58686/zew=="
+      },
+      {
+        "file": ".tmp-wallpaper-player/scan-index/06cf5926d93db3cc7b30882ee7dbecb69d51ce4e00de7901de3d48b866f9afc3.json",
+        "bytes": 2804,
+        "sha256": "274848604327a2f96f0d152b9f23a7b4e5470fdd67c744e1c181e86c2d284059",
+        "sha512": "SfqtOuo1zybHY9rNSzVPEY8GX8ze3//TDKguB+bnjwnkeuVpuQVj2Vty2ylkDHPMjPXmp0jUt68R9zoI+4GX0w=="
+      },
+      {
+        "file": ".tmp-wallpaper-player/scan-index/0e65747e6e0fc76a1e0c86e951c35d6c7392c184ba6cb43724d7d58856ff212a.json",
+        "bytes": 3544,
+        "sha256": "3ac45a0678e6ed4554fe1f315f923d999b0311096acd3c9394e3d85826d37db9",
+        "sha512": "JgrxWZh+aE0Nin+UuLG8ox8+HknyXbJTVUwtv1hCfiFDKIt6NGjqeAY2VvlkIwFriM2ckV6ivxe3Y/gML3K55Q=="
+      },
+      {
+        "file": ".tmp-wallpaper-player/scan-index/114890f3437dd45b34313ba38d9d3c36a09701d5d672bf8abd7af8c922db61af.json",
+        "bytes": 2804,
+        "sha256": "3796d21463d2b2418c485565780e9628a50ab4f1a69d8faeadec1eb70a9af290",
+        "sha512": "HhTKLIOn4KVc35dqiq1C8/vgYqjsy283HCb5hf059Oxtbv5JDDvFX04oTo2bELF3+lKXVphJ6unFDntwFAZ2mQ=="
+      },
+      {
+        "file": ".tmp-wallpaper-player/scan-index/1465f8e823323fe9c4383abb5a38c9e17fc550dd44cd2f14fd7f7242bc309e12.json",
+        "bytes": 3644,
+        "sha256": "1be5fefdb59d8af06de2a6be0eeb0025a96253d719de1e0daced6f1fe35cdde0",
+        "sha512": "CpOFNP0GX5osz0op032Dd7FLmQAOzPuyE93/eojg+9ByVjB+EYnL+lRCNtYYpHKtgUDa70CsKgqsKmj9zrvYjw=="
+      },
+      {
+        "file": ".tmp-wallpaper-player/scan-index/153bae098b5d3524553fcf4d8cbb1eacef2471314948819d043b26cebe199e14.json",
+        "bytes": 3542,
+        "sha256": "689305d629290f70b40c5ea8454db685486f87be218b38da7aa4f0594a1d1cb8",
+        "sha512": "8kerKuwc+cRXh4AudNWIRGsiyRbNQ8/zxsYjznmUe+rNeNL/WnHBot6q/4Vuw2UNi4TyHXw8m0V0MBn46xYkSA=="
+      },
+      {
+        "file": ".tmp-wallpaper-player/scan-index/165f4a9a9309a7ac323647e9acefd754a66c6295cab7db6bdb50830914bf0d68.json",
+        "bytes": 3648,
+        "sha256": "5b0738883aee24ac7e17fc108a221e395380d2bae6a32f3ba3f70606e4b27ebe",
+        "sha512": "GZ7tj7mlwK/O89WI8ML7AjmqLVxdj5e7mYbY14b0R/bjfpE9QZCEPFWI7PzE1Qgd0cUausDqYOydvmZlpzZGEg=="
+      },
+      {
+        "file": ".tmp-wallpaper-player/scan-index/1db67e5d68a60a19388b0338ed1ee18c2a2bcd0025ab168a1d69920c929bd647.json",
+        "bytes": 3648,
+        "sha256": "b19f9d1c96db4b9106b2a28058ab1c33f4d3edc45fa693126cad0efe48cd44dd",
+        "sha512": "vrUy+UuWCJRS4x5JPcvCK5+TjuF5mjdMCEjabdWa9LC7tHyQxtzDHRZml+sMMTD97TLeiKrAoJXOZD0Nis7/PA=="
+      },
+      {
+        "file": ".tmp-wallpaper-player/scan-index/3032598f9f4655037a67986db404cfbf60011a2ca84a1e6edcec794c7deab956.json",
+        "bytes": 2806,
+        "sha256": "db1c59c38bb8ba2122afad18a73d956ec55d4580f4cad17f365b37b71d7e3db8",
+        "sha512": "HVNYzoort16/Ncksp7jBnqk5WCQZJa4KO8eaE0ahR40LJw5m05O/JyT4YGKP1eQfiLxzahH9JX78x69NcGb/jg=="
+      },
+      {
+        "file": ".tmp-wallpaper-player/scan-index/358da0698a4692a8052707f22ba2b9c94b5c4e73080d12c721e622b66a80614c.json",
+        "bytes": 2804,
+        "sha256": "f1fb6fbd25b3d96027a86d6c797b162a74c95544c04f64470ed733ddbc8983ee",
+        "sha512": "rysp1c9kbIPLesxhSgtiIrnJ83hfhytNyyNk0uH6e7GdN/vMbOiHlE642t1ZXqJTauM2hfzPz2e8rL/nP2JdRQ=="
+      },
+      {
+        "file": ".tmp-wallpaper-player/scan-index/5eb5da5dcf86cb8c66f674df75935c030f8e12d86b6373ebcdaa3d7aba7eb672.json",
+        "bytes": 2804,
+        "sha256": "489328dc3fa24223d6db18869658db5d01f915838ba97532de8193f8bedc6f93",
+        "sha512": "T8qvhLmNGsRKWXxfl4Gtw8GwUFVG5yADJG77jBAw7k4f2VWaKPNrLLpNloWUbAjc07irh5+8XbgOBV9XZftm0A=="
+      },
+      {
+        "file": ".tmp-wallpaper-player/scan-index/5f59f687750abe3eb7d55cdb1aa86cb802bf22f3b00e3bb369f77a7ef2584d06.json",
+        "bytes": 3308,
+        "sha256": "ae2763e5e5553a4eb759576c8f26efcffc9ef5aa741ddd6aad78b2e33716a719",
+        "sha512": "0g+ToYRbljDXBhGZZKZcofBZ+hEyEgd0rmuhucc707de8aCvJ5oNX0d74t8MZbS9EKgJ0tRmDrbYpkPcLjoGLg=="
+      },
+      {
+        "file": ".tmp-wallpaper-player/scan-index/602ae02092dd5e362dec6b88bd5afb39f14c218b3e0f0fbd52e5a8d09eddeb0d.json",
+        "bytes": 2804,
+        "sha256": "cd75909f0b53f3d449d479531d62f3ff1bb3144eb918086cc7a25d05816c2a7d",
+        "sha512": "/4Odv2/hdYwttrHPlYyGSedfSREkrg8GsABmSmYCLRSdfMf1X5p3/0ojSEOGXzX8ZeJNvo706Z1EIe+7zwq35g=="
+      },
+      {
+        "file": ".tmp-wallpaper-player/scan-index/664a4a47b45908fdfdf2d6bb5ec7024e41699d7dd2af4110f2889d4eac6dd2d7.json",
+        "bytes": 3644,
+        "sha256": "64835ce867a827d40088ce1b9c8e4e19cb996d0df4c2e676cbb215cf38868556",
+        "sha512": "NVP/GLwJxIW5cfXNSvpnzFyWtmDeu4DzE63wNyLSWFA1nfhwqkcYqVc0+SIKigFFGQqzLt+tHGpUA6eRZPGgkw=="
+      },
+      {
+        "file": ".tmp-wallpaper-player/scan-index/6a4b7a95d1ae5d67f63cc87a4f3486c0a22c35af457355ae63f4303d7bdbcaa1.json",
+        "bytes": 3644,
+        "sha256": "7ab98d842e31b5da1227cf6e00d98e3e32287c53b0965f3e8a964dbc9e982b20",
+        "sha512": "NyiKXbyq1oe6J2npG624E+HF+rCXCdRYs6Il4Ef0gzTtslMoRsfE+DLoPapLYHQSW6U8ExbHQTcwAnDM0U9wqQ=="
+      },
+      {
+        "file": ".tmp-wallpaper-player/scan-index/6c2bfaa6b9f2b41ef00e065bab2a6d71c599e2ce76cc3f5939228ecc7b8be650.json",
+        "bytes": 2804,
+        "sha256": "33dd4002ba26ea91ef1c97f264ef0337dd78b37d06f03a538f514ee0809c5107",
+        "sha512": "F+Ey+/oGXuwgd17lgc1XOAv8Z72NWNqPxumGRLqvou3fyWyHxy2LmBHssjF4dOjZtkNQn//W6Cw/iqQaDi1mOQ=="
+      },
+      {
+        "file": ".tmp-wallpaper-player/scan-index/703cb3b91afdc3a4a39fb95f9d0c0289fe6dcdab34f10425d71858a05164ce3b.json",
+        "bytes": 3648,
+        "sha256": "217ca6aa5c2c3b721795e93c7cb5d819317fa55546fee842c81420f84c353fe8",
+        "sha512": "IUU53piv+yx2nQR68jiDyzrLOW1IAUZbbp7T+GWa1ccecbCAnTooc+xE5NS8IcdbmoCyoaJTQ/obZvI8F3u1ug=="
+      },
+      {
+        "file": ".tmp-wallpaper-player/scan-index/85bd705cb26d94f80943f15877c1c71cc9f9a665c0bf24f8ab568b0b6bacf550.json",
+        "bytes": 2806,
+        "sha256": "d4bb5033f4315903b0083789b87e09f4e06cb294a17313439f21987dd0b3a527",
+        "sha512": "NrfeVgZKaLZ30q5dyBAvCcDZkgicLHIvehVasAO2XXOZZTCWIIRy3nHfXkQmhANQK3YKmTpqnaKrs4GBI6h5nA=="
+      },
+      {
+        "file": ".tmp-wallpaper-player/scan-index/87720e2b63644af82253d5ec9ace977d27e42c03a6033c6811af6c6094928e09.json",
+        "bytes": 2802,
+        "sha256": "2b01b9760b6e8f5605fd9bb0cbc74e6f248c0bec7428982ce0dbb848c1f6e589",
+        "sha512": "iCCi1mNzPOVPyR1cbkBM7AxK/MkwbFER9KR2S0aBAAndRi0T+hVSA0cZ9M9vmDPyjWHgrfGjXb+btYMs44Cd1Q=="
+      },
+      {
+        "file": ".tmp-wallpaper-player/scan-index/959e88efa835995e2afff87fc4257966a41b7f45da19d44dc3369ba0d88599c9.json",
+        "bytes": 3542,
+        "sha256": "bec93346f2dfbf0938b593658fd80e43a9be33b0bd4a0f7bcbf9a8997198ba9e",
+        "sha512": "dQAtg3U7P2g5MYh7BExWdhxBNOsAzhiI/T8QULgKXtsXMNOS6Wz8FFuvvbDEsYEVfidJyTx7XDcM1TNba/snpw=="
+      },
+      {
+        "file": ".tmp-wallpaper-player/scan-index/9d7bcef01cadb37f1a59d31b708084c192007deea8564d134dcc473b0605201c.json",
+        "bytes": 3646,
+        "sha256": "04d6bfae12cdb3e73f828813477825cd39dc803c37893be82455ecebe7734312",
+        "sha512": "mmyVIHPDUxg0J1fw4absJBT8pxXVxGydWULDVqoGgZ/T6n2K+HT+MPsDPC4Q4fzt42I9w93/WkKClNUeKsQBEg=="
+      },
+      {
+        "file": ".tmp-wallpaper-player/scan-index/a02253e6f623d27dfaa6674be31d9b43fc3d9b2c6bcda125418f1c3dd2a25709.json",
+        "bytes": 3646,
+        "sha256": "90f629426a02dbbe9d60c7ad0c28090bd77a96693fcd1187b5215eda49184b86",
+        "sha512": "fG5aIsYjKTh7Jkzn4jXeCKXo7MkJ1MI81w7aVbEp0wp6+hDwsZxg1sDGGEVFKjyaLFL03yzuCSwzSWpm0RaOdg=="
+      },
+      {
+        "file": ".tmp-wallpaper-player/scan-index/a17738a5c4b4bc1ce4358ecff69b8e44a1e1a33a7511d9a11eddecd94b9e58cd.json",
+        "bytes": 3648,
+        "sha256": "a1fd92c4c4c8b9bbfeb105da251cc5230f16f1f68edf7cf909a468da0c242d99",
+        "sha512": "F5HdrOrZUO8fIHS1o89eF7h/7ML40JlbFL20LjQjJ6QyZV1sM7mgbHMrrhmwBmPW7jD9SSG9DJU8RixzIRb4pA=="
+      },
+      {
+        "file": ".tmp-wallpaper-player/scan-index/c53e2ac468d9387f39255a1ee9893eba1abe325ab086dea0025a18d1ef67e75f.json",
+        "bytes": 2804,
+        "sha256": "2042c353b3e1c29eb236d1a1dfce79afdb85839f40f02f0b70d521eff607e6bb",
+        "sha512": "q+AwWtox8bz3pRPCOQJbIhLMae2jHK2MpFgVQOOFSbY2eK9wXc+JsZVZhcuZriT9T6O3virpdZjldWTted0Www=="
+      },
+      {
+        "file": ".tmp-wallpaper-player/scan-index/cb702390842effe5e6e22e77acbda7b2bbea77ed51a5c07e66c3c5d8d0bc15bf.json",
+        "bytes": 3648,
+        "sha256": "718b65c8b9b80caa3c5d34bc3244f750cd8243dc4b8743f637c3b12dbbbbda4a",
+        "sha512": "VwI5kOJHT0HBNfNf53S8wPNjIKD0E1xyayfBFLo7R9GrCm+JAChnXDUD6GVWERfnX/o+g8v1KUXIc6RYwVmZSg=="
+      },
+      {
+        "file": ".tmp-wallpaper-player/scan-index/cbf568b1144651ce061c2dc94a347128724334dd45ac2dd4ebf6890d74c66251.json",
+        "bytes": 2806,
+        "sha256": "e22fd608a0197ea15fdbd8e3320b49d60e518bb4054b74ffb7504cd8e6035134",
+        "sha512": "R+e155qYNIEMMkhu21Nr6saous6xPVus16OS660Z33iA457ArcVOPLhrvG4WJ0zuO30PXvrIgNBH1K82vrgnDQ=="
+      },
+      {
+        "file": ".tmp-wallpaper-player/scan-index/d6cd75e4bc356e88ed2b4c2272c32263e568d67a07b4017d73b22e09c23e8306.json",
+        "bytes": 2804,
+        "sha256": "d3ccf77f170934b4987c22301d34abbb8b7646d45af03f575057804e4c892629",
+        "sha512": "RqfvOli86TmrbwzJg6/0qmhbU+xZfSXhyRoUE3CglspacMmAObLy0iVsbsLa6XNu3LmUWLcwPLHb+u8dPh4DkQ=="
+      },
+      {
+        "file": ".tmp-wallpaper-player/scan-index/db34a207b303445fed1e9654c8e68883c93c5123070913181f89844225e4636a.json",
+        "bytes": 3648,
+        "sha256": "81149ad6956bdb73b468e88036ef043043faecd14d34901ba5eaa49b775d3a72",
+        "sha512": "XX9oIcBnulsAfGyi3UgTmRmy0XKAlHrsFNcW2LUSpKGIpLXeRcNfUij50lShTYa6Ng+LTQMCVKrjrmH8GYlMAg=="
+      },
+      {
+        "file": ".tmp-wallpaper-player/scan-index/de13066bd94cc789543a5fa9e6100f3297df42c5dd715cccf10b11383b6f1d68.json",
+        "bytes": 3648,
+        "sha256": "d2ac7243b636179c0e35727cb899a4f608b7c044d759e6b6a52c8f501a3a6945",
+        "sha512": "/iBjVcHVkmDBH0UfuUv7GFI7zmWhQwiurz/Q5x8id5LLqaDcLdWEjCcgyR6lyob3aW56aY/2hxTjNHPUh1Z0kg=="
+      },
+      {
+        "file": ".tmp-wallpaper-player/scan-index/eba7ad116c30f43341d30f06e5f9efe510565b2a31a16c0eccab8fc4c303e6bc.json",
+        "bytes": 3646,
+        "sha256": "636392edc5a9f41da4b70492833939eac890636623ab957400a7118bba472fc7",
+        "sha512": "+ZUzFXtHhbC1NoZ6p6668vkdiHbZam7+MUDiSkmJY7VPe8u4nXV1DyhmCatQr+7PKNKljbBUXV0KJua57UUx/A=="
+      },
+      {
+        "file": ".tmp-wallpaper-player/scan-index/f16070f230607bf79853b98a8c462b8e7b854deeb16fe246ba6c9d783c9b2832.json",
+        "bytes": 3644,
+        "sha256": "becff49c6c81b5dfd4688bbb272be352a8821ce42120b45282ea86c65f6378c2",
+        "sha512": "551Jsgf2K8+PezP3FuKxD517yMnQKj+S9Ao6VIZ3gkkvhsbABUL8u2lnMgM7bxHhRlv7bUILXp9nQ2ku2Wj9BQ=="
+      },
+      {
+        "file": ".tmp-wallpaper-player/scan-index/f408135604349a60c1b7caa1d60757de692af100c4518e5588f38b619995f186.json",
+        "bytes": 3646,
+        "sha256": "b894250b5d420a09b89350f33103a5d08edb5fc3d20f3cddf7604ed1fcb9df3a",
+        "sha512": "xheXBso55dwHEgykAvfDZf4n/26SCAP7fAyW0+BzsBmCJ+kcBgURcjEGCeYNaqTQqihKydkgsGs46ew8DHyERg=="
+      },
+      {
+        "file": ".tmp-wallpaper-player/scan-index/f7b0c1004febecbe36453be10ef2ddc2523e5b92f4af5f318ce1049990e93053.json",
+        "bytes": 3646,
+        "sha256": "77f2b4ded7202b828e8a6e281d549eecd1e79aea4030dfb2a7d918202ab090c5",
+        "sha512": "l/iSSuhoNjz2tFcSPobHYiXReYIlJaCmkLixky5HUeo+x272kifGGRjKSUukapRVTnvVQybUWX45ju2TN7gcew=="
+      },
+      {
+        "file": ".tmp-wallpaper-player/scan-index/f892c389d585d65dff3d06f6c86d3355dc90100c808a4f80da22b2f7e81865ba.json",
+        "bytes": 3644,
+        "sha256": "b0f007ba8b4249849d726eee7a9fec6cf5926742e62d3cb833bd464423af520e",
+        "sha512": "Fs2lK+N0GU/ztNoqj/OAFg2rQzejqj+cdVpT5Q1w52Tp4KZKJNwMi4VyEKTGTbDwOTj/opUURVbIaFzdTeVJpg=="
+      },
+      {
+        "file": ".tmp-wallpaper-player/scan-index/fc41c7e68e94b6f115983997d8498353a4f8f41b61fc91662dd84affe70fc9fb.json",
+        "bytes": 3646,
+        "sha256": "fa79531cd58ae0323d29102813386358d2e599ecb63902231ed73e264196abdc",
+        "sha512": "snnACJ0NqnrAILRdOeWbzApt189/MsfL+hNou4uzRTPDa2NELP3D44teP3+gIe3arlc7mcdslaPIlyO8XtDHSg=="
+      },
+      {
+        "file": ".tmp-wallpaper-player/settings.json",
+        "bytes": 22291,
+        "sha256": "6fb990f7edfe0707bb48b8bed65455cc2a521d33e028b45ce77f98b6a466a0d5",
+        "sha512": "5ZkzZzpz3QlA05Qeu4IOhPuUYVIAuCnMfvzvH0loMSNBo58NFt578k3Q+wWhPLsHh5hjfxeh1Db0boZ00WSsaA=="
+      },
+      {
+        "file": ".tmp-wallpaper-player/video-metadata-cache.json",
+        "bytes": 39687,
+        "sha256": "616205b2e97a75ea8842d3b4f6f3de778fc545493659d45e5c0139c6d7087f47",
+        "sha512": "vImCz/hAu8kdmXwFXl6Atw2rREaBoO44lHfPhdDlXBJrHxMC0PIO7KzRlV7WM5IaAfPT3aE7Dgtvr2NmHiUT4Q=="
+      }
+    ],
+    "retainedPublicArtifacts": [
+      {
+        "file": "release/Wallpaper-Player-Setup-1.4.0.exe",
+        "bytes": 204165215,
+        "sha256": "ebea8ed1eda6529d98edf8937645236826e1120cffd5e79ad3ffea50da1351c8",
+        "sha512": "+1/EwHV0Iu01FqWY7JOXtJ7aRDavagF0wIz0aEoA4ZnULIxkWi68Ys9pXK/8xjrsr6OGIivw5hj7NW58ql/Wrw=="
+      },
+      {
+        "file": "release/Wallpaper-Player-1.4.0.exe",
+        "bytes": 203941071,
+        "sha256": "23fcd04385d3b895259711f00983c7fec5fefce1834fce2cc8e2c469fdcd6f14",
+        "sha512": "bRFR1d7pmRUeRVtX7FToivqxdNaac16ot4NbB/uMOMj9VNnhHnEbVLXG1RUR5N8DJXy12/6aUYZwpnakGyxGxA=="
+      },
+      {
+        "file": "release/Wallpaper-Player-Setup-1.4.0.exe.blockmap",
+        "bytes": 212662,
+        "sha256": "725f928d1ff169d97633f85175878ecab838d0707864a35be60634ba9e2abd7e",
+        "sha512": "hlfYqOfkaDWX0+sorrDPuJH4QHRibVyuDhBeokDrfe1w78XM1Vh2UjsMRVmtGv4t2aRg3uh781h+TQ6RfJW9FA=="
+      },
+      {
+        "file": "release/latest.yml",
+        "bytes": 361,
+        "sha256": "4f5c80d6597d12f99f6b9aa2f6b64ad6b89b84b43b49cfc6204dd8651ed1edb9",
+        "sha512": "F/zeGav7F4QoOW6ZDET2h/9JHcnPf4ZMD2QmkQqM2BF4ZNUAFUetG2ncaDAAUx1kFzPNHXaD2bv3oGIb5Uq07w=="
+      },
+      {
+        "file": "release/plugins/Wallpaper-Player-Plugin-video-analysis-1.0.0.zip",
+        "bytes": 570209084,
+        "sha256": "552847152007d463424d43971778f40545b95139830dd15cc76957de59b4baa1",
+        "sha512": "LVbf4akQEqnAWSanp4f4obrc1ZY+td2XHD8b/IDoRZ28IbVLWP2nGuMOgafC2jaOziVa31WuyZYAAEfbmH912Q=="
+      },
+      {
+        "file": "release/plugins/Wallpaper-Player-Plugin-ai-search-0.1.0.zip",
+        "bytes": 2955538,
+        "sha256": "83f0949f361f03a78f78496c9b15510b0c6f8fb0581cea9bf8b94724faa7d781",
+        "sha512": "tyJjoVTN9JitDPVFx2+Lv01fzo5Bik3ELcl64iyxz5QBl7YSmTvJXT3MGyyVlkD1I+BO8tPtbHqtpQ8koXuatw=="
+      },
+      {
+        "file": "release/plugins/Wallpaper-Player-Plugin-agent-bridge-0.1.0.zip",
+        "bytes": 1093,
+        "sha256": "9f499408c282a144ffe411648d476fd4e36bd010c6e8974be3b9fd16460bed1a",
+        "sha512": "W5qWvlCSHQT8RlE31UF1e06dN3162tSZVhs7nqyFBhFLJdcN7Z8rE2WDw6ZMjQIygO89K/Xbuev/TJY+ImfSqg=="
+      },
+      {
+        "file": "mobile/dist/wallpaper-player-mobile-0.1.4-arm64-release.apk",
+        "bytes": 40710234,
+        "sha256": "f7e46638aa17f66ce68c9c96484909667af7e720bcc63fdc4f46ced39cbaec22",
+        "sha512": "TVvLeuH/1CXDXpspYbDHt8xwcX76SAe134l24lPwQkAGhg2FGJgUWumA2KeVmQ2sCePdONcklROdfjANnJ7lKg=="
+      }
+    ],
+    "allHashesUnchanged": true,
+    "originalDataCount": 42,
+    "historicalArtifactCount": 8,
+    "frontendFilesUnchanged": 144,
+    "rootPackageAndLockAndMainAndInstallerUnchanged": true
+  },
+  "productionApplicationChangesInThisPhase": [],
+  "sources": [
+    {
+      "file": "package.json",
+      "sha256": "01de51132f469116b485fbb2b283b8880606c6fd5b6c2379b8afbe34af40b48f"
+    },
+    {
+      "file": "package-lock.json",
+      "sha256": "7366f3a5de4b9fbbafdea8a1febbc35828fa788fe006635b87727d559f4d149a"
+    },
+    {
+      "file": "main.js",
+      "sha256": "7198acda5739a568d7c868e07637e69ee1833bf7f734e2c851ef04d95caf13c3"
+    },
+    {
+      "file": "main/portable-user-data.js",
+      "sha256": "577ced55e53005a55d71a07c0cd4824ac2657d9f6f420385d1ebd54063e33e5e"
+    },
+    {
+      "file": "main/index.js",
+      "sha256": "0b2d8a6de90c4699efffe99185802b0c2276d3985c4ce09814361cfe50d5ec19"
+    },
+    {
+      "file": "main/settings.js",
+      "sha256": "36722c64ccd04a0ca56c3d9b6f72b09ee3924af7b52f65b17a4294ee21314cb1"
+    },
+    {
+      "file": "build/installer.nsh",
+      "sha256": "5be03d9a320bf24ff82c42994df946521ac3fa7f9a2a9130d120753ee68654c1"
+    },
+    {
+      "file": "scripts/package-win.js",
+      "sha256": "c471aff232f4961aa45d412d6f71557cc8330463972a17c3ce416bd1b09c50a0"
+    },
+    {
+      "file": "src/splash-boot.js",
+      "sha256": "43d2ec5291b1cf909b9055d3a729c4f762fc1ffdede30c7904c14216cbe0abe7"
+    },
+    {
+      "file": "src/services/splash.js",
+      "sha256": "0115043e5b0d6a724efcfac78164c2ed9f98ab6231b2966d3930dba9315d0291"
+    }
+  ],
+  "rawEvidence": [
+    {
+      "file": ".tmp/refactor-tests/r8-windows-delivery/baseline.json",
+      "sha256": "d1073b999a4073069836efac433e635b48de3327b7162939644145bed479d365"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-windows-delivery/build-9.9.0.json",
+      "sha256": "1554b58bdcd27a037da10cfa6afa2f4e7cdd918ceea7ea2c5f74b2626a013655"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-windows-delivery/build-9.9.0.log",
+      "sha256": "36301212f3dc34425910497c808e5a80fbd28a3c550cefe05c0d67da594c2114"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-windows-delivery/build-9.9.1.json",
+      "sha256": "8a637f017574e3a6b2a28a57bce486e5f694604b0d9061e80421c954c1bacf08"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-windows-delivery/build-9.9.1.log",
+      "sha256": "84dd913463843ecc2c049f189ef78ee66ebb6628d6ce797dcb5befb08bd54baf"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-windows-delivery/build-verification.json",
+      "sha256": "0aca65cf2cdf245582ce1c47bdfa8e16e957602eb7cdfb00e1f2f411c7cff0c6"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-windows-delivery/build.cjs",
+      "sha256": "584c42833944b261f4e524347ef378b2927ed6dc2a4653cc13e11572914ffe63"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-windows-delivery/builder-9.9.0-local-runtime.log",
+      "sha256": "c940d641fece7e837e6f2352fda7261e08692b5d9931760165cc2add01f87ac6"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-windows-delivery/builder-9.9.0-local-runtime.log.process.json",
+      "sha256": "2163e4ffa6e4fc6e7f7c919773b23fe40818720d59f5f48576291bd65dade15d"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-windows-delivery/builder-9.9.0-retry.log",
+      "sha256": "05f63b22677c5e1b319952a3d04554ab281988c3e4adc6a075185c1bbbcc34b7"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-windows-delivery/builder-9.9.0-retry.log.process.json",
+      "sha256": "ba407f3a647dd1e832da8b89b7eda6dd5dae38c2f839a3af6a6a0e8e2fe983a0"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-windows-delivery/builder-9.9.0.error.log",
+      "sha256": "c64f1c505bb5b607c834007c1f236cc8193d845fa43832ea3c17aaafd6d7bcef"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-windows-delivery/builder-9.9.1.live.log",
+      "sha256": "bc1b2eb5d61218c847301058aaa173a71882f526a0341ab7352feb8d1323c1d8"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-windows-delivery/builder-9.9.1.live.log.process.json",
+      "sha256": "c2d65aa92741cc222c254d6bb9e032145bf69c8deb2beffa441df31950bb3a4b"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-windows-delivery/builder-9.9.1.log",
+      "sha256": "de45c82468ecfc03adcdd1630732831f0fbc87ce3a2542474632a5a820a0462d"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-windows-delivery/builder-wait-inspection.json",
+      "sha256": "a290649b11f7a4aad388f7221103584d449145a1c71d720f837a9f464cfbbbf5"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-windows-delivery/bundled-tools.json",
+      "sha256": "31de91b38450e1b49b6f42ac5dba56684867d654c33af3c700478727d3f7c0f2"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-windows-delivery/cdp.cjs",
+      "sha256": "310e4ae3f3824738e18a39a9bf1ead7ff137d3243eb75156ac30fe64cec83ada"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-windows-delivery/close.cjs",
+      "sha256": "8172b4d65b71de947d5606665e8d772c593e05f9f5dfe198d5742c99cc069961"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-windows-delivery/closure-initial.json",
+      "sha256": "eb50be541742b9dbfe2f4293950d2e473c1c34e715a102fe90edc82d30c4ea04"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-windows-delivery/closure.json",
+      "sha256": "fed8541165e58c0d817d297bc8ec8a998e35f8b800e051525fb077c6917f703c"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-windows-delivery/cold-before-settings.json",
+      "sha256": "79244082c02421cb91c2f56c69759738fb4a902bd8064868af875d81c71179de"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-windows-delivery/cold-before-settings.v1.backup.json",
+      "sha256": "79244082c02421cb91c2f56c69759738fb4a902bd8064868af875d81c71179de"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-windows-delivery/cold-v1-before-settings.json",
+      "sha256": "d594a30a383e1c6b69df6537472ca93b8c285ab4d177390963bf7ab2e3eede74"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-windows-delivery/cold-v1-before-settings.v1.backup.json",
+      "sha256": "e0e5f7cbd094b5758413c1aa84653400c41dd7027c1e8842f1dbb7f196ac60e6"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-windows-delivery/data-acl-after-restore-attempt.json",
+      "sha256": "a884023684fac7ab18502f455f9cd7b6f623a5fc1343035580282af6a9d9af6c"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-windows-delivery/data-acl-before.json",
+      "sha256": "896f133cfc44de16bfcba26ce940a6aee00aea243f4c708e02551fe8997dc0b1"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-windows-delivery/data-acl-restored.json",
+      "sha256": "d22bb96744b3bcf9f5b6809e340d4fa0207358a0d1336ea44c66a509654b988c"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-windows-delivery/data-acl.ps1",
+      "sha256": "13a80bd46b2d5a013c47b681d54b39f5c243f40de9b4e098cd70ab23ef2e83ba"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-windows-delivery/desktop-cold-9.9.0.png",
+      "sha256": "79aa22a66eed1de654c9fd5a56075eb21b27616cc0cb5a5190a2a2bcd12359f5"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-windows-delivery/desktop-cold-9.9.1.png",
+      "sha256": "8a927396b9f7b15fbd65811f67927bd20b5ce7e5a47d6f99d037bbc696650326"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-windows-delivery/desktop-complete-9.9.0.png",
+      "sha256": "46d6c1ba636e338457d1a89b8c3779f42685b3f4385999fe9714d11715a85bb6"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-windows-delivery/desktop-complete-9.9.1.png",
+      "sha256": "b818f1b7e1ff18b4dd48776f0c5d78faf97e410decc863a961786eee5b679540"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-windows-delivery/desktop-full-9.9.0.png",
+      "sha256": "8a9a86aa683be68272f637353053b999719e318face19bfa0bc826f8ef46b1c1"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-windows-delivery/finalize.cjs",
+      "sha256": "a624c1b1aa78c514df68109db4d4840fe17cdb23313447f1830a8cf4eb37b446"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-windows-delivery/finish-runtime.cjs",
+      "sha256": "c1c6602c3bc0cc6862fa3c2c0a99b6bf5770bfda196a0f2a0c8a123697d35f6e"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-windows-delivery/finish-runtime.log",
+      "sha256": "a3d4fa8d4bc30d981b6df8a49a8381dda967db14c14aa751469bcf84b9088a58"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-windows-delivery/inspect-wait.cjs",
+      "sha256": "0f298b4e747ebc8368619a4c7acb2162a8d3264f462a3df432584af8768dfd20"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-windows-delivery/installed-single-instance.control.json",
+      "sha256": "aab6c40c7fd07d78d8345dce5588ef0d833b30035ab518f4d4daa0b28f82822e"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-windows-delivery/installed-single-instance.control.json.process.log",
+      "sha256": "899b4cb63e69e3aeda692b18aaffed124072331fd02118e48ebeb8a4e67184e8"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-windows-delivery/installed-single-instance.report.json",
+      "sha256": "c65c3277b3ffe69fac79df6a9b18e6e17bd4e619b508b813e4946cf4fd47e4e3"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-windows-delivery/installed-single-instance.report.json.ready.json",
+      "sha256": "44be62a6982766d255c00580d3cd1a4cdc9511d0a3c37f29457d9ac3469124c9"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-windows-delivery/installed-v1.control.json",
+      "sha256": "9f369d1d29d16f87027955e6516bc231cb706c520de78b951e7696d596861835"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-windows-delivery/installed-v1.control.json.process.log",
+      "sha256": "0cb7d8524981fe9d4070862f51fe277a1571e08cb756527b158825b11ffef997"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-windows-delivery/installed-v1.report.json",
+      "sha256": "2d803745ad01bc8dfc6934641b2d617e11697c6b71536bdde56f297d85dfcf1c"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-windows-delivery/installed-v1.report.json.png",
+      "sha256": "ad7ea44542834a2dfac8019f4cc468d0e76614f7a86b0fcbbc4bf8f74177f634"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-windows-delivery/installed-v1.report.json.ready.json",
+      "sha256": "6694761c71b3ab55abe10867cb280b275a2913eb1f862e14de048f0f250620f5"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-windows-delivery/installed-v2-reinstall.control.json",
+      "sha256": "3a8500c36bfaadd5f9e151f721e7666bb10ed5890c5aac1fa9e6a9211e43f144"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-windows-delivery/installed-v2-reinstall.control.json.process.log",
+      "sha256": "5bff293d7976aaaa2a5fe10e9d32a58af46627c79f633053c75fc7e5391f899d"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-windows-delivery/installed-v2-reinstall.report.json",
+      "sha256": "828e081872c683c75a0c9a57c0c58f00a0d9a5ccd328120b388fa1c2cbd9d153"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-windows-delivery/installed-v2-reinstall.report.json.ready.json",
+      "sha256": "ccf77f4ad4a634f40559c750fdf385dd826b3c8df72a2011a0acd6faf1579614"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-windows-delivery/installed-v2-upgrade.control.json",
+      "sha256": "c855c43a4c5ddaea32d8fe6ed5fec9bb3e3fa42baaceb51af6e1e947cd782422"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-windows-delivery/installed-v2-upgrade.control.json.process.log",
+      "sha256": "977af7dcae30f50ead9fc98436ac2849495382ddc8cfcc444fe994916c6b1eef"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-windows-delivery/installed-v2-upgrade.report.json",
+      "sha256": "8426401d601c3cf2042f8aefd1ed2e171e59ec7082ebbb97ff00dcc6b7971d39"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-windows-delivery/installed-v2-upgrade.report.json.png",
+      "sha256": "1089969b1c98563b56e23d39e70801e065d6eb45a01394a6d60c5049c61c0279"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-windows-delivery/installed-v2-upgrade.report.json.ready.json",
+      "sha256": "2e1206f6b382a2d0fa0785acc1b6338d8aeb0b677e66357b08ef17b5e88f1f96"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-windows-delivery/installer-operation.ps1",
+      "sha256": "66ef51c56dfe87cf6f6ff79d41087100b146f58a9cf73731c18cbe3ee73d1772"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-windows-delivery/installer-operations.json",
+      "sha256": "2eb8ece13544de80fe2bba63decf2cd358fc6be8a3b38a1edff419127a36fb17"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-windows-delivery/maintrace-before-settings.json",
+      "sha256": "d594a30a383e1c6b69df6537472ca93b8c285ab4d177390963bf7ab2e3eede74"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-windows-delivery/maintrace-before-settings.v1.backup.json",
+      "sha256": "e0e5f7cbd094b5758413c1aa84653400c41dd7027c1e8842f1dbb7f196ac60e6"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-windows-delivery/maintrace-result.json",
+      "sha256": "e5865d7eaf8dee536cea3647be318e55c8c2f96a1f8db7c744249abecbcdde73"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-windows-delivery/maintrace.control.json",
+      "sha256": "4f13607c633e23a97583b3d8833838d51fd87d2b36bcd9ba1e711852b2e23c69"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-windows-delivery/maintrace.log",
+      "sha256": "ecadf8cdd766f2624e994d3458223127ffe8d703f782addd5cfc4102044f08ce"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-windows-delivery/maintrace.process.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-windows-delivery/maintrace.release.json",
+      "sha256": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-windows-delivery/maintrace.report.json",
+      "sha256": "f138babf4ea662e0d9082d2522c3b6b04d80b833336b6a557aee45097520e20d"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-windows-delivery/maintrace.report.json.ready.json",
+      "sha256": "b728b8907839c669e88cef8f0e58e9dac50d4ce0d2396b8c4e816496d9d4f020"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-windows-delivery/maintrace2-before-settings.json",
+      "sha256": "e0e5f7cbd094b5758413c1aa84653400c41dd7027c1e8842f1dbb7f196ac60e6"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-windows-delivery/maintrace2-before-settings.v1.backup.json",
+      "sha256": "93e5fff291bcdcb35eeaa3702a600caed62feb1ca1e4ec7e6cdcf5d4e0c2eba1"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-windows-delivery/maintrace2-result.json",
+      "sha256": "776f3e3dfe0145bb8421234a5516e1ececa8f47de2854f310b1b0030978d2d66"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-windows-delivery/maintrace2.control.json",
+      "sha256": "60f5d1e0a824aac8a5aee5b7639837002134f59df4389b0d6370d43b8cc44825"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-windows-delivery/maintrace2.log",
+      "sha256": "96f1146c020ffe0101a5d7878fb7cd6c11f9773668c2b2d44576eb38209cf522"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-windows-delivery/maintrace2.process.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-windows-delivery/maintrace2.release.json",
+      "sha256": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-windows-delivery/maintrace2.report.json",
+      "sha256": "6467a52e70caa333819e38ef207b1b5c6ec89e2248cf205654e70850a3ccdd2f"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-windows-delivery/maintrace2.report.json.ready.json",
+      "sha256": "1cd3dffb057b7c4e509373c7ebe650960fe5757a47085bcdd145a3282c832213"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-windows-delivery/observe-splash-clock.cjs",
+      "sha256": "d6ab9fc53942644044b2044acc9a622c9390f3266156741cc33a72365aeec789"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-windows-delivery/os.json",
+      "sha256": "36e3f5b6ab197d5b2196349a740d193cd440d30f1aed7823a3495809e95dbd8e"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-windows-delivery/portable-v1.control.json",
+      "sha256": "1158cc1a0fb858ae5606f3443b31b03ba4e91f710eb30ba77919295172729a53"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-windows-delivery/portable-v1.control.json.process.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-windows-delivery/portable-v1.report.json",
+      "sha256": "42d3d3972ea5a965b81f1bc6f50f3cbfad6e132387ad291ba77bec50f9ac276d"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-windows-delivery/portable-v1.report.json.png",
+      "sha256": "ec9807533ba4ee348b0a29ebbfe62d3732db1c0ebe7abdd7a182fb8e81248471"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-windows-delivery/portable-v1.report.json.ready.json",
+      "sha256": "c2421c6b01513716e7039cab5819a73016c5f1bf17cd495c0dcfefbbb5849a54"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-windows-delivery/portable-v2-moved.control.json",
+      "sha256": "8f9d3f221fb2580a9fd0edf18f3fc19a6c428135f6b26494f1100c57679a06f7"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-windows-delivery/portable-v2-moved.control.json.process.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-windows-delivery/portable-v2-moved.report.json",
+      "sha256": "2627c5d9705a088bb6335e6dfe7d19f11ff9da1dbb8481255fa80f78a68bc879"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-windows-delivery/portable-v2-moved.report.json.png",
+      "sha256": "008dc9fe20d3713952b067ec27925c4295804869926601b799a5e1c2e9492ef9"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-windows-delivery/portable-v2-moved.report.json.ready.json",
+      "sha256": "b0b9eea02788630dabe6b5db567df0418dfb170b017ad03b8571574281e3ca9a"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-windows-delivery/portable-v2-restored-data.control.json",
+      "sha256": "389d3742b86033cf80d19cc925fa1456cc4fbc57a99a49d9038a6370bd673ce9"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-windows-delivery/portable-v2-restored-data.control.json.process.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-windows-delivery/portable-v2-restored-data.report.json",
+      "sha256": "7d3a99eab67e30660c82ee34c5c907a33ad996228eae40e5cd90dc9a7ece636c"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-windows-delivery/portable-v2-restored-data.report.json.ready.json",
+      "sha256": "4fd69cc6c9368255376d981bfaa94f41196e6aeb279a3d3964f7ce6d8cee9f00"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-windows-delivery/portable-v2-unwritable-data.control.json",
+      "sha256": "5d54bf848acfaed5ec65dfd62e9f90ae221cbb17171d8f92be78fa4e83ddbe94"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-windows-delivery/portable-v2-unwritable-data.control.json.process.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-windows-delivery/portable-v2-unwritable-data.report.json",
+      "sha256": "27e0ce71974b57340f583137cbf2d4e0235daf33d0a7acdb0962ede225c3ca10"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-windows-delivery/portable-v2-unwritable-data.report.json.png",
+      "sha256": "099f87c249a5bd937666f5359683712f656a35167f4052702157a17420b8a3c2"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-windows-delivery/portable-v2-unwritable-data.report.json.ready.json",
+      "sha256": "7a7b1f6f695375a69a11bcf4ffa4250c0ce59704867ea2fb16e065f126f81697"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-windows-delivery/portable-v2-upgrade.control.json",
+      "sha256": "d1b5fc06ab56fdf6f35c165c25e97acf70c7e50552cfa21c71dc68cad2af6cf7"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-windows-delivery/portable-v2-upgrade.control.json.process.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-windows-delivery/portable-v2-upgrade.report.json",
+      "sha256": "734251b55e71cf0c40e532d03ff32d85ab0b33a452cc8417912abb14c59db19e"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-windows-delivery/portable-v2-upgrade.report.json.ready.json",
+      "sha256": "3c6d54dfbf5d8a5e13b56cd78b19e79a0c52e8bf813f9ced473846d86c28f6b8"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-windows-delivery/powershell-parse.json",
+      "sha256": "525e2d222227322d60189cfddfc588996662e6518fc6369e58ac80230ff246b5"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-windows-delivery/prepare.cjs",
+      "sha256": "80aea933153fb3fa9773b8fcad34fa8425864ee1491ea0d37dc678f5986ea7d4"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-windows-delivery/qa-main-first-attempt.cjs",
+      "sha256": "6f53f5d679231545cc27c14e68afb569d8236efbe967e199356292270d0e7404"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-windows-delivery/qa-main.cjs",
+      "sha256": "2df7774c775c639a599c1e243dfa62fd04556aa29a845000bd08c281668f22b2"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-windows-delivery/registry-first-install.json",
+      "sha256": "508900862c4e241cf930f222c9c92badac129400b49d84aaed0d69c186a4fa8f"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-windows-delivery/registry.ps1",
+      "sha256": "cd4c43163eaf1d5441080356910d4b6772a1f9d351dfa5eda897f9be666b77af"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-windows-delivery/resume-build-current.log",
+      "sha256": "ab71148c179c6ddc3a3937d3c6fec0dbac8f47eda38f481cd99ad3a4a613b2ed"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-windows-delivery/resume-build.cjs",
+      "sha256": "bb2bc9e7ead0d7e4e0451d8dbf9bf4b0c808c9b6eda3f192449a63049ca4e9e6"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-windows-delivery/resume-build.log",
+      "sha256": "9486ca2b17486c2c3a0a43111ac9974e8a7baaef0298092b35e37666a46674b6"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-windows-delivery/resume-local-runtime.log",
+      "sha256": "6524236e576a6b86fcb8e6de3319bb09a2f8e7566defab28aa2025cef9d88094"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-windows-delivery/run-stream.cjs",
+      "sha256": "b8916ad87ad7db86b5dae787b55b7e5bf96fdd4e41dc040415bdb5da43b609d2"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-windows-delivery/runtime-before-acl-normalization.json",
+      "sha256": "4aca1b9f8ea64e75a17658aa7164156e5d8d144f7c81c33a0be747dd05bc47c0"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-windows-delivery/runtime-error.log",
+      "sha256": "4ad2519de0db369dd0a68b9f2b9868974b85b831f40b42dcfdf42ff88662c48e"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-windows-delivery/runtime-first-error.log",
+      "sha256": "780a697e0616c8aec0073e4f299b359d6e4e3a56e4dd09ea2743022d8206986d"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-windows-delivery/runtime-native.log",
+      "sha256": "045e9f918595d4fb8667ce0b4f67fbe07d5c0ceff3ca5f84cf29d8a4146a47d8"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-windows-delivery/runtime-registry-encoding-error.log",
+      "sha256": "34625e2c0d29ed2bdac242a0f68ecd3492cb882b585ef89aa15890215d0e5ec4"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-windows-delivery/runtime-result.json",
+      "sha256": "ef6f08177359a3b4b24d4be6d916e3ce896b3e76cccdc13e1bf771d7ccaa5389"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-windows-delivery/runtime-resumed.log",
+      "sha256": "d8d53df5172389d4bd2253c6d0aef27d13711d3eee7b0af29c907db6b510b2da"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-windows-delivery/runtime.cjs",
+      "sha256": "4a0e9e76f14d2c63f20005eb9ad2d24a9237585af784f7e9bd50fce4dfff9dd2"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-windows-delivery/runtime.log",
+      "sha256": "b0e6dbdcf8390d911d498fe764b20d9307c1fcbfea4d3cc235a9051e2f60be25"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-windows-delivery/setup.json",
+      "sha256": "f8cc8367fb287b07dc16a14422f65cd963b03314c745174147dcce8d3e646366"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-windows-delivery/single-release.json",
+      "sha256": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-windows-delivery/source-inputs.json",
+      "sha256": "04b98664460624c7192e6596810e322ab542a81e6533a3ccd41e9160f1626f51"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-windows-delivery/splash-clock-observation.json",
+      "sha256": "8485f66a3c22174c6a240fbc7d12cdd80e1e1c9c3c4fa86d03d6941b3fe02e6a"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-windows-delivery/stage.cjs",
+      "sha256": "5b2cee347c5e5f49856e698fd24fc53a38435aa62e5a8a7c9033326f6815c98f"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-windows-delivery/startup.log",
+      "sha256": "f0b7391033000745ab7f4dadfbd4934e934d5b229a0ed0074b5004088251a5a8"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-windows-delivery/trace-settings.cjs",
+      "sha256": "7de2e60292e522c0a5a2e5536f36c41c88938c2e9137c8f5f1741236b92faf75"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-windows-delivery/verify-builds.cjs",
+      "sha256": "9ae3291ddc042925bf7c10cacabd4ff7359e550d534b488e4b7e92202779c325"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-windows-delivery/visual-9.9.0.control.json",
+      "sha256": "a938378ba084bb4074f7535b760eee0896e5d338daaebc82981bafe4460467fc"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-windows-delivery/visual-9.9.0.release.json",
+      "sha256": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-windows-delivery/visual-9.9.0.report.json",
+      "sha256": "3da1dd966f2a1b8e7512e1f45265cc9f1d772f89dcabf5c8e10e2d53d65deffb"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-windows-delivery/visual-9.9.0.report.json.process.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-windows-delivery/visual-9.9.0.report.json.ready.json",
+      "sha256": "5aedf06f7539952df9e0d4c4296237a5cd90f0aefe84fa107bb583382078925f"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-windows-delivery/visual-cold-9.9.1.control.json",
+      "sha256": "cfadf53ea1d014ffe28d45e2fbb06bedfb426c6192cef237f6508aa2ecaae124"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-windows-delivery/visual-cold-9.9.1.release.json",
+      "sha256": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-windows-delivery/visual-cold-9.9.1.report.json",
+      "sha256": "303eab29f5d1499f07d43bf86d3b35b6f062a395fe61681809ac530f0acb6f54"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-windows-delivery/visual-cold-9.9.1.report.json.process.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-windows-delivery/visual-cold-9.9.1.report.json.ready.json",
+      "sha256": "46118fc888304507c3516b53796a82f5077a4c97825b60a40f008e748af920b8"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-windows-delivery/visual-cold-9.9.1.trace.json",
+      "sha256": "724713770579f73de0aae590f3e77b7e70f415cef14edce3c1adbb776d5c5652"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-windows-delivery/visual-cold-result.json",
+      "sha256": "ea731599fd662acb2efd09fc4cdb51e83b64dbfbdf7945f786fb8028b03bccc9"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-windows-delivery/visual-cold-v1-9.9.0.control.json",
+      "sha256": "ab1ee8550f95504e791b5a9857284731dee2d18fdb66ab1944661e07bde47f81"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-windows-delivery/visual-cold-v1-9.9.0.release.json",
+      "sha256": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-windows-delivery/visual-cold-v1-9.9.0.report.json",
+      "sha256": "c3c80b790318274cd8da696022c2f7ee1c92553dc4977e0dc2b46210bd5c5aa7"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-windows-delivery/visual-cold-v1-9.9.0.report.json.process.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-windows-delivery/visual-cold-v1-9.9.0.report.json.ready.json",
+      "sha256": "1ade5c13f161dd16bcc0862d202b5fbaf25eb1cdc9640661da6dd8d2aff305c6"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-windows-delivery/visual-cold-v1-9.9.0.trace.json",
+      "sha256": "7cdc54df04bd76e56704accbcb34a1170a1690f9b9d8ae1808cf4cc4e03a6d9c"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-windows-delivery/visual-cold-v1-result.json",
+      "sha256": "22c02f3277df1ddf433a90b1e4b86e692ebd3fb0300eeed823aab75d5a1b2ef4"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-windows-delivery/visual-cold-v1.log",
+      "sha256": "5e898b24202b0f446010b6e5983126360829835b82c49549075b933f75389064"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-windows-delivery/visual-cold.log",
+      "sha256": "f0a85ebdcf27c072a21d672b6b844398d4de967cad9409ee6415a01636b4bc36"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-windows-delivery/visual-final-9.9.0.control.json",
+      "sha256": "4b1f5bc3a0f7f4e17529f283cc716c58b5b2dccbc0ad64e848e8d336d23ac717"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-windows-delivery/visual-final-9.9.0.release.json",
+      "sha256": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-windows-delivery/visual-final-9.9.0.report.json",
+      "sha256": "7a40c2719bdf0ae4e7fc37e3995134de43a4c03595d1f4013aaf3d62c6d76886"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-windows-delivery/visual-final-9.9.0.report.json.process.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-windows-delivery/visual-final-9.9.0.report.json.ready.json",
+      "sha256": "f8ad90c8a840d94d51df17b029a74b6bced9b41f02ae5433856685956cb3da7e"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-windows-delivery/visual-final-9.9.0.trace.json",
+      "sha256": "1300a800991b63005c8904bb9440fa5d0e1e98cb0604a48a0825695350c25019"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-windows-delivery/visual-final-9.9.1.control.json",
+      "sha256": "4861dabea6a59e4b9e30a2b70e2ee8d9187837fb522fec3e9ce51b8fa561134f"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-windows-delivery/visual-final-9.9.1.release.json",
+      "sha256": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-windows-delivery/visual-final-9.9.1.report.json",
+      "sha256": "d633e4e0ffb233efca9ffcb47293a24f797b5af878bcf5acee0312b5c0b33aac"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-windows-delivery/visual-final-9.9.1.report.json.process.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-windows-delivery/visual-final-9.9.1.report.json.ready.json",
+      "sha256": "de05fa803811802ce3ab08145c82fbfb0504c711d1d32915a2cba0e0ad7bdd8c"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-windows-delivery/visual-final-9.9.1.trace.json",
+      "sha256": "ca9632332c85882dea8a349296c12437d452e08857216e503e8da83efd944991"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-windows-delivery/visual-final.log",
+      "sha256": "262fa97cd1283c54b67c237f3afdb85b6096e2852bb629feb7d71a9d8b92d423"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-windows-delivery/visual-first.cjs",
+      "sha256": "8041b632d8fa66eaaf280730a5e2cacf9955e182861a36b4e4ad1770107ce84c"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-windows-delivery/visual-result.json",
+      "sha256": "e0546348e4711ab6747f127548d7e8f9994bf7b8fa48e8e332988d19cab9a779"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-windows-delivery/visual-traced.cjs",
+      "sha256": "7c87eaadd958764eda3e8f5c841fe1910f74ad1ab4fa90ca3790b96a00e1043f"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-windows-delivery/visual.cjs",
+      "sha256": "71ff46c24724b6169113e6a23ed404ad7e3ccba06229c3d1e42297fb8d6c6122"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-windows-delivery/visual.log",
+      "sha256": "342739a235faf19ccf9b0484a31830ff48884bf7cd5fd3ecf0f5f7c62d9cc3b6"
+    }
+  ],
+  "published": false,
+  "cloudCiTriggered": false,
+  "references": [
+    {
+      "title": "NSIS installer command-line syntax",
+      "url": "https://nsis.sourceforge.io/Docs/Chapter3.html#installerusage",
+      "appliesTo": "Last unquoted absolute /D argument; /S silent install"
+    }
+  ],
+  "remaining": [
+    "Fix the confirmed desktop splash clock mismatch",
+    "Determine the isolated theme anomaly and complete full renderer acceptance",
+    "Windows10/other Windows11, interactive finish/shortcut and native fallback notice, multiple displays/scale",
+    "Official signing policies and Android identity migration/versionCode",
+    "Physical Android, native iOS, LAN transport and long-run/R6/R7/R8 acceptance",
+    "Real cloud build/publish and production historical installer upgrade in an isolated OS"
+  ]
+}

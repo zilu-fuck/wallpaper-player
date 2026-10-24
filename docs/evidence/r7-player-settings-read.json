@@ -1,0 +1,204 @@
+{
+  "date": "2026-10-23T14:44:13.095Z",
+  "status": "Selective player preparation settings reads implemented and verified in background; full R6/R7/R8 remain active",
+  "implementation": {
+    "service": "Player service depends on readPlaybackState(target), rather than a full settings loader and map selector. It reads after tool preparation so newer committed resume values remain visible.",
+    "selectedFields": [
+      "mpvPath for integration discovery and installed-version configured-path protection",
+      "networkResources for known resource selection and fresh post-parse revalidation",
+      "directories for persistent-library containment"
+    ],
+    "ownership": "The existing per-record/field repository returns detached objects. Resume false still resets only position, retaining volume, speed and other saved preferences.",
+    "securityAndLifecycle": "Existing local authority check remains after tool resolution. Known network resource identity/headers are reread after parse. Stop and replaced owners propagate the same preparation context/signal; no late parse result may start playback.",
+    "publicApi": "No public preload method, channel, player request or result shape changed. Modern and legacy player IPC handlers use the same service."
+  },
+  "verification": {
+    "newCases": [
+      "production player IPC uses detached per-target resume state, keeps zero volume/speed and rechecks local authority after tool resolution",
+      "legacy local restart resets position while preserving saved playback preferences",
+      "known and temporary network playback retain logical resource targets through actual production resolver and IPC wiring",
+      "real mpv constructor retains the configured-path protection callback and directory policy reads only its own field",
+      "resume reads stay after asynchronous tool preparation and observe the latest committed record",
+      "local authority revoked during tool preparation prevents any late play",
+      "known network resources are freshly revalidated after parsing; removal or changed credentials cannot play an old result",
+      "stop reaches the real resolver context, invalidates pending parsing and releases the preparation slot without a late play"
+    ],
+    "fullMainParseComparisons": {
+      "localResume": {
+        "before": 3,
+        "after": 0,
+        "priorParsedBytes": 748881
+      },
+      "localRestart": {
+        "before": 3,
+        "after": 0,
+        "priorParsedBytes": 748881
+      },
+      "knownNetwork": {
+        "before": 4,
+        "after": 0,
+        "priorParsedBytes": 998508
+      },
+      "temporaryNetwork": {
+        "before": 3,
+        "after": 0,
+        "priorParsedBytes": 748881
+      },
+      "mpvConfiguredPin": {
+        "before": 1,
+        "after": 0,
+        "priorParsedBytes": 249627
+      },
+      "libraryDirectoryPolicy": {
+        "before": 1,
+        "after": 0,
+        "priorParsedBytes": 249627
+      }
+    },
+    "repositoryTags": 10000,
+    "otherChecks": [
+      {
+        "command": "node scripts/run-verify.cjs scripts/verify-player-service.js",
+        "exitCode": 0,
+        "completion": "player service passed: production contracts, newest load wins, cancelled preparation, stale stop/control isolation, frame ownership, zero/resume state and logical network target"
+      },
+      {
+        "command": "node scripts/run-verify.cjs scripts/verify-preparation-processes.js",
+        "exitCode": 0,
+        "completion": "preparation processes passed: actual owned process trees, signal/timeout/output cleanup, responsive event loop, full player preparation deadline, retained late-IO budget/no late play, mpv finder disposal and graceful downloader budget preservation"
+      },
+      {
+        "command": "node scripts/run-verify.cjs scripts/verify-mpv-session-lifecycle.js",
+        "exitCode": 0,
+        "completion": "mpv lifecycle passed: production manager/process/socket protocol, session-tagged state, volume zero, late process/socket isolation, no overlapping processes on stop timeout, command cancellation and disposal"
+      },
+      {
+        "command": "node scripts/run-verify.cjs scripts/verify-network-preparation.js",
+        "exitCode": 0,
+        "completion": "network preparation passed: actual HTTP redirect/body limits and credentials, shared per-caller cancellation/deadlines, last-owner cleanup/replacement, production IPC cancel-before-commit, authenticated remote preparation admission/disconnect/server stop and no fallback after cancellation"
+      },
+      {
+        "command": "node scripts/run-verify.cjs scripts/verify-async-media-policy.js",
+        "exitCode": 0,
+        "completion": "async media policy passed: production scanner/policy, zero synchronous realpath calls, changed privacy/settings during root IO, cancellation before the next stage, maximum eight root resolutions and actual cleanup before settlement"
+      },
+      {
+        "command": "node scripts/run-verify.cjs scripts/verify-desktop-player-behavior.js",
+        "exitCode": 0,
+        "completion": "desktop player passed: production component and adapters, metadata stability, late native/media events, one queue advance, HTML5 fallback and preferred retry, volume zero, own final checkpoint and complete resource/listener cleanup"
+      }
+    ],
+    "testIsolationCorrection": "The mpv lifecycle test restored Module._load before its dynamic configured-path callback. Its whole working directory now stays inside its owned fixture, checks the actual user-data root and closes settings workers before cleanup.",
+    "ci": "New verify:player-settings-read command and verify-core step parsed and checked locally; cloud CI not run.",
+    "conditions": "Actual isolated 10000-tag settings repository and worker writes, current or explicitly captured source modules in VM, real IPC registration/service/resolver/integration paths. Manager, window, parser and authority dependencies controlled. No external network, decoder, native player process, window or focus action. Parse counts are not native latency/P95 or memory-budget acceptance.",
+    "scope": "The before/after source modules share the same new verifier. Real Node repository/worker writes and real production IPC registration/service/network resolver/mpv integration code; controlled manager, parser, window and authority dependencies. Separate existing tests cover actual local HTTP and actual scanner/policy. No native decode, physical phone, native UI or game-performance acceptance.",
+    "frontend": "No frontend or shared public-contract source changed in this phase; prior type/build evidence is retained, not counted as a fresh frontend build.",
+    "diffCheck": "git diff --check passed with CRLF-aware whitespace configuration"
+  },
+  "preservation": {
+    "originalDataFiles": 42,
+    "historicalPublicAssets": 8,
+    "selectedSvgUnchanged": true,
+    "packageLockUnchanged": true,
+    "latestFormalPackage": "E:\\wallpaper播放器\\release\\windows-1.5.1-14f3526e-d50d-47b3-8899-6f5e74d12c75",
+    "latestFormalAsarUnchanged": true,
+    "newDistributionBuilt": false,
+    "productionInstallationReplaced": false,
+    "windowsCreatedByThisPhase": 0
+  },
+  "limits": [
+    "Cold startup and other remaining full configuration reads/old mutation replies are still open. Only the measured preparation paths are claimed here.",
+    "Network-resource and directory field copies still scale with their own contents. Entity-level preparation, old path/plug-in bridges, renderer/IPC work, sustained CPU/RSS and event-loop p95 need separate acceptance.",
+    "No complete new production Windows distribution or foreground/native-player run was made. Existing local distribution remains the previously verified splash bundle.",
+    "Foreground resource checks remain deferred per user gaming preference. Physical Android long runs, native iOS, signing/identity migration, production TLS/update delivery and historical theme drift remain open."
+  ],
+  "sourceHashes": [
+    {
+      "file": "main/application/player-service.js",
+      "sha256": "fcec21a374f75e8147dcb75205af619e277c13b4e2a5df97d305f9e670129a29"
+    },
+    {
+      "file": "main/ipc/player.js",
+      "sha256": "d16de08a0613ed17f4597af49c097e6c1edb0423fea845db71e7238562254fec"
+    },
+    {
+      "file": "main/mpv-integration.js",
+      "sha256": "888de8bfa94d6f2636f6ca530571266375baf893d045ef4cd3dc108fa096e519"
+    },
+    {
+      "file": "main/mpv.js",
+      "sha256": "d2214681e7ebaad149c6971bdcbd8c25389cbf6ee5c43fdde6f5e99ef036d2d2"
+    },
+    {
+      "file": "main/ipc/network-resource-service.js",
+      "sha256": "3a7556cfe0dc7772c0c3989457d3e681445b1912c00548738cb8759f106f13d5"
+    },
+    {
+      "file": "main/settings.js",
+      "sha256": "7208ff2eb10b1591a0c8d9fba5db65a4d9c73f34cc2afd9ea15983961ea6a696"
+    },
+    {
+      "file": "scripts/verify-player-settings-read.js",
+      "sha256": "42440b1fa749a7a8e0f1c67a918389289564413ca7a3bd57110d71c8415119a1"
+    },
+    {
+      "file": "scripts/verify-player-service.js",
+      "sha256": "f53d0e48b5222bb298d6f68286df4de5e4a749dc2dbd66d99cba33818274c646"
+    },
+    {
+      "file": "scripts/verify-preparation-processes.js",
+      "sha256": "6913604aedd24ccdbdd1cd1f1f44240dab13771ea2b2ad5e46891b0adb677fc1"
+    },
+    {
+      "file": "scripts/verify-mpv-session-lifecycle.js",
+      "sha256": "20555f1eb78a60c183e094b487e415e56c548aae9ad27bd9d5a7eec590faf6ee"
+    },
+    {
+      "file": "scripts/verify-network-preparation.js",
+      "sha256": "ae7529a67c174c3ace4580198ab41b478f298a4f8063bdb42770acbc857274c8"
+    },
+    {
+      "file": "scripts/verify-async-media-policy.js",
+      "sha256": "f457c64889b0326641407571769cf4ff3a9758a65378af306e3f94d5bc5288d6"
+    },
+    {
+      "file": "scripts/verify-desktop-player-behavior.js",
+      "sha256": "72e7232c59475f292119e28b44226b514b44a6dedbce8b668d90a5210d430a82"
+    },
+    {
+      "file": "package.json",
+      "sha256": "5faba16250e1b90106706bb60fcb1a4326e173bd8bb1da50d0305f5f9ac0af86"
+    },
+    {
+      "file": ".github/workflows/ci.yml",
+      "sha256": "1bd820737dedf4fb07e95ffaeecfacf85655cce1b6d38cd1475485c87bcc6447"
+    }
+  ],
+  "baselineSources": [
+    {
+      "file": "main/application/player-service.js",
+      "sha256": "6394eca46fd28a4419fc914eb826ef51485bef676fbfb5202db59396ce46c9fe"
+    },
+    {
+      "file": "main/ipc/player.js",
+      "sha256": "71e822d31bd65773e75adf2a4a3a15a6ea7919a9577edd96208d512068439d06"
+    },
+    {
+      "file": "main/mpv-integration.js",
+      "sha256": "dbc7c1597c82285f24022a9f1ff499a630d7be6f4779fe4ecb980cfac506a0f0"
+    },
+    {
+      "file": "main/mpv.js",
+      "sha256": "ca6ff999cbf3560f65d796e3f1a7937f1db45381b507a26003b239abc9073589"
+    },
+    {
+      "file": "main/ipc/network-resource-service.js",
+      "sha256": "f91af3c85e39e2f1cacfc6eb321da4ab2f9178cbeaa72f49edce93ac40620f91"
+    }
+  ],
+  "raw": {
+    "before": ".tmp/refactor-tests/r7-player-settings-read/before-result.json",
+    "after": ".tmp/refactor-tests/r7-player-settings-read/after-result.json",
+    "checks": ".tmp/refactor-tests/r7-player-settings-read/checks.json"
+  }
+}

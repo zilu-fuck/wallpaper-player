@@ -4,15 +4,15 @@ Wallpaper Player 是一个本地视频壁纸画廊播放器，电脑端基于 El
 
 Windows 发布包内置 mpv、FFmpeg、aria2 和 yt-dlp，普通用户不需要额外安装播放器、转码工具或下载引擎。Android 端是独立 APK，正式测试时不依赖 Expo Go。
 
-## 当前测试版
+## 源码与本地产物
 
 | 端 | 版本 | 产物 |
 | --- | --- | --- |
-| Windows 电脑端 | `1.5.1` | `release/Wallpaper-Player-Setup-1.5.1.exe`、`release/Wallpaper-Player-1.5.1.exe` |
-| Android 手机端 | `0.1.4` | `mobile/dist/wallpaper-player-mobile-0.1.4-arm64-release.apk` |
-| 插件包 | `video-analysis 1.0.0`、`ai-search 0.1.0`、`agent-bridge 0.1.0` | `release/plugins/*.zip` |
+| Windows 电脑端 | 源码版本见 [package.json](package.json)；本地包验收与签名状态见[交付说明](docs/release-delivery.md) | 最新成功输出由 `.release/packaging/windows.json` 定位，历史产物保留原位 |
+| Android 手机端 | 源码版本见 [mobile/app.json](mobile/app.json)；现有 APK 是历史构建，正式签名迁移仍待完成 | 历史文件 `mobile/dist/wallpaper-player-mobile-0.1.4-arm64-release.apk` 不代表当前源码已重新打包 |
+| 插件包 | 版本及摘要以对应桌面构建的 `official-package-integrity.json` 为准 | 对应构建目录的 `plugins/`；独立构建见下方说明 |
 
-本批更新说明见 [release-notes/v1.5.1.md](release-notes/v1.5.1.md)，开发记录见 [docs/dev-log-v1.3.0.md](docs/dev-log-v1.3.0.md)。
+本批更新说明见 [release-notes/v1.5.2.md](release-notes/v1.5.2.md)，重构进度与验收范围见 [docs/refactor-progress.md](docs/refactor-progress.md)。
 
 ## 主要功能
 
@@ -54,11 +54,11 @@ Windows 发布包内置 mpv、FFmpeg、aria2 和 yt-dlp，普通用户不需要�
 
 ## 安装和绑定
 
-1. 在电脑上安装或运行 `release/Wallpaper-Player-Setup-1.4.0.exe` / `release/Wallpaper-Player-1.4.0.exe`。
+1. 从 `.release/packaging/windows.json` 的 `output` 字段定位最新成功的 Windows 完整构建，确认 `mode` 为 `distribution`。安装其中的 `Wallpaper-Player-Setup-<版本>.exe`，或将 `Wallpaper-Player-<版本>.exe` 放到可写目录运行。构建版本、签名及验收范围见[交付说明](docs/release-delivery.md)。
 2. 打开电脑端，通过“添加资源”添加本地目录、网络资源或磁链任务。
-3. 如需视频理解、AI 搜索或 Agent Bridge，在电脑端设置的“插件管理”中安装对应 `release/plugins/*.zip` 插件包，再启用插件。
+3. 如需视频理解、AI 搜索或 Agent Bridge，在电脑端设置的“插件管理”中安装同一构建目录内的 `plugins/*.zip`，再启用插件。使用该构建的完整性清单核对配套版本；历史 `release/plugins/` 保留供旧版本使用。
 4. 在电脑端设置中打开手机访问功能。
-5. 在 Android 手机上安装 `mobile/dist/wallpaper-player-mobile-0.1.4-arm64-release.apk`。
+5. 在 Android 手机上安装已核对包名、签名和版本码的 APK。仓库保留的历史 APK 可用于旧版本兼容检查；当前源码的正式包和覆盖升级状态见[交付说明](docs/release-delivery.md)。
 6. 确保手机和电脑在同一局域网内。
 7. 手机端进入绑定页，扫描电脑端二维码或粘贴绑定码。
 8. 绑定完成后进入手机端视频库，选择视频开始播放。
@@ -67,8 +67,8 @@ Windows 发布包内置 mpv、FFmpeg、aria2 和 yt-dlp，普通用户不需要�
 
 ## 开发环境
 
-- Windows 10 或更新版本
-- Node.js 20 或更新版本
+- Windows 10 或更新版本（当前桌面构建验证为 x64）
+- 桌面开发需要 Node.js 22.12 或更新版本；手机工具链使用 Node.js 22.13+（22 系列）、24.3+（24 系列）、26 或 27+，CI 使用 Node.js 24
 - npm
 - Android APK 本地构建需要 JDK 17 和 Android SDK
 
@@ -76,9 +76,18 @@ Windows 发布包内置 mpv、FFmpeg、aria2 和 yt-dlp，普通用户不需要�
 
 ```powershell
 npm install
+npm run electron:install
 cd mobile
 npm install
 ```
+
+桌面运行时固定为 Electron 44.9.0。Electron 42 起不再在 npm 安装阶段下载二进制；首次运行会按需准备，也可先执行上面的 `electron:install`。Electron 44 不再提供 Windows 32 位版本。
+
+桌面前端使用 Vite 8 / React 插件 6。修改 `packages/contracts` 或 `packages/domain` 的源码后，先运行 `npm run build:contracts`，再用 `npm run dev -- --force` 重启开发服务器，刷新共享包的预打包缓存。
+
+手机源码使用 Expo 58.0.17 / React Native 0.88.0 / React 19.3.0。修改依赖后，在 `mobile` 目录执行 `node ../scripts/run-verify.cjs node_modules/expo/bin/cli install --check` 检查 SDK 兼容性，再生成新的原生构建；现有 `mobile/dist` 安装包不会随源码升级自动更新。原生 QA 与发布验收状态见[实施记录](docs/refactor-progress.md)。
+
+手机 Node 构建工具包含固定版本、npm integrity 和源码摘要的 node-forge 验签与 braces 嵌套深度回补。正常 `npm install` / `npm ci` 会自动应用，`npm start` / `npm run android` 会先检查；使用 `--ignore-scripts` 安装后，先在 `mobile` 运行 `npm run patch:dependencies`，直接使用 Expo CLI 前也要完成该步骤。遇到未知版本或源码摘要时安装会停止，需要重新评估上游差异及验签/嵌套回归。已有开发进程需重新启动才能加载新依赖源码。回补不会改变 npm audit 的版本告警；范围见[依赖治理](docs/dependency-governance.md)。
 
 启动电脑端开发：
 
@@ -119,7 +128,9 @@ npm run prepare-vendor
 npm run dist:win
 ```
 
-最终文件会输出到 `release/`，插件包会输出到 `release/plugins/`。`dist:win` 会把项目复制到纯 ASCII 临时目录再打包，用来规避中文路径导致的 Electron Builder / NSIS 路径解析问题。
+每次成功构建输出到独立的 `release/windows-<版本>-<构建ID>/`，其中包含配套 `plugins/` 和完整性清单。最新成功输出记录在 `.release/packaging/windows.json` 的 `output` 字段；`mode` 区分完整发行包与 `pack:win` 目录包。发布门禁只接受当前版本、提交匹配的完整发行包，不回退到旧产物。
+
+构建先复制到独立纯 ASCII 暂存目录；可通过 `WALLPAPER_PLAYER_BUILD_ROOT` 指定项目目录之外的 ASCII 基目录。旧 `release/` 文件和便携版 `Data` 保留原位。失败时保留暂存现场和旧索引，成功才更新索引；具体路径与清理约束见[交付门禁](docs/release-delivery.md)。
 
 只生成插件包：
 
@@ -127,11 +138,15 @@ npm run dist:win
 npm run pack:plugins
 ```
 
-Android APK 构建建议在纯 ASCII 路径下执行 Expo prebuild 和 Gradle，避免中文路径触发 autolinking JSON 路径转义问题。当前生成 APK 输出到：
+独立插件构建输出到 `release/plugins-<桌面版本>-<构建ID>/plugins/`，索引为 `.release/packaging/plugins.json`。打包不会改写源码中的官方插件摘要；新 ZIP 需与内嵌同一份摘要的桌面构建配套，开发环境与历史应用不会自动信任新包。`npm run verify:plugin-package` 默认验证最新成功的 Windows 构建及其配套插件。
+
+Android APK 构建建议在较短的纯 ASCII 路径下执行 Expo prebuild 和 Gradle，避免中文路径触发 autolinking JSON 路径转义问题。配置插件会在 Windows 设置 CMake 对象路径上限，让过长的生成文件路径使用哈希目录，避免 Ninja 的 260 字符限制。已有历史 APK 位于：
 
 ```text
 mobile/dist/wallpaper-player-mobile-0.1.4-arm64-release.apk
 ```
+
+发布流程区分桌面独立发布与联合 Android 发布，复用完整 CI，产物齐备后先上传草稿、下载校验再公开。Android 正式身份迁移及版本码递增仍是阻断项；配置、签名状态与本机验证范围见[发布交付门禁](docs/release-delivery.md)。
 
 ## 验证命令
 
@@ -147,6 +162,9 @@ npm run verify:plugin-official
 npm run verify:plugin-video
 npm run verify:plugin-external
 npm run verify:plugin-package
+npm run verify:release-gate
+npm run verify:mobile-updates
+npm run verify:update-context
 cd mobile
 npm run typecheck
 ```
@@ -176,6 +194,10 @@ npm run typecheck
 
 ## 文档
 
+- [桌面端与手机端审查及重构方案](docs/desktop-mobile-review-and-refactor-plan.md)
+- [重构实施记录](docs/refactor-progress.md)
+- [共享协议与接口边界](docs/protocol-contracts.md)
+- [发布交付门禁](docs/release-delivery.md)
 - [移动端和远程访问方案](docs/mobile-client-remote-access-plan.md)
 - [1.4.0 更新说明](release-notes/v1.4.0.md)
 - [1.3.3 更新说明](release-notes/v1.3.3.md)

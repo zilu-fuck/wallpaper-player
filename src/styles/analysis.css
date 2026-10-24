@@ -77,9 +77,9 @@
   align-items: center;
   gap: 8px;
   padding: 8px 10px;
-  border: 1px solid rgba(34, 211, 238, 0.18);
+  border: 1px solid rgba(45, 212, 234, 0.18);
   border-radius: var(--radius-sm);
-  background: rgba(34, 211, 238, 0.06);
+  background: rgba(45, 212, 234, 0.06);
 }
 
 .analysis-sidebar-note span {
@@ -384,7 +384,7 @@
 .video-card-list.selected {
   border-color: var(--accent);
   background: var(--glass-bg-strong);
-  box-shadow: 0 0 0 2px rgba(34, 211, 238, 0.18);
+  box-shadow: 0 0 0 2px rgba(45, 212, 234, 0.18);
 }
 
 .video-card-list .selection-check {

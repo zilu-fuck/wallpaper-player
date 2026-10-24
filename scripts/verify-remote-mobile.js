@@ -7,9 +7,9 @@ const { decodePairingPayload } = require('./verify-helpers')
 const projectRoot = path.resolve(__dirname, '..')
 const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'wallpaper-player-remote-verify-'))
 
-function expectPairingFailure(fn, code) {
+async function expectPairingFailure(fn, code) {
   try {
-    fn()
+    await fn()
   } catch (error) {
     assert.strictEqual(error.code, code)
     return
@@ -29,10 +29,11 @@ const {
   rejectPairingRequest,
   revokePairedDeviceByToken,
   verifyAccessToken,
-  verifyBoundScopedToken
+  verifyBoundScopedToken,
+  flushIdentityWrites
 } = require(path.join(projectRoot, 'main', 'remote', 'identity'))
 
-try {
+;(async () => { try {
   const pairing = createPairingCode({
     endpoint: 'http://127.0.0.1:38127',
     endpoints: ['http://127.0.0.1:38127'],
@@ -45,7 +46,7 @@ try {
   assert.ok(payload.oneTimeSecret, 'pairing payload should include oneTimeSecret')
   assert.ok(payload.expiresAt > Date.now(), 'pairing payload should not be expired')
 
-  const pending = claimPairing({
+  const pending = await claimPairing({
     pairingId: payload.pairingId,
     oneTimeSecret: payload.oneTimeSecret,
     clientId: 'mobile_verify',
@@ -58,7 +59,7 @@ try {
   assert.strictEqual(listPairedDevices().length, 0, 'pending request should not create a paired device before approval')
   approvePairingRequest(pending.pairingRequestId)
   assert.strictEqual(listPairedDevices().length, 0, 'approval should not create a paired device until the phone receives its token')
-  const claimed = claimPairing({
+  const claimed = await claimPairing({
     pairingId: payload.pairingId,
     oneTimeSecret: payload.oneTimeSecret,
     clientId: 'mobile_verify',
@@ -80,7 +81,7 @@ try {
   assert.strictEqual(devices.length, 1, 'one paired device should be listed')
   assert.strictEqual(devices[0].id, 'mobile_verify')
 
-  expectPairingFailure(() => claimPairing({
+  await expectPairingFailure(() => claimPairing({
     pairingId: payload.pairingId,
     oneTimeSecret: payload.oneTimeSecret,
     clientId: 'mobile_second'
@@ -92,21 +93,21 @@ try {
     ttlMs: 60 * 1000
   })
   const rejectedPayload = decodePairingPayload(rejectedPairing.pairingCode)
-  const rejectedPending = claimPairing({
+  const rejectedPending = await claimPairing({
     pairingId: rejectedPayload.pairingId,
     oneTimeSecret: rejectedPayload.oneTimeSecret,
     clientId: 'mobile_rejected',
     clientName: 'Rejected Phone'
   })
   rejectPairingRequest(rejectedPending.pairingRequestId)
-  expectPairingFailure(() => claimPairing({
+  await expectPairingFailure(() => claimPairing({
     pairingId: rejectedPayload.pairingId,
     oneTimeSecret: rejectedPayload.oneTimeSecret,
     clientId: 'mobile_rejected',
     clientName: 'Rejected Phone'
   }), 'pairing_rejected')
 
-  const revoked = revokePairedDeviceByToken(claimed.token)
+  const revoked = await revokePairedDeviceByToken(claimed.token)
   assert.ok(revoked, 'revocation by token should find the paired device')
   assert.strictEqual(verifyAccessToken(claimed.token), false, 'revoked token should be rejected')
   assert.strictEqual(
@@ -118,6 +119,9 @@ try {
 
   console.log('remote/mobile pairing verification passed')
 } finally {
+  await flushIdentityWrites()
   process.chdir(projectRoot)
+  assert.strictEqual(path.dirname(path.resolve(tempRoot)), path.resolve(os.tmpdir()))
+  assert.ok(path.basename(tempRoot).startsWith('wallpaper-player-remote-verify-'))
   fs.rmSync(tempRoot, { recursive: true, force: true })
-}
+} })().catch(error => { console.error(error); process.exitCode = 1 })

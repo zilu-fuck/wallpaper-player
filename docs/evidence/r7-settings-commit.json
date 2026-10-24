@@ -1,0 +1,725 @@
+{
+  "date": "2026-10-18T15:23:39.803Z",
+  "stage": "R7 batch 13: field-scoped settings patches and commit snapshot ownership",
+  "sourceDigests": {
+    "main/settings.js": "a404d37e56329dc8a874ffd79c47ea32bd34ea96b6bedf544a7a91e491ab5052",
+    "main/application/media-mutations.js": "ead7c7e564a383af2f33ce0b6b6665a371797c3315cc2aed46c27e38d3d13872",
+    "main/application/media-mutation-paths.js": "aadf4ee7550a6d0335a63dae337e62fb641a8780645eb9399f18a205ff994666",
+    "main/repositories/tag-state.js": "046376c6bb56d3251c6f4a1d80c8e0273eeeac247b5d8031209787ace1852065",
+    "main/ipc/media-data.js": "fbcf14db2be08e8b3e9b5b7fe67ac5ea8b4f2d59d0e8c5050a3241ab05b890a9",
+    "main/remote/media-mutations.js": "cf14eb6a3923fec99b85d45794c448e618ab46006bf5459f6d43e31af15f5729",
+    "scripts/verify-settings-commit-cost.js": "a12ee4ea413788f677e45b37e0ad319d9d2d840bc15d657ec0c976008d4f8fa0",
+    "scripts/verify-settings-patch-lifecycle.js": "1e3ccc31852d131e08a565fa0689b9f3c5803ca61682f5fbde7746ddf28354dd",
+    "scripts/verify-packaged-contracts.js": "1562f95200be8e161ec7e57e94e4341dbf6a74bcbd6e7acfd51762b4607e8a20",
+    "package.json": "dac02e9f93ed2e8ca939410c6f7218e863098ba158db1c59c9910e0bda78c48c",
+    ".github/workflows/ci.yml": "3b6cf29de81e79c3bd954b26acc8540eae7d71d04b32d4d5e64fcea1895df90a",
+    "docs/refactor-progress.md": "52bd904160044d4bbcd94e3a5861e9afc5ebe6db1c2b6cdd8ceec209167c271d",
+    "docs/desktop-mobile-review-and-refactor-plan.md": "5fa17f97e5f55e41f5a20177eaabb81a1948e8655fb189e8ee20e00d4dc1e4cb"
+  },
+  "inputArtifacts": {
+    "initialBaseline": {
+      "file": ".tmp/refactor-tests/settings-commit-cost-baseline.json",
+      "sha256": "a0a0b8fc91a373947a934baf97da53251aa4031c475cb24dd21c2e4a8312a283"
+    },
+    "finalSeries": {
+      "file": ".tmp/refactor-tests/settings-commit-series-final.json",
+      "sha256": "5bd58c2085c60c2d18d5ab05732c7d07f2c8a32aeb59d23926b99e3aec792caf"
+    },
+    "concurrentChecksObservation": {
+      "file": ".tmp/refactor-tests/settings-commit-under-parallel-checks.json",
+      "sha256": "5a3aa88a29c8f3812f23e1664b9a57c215ad227402e29e1acd566280a5fc94b4"
+    },
+    "patchLifecycle": {
+      "file": ".tmp/refactor-tests/settings-patch-lifecycle.json",
+      "sha256": "cee22e2ee03b8faa00d4a535ba5ad58fd385ed9cf38246c31753e80efaad5c3e"
+    },
+    "largeMediaDiagnostic": {
+      "file": ".tmp/refactor-tests/media-mutation-paths-large.json",
+      "sha256": "2ee1da938275cddda98a665f1fc9c454fb75a61ededb456228488a0d248b59cc"
+    }
+  },
+  "capturedBaseline": {
+    "file": ".tmp\\refactor-tests\\settings-commit-cost-J2Lo8U\\settings-at-start.cjs",
+    "sha256": "51b54c9e45d8f81c343f4d90fc3316c5ee47b8710c86eef6f98c869ec7e2b0d0",
+    "productionSourceReplaced": false
+  },
+  "summary": {
+    "baseline": [
+      {
+        "name": "favorite patch",
+        "elapsedMedianMs": 89.9519,
+        "elapsedRangeMs": [
+          87.2507,
+          91.76329999999999
+        ],
+        "largestObservedHeartbeatGapMs": 58.64189999999999,
+        "fullStateStringifies": [
+          7,
+          7,
+          7
+        ],
+        "synchronousRealpaths": [
+          6,
+          6,
+          6
+        ],
+        "unrelatedSectionNormalizations": [
+          2,
+          2,
+          2
+        ]
+      },
+      {
+        "name": "theme patch",
+        "elapsedMedianMs": 96.6848,
+        "elapsedRangeMs": [
+          95.57680000000002,
+          97.30249999999998
+        ],
+        "largestObservedHeartbeatGapMs": 59.9701,
+        "fullStateStringifies": [
+          7,
+          7,
+          7
+        ],
+        "synchronousRealpaths": [
+          6,
+          6,
+          6
+        ],
+        "unrelatedSectionNormalizations": [
+          2,
+          2,
+          2
+        ]
+      },
+      {
+        "name": "whole tag map patch",
+        "elapsedMedianMs": 82.18700000000001,
+        "elapsedRangeMs": [
+          81.77859999999998,
+          82.51570000000004
+        ],
+        "largestObservedHeartbeatGapMs": 48.141999999999996,
+        "fullStateStringifies": [
+          7,
+          7,
+          7
+        ],
+        "synchronousRealpaths": [
+          6,
+          6,
+          6
+        ],
+        "unrelatedSectionNormalizations": [
+          2,
+          2,
+          2
+        ]
+      },
+      {
+        "name": "read-only snapshot",
+        "elapsedMedianMs": 20.812999999999988,
+        "elapsedRangeMs": [
+          20.328399999999988,
+          21.437299999999993
+        ],
+        "largestObservedHeartbeatGapMs": 21.404399999999953,
+        "fullStateStringifies": [
+          2,
+          2,
+          2
+        ],
+        "synchronousRealpaths": [
+          0,
+          0,
+          0
+        ],
+        "unrelatedSectionNormalizations": [
+          0,
+          0,
+          0
+        ]
+      }
+    ],
+    "current": [
+      {
+        "name": "favorite patch",
+        "elapsedMedianMs": 59.56699999999998,
+        "elapsedRangeMs": [
+          57.39850000000001,
+          60.12049999999999
+        ],
+        "largestObservedHeartbeatGapMs": 34.563199999999995,
+        "fullStateStringifies": [
+          5,
+          5,
+          5
+        ],
+        "synchronousRealpaths": [
+          0,
+          0,
+          0
+        ],
+        "unrelatedSectionNormalizations": [
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "name": "theme patch",
+        "elapsedMedianMs": 58.93339999999998,
+        "elapsedRangeMs": [
+          57.75860000000003,
+          59.405400000000014
+        ],
+        "largestObservedHeartbeatGapMs": 36.8963,
+        "fullStateStringifies": [
+          5,
+          5,
+          5
+        ],
+        "synchronousRealpaths": [
+          0,
+          0,
+          0
+        ],
+        "unrelatedSectionNormalizations": [
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "name": "whole tag map patch",
+        "elapsedMedianMs": 69.0566,
+        "elapsedRangeMs": [
+          67.2441,
+          80.70659999999998
+        ],
+        "largestObservedHeartbeatGapMs": 31.026700000000005,
+        "fullStateStringifies": [
+          5,
+          5,
+          5
+        ],
+        "synchronousRealpaths": [
+          0,
+          0,
+          0
+        ],
+        "unrelatedSectionNormalizations": [
+          0,
+          0,
+          0
+        ]
+      },
+      {
+        "name": "read-only snapshot",
+        "elapsedMedianMs": 19.37790000000001,
+        "elapsedRangeMs": [
+          19.37489999999997,
+          19.470699999999965
+        ],
+        "largestObservedHeartbeatGapMs": 19.439399999999978,
+        "fullStateStringifies": [
+          2,
+          2,
+          2
+        ],
+        "synchronousRealpaths": [
+          0,
+          0,
+          0
+        ],
+        "unrelatedSectionNormalizations": [
+          0,
+          0,
+          0
+        ]
+      }
+    ]
+  },
+  "observations": {
+    "initialBaseline": {
+      "date": "2026-10-18T14:54:00.895Z",
+      "fixture": ".tmp\\refactor-tests\\settings-commit-cost-J2Lo8U",
+      "baseline": true,
+      "sourceSha256": "51b54c9e45d8f81c343f4d90fc3316c5ee47b8710c86eef6f98c869ec7e2b0d0",
+      "tagEntries": 10000,
+      "results": [
+        {
+          "name": "favorite patch",
+          "milliseconds": 105.46169999999998,
+          "maxHeartbeatGapMs": 65.16049999999998,
+          "fullStateStringifies": 7,
+          "synchronousRealpaths": 6,
+          "unrelatedSectionNormalizations": 2
+        },
+        {
+          "name": "theme patch",
+          "milliseconds": 104.21910000000003,
+          "maxHeartbeatGapMs": 61.344799999999964,
+          "fullStateStringifies": 7,
+          "synchronousRealpaths": 6,
+          "unrelatedSectionNormalizations": 2
+        },
+        {
+          "name": "whole tag map patch",
+          "milliseconds": 82.98000000000002,
+          "maxHeartbeatGapMs": 48.06130000000002,
+          "fullStateStringifies": 7,
+          "synchronousRealpaths": 6,
+          "unrelatedSectionNormalizations": 2
+        },
+        {
+          "name": "read-only snapshot",
+          "milliseconds": 20.962500000000034,
+          "maxHeartbeatGapMs": 20.932799999999986,
+          "fullStateStringifies": 2,
+          "synchronousRealpaths": 0,
+          "unrelatedSectionNormalizations": 0
+        }
+      ],
+      "conditions": "Production settings repository, one real local directory, preloaded 10000 generated JSON tag entries, one settings listener, actual atomic file writes. Each operation is one observation after setup, not event-loop P95 or cold-start/media/phone acceptance."
+    },
+    "finalSeries": {
+      "date": "2026-10-18T15:17:01.168Z",
+      "samples": [
+        {
+          "date": "2026-10-18T15:16:56.528Z",
+          "fixture": ".tmp\\refactor-tests\\settings-commit-cost-dyNXqa",
+          "baseline": true,
+          "sourceSha256": "51b54c9e45d8f81c343f4d90fc3316c5ee47b8710c86eef6f98c869ec7e2b0d0",
+          "tagEntries": 10000,
+          "results": [
+            {
+              "name": "favorite patch",
+              "milliseconds": 87.2507,
+              "maxHeartbeatGapMs": 54.24270000000001,
+              "fullStateStringifies": 7,
+              "synchronousRealpaths": 6,
+              "unrelatedSectionNormalizations": 2
+            },
+            {
+              "name": "theme patch",
+              "milliseconds": 96.6848,
+              "maxHeartbeatGapMs": 58.02410000000003,
+              "fullStateStringifies": 7,
+              "synchronousRealpaths": 6,
+              "unrelatedSectionNormalizations": 2
+            },
+            {
+              "name": "whole tag map patch",
+              "milliseconds": 81.77859999999998,
+              "maxHeartbeatGapMs": 47.8578,
+              "fullStateStringifies": 7,
+              "synchronousRealpaths": 6,
+              "unrelatedSectionNormalizations": 2
+            },
+            {
+              "name": "read-only snapshot",
+              "milliseconds": 21.437299999999993,
+              "maxHeartbeatGapMs": 21.404399999999953,
+              "fullStateStringifies": 2,
+              "synchronousRealpaths": 0,
+              "unrelatedSectionNormalizations": 0
+            }
+          ],
+          "baselineMode": "SHA-verified settings module captured before this batch; current unchanged dependency modules; production source is not replaced.",
+          "conditions": "Production settings repository, one real local directory, preloaded 10000 generated JSON tag entries, one settings listener, actual atomic file writes. Each operation is one observation after setup, not event-loop P95 or cold-start/media/phone acceptance."
+        },
+        {
+          "date": "2026-10-18T15:16:57.380Z",
+          "fixture": ".tmp\\refactor-tests\\settings-commit-cost-YRkidv",
+          "baseline": false,
+          "sourceSha256": "a404d37e56329dc8a874ffd79c47ea32bd34ea96b6bedf544a7a91e491ab5052",
+          "tagEntries": 10000,
+          "results": [
+            {
+              "name": "favorite patch",
+              "milliseconds": 60.12049999999999,
+              "maxHeartbeatGapMs": 34.373999999999995,
+              "fullStateStringifies": 5,
+              "synchronousRealpaths": 0,
+              "unrelatedSectionNormalizations": 0
+            },
+            {
+              "name": "theme patch",
+              "milliseconds": 59.405400000000014,
+              "maxHeartbeatGapMs": 36.8963,
+              "fullStateStringifies": 5,
+              "synchronousRealpaths": 0,
+              "unrelatedSectionNormalizations": 0
+            },
+            {
+              "name": "whole tag map patch",
+              "milliseconds": 67.2441,
+              "maxHeartbeatGapMs": 29.786200000000008,
+              "fullStateStringifies": 5,
+              "synchronousRealpaths": 0,
+              "unrelatedSectionNormalizations": 0
+            },
+            {
+              "name": "read-only snapshot",
+              "milliseconds": 19.470699999999965,
+              "maxHeartbeatGapMs": 19.439399999999978,
+              "fullStateStringifies": 2,
+              "synchronousRealpaths": 0,
+              "unrelatedSectionNormalizations": 0
+            }
+          ],
+          "conditions": "Production settings repository, one real local directory, preloaded 10000 generated JSON tag entries, one settings listener, actual atomic file writes. Each operation is one observation after setup, not event-loop P95 or cold-start/media/phone acceptance."
+        },
+        {
+          "date": "2026-10-18T15:16:58.353Z",
+          "fixture": ".tmp\\refactor-tests\\settings-commit-cost-cdWOxH",
+          "baseline": true,
+          "sourceSha256": "51b54c9e45d8f81c343f4d90fc3316c5ee47b8710c86eef6f98c869ec7e2b0d0",
+          "tagEntries": 10000,
+          "results": [
+            {
+              "name": "favorite patch",
+              "milliseconds": 91.76329999999999,
+              "maxHeartbeatGapMs": 58.64189999999999,
+              "fullStateStringifies": 7,
+              "synchronousRealpaths": 6,
+              "unrelatedSectionNormalizations": 2
+            },
+            {
+              "name": "theme patch",
+              "milliseconds": 95.57680000000002,
+              "maxHeartbeatGapMs": 55.72829999999999,
+              "fullStateStringifies": 7,
+              "synchronousRealpaths": 6,
+              "unrelatedSectionNormalizations": 2
+            },
+            {
+              "name": "whole tag map patch",
+              "milliseconds": 82.51570000000004,
+              "maxHeartbeatGapMs": 47.75529999999998,
+              "fullStateStringifies": 7,
+              "synchronousRealpaths": 6,
+              "unrelatedSectionNormalizations": 2
+            },
+            {
+              "name": "read-only snapshot",
+              "milliseconds": 20.328399999999988,
+              "maxHeartbeatGapMs": 20.29540000000003,
+              "fullStateStringifies": 2,
+              "synchronousRealpaths": 0,
+              "unrelatedSectionNormalizations": 0
+            }
+          ],
+          "baselineMode": "SHA-verified settings module captured before this batch; current unchanged dependency modules; production source is not replaced.",
+          "conditions": "Production settings repository, one real local directory, preloaded 10000 generated JSON tag entries, one settings listener, actual atomic file writes. Each operation is one observation after setup, not event-loop P95 or cold-start/media/phone acceptance."
+        },
+        {
+          "date": "2026-10-18T15:16:59.203Z",
+          "fixture": ".tmp\\refactor-tests\\settings-commit-cost-YMBoHT",
+          "baseline": false,
+          "sourceSha256": "a404d37e56329dc8a874ffd79c47ea32bd34ea96b6bedf544a7a91e491ab5052",
+          "tagEntries": 10000,
+          "results": [
+            {
+              "name": "favorite patch",
+              "milliseconds": 59.56699999999998,
+              "maxHeartbeatGapMs": 34.563199999999995,
+              "fullStateStringifies": 5,
+              "synchronousRealpaths": 0,
+              "unrelatedSectionNormalizations": 0
+            },
+            {
+              "name": "theme patch",
+              "milliseconds": 58.93339999999998,
+              "maxHeartbeatGapMs": 36.599999999999994,
+              "fullStateStringifies": 5,
+              "synchronousRealpaths": 0,
+              "unrelatedSectionNormalizations": 0
+            },
+            {
+              "name": "whole tag map patch",
+              "milliseconds": 69.0566,
+              "maxHeartbeatGapMs": 30.385899999999992,
+              "fullStateStringifies": 5,
+              "synchronousRealpaths": 0,
+              "unrelatedSectionNormalizations": 0
+            },
+            {
+              "name": "read-only snapshot",
+              "milliseconds": 19.37489999999997,
+              "maxHeartbeatGapMs": 19.34639999999996,
+              "fullStateStringifies": 2,
+              "synchronousRealpaths": 0,
+              "unrelatedSectionNormalizations": 0
+            }
+          ],
+          "conditions": "Production settings repository, one real local directory, preloaded 10000 generated JSON tag entries, one settings listener, actual atomic file writes. Each operation is one observation after setup, not event-loop P95 or cold-start/media/phone acceptance."
+        },
+        {
+          "date": "2026-10-18T15:17:00.170Z",
+          "fixture": ".tmp\\refactor-tests\\settings-commit-cost-9EaOTd",
+          "baseline": true,
+          "sourceSha256": "51b54c9e45d8f81c343f4d90fc3316c5ee47b8710c86eef6f98c869ec7e2b0d0",
+          "tagEntries": 10000,
+          "results": [
+            {
+              "name": "favorite patch",
+              "milliseconds": 89.9519,
+              "maxHeartbeatGapMs": 55.59049999999999,
+              "fullStateStringifies": 7,
+              "synchronousRealpaths": 6,
+              "unrelatedSectionNormalizations": 2
+            },
+            {
+              "name": "theme patch",
+              "milliseconds": 97.30249999999998,
+              "maxHeartbeatGapMs": 59.9701,
+              "fullStateStringifies": 7,
+              "synchronousRealpaths": 6,
+              "unrelatedSectionNormalizations": 2
+            },
+            {
+              "name": "whole tag map patch",
+              "milliseconds": 82.18700000000001,
+              "maxHeartbeatGapMs": 48.141999999999996,
+              "fullStateStringifies": 7,
+              "synchronousRealpaths": 6,
+              "unrelatedSectionNormalizations": 2
+            },
+            {
+              "name": "read-only snapshot",
+              "milliseconds": 20.812999999999988,
+              "maxHeartbeatGapMs": 20.779600000000016,
+              "fullStateStringifies": 2,
+              "synchronousRealpaths": 0,
+              "unrelatedSectionNormalizations": 0
+            }
+          ],
+          "baselineMode": "SHA-verified settings module captured before this batch; current unchanged dependency modules; production source is not replaced.",
+          "conditions": "Production settings repository, one real local directory, preloaded 10000 generated JSON tag entries, one settings listener, actual atomic file writes. Each operation is one observation after setup, not event-loop P95 or cold-start/media/phone acceptance."
+        },
+        {
+          "date": "2026-10-18T15:17:01.038Z",
+          "fixture": ".tmp\\refactor-tests\\settings-commit-cost-ACLtWy",
+          "baseline": false,
+          "sourceSha256": "a404d37e56329dc8a874ffd79c47ea32bd34ea96b6bedf544a7a91e491ab5052",
+          "tagEntries": 10000,
+          "results": [
+            {
+              "name": "favorite patch",
+              "milliseconds": 57.39850000000001,
+              "maxHeartbeatGapMs": 33.6309,
+              "fullStateStringifies": 5,
+              "synchronousRealpaths": 0,
+              "unrelatedSectionNormalizations": 0
+            },
+            {
+              "name": "theme patch",
+              "milliseconds": 57.75860000000003,
+              "maxHeartbeatGapMs": 35.42769999999999,
+              "fullStateStringifies": 5,
+              "synchronousRealpaths": 0,
+              "unrelatedSectionNormalizations": 0
+            },
+            {
+              "name": "whole tag map patch",
+              "milliseconds": 80.70659999999998,
+              "maxHeartbeatGapMs": 31.026700000000005,
+              "fullStateStringifies": 5,
+              "synchronousRealpaths": 0,
+              "unrelatedSectionNormalizations": 0
+            },
+            {
+              "name": "read-only snapshot",
+              "milliseconds": 19.37790000000001,
+              "maxHeartbeatGapMs": 19.348000000000013,
+              "fullStateStringifies": 2,
+              "synchronousRealpaths": 0,
+              "unrelatedSectionNormalizations": 0
+            }
+          ],
+          "conditions": "Production settings repository, one real local directory, preloaded 10000 generated JSON tag entries, one settings listener, actual atomic file writes. Each operation is one observation after setup, not event-loop P95 or cold-start/media/phone acceptance."
+        }
+      ],
+      "conditions": "Three alternating captured-baseline/current processes on final runtime source; no other verification command deliberately ran concurrently. All samples retained; medians and observed maxima are not population P95."
+    },
+    "concurrentChecksObservation": {
+      "date": "2026-10-18T15:15:05.853Z",
+      "fixture": ".tmp\\refactor-tests\\settings-commit-cost-TNZFGc",
+      "baseline": false,
+      "sourceSha256": "a404d37e56329dc8a874ffd79c47ea32bd34ea96b6bedf544a7a91e491ab5052",
+      "tagEntries": 10000,
+      "results": [
+        {
+          "name": "favorite patch",
+          "milliseconds": 79.43109999999999,
+          "maxHeartbeatGapMs": 45.48540000000003,
+          "fullStateStringifies": 5,
+          "synchronousRealpaths": 0,
+          "unrelatedSectionNormalizations": 0
+        },
+        {
+          "name": "theme patch",
+          "milliseconds": 80.40310000000005,
+          "maxHeartbeatGapMs": 50.952,
+          "fullStateStringifies": 5,
+          "synchronousRealpaths": 0,
+          "unrelatedSectionNormalizations": 0
+        },
+        {
+          "name": "whole tag map patch",
+          "milliseconds": 100.50420000000003,
+          "maxHeartbeatGapMs": 47.01319999999998,
+          "fullStateStringifies": 5,
+          "synchronousRealpaths": 0,
+          "unrelatedSectionNormalizations": 0
+        },
+        {
+          "name": "read-only snapshot",
+          "milliseconds": 29.385899999999992,
+          "maxHeartbeatGapMs": 29.356400000000008,
+          "fullStateStringifies": 2,
+          "synchronousRealpaths": 0,
+          "unrelatedSectionNormalizations": 0
+        }
+      ],
+      "conditions": "Production settings repository, one real local directory, preloaded 10000 generated JSON tag entries, one settings listener, actual atomic file writes. Each operation is one observation after setup, not event-loop P95 or cold-start/media/phone acceptance."
+    },
+    "patchLifecycle": {
+      "date": "2026-10-18T15:15:06.083Z",
+      "fixture": ".tmp\\refactor-tests\\settings-patch-lifecycle-b7ufBg",
+      "passed": [
+        "detached initial/provider defaults",
+        "patch-only intent",
+        "cache unchanged before rename",
+        "sync field/plugin rebase",
+        "observer/result/callback/input isolation after commit",
+        "in-flight input cannot change durable intent",
+        "queued input captured at call",
+        "snapshot stamps",
+        "failed custom merge does not mutate cache or notify",
+        "explicit undefined reset",
+        "unrelated patch preserves path config",
+        "actual policy re-resolves retargeted root",
+        "explicit path patch normalizes current root"
+      ],
+      "conditions": "Production settings and media policy, actual atomic file writes and real directory junction/symlink. Rename delay/failure controlled; no renderer/native performance claim."
+    },
+    "largeMediaDiagnostic": {
+      "date": "2026-10-18T15:17:04.814Z",
+      "fixture": ".tmp\\refactor-tests\\media-mutation-paths-SnSzeu",
+      "baseline": false,
+      "sourceDigests": {
+        "main/application/media-mutations.js": "ead7c7e564a383af2f33ce0b6b6665a371797c3315cc2aed46c27e38d3d13872",
+        "main/application/media-mutation-paths.js": "aadf4ee7550a6d0335a63dae337e62fb641a8780645eb9399f18a205ff994666",
+        "main/settings.js": "a404d37e56329dc8a874ffd79c47ea32bd34ea96b6bedf544a7a91e491ab5052",
+        "main/repositories/tag-state.js": "046376c6bb56d3251c6f4a1d80c8e0273eeeac247b5d8031209787ace1852065",
+        "main/ipc/media-data.js": "fbcf14db2be08e8b3e9b5b7fe67ac5ea8b4f2d59d0e8c5050a3241ab05b890a9",
+        "main/remote/media-mutations.js": "cf14eb6a3923fec99b85d45794c448e618ab46006bf5459f6d43e31af15f5729"
+      },
+      "files": 1280,
+      "legacyKeys": 10240,
+      "aliases": 8,
+      "results": [
+        {
+          "name": "read legacy tags",
+          "milliseconds": 622.6538,
+          "maxHeartbeatGapMs": 27.80099999999993,
+          "synchronousRealpathCalls": 0,
+          "mediaSynchronousRealpathCalls": 0
+        },
+        {
+          "name": "replace tags",
+          "milliseconds": 619.2266000000002,
+          "maxHeartbeatGapMs": 40.97140000000036,
+          "synchronousRealpathCalls": 0,
+          "mediaSynchronousRealpathCalls": 0
+        },
+        {
+          "name": "append eight targets",
+          "milliseconds": 842.732,
+          "maxHeartbeatGapMs": 52.76690000000008,
+          "synchronousRealpathCalls": 0,
+          "mediaSynchronousRealpathCalls": 0
+        },
+        {
+          "name": "clear alias favorites",
+          "milliseconds": 100.73309999999992,
+          "maxHeartbeatGapMs": 57.73720000000003,
+          "synchronousRealpathCalls": 0,
+          "mediaSynchronousRealpathCalls": 0
+        }
+      ],
+      "conditions": "Production media service/settings/scanner, actual Windows junctions (directory symlinks on other platforms) and generated MP4 file headers. Not decoding or physical mobile performance. Root/settings normalization and identity reads remain separate work; media/legacy realpath counts are scoped to .mp4 paths."
+    }
+  },
+  "checksOnFinalRuntime": [
+    {
+      "command": "npm run verify:settings-commit",
+      "status": "passed",
+      "scope": "Atomic writes, 10000-tag structural cost assertions and 13 ownership/rebase/failure/path lifecycle cases. The timed concurrent-checks observation is retained separately."
+    },
+    {
+      "command": "npm run verify:settings-snapshots",
+      "status": "passed",
+      "scope": "Main snapshot ordering and production App/settings/preload/guarded IPC in actual Electron, including disk failure, visible rollback and retry."
+    },
+    {
+      "command": "npm run verify:media-mutations",
+      "status": "passed"
+    },
+    {
+      "command": "npm run verify:tag-conflicts",
+      "status": "passed"
+    },
+    {
+      "command": "npm run verify:packaged-contracts -- --in-process-gpu --no-sandbox",
+      "status": "passed",
+      "scope": "Actual Electron/ASAR with current settings module and async commit; flags are local verification arguments only."
+    },
+    {
+      "command": "Three alternating node scripts/verify-settings-commit-cost.js --baseline / without --baseline",
+      "status": "passed",
+      "scope": "All six raw samples retained. No other verification command deliberately ran concurrently during this final series."
+    },
+    {
+      "command": "node scripts/verify-media-mutation-paths.js --large",
+      "status": "diagnostic recorded",
+      "scope": "Actual production service/settings/scanner with 1280 file headers, 10240 legacy keys and Windows junctions; current runtime source digests verified."
+    },
+    {
+      "command": "CI YAML parse and verify:settings-commit command match",
+      "status": "passed"
+    }
+  ],
+  "earlierBatchCheckpointChecks": {
+    "qualification": "Passed earlier in this batch, before final reuse of already-normalized owned tag fields; they were not all repeated on final source. No native mobile acceptance is inferred.",
+    "checks": [
+      "settings panels and actual Electron UI",
+      "analysis settings/configuration repository",
+      "settings persistence",
+      "media access",
+      "media policy settings",
+      "library paths",
+      "startup",
+      "mobile correctness",
+      "remote settings",
+      "media mutation paths and lifecycle",
+      "shutdown persistence",
+      "desktop build"
+    ]
+  },
+  "limitations": [
+    "Three samples per module are a local diagnostic: medians and observed maxima are not population P95, cold-start, throughput or sustained responsiveness acceptance.",
+    "The separately retained concurrent-checks sample includes a 50.952 ms theme heartbeat gap; the large media diagnostic includes a 57.7372 ms maximum. Neither is discarded or combined with the final alternating series.",
+    "Common writes still perform five full-state JSON.stringify operations and read-only snapshots two. JSON serialization, snapshot copies and large configuration preparation remain on the main process.",
+    "Initial load and extension registration still fully normalize/copy settings. Explicit directory/download configuration retains synchronous normalization; identity synchronous IO and cold-start stability remain separate work.",
+    "Plain input ownership is captured; non-plain custom prototypes/accessors/serialization behavior and unsupported values retain compatibility fallback. Complete ownership for all arbitrary objects is not claimed.",
+    "Ordinary patches preserve unmodified path configuration, while actual media policy re-resolves current roots. This is not a cross-request authorization cache.",
+    "Controlled rename delay/failure and generated file headers are not physical-device decoding, FPS, rotation, long-term PSS or iOS acceptance.",
+    "The raw media diagnostic retains its inherited generic conditions text. This batch removes unrelated root normalization from common patches; explicit path configuration and initial load remain pending.",
+    "R6, remaining R7 work and R8 dependency/migration/signing/update/TLS/native delivery are still incomplete."
+  ]
+}

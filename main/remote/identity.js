@@ -4,12 +4,19 @@ const path = require('path')
 const { app } = require('electron')
 const log = require('electron-log')
 const { getUserDataDir } = require('../user-data')
+const { parseIdentityDocument } = require('../repositories/identity-document')
 
 const IDENTITY_FILE = 'remote-identity.json'
 const DEFAULT_PAIRING_TTL_MS = 5 * 60 * 1000
 const LAST_SEEN_WRITE_INTERVAL_MS = 60 * 1000
-let identityCorruptedAt = 0
 const pairingSessions = new Map()
+const authorizationListeners = new Set()
+const identityStores = new Map()
+let identityWriteCounter = 0
+let authorizationRevision = 0
+function getAuthorizationRevision() { return authorizationRevision }
+function onAuthorizationChanged(listener) { authorizationListeners.add(listener); return () => authorizationListeners.delete(listener) }
+function notifyAuthorizationChanged() { authorizationRevision++; queueMicrotask(() => { for (const listener of authorizationListeners) { try { listener() } catch {} } }) }
 
 function getIdentityPath() {
   return path.join(getUserDataDir(), IDENTITY_FILE)
@@ -78,6 +85,7 @@ function createIdentity() {
 function normalizeIdentity(identity) {
   const current = identity && typeof identity === 'object' ? identity : {}
   return {
+    ...current,
     deviceId: typeof current.deviceId === 'string' && current.deviceId.trim()
       ? current.deviceId
       : `pc_${randomBase64Url(6)}`,
@@ -95,55 +103,150 @@ function normalizeIdentity(identity) {
   }
 }
 
-function saveIdentity(identity) {
-  const identityPath = getIdentityPath()
-  const dir = path.dirname(identityPath)
-  if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true })
-  fs.writeFileSync(identityPath, JSON.stringify(identity, null, 2))
+function identityStore() {
+  const file = getIdentityPath()
+  if (!identityStores.has(file)) identityStores.set(file, { file, identity: null, queue: Promise.resolve(),
+    pending: 0, queuedRefresh: null, touches: new Map(), touchTask: null, readError: null, unavailableAt: 0 })
+  return identityStores.get(file)
+}
+
+const copyIdentity = identity => JSON.parse(JSON.stringify(identity))
+function authorizationKey(identity) {
+  return identity ? JSON.stringify([identity.deviceId, identity.machineSecret, identity.accessToken,
+    identity.pairedDevices.map(device => [device.id, device.tokenHash, device.revokedAt])]) : ''
+}
+
+function publishIdentity(store, identity) {
+  const changed = Boolean(store.readError) || authorizationKey(store.identity) !== authorizationKey(identity)
+  if (store.identity && (store.identity.machineSecret !== identity.machineSecret || store.identity.deviceId !== identity.deviceId)) pairingSessions.clear()
+  store.identity = copyIdentity(identity)
+  store.readError = null; store.unavailableAt = 0
+  if (changed) notifyAuthorizationChanged()
+  if (store.touches.size) scheduleLastSeen(store)
+}
+
+function serializeIdentity(store, operation) {
+  store.pending++
+  const task = store.queue.then(operation)
+  store.queue = task.catch(() => {}).finally(() => { store.pending-- })
+  return task
+}
+
+function identityReadFailure(store, cause) {
+  const code = cause.code === 'ENOENT' ? 'identity_missing' : cause.code || 'identity_unreadable'
+  const message = code.startsWith('identity_') && cause.status === 503 ? cause.message
+    : cause.code === 'ENOENT' ? '设备身份文件缺失，未自动重建；请修复后重试'
+      : '设备身份文件无法读取，原文件未覆盖；请检查访问权限后重试'
+  const error = Object.assign(new Error(message), { code, status: 503 })
+  if (!store.readError) {
+    store.unavailableAt = Date.now()
+    for (const [key, session] of pairingSessions) if (session.identityPath === store.file) pairingSessions.delete(key)
+    notifyAuthorizationChanged()
+    log.error('[identity]', message)
+  }
+  store.readError = error
+  return error
+}
+
+function readOrCreateIdentity(store, error) {
+  if (error.code === 'ENOENT' && !store.identity && !store.readError) return createIdentity()
+  throw identityReadFailure(store, error)
+}
+
+async function writeIdentity(store, identity) {
+  const temporary = `${store.file}.${process.pid}.${++identityWriteCounter}.tmp`
+  try {
+    await fs.promises.mkdir(path.dirname(store.file), { recursive: true })
+    await fs.promises.writeFile(temporary, JSON.stringify(identity, null, 2), { encoding: 'utf8', mode: 0o600 })
+    await fs.promises.rename(temporary, store.file)
+  } catch (cause) {
+    throw Object.assign(new Error('设备身份保存失败，原文件未替换；请重试'), { code: cause.code || 'identity_write_failed', status: 503 })
+  } finally { await fs.promises.rm(temporary, { force: true }).catch(() => {}) }
+}
+
+async function readIdentity(store) {
+  let parsed, identity
+  try { parsed = parseIdentityDocument(await fs.promises.readFile(store.file, 'utf8')); identity = normalizeIdentity(parsed) }
+  catch (error) { identity = readOrCreateIdentity(store, error) }
+  if (JSON.stringify(identity) !== JSON.stringify(parsed)) await writeIdentity(store, identity)
+  publishIdentity(store, identity)
+  return store.identity
+}
+
+// Production boundaries refresh asynchronously. The synchronous bridge remains
+// for installed plugins and cold local callers; it cannot race queued IO.
+function refreshIdentitySync() {
+  const store = identityStore()
+  if (store.pending) throw Object.assign(new Error('身份仓库正在提交，请重试'), { status: 503, code: 'identity_busy' })
+  let parsed, identity
+  try { parsed = parseIdentityDocument(fs.readFileSync(store.file, 'utf8')); identity = normalizeIdentity(parsed) }
+  catch (error) { identity = readOrCreateIdentity(store, error) }
+  if (JSON.stringify(identity) !== JSON.stringify(parsed)) {
+    const temporary = `${store.file}.${process.pid}.${++identityWriteCounter}.tmp`
+    try { fs.mkdirSync(path.dirname(store.file), { recursive: true }); fs.writeFileSync(temporary, JSON.stringify(identity, null, 2), { mode: 0o600 }); fs.renameSync(temporary, store.file) }
+    catch (cause) { throw Object.assign(new Error('设备身份保存失败，原文件未替换；请重试'), { code: cause.code || 'identity_write_failed', status: 503 }) }
+    finally { fs.rmSync(temporary, { force: true }) }
+  }
+  publishIdentity(store, identity)
 }
 
 function loadIdentity() {
-  try {
-    if (!fs.existsSync(getIdentityPath())) {
-      return loadFreshIdentity()
-    }
-    const raw = fs.readFileSync(getIdentityPath(), 'utf-8')
-    if (!raw.trim()) throw new Error('identity file is empty')
-    const parsed = JSON.parse(raw)
-    const identity = normalizeIdentity(parsed)
-    if (!identity.machineSecret || !identity.accessToken) {
-      throw new Error('identity missing required fields')
-    }
-    saveIdentity(identity)
-    return identity
-  } catch (err) {
-    const now = Date.now()
-    if (identityCorruptedAt === 0) {
-      identityCorruptedAt = now
-      log.error('[identity] 身份文件损坏，已自动重建，旧配对将失效:', err.message)
-    }
-    return loadFreshIdentity()
-  }
+  const store = identityStore()
+  if (store.readError) throw store.readError
+  if (!store.identity) refreshIdentitySync()
+  return copyIdentity(store.identity)
 }
 
-function loadFreshIdentity() {
-  const identity = createIdentity()
-  saveIdentity(identity)
-  return identity
+function refreshIdentity() {
+  const store = identityStore()
+  if (!store.queuedRefresh) {
+    store.queuedRefresh = serializeIdentity(store, async () => {
+      // Only share a read that has not started: a later boundary must not join a
+      // read issued before an external revocation or a preceding commit.
+      store.queuedRefresh = null
+      await readIdentity(store)
+    })
+  }
+  return store.queuedRefresh
+}
+
+function currentIdentity() {
+  const store = identityStore()
+  if (store.readError) throw store.readError
+  if (!store.identity) loadIdentity()
+  return store.identity
+}
+
+function mutateIdentity(update) {
+  const store = identityStore()
+  return serializeIdentity(store, async () => {
+    const current = await readIdentity(store)
+    const mutation = update(copyIdentity(current))
+    if (mutation.next) { await writeIdentity(store, mutation.next); publishIdentity(store, mutation.next) }
+    return mutation.value
+  })
+}
+
+async function flushIdentityWrites() {
+  for (const store of identityStores.values()) {
+    do { await store.queue; await store.touchTask } while (store.pending || store.touchTask)
+  }
 }
 
 function getIdentityCorruptedAt() {
-  return identityCorruptedAt
+  return identityStore().unavailableAt
+}
+
+function getIdentityReadError() {
+  const store = identityStore()
+  return store.readError ? { code: store.readError.code, message: store.readError.message, at: store.unavailableAt } : null
 }
 
 function rotateAccessToken() {
-  const identity = loadIdentity()
-  const next = {
-    ...identity,
-    accessToken: randomBase64Url(32)
-  }
-  saveIdentity(next)
-  return next
+  return mutateIdentity(identity => {
+    const next = { ...identity, accessToken: randomBase64Url(32) }
+    return { next, value: copyIdentity(next) }
+  })
 }
 
 function hashToken(token) {
@@ -168,7 +271,7 @@ function toPublicPairedDevice(device) {
 }
 
 function listPairedDevices() {
-  const identity = loadIdentity()
+  const identity = currentIdentity()
   return identity.pairedDevices
     .filter(device => !device.revokedAt)
     .map(toPublicPairedDevice)
@@ -177,24 +280,32 @@ function listPairedDevices() {
 
 function updatePairedDeviceLastSeen(identity, deviceId, context = {}) {
   const now = Date.now()
-  let changed = false
-  const nextDevices = identity.pairedDevices.map(device => {
-    if (device.id !== deviceId || device.revokedAt) return device
-    const lastAddress = normalizeString(context.remoteAddress, device.lastAddress || '', 80)
-    if ((now - (device.lastSeenAt || 0)) < LAST_SEEN_WRITE_INTERVAL_MS && lastAddress === device.lastAddress) {
-      return device
-    }
-    changed = true
-    return {
-      ...device,
-      lastSeenAt: now,
-      lastAddress
-    }
-  })
+  const device = identity.pairedDevices.find(device => device.id === deviceId && !device.revokedAt)
+  if (!device) return
+  const lastAddress = normalizeString(context.remoteAddress, device.lastAddress || '', 80)
+  if (now - (device.lastSeenAt || 0) < LAST_SEEN_WRITE_INTERVAL_MS && lastAddress === device.lastAddress) return
+  const store = identityStore()
+  store.touches.set(deviceId, { tokenHash: device.tokenHash, lastSeenAt: now, lastAddress })
+  scheduleLastSeen(store)
+}
 
-  if (changed) {
-    saveIdentity({ ...identity, pairedDevices: nextDevices })
-  }
+function scheduleLastSeen(store) {
+  if (store.touchTask || !store.touches.size || store.readError) return
+  const task = serializeIdentity(store, async () => {
+    const identity = await readIdentity(store), touches = new Map(store.touches)
+    store.touches.clear()
+    let changed = false
+    const pairedDevices = identity.pairedDevices.map(device => {
+      const touch = touches.get(device.id)
+      if (!touch || device.revokedAt || device.tokenHash !== touch.tokenHash) return device
+      if (touch.lastSeenAt - device.lastSeenAt < LAST_SEEN_WRITE_INTERVAL_MS && touch.lastAddress === device.lastAddress) return device
+      changed = true
+      return { ...device, lastSeenAt: Math.max(device.lastSeenAt, touch.lastSeenAt), lastAddress: touch.lastAddress }
+    })
+    if (changed) { const next = { ...identity, pairedDevices }; await writeIdentity(store, next); publishIdentity(store, next) }
+  })
+  store.touchTask = task.catch(error => { log.warn('[identity] 设备最近访问记录写入失败:', error.message) })
+    .finally(() => { store.touchTask = null; scheduleLastSeen(store) })
 }
 
 function verifyAccessToken(token, context = {}) {
@@ -202,14 +313,14 @@ function verifyAccessToken(token, context = {}) {
 }
 
 function verifyAccessTokenWithType(token, context = {}) {
-  if (typeof token !== 'string' || !token.trim()) {
+  if (identityStore().readError || typeof token !== 'string' || !token.trim()) {
     return {
       authorized: false,
       type: '',
       deviceId: ''
     }
   }
-  const identity = loadIdentity()
+  const identity = currentIdentity()
   const expected = hashToken(identity.accessToken)
   const actual = hashToken(token.trim())
   if (safeHashEqual(expected, actual)) {
@@ -242,7 +353,7 @@ function verifyAccessTokenWithType(token, context = {}) {
 
 function getAccessTokenHashAuthorization(tokenHash) {
   const hash = normalizeString(tokenHash, '', 128)
-  if (!hash) {
+  if (!hash || identityStore().readError) {
     return {
       authorized: false,
       type: '',
@@ -250,7 +361,7 @@ function getAccessTokenHashAuthorization(tokenHash) {
     }
   }
 
-  const identity = loadIdentity()
+  const identity = currentIdentity()
   if (safeHashEqual(hashToken(identity.accessToken), hash)) {
     return {
       authorized: true,
@@ -282,23 +393,22 @@ function isAccessTokenHashAuthorized(tokenHash) {
 
 function revokePairedDevice(deviceId) {
   const id = normalizeString(deviceId, '', 80)
-  if (!id) return false
-
-  const identity = loadIdentity()
-  const nextDevices = identity.pairedDevices.filter(device => device.id !== id)
-  if (nextDevices.length === identity.pairedDevices.length) return false
-  saveIdentity({ ...identity, pairedDevices: nextDevices })
-  return true
+  if (!id) return Promise.resolve(false)
+  return mutateIdentity(identity => {
+    const nextDevices = identity.pairedDevices.filter(device => device.id !== id)
+    return nextDevices.length === identity.pairedDevices.length ? { value: false }
+      : { next: { ...identity, pairedDevices: nextDevices }, value: true }
+  })
 }
 
 function revokePairedDeviceByToken(token) {
-  if (typeof token !== 'string' || !token.trim()) return null
-  const identity = loadIdentity()
+  if (typeof token !== 'string' || !token.trim()) return Promise.resolve(null)
   const actual = hashToken(token.trim())
-  const target = identity.pairedDevices.find(device => !device.revokedAt && safeHashEqual(device.tokenHash, actual))
-  if (!target) return null
-  revokePairedDevice(target.id)
-  return toPublicPairedDevice(target)
+  return mutateIdentity(identity => {
+    const target = identity.pairedDevices.find(device => !device.revokedAt && safeHashEqual(device.tokenHash, actual))
+    return target ? { next: { ...identity, pairedDevices: identity.pairedDevices.filter(device => device.id !== target.id) },
+      value: toPublicPairedDevice(target) } : { value: null }
+  })
 }
 
 function cleanupPairingSessions() {
@@ -313,7 +423,7 @@ function cleanupPairingSessions() {
 function createPairingCode({ endpoint, endpoints, ttlMs = DEFAULT_PAIRING_TTL_MS } = {}) {
   cleanupPairingSessions()
 
-  const identity = loadIdentity()
+  const identity = currentIdentity()
   const pairingId = `pair_${randomBase64Url(8)}`
   const oneTimeSecret = randomBase64Url(24)
   const expiresAt = Date.now() + Math.max(30 * 1000, Number(ttlMs) || DEFAULT_PAIRING_TTL_MS)
@@ -330,6 +440,8 @@ function createPairingCode({ endpoint, endpoints, ttlMs = DEFAULT_PAIRING_TTL_MS
 
   pairingSessions.set(pairingId, {
     pairingId,
+    identityPath: getIdentityPath(),
+    machineSecret: identity.machineSecret,
     oneTimeSecretHash: hashToken(oneTimeSecret),
     endpoint: payload.endpoint,
     endpoints: payload.endpoints,
@@ -350,7 +462,7 @@ function createPairingError(status, code, message) {
 }
 
 function createPendingPairingResult(session) {
-  const identity = loadIdentity()
+  const identity = currentIdentity()
   return {
     status: 'pending',
     pairingRequestId: session.request.id,
@@ -363,40 +475,37 @@ function createPendingPairingResult(session) {
 }
 
 function createApprovedPairingResult(session) {
-  const identity = loadIdentity()
-  const request = session.request || {}
-  const token = randomBase64Url(32)
-  const pairedDeviceId = normalizeString(request.clientId, '', 80) || `mobile_${randomBase64Url(6)}`
-  const now = Date.now()
-  const pairedDevice = {
-    id: pairedDeviceId,
-    name: normalizeString(request.clientName, '手机端', 80),
-    platform: normalizeString(request.platform, '', 40),
-    tokenHash: hashToken(token),
-    createdAt: now,
-    lastSeenAt: now,
-    lastAddress: '',
-    revokedAt: 0
-  }
-  const nextDevices = [
-    ...identity.pairedDevices.filter(device => device.id !== pairedDevice.id),
-    pairedDevice
-  ]
-  saveIdentity({
-    ...identity,
-    pairedDevices: normalizePairedDevices(nextDevices)
+  return mutateIdentity(identity => {
+    if (pairingSessions.get(session.pairingId) !== session || session.machineSecret !== identity.machineSecret) throw createPairingError(410, 'pairing_expired', '绑定二维码已过期，请重新生成')
+    if (session.request?.rejectedAt) throw createPairingError(403, 'pairing_rejected', '电脑端已拒绝本次绑定')
+    const request = session.request || {}
+    const token = randomBase64Url(32)
+    const pairedDeviceId = normalizeString(request.clientId, '', 80) || `mobile_${randomBase64Url(6)}`
+    const now = Date.now()
+    const pairedDevice = {
+      id: pairedDeviceId,
+      name: normalizeString(request.clientName, '手机端', 80),
+      platform: normalizeString(request.platform, '', 40),
+      tokenHash: hashToken(token),
+      createdAt: now,
+      lastSeenAt: now,
+      lastAddress: '',
+      revokedAt: 0
+    }
+    const next = { ...identity, pairedDevices: normalizePairedDevices([
+      ...identity.pairedDevices.filter(device => device.id !== pairedDevice.id), pairedDevice
+    ]) }
+    return { next, value: {
+      status: 'approved',
+      deviceId: identity.deviceId,
+      deviceName: identity.deviceName,
+      endpoint: session.endpoint,
+      endpoints: session.endpoints,
+      token,
+      pairedDeviceId,
+      serverVersion: getAppVersion()
+    } }
   })
-
-  return {
-    status: 'approved',
-    deviceId: identity.deviceId,
-    deviceName: identity.deviceName,
-    endpoint: session.endpoint,
-    endpoints: session.endpoints,
-    token,
-    pairedDeviceId,
-    serverVersion: getAppVersion()
-  }
 }
 
 function toPublicPairingRequest(session) {
@@ -450,18 +559,19 @@ function rejectPairingRequest(pairingRequestId) {
   if (!session || !session.request) {
     throw createPairingError(404, 'pairing_request_not_found', '绑定请求不存在或已过期')
   }
+  if (session.claimPromise) throw createPairingError(409, 'pairing_in_progress', '绑定凭证正在提交，请完成后移除设备')
   session.request.rejectedAt = Date.now()
   return true
 }
 
-function claimPairing({ pairingId, oneTimeSecret, clientId, clientName, platform } = {}) {
+async function claimPairing({ pairingId, oneTimeSecret, clientId, clientName, platform } = {}) {
   cleanupPairingSessions()
 
   const id = normalizeString(pairingId, '', 80)
   const secret = normalizeString(oneTimeSecret, '', 200)
   const normalizedClientId = normalizeString(clientId, '', 80)
   const session = id ? pairingSessions.get(id) : null
-  if (!session || session.expiresAt < Date.now()) {
+  if (!session || session.expiresAt < Date.now() || session.identityPath !== getIdentityPath()) {
     throw createPairingError(410, 'pairing_expired', '绑定二维码已过期，请在电脑端重新生成')
   }
   if (session.claimedAt) {
@@ -480,11 +590,15 @@ function claimPairing({ pairingId, oneTimeSecret, clientId, clientName, platform
     if (requestClientId && normalizedClientId && requestClientId !== normalizedClientId) {
       throw createPairingError(409, 'pairing_in_progress', '二维码正在被另一台设备绑定')
     }
-    const result = session.approvedResult || createApprovedPairingResult(session)
-    session.approvedResult = result
-    session.claimedAt = Date.now()
-    pairingSessions.delete(id)
-    return result
+    if (!session.claimPromise) {
+      session.claimPromise = createApprovedPairingResult(session).then(result => {
+        session.approvedResult = result
+        session.claimedAt = Date.now()
+        pairingSessions.delete(id)
+        return result
+      }).catch(error => { session.claimPromise = null; throw error })
+    }
+    return session.claimPromise
   }
 
   if (session.request) {
@@ -508,7 +622,7 @@ function claimPairing({ pairingId, oneTimeSecret, clientId, clientName, platform
 }
 
 function signScopedToken(scope, subject, expiresAt) {
-  const identity = loadIdentity()
+  const identity = currentIdentity()
   const payload = [
     String(scope || ''),
     String(subject || ''),
@@ -526,7 +640,7 @@ function createScopedToken(scope, subject, ttlMs) {
 }
 
 function verifyScopedToken(scope, subject, token) {
-  if (typeof token !== 'string' || !token.trim()) return false
+  if (identityStore().readError || typeof token !== 'string' || !token.trim()) return false
   const [expiresAtText, signature] = token.split('.')
   const expiresAt = Number(expiresAtText)
   if (!Number.isFinite(expiresAt) || expiresAt < Date.now() || !signature) return false
@@ -538,10 +652,18 @@ function verifyScopedToken(scope, subject, token) {
 }
 
 function createBoundScopedToken(scope, subject, accessToken, ttlMs) {
+  return createBoundScopedTokenSigner(scope, accessToken, ttlMs)(subject)
+}
+
+function createBoundScopedTokenSigner(scope, accessToken, ttlMs) {
+  const { machineSecret } = currentIdentity()
   const tokenHash = hashToken(accessToken)
   const expiresAt = Date.now() + Math.max(1000, Number(ttlMs) || 0)
-  const signature = signScopedToken(scope, `${subject}\n${tokenHash}`, expiresAt)
-  return `${tokenHash}.${expiresAt}.${signature}`
+  return subject => {
+    const signature = crypto.createHmac('sha256', machineSecret)
+      .update([String(scope || ''), `${subject}\n${tokenHash}`, String(expiresAt)].join('\n')).digest('base64url')
+    return `${tokenHash}.${expiresAt}.${signature}`
+  }
 }
 
 function verifyBoundScopedToken(scope, subject, token, options = {}) {
@@ -560,7 +682,7 @@ function verifyBoundScopedToken(scope, subject, token, options = {}) {
 }
 
 function getPublicIdentity() {
-  const identity = loadIdentity()
+  const identity = currentIdentity()
   return {
     deviceId: identity.deviceId,
     deviceName: identity.deviceName,
@@ -569,12 +691,19 @@ function getPublicIdentity() {
 }
 
 module.exports = {
+  getAccessTokenHashAuthorization,
+  onAuthorizationChanged,
   getIdentityPath,
   getIdentityCorruptedAt,
+  getIdentityReadError,
   loadIdentity,
+  refreshIdentity,
+  refreshIdentitySync,
+  flushIdentityWrites,
   rotateAccessToken,
   verifyAccessToken,
   verifyAccessTokenWithType,
+  getAuthorizationRevision,
   listPairedDevices,
   revokePairedDevice,
   revokePairedDeviceByToken,
@@ -586,6 +715,7 @@ module.exports = {
   createScopedToken,
   verifyScopedToken,
   createBoundScopedToken,
+  createBoundScopedTokenSigner,
   verifyBoundScopedToken,
   hashToken,
   signScopedToken,

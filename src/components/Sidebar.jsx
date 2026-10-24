@@ -1,7 +1,11 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import { memo, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
+import appIcon from '../assets/app-icon.svg'
 import { WINDOW_EVENTS } from '../api/events'
 import { createPortal } from 'react-dom'
-import { useApp } from '../context/AppContext'
+import { useAppFields, useAppSelection } from '../context/AppContext'
+import { getPublicDirectories, isPrivateDirectory } from '../utils/directories'
+import { useMediaQuery } from '../hooks/useMediaQuery'
+import { useOverlayFocus } from '../hooks/useOverlayFocus'
 
 const EMPTY_LIST = []
 
@@ -9,11 +13,10 @@ function dirName(dir) {
   return dir.split(/[/\\]/).pop()
 }
 
-export default function Sidebar() {
+function Sidebar() {
   const {
-    sidebarCollapsed,
+    sidebarCollapsed: savedSidebarCollapsed,
     setSidebarCollapsed,
-    settings,
     setSettings,
     currentDir,
     handleDirectoryChange,
@@ -29,15 +32,32 @@ export default function Sidebar() {
     totalCount = 0,
     hiddenTags = [],
     saveSettings
-  } = useApp()
+  } = useAppFields([
+    'sidebarCollapsed', 'setSidebarCollapsed', 'setSettings', 'currentDir',
+    'handleDirectoryChange', 'handleAddDirectory', 'handleDirectoriesChange', 'setShowSettings',
+    'categoryGroups', 'activeCategory', 'includedCategoryKeys', 'excludedCategoryKeys',
+    'setActiveCategory', 'favoriteCount', 'totalCount', 'hiddenTags',
+    'saveSettings'
+  ])
 
-  const directories = settings?.directories || EMPTY_LIST
-  const networkResources = settings?.networkResources || EMPTY_LIST
-  const privateDirectories = settings?.privateDirectories || EMPTY_LIST
-  const privateDirSet = useMemo(() => new Set(privateDirectories), [privateDirectories])
+  const compact = useMediaQuery('(max-width: 900px)')
+  const [compactOpen, setCompactOpen] = useState(false)
+  const sidebarRef = useRef(null)
+  const sidebarCollapsed = compact ? !compactOpen : savedSidebarCollapsed
+  const closeCompact = useCallback(() => setCompactOpen(false), [])
+  useOverlayFocus(sidebarRef, compact && compactOpen, closeCompact)
+  useLayoutEffect(closeCompact, [compact, closeCompact])
+
+  const { directories, networkResources, privateDirectories, privacyPasswordSet } = useAppSelection(state => ({
+    directories: state.settings?.directories || EMPTY_LIST,
+    networkResources: state.settings?.networkResources || EMPTY_LIST,
+    privateDirectories: state.settings?.privateDirectories || EMPTY_LIST,
+    privacyPasswordSet: Boolean(state.settings?.privacy?.passwordSet)
+  }))
+  const privateDirSet = useMemo(() => new Set(directories.filter(dir => isPrivateDirectory(dir, privateDirectories))), [directories, privateDirectories])
   const hiddenPrivateCount = useMemo(
-    () => privateDirectories.filter(dir => directories.includes(dir)).length,
-    [directories, privateDirectories]
+    () => directories.filter(dir => privateDirSet.has(dir)).length,
+    [directories, privateDirSet]
   )
   const [showPrivateDirs, setShowPrivateDirs] = useState(false)
   const [privacyDialogOpen, setPrivacyDialogOpen] = useState(false)
@@ -57,7 +77,6 @@ export default function Sidebar() {
   const [resourceSubmitting, setResourceSubmitting] = useState(false)
   const [libraryView, setLibraryView] = useState('local')
   const [localDirs, setLocalDirs] = useState(() => directories.filter(dir => showPrivateDirs || !privateDirSet.has(dir)))
-  const privacyPasswordSet = Boolean(settings?.privacy?.passwordSet)
   const includedKeySet = useMemo(() => new Set(includedCategoryKeys), [includedCategoryKeys])
   const excludedKeySet = useMemo(() => new Set(excludedCategoryKeys), [excludedCategoryKeys])
   // 用 ref 跟踪最新 hiddenTags，避免快速连续隐藏时 React state 未更新导致覆盖丢失
@@ -83,10 +102,7 @@ export default function Sidebar() {
     }
   }, [directoryMenu])
 
-  const getPublicDirs = useCallback((dirs, privateDirs) => {
-    const privateSet = new Set(privateDirs)
-    return dirs.filter(dir => !privateSet.has(dir))
-  }, [])
+  const getPublicDirs = getPublicDirectories
 
   useEffect(() => {
     if (showPrivateDirs || !currentDir || !privateDirSet.has(currentDir)) return
@@ -121,7 +137,12 @@ export default function Sidebar() {
     return () => window.removeEventListener(WINDOW_EVENTS.PRIVATE_DIRECTORY_PASSWORD_REQUIRED, openPendingPrivateDirectory)
   }, [])
 
-  const lockPrivateDirs = useCallback(() => {
+  const lockPrivateDirs = useCallback(async () => {
+    try {
+      await window.electronAPI?.lockPrivacy?.()
+    } catch (error) {
+      console.error('隐私目录锁定失败:', error)
+    }
     setShowPrivateDirs(false)
     setPrivacyDialogOpen(false)
     setPrivacyPassword('')
@@ -187,8 +208,8 @@ export default function Sidebar() {
     setPrivacyMessage('')
     try {
       const result = privacyPasswordSet
-        ? await window.electronAPI?.unlockPrivacy?.(password)
-        : await window.electronAPI?.setPrivacyPassword?.(password)
+        ? await window.electronAPI?.unlockPrivacy?.(password, { verifyOnly: privacyAction === 'restoreHiddenTags' })
+        : await window.electronAPI?.setPrivacyPassword?.(password, { verifyOnly: privacyAction === 'restoreHiddenTags' })
       if (!result?.success) {
         setPrivacyMessage(result?.error || '隐私验证失败')
         return
@@ -229,6 +250,7 @@ export default function Sidebar() {
   }, [currentDir, getPublicDirs, handleDirectoriesChange, privateDirectories])
 
   const openResourceDialog = useCallback((options = {}) => {
+    setCompactOpen(false)
     setDirectoryMenu(null)
     setResourceMode(options?.mode === 'network' ? 'network' : 'choices')
     setResourceMessage('')
@@ -331,11 +353,13 @@ export default function Sidebar() {
   }, [])
 
   const changeDirectory = useCallback((dir) => {
+    setCompactOpen(false)
     openLocalLibrary()
     handleDirectoryChange(dir)
   }, [handleDirectoryChange, openLocalLibrary])
 
   const openNetworkLibrary = useCallback(() => {
+    setCompactOpen(false)
     setDirectoryMenu(null)
     window.dispatchEvent(new CustomEvent(WINDOW_EVENTS.OPEN_NETWORK_LIBRARY))
   }, [])
@@ -392,6 +416,7 @@ export default function Sidebar() {
   }, [removePrivateDirectory])
 
   const handleCategorySelect = useCallback((categoryKey) => {
+    setCompactOpen(false)
     window.dispatchEvent(new CustomEvent(WINDOW_EVENTS.OPEN_LOCAL_LIBRARY))
     setActiveCategory?.(categoryKey)
   }, [setActiveCategory])
@@ -416,8 +441,12 @@ export default function Sidebar() {
     setPrivacyDialogOpen(true)
   }, [hiddenTags])
 
-  const onToggle = useCallback(() => setSidebarCollapsed(!sidebarCollapsed), [sidebarCollapsed, setSidebarCollapsed])
+  const onToggle = useCallback(() => {
+    if (compact) setCompactOpen(value => !value)
+    else setSidebarCollapsed(!savedSidebarCollapsed)
+  }, [compact, savedSidebarCollapsed, setSidebarCollapsed])
   const onOpenSettings = useCallback(() => {
+    setCompactOpen(false)
     window.dispatchEvent(new CustomEvent(WINDOW_EVENTS.CLOSE_DOWNLOAD_DIALOGS))
     setShowSettings(true)
   }, [setShowSettings])
@@ -484,7 +513,10 @@ export default function Sidebar() {
     : null
 
   return (
-    <aside className={`sidebar${sidebarCollapsed ? ' collapsed' : ''}`} aria-label="导航">
+    <>
+    {compact && compactOpen && <button className="workspace-overlay-scrim" data-overlay-backdrop="" tabIndex={-1} aria-label="关闭导航" onClick={closeCompact} />}
+    <aside ref={sidebarRef} data-compact={compact} className={`sidebar${sidebarCollapsed ? ' collapsed' : ''}${compact && compactOpen ? ' compact-open' : ''}`}
+      role={compact && compactOpen ? 'dialog' : undefined} aria-modal={compact && compactOpen ? true : undefined} tabIndex={-1} aria-label="导航">
       <div className={`sidebar-collapsed-content sidebar-pane${sidebarCollapsed ? ' active' : ''}`} aria-hidden={!sidebarCollapsed} inert={!sidebarCollapsed}>
           <button className="sidebar-toggle-btn" onClick={onToggle} title="展开侧边栏" aria-label="展开侧边栏">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -555,9 +587,7 @@ export default function Sidebar() {
       <div className={`sidebar-full-content sidebar-pane${sidebarCollapsed ? '' : ' active'}`} aria-hidden={sidebarCollapsed} inert={sidebarCollapsed}>
           <div className="sidebar-header">
             <h1 className="sidebar-title">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <polygon points="5 3 19 12 5 21 5 3" />
-              </svg>
+              <img src={appIcon} width="24" height="24" alt="" aria-hidden="true" draggable={false} />
               视频画廊
             </h1>
             <button className="sidebar-toggle-btn" onClick={onToggle} title="收起侧边栏" aria-label="收起侧边栏">
@@ -936,5 +966,8 @@ export default function Sidebar() {
         </div>
       )}
     </aside>
+    </>
   )
 }
+
+export default memo(Sidebar)

@@ -1,9 +1,10 @@
 import { useState, useMemo, useCallback, useEffect, useDeferredValue } from 'react'
+import { aggregateCategoryGroups, categoryKey, createSearchEntry, matchesLibraryQuery, normalizeCategoryKey } from '@wallpaper/domain'
 
 const zhCollator = new Intl.Collator('zh-Hans-CN', { numeric: true, sensitivity: 'base' })
 
 export function getCategoryKey(type, name) {
-  return `${type}:${name}`
+  return categoryKey(type, name)
 }
 
 export function parseCategoryKey(key) {
@@ -49,8 +50,8 @@ function getCustomTags(video) {
 function categoryExists(categoryKey, categoryGroups) {
   if (categoryKey === 'favorites') return true
   const category = parseCategoryKey(categoryKey)
-  if (category.type === 'custom') return categoryGroups.custom.some(item => item.name === category.name)
-  if (category.type === 'system') return categoryGroups.system.some(item => item.name === category.name)
+  if (category.type === 'custom') return categoryGroups.custom.some(item => item.key === normalizeCategoryKey(categoryKey))
+  if (category.type === 'system') return categoryGroups.system.some(item => item.key === normalizeCategoryKey(categoryKey))
   return [...categoryGroups.custom, ...categoryGroups.system].some(item => item.name === categoryKey)
 }
 
@@ -176,17 +177,17 @@ export function useVideoFilter({ videos, customTags, favoriteKeys, hiddenTags })
   }, [videos, customTags])
 
   // 隐藏标签黑名单：含任意隐藏标签的视频从画廊移除（持久化、受密码保护）
-  const hiddenTagSet = useMemo(() => new Set(hiddenTags || []), [hiddenTags])
+  const hiddenTagSet = useMemo(() => new Set((hiddenTags || []).map(normalizeCategoryKey)), [hiddenTags])
   const hiddenFilteredVideos = useMemo(() => {
     if (hiddenTagSet.size === 0) return displayVideos
     return displayVideos.filter(video => {
       const customTagsList = getCustomTags(video)
       const systemTagsList = getSystemTags(video)
       for (const tag of customTagsList) {
-        if (hiddenTagSet.has(`custom:${tag}`)) return false
+        if (hiddenTagSet.has(normalizeCategoryKey(`custom:${tag}`))) return false
       }
       for (const tag of systemTagsList) {
-        if (hiddenTagSet.has(`system:${tag}`)) return false
+        if (hiddenTagSet.has(normalizeCategoryKey(`system:${tag}`))) return false
       }
       return true
     })
@@ -204,27 +205,7 @@ export function useVideoFilter({ videos, customTags, favoriteKeys, hiddenTags })
     })
   }, [hiddenFilteredVideos, sortBy])
 
-  const categoryGroups = useMemo(() => {
-    const customCounts = new Map()
-    const systemCounts = new Map()
-    for (const video of hiddenFilteredVideos) {
-      for (const tag of getCustomTags(video)) {
-        customCounts.set(tag, (customCounts.get(tag) || 0) + 1)
-      }
-      for (const tag of getSystemTags(video)) {
-        systemCounts.set(tag, (systemCounts.get(tag) || 0) + 1)
-      }
-    }
-
-    const toCategories = (counts, type) => Array.from(counts.entries())
-      .map(([name, count]) => ({ name, count, type, key: getCategoryKey(type, name) }))
-      .sort((a, b) => b.count - a.count || zhCollator.compare(a.name, b.name))
-
-    return {
-      custom: toCategories(customCounts, 'custom'),
-      system: toCategories(systemCounts, 'system')
-    }
-  }, [hiddenFilteredVideos])
+  const categoryGroups = useMemo(() => aggregateCategoryGroups(hiddenFilteredVideos), [hiddenFilteredVideos])
 
   const availableTags = useMemo(() => {
     const tags = []
@@ -262,6 +243,7 @@ export function useVideoFilter({ videos, customTags, favoriteKeys, hiddenTags })
     deferredSearchQuery.trim().toLowerCase()
   ), [deferredSearchQuery])
   const trimmedSearchQuery = searchQuery.trim()
+  const searchEntries = useMemo(() => new Map(sortedVideos.map(video => [video, createSearchEntry(video)])), [sortedVideos])
 
   const filteredVideos = useMemo(() => {
     const { included, excluded } = filterState
@@ -271,17 +253,17 @@ export function useVideoFilter({ videos, customTags, favoriteKeys, hiddenTags })
     if (!favoriteOnly && includeTags.length === 0 && excludeTags.length === 0 && !normalizedSearchQuery) {
       return sortedVideos
     }
+    const typedTags = keys => keys.map(parseCategoryKey).filter(tag => tag.type === 'custom' || tag.type === 'system')
+    const query = { includeTags: typedTags(includeTags), excludeTags: typedTags(excludeTags), query: normalizedSearchQuery, sort: sortBy }
+    const legacyIncludes = includeTags.filter(key => !key.startsWith('custom:') && !key.startsWith('system:'))
+    const legacyExcludes = excludeTags.filter(key => !key.startsWith('custom:') && !key.startsWith('system:'))
     return sortedVideos.filter(v => (
       (!favoriteOnly || favoriteKeys.has(v.favoriteKey || v.fullPath)) &&
-      includeTags.every(categoryKey => videoMatchesCategory(v, categoryKey)) &&
-      excludeTags.every(categoryKey => !videoMatchesCategory(v, categoryKey)) &&
-      (!normalizedSearchQuery ||
-        v.name.toLowerCase().includes(normalizedSearchQuery) ||
-        v.fileName?.toLowerCase().includes(normalizedSearchQuery) ||
-        v.group.toLowerCase().includes(normalizedSearchQuery) ||
-        (v.tags || []).some(tag => tag.toLowerCase().includes(normalizedSearchQuery)))
+      legacyIncludes.every(categoryKey => videoMatchesCategory(v, categoryKey)) &&
+      legacyExcludes.every(categoryKey => !videoMatchesCategory(v, categoryKey)) &&
+      matchesLibraryQuery(v, query, searchEntries.get(v))
     ))
-  }, [sortedVideos, normalizedSearchQuery, filterState, favoriteKeys])
+  }, [sortedVideos, normalizedSearchQuery, filterState, favoriteKeys, searchEntries, sortBy])
 
   const hasSearch = trimmedSearchQuery.length > 0
   const { included, excluded } = filterState

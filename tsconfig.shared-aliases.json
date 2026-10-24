@@ -1,0 +1,8 @@
+{
+  "compilerOptions": {
+    "paths": {
+      "@wallpaper/contracts": ["./packages/contracts"],
+      "@wallpaper/domain": ["./packages/domain"]
+    }
+  }
+}

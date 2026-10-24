@@ -2,72 +2,35 @@ const path = require('path')
 const fs = require('fs')
 const fsp = require('fs/promises')
 const crypto = require('crypto')
-const { execFile } = require('child_process')
 const { app } = require('electron')
 const { execFileAsync } = require('./exec')
 const { getUserDataDir } = require('./user-data')
 const { getResourcePath, isPathInside } = require('./paths')
 const { getAllowedVideoDirectories } = require('./settings')
 const { assertAllowedVideoPath, readWallpaperMetadata } = require('./scanner')
-const { setVideoMetadataWarmPaused } = require('./video-metadata')
+const { createMediaAccessPolicy, createMediaAccessPolicyAsync } = require('./security/media-access')
+const { setDesktopPlaybackActive } = require('./media-pressure')
+const { mediaScheduler, taskError } = require('./application/resource-scheduler')
 
 let ffmpegPath = null
 let ffmpegSearchPromise = null
 let ffmpegSearchCompleted = false
-const THUMBNAIL_FFMPEG_CONCURRENCY = 1
 const THUMBNAIL_SCALE = '256:-1'
 const PREVIEW_FRAME_SCALE = '200:-1'
 const THUMBNAIL_QUALITY = '5'
 const PREVIEW_FRAME_CACHE_LIMIT = 240
 const PREVIEW_FRAME_MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000
 const PREVIEW_FRAME_CLEANUP_INTERVAL_MS = 5 * 60 * 1000
-const THUMBNAIL_QUEUE_LIMIT = 120
-const thumbnailJobQueue = []
-let activeThumbnailJobs = 0
 let lastPreviewFrameCleanupAt = 0
-let mediaPlaybackActive = false
-
-function pruneThumbnailQueueForPlayback() {
-  if (!mediaPlaybackActive || thumbnailJobQueue.length <= THUMBNAIL_QUEUE_LIMIT) return
-  for (let index = thumbnailJobQueue.length - 1; index >= 0 && thumbnailJobQueue.length > THUMBNAIL_QUEUE_LIMIT; index -= 1) {
-    const item = thumbnailJobQueue[index]
-    if (item.priority === 'preview') continue
-    thumbnailJobQueue.splice(index, 1)
-    item.resolve(null)
-  }
-}
-
-function drainThumbnailJobs() {
-  while (activeThumbnailJobs < THUMBNAIL_FFMPEG_CONCURRENCY && thumbnailJobQueue.length > 0) {
-    const nextRunnableIndex = thumbnailJobQueue.findIndex(item => (
-      !mediaPlaybackActive || item.priority === 'preview'
-    ))
-    if (nextRunnableIndex < 0) return
-
-    const [{ task, resolve }] = thumbnailJobQueue.splice(nextRunnableIndex, 1)
-    activeThumbnailJobs += 1
-    Promise.resolve()
-      .then(task)
-      .then(resolve, () => resolve(null))
-      .finally(() => {
-        activeThumbnailJobs -= 1
-        drainThumbnailJobs()
-      })
-  }
-}
-
 function enqueueThumbnailJob(task, options = {}) {
-  return new Promise((resolve) => {
-    thumbnailJobQueue.push({ task, resolve, priority: options.priority || 'thumbnail' })
-    pruneThumbnailQueueForPlayback()
-    drainThumbnailJobs()
-  })
+  return mediaScheduler.enqueue({ key: options.key, type: 'image', groupLimit: 1,
+    priority: options.priority === 'preview' ? 80 : options.priority === 'visible' ? 40 : 0,
+    background: options.priority !== 'preview' && options.priority !== 'visible',
+    timeoutMs: options.timeoutMs || 45000, signal: options.signal }, task).catch(() => null)
 }
 
 function setMediaPlaybackActive(active) {
-  mediaPlaybackActive = Boolean(active)
-  setVideoMetadataWarmPaused(mediaPlaybackActive)
-  if (!mediaPlaybackActive) drainThumbnailJobs()
+  setDesktopPlaybackActive(active)
 }
 
 function getThumbnailDir() {
@@ -111,147 +74,103 @@ async function cleanupPreviewFrameCache(force = false) {
   } catch {}
 }
 
-async function findFfmpeg() {
+async function findFfmpeg(options = {}) {
+  if (options.signal?.aborted) throw options.signal.reason || taskError('task_cancelled', '媒体任务已取消', 499)
   if (process.env.WALLPAPER_PLAYER_FFMPEG_PATH) return process.env.WALLPAPER_PLAYER_FFMPEG_PATH
   if (ffmpegPath) return ffmpegPath
   if (ffmpegSearchCompleted) return null
-  if (ffmpegSearchPromise) return ffmpegSearchPromise
-
-  ffmpegSearchPromise = (async () => {
-    const candidates = [
-      getResourcePath('vendor', 'ffmpeg', 'bin', 'ffmpeg.exe'),
-      getResourcePath('vendor', 'ffmpeg', 'ffmpeg.exe'),
-      'ffmpeg',
-      'ffmpeg.exe',
+  if (!options.signal && ffmpegSearchPromise) return ffmpegSearchPromise
+  const search = async () => {
+    const candidates = [getResourcePath('vendor', 'ffmpeg', 'bin', 'ffmpeg.exe'),
+      getResourcePath('vendor', 'ffmpeg', 'ffmpeg.exe'), 'ffmpeg', 'ffmpeg.exe',
       app?.getAppPath ? path.join(app.getAppPath(), 'ffmpeg.exe') : '',
       app?.getAppPath ? path.join(app.getAppPath(), 'ffmpeg') : '',
-      'C:\\ffmpeg\\bin\\ffmpeg.exe',
-      'C:\\Program Files\\ffmpeg\\bin\\ffmpeg.exe'
-    ]
-
-    for (const candidate of candidates) {
+      'C:\\ffmpeg\\bin\\ffmpeg.exe', 'C:\\Program Files\\ffmpeg\\bin\\ffmpeg.exe']
+    for (const candidate of candidates.filter(Boolean)) {
+      if (options.signal?.aborted) throw options.signal.reason
       try {
-        await execFileAsync(candidate, ['-version'], { timeout: 5000 })
-        ffmpegPath = candidate
-        return candidate
-      } catch {
-        continue
-      }
+        await execFileAsync(candidate, ['-version'], { timeout: 5000, signal: options.signal })
+        ffmpegPath = candidate; return candidate
+      } catch (error) { if (options.signal?.aborted) throw options.signal.reason || error }
     }
-
-    return null
-  })()
-
-  try {
-    return await ffmpegSearchPromise
-  } finally {
     ffmpegSearchCompleted = true
-    ffmpegSearchPromise = null
+    return null
   }
+  if (options.signal) return search()
+  ffmpegSearchPromise = search()
+  try { return await ffmpegSearchPromise } finally { ffmpegSearchPromise = null }
 }
 
-async function generateThumbnail(videoPath) {
-  const thumbDir = getThumbnailDir()
+async function createImage(videoPath, outputPath, seconds, scale, access, priority, signature) {
+  const publicPolicy = await createMediaAccessPolicyAsync({ audience: 'remote', signal: access.signal })
+  const publicSource = publicPolicy.canReadResolvedPath(videoPath, false)
+  const scope = publicSource ? 'public' : 'desktop:' + (access.senderId ?? 'default')
+  const result = await enqueueThumbnailJob(async context => {
+    const workerAccess = { ...(publicSource ? { audience: 'remote' } : access), ...context }
+    context.throwIfAborted()
+    await assertAllowedVideoPath(videoPath, workerAccess)
+    if (fs.existsSync(outputPath)) return outputPath
+    const ffmpeg = await findFfmpeg({ signal: context.signal })
+    if (!ffmpeg) return null
+    const temporary = outputPath + '.' + crypto.randomUUID() + '.tmp.jpg'
+    const execute = async offset => {
+      await assertAllowedVideoPath(videoPath, workerAccess)
+      context.throwIfAborted()
+      return execFileAsync(ffmpeg, [
+      ...(offset === null ? [] : ['-ss', String(offset)]), '-threads', '1', '-i', videoPath, '-threads', '1',
+      '-vframes', '1', '-vf', 'scale=' + scale, '-q:v', THUMBNAIL_QUALITY, '-y', temporary
+      ], { timeout: Math.max(1, Math.min(30000, context.deadlineAt - Date.now())), signal: context.signal, maxBuffer: 1024 * 1024 })
+    }
+    try {
+      try { await execute(seconds) } catch (error) {
+        context.throwIfAborted()
+        if (priority === 'preview') throw error
+        await execute(null)
+      }
+      context.throwIfAborted()
+      await assertAllowedVideoPath(videoPath, workerAccess)
+      const current = await fsp.stat(videoPath)
+      if (current.size !== signature.size || Math.round(current.mtimeMs) !== signature.mtimeMs) throw new Error('媒体文件已改变')
+      context.throwIfAborted()
+      await fsp.rename(temporary, outputPath)
+      if (priority === 'preview') cleanupPreviewFrameCache().catch(() => {})
+      return outputPath
+    } finally { await fsp.unlink(temporary).catch(() => {}) }
+  }, { key: 'image:' + outputPath + ':' + scope, priority, signal: access.signal })
+  if (result) await assertAllowedVideoPath(videoPath, access)
+  return result
+}
+
+async function generateThumbnail(videoPath, access = {}) {
+  videoPath = await assertAllowedVideoPath(videoPath, access)
   const thumbName = Buffer.from(videoPath).toString('base64url') + '.jpg'
-  const thumbPath = path.join(thumbDir, thumbName)
-
-  if (fs.existsSync(thumbPath)) {
-    return thumbPath
-  }
-
-  const ffmpeg = await findFfmpeg()
-  if (!ffmpeg) {
-    return null
-  }
-
-  return enqueueThumbnailJob(() => new Promise((resolve) => {
-    if (fs.existsSync(thumbPath)) {
-      resolve(thumbPath)
-      return
-    }
-
-    // 取视频第 1 秒的帧作为缩略图（跳过可能的黑色片头）
-    execFile(ffmpeg, [
-      '-ss', '00:00:01',
-      '-i', videoPath,
-      '-threads', '1',
-      '-vframes', '1',
-      '-vf', `scale=${THUMBNAIL_SCALE}`,
-      '-q:v', THUMBNAIL_QUALITY,
-      '-y',
-      thumbPath
-    ], { timeout: 30000 }, (err) => {
-      if (err) {
-        // 如果 -ss 1 秒失败，尝试第 0 秒
-        execFile(ffmpeg, [
-          '-i', videoPath,
-          '-threads', '1',
-          '-vframes', '1',
-          '-vf', `scale=${THUMBNAIL_SCALE}`,
-          '-q:v', THUMBNAIL_QUALITY,
-          '-y',
-          thumbPath
-        ], { timeout: 30000 }, (err2) => {
-          resolve(err2 ? null : thumbPath)
-        })
-      } else {
-        resolve(thumbPath)
-      }
-    })
-  }))
+  const thumbPath = path.join(getThumbnailDir(), thumbName)
+  if (fs.existsSync(thumbPath)) return thumbPath
+  const stats = await fsp.stat(videoPath)
+  return createImage(videoPath, thumbPath, 1, THUMBNAIL_SCALE, access, access.priority || 'thumbnail',
+    { size: stats.size, mtimeMs: Math.round(stats.mtimeMs) })
 }
 
-async function generatePreviewFrame(videoPath, seconds) {
-  const resolvedPath = await assertAllowedVideoPath(videoPath)
-  const time = Math.max(0, Math.round(Number(seconds) || 0))
-  const stats = await fsp.stat(resolvedPath)
-  const previewDir = getPreviewFrameDir()
-  const signature = `${Math.round(stats.mtimeMs)}-${stats.size}`
-  const cacheKey = crypto.createHash('sha256').update(`${resolvedPath}|${signature}|${time}`).digest('hex')
-  const framePath = path.join(previewDir, `${cacheKey}.jpg`)
-
-  if (fs.existsSync(framePath)) {
-    return framePath
-  }
-
-  const ffmpeg = await findFfmpeg()
-  if (!ffmpeg) {
-    return null
-  }
-
-  return enqueueThumbnailJob(() => new Promise((resolve) => {
-    if (fs.existsSync(framePath)) {
-      resolve(framePath)
-      return
-    }
-
-    execFile(ffmpeg, [
-      '-ss', String(time),
-      '-i', resolvedPath,
-      '-threads', '1',
-      '-vframes', '1',
-      '-vf', `scale=${PREVIEW_FRAME_SCALE}`,
-      '-q:v', THUMBNAIL_QUALITY,
-      '-y',
-      framePath
-    ], { timeout: 30000 }, (err) => {
-      if (err) {
-        fsp.unlink(framePath).catch(() => {})
-      } else {
-        cleanupPreviewFrameCache().catch(() => {})
-      }
-      resolve(err ? null : framePath)
-    })
-  }), { priority: 'preview' })
+async function generatePreviewFrame(videoPath, seconds, access = {}) {
+  const resolvedPath = await assertAllowedVideoPath(videoPath, access)
+  const time = Math.max(0, Math.round(Number(seconds) || 0)), stats = await fsp.stat(resolvedPath)
+  const signature = Math.round(stats.mtimeMs) + '-' + stats.size
+  const cacheKey = crypto.createHash('sha256').update(resolvedPath + '|' + signature + '|' + time).digest('hex')
+  const framePath = path.join(getPreviewFrameDir(), cacheKey + '.jpg')
+  if (fs.existsSync(framePath)) { await assertAllowedVideoPath(resolvedPath, access); return framePath }
+  return createImage(resolvedPath, framePath, time, PREVIEW_FRAME_SCALE, access, 'preview',
+    { size: stats.size, mtimeMs: Math.round(stats.mtimeMs) })
 }
 
-async function getExistingPreviewPath(videoPath) {
+async function getExistingPreviewPath(videoPath, access = {}) {
   let dirPath = path.dirname(videoPath)
   const allowedDirs = getAllowedVideoDirectories()
 
   while (allowedDirs.some(dir => isPathInside(dir, dirPath))) {
     const metadata = await readWallpaperMetadata(dirPath)
-    if (metadata?.previewPath) return metadata.previewPath
+    if (metadata?.previewPath && createMediaAccessPolicy(access).canReadPath(metadata.previewPath)) {
+      return metadata.previewPath
+    }
 
     const parentPath = path.dirname(dirPath)
     if (parentPath === dirPath) break
@@ -261,9 +180,11 @@ async function getExistingPreviewPath(videoPath) {
   return null
 }
 
-async function resolveThumbnail(videoPath) {
-  const resolvedPath = await assertAllowedVideoPath(videoPath)
-  return await getExistingPreviewPath(resolvedPath) || await generateThumbnail(resolvedPath)
+async function resolveThumbnail(videoPath, access = {}) {
+  const resolvedPath = await assertAllowedVideoPath(videoPath, access)
+  const result = await getExistingPreviewPath(resolvedPath, access) || await generateThumbnail(resolvedPath, access)
+  if (result) await assertAllowedVideoPath(resolvedPath, access)
+  return result
 }
 
 module.exports = {

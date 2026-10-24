@@ -1,0 +1,360 @@
+{
+  "date": "2026-10-18T14:02:02.321Z",
+  "stage": "R7 batch 11: player panel ownership and native layout",
+  "sourceDigests": {
+    "mobile/App.tsx": "d69e3d903c2a560e4b558d2f389a48e5f48f88d66a022ce7b68e23bb8966fd8a",
+    "mobile/src/AppNavigator.tsx": "c4cacc8f12f40bb6f89910fafd2b26682e91a5dacd580d4f7860deea5f0a96ab",
+    "mobile/src/theme.ts": "9b9a2d4e76d609b2fb2bed18c999d8be2d232720323191c62f2b39c530b0641a",
+    "mobile/src/screens/PlayerScreen.tsx": "03dfee072cef5fab56880cf5fe40e502f60c1e7bef02ed3a6dd1431c54726f85",
+    "mobile/src/screens/DeviceListScreen.tsx": "acf368835b8e282f0467f7a106fd25e1509e79a3b5c316c989d40d623fb0a474",
+    "mobile/src/components/AccessibleModal.tsx": "f079bdc22b1033b504c7dfff3f5a6693f82448e73d0b7c1ef7d4535910409232",
+    "mobile/src/components/player/PlayerSheetFrame.tsx": "6d2646becf3a509139d7a1fbe0b22409ce05d394fd13fb5fb629bddbdba4c5d1",
+    "mobile/src/components/player/PlayerMoreSheet.tsx": "7caa11645220f5abf3309af74a7a55f413bfc9f2e10825e68aae1dd8e6189909",
+    "mobile/src/components/player/TagEditorSheet.tsx": "f992a6a1a873c1846e2d1534201fda7c9c718a45f2fa2917dfadfe1c2bdbd69b",
+    "mobile/src/components/player/VideoAnalysisSheet.tsx": "3a07d4302fc8898bcbcddf2f1e65fb44e017d7fdb8bc08acefe9475731cee8be",
+    "mobile/src/components/player/VideoActionBar.tsx": "6877ee74eaf6a131ecaea08911cb243cb9a322e97918cd364afde31cbdb35126",
+    "mobile/src/components/player/VideoOverlay.tsx": "48ab547045366f65eed4fb97fae10298f2265c86104e872d2b8696eb6419eb7d",
+    "mobile/src/components/player/PlayerControls.tsx": "8110761189ae66461b323207a023ef42359346c095331e4ad614cd75e6693d64",
+    "mobile/src/hooks/usePlayerSheet.ts": "4ecef34ef84429505859affb6cff760295a67e78425a328a481721871fe64c24",
+    "mobile/src/hooks/useTagEditorDraft.ts": "849a05bd3a0007dd654bd9d8ed88ff59f3382bab5bec288d96bd070eba8f79a6",
+    "scripts/verify-mobile-player-panels.js": "fb301aa5d7abbb2c651893446385a9ef6bd8101f3561f97acc9837b73e5db8c0",
+    "scripts/verify-mobile-player-structure.js": "be78a2f73540edd5aa96a73c3c11d5e79285a03c51dca5daa067629205aff00c",
+    "scripts/verify-mobile-player-behavior.js": "8d52db9a5d747f52f827cbd97bf8d55e6f1c844021d75b9d212f31f03d9e24e2",
+    "scripts/verify-tag-conflicts.js": "a06a23c65f8eb4af47229faaceb6a6c74e651eb9bd27700656e65198edbe2a32",
+    "scripts/verify-analysis-ui-lifecycle.js": "fd99797a4aded6ee4fc68be50c6186edd55f99e4885aa3913f0930cc2f0f6cce",
+    "scripts/verify-mobile-bundles.js": "8ef2586b376a8985e47e29d5121f1cb3b51d42907befa899809a92b19d518334",
+    "package.json": "9c901aee7a96ff65ddef398ee529044598b4d3d9c6b75bfe47d2295acfef532a",
+    ".github/workflows/ci.yml": "bda2e56d49b3c4e4774ead0d6d1b758196b1ea85bc5667a2dde469ffa6105434",
+    "docs/refactor-progress.md": "9384395a7e5c9d6fd15a4f05264f77696f8aca93fe055a9b8fb0e01a3bcd7c5a",
+    "docs/desktop-mobile-review-and-refactor-plan.md": "9051c0466f2cf9ce2e3b9f438562ffff06647a7b2afa39031924903386ee04d0",
+    "docs/mobile-real-device-qa.md": "e9f0d1457c54bdf12e4bfd47efa83955153bf565fbd8c7b2830b4e0f5a92e1c9"
+  },
+  "keyboardBefore": {
+    "date": "2026-10-18T13:47:52.622Z",
+    "apkSha256": "db0eecb8ca77c9ade2999e1a4e0e5290b973bcb1efcdb26e02aab5dc89dd32fe",
+    "frameSha256": "0c3267d652a8e9d6cb22d0e1fe6ed4082aceb1129446bad9a5c32f5ece6f9bb7",
+    "saveButtonBottom": 1047,
+    "imeTop": 981,
+    "keyboardOverlapPixels": 66,
+    "conditions": "Same owned Android emulator, 1x font, production panel before safe-area keyboard offset. Raw screenshot and UI hierarchy; IME top from dumpsys window."
+  },
+  "baseline": {
+    "capturedAt": "2026-10-17T17:34:38.186Z",
+    "sourceDigests": {
+      "mobile/src/screens/PlayerScreen.tsx": "007bf66af83d75f6ec27475a10a84c6b70f96f1be58e86799f3d5588f96c34af",
+      "mobile/src/screens/DeviceListScreen.tsx": "29365f0f1f76450baadd42e7381dd9f8c21cf8fe9c8159f467443eaadadb390b",
+      "mobile/src/components/player/PlayerMoreSheet.tsx": "b5f45a3b8d091eecce53746a5790449e8cb974112b73e07334bd7fcbf068dac5",
+      "mobile/src/components/player/TagEditorSheet.tsx": "bc72957f30acfb542f1df97a21a83bb885e76212ce60b8a785daaba77ebf184c",
+      "mobile/src/components/player/VideoAnalysisSheet.tsx": "4e77887f7def2bfdc4f2b336b829b23f37bae4568c1ae035b0da0d41450bd057",
+      "mobile/src/components/AccessibleModal.tsx": "508cc62d80cff065d4a0211041fecaea85e35279877f72f339df4d27c8360e1b",
+      "mobile/src/theme.ts": "9b9a2d4e76d609b2fb2bed18c999d8be2d232720323191c62f2b39c530b0641a"
+    },
+    "native": {
+      "date": "2026-10-17T17:51:44.701Z",
+      "apkSha256": "3d20d7f0097890f1a638269ff909bfdf6e939ffb4a0c28ffbf3f071b4cf1e593",
+      "backFromMoreLeftPlayer": true,
+      "conditions": "Actual prior debug APK/current-at-start production Hermes, owned Android emulator, production authenticated isolated HTTP media library and generated H264 test file. Analysis responses are synthetic. Not a physical-device performance claim."
+    }
+  },
+  "panelBehavior": {
+    "date": "2026-10-18T13:49:11.928Z",
+    "behavior": {
+      "singleNativeOwner": true,
+      "outsideVirtualizedPages": true,
+      "backKeepsPlayer": true,
+      "tagDraftSurvivesBackground": true,
+      "analysisSelectionSurvivesBackground": true,
+      "lateCloseClipboardAndMutationEventsRejected": true,
+      "failedAddKeepsSelection": true,
+      "totalAddRequestsWithOneRetry": 2,
+      "liveQualityRequests": 1,
+      "playlistHideApplied": true
+    },
+    "conditions": "Production PlayerScreen/hooks/frame; native player/windows/events and selected API/clipboard results controlled. Verifies ownership, draft and callback behavior; native layout and reader/device gates are separate."
+  },
+  "checks": [
+    "mobile typecheck",
+    "verify:mobile-player (includes actual panel behavior and transcode cache lifecycle)",
+    "verify:tag-conflicts",
+    "verify:mobile-correctness",
+    "verify:player-resources (30 controlled screen cycles)",
+    "verify:analysis-interests",
+    "verify:mobile-navigation",
+    "verify:mobile-accessibility",
+    "verify:mobile-input-accessibility",
+    "Android and iOS production Hermes export and source-map verification",
+    "git diff --check"
+  ],
+  "bundles": [
+    {
+      "platform": "android",
+      "bytes": 3099440,
+      "modules": 2513,
+      "reactVersion": "19.2.3",
+      "sharedContracts": true
+    },
+    {
+      "platform": "ios",
+      "bytes": 3095792,
+      "modules": 2517,
+      "reactVersion": "19.2.3",
+      "sharedContracts": true
+    }
+  ],
+  "bundleArtifacts": {
+    "android": {
+      "bytes": 3099440,
+      "sha256": "66670f042bb9b0e42f211a71bc9667c94b95e21ead2e91116ce0709b1549762a",
+      "sourceMapSha256": "e7efd92a3c8faf0e61143f3f854fa131c6bc8becd6ac4ba6edb90489df556b5c"
+    },
+    "ios": {
+      "bytes": 3095792,
+      "sha256": "eefd662e88d4a0fad327cc1a3d41f05b059aec2f491a8d344c1e8b9dd15d1a31",
+      "sourceMapSha256": "e51803066d77e1d02d6deeac435bccce0a6b2bc113c16f435573564fddb0017d"
+    }
+  },
+  "native": {
+    "date": "2026-10-18T14:00:10.955Z",
+    "apkSha256": "f3ef7bd54faf3a497c0115260333f7728f747380296cbcd9472524d98fbb27ef",
+    "api": 36,
+    "abi": "x86_64",
+    "density": 440,
+    "logicalPortraitWidth": 320,
+    "reusedIsolatedBinding": true,
+    "keyboard": {
+      "imeTop": 981,
+      "saveBounds": {
+        "left": 36,
+        "top": 740,
+        "right": 844,
+        "bottom": 879,
+        "width": 808,
+        "height": 139
+      }
+    },
+    "core": {
+      "backFromMoreKeepsPlayer": true,
+      "backgroundExcludedFromModalTree": true,
+      "speedChangeNoticeVisible": true,
+      "tagSaveAboveKeyboard": true,
+      "tagDraftSurvivesHome": true,
+      "tagSaved": true,
+      "candidateTagsReachable": true,
+      "removeConfirmationBackDismisses": true
+    },
+    "results": [
+      {
+        "prefix": "dark-font2_5",
+        "landscape": false,
+        "allPanelCloseTargets48dp": true,
+        "tagSaveVisible": true,
+        "analysisRefreshReachable": true
+      },
+      {
+        "prefix": "light-font2_5-landscape",
+        "landscape": true,
+        "allPanelCloseTargets48dp": true,
+        "tagSaveVisible": true,
+        "analysisRefreshReachable": true
+      }
+    ],
+    "continuation": "The current-APK core run passed panel/back/keyboard/Home/save/analysis, then the fixture expected the pair root instead of the devices root for a reused binding. A continuation passed remove confirmation and the dark large-font matrix; it looked for the theme directly in the drawer instead of entering Settings. The light phase continued from that drawer through the actual Settings and All Videos UI. Each continuation verifies the same installed APK digest and saved-tag HTTP state. Capture timestamps/checkpoint logs retain the completed phases; no app build or code changed across these runs.",
+    "conditions": "Production app/current Hermes in debug APK; owned API36 x86_64 emulator; isolated pre-approved fixture binding, production authenticated HTTP library/media/tag endpoints and generated 8s H264. Analysis GET is schema-validated synthetic; no model ran. No physical phone, iOS native, reader or performance acceptance claim.",
+    "apkBytes": 67945541,
+    "embeddedHermesSha256": "66670f042bb9b0e42f211a71bc9667c94b95e21ead2e91116ce0709b1549762a",
+    "abis": [
+      "x86_64"
+    ],
+    "fixtureSummary": {
+      "date": "2026-10-18T14:01:09.118Z",
+      "analysisReads": 5,
+      "mediaRequests": 8,
+      "tagWrites": 2,
+      "conditions": "Production isolated authenticated HTTP library/media/tag service and real generated H264 MP4. Test-only network advertisement uses emulator host alias. Analysis GET is a schema-validated synthetic route behind production authorization and media resolution; no model ran."
+    },
+    "captures": [
+      {
+        "file": "r7-player-panels/native-before-player.png",
+        "bytes": 244218,
+        "sha256": "e454623f69117d2356ccd783f933370f59776310b72d17f18b118cdd54ba4212"
+      },
+      {
+        "file": "r7-player-panels/native-before-player.xml",
+        "bytes": 56319,
+        "sha256": "3ba8a303d99c9ea819810070f715c0b16e17560dcd8c3e7fb5ab3000290b03e0"
+      },
+      {
+        "file": "r7-player-panels/native-before-more.png",
+        "bytes": 184590,
+        "sha256": "f8f3d21b2b3975bd094307820a093154b023cef1c121c553dea0036ba652c55b"
+      },
+      {
+        "file": "r7-player-panels/native-before-more.xml",
+        "bytes": 84470,
+        "sha256": "b91db3c4079bf596455c57c2ac144db62756465a56de7cc6ab798c4365148958"
+      },
+      {
+        "file": "r7-player-panels/native-before-after-back.png",
+        "bytes": 117375,
+        "sha256": "68e711969f6f57296d405a04266109e21ff1df9c5ad43b16900e643b3f33c704"
+      },
+      {
+        "file": "r7-player-panels/native-before-after-back.xml",
+        "bytes": 26278,
+        "sha256": "f893ad9026f8d545af2fd96e5ed2addcc2a957a450fa012ec7d348f526cbbd50"
+      },
+      {
+        "file": "r7-player-panels/native-after-player-progress-clearance.png",
+        "bytes": 248418,
+        "sha256": "8b0097b06a3a7143f34f15d91bd8504c368486f6fc89346d32508b8e9de05ecf"
+      },
+      {
+        "file": "r7-player-panels/native-after-player-progress-clearance.xml",
+        "bytes": 56340,
+        "sha256": "216be24c4a3bbf65ab9e95e8d02328b1b78918c0bc1599513e7f43ec6685a0e6"
+      },
+      {
+        "file": "r7-player-panels/native-after-dark-font1-more.png",
+        "bytes": 131982,
+        "sha256": "a794bdbe23dd84bbf3dd86f7911bcfcabefee95a150e3b495c4543a23f8b8b89"
+      },
+      {
+        "file": "r7-player-panels/native-after-dark-font1-more.xml",
+        "bytes": 19690,
+        "sha256": "032517c0f8e21a346442c3a8cb1b76cdc455361cb87e65fd54d85fe4730bd391"
+      },
+      {
+        "file": "r7-player-panels/native-after-after-more-back.png",
+        "bytes": 250451,
+        "sha256": "242c47c98ecd2bb16969c077ae5f29307310f74b32a9131870302beca72686a3"
+      },
+      {
+        "file": "r7-player-panels/native-after-after-more-back.xml",
+        "bytes": 64655,
+        "sha256": "989c8d4bf087f1440e791c10396eae730baa385719d4ea42eba25ca25d325bd2"
+      },
+      {
+        "file": "r7-player-panels/native-after-tag-keyboard.png",
+        "bytes": 133997,
+        "sha256": "1d6d787b84292535b4d9b12a8f55d4692172cc5f13a197fd32c30ddfb1aff3de"
+      },
+      {
+        "file": "r7-player-panels/native-after-tag-keyboard.xml",
+        "bytes": 15709,
+        "sha256": "2349c518b26d08d234de1a1b49daa4674b5ab07ff0cdb2833100054449a9b1d8"
+      },
+      {
+        "file": "r7-player-panels/native-after-tag-draft-restored.png",
+        "bytes": 130563,
+        "sha256": "55396c61e0c9790931702c87a3ebcd79dc887449213e5f61c521a206075034eb"
+      },
+      {
+        "file": "r7-player-panels/native-after-tag-draft-restored.xml",
+        "bytes": 15737,
+        "sha256": "b2f863bfc96d1604b6b5f79b4de6c76c6efb98f94bb55638244af6fb1253ada5"
+      },
+      {
+        "file": "r7-player-panels/native-after-after-tag-save.png",
+        "bytes": 248145,
+        "sha256": "4e143ff285ab3070e0cca149d09a6e8e490e3675abe4b544096486215eb24bbf"
+      },
+      {
+        "file": "r7-player-panels/native-after-after-tag-save.xml",
+        "bytes": 56364,
+        "sha256": "23535c0d05692c18e052a2abd6c3024d150cbd317ea4a55cdb8f45e5d0d27744"
+      },
+      {
+        "file": "r7-player-panels/native-after-dark-font1-analysis.png",
+        "bytes": 190200,
+        "sha256": "6d846c11cf9b94c5df345668061825325d4d009095740066116ab239afc82553"
+      },
+      {
+        "file": "r7-player-panels/native-after-dark-font1-analysis.xml",
+        "bytes": 18078,
+        "sha256": "4a345ac38d3741a2a0787a7548ddcfb803e0f0803d01f3d27228aed0a61f0991"
+      },
+      {
+        "file": "r7-player-panels/native-after-remove-confirm.png",
+        "bytes": 103930,
+        "sha256": "9d406d984f4345da32dc8964dd6f0868cea6e38813a14e93b4700cefdd384901"
+      },
+      {
+        "file": "r7-player-panels/native-after-remove-confirm.xml",
+        "bytes": 7082,
+        "sha256": "d8cbe31884a5dbe57e35ae9bb04a1966827f1933e20e5e59640c97518625cc43"
+      },
+      {
+        "file": "r7-player-panels/native-after-dark-font2_5-more.png",
+        "bytes": 144942,
+        "sha256": "cfd3cc8a28ebb1fb36b042d647eb6243739f300dfacc735a227ab09f3f4509f0"
+      },
+      {
+        "file": "r7-player-panels/native-after-dark-font2_5-more.xml",
+        "bytes": 8922,
+        "sha256": "1a3eefe455da465582a57ba517d2c26b74d01b4445b86bdc44c7c00b4081b2e0"
+      },
+      {
+        "file": "r7-player-panels/native-after-dark-font2_5-tags.png",
+        "bytes": 138507,
+        "sha256": "b7bb95c6c9c8314126a7546b329430c17c79a0af67a60845d96ff3a092e52ec5"
+      },
+      {
+        "file": "r7-player-panels/native-after-dark-font2_5-tags.xml",
+        "bytes": 10027,
+        "sha256": "e76ccb57859c3dcb7df7b275fd3b045e17776e6fc3151ef1a9ea97c23194f9cc"
+      },
+      {
+        "file": "r7-player-panels/native-after-dark-font2_5-analysis.png",
+        "bytes": 137669,
+        "sha256": "39d47b8ccfb072b5224fb7d67921cc12f11277a025ac11787e1b0d448a1a74ea"
+      },
+      {
+        "file": "r7-player-panels/native-after-dark-font2_5-analysis.xml",
+        "bytes": 9278,
+        "sha256": "3757de231b5e6d610f109ce8660d6f1499387d8806a7e92417f5311f55d12705"
+      },
+      {
+        "file": "r7-player-panels/native-after-light-font2_5-landscape-more.png",
+        "bytes": 166285,
+        "sha256": "341845a8448ac0fc332f2606b2d91438e56697cc538c228514c4c881038bf8a3"
+      },
+      {
+        "file": "r7-player-panels/native-after-light-font2_5-landscape-more.xml",
+        "bytes": 7437,
+        "sha256": "87f080183b39754fd0dbb0be6d92a7d983cb683c28dfa8697a6c915e7c10821f"
+      },
+      {
+        "file": "r7-player-panels/native-after-light-font2_5-landscape-tags.png",
+        "bytes": 141452,
+        "sha256": "e2adba881b8a4f5a6c3357dc3fe3ef15e0987683c42b23dcc9063f7de97f2611"
+      },
+      {
+        "file": "r7-player-panels/native-after-light-font2_5-landscape-tags.xml",
+        "bytes": 8899,
+        "sha256": "a5c1ea3d85d877ba353f4790ce6d9ec695cba162c8399e6856f8d1cfcbf32e27"
+      },
+      {
+        "file": "r7-player-panels/native-after-light-font2_5-landscape-analysis.png",
+        "bytes": 169324,
+        "sha256": "2a16ef849058bb2a2bcdd334e10d913a0da444091845e2ded6f49e1d982123fd"
+      },
+      {
+        "file": "r7-player-panels/native-after-light-font2_5-landscape-analysis.xml",
+        "bytes": 8172,
+        "sha256": "1c5ce7c976317be400592455663d076c149174f22f6b321842f776308c6504aa"
+      },
+      {
+        "file": "r7-player-panels/keyboard-before.png",
+        "bytes": 142968,
+        "sha256": "cadfd0f702009138f780c13eefc0d0824da4da028f2428ca42cb2e3e2fe52606"
+      },
+      {
+        "file": "r7-player-panels/keyboard-before.xml",
+        "bytes": 15716,
+        "sha256": "f9950ef2f13e11f52af695a6c3d8fc0737804e061e229aeb8c8db98401e043df"
+      }
+    ],
+    "fixtureNotes": "Binding uses an isolated pre-approved synthetic token, actual UI submission, production authenticated HTTP library/media/tag handlers and a generated 8s H264 clip. Long ADB input is chunked and checked before submission; scroll targets must expose at least 48dp. System UI startup and failed automation attempts are excluded from passing captures. Fixture HTTP counters are cumulative across attempts, not final-run-only. After closing a modal UIAutomator can include retained library nodes; player presence and screenshots establish the foreground instead of treating an underlying search node as navigation. Analysis GET is synthetic and schema-validated; no model or camera ran."
+  },
+  "scope": "Current mobile panel refactor and remove Alert cancelability only. Desktop implementation unchanged in this batch. Native Android debug APK on one owned emulator; no signed release, iOS native, physical phone, native reader, FPS/PSS, 60-minute or complete R6/R7/R8 acceptance claim."
+}

@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "desktopArch": "x64",
+  "desktopSigning": {
+    "required": false,
+    "certificateSha256": null
+  },
+  "android": {
+    "abi": "arm64-v8a",
+    "minServerProtocol": 1,
+    "signingState": "migration-required",
+    "certificateSha256": null,
+    "previous": {
+      "applicationId": "com.wallpaperplayer.mobile",
+      "version": "0.1.4",
+      "versionCode": 5,
+      "certificateSha256": "fac61745dc0903786fb9ede62a962b399f7348f0bb6f899b8332667591033b9c",
+      "debugCertificate": true,
+      "apkSha256": "f7e46638aa17f66ce68c9c96484909667af7e720bcc63fdc4f46ced39cbaec22"
+    }
+  }
+}

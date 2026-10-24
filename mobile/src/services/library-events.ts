@@ -1,9 +1,10 @@
 import type { VideoItem } from '../types'
 
-type VideoLibraryPatch = Partial<Pick<VideoItem, 'favorite' | 'customTags' | 'tags' | 'group'>>
+type VideoLibraryPatch = Partial<Pick<VideoItem, 'favorite' | 'customTags' | 'customTagsRevision' | 'tags' | 'group'>>
 
 export type VideoLibraryUpdate = {
   deviceId: string
+  bindingId?: string
   videoId: string
   patch: VideoLibraryPatch
 }

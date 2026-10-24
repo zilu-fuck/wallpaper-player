@@ -1,0 +1,1179 @@
+{
+  "date": "2026-10-19T09:54:21.121Z",
+  "stage": "R8 Electron 44 upgrade with Windows x64 application and packaged playback smoke",
+  "environment": {
+    "node": "v24.14.0",
+    "platform": "win32",
+    "arch": "x64",
+    "osRelease": "10.0.26300",
+    "cpu": "AMD Ryzen 7 5800X 8-Core Processor             "
+  },
+  "runtime": {
+    "before": "35.7.5",
+    "pinned": "44.9.0",
+    "chrome": "152.0.7977.167",
+    "embeddedNode": "24.22.0",
+    "v8": "15.2.124.43-electron.0",
+    "devNodeMinimum": ">=22.12.0",
+    "installedBinaryVersion": "44.9.0"
+  },
+  "dependencyChanges": [
+    {
+      "path": "node_modules/@electron/get",
+      "before": "2.0.3",
+      "after": "5.1.0",
+      "integrity": "sha512-3kSBtG8ObcTVfXanm5vVJ6UnBLEVmVsRk1M+vGqCuMBV+XLCbJYuWQful+yIy0GQDsSlK0kHEriEHn7SPk4EnA=="
+    },
+    {
+      "path": "node_modules/@types/node",
+      "before": "22.19.21",
+      "after": "24.19.2",
+      "integrity": "sha512-93d49wCWJkCyN87MxLpNN6KXPCwFw7bVUg79mGUV1OS40JGWwVCr8n61DXCSqz7CV6/VfPkb7xec7uP2M+QHWQ=="
+    },
+    {
+      "path": "node_modules/@types/yauzl",
+      "before": "2.10.3",
+      "after": null,
+      "integrity": null
+    },
+    {
+      "path": "node_modules/buffer-crc32",
+      "before": "0.2.13",
+      "after": null,
+      "integrity": null
+    },
+    {
+      "path": "node_modules/electron",
+      "before": "35.7.5",
+      "after": "44.9.0",
+      "integrity": "sha512-boP8zA5OIoMGYe3uWP4IqB1VJNoEzdHYgcBaVYnd1DBv5TogwXkbM4yJGSfNmYCzalVQ5J3TAIbaKOY+ILTnyg=="
+    },
+    {
+      "path": "node_modules/extract-zip",
+      "before": "2.0.1",
+      "after": null,
+      "integrity": null
+    },
+    {
+      "path": "node_modules/fd-slicer",
+      "before": "1.1.0",
+      "after": null,
+      "integrity": null
+    },
+    {
+      "path": "node_modules/fs-extra",
+      "before": "8.1.0",
+      "after": null,
+      "integrity": null
+    },
+    {
+      "path": "node_modules/pend",
+      "before": "1.2.0",
+      "after": null,
+      "integrity": null
+    },
+    {
+      "path": "node_modules/undici-types",
+      "before": "6.21.0",
+      "after": "7.24.6",
+      "integrity": "sha512-WRNW+sJgj5OBN4/0JpHFqtqzhpbnV0GuB+OozA9gCL7a993SmU+1JBZCzLNxYsbMfIeDL+lTsphD5jN5N+n0zg=="
+    },
+    {
+      "path": "node_modules/yauzl",
+      "before": "2.10.0",
+      "after": null,
+      "integrity": null
+    },
+    {
+      "path": "node_modules/@electron-internal/extract-zip",
+      "before": null,
+      "after": "1.0.5",
+      "integrity": "sha512-+bqFCP98pLI0Tt0XQo1TmlXtwjWchISndDOxCkEcIuUgXWpBnLyRI+2DU+mesvnMMX6L1XDqYNA0lXNDHd/yiA=="
+    },
+    {
+      "path": "node_modules/@electron/get/node_modules/env-paths",
+      "before": null,
+      "after": "3.0.0",
+      "integrity": "sha512-dtJUTepzMW3Lm/NPxRf3wP4642UWhjL2sQxc+ym2YMj1m/H2zDNQOlezafzkHwn6sMstjHTwG6iQQsctDW/b1A=="
+    },
+    {
+      "path": "node_modules/@electron/get/node_modules/semver",
+      "before": null,
+      "after": "7.8.5",
+      "integrity": "sha512-Y7/KDsb8LjooZpwaqGyulO6DQlksgCncchHGk+sZIY4SBvUocMBEFH5Ur1fI4dV+Jvl0w6cjvucaIi40puRioA=="
+    },
+    {
+      "path": "node_modules/@electron/get/node_modules/undici",
+      "before": null,
+      "after": "7.30.1",
+      "integrity": "sha512-03KrMbjIFDWQR5RNPrSw3bd1r12JpyFQl9/yxjUbJtqkjmllqC5lFjZh6ujeuJCKr8EOQvRW872Oy/az+nLYxg=="
+    }
+  ],
+  "auditBefore": {
+    "evidence": "docs/evidence/r8-dependency-patches.json",
+    "full": {
+      "info": 0,
+      "low": 0,
+      "moderate": 8,
+      "high": 2,
+      "critical": 0,
+      "total": 10
+    },
+    "omitDev": {
+      "info": 0,
+      "low": 0,
+      "moderate": 0,
+      "high": 0,
+      "critical": 0,
+      "total": 0
+    }
+  },
+  "audits": {
+    "full": {
+      "totals": {
+        "info": 0,
+        "low": 0,
+        "moderate": 8,
+        "high": 0,
+        "critical": 0,
+        "total": 8
+      },
+      "raw": {
+        "file": ".tmp/refactor-tests/r8-electron44/audit-full-after.json",
+        "bytes": 4666,
+        "sha256": "0701afa28242da215a6ea4f88b1931ea2c83968f197192fd9d3641f8925bcc12"
+      },
+      "vulnerabilities": {
+        "@electron/get": {
+          "severity": "moderate",
+          "nodes": [
+            "node_modules/app-builder-lib/node_modules/@electron/get"
+          ],
+          "range": "1.6.0 - 4.0.3",
+          "effects": [
+            "app-builder-lib"
+          ],
+          "fixAvailable": {
+            "name": "electron-builder",
+            "version": "26.5.0",
+            "isSemVerMajor": true
+          },
+          "via": [
+            "global-agent"
+          ]
+        },
+        "app-builder-lib": {
+          "severity": "moderate",
+          "nodes": [
+            "node_modules/app-builder-lib"
+          ],
+          "range": "26.6.0 - 27.0.0-alpha.2",
+          "effects": [
+            "dmg-builder",
+            "electron-builder",
+            "electron-builder-squirrel-windows"
+          ],
+          "fixAvailable": {
+            "name": "electron-builder",
+            "version": "26.5.0",
+            "isSemVerMajor": true
+          },
+          "via": [
+            "@electron/get",
+            "dmg-builder",
+            "electron-builder-squirrel-windows"
+          ]
+        },
+        "dmg-builder": {
+          "severity": "moderate",
+          "nodes": [
+            "node_modules/dmg-builder"
+          ],
+          "range": "26.6.0 - 27.0.0-alpha.2",
+          "effects": [
+            "electron-builder"
+          ],
+          "fixAvailable": {
+            "name": "electron-builder",
+            "version": "26.5.0",
+            "isSemVerMajor": true
+          },
+          "via": [
+            "app-builder-lib"
+          ]
+        },
+        "electron-builder": {
+          "severity": "moderate",
+          "nodes": [
+            "node_modules/electron-builder"
+          ],
+          "range": "19.25.0 || 26.6.0 - 27.0.0-alpha.2",
+          "effects": [],
+          "fixAvailable": {
+            "name": "electron-builder",
+            "version": "26.5.0",
+            "isSemVerMajor": true
+          },
+          "via": [
+            "app-builder-lib",
+            "dmg-builder"
+          ]
+        },
+        "electron-builder-squirrel-windows": {
+          "severity": "moderate",
+          "nodes": [
+            "node_modules/electron-builder-squirrel-windows"
+          ],
+          "range": "26.6.0 - 27.0.0-alpha.2",
+          "effects": [],
+          "fixAvailable": true,
+          "via": [
+            "app-builder-lib"
+          ]
+        },
+        "global-agent": {
+          "severity": "moderate",
+          "nodes": [
+            "node_modules/global-agent"
+          ],
+          "range": "<=3.0.0",
+          "effects": [
+            "@electron/get"
+          ],
+          "fixAvailable": {
+            "name": "electron-builder",
+            "version": "26.5.0",
+            "isSemVerMajor": true
+          },
+          "via": [
+            "roarr"
+          ]
+        },
+        "roarr": {
+          "severity": "moderate",
+          "nodes": [
+            "node_modules/roarr"
+          ],
+          "range": "<=2.15.4",
+          "effects": [
+            "global-agent"
+          ],
+          "fixAvailable": {
+            "name": "electron-builder",
+            "version": "26.5.0",
+            "isSemVerMajor": true
+          },
+          "via": [
+            "sprintf-js"
+          ]
+        },
+        "sprintf-js": {
+          "severity": "moderate",
+          "nodes": [
+            "node_modules/sprintf-js"
+          ],
+          "range": "*",
+          "effects": [
+            "roarr"
+          ],
+          "fixAvailable": {
+            "name": "electron-builder",
+            "version": "26.5.0",
+            "isSemVerMajor": true
+          },
+          "via": [
+            {
+              "title": "sprintf-js vulnerable to denial of service through unbounded precision specifiers",
+              "url": "https://github.com/advisories/GHSA-hp3w-g68c-fv3c",
+              "range": "<=1.1.3"
+            }
+          ]
+        }
+      }
+    },
+    "omit-dev": {
+      "totals": {
+        "info": 0,
+        "low": 0,
+        "moderate": 0,
+        "high": 0,
+        "critical": 0,
+        "total": 0
+      },
+      "raw": {
+        "file": ".tmp/refactor-tests/r8-electron44/audit-production-after.json",
+        "bytes": 387,
+        "sha256": "2dbf155e5104bf6643cf41bceea9c3f9c3e3995f07fcc3a7065cb9234259817c"
+      },
+      "vulnerabilities": {}
+    }
+  },
+  "unchangedMobileLock": {
+    "file": "mobile/package-lock.json",
+    "sha256": "090e4ecafb937f490a2caac87f81bb4ed54b306cd149d54b1f122afeaffb7ecf",
+    "auditNotRepeated": true,
+    "lastKnownAudit": {
+      "info": 0,
+      "low": 0,
+      "moderate": 7,
+      "high": 17,
+      "critical": 0,
+      "total": 24
+    }
+  },
+  "sourceDigests": {
+    "package.json": "1f3064c2e40705bb82e4f83c67392361e4c14082c8b61bc458002f7bf96ca184",
+    "package-lock.json": "ead6c40c96d9304e2f0b33bd2e9d1b06f76939f88d9297c543ce9849a1912942",
+    "README.md": "57c90a28b3e527c90ffb4dc598c1982046e81b67e9a14c9f9e8a8e7947e4d8f3",
+    ".github/workflows/ci.yml": "0bf4cb2270afd4dd5466fd3990676ee667d89805b41ea732b85ad4dd8cba4c70",
+    ".github/workflows/release.yml": "5174384cd084af661dceeee7dbc8bacd7c5e27b8d868ca09f52e15046545783f",
+    "main/window.js": "7e1267a8168c04244f4f6fa249cb4c5ed3eafec2e5e20031d0d4c6561acfc0cc",
+    "main/ipc/remote.js": "838980ed5756221e112ecefa26c2e2424edd6023118e242ac5916f18ff7f6fb9",
+    "main/remote/index.js": "5305e893b421a9f1ca80f035fbf1ee20448099f4283a6e84dcd80f3db5a62697",
+    "main/index.js": "f857b8c8624576dd6d24c56cce1f068248b97da5aebac3cbf234d30d563ef5fc",
+    "main/settings.js": "36722c64ccd04a0ca56c3d9b6f72b09ee3924af7b52f65b17a4294ee21314cb1",
+    "scripts/verify-electron-runtime.js": "59184806bc709d8b2806385873642e9127aa9d8d21eb27a2df190a8cd1b8a3c4",
+    "scripts/verify-electron-runtime-electron.js": "c9966a5ea68bd2920316c2d4721ecfc6cddb81c1a98c2c4bcf04d35fbd9e0c44",
+    "scripts/verify-remote-server-lifecycle.js": "fd3772fb58a48b8ca35a3aaa7b2f46d4a874ebb16da8cc05dee0029aec5d8f4c",
+    "scripts/run-verify.cjs": "8126a5af38a417233a333c535d0c06ab2b92419f5d4615a0b26db08df74766a6",
+    "scripts/test-data-guard.cjs": "ee61c45dd4f2671dd9c9af2b68e589e60fb15dcae8b7d879e1a4663b37270d3f",
+    "docs/dependency-governance.md": "167bd4e9b4ebb18d3175d6b507ab06218098519df49ea8cf3592a087abc3dfeb",
+    "docs/refactor-progress.md": "6744b69d68e6a3b7235089678fd9f4ccdc9202922a4cf9f6e359ce5778dd2a69",
+    "docs/desktop-mobile-review-and-refactor-plan.md": "c3abd790c4e2b1c8e4cfdae867e126f0c8354c6a809091ca91dfdefd54cc83c6",
+    "mobile/package.json": "fa0cee730c634d8957e9b0879bcd52635e4ce6e59a8d84dd04c59fcbcdca2ca1",
+    "mobile/package-lock.json": "090e4ecafb937f490a2caac87f81bb4ed54b306cd149d54b1f122afeaffb7ecf"
+  },
+  "developmentApplication": {
+    "date": "2026-10-19T09:36:48.361Z",
+    "clipboard": [
+      "remote-copy-endpoint: pending completion and rejection",
+      "remote-copy-token: pending completion and rejection",
+      "remote-copy-pairing-code: pending completion and rejection"
+    ],
+    "native": {
+      "success": true,
+      "electron": "44.9.0",
+      "chrome": "152.0.7977.167",
+      "node": "24.22.0",
+      "v8": "15.2.124.43-electron.0",
+      "arch": "x64",
+      "profile": "E:\\wallpaper播放器\\.tmp\\refactor-tests\\runtime-native-中文 空格-akUnop",
+      "security": {
+        "allowRunningInsecureContent": false,
+        "contextIsolation": true,
+        "disableDialogs": false,
+        "disablePopups": false,
+        "enableBlinkFeatures": "",
+        "experimentalFeatures": false,
+        "javascript": true,
+        "nodeIntegration": false,
+        "nodeIntegrationInSubFrames": false,
+        "nodeIntegrationInWorker": false,
+        "safeDialogs": false,
+        "safeDialogsMessage": "",
+        "sandbox": true,
+        "webSecurity": true,
+        "webviewTag": true
+      },
+      "consoleDetails": [
+        {
+          "method": "debug",
+          "text": "[renderer:debug] runtime44-probe-debug (:1)"
+        },
+        {
+          "method": "info",
+          "text": "[renderer:info] runtime44-probe-info (:1)"
+        },
+        {
+          "method": "warn",
+          "text": "[renderer:warning] runtime44-probe-warning (:1)"
+        },
+        {
+          "method": "error",
+          "text": "[renderer:error] runtime44-probe-error (:1)"
+        }
+      ],
+      "frontend": {
+        "title": "视频画廊",
+        "bridge": "function",
+        "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/152.0.7977.167 Electron/44.9.0 Safari/537.36",
+        "theme": null
+      },
+      "screenshot": "E:\\wallpaper播放器\\.tmp\\refactor-tests\\runtime-native-中文 空格-akUnop\\runtime-window.png",
+      "persistedAfterShutdown": true
+    },
+    "conditions": "Clipboard writes are controlled promises; no native clipboard contents are read or modified. Native check uses real main/index, window, preload, frontend, IPC and settings worker with its own profile."
+  },
+  "actualDirectoryPackage": {
+    "output": "E:\\wp-electron44-qa-382a53c790",
+    "config": {
+      "version": "44.9.0",
+      "signing": false,
+      "output": "E:\\wp-electron44-qa-382a53c790",
+      "publish": "never"
+    },
+    "asar": {
+      "file": "E:\\wp-electron44-qa-382a53c790\\win-unpacked\\resources\\app.asar",
+      "bytes": 16394521,
+      "sha256": "7d9d9a5dee2e36f77c7e4a1c121aa760d9bc6b9450655c2e1a0b9c646037a5a5"
+    },
+    "executable": {
+      "file": "E:\\wp-electron44-qa-382a53c790\\win-unpacked\\Wallpaper Player.exe",
+      "bytes": 247185408,
+      "sha256": "a1826e2c26e1ec5621597e0f7ba8f3477557123be263ef9e6958f163fecd0dd6"
+    },
+    "runtimeExecutable": {
+      "file": "node_modules/electron/dist/electron.exe",
+      "bytes": 247184896,
+      "sha256": "c99a56d653220a8bf209b0b9ae2424ec1f1580946d1bf3395a968eb211a4f1b5"
+    },
+    "sourceModulesMatched": 92,
+    "shippedSourceDigests": {
+      "main.js": "7198acda5739a568d7c868e07637e69ee1833bf7f734e2c851ef04d95caf13c3",
+      "main/application/download-service.js": "09778e3ef2ddcc6f2b25d57b0e1f070b45e9a141ed96b330771ef13bb5daec29",
+      "main/application/download-tasks.js": "9779d68580b47cb7f57e7ba7f762748fa5d17f82bfc2e0055a77fa0459bd5a49",
+      "main/application/library-service.js": "110b46f24e4b433b1bd74402f0a403cd6f086264915efccf9d7d968429fffef9",
+      "main/application/media-mutation-paths.js": "13fad00c9960895dd22fbfaf4139eb44cbd9e7b6db9c3fffda6b83545f3a0293",
+      "main/application/media-mutations.js": "da1d0a81ec7afaa6c1da34ac0e8f4e75feeee760195b5dd4ece267f9d4971eb3",
+      "main/application/media-work-service.js": "af3a03d9b571a3e83617fbaa7a078c61aa41189f5db5b290acb046d060ed5805",
+      "main/application/mpv-installer.js": "f430087a5b65d5b6fe7dd4ff361b7704d728e6c137bfbe1075dbb77c32f3838e",
+      "main/application/mpv-version-cache.js": "b9082d1f7285143264679ebbfa60a86276e1bb041a30686f75d6fccdf9128458",
+      "main/application/player-service.js": "6394eca46fd28a4419fc914eb826ef51485bef676fbfb5202db59396ce46c9fe",
+      "main/application/resource-scheduler.js": "af4d6ab3e34e0ea4e498820a6fba5cced8d67790fa1d4f18fa713b6674f91682",
+      "main/application/settings-broadcast.js": "f7137590c14a6e3c4fa4217fe318f90d5072942b1d206c2d5d50e4a97e38281e",
+      "main/application/settings-json-worker.js": "40bfb2cf2e6312eb91cb246e9ae20537f79ca89bfd23ddf9e702c43ced57c799",
+      "main/application/settings-json.js": "b051646df7c453b943e1c51f0e58a23caaea1c06b8d4fe243c476e86bfeb60ba",
+      "main/application/settings-startup.js": "55aa1d65ef202b793d6f0548d890233a929cee9cc3907d6fdacda61635cdacf0",
+      "main/application/transcode-service.js": "4c97ba7a53c864e4f6396c432739a1858db79bd5e659b4d537d985c506b00cb4",
+      "main/constants.js": "3a28c8aca49a6b0f16103aed2220003fe12258ea86745cd05e47449d6102bed9",
+      "main/download-manager.js": "827645aea0f6b35719299bf8e961c11f3c290290bf6e1b5af3d3f18018ab14a0",
+      "main/download-xunlei.js": "400e53bfed14c67434fe23acb1dc83d8f2694869edcabc9b00fdc166b3784e15",
+      "main/exec.js": "16304d4d1307f1caa3a850aad5f037c48c20e3ebfcbcd1d2f7a5b5f3531add03",
+      "main/index.js": "f857b8c8624576dd6d24c56cce1f068248b97da5aebac3cbf234d30d563ef5fc",
+      "main/ip-utils.js": "d30b44b3f8236c34113906c5ea8f87db3f86d458bbfddb64c9ff6821e3241170",
+      "main/ipc-channels.js": "0f331e70e6b1ee6bf9f3d815bffb406e459e60f8b759100eb78fafaa97f0ddca",
+      "main/ipc.js": "5e0fb636a97d3548236dc135ff3f82ff73566ea216a29914351bc75dc3b3e458",
+      "main/ipc/downloads.js": "a27da24ddeb3c700f27bbcf81944afda9c9ae9f389dfc74a770716f5d58725be",
+      "main/ipc/files.js": "7cd7adafe5d6fcaf68814e005a1a147c641513dee814b48ab1fa0ddf8543caaa",
+      "main/ipc/media-data.js": "23dc622bb90bdbed724c5bdb86aecaa095a4ee4a1a4312b3387728d179b91300",
+      "main/ipc/media.js": "60248568e1bc5f0540df910ccd171f7982f9ed0b48108c2f3429229a7dc7bb04",
+      "main/ipc/network-resource-service.js": "f91af3c85e39e2f1cacfc6eb321da4ab2f9178cbeaa72f49edce93ac40620f91",
+      "main/ipc/network-resources.js": "92fa52f788314973164be5936708f5adff29271730d62f9bbb740f0bc7064363",
+      "main/ipc/player.js": "71e822d31bd65773e75adf2a4a3a15a6ea7919a9577edd96208d512068439d06",
+      "main/ipc/plugins.js": "1631666db09d154a749d4c75b3bb298c8e0b05d42847d65e4afcff46c67dcb8e",
+      "main/ipc/privacy.js": "3d83d872adc75a6720fa0ddfdc63bfc563deb4f0e76b5fddea93c0725fabdea3",
+      "main/ipc/remote.js": "838980ed5756221e112ecefa26c2e2424edd6023118e242ac5916f18ff7f6fb9",
+      "main/ipc/settings.js": "de7fca92a59b29f8149f869bec5799bbbe8998a611844b28d027fae84e7035ad",
+      "main/ipc/updater.js": "379d0733646824c7b7cdc22b6743d5268d41dcd6491280c16edfd6f0cbcba12a",
+      "main/media-pressure.js": "3995ec75817061ffdf0f39297cbdf373d4163506e9dbbd90ccc5286aef730fbc",
+      "main/mpv-host.js": "afb7a76cbfb88ea786281751d6c6cfea0e10f280d263108c806b71049465c05f",
+      "main/mpv-integration.js": "dbc7c1597c82285f24022a9f1ff499a630d7be6f4779fe4ecb980cfac506a0f0",
+      "main/mpv.js": "3006bb6d74ee2f3ae679fc4265a96b31263efd133c4a5e1759bb2b96344bd989",
+      "main/network-resource-parser.js": "6608ca5f0c15dcd3186b8142fceb256d338edf01d4057e062c521e835119e2f6",
+      "main/paths.js": "3422ec30987c55308fea878739efec3f6ad8f4cf132e157d042a037061dc671b",
+      "main/plugins/builtin.js": "2d1bb7556272f42f01d46eafdead480e333fe049d8520c6ef34b90b10782e79a",
+      "main/plugins/capabilities.js": "4a12956d2f31f0459b226bb710c10a63ded11dd602d65755681bc51fbf8e609f",
+      "main/plugins/core-api.js": "053244b815819208cf7fc553dbcaaa187b71efc7e862a66b66c02d6a6bb495a4",
+      "main/plugins/index.js": "39b2d2a2680bd4676c9a586f28d3062a2eb672f88e432ba6eeb29f37a551ac29",
+      "main/plugins/loader.js": "f5959dca140a4b47301a105264adc0419db9326f0128908f578bab3a39946d59",
+      "main/plugins/manifest.js": "165b9c49ad1bb32905b5bf3b4f55cc522b625fa7fee41f983dcde27378506f16",
+      "main/plugins/official.js": "defb64927c735b9ed6a017298e69d0f958f8202aa63940927e505dca456bfe0c",
+      "main/plugins/registry.js": "2978eef43c6b338e31d2d0e60ec0e7a4cd860a679889469f00a9b23e245ac9c3",
+      "main/portable-user-data.js": "577ced55e53005a55d71a07c0cd4824ac2657d9f6f420385d1ebd54063e33e5e",
+      "main/process-lifecycle.js": "3539243520e61a44487c365c8d1fb0df9ead472229797d83ef90419bab400e62",
+      "main/rate-limiter.js": "26736a7b9716ae07ec27689ed960d69c8ce43f9fd6877733f1f5ddd22ee05769",
+      "main/remote/handlers/desktop.js": "2505822080fab8c3041fd4a6f7bc27d0f26e0c580da0d4755a32474882b4c480",
+      "main/remote/handlers/info.js": "ce9c15b04e78f972f354cad5732bf068f74c2dfdb1746da25e1633fa5ee888f1",
+      "main/remote/handlers/library.js": "823733318ba097126d16a72d50795612cd29b321cb8fb822aa347de298b8daa2",
+      "main/remote/handlers/media.js": "e0d80f996809972cb4fb66db1622e053c30adc274eab78e3334d0edfae97c52b",
+      "main/remote/handlers/network-resources.js": "75121b4b0bd47dc60467008bbb0a7bfcc12b7ee61997cd4f1acf97885704a1b8",
+      "main/remote/handlers/tags.js": "1422546a6e4e1db62d8e7e238dfe3cec725b40c1732e567ed484eda38024512f",
+      "main/remote/handlers/transcode.js": "afb5f616ef8e7b2d24dfef22f66fb352dee1732c4b16b901a521a750a42054fc",
+      "main/remote/http-utils.js": "c5c18a64b48d77e7eae803d84834de38d3180385f779d5e6900fd1755b76dc94",
+      "main/remote/identity.js": "1807700ddbeb1cce5aacc0f17fdc96a45e25e6ff2c1f41f0e6c24e2497972115",
+      "main/remote/index.js": "5305e893b421a9f1ca80f035fbf1ee20448099f4283a6e84dcd80f3db5a62697",
+      "main/remote/json-responses.js": "3844076ab33e7cd3c6e30644ab9bb25baefc885c5e2d09f1570dca54d7ba4e16",
+      "main/remote/media-mutations.js": "76ea043d52a84d980b1b0ff683553cd304da1aa21c806c7d165b54beda11b2aa",
+      "main/remote/network.js": "63ea5008b3e8b0bfe11536a1cee6222e5f4bc856abf9566af9ce38d561023da7",
+      "main/remote/request-lifecycle.js": "97af1ff899688600b53318033fe6700a50930a4c0bc216b801cf29fc39e99a91",
+      "main/remote/server.js": "331f052d3e9e8c27ef20ece86e7eb39b08650351223ced861d7db557d3e977f3",
+      "main/remote/streaming.js": "1910972d998d49279320d39d1b55eb28f92222f1e1d6e7fc32b341b6cdff289d",
+      "main/remote/transcode-cache.js": "e00358c5d62afdcad03ba240994145d4b03ed7528f1e9b515af9392d16818b04",
+      "main/remote/transcode.js": "fed5363a58e63556d088ee4bd31e040670df162f5eb81f7c868fe8dd4ac9a215",
+      "main/remote/video-index.js": "4ffc21b59ec2dc890442375c7471056bf2956d8a9d8cc949693207c0c507b3d8",
+      "main/repositories/settings-file.js": "e45a80bf524c810073ca7395785086207d92b1e012ba50d95bbf4b179677d672",
+      "main/repositories/tag-state.js": "046376c6bb56d3251c6f4a1d80c8e0273eeeac247b5d8031209787ace1852065",
+      "main/repositories/user-media.js": "3049437c334259acaed84e16b52a29d81f3e0f777b3bfa7f3cc4d1c95de3c2b8",
+      "main/scanner.js": "cb0ba79b0359a065e28a80020995617067d2f29a9a5121dd7a9fa5fa16c07b5d",
+      "main/security/ipc-sender.js": "da80398dd786f6a7b6c737fbd2e3f0de9b581584fb5c3f81a16b44a12e570b1a",
+      "main/security/ipc.js": "3727a72b5bbf2ef320d3e04ed436ff41db04d2ece150e7c22ce21dbca177cb5d",
+      "main/security/media-access.js": "c5263dcdc6cfd1c4486774061ddae6764ea4a6abcc84b4972497dd7c296f9bac",
+      "main/security/privacy-password.js": "c52b147621c8c717d46b21906662de74dcdfbb237fb67094a84bafb1c369ffb9",
+      "main/settings.js": "36722c64ccd04a0ca56c3d9b6f72b09ee3924af7b52f65b17a4294ee21314cb1",
+      "main/thumbnail.js": "5eb93e614e75972056f6d387bddcc237a26629ba740181db789e146204b130cb",
+      "main/updater.js": "3a58eaf25abd6face692f0ccc1f73c927e87fc4134ec274b764b375b6459ae4e",
+      "main/user-data.js": "940161537bcad84992d24516497606bcb79bbf551d01521f73337a69d700303a",
+      "main/video-metadata.js": "ff4a40f6b3882b1567c9ab7a42e0a6a62a535a66d33bb873709efc6f0eae3801",
+      "main/window.js": "7e1267a8168c04244f4f6fa249cb4c5ed3eafec2e5e20031d0d4c6561acfc0cc",
+      "main/ytdlp-service.js": "a063a4439364aca0e893eff6d8441584e579c77c6f5946e9917d6da4b90182d4",
+      "packages/contracts/dist/index.js": "6fd89ec15d078d06f85781f98d2c8e9dd4815586539ec255cd40662f23c99ef3",
+      "packages/contracts/dist/schema.js": "6b889492fa4260b6ef309bd8823813802ddb38b71dbc162c0359441819dfc91b",
+      "packages/contracts/dist/settings-feed.js": "d3de55971030b50e35ee4f8e70ebdd1c65a3353553f211aea31e6bf58e98424c",
+      "packages/domain/dist/index.js": "e16a487dbda471e000a1d37a362583167d20f8020c5a017ca81fadfad36a4bdb",
+      "preload.js": "b4a725252f0b0a6ecd2afec36084678984a975b795c363ee2cd09f6fbdff22c6"
+    },
+    "smoke": {
+      "date": "2026-10-19T09:47:05.606Z",
+      "output": "E:\\wp-electron44-qa-382a53c790",
+      "executable": "E:\\wp-electron44-qa-382a53c790\\win-unpacked\\Wallpaper Player.exe",
+      "clip": "E:\\wp-electron44-qa-382a53c790\\smoke-profile-ghrAMX\\media\\runtime-h264.mp4",
+      "profile": "E:\\wp-electron44-qa-382a53c790\\smoke-profile-ghrAMX",
+      "data": "E:\\wp-electron44-qa-382a53c790\\smoke-profile-ghrAMX\\Data",
+      "success": true,
+      "native": {
+        "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) wallpaper-player/1.5.1 Chrome/152.0.7977.167 Electron/44.9.0 Safari/537.36",
+        "bridge": "function"
+      },
+      "url": "file:///E:/wp-electron44-qa-382a53c790/win-unpacked/resources/app.asar/dist/index.html",
+      "cards": 1,
+      "settings": {
+        "theme": "light",
+        "schemaVersion": 1
+      },
+      "screenshot": "E:\\wp-electron44-qa-382a53c790\\smoke-profile-ghrAMX\\packaged-window.png",
+      "playing": {
+        "filePath": "E:\\wp-electron44-qa-382a53c790\\smoke-profile-ghrAMX\\media\\runtime-h264.mp4",
+        "timePos": 0.3,
+        "duration": 5,
+        "paused": false,
+        "buffering": false,
+        "volume": 100,
+        "muted": false,
+        "speed": 1,
+        "audioId": 0,
+        "subtitleId": 0,
+        "subtitleVisible": true,
+        "subtitleScale": 1,
+        "loopFile": "false",
+        "abLoopA": null,
+        "abLoopB": null,
+        "playlistPos": 1,
+        "playlistCount": 1,
+        "eofReached": false,
+        "trackList": [
+          {
+            "id": 1,
+            "type": "video",
+            "src-id": 1,
+            "image": false,
+            "albumart": false,
+            "default": true,
+            "forced": false,
+            "dependent": false,
+            "visual-impaired": false,
+            "hearing-impaired": false,
+            "external": false,
+            "selected": true,
+            "main-selection": 0,
+            "ff-index": 0,
+            "decoder": "h264",
+            "decoder-desc": "H.264 / AVC / MPEG-4 AVC / MPEG-4 part 10",
+            "codec": "h264",
+            "codec-desc": "H.264 / AVC / MPEG-4 AVC / MPEG-4 part 10",
+            "codec-profile": "Constrained Baseline",
+            "demux-w": 320,
+            "demux-h": 180,
+            "demux-fps": 30,
+            "demux-par": 1,
+            "metadata": {
+              "language": "und",
+              "handler_name": "VideoHandler",
+              "vendor_id": "[0][0][0][0]",
+              "encoder": "Lavc62.28.101 libx264"
+            }
+          }
+        ],
+        "sessionId": "player_4ae093f5-8fc3-4877-b900-ebea0884338c",
+        "engineSessionId": 3,
+        "resourceTarget": "E:\\wp-electron44-qa-382a53c790\\smoke-profile-ghrAMX\\media\\runtime-h264.mp4",
+        "ready": true
+      },
+      "advanced": {
+        "filePath": "E:\\wp-electron44-qa-382a53c790\\smoke-profile-ghrAMX\\media\\runtime-h264.mp4",
+        "timePos": 0.7,
+        "duration": 5,
+        "paused": false,
+        "buffering": false,
+        "volume": 100,
+        "muted": false,
+        "speed": 1,
+        "audioId": 0,
+        "subtitleId": 0,
+        "subtitleVisible": true,
+        "subtitleScale": 1,
+        "loopFile": "false",
+        "abLoopA": null,
+        "abLoopB": null,
+        "playlistPos": 1,
+        "playlistCount": 1,
+        "eofReached": false,
+        "trackList": [
+          {
+            "id": 1,
+            "type": "video",
+            "src-id": 1,
+            "image": false,
+            "albumart": false,
+            "default": true,
+            "forced": false,
+            "dependent": false,
+            "visual-impaired": false,
+            "hearing-impaired": false,
+            "external": false,
+            "selected": true,
+            "main-selection": 0,
+            "ff-index": 0,
+            "decoder": "h264",
+            "decoder-desc": "H.264 / AVC / MPEG-4 AVC / MPEG-4 part 10",
+            "codec": "h264",
+            "codec-desc": "H.264 / AVC / MPEG-4 AVC / MPEG-4 part 10",
+            "codec-profile": "Constrained Baseline",
+            "demux-w": 320,
+            "demux-h": 180,
+            "demux-fps": 30,
+            "demux-par": 1,
+            "metadata": {
+              "language": "und",
+              "handler_name": "VideoHandler",
+              "vendor_id": "[0][0][0][0]",
+              "encoder": "Lavc62.28.101 libx264"
+            }
+          }
+        ],
+        "sessionId": "player_4ae093f5-8fc3-4877-b900-ebea0884338c",
+        "engineSessionId": 3,
+        "resourceTarget": "E:\\wp-electron44-qa-382a53c790\\smoke-profile-ghrAMX\\media\\runtime-h264.mp4",
+        "ready": true
+      },
+      "videoFrame": {
+        "success": true,
+        "sessionId": "player_4ae093f5-8fc3-4877-b900-ebea0884338c",
+        "screenshotPath": "E:\\wp-electron44-qa-382a53c790\\smoke-profile-ghrAMX\\Data\\screenshots\\shot-2026-10-19T09-47-08-224Z.png"
+      },
+      "stop": {
+        "success": true,
+        "sessionId": "player_4ae093f5-8fc3-4877-b900-ebea0884338c"
+      },
+      "cleanExit": true,
+      "exitCode": 0,
+      "persisted": {
+        "theme": "light",
+        "schemaVersion": 1,
+        "playbackRecords": 1
+      }
+    },
+    "processAudit": {
+      "checkedAt": "2026-10-19T09:54:20.3156830Z",
+      "processes": [],
+      "prefix": "E:\\wp-electron44-qa-382a53c790\\"
+    }
+  },
+  "images": {
+    "frontend": {
+      "file": "docs/evidence/r8-electron44-packaged-window.png",
+      "bytes": 113356,
+      "sha256": "2451420db04d274e27089fdc6e4dd22bb2d7014cade116235846ecbd0932eba5"
+    },
+    "decodedFrame": {
+      "file": "docs/evidence/r8-electron44-video-frame.png",
+      "bytes": 38105,
+      "sha256": "a70bc8cdf9eae83bec2fcbecb8d48bb9d24bf89bf0257358d865c729dc8496ad",
+      "width": 320,
+      "height": 180,
+      "source": "E:\\wp-electron44-qa-382a53c790\\smoke-profile-ghrAMX\\Data\\screenshots\\shot-2026-10-19T09-47-08-224Z.png"
+    }
+  },
+  "dataPreservation": {
+    "files": 42,
+    "preservedFallbackFiles": [
+      [
+        "analysis-results\\G086 Bronya分析结果2026-06-22_20-00-44.json",
+        "01db5f778601802471791e416b40c3ac8f96248e4542b78a867eaee77dd265e4"
+      ],
+      [
+        "downloads\\aria2.session",
+        "bbe9d72e7e5001c01f3a012fa73e5d35b6d53b9e76e08190bba58973ce1ba9bc"
+      ],
+      [
+        "llama-server-err.log",
+        "5744b9bb378569a3a4f664b62aad9a4b0025cd7d419cba73b793fb62cb737f42"
+      ],
+      [
+        "llama-server-out.log",
+        "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      ],
+      [
+        "remote-identity.json",
+        "0abcd8df9c1443a348b050b5abe28ac419ecef717ddf31a0daa680f153061324"
+      ],
+      [
+        "scan-index\\029fa92465c3409cba74ce3db6b927dfec0d4f581b12122975041a32ab324e8a.json",
+        "33b1310886821b4f01322041a561c8a6b4ed10aa351772effb396e7b1b547cfd"
+      ],
+      [
+        "scan-index\\06cf5926d93db3cc7b30882ee7dbecb69d51ce4e00de7901de3d48b866f9afc3.json",
+        "274848604327a2f96f0d152b9f23a7b4e5470fdd67c744e1c181e86c2d284059"
+      ],
+      [
+        "scan-index\\0e65747e6e0fc76a1e0c86e951c35d6c7392c184ba6cb43724d7d58856ff212a.json",
+        "3ac45a0678e6ed4554fe1f315f923d999b0311096acd3c9394e3d85826d37db9"
+      ],
+      [
+        "scan-index\\114890f3437dd45b34313ba38d9d3c36a09701d5d672bf8abd7af8c922db61af.json",
+        "3796d21463d2b2418c485565780e9628a50ab4f1a69d8faeadec1eb70a9af290"
+      ],
+      [
+        "scan-index\\1465f8e823323fe9c4383abb5a38c9e17fc550dd44cd2f14fd7f7242bc309e12.json",
+        "1be5fefdb59d8af06de2a6be0eeb0025a96253d719de1e0daced6f1fe35cdde0"
+      ],
+      [
+        "scan-index\\153bae098b5d3524553fcf4d8cbb1eacef2471314948819d043b26cebe199e14.json",
+        "689305d629290f70b40c5ea8454db685486f87be218b38da7aa4f0594a1d1cb8"
+      ],
+      [
+        "scan-index\\165f4a9a9309a7ac323647e9acefd754a66c6295cab7db6bdb50830914bf0d68.json",
+        "5b0738883aee24ac7e17fc108a221e395380d2bae6a32f3ba3f70606e4b27ebe"
+      ],
+      [
+        "scan-index\\1db67e5d68a60a19388b0338ed1ee18c2a2bcd0025ab168a1d69920c929bd647.json",
+        "b19f9d1c96db4b9106b2a28058ab1c33f4d3edc45fa693126cad0efe48cd44dd"
+      ],
+      [
+        "scan-index\\3032598f9f4655037a67986db404cfbf60011a2ca84a1e6edcec794c7deab956.json",
+        "db1c59c38bb8ba2122afad18a73d956ec55d4580f4cad17f365b37b71d7e3db8"
+      ],
+      [
+        "scan-index\\358da0698a4692a8052707f22ba2b9c94b5c4e73080d12c721e622b66a80614c.json",
+        "f1fb6fbd25b3d96027a86d6c797b162a74c95544c04f64470ed733ddbc8983ee"
+      ],
+      [
+        "scan-index\\5eb5da5dcf86cb8c66f674df75935c030f8e12d86b6373ebcdaa3d7aba7eb672.json",
+        "489328dc3fa24223d6db18869658db5d01f915838ba97532de8193f8bedc6f93"
+      ],
+      [
+        "scan-index\\5f59f687750abe3eb7d55cdb1aa86cb802bf22f3b00e3bb369f77a7ef2584d06.json",
+        "ae2763e5e5553a4eb759576c8f26efcffc9ef5aa741ddd6aad78b2e33716a719"
+      ],
+      [
+        "scan-index\\602ae02092dd5e362dec6b88bd5afb39f14c218b3e0f0fbd52e5a8d09eddeb0d.json",
+        "cd75909f0b53f3d449d479531d62f3ff1bb3144eb918086cc7a25d05816c2a7d"
+      ],
+      [
+        "scan-index\\664a4a47b45908fdfdf2d6bb5ec7024e41699d7dd2af4110f2889d4eac6dd2d7.json",
+        "64835ce867a827d40088ce1b9c8e4e19cb996d0df4c2e676cbb215cf38868556"
+      ],
+      [
+        "scan-index\\6a4b7a95d1ae5d67f63cc87a4f3486c0a22c35af457355ae63f4303d7bdbcaa1.json",
+        "7ab98d842e31b5da1227cf6e00d98e3e32287c53b0965f3e8a964dbc9e982b20"
+      ],
+      [
+        "scan-index\\6c2bfaa6b9f2b41ef00e065bab2a6d71c599e2ce76cc3f5939228ecc7b8be650.json",
+        "33dd4002ba26ea91ef1c97f264ef0337dd78b37d06f03a538f514ee0809c5107"
+      ],
+      [
+        "scan-index\\703cb3b91afdc3a4a39fb95f9d0c0289fe6dcdab34f10425d71858a05164ce3b.json",
+        "217ca6aa5c2c3b721795e93c7cb5d819317fa55546fee842c81420f84c353fe8"
+      ],
+      [
+        "scan-index\\85bd705cb26d94f80943f15877c1c71cc9f9a665c0bf24f8ab568b0b6bacf550.json",
+        "d4bb5033f4315903b0083789b87e09f4e06cb294a17313439f21987dd0b3a527"
+      ],
+      [
+        "scan-index\\87720e2b63644af82253d5ec9ace977d27e42c03a6033c6811af6c6094928e09.json",
+        "2b01b9760b6e8f5605fd9bb0cbc74e6f248c0bec7428982ce0dbb848c1f6e589"
+      ],
+      [
+        "scan-index\\959e88efa835995e2afff87fc4257966a41b7f45da19d44dc3369ba0d88599c9.json",
+        "bec93346f2dfbf0938b593658fd80e43a9be33b0bd4a0f7bcbf9a8997198ba9e"
+      ],
+      [
+        "scan-index\\9d7bcef01cadb37f1a59d31b708084c192007deea8564d134dcc473b0605201c.json",
+        "04d6bfae12cdb3e73f828813477825cd39dc803c37893be82455ecebe7734312"
+      ],
+      [
+        "scan-index\\a02253e6f623d27dfaa6674be31d9b43fc3d9b2c6bcda125418f1c3dd2a25709.json",
+        "90f629426a02dbbe9d60c7ad0c28090bd77a96693fcd1187b5215eda49184b86"
+      ],
+      [
+        "scan-index\\a17738a5c4b4bc1ce4358ecff69b8e44a1e1a33a7511d9a11eddecd94b9e58cd.json",
+        "a1fd92c4c4c8b9bbfeb105da251cc5230f16f1f68edf7cf909a468da0c242d99"
+      ],
+      [
+        "scan-index\\c53e2ac468d9387f39255a1ee9893eba1abe325ab086dea0025a18d1ef67e75f.json",
+        "2042c353b3e1c29eb236d1a1dfce79afdb85839f40f02f0b70d521eff607e6bb"
+      ],
+      [
+        "scan-index\\cb702390842effe5e6e22e77acbda7b2bbea77ed51a5c07e66c3c5d8d0bc15bf.json",
+        "718b65c8b9b80caa3c5d34bc3244f750cd8243dc4b8743f637c3b12dbbbbda4a"
+      ],
+      [
+        "scan-index\\cbf568b1144651ce061c2dc94a347128724334dd45ac2dd4ebf6890d74c66251.json",
+        "e22fd608a0197ea15fdbd8e3320b49d60e518bb4054b74ffb7504cd8e6035134"
+      ],
+      [
+        "scan-index\\d6cd75e4bc356e88ed2b4c2272c32263e568d67a07b4017d73b22e09c23e8306.json",
+        "d3ccf77f170934b4987c22301d34abbb8b7646d45af03f575057804e4c892629"
+      ],
+      [
+        "scan-index\\db34a207b303445fed1e9654c8e68883c93c5123070913181f89844225e4636a.json",
+        "81149ad6956bdb73b468e88036ef043043faecd14d34901ba5eaa49b775d3a72"
+      ],
+      [
+        "scan-index\\de13066bd94cc789543a5fa9e6100f3297df42c5dd715cccf10b11383b6f1d68.json",
+        "d2ac7243b636179c0e35727cb899a4f608b7c044d759e6b6a52c8f501a3a6945"
+      ],
+      [
+        "scan-index\\eba7ad116c30f43341d30f06e5f9efe510565b2a31a16c0eccab8fc4c303e6bc.json",
+        "636392edc5a9f41da4b70492833939eac890636623ab957400a7118bba472fc7"
+      ],
+      [
+        "scan-index\\f16070f230607bf79853b98a8c462b8e7b854deeb16fe246ba6c9d783c9b2832.json",
+        "becff49c6c81b5dfd4688bbb272be352a8821ce42120b45282ea86c65f6378c2"
+      ],
+      [
+        "scan-index\\f408135604349a60c1b7caa1d60757de692af100c4518e5588f38b619995f186.json",
+        "b894250b5d420a09b89350f33103a5d08edb5fc3d20f3cddf7604ed1fcb9df3a"
+      ],
+      [
+        "scan-index\\f7b0c1004febecbe36453be10ef2ddc2523e5b92f4af5f318ce1049990e93053.json",
+        "77f2b4ded7202b828e8a6e281d549eecd1e79aea4030dfb2a7d918202ab090c5"
+      ],
+      [
+        "scan-index\\f892c389d585d65dff3d06f6c86d3355dc90100c808a4f80da22b2f7e81865ba.json",
+        "b0f007ba8b4249849d726eee7a9fec6cf5926742e62d3cb833bd464423af520e"
+      ],
+      [
+        "scan-index\\fc41c7e68e94b6f115983997d8498353a4f8f41b61fc91662dd84affe70fc9fb.json",
+        "fa79531cd58ae0323d29102813386358d2e599ecb63902231ed73e264196abdc"
+      ],
+      [
+        "settings.json",
+        "6fb990f7edfe0707bb48b8bed65455cc2a521d33e028b45ce77f98b6a466a0d5"
+      ],
+      [
+        "video-metadata-cache.json",
+        "616205b2e97a75ea8842d3b4f6f3de778fc545493659d45e5c0139c6d7087f47"
+      ]
+    ],
+    "settingsSha256": "6fb990f7edfe0707bb48b8bed65455cc2a521d33e028b45ce77f98b6a466a0d5",
+    "freshNonemptyGuardReports": [
+      "verification-guard-066380f3-b264-4ccd-bbdf-f5ecc8942a0c.jsonl"
+    ],
+    "expectedSyntheticNegativeOnly": true,
+    "packagedCondition": "Packaged exe ignored NODE_OPTIONS require preloads. Portable data isolation, actual saved file results and full project fallback inventory were used; packaged guard coverage is not claimed."
+  },
+  "checks": [
+    {
+      "name": "verify:test-data-guard",
+      "exit": 0,
+      "scope": "Node/worker/unpackaged actual Electron; 15 synthetic probes"
+    },
+    {
+      "name": "verify:electron-runtime",
+      "exit": 0,
+      "scope": "controlled clipboard promises plus real full main/index startup/preload/IPC/worker/render/exit"
+    },
+    {
+      "name": "build",
+      "exit": 0,
+      "log": ".tmp/refactor-tests/r8-electron44/build.log"
+    },
+    {
+      "name": "verify:electron-api",
+      "exit": 0,
+      "log": ".tmp/refactor-tests/r8-electron44/verify-electron-api.log"
+    },
+    {
+      "name": "verify:api-adapters",
+      "exit": 0,
+      "log": ".tmp/refactor-tests/r8-electron44/verify-api-adapters.log"
+    },
+    {
+      "name": "verify:remote-server-lifecycle",
+      "exit": 0,
+      "log": ".tmp/refactor-tests/r8-electron44/verify-remote-server-lifecycle.log"
+    },
+    {
+      "name": "verify:dependency-security",
+      "exit": 0,
+      "log": ".tmp/refactor-tests/r8-electron44/verify-dependency-security.log"
+    },
+    {
+      "name": "verify:settings-recovery",
+      "exit": 0,
+      "seconds": 4.456,
+      "log": ".tmp/refactor-tests/r8-electron44/verify-settings-recovery.log"
+    },
+    {
+      "name": "verify:settings-json",
+      "exit": 0,
+      "seconds": 3.278,
+      "log": ".tmp/refactor-tests/r8-electron44/verify-settings-json.log"
+    },
+    {
+      "name": "verify:settings-feed",
+      "exit": 0,
+      "seconds": 4.231,
+      "log": ".tmp/refactor-tests/r8-electron44/verify-settings-feed.log"
+    },
+    {
+      "name": "verify:desktop-player",
+      "exit": 0,
+      "seconds": 5.186,
+      "log": ".tmp/refactor-tests/r8-electron44/verify-desktop-player.log"
+    },
+    {
+      "name": "verify:ipc-sender",
+      "exit": 0,
+      "seconds": 2.582,
+      "log": ".tmp/refactor-tests/r8-electron44/verify-ipc-sender.log"
+    },
+    {
+      "name": "verify:plugins",
+      "exit": 0,
+      "seconds": 0.871,
+      "log": ".tmp/refactor-tests/r8-electron44/verify-plugins.log"
+    },
+    {
+      "name": "verify:plugin-video",
+      "exit": 0,
+      "seconds": 1.295,
+      "log": ".tmp/refactor-tests/r8-electron44/verify-plugin-video.log"
+    },
+    {
+      "name": "verify:plugin-external",
+      "exit": 0,
+      "seconds": 1.22,
+      "log": ".tmp/refactor-tests/r8-electron44/verify-plugin-external.log"
+    },
+    {
+      "name": "verify:plugin-package",
+      "exit": 0,
+      "seconds": 18.409,
+      "log": ".tmp/refactor-tests/r8-electron44/verify-plugin-package.log"
+    },
+    {
+      "name": "verify:packaged-contracts",
+      "exit": 0,
+      "seconds": 2.275,
+      "log": ".tmp/refactor-tests/r8-electron44/verify-packaged-contracts.log"
+    },
+    {
+      "name": "verify:remote-mobile",
+      "exit": 0,
+      "log": ".tmp/refactor-tests/r8-electron44/verify-remote-mobile.log"
+    },
+    {
+      "name": "verify:remote-library",
+      "exit": 0,
+      "log": ".tmp/refactor-tests/r8-electron44/verify-remote-library.log"
+    },
+    {
+      "name": "verify:privacy-passwords",
+      "exit": 0,
+      "log": ".tmp/refactor-tests/r8-electron44/verify-privacy-passwords.log"
+    },
+    {
+      "name": "verify:update-metadata",
+      "exit": 0,
+      "log": ".tmp/refactor-tests/r8-electron44/verify-update-metadata.log"
+    },
+    {
+      "name": "verify:updater-startup",
+      "exit": 0,
+      "log": ".tmp/refactor-tests/r8-electron44/verify-updater-startup.log"
+    },
+    {
+      "name": "verify:mobile-correctness",
+      "exit": 0,
+      "log": ".tmp/refactor-tests/r8-electron44/verify-mobile-correctness.log"
+    },
+    {
+      "name": "mobile typecheck",
+      "exit": 0,
+      "log": ".tmp/refactor-tests/r8-electron44/mobile-typecheck.log"
+    },
+    {
+      "name": "Windows x64 actual directory build",
+      "exit": 0,
+      "log": ".tmp/refactor-tests/r8-electron44/build-directory.log"
+    },
+    {
+      "name": "actual packaged silent H264/playback/frame/stop/persistence/exit",
+      "exit": 0,
+      "script": ".tmp/refactor-tests/r8-electron44/packaged-smoke.cjs"
+    },
+    {
+      "name": "npm ls --all",
+      "exit": 0,
+      "tree": {
+        "file": ".tmp/refactor-tests/r8-electron44/installed-tree.json",
+        "bytes": 132945,
+        "sha256": "e84da32abc1c9f1752a690806ee80b3b5bb2d74c4a66198f9805fdc66274e8bc"
+      }
+    }
+  ],
+  "rawArtifacts": [
+    {
+      "file": ".tmp/refactor-tests/r8-electron44/baseline.json",
+      "bytes": 7302,
+      "sha256": "9155f1c1be958636ef6285e140f17424cb57fea97f08a8605e827d5aa79d170f"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-electron44/package.json.before",
+      "bytes": 14761,
+      "sha256": "73d16d772d4f975b03cb0d3bc603a05a754818d4263e805cd47cd611298079ec"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-electron44/package-lock.json.before",
+      "bytes": 218509,
+      "sha256": "8aa888ac0c13a44a7cd2b4db344163b32d5965fa9b4123f684875f940b7dcd50"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-electron44/main__window.js.before",
+      "bytes": 5528,
+      "sha256": "a00acaf536d7091edafb1507efacd6a5ccd6db72f599aa2657b1c85cf48c9997"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-electron44/main__ipc__remote.js.before",
+      "bytes": 2956,
+      "sha256": "2c5f7b6baeecc720655972f9d344b1af25661e7bd0991f9cdf7d2319007bf643"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-electron44/main__remote__index.js.before",
+      "bytes": 12680,
+      "sha256": "99b4e5117d47c0c6b8956f926125f7bbdbd9fe603cc146f28b39caffc659a3b9"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-electron44/breaking-changes.md",
+      "bytes": 122255,
+      "sha256": "6dc1720af67d04b313be5eb757314a783f5233f520e6db0dd06ffa1c9d7d5a92"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-electron44/install.log",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-electron44/runtime.log",
+      "bytes": 396,
+      "sha256": "313cc93ba0ebd3995efa538a5bc161dbcd17c67615de0cb77e37afebbe61c52d"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-electron44/runtime-evidence.json",
+      "bytes": 2123,
+      "sha256": "63e6764be91ec44f8904ac2d69445462040b1624d7d890f0bcb9202c07e5294a"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-electron44/data-guard.log",
+      "bytes": 1015,
+      "sha256": "1c0e857b7099cb620c9340f0b91c050ae2068c8b6bd86ec46352a43d40412175"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-electron44/data-guard-evidence.json",
+      "bytes": 849,
+      "sha256": "a0303cfb5bfc4344693dff6c32e01fc1d35341c6d69270e0702053f48cd85daf"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-electron44/build-root.json",
+      "bytes": 121,
+      "sha256": "6b0076deda275a1cdc4091db4b264b0dd6463d86331fb46a17197ac8cb242eb8"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-electron44/build.log",
+      "bytes": 1126,
+      "sha256": "dac524cdc45f35d9c89582812aa66fae0d4be81cf48930628db5fe9e48da62c9"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-electron44/build-directory.log",
+      "bytes": 1423,
+      "sha256": "4f6b197c223f4bc7eb43a6a298e4a319e4470dddc241e210da87dbdc8dec0030"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-electron44/basic-checks.json",
+      "bytes": 581,
+      "sha256": "96fc232694fb936914c2fe1734f9cb3fa0af7c015ac5c859f410b5764455e0dc"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-electron44/native-regressions.json",
+      "bytes": 1611,
+      "sha256": "0da076022cc9867cc853636a7910fde1346a28fdbd9e3c7449ca3ef577b6f2e8"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-electron44/service-regressions.json",
+      "bytes": 855,
+      "sha256": "ee34c63877b2adfd1e4d8c502f65b27f720035b251033f97da9d66b93c9d7614"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-electron44/mobile-typecheck.log",
+      "bytes": 63,
+      "sha256": "1e0f0490123b26a1e922ddceb0d3a75f1acc55b8dbd07d5c200b38c8cde87737"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-electron44/packaged-smoke-first-pass.json",
+      "bytes": 4420,
+      "sha256": "7574dad7a09b8178f6a13454daec5a58587eaef60f7a2bcb94fdb6ae2a8db8ff"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-electron44/packaged-smoke.json",
+      "bytes": 4650,
+      "sha256": "7b7a65528ec833f2a43671fcabec889b9e10bec695995eee343a281679dc0df4"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-electron44/packaged-app.log",
+      "bytes": 713,
+      "sha256": "3d9a3eaf29c32e649be681ca0d39bff1587405dc37a742d69a5ee69c5139e5c2"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-electron44/process-audit.json",
+      "bytes": 123,
+      "sha256": "6e5c30048077c5c55da82702850490522ecd588e93b7bd41990df59fa4ac4e29"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-electron44/packaged-smoke.cjs",
+      "bytes": 6971,
+      "sha256": "15f678bb916612e4db6eda8292b054d4558d6baf4b396ee40d7985720a92e383"
+    },
+    {
+      "file": ".tmp/refactor-tests/r8-electron44/collect-evidence.cjs",
+      "bytes": 13232,
+      "sha256": "fea6d9e5040a19b8eb5ec1a1841deb7a4f1b8698b59b58ae0d2c9af6e31dd001"
+    }
+  ],
+  "upstream": [
+    "https://raw.githubusercontent.com/electron/electron/v44.9.0/docs/breaking-changes.md",
+    "https://raw.githubusercontent.com/electron/electron/v44.9.0/docs/api/web-contents.md",
+    "https://releases.electronjs.org/release/v44.9.0",
+    "https://www.electronjs.org/docs/latest/tutorial/electron-timelines#version-support-policy"
+  ],
+  "reviewedChanges": [
+    "36 app.commandLine behavior: existing code appends switches, no commandLine replacement.",
+    "37 utilityProcess behavior: owned Node worker_threads and child processes remain the used paths; settings worker and native process/session cases passed.",
+    "38/44 platform removals: local evidence Windows x64 only; no ia32 release claimed, no macOS/Linux native run.",
+    "39 window.open defaults: app/webview popup denial and source gates retained, real foreign-frame/navigation tests passed.",
+    "40/44 clipboard: first-party writes remain in main; awaited IPC completion/rejection and tray error handling covered with controlled promises.",
+    "41 PDF behavior and 43 native dialog defaults: no PDF-specific lifecycle assumptions added; native picker UX remains a manual acceptance condition.",
+    "42 runtime download: explicit install preparation before CI verification; exact binary acquired and all current native checks use 44.9.0.",
+    "44 ANGLE static linkage: no app-managed EGL/GLES DLL replacement; actual default-GPU window and packaged mpv frame smoke succeeded."
+  ],
+  "limitations": [
+    "Native clipboard contents were neither read nor written; async behavior tested with controlled promises at actual production handlers.",
+    "Source hidden-window capture initially failed UnknownVizError; inactive visible capture succeeded and was inspected.",
+    "Initial packaged metadata preload was unsupported, so the first owned QA process was stopped after timeout; final CDP/portable checks succeeded and exited normally.",
+    "ASAR reader initially used POSIX separators for deep Windows paths; native paths resolved the tool lookup and all selected shipped sources matched.",
+    "Directory build disables signing and branding edits and publishes nothing. No NSIS/portable installer, signature or coverage-install acceptance.",
+    "Five-second generated silent H264 and one decoded frame are a smoke check, not all codecs, hardware decode proof, sustained frame/latency/memory budgets or real mobile playback.",
+    "Vite, electron-builder, mobile runtime/native modules, remaining tooling vulnerabilities, migration/other stores, release manifests/signing and TLS work remain open.",
+    "Core/release CI gates updated and inspected; remote CI jobs were not dispatched."
+  ]
+}

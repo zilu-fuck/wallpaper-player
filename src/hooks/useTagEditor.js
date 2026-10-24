@@ -1,4 +1,5 @@
-import { useMemo, useState, useCallback } from 'react'
+import { useMemo, useState, useCallback, useRef } from 'react'
+import { appendVideoCustomTags, getVideoCustomTags, setVideoCustomTags } from '../api/media'
 
 function parseTagText(value) {
   return [...new Set(String(value || '').split(/[,，\s]+/).map(tag => tag.trim()).filter(Boolean))]
@@ -14,9 +15,13 @@ function getLegacyVideoKey(video) {
   return legacyKey && legacyKey !== key ? legacyKey : ''
 }
 
-export function useTagEditor({ settings, saveSettings }) {
+export function useTagEditor({ settings, reconcileSettings }) {
   const [tagEditorVideo, setTagEditorVideo] = useState(null)
   const [tagEditorValue, setTagEditorValue] = useState('')
+  const [tagEditorLoading, setTagEditorLoading] = useState(false)
+  const [tagEditorError, setTagEditorError] = useState('')
+  const editorGenerationRef = useRef(0)
+  const editorSessionRef = useRef(null)
   const [bulkTagVideos, setBulkTagVideos] = useState([])
   const [bulkTagValue, setBulkTagValue] = useState('')
   const [selectedVideoKeys, setSelectedVideoKeys] = useState([])
@@ -27,20 +32,10 @@ export function useTagEditor({ settings, saveSettings }) {
   const handleSetCustomTags = useCallback(async (video, tags) => {
     const tagKey = getVideoKey(video)
     if (!tagKey) return
-    const nextCustomTags = {
-      ...(settings?.customTags || {})
-    }
-    const legacyKey = getLegacyVideoKey(video)
-    if (legacyKey) delete nextCustomTags[legacyKey]
-
-    if (tags.length > 0) {
-      nextCustomTags[tagKey] = tags
-    } else {
-      delete nextCustomTags[tagKey]
-    }
-
-    await saveSettings({ customTags: nextCustomTags })
-  }, [settings, saveSettings])
+    const result = await setVideoCustomTags(video, tags)
+    await reconcileSettings?.(result)
+    return result
+  }, [reconcileSettings])
 
   const handleAppendCustomTags = useCallback(async (videos, tags) => {
     const normalizedTags = Array.isArray(tags)
@@ -49,41 +44,69 @@ export function useTagEditor({ settings, saveSettings }) {
     const targetVideos = Array.isArray(videos) ? videos.filter(Boolean) : []
     if (!targetVideos.length || !normalizedTags.length) return
 
-    const nextCustomTags = {
-      ...(settings?.customTags || {})
+    const result = await appendVideoCustomTags(targetVideos, normalizedTags)
+    await reconcileSettings?.(result)
+    return result
+  }, [reconcileSettings])
+
+  const handleOpenTagEditor = useCallback(async (video) => {
+    const generation = ++editorGenerationRef.current
+    const target = { ...video }
+    editorSessionRef.current = null
+    setTagEditorVideo(target)
+    setTagEditorLoading(true)
+    setTagEditorError('')
+    const tags = settings?.customTags?.[getVideoKey(video)] ||
+      settings?.customTags?.[getLegacyVideoKey(video)] || []
+    setTagEditorValue(tags.join(', '))
+    try {
+      const snapshot = typeof window.electronAPI?.getVideoCustomTags === 'function' ? await getVideoCustomTags(target) : null
+      await reconcileSettings?.(snapshot)
+      if (generation !== editorGenerationRef.current) return
+      editorSessionRef.current = { target, expectedRevision: snapshot?.customTagsRevision, generation, attempt: null }
+      setTagEditorValue((snapshot?.customTags || tags).join(', '))
+    } catch (error) {
+      if (generation === editorGenerationRef.current) setTagEditorError(error?.message || '读取标签失败，请重试')
+    } finally {
+      if (generation === editorGenerationRef.current) setTagEditorLoading(false)
     }
+  }, [settings, reconcileSettings])
 
-    for (const video of targetVideos) {
-      const tagKey = getVideoKey(video)
-      if (!tagKey) continue
-      const legacyKey = getLegacyVideoKey(video)
-      const currentTags = [
-        ...(Array.isArray(nextCustomTags[tagKey]) ? nextCustomTags[tagKey] : []),
-        ...(legacyKey && Array.isArray(nextCustomTags[legacyKey]) ? nextCustomTags[legacyKey] : []),
-        ...(video.customTags || [])
-      ]
-      nextCustomTags[tagKey] = [...new Set([...currentTags, ...normalizedTags])]
-      if (legacyKey) delete nextCustomTags[legacyKey]
-    }
-
-    await saveSettings({ customTags: nextCustomTags })
-  }, [settings, saveSettings])
-
-  const handleOpenTagEditor = useCallback((video) => {
-    setTagEditorVideo(video)
-    setTagEditorValue((video.customTags || []).join(', '))
-  }, [])
+  const handleReloadTagEditor = useCallback(() => {
+    if (tagEditorVideo) return handleOpenTagEditor(tagEditorVideo)
+  }, [handleOpenTagEditor, tagEditorVideo])
 
   const handleCloseTagEditor = useCallback(() => {
+    editorGenerationRef.current += 1
+    editorSessionRef.current = null
     setTagEditorVideo(null)
     setTagEditorValue('')
+    setTagEditorLoading(false)
+    setTagEditorError('')
   }, [])
 
   const handleSaveTagEditor = useCallback(async () => {
     if (!tagEditorVideo) return
-    await handleSetCustomTags(tagEditorVideo, parseTagText(tagEditorValue))
-    handleCloseTagEditor()
-  }, [tagEditorVideo, tagEditorValue, handleSetCustomTags, handleCloseTagEditor])
+    const session = editorSessionRef.current
+    if (!session) throw new Error('标签尚未读取成功，请重新载入')
+    const tags = parseTagText(tagEditorValue)
+    const fingerprint = JSON.stringify(tags)
+    if (!session.attempt || session.attempt.fingerprint !== fingerprint) {
+      session.attempt = { fingerprint, operationId: `tags_${Date.now().toString(36)}_${Math.random().toString(36).slice(2)}_${Math.random().toString(36).slice(2)}` }
+    }
+    try {
+      const result = await setVideoCustomTags(session.target, tags, session.expectedRevision === undefined ? undefined : {
+        expectedRevision: session.expectedRevision, operationId: session.attempt.operationId
+      })
+      await reconcileSettings?.(result)
+      if (session.generation === editorGenerationRef.current) handleCloseTagEditor()
+    } catch (error) {
+      if (session.generation === editorGenerationRef.current) {
+        setTagEditorError(error?.message || '标签保存失败')
+        throw error
+      }
+    }
+  }, [tagEditorVideo, tagEditorValue, handleCloseTagEditor, reconcileSettings])
 
   const handleToggleVideoSelection = useCallback((video) => {
     const key = getVideoKey(video)
@@ -132,7 +155,14 @@ export function useTagEditor({ settings, saveSettings }) {
   const handleSaveBulkTagEditor = useCallback(async () => {
     const tags = parseTagText(bulkTagValue)
     if (!bulkTagVideos.length || !tags.length) return
-    await handleAppendCustomTags(bulkTagVideos, tags)
+    const result = await handleAppendCustomTags(bulkTagVideos, tags)
+    if (result?.failed?.length) {
+      const failedVideos = result.failed.map(item => bulkTagVideos[item.index]).filter(Boolean)
+      setBulkTagVideos(failedVideos)
+      setSelectedVideoKeys(failedVideos.map(getVideoKey))
+      setSelectedVideoMap(Object.fromEntries(failedVideos.map(video => [getVideoKey(video), video])))
+      throw new Error('已更新 ' + result.updatedCount + ' 项，' + result.failed.length + ' 项失败，请检查后重试')
+    }
     handleCloseBulkTagEditor()
     handleClearVideoSelection()
   }, [bulkTagVideos, bulkTagValue, handleAppendCustomTags, handleCloseBulkTagEditor, handleClearVideoSelection])
@@ -140,6 +170,9 @@ export function useTagEditor({ settings, saveSettings }) {
   return {
     tagEditorVideo,
     tagEditorValue,
+    tagEditorLoading,
+    tagEditorError,
+    handleReloadTagEditor,
     setTagEditorValue,
     bulkTagVideos,
     bulkTagValue,

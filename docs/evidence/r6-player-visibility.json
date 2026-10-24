@@ -1,0 +1,1814 @@
+{
+  "date": "2026-10-23T11:52:31.229Z",
+  "scope": "Desktop pause ownership and native host presentation; resource acceptance remains partial",
+  "sourceChanges": [
+    "src/components/VideoPlayer.jsx",
+    "main/mpv-host.js"
+  ],
+  "defects": [
+    "A new hidden adapter could inherit the previous paused snapshot and start playing",
+    "An explicit pause after automatic background pause could resume on foreground",
+    "Native host presentation intent was lost on parent hide; child focus could interfere with main visibility"
+  ],
+  "before": {
+    "controlled": "before-test.log",
+    "actualPackage": "before-4-result.json",
+    "diagnosticOcclusionFlag": true,
+    "limitations": "The two original adapter failures were reproduced in a diagnostic launch. Current source and final packages were also tested with default Chromium occlusion."
+  },
+  "after": {
+    "controlledCases": 13,
+    "desktopGroupLog": "desktop-group-final.log",
+    "native": {
+      "tag": "fixed",
+      "id": "1f24fbf5",
+      "base": "E:/wpvisibility-1f24fbf5",
+      "data": "E:\\wpvisibility-1f24fbf5\\Data",
+      "browserPort": 59530,
+      "nodePort": 59531,
+      "disableOcclusion": false,
+      "engine": "mpv",
+      "cases": [
+        {
+          "name": "automatic-hidden",
+          "at": 1792753935234,
+          "expectedPaused": true,
+          "passed": true,
+          "hostCorrect": true,
+          "ui": {
+            "hidden": true,
+            "theme": "dark"
+          },
+          "native": {
+            "filePath": "E:\\wpres-c04aa8bb\\media\\landscape.mp4",
+            "timePos": 1,
+            "duration": 20,
+            "paused": true,
+            "buffering": false,
+            "volume": 100,
+            "muted": true,
+            "speed": 1,
+            "audioId": 1,
+            "subtitleId": 0,
+            "subtitleVisible": true,
+            "subtitleScale": 1,
+            "loopFile": "inf",
+            "abLoopA": null,
+            "abLoopB": null,
+            "playlistPos": 1,
+            "playlistCount": 1,
+            "eofReached": false,
+            "trackList": [
+              {
+                "id": 1,
+                "type": "video",
+                "src-id": 1,
+                "image": false,
+                "albumart": false,
+                "default": true,
+                "forced": false,
+                "dependent": false,
+                "visual-impaired": false,
+                "hearing-impaired": false,
+                "external": false,
+                "selected": true,
+                "main-selection": 0,
+                "ff-index": 0,
+                "decoder": "h264",
+                "decoder-desc": "H.264 / AVC / MPEG-4 AVC / MPEG-4 part 10",
+                "codec": "h264",
+                "codec-desc": "H.264 / AVC / MPEG-4 AVC / MPEG-4 part 10",
+                "codec-profile": "Constrained Baseline",
+                "demux-w": 1920,
+                "demux-h": 1080,
+                "demux-fps": 30,
+                "demux-par": 1,
+                "metadata": {
+                  "language": "und",
+                  "handler_name": "VideoHandler",
+                  "vendor_id": "[0][0][0][0]",
+                  "encoder": "Lavc62.28.101 libx264"
+                }
+              },
+              {
+                "id": 1,
+                "type": "audio",
+                "src-id": 2,
+                "audio-channels": 2,
+                "image": false,
+                "albumart": false,
+                "default": true,
+                "forced": false,
+                "dependent": false,
+                "visual-impaired": false,
+                "hearing-impaired": false,
+                "external": false,
+                "selected": true,
+                "main-selection": 0,
+                "ff-index": 1,
+                "decoder": "aac",
+                "decoder-desc": "AAC (Advanced Audio Coding)",
+                "codec": "aac",
+                "codec-desc": "AAC (Advanced Audio Coding)",
+                "codec-profile": "LC",
+                "demux-channel-count": 2,
+                "demux-channels": "stereo",
+                "demux-samplerate": 48000,
+                "demux-bitrate": 2278,
+                "metadata": {
+                  "language": "und",
+                  "handler_name": "SoundHandler",
+                  "vendor_id": "[0][0][0][0]"
+                }
+              }
+            ],
+            "sessionId": "player_60312d64-ceb4-4204-8f97-91c2cd98a95a",
+            "engineSessionId": 3,
+            "resourceTarget": "E:\\wpres-c04aa8bb\\media\\landscape.mp4",
+            "ready": true
+          },
+          "windows": {
+            "minimized": false,
+            "visible": false,
+            "mpvPid": 41780,
+            "hosts": [
+              {
+                "id": 2,
+                "visible": false,
+                "bounds": {
+                  "x": 43,
+                  "y": 117,
+                  "width": 918,
+                  "height": 483
+                }
+              }
+            ]
+          }
+        },
+        {
+          "name": "automatic-restored",
+          "at": 1792753935469,
+          "expectedPaused": false,
+          "passed": true,
+          "hostCorrect": true,
+          "ui": {
+            "hidden": false,
+            "theme": "dark"
+          },
+          "native": {
+            "filePath": "E:\\wpres-c04aa8bb\\media\\landscape.mp4",
+            "timePos": 1.2,
+            "duration": 20,
+            "paused": false,
+            "buffering": false,
+            "volume": 100,
+            "muted": true,
+            "speed": 1,
+            "audioId": 1,
+            "subtitleId": 0,
+            "subtitleVisible": true,
+            "subtitleScale": 1,
+            "loopFile": "inf",
+            "abLoopA": null,
+            "abLoopB": null,
+            "playlistPos": 1,
+            "playlistCount": 1,
+            "eofReached": false,
+            "trackList": [
+              {
+                "id": 1,
+                "type": "video",
+                "src-id": 1,
+                "image": false,
+                "albumart": false,
+                "default": true,
+                "forced": false,
+                "dependent": false,
+                "visual-impaired": false,
+                "hearing-impaired": false,
+                "external": false,
+                "selected": true,
+                "main-selection": 0,
+                "ff-index": 0,
+                "decoder": "h264",
+                "decoder-desc": "H.264 / AVC / MPEG-4 AVC / MPEG-4 part 10",
+                "codec": "h264",
+                "codec-desc": "H.264 / AVC / MPEG-4 AVC / MPEG-4 part 10",
+                "codec-profile": "Constrained Baseline",
+                "demux-w": 1920,
+                "demux-h": 1080,
+                "demux-fps": 30,
+                "demux-par": 1,
+                "metadata": {
+                  "language": "und",
+                  "handler_name": "VideoHandler",
+                  "vendor_id": "[0][0][0][0]",
+                  "encoder": "Lavc62.28.101 libx264"
+                }
+              },
+              {
+                "id": 1,
+                "type": "audio",
+                "src-id": 2,
+                "audio-channels": 2,
+                "image": false,
+                "albumart": false,
+                "default": true,
+                "forced": false,
+                "dependent": false,
+                "visual-impaired": false,
+                "hearing-impaired": false,
+                "external": false,
+                "selected": true,
+                "main-selection": 0,
+                "ff-index": 1,
+                "decoder": "aac",
+                "decoder-desc": "AAC (Advanced Audio Coding)",
+                "codec": "aac",
+                "codec-desc": "AAC (Advanced Audio Coding)",
+                "codec-profile": "LC",
+                "demux-channel-count": 2,
+                "demux-channels": "stereo",
+                "demux-samplerate": 48000,
+                "demux-bitrate": 2278,
+                "metadata": {
+                  "language": "und",
+                  "handler_name": "SoundHandler",
+                  "vendor_id": "[0][0][0][0]"
+                }
+              }
+            ],
+            "sessionId": "player_60312d64-ceb4-4204-8f97-91c2cd98a95a",
+            "engineSessionId": 3,
+            "resourceTarget": "E:\\wpres-c04aa8bb\\media\\landscape.mp4",
+            "ready": true
+          },
+          "windows": {
+            "minimized": false,
+            "visible": true,
+            "mpvPid": 41780,
+            "hosts": [
+              {
+                "id": 2,
+                "visible": true,
+                "bounds": {
+                  "x": 43,
+                  "y": 117,
+                  "width": 918,
+                  "height": 483
+                }
+              }
+            ]
+          }
+        },
+        {
+          "name": "manual-pause-restored",
+          "at": 1792753935920,
+          "expectedPaused": true,
+          "passed": true,
+          "hostCorrect": true,
+          "ui": {
+            "hidden": false,
+            "theme": "dark"
+          },
+          "native": {
+            "filePath": "E:\\wpres-c04aa8bb\\media\\landscape.mp4",
+            "timePos": 1.2,
+            "duration": 20,
+            "paused": true,
+            "buffering": false,
+            "volume": 100,
+            "muted": true,
+            "speed": 1,
+            "audioId": 1,
+            "subtitleId": 0,
+            "subtitleVisible": true,
+            "subtitleScale": 1,
+            "loopFile": "inf",
+            "abLoopA": null,
+            "abLoopB": null,
+            "playlistPos": 1,
+            "playlistCount": 1,
+            "eofReached": false,
+            "trackList": [
+              {
+                "id": 1,
+                "type": "video",
+                "src-id": 1,
+                "image": false,
+                "albumart": false,
+                "default": true,
+                "forced": false,
+                "dependent": false,
+                "visual-impaired": false,
+                "hearing-impaired": false,
+                "external": false,
+                "selected": true,
+                "main-selection": 0,
+                "ff-index": 0,
+                "decoder": "h264",
+                "decoder-desc": "H.264 / AVC / MPEG-4 AVC / MPEG-4 part 10",
+                "codec": "h264",
+                "codec-desc": "H.264 / AVC / MPEG-4 AVC / MPEG-4 part 10",
+                "codec-profile": "Constrained Baseline",
+                "demux-w": 1920,
+                "demux-h": 1080,
+                "demux-fps": 30,
+                "demux-par": 1,
+                "metadata": {
+                  "language": "und",
+                  "handler_name": "VideoHandler",
+                  "vendor_id": "[0][0][0][0]",
+                  "encoder": "Lavc62.28.101 libx264"
+                }
+              },
+              {
+                "id": 1,
+                "type": "audio",
+                "src-id": 2,
+                "audio-channels": 2,
+                "image": false,
+                "albumart": false,
+                "default": true,
+                "forced": false,
+                "dependent": false,
+                "visual-impaired": false,
+                "hearing-impaired": false,
+                "external": false,
+                "selected": true,
+                "main-selection": 0,
+                "ff-index": 1,
+                "decoder": "aac",
+                "decoder-desc": "AAC (Advanced Audio Coding)",
+                "codec": "aac",
+                "codec-desc": "AAC (Advanced Audio Coding)",
+                "codec-profile": "LC",
+                "demux-channel-count": 2,
+                "demux-channels": "stereo",
+                "demux-samplerate": 48000,
+                "demux-bitrate": 2278,
+                "metadata": {
+                  "language": "und",
+                  "handler_name": "SoundHandler",
+                  "vendor_id": "[0][0][0][0]"
+                }
+              }
+            ],
+            "sessionId": "player_60312d64-ceb4-4204-8f97-91c2cd98a95a",
+            "engineSessionId": 3,
+            "resourceTarget": "E:\\wpres-c04aa8bb\\media\\landscape.mp4",
+            "ready": true
+          },
+          "windows": {
+            "minimized": false,
+            "visible": true,
+            "mpvPid": 41780,
+            "hosts": [
+              {
+                "id": 2,
+                "visible": true,
+                "bounds": {
+                  "x": 43,
+                  "y": 117,
+                  "width": 918,
+                  "height": 483
+                }
+              }
+            ]
+          }
+        },
+        {
+          "name": "hidden-replacement",
+          "at": 1792753937357,
+          "expectedPaused": true,
+          "passed": true,
+          "hostCorrect": true,
+          "ui": {
+            "hidden": true,
+            "theme": "dark"
+          },
+          "native": {
+            "filePath": "E:\\wpres-c04aa8bb\\media\\portrait.mp4",
+            "timePos": 1,
+            "duration": 20,
+            "paused": true,
+            "buffering": false,
+            "volume": 100,
+            "muted": true,
+            "speed": 1,
+            "audioId": 1,
+            "subtitleId": 0,
+            "subtitleVisible": true,
+            "subtitleScale": 1,
+            "loopFile": "false",
+            "abLoopA": null,
+            "abLoopB": null,
+            "playlistPos": 1,
+            "playlistCount": 1,
+            "eofReached": false,
+            "trackList": [
+              {
+                "id": 1,
+                "type": "video",
+                "src-id": 1,
+                "image": false,
+                "albumart": false,
+                "default": true,
+                "forced": false,
+                "dependent": false,
+                "visual-impaired": false,
+                "hearing-impaired": false,
+                "external": false,
+                "selected": true,
+                "main-selection": 0,
+                "ff-index": 0,
+                "decoder": "h264",
+                "decoder-desc": "H.264 / AVC / MPEG-4 AVC / MPEG-4 part 10",
+                "codec": "h264",
+                "codec-desc": "H.264 / AVC / MPEG-4 AVC / MPEG-4 part 10",
+                "codec-profile": "Constrained Baseline",
+                "demux-w": 720,
+                "demux-h": 1280,
+                "demux-fps": 30,
+                "demux-par": 1,
+                "metadata": {
+                  "language": "und",
+                  "handler_name": "VideoHandler",
+                  "vendor_id": "[0][0][0][0]",
+                  "encoder": "Lavc62.28.101 libx264"
+                }
+              },
+              {
+                "id": 1,
+                "type": "audio",
+                "src-id": 2,
+                "audio-channels": 2,
+                "image": false,
+                "albumart": false,
+                "default": true,
+                "forced": false,
+                "dependent": false,
+                "visual-impaired": false,
+                "hearing-impaired": false,
+                "external": false,
+                "selected": true,
+                "main-selection": 0,
+                "ff-index": 1,
+                "decoder": "aac",
+                "decoder-desc": "AAC (Advanced Audio Coding)",
+                "codec": "aac",
+                "codec-desc": "AAC (Advanced Audio Coding)",
+                "codec-profile": "LC",
+                "demux-channel-count": 2,
+                "demux-channels": "stereo",
+                "demux-samplerate": 48000,
+                "demux-bitrate": 2278,
+                "metadata": {
+                  "language": "und",
+                  "handler_name": "SoundHandler",
+                  "vendor_id": "[0][0][0][0]"
+                }
+              }
+            ],
+            "sessionId": "player_dd9ebd2e-ee3d-44ea-8bf4-8a2bfffd11f5",
+            "engineSessionId": 7,
+            "resourceTarget": "E:\\wpres-c04aa8bb\\media\\portrait.mp4",
+            "ready": true
+          },
+          "windows": {
+            "minimized": false,
+            "visible": false,
+            "mpvPid": 32988,
+            "hosts": [
+              {
+                "id": 2,
+                "visible": false,
+                "bounds": {
+                  "x": 43,
+                  "y": 117,
+                  "width": 918,
+                  "height": 483
+                }
+              }
+            ]
+          }
+        },
+        {
+          "name": "explicit-pause-after-auto",
+          "at": 1792753938652,
+          "expectedPaused": true,
+          "passed": true,
+          "hostCorrect": true,
+          "ui": {
+            "hidden": true,
+            "theme": "dark"
+          },
+          "native": {
+            "filePath": "E:\\wpres-c04aa8bb\\media\\landscape.mp4",
+            "timePos": 1.5,
+            "duration": 20,
+            "paused": true,
+            "buffering": false,
+            "volume": 100,
+            "muted": true,
+            "speed": 1,
+            "audioId": 1,
+            "subtitleId": 0,
+            "subtitleVisible": true,
+            "subtitleScale": 1,
+            "loopFile": "inf",
+            "abLoopA": null,
+            "abLoopB": null,
+            "playlistPos": 1,
+            "playlistCount": 1,
+            "eofReached": false,
+            "trackList": [
+              {
+                "id": 1,
+                "type": "video",
+                "src-id": 1,
+                "image": false,
+                "albumart": false,
+                "default": true,
+                "forced": false,
+                "dependent": false,
+                "visual-impaired": false,
+                "hearing-impaired": false,
+                "external": false,
+                "selected": true,
+                "main-selection": 0,
+                "ff-index": 0,
+                "decoder": "h264",
+                "decoder-desc": "H.264 / AVC / MPEG-4 AVC / MPEG-4 part 10",
+                "codec": "h264",
+                "codec-desc": "H.264 / AVC / MPEG-4 AVC / MPEG-4 part 10",
+                "codec-profile": "Constrained Baseline",
+                "demux-w": 1920,
+                "demux-h": 1080,
+                "demux-fps": 30,
+                "demux-par": 1,
+                "metadata": {
+                  "language": "und",
+                  "handler_name": "VideoHandler",
+                  "vendor_id": "[0][0][0][0]",
+                  "encoder": "Lavc62.28.101 libx264"
+                }
+              },
+              {
+                "id": 1,
+                "type": "audio",
+                "src-id": 2,
+                "audio-channels": 2,
+                "image": false,
+                "albumart": false,
+                "default": true,
+                "forced": false,
+                "dependent": false,
+                "visual-impaired": false,
+                "hearing-impaired": false,
+                "external": false,
+                "selected": true,
+                "main-selection": 0,
+                "ff-index": 1,
+                "decoder": "aac",
+                "decoder-desc": "AAC (Advanced Audio Coding)",
+                "codec": "aac",
+                "codec-desc": "AAC (Advanced Audio Coding)",
+                "codec-profile": "LC",
+                "demux-channel-count": 2,
+                "demux-channels": "stereo",
+                "demux-samplerate": 48000,
+                "demux-bitrate": 2278,
+                "metadata": {
+                  "language": "und",
+                  "handler_name": "SoundHandler",
+                  "vendor_id": "[0][0][0][0]"
+                }
+              }
+            ],
+            "sessionId": "player_8f59c4d7-28a1-4d7b-91b2-bcf9ef534ab8",
+            "engineSessionId": 12,
+            "resourceTarget": "E:\\wpres-c04aa8bb\\media\\landscape.mp4",
+            "ready": true
+          },
+          "windows": {
+            "minimized": false,
+            "visible": false,
+            "mpvPid": 46424,
+            "hosts": [
+              {
+                "id": 2,
+                "visible": false,
+                "bounds": {
+                  "x": 43,
+                  "y": 117,
+                  "width": 918,
+                  "height": 483
+                }
+              }
+            ]
+          }
+        },
+        {
+          "name": "explicit-pause-restored",
+          "at": 1792753939384,
+          "expectedPaused": true,
+          "passed": true,
+          "hostCorrect": true,
+          "ui": {
+            "hidden": false,
+            "theme": "dark"
+          },
+          "native": {
+            "filePath": "E:\\wpres-c04aa8bb\\media\\landscape.mp4",
+            "timePos": 1.5,
+            "duration": 20,
+            "paused": true,
+            "buffering": false,
+            "volume": 100,
+            "muted": true,
+            "speed": 1,
+            "audioId": 1,
+            "subtitleId": 0,
+            "subtitleVisible": true,
+            "subtitleScale": 1,
+            "loopFile": "inf",
+            "abLoopA": null,
+            "abLoopB": null,
+            "playlistPos": 1,
+            "playlistCount": 1,
+            "eofReached": false,
+            "trackList": [
+              {
+                "id": 1,
+                "type": "video",
+                "src-id": 1,
+                "image": false,
+                "albumart": false,
+                "default": true,
+                "forced": false,
+                "dependent": false,
+                "visual-impaired": false,
+                "hearing-impaired": false,
+                "external": false,
+                "selected": true,
+                "main-selection": 0,
+                "ff-index": 0,
+                "decoder": "h264",
+                "decoder-desc": "H.264 / AVC / MPEG-4 AVC / MPEG-4 part 10",
+                "codec": "h264",
+                "codec-desc": "H.264 / AVC / MPEG-4 AVC / MPEG-4 part 10",
+                "codec-profile": "Constrained Baseline",
+                "demux-w": 1920,
+                "demux-h": 1080,
+                "demux-fps": 30,
+                "demux-par": 1,
+                "metadata": {
+                  "language": "und",
+                  "handler_name": "VideoHandler",
+                  "vendor_id": "[0][0][0][0]",
+                  "encoder": "Lavc62.28.101 libx264"
+                }
+              },
+              {
+                "id": 1,
+                "type": "audio",
+                "src-id": 2,
+                "audio-channels": 2,
+                "image": false,
+                "albumart": false,
+                "default": true,
+                "forced": false,
+                "dependent": false,
+                "visual-impaired": false,
+                "hearing-impaired": false,
+                "external": false,
+                "selected": true,
+                "main-selection": 0,
+                "ff-index": 1,
+                "decoder": "aac",
+                "decoder-desc": "AAC (Advanced Audio Coding)",
+                "codec": "aac",
+                "codec-desc": "AAC (Advanced Audio Coding)",
+                "codec-profile": "LC",
+                "demux-channel-count": 2,
+                "demux-channels": "stereo",
+                "demux-samplerate": 48000,
+                "demux-bitrate": 2278,
+                "metadata": {
+                  "language": "und",
+                  "handler_name": "SoundHandler",
+                  "vendor_id": "[0][0][0][0]"
+                }
+              }
+            ],
+            "sessionId": "player_8f59c4d7-28a1-4d7b-91b2-bcf9ef534ab8",
+            "engineSessionId": 12,
+            "resourceTarget": "E:\\wpres-c04aa8bb\\media\\landscape.mp4",
+            "ready": true
+          },
+          "windows": {
+            "minimized": false,
+            "visible": true,
+            "mpvPid": 46424,
+            "hosts": [
+              {
+                "id": 2,
+                "visible": true,
+                "bounds": {
+                  "x": 43,
+                  "y": 117,
+                  "width": 918,
+                  "height": 483
+                }
+              }
+            ]
+          }
+        }
+      ],
+      "startedAt": "2026-10-23T11:12:06.361Z",
+      "identity": {
+        "pid": 47020,
+        "data": "E:\\wpvisibility-1f24fbf5\\Data",
+        "archive": "C:\\Users\\s1897\\AppData\\Local\\Temp\\3L5pT6RyWIZUQZ1rvtKVbBznzmN\\resources\\app.asar"
+      },
+      "archiveSha256": "7c779732672e9fae94f21f34c70a717c3deb5a63940e50150957b291770bc2e2",
+      "visibility": [
+        {
+          "at": 1792753935013,
+          "hidden": true
+        },
+        {
+          "at": 1792753935244,
+          "hidden": false
+        },
+        {
+          "at": 1792753935488,
+          "hidden": true
+        },
+        {
+          "at": 1792753935704,
+          "hidden": false
+        },
+        {
+          "at": 1792753935933,
+          "hidden": true
+        },
+        {
+          "at": 1792753937373,
+          "hidden": false
+        },
+        {
+          "at": 1792753938366,
+          "hidden": true
+        },
+        {
+          "at": 1792753938663,
+          "hidden": false
+        }
+      ],
+      "passed": true,
+      "finishedAt": "2026-10-23T11:12:20.092Z"
+    },
+    "html5": {
+      "tag": "fixed-2",
+      "id": "294acfe5",
+      "base": "E:/wpvisibility-294acfe5",
+      "data": "E:\\wpvisibility-294acfe5\\Data",
+      "browserPort": 51113,
+      "nodePort": 51114,
+      "disableOcclusion": false,
+      "engine": "html5",
+      "cases": [
+        {
+          "name": "automatic-hidden",
+          "at": 1792753945723,
+          "expectedPaused": true,
+          "passed": true,
+          "hostCorrect": true,
+          "ui": {
+            "hidden": true,
+            "theme": "dark"
+          },
+          "native": {
+            "ready": true,
+            "paused": true,
+            "timePos": 1.020045,
+            "duration": 20,
+            "filePath": "file:///E:/wpres-c04aa8bb/media/landscape.mp4",
+            "sessionId": "file:///E:/wpres-c04aa8bb/media/landscape.mp4",
+            "decodedFrames": 9
+          },
+          "windows": {
+            "minimized": false,
+            "visible": false,
+            "hosts": []
+          }
+        },
+        {
+          "name": "automatic-restored",
+          "at": 1792753945943,
+          "expectedPaused": false,
+          "passed": true,
+          "hostCorrect": true,
+          "ui": {
+            "hidden": false,
+            "theme": "dark"
+          },
+          "native": {
+            "ready": true,
+            "paused": false,
+            "timePos": 1.230588,
+            "duration": 20,
+            "filePath": "file:///E:/wpres-c04aa8bb/media/landscape.mp4",
+            "sessionId": "file:///E:/wpres-c04aa8bb/media/landscape.mp4",
+            "decodedFrames": 19
+          },
+          "windows": {
+            "minimized": false,
+            "visible": true,
+            "hosts": []
+          }
+        },
+        {
+          "name": "manual-pause-restored",
+          "at": 1792753946384,
+          "expectedPaused": true,
+          "passed": true,
+          "hostCorrect": true,
+          "ui": {
+            "hidden": false,
+            "theme": "dark"
+          },
+          "native": {
+            "ready": true,
+            "paused": true,
+            "timePos": 1.235569,
+            "duration": 20,
+            "filePath": "file:///E:/wpres-c04aa8bb/media/landscape.mp4",
+            "sessionId": "file:///E:/wpres-c04aa8bb/media/landscape.mp4",
+            "decodedFrames": 19
+          },
+          "windows": {
+            "minimized": false,
+            "visible": true,
+            "hosts": []
+          }
+        },
+        {
+          "name": "hidden-replacement",
+          "at": 1792753947170,
+          "expectedPaused": true,
+          "passed": true,
+          "hostCorrect": true,
+          "ui": {
+            "hidden": true,
+            "theme": "dark"
+          },
+          "native": {
+            "ready": true,
+            "paused": true,
+            "timePos": 1,
+            "duration": 20,
+            "filePath": "file:///E:/wpres-c04aa8bb/media/portrait.mp4",
+            "sessionId": "file:///E:/wpres-c04aa8bb/media/portrait.mp4",
+            "decodedFrames": 17
+          },
+          "windows": {
+            "minimized": false,
+            "visible": false,
+            "hosts": []
+          }
+        },
+        {
+          "name": "explicit-pause-after-auto",
+          "at": 1792753948046,
+          "expectedPaused": true,
+          "passed": true,
+          "hostCorrect": true,
+          "ui": {
+            "hidden": true,
+            "theme": "dark"
+          },
+          "native": {
+            "ready": true,
+            "paused": true,
+            "timePos": 1.669295,
+            "duration": 20,
+            "filePath": "file:///E:/wpres-c04aa8bb/media/landscape.mp4",
+            "sessionId": "file:///E:/wpres-c04aa8bb/media/landscape.mp4",
+            "decodedFrames": 25
+          },
+          "windows": {
+            "minimized": false,
+            "visible": false,
+            "hosts": []
+          }
+        },
+        {
+          "name": "explicit-pause-restored",
+          "at": 1792753948764,
+          "expectedPaused": true,
+          "passed": true,
+          "hostCorrect": true,
+          "ui": {
+            "hidden": false,
+            "theme": "dark"
+          },
+          "native": {
+            "ready": true,
+            "paused": true,
+            "timePos": 1.669295,
+            "duration": 20,
+            "filePath": "file:///E:/wpres-c04aa8bb/media/landscape.mp4",
+            "sessionId": "file:///E:/wpres-c04aa8bb/media/landscape.mp4",
+            "decodedFrames": 25
+          },
+          "windows": {
+            "minimized": false,
+            "visible": true,
+            "hosts": []
+          }
+        }
+      ],
+      "startedAt": "2026-10-23T11:12:16.577Z",
+      "identity": {
+        "pid": 39220,
+        "data": "E:\\wpvisibility-294acfe5\\Data",
+        "archive": "C:\\Users\\s1897\\AppData\\Local\\Temp\\3L5pT6RyWIZUQZ1rvtKVbBznzmN\\resources\\app.asar"
+      },
+      "archiveSha256": "7c779732672e9fae94f21f34c70a717c3deb5a63940e50150957b291770bc2e2",
+      "visibility": [
+        {
+          "at": 1792753945512,
+          "hidden": true
+        },
+        {
+          "at": 1792753945732,
+          "hidden": false
+        },
+        {
+          "at": 1792753945953,
+          "hidden": true
+        },
+        {
+          "at": 1792753946167,
+          "hidden": false
+        },
+        {
+          "at": 1792753946396,
+          "hidden": true
+        },
+        {
+          "at": 1792753947182,
+          "hidden": false
+        },
+        {
+          "at": 1792753947828,
+          "hidden": true
+        },
+        {
+          "at": 1792753948054,
+          "hidden": false
+        }
+      ],
+      "passed": true,
+      "finishedAt": "2026-10-23T11:12:29.410Z"
+    },
+    "nativeLayout": {
+      "result": "fixed-20-result.json",
+      "cases": 14
+    },
+    "frozenProductionBuild": {
+      "passed": true,
+      "directory": "E:\\wallpaper播放器\\release\\windows-1.5.1-33831e4e-44b2-4e41-8271-b52158d9cc05",
+      "version": "1.5.1",
+      "productionSourceChanges": [
+        "main/mpv-host.js",
+        "src/components/VideoPlayer.jsx"
+      ],
+      "qaWrapperAbsent": true,
+      "archive": {
+        "file": "E:\\wallpaper播放器\\release\\windows-1.5.1-33831e4e-44b2-4e41-8271-b52158d9cc05\\win-unpacked\\resources\\app.asar",
+        "bytes": 16416688,
+        "sha256": "7c779732672e9fae94f21f34c70a717c3deb5a63940e50150957b291770bc2e2",
+        "sha512": "H/XBPiABfNX77fms6JY7S5K6fLhz/YjM0zzFRpxi8N02dWq5aoMxOFVVynd72QADIqiMzIZFNlFyaNv1XjBYCQ=="
+      },
+      "embedded": [
+        "main/application/confirm.js",
+        "main/application/download-service.js",
+        "main/application/download-tasks.js",
+        "main/application/extract-mpv.ps1",
+        "main/application/library-service.js",
+        "main/application/media-mutation-paths.js",
+        "main/application/media-mutations.js",
+        "main/application/media-work-service.js",
+        "main/application/mpv-installer.js",
+        "main/application/mpv-version-cache.js",
+        "main/application/player-service.js",
+        "main/application/resource-scheduler.js",
+        "main/application/settings-broadcast.js",
+        "main/application/settings-json-worker.js",
+        "main/application/settings-json.js",
+        "main/application/settings-startup.js",
+        "main/application/transcode-service.js",
+        "main/constants.js",
+        "main/download-manager.js",
+        "main/download-xunlei.js",
+        "main/exec.js",
+        "main/index.js",
+        "main/ip-utils.js",
+        "main/ipc/app-dialogs.js",
+        "main/ipc/downloads.js",
+        "main/ipc/files.js",
+        "main/ipc/media-data.js",
+        "main/ipc/media.js",
+        "main/ipc/network-resource-service.js",
+        "main/ipc/network-resources.js",
+        "main/ipc/player.js",
+        "main/ipc/plugins.js",
+        "main/ipc/privacy.js",
+        "main/ipc/remote.js",
+        "main/ipc/settings.js",
+        "main/ipc/updater.js",
+        "main/ipc/window-shell.js",
+        "main/ipc-channels.js",
+        "main/ipc.js",
+        "main/media-pressure.js",
+        "main/mpv-host.js",
+        "main/mpv-integration.js",
+        "main/mpv.js",
+        "main/network-resource-parser.js",
+        "main/paths.js",
+        "main/plugins/builtin.js",
+        "main/plugins/capabilities.js",
+        "main/plugins/core-api.js",
+        "main/plugins/index.js",
+        "main/plugins/loader.js",
+        "main/plugins/manifest.js",
+        "main/plugins/official.js",
+        "main/plugins/registry.js",
+        "main/portable-user-data.js",
+        "main/process-lifecycle.js",
+        "main/rate-limiter.js",
+        "main/remote/handlers/desktop.js",
+        "main/remote/handlers/info.js",
+        "main/remote/handlers/library.js",
+        "main/remote/handlers/media.js",
+        "main/remote/handlers/network-resources.js",
+        "main/remote/handlers/tags.js",
+        "main/remote/handlers/transcode.js",
+        "main/remote/http-utils.js",
+        "main/remote/identity.js",
+        "main/remote/index.js",
+        "main/remote/json-responses.js",
+        "main/remote/media-mutations.js",
+        "main/remote/network.js",
+        "main/remote/request-lifecycle.js",
+        "main/remote/server.js",
+        "main/remote/streaming.js",
+        "main/remote/transcode-cache.js",
+        "main/remote/transcode.js",
+        "main/remote/video-index.js",
+        "main/repositories/settings-file.js",
+        "main/repositories/tag-state.js",
+        "main/repositories/user-media.js",
+        "main/scanner.js",
+        "main/security/ipc-sender.js",
+        "main/security/ipc.js",
+        "main/security/media-access.js",
+        "main/security/privacy-password.js",
+        "main/settings.js",
+        "main/thumbnail.js",
+        "main/updater.js",
+        "main/user-data.js",
+        "main/video-metadata.js",
+        "main/window.js",
+        "main/ytdlp-service.js",
+        "dist/assets/AISearchPanel-1HGx_hV9.js",
+        "dist/assets/DownloadCenter-ogdQqbRk.js",
+        "dist/assets/index-DhGRM5JI.css",
+        "dist/assets/index-DNX0aOFE.js",
+        "dist/assets/NetworkResourceLibrary-DS1-_mFs.js",
+        "dist/assets/Settings-BY_Sfzjq.js",
+        "dist/assets/useDownloadStateObserver-zFSfzyD9.js",
+        "dist/assets/VideoAnalysisSidebar-nrfGgucv.js",
+        "dist/index.html",
+        "packages/contracts/dist/index.js",
+        "packages/contracts/dist/schema.js",
+        "packages/contracts/dist/settings-feed.js",
+        "packages/contracts/package.json",
+        "packages/domain/dist/index.js",
+        "packages/domain/package.json",
+        "main.js",
+        "preload.js"
+      ],
+      "vendor": [
+        "vendor/aria2/aria2c.exe",
+        "vendor/aria2/AUTHORS",
+        "vendor/aria2/ChangeLog",
+        "vendor/aria2/COPYING",
+        "vendor/aria2/LICENSE.OpenSSL",
+        "vendor/aria2/NEWS",
+        "vendor/aria2/README.html",
+        "vendor/aria2/README.mingw",
+        "vendor/ffmpeg/bin/ffmpeg.exe",
+        "vendor/ffmpeg/bin/ffplay.exe",
+        "vendor/ffmpeg/bin/ffprobe.exe",
+        "vendor/ffmpeg/LICENSE",
+        "vendor/ffmpeg/presets/libvpx-1080p.ffpreset",
+        "vendor/ffmpeg/presets/libvpx-1080p50_60.ffpreset",
+        "vendor/ffmpeg/presets/libvpx-360p.ffpreset",
+        "vendor/ffmpeg/presets/libvpx-720p.ffpreset",
+        "vendor/ffmpeg/presets/libvpx-720p50_60.ffpreset",
+        "vendor/ffmpeg/README.txt",
+        "vendor/mpv/mpv-register.bat",
+        "vendor/mpv/mpv-unregister.bat",
+        "vendor/mpv/mpv.com",
+        "vendor/mpv/mpv.exe",
+        "vendor/mpv/vulkan-1.dll",
+        "vendor/yt-dlp/yt-dlp.exe"
+      ],
+      "assets": [
+        {
+          "file": "Wallpaper-Player-Setup-1.5.1.exe",
+          "role": "installer",
+          "bytes": 232014240,
+          "sha256": "825491d91d7bf2e96f63480cca7bdbdd79a187ad44bdebb6bdb1a6e96a79dece",
+          "sha512": "4hqn/wkAHQvuoYWxIPEKH/vLmniB2kJ/7VWhxqcMi9OgFkERFSEurD7CLw6PXxCtud7MwAEaltLEZKgFIpCRaw==",
+          "bootstrapArch": "ia32",
+          "productVersion": "1.5.1",
+          "signing": {
+            "status": "NotSigned",
+            "certificateSha256": null
+          }
+        },
+        {
+          "file": "Wallpaper-Player-1.5.1.exe",
+          "role": "portable",
+          "bytes": 231790107,
+          "sha256": "4f7a503a7d51bcb892e18fd67f50971335f4cce1f9a87d01ce25fb4c35accb6f",
+          "sha512": "boRm7OR4myHdrhc3m9qXoZufOTthoihFb4hpwSo0d3hg626/2S0k/KYoLtZCsdQCGHoL1+VDWenZKcJM1ac6nQ==",
+          "bootstrapArch": "ia32",
+          "productVersion": "1.5.1",
+          "signing": {
+            "status": "NotSigned",
+            "certificateSha256": null
+          }
+        },
+        {
+          "file": "Wallpaper-Player-Setup-1.5.1.exe.blockmap",
+          "role": "blockmap",
+          "bytes": 241953,
+          "sha256": "4234e9eeb990842345d3907d6dec7c44f0b8daeed0bfd36acb52f69f49bf7317",
+          "sha512": "IhcGHQL0HSoCRFebm63WxatWp+2KULWeQSw2jOF6HQTk3vWRtHbPp3ysi+cgWh6ApNz/PjlFx9DSdjVLYOmK5g=="
+        },
+        {
+          "file": "latest.yml",
+          "role": "desktop-update-metadata",
+          "bytes": 361,
+          "sha256": "55f885ca1b9787a1ff70db95ca5164f9255af17b341762a139fa8a6c2a4b8a28",
+          "sha512": "Pk+3YAuNUtiQn4yhDGw0JQVFQK5EYSjGAT3IhRBaLheyQkQDf4Fuwp3y0lMuyRmrfCSQ73W91JMHoU9EmreG6w=="
+        },
+        {
+          "file": "Wallpaper-Player-Plugin-video-analysis-1.0.0.zip",
+          "source": "plugins/Wallpaper-Player-Plugin-video-analysis-1.0.0.zip",
+          "role": "plugin",
+          "pluginId": "video-analysis",
+          "version": "1.0.0",
+          "bytes": 570218532,
+          "sha256": "365c2f5ccbec6afe7df5ce4b5c5df1699728cac113884abd48898d8209a5502a",
+          "sha512": "5W7hIMUaK+frnE+0/87KhyfC6BKbFTT2R3GgW+TCtG7Z037HNRooT/RVGrJTOMq5eDFEBHKhlSiVZQ9vMI838w=="
+        },
+        {
+          "file": "Wallpaper-Player-Plugin-ai-search-0.1.0.zip",
+          "source": "plugins/Wallpaper-Player-Plugin-ai-search-0.1.0.zip",
+          "role": "plugin",
+          "pluginId": "ai-search",
+          "version": "0.1.0",
+          "bytes": 2955069,
+          "sha256": "464e129ebb9a4731fff800c26c6e4c94ddbe33fbd1699486c166d9e112a97fc8",
+          "sha512": "rKd4RQyHFHEIADm+H3KQddNRMuu2UbSuiK4OK+hkfrp3JV36mLcSdLA0UNlAPW+7L5X1xi5kiTVNPmq1lDzOKw=="
+        },
+        {
+          "file": "Wallpaper-Player-Plugin-agent-bridge-0.1.0.zip",
+          "source": "plugins/Wallpaper-Player-Plugin-agent-bridge-0.1.0.zip",
+          "role": "plugin",
+          "pluginId": "agent-bridge",
+          "version": "0.1.0",
+          "bytes": 1093,
+          "sha256": "9f499408c282a144ffe411648d476fd4e36bd010c6e8974be3b9fd16460bed1a",
+          "sha512": "W5qWvlCSHQT8RlE31UF1e06dN3162tSZVhs7nqyFBhFLJdcN7Z8rE2WDw6ZMjQIygO89K/Xbuev/TJY+ImfSqg=="
+        }
+      ],
+      "originalData": 42,
+      "historicalArtifacts": 8,
+      "oldQaArtifactsPreserved": true,
+      "releasePublished": false
+    }
+  },
+  "resourceRun": {
+    "passed": false,
+    "completion": "interrupted during idle acceptance",
+    "wantedSeconds": 1200,
+    "cyclesPassed": 30,
+    "totalSamples": 102,
+    "playbackSamples": 60,
+    "playbackSpanSeconds": 901.953,
+    "visiblePlaybackSamples": 40,
+    "backgroundPlaybackSamples": 20,
+    "plannedMinimizeAt": 1792754403255,
+    "plannedRestoreAt": 1792754703720,
+    "manualPausePreserved": true,
+    "stableNativeSession": true,
+    "peakConcurrentPlayers": 1,
+    "everyCycleReturnedFullPreloadListenerMapToBaseline": true,
+    "initialListeners": {
+      "ai-search-event": 1,
+      "app-ask": 1,
+      "mpv-state": 1,
+      "player-shortcut": 1,
+      "privacy-state-changed": 1,
+      "remote-play-on-desktop": 1,
+      "settings-patched": 2,
+      "updater-status": 1,
+      "window-close-prompt": 1,
+      "window-maximized-changed": 1
+    },
+    "idleSamplesBeforeInterference": 8,
+    "finalAssertion": "AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:\n+ actual - expected\n\n  {\n+   'mpv-ended': 1,\n+   'mpv-error': 1,\n+   'mpv-state': 2\n-   'mpv-ended': 0,\n-   'mpv-error': 0,\n-   'mpv-state': 1\n  }\n\n    at main (E:\\wallpaper播放器\\.tmp\\refactor-tests\\r6-player-visibility\\resource-run.cjs:112:130)",
+    "actualInput": [
+      {
+        "at": 1792755120084,
+        "type": "pointerdown",
+        "trusted": true,
+        "tag": "DIV",
+        "classes": "card-overlay"
+      },
+      {
+        "at": 1792755120185,
+        "type": "click",
+        "trusted": true,
+        "tag": "DIV",
+        "classes": "card-overlay"
+      },
+      {
+        "at": 1792755122672,
+        "type": "pointerdown",
+        "trusted": true,
+        "tag": "DIV",
+        "classes": "player-overlay"
+      },
+      {
+        "at": 1792755122790,
+        "type": "click",
+        "trusted": true,
+        "tag": "DIV",
+        "classes": "player-overlay"
+      },
+      {
+        "at": 1792755123600,
+        "type": "pointerdown",
+        "trusted": true,
+        "tag": "DIV",
+        "classes": "card-overlay"
+      },
+      {
+        "at": 1792755123678,
+        "type": "click",
+        "trusted": true,
+        "tag": "DIV",
+        "classes": "card-overlay"
+      }
+    ],
+    "interpretation": "Real pointer input opened, dismissed and reopened a video while the driver expected an idle page. The observed extra player/listeners correspond to a real active player, so this run cannot establish the full 20-minute resource gate; raw failure retained.",
+    "eventLoop": {
+      "unit": "ms",
+      "histogramResolution": 10,
+      "measurement": "Each p95 is a separate reset interval, not an aggregate p95",
+      "intervalP95": {
+        "first": 18.071551,
+        "last": 16.670719,
+        "min": 16.179199,
+        "max": 20.627455
+      },
+      "largestObservedDelay": 49.610751
+    },
+    "mainRssMiB": {
+      "first": 166.8828125,
+      "last": 82.00390625,
+      "min": 8.76953125,
+      "max": 180.75
+    },
+    "mainHeapMiB": {
+      "first": 10.538406372070312,
+      "last": 10.8470458984375,
+      "min": 8.582782745361328,
+      "max": 12.031196594238281
+    },
+    "osRoles": {
+      "Browser": {
+        "samples": 67,
+        "pidCount": 1,
+        "workingSetMiB": {
+          "first": 180.69140625,
+          "last": 65.87109375,
+          "min": 62.25,
+          "max": 180.69140625
+        },
+        "privateMiB": {
+          "first": 133.16015625,
+          "last": 113.37890625,
+          "min": 112.03125,
+          "max": 133.16015625
+        },
+        "handles": {
+          "first": 1318,
+          "last": 1309,
+          "min": 1309,
+          "max": 1333
+        },
+        "threads": {
+          "first": 65,
+          "last": 56,
+          "min": 54,
+          "max": 65
+        },
+        "oneCoreCpuPercentOverSampleSpan": 1.5492173166332452
+      },
+      "GPU": {
+        "samples": 67,
+        "pidCount": 1,
+        "workingSetMiB": {
+          "first": 145.484375,
+          "last": 55.17578125,
+          "min": 0.07421875,
+          "max": 145.7421875
+        },
+        "privateMiB": {
+          "first": 159.52734375,
+          "last": 394.54296875,
+          "min": 132.31640625,
+          "max": 395.5234375
+        },
+        "handles": {
+          "first": 756,
+          "last": 747,
+          "min": 744,
+          "max": 757
+        },
+        "threads": {
+          "first": 73,
+          "last": 72,
+          "min": 72,
+          "max": 73
+        },
+        "oneCoreCpuPercentOverSampleSpan": 0.6951033708061188
+      },
+      "Utility": {
+        "samples": 67,
+        "pidCount": 1,
+        "workingSetMiB": {
+          "first": 52.9296875,
+          "last": 3.65234375,
+          "min": 0,
+          "max": 52.9296875
+        },
+        "privateMiB": {
+          "first": 12.34375,
+          "last": 11.94921875,
+          "min": 11.9453125,
+          "max": 12.34375
+        },
+        "handles": {
+          "first": 344,
+          "last": 330,
+          "min": 330,
+          "max": 344
+        },
+        "threads": {
+          "first": 24,
+          "last": 18,
+          "min": 18,
+          "max": 24
+        },
+        "oneCoreCpuPercentOverSampleSpan": 0.004543159286314502
+      },
+      "Tab": {
+        "samples": 67,
+        "pidCount": 1,
+        "workingSetMiB": {
+          "first": 145.11328125,
+          "last": 67.28515625,
+          "min": 0,
+          "max": 145.11328125
+        },
+        "privateMiB": {
+          "first": 85.45703125,
+          "last": 57.65625,
+          "min": 51.2734375,
+          "max": 85.45703125
+        },
+        "handles": {
+          "first": 324,
+          "last": 339,
+          "min": 324,
+          "max": 341
+        },
+        "threads": {
+          "first": 17,
+          "last": 24,
+          "min": 17,
+          "max": 27
+        },
+        "oneCoreCpuPercentOverSampleSpan": 0.5345784093563397
+      },
+      "mpv": {
+        "samples": 58,
+        "pidCount": 1,
+        "workingSetMiB": {
+          "first": 135.78125,
+          "last": 65.44140625,
+          "min": 0.2265625,
+          "max": 154.9140625
+        },
+        "privateMiB": {
+          "first": 215.76953125,
+          "last": 216.91015625,
+          "min": 212.96875,
+          "max": 240.87890625
+        },
+        "handles": {
+          "first": 885,
+          "last": 845,
+          "min": 791,
+          "max": 887
+        },
+        "threads": {
+          "first": 88,
+          "last": 82,
+          "min": 78,
+          "max": 90
+        },
+        "oneCoreCpuPercentOverSampleSpan": 7.602020268875586
+      }
+    },
+    "osSamples": 68,
+    "lastOsRowsAfterQuit": [],
+    "themeWrites": 0,
+    "themeObservation": "All sampled UI/settings stayed dark before interruption; prior historical theme anomaly remains open"
+  },
+  "exclusions": [
+    "Full 20-minute resource run",
+    "Concurrent 10k library queries and thumbnails with playback",
+    "Physical Android 60-minute PSS/FPS/LAN acceptance",
+    "Unrelated historical theme issue",
+    "before-expanded.cjs is an unrun invalid scratch experiment and is excluded"
+  ],
+  "raw": [
+    {
+      "file": ".tmp/refactor-tests/r6-player-visibility/after-test.log",
+      "sha256": "342a95872f66886bbe2c15ee7bca32d608186fe2aebec8ab36a591705b0d913d"
+    },
+    {
+      "file": ".tmp/refactor-tests/r6-player-visibility/baseline.json",
+      "sha256": "11ee937079ba3b68918fcded9aee2a8996afbd429fd9162ec612403d1eafe141"
+    },
+    {
+      "file": ".tmp/refactor-tests/r6-player-visibility/before-2-process.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": ".tmp/refactor-tests/r6-player-visibility/before-2-progress.json",
+      "sha256": "e8562211cfb74cb176435b315185e1daf43eed9ecb0a6842da436df08bbf2f5d"
+    },
+    {
+      "file": ".tmp/refactor-tests/r6-player-visibility/before-2-result.json",
+      "sha256": "c8e2434d0031a8d1aa6fd999739380183c32e798823d67c2f1a47dc222aa32c1"
+    },
+    {
+      "file": ".tmp/refactor-tests/r6-player-visibility/before-2-started.json",
+      "sha256": "bc1cfb1b07cebb1b6a4753786d8062bed025635fc231693c4b3a242f387993ab"
+    },
+    {
+      "file": ".tmp/refactor-tests/r6-player-visibility/before-3-process.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": ".tmp/refactor-tests/r6-player-visibility/before-3-progress.json",
+      "sha256": "4c7ff9642851084495cbca324c96356b6e01f3644862835c09f97067e5c935c6"
+    },
+    {
+      "file": ".tmp/refactor-tests/r6-player-visibility/before-3-result.json",
+      "sha256": "2b3abe8c1cfc0ba2d4e2a89743be55b3dd9f75a4368fd674be91c2c9af425c13"
+    },
+    {
+      "file": ".tmp/refactor-tests/r6-player-visibility/before-3-started.json",
+      "sha256": "929ba5b149b66e401b0af0e2aca9f03c15442c77b8938d7e3cdbd765b3d0231d"
+    },
+    {
+      "file": ".tmp/refactor-tests/r6-player-visibility/before-4-process.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": ".tmp/refactor-tests/r6-player-visibility/before-4-progress.json",
+      "sha256": "c33872752606f23bbb3b4272e0c8f9da95d5e497a42b04b4d357e0af35354e08"
+    },
+    {
+      "file": ".tmp/refactor-tests/r6-player-visibility/before-4-result.json",
+      "sha256": "9ecc680e423ca1c49b8790908a7658ecadf27eed9ac2b59668f99a2584ee2195"
+    },
+    {
+      "file": ".tmp/refactor-tests/r6-player-visibility/before-4-started.json",
+      "sha256": "e4771c515b68a9bda2c235c218e2f8a24c9a80f92d0d66ac8a14d2cc65eb1821"
+    },
+    {
+      "file": ".tmp/refactor-tests/r6-player-visibility/before-process.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": ".tmp/refactor-tests/r6-player-visibility/before-progress.json",
+      "sha256": "7f246aa6fe79136cded45f00365574f05603580ebaef3138d19f09b1b9bfb4c6"
+    },
+    {
+      "file": ".tmp/refactor-tests/r6-player-visibility/before-result.json",
+      "sha256": "3838fd247afa0ea03e42da6db66d892f6ca0e5f5e74c112cf4c32f577933e267"
+    },
+    {
+      "file": ".tmp/refactor-tests/r6-player-visibility/before-started.json",
+      "sha256": "7a6b251b66c00d7bfac83e8336ecc3d0be86bad922d9e137c78bab958b1fead8"
+    },
+    {
+      "file": ".tmp/refactor-tests/r6-player-visibility/before-test.log",
+      "sha256": "677ed6d76f0f30f7de5fc8aa63b4a97074fa95553213f10ce78bea64a03eb48b"
+    },
+    {
+      "file": ".tmp/refactor-tests/r6-player-visibility/build-verification.json",
+      "sha256": "4148d661a33c805670f8c5d6e4e7b795d67d07e63fd74f48a5cb480d4257f58f"
+    },
+    {
+      "file": ".tmp/refactor-tests/r6-player-visibility/build.cjs",
+      "sha256": "089048aada0e6d7011c800e249384a6b142a2220d8271af08d94b53a1b189aba"
+    },
+    {
+      "file": ".tmp/refactor-tests/r6-player-visibility/build.json",
+      "sha256": "691f55d190e01bc18b29a81f33f4c5ce329b7ac1e8b88c9f9aeed2a179f81407"
+    },
+    {
+      "file": ".tmp/refactor-tests/r6-player-visibility/builder.live.log",
+      "sha256": "3c9671c9837843ec192f6ddce35b400353c48706aa4f81a736991f47636e637b"
+    },
+    {
+      "file": ".tmp/refactor-tests/r6-player-visibility/builder.live.log.process.json",
+      "sha256": "c493822108c253b31d55ba8a054a9bcef53e0df4b4cb19c9af2cfaf1688a2c67"
+    },
+    {
+      "file": ".tmp/refactor-tests/r6-player-visibility/desktop-group-final.log",
+      "sha256": "ec432ee50a3e8acc42bbf011295d1f7f217b27ad4b421672942acd7fbd15ab90"
+    },
+    {
+      "file": ".tmp/refactor-tests/r6-player-visibility/environment.json",
+      "sha256": "2543abc61bf68d725de39abefb5535a463083c0c4adf4872f16209f35f0b798d"
+    },
+    {
+      "file": ".tmp/refactor-tests/r6-player-visibility/expanded-test.log",
+      "sha256": "9b34756dbd0b09166cd449bd75708d95427ee14485b749534a919eed0e72d3b4"
+    },
+    {
+      "file": ".tmp/refactor-tests/r6-player-visibility/expanded-valid-fixture-test.log",
+      "sha256": "bc05995c65b6cacdd4000c6eb272ed79177463d8fecc15cf571fd2b1d94229d0"
+    },
+    {
+      "file": ".tmp/refactor-tests/r6-player-visibility/fixed-2-process.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": ".tmp/refactor-tests/r6-player-visibility/fixed-2-progress.json",
+      "sha256": "e7a705496e8929d2a760f2c3ed3f65f115e31b833de9a0e8fe16ec9b705782e7"
+    },
+    {
+      "file": ".tmp/refactor-tests/r6-player-visibility/fixed-2-result.json",
+      "sha256": "4dc9c869353dc0b8d63aa6a2cf24d4b9c2a381e6e843d97530624310a1832141"
+    },
+    {
+      "file": ".tmp/refactor-tests/r6-player-visibility/fixed-2-started.json",
+      "sha256": "c983dc15957ff4d82023540accfdbbbe4639ea07064235e6bdab6b479ce2acdd"
+    },
+    {
+      "file": ".tmp/refactor-tests/r6-player-visibility/fixed-20-1024-2-speed-native.png",
+      "sha256": "ab3e7ae4d79679eefb026d82a6f0bfa70a003f9ee37095e96e3a147410df9975"
+    },
+    {
+      "file": ".tmp/refactor-tests/r6-player-visibility/fixed-20-1366-1-normal-fullscreen-native.png",
+      "sha256": "6524020eb3a268d95439169e613ab01059ea1beff456903efbc97ad58a7db8a5"
+    },
+    {
+      "file": ".tmp/refactor-tests/r6-player-visibility/fixed-20-1366-1-normal-native.png",
+      "sha256": "e5a191d0022c70c8c68f8ff93195aca4008d1ea8c05b4644322a976427f7654f"
+    },
+    {
+      "file": ".tmp/refactor-tests/r6-player-visibility/fixed-20-1366-1-playlist-native.png",
+      "sha256": "4a1b0c7a2808147b5b87e3c587f7e8dfe6534aa3ab56f9bf037f49cea51c7966"
+    },
+    {
+      "file": ".tmp/refactor-tests/r6-player-visibility/fixed-20-1366-1-portrait-native.png",
+      "sha256": "aedd8c6aacac647fc34a82c33528a7dd80b89e2fe8bc2ce850077a0878c7ec8d"
+    },
+    {
+      "file": ".tmp/refactor-tests/r6-player-visibility/fixed-20-1366-1-speed-native.png",
+      "sha256": "db54f61b53a92dbb0777c1f362f0da0590cd20a28e28248211745e004047f2c2"
+    },
+    {
+      "file": ".tmp/refactor-tests/r6-player-visibility/fixed-20-process.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": ".tmp/refactor-tests/r6-player-visibility/fixed-20-progress.json",
+      "sha256": "74158e75aa6e8e2e64735b0cb6a7320f311f4d10995e3077521e5928c10dd540"
+    },
+    {
+      "file": ".tmp/refactor-tests/r6-player-visibility/fixed-20-result.json",
+      "sha256": "00f7202d33001e321da131532a06e13d04cb20c3c6291c929ed04380ae17cc69"
+    },
+    {
+      "file": ".tmp/refactor-tests/r6-player-visibility/fixed-20-started.json",
+      "sha256": "743848b674eb5158904e639c80cc76509ce44df15b4ea81b0ca2bfbf224bbcfc"
+    },
+    {
+      "file": ".tmp/refactor-tests/r6-player-visibility/fixed-process.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": ".tmp/refactor-tests/r6-player-visibility/fixed-progress.json",
+      "sha256": "a44809d4fd5fff0c0816e4f4d24bdea19bb785b5bb3def99f982d7acadf23dc4"
+    },
+    {
+      "file": ".tmp/refactor-tests/r6-player-visibility/fixed-result.json",
+      "sha256": "32035f36ad99f96a0c30c4cf807d89ccb70cfcf7e9ca7dd5745deacfe80eaa11"
+    },
+    {
+      "file": ".tmp/refactor-tests/r6-player-visibility/fixed-started.json",
+      "sha256": "61a6d0540ab2e3a2bf342a319d34754d503285e3544e004947d73526b69e2890"
+    },
+    {
+      "file": ".tmp/refactor-tests/r6-player-visibility/host-before-test.log",
+      "sha256": "4d7cb019342455f82608dfd0a9c56cf3510311b9c3e3ad774783f1259fcc50f5"
+    },
+    {
+      "file": ".tmp/refactor-tests/r6-player-visibility/initial-harness-correction.json",
+      "sha256": "66da73fd7d7cb7dd919e5c3e6d36eabd4d9d13e7174f7c7f886ea95b2bc25e95"
+    },
+    {
+      "file": ".tmp/refactor-tests/r6-player-visibility/layout-check.cjs",
+      "sha256": "5d990788ce79fe67a82cac28915e340c408cc93ac197c3f34dd2da2a913948c3"
+    },
+    {
+      "file": ".tmp/refactor-tests/r6-player-visibility/main-observer.cjs",
+      "sha256": "242c9aa9fe40e59a916b0c7cb66afd648abc0b414c575f15d40df480fa7a9483"
+    },
+    {
+      "file": ".tmp/refactor-tests/r6-player-visibility/native-check.cjs",
+      "sha256": "7e3791c6371c69d7d9ad80315b7b41578c74c799b4a75c24cb99ee41d8f7c81c"
+    },
+    {
+      "file": ".tmp/refactor-tests/r6-player-visibility/prepare-resources.cjs",
+      "sha256": "f59c8eb482723d42053a51131428661d84a0d4972ba85a2964d4012474e4cdcf"
+    },
+    {
+      "file": ".tmp/refactor-tests/r6-player-visibility/process-closure.json",
+      "sha256": "cf16400af5024a869ab948d48115efff60a6956a1cd0300b1c8c04632a0f2573"
+    },
+    {
+      "file": ".tmp/refactor-tests/r6-player-visibility/protocol.cjs",
+      "sha256": "1f7551ab3a560e8c5df076d9f95dd26deb97e17ca6d4f95d8b5265d83618d249"
+    },
+    {
+      "file": ".tmp/refactor-tests/r6-player-visibility/resource-run.cjs",
+      "sha256": "762b6eae15889dfa13b80dc4c16d40cae2530690bb60d939bde4bd91936e873d"
+    },
+    {
+      "file": ".tmp/refactor-tests/r6-player-visibility/resource-setup.json",
+      "sha256": "3841b64d0a1c492abc99c7c791ffc4232851eeb4afa67cbdde198f489e6291a9"
+    },
+    {
+      "file": ".tmp/refactor-tests/r6-player-visibility/resource-soak-os.jsonl",
+      "sha256": "b1412b8f588eeb1470d09a6f402f801dc72e7b505f914352753518b080e31927"
+    },
+    {
+      "file": ".tmp/refactor-tests/r6-player-visibility/resource-soak-process.log",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "file": ".tmp/refactor-tests/r6-player-visibility/resource-soak-progress.json",
+      "sha256": "84faebf2cc98176c4fda59840d33f67091be2800127a90e997dfb68bb97c3759"
+    },
+    {
+      "file": ".tmp/refactor-tests/r6-player-visibility/resource-soak-result.json",
+      "sha256": "dbf9dbfe3c141f36ff3c2d1ff7a2254913d435a49d6299560c6b0dba02d8faf3"
+    },
+    {
+      "file": ".tmp/refactor-tests/r6-player-visibility/resource-soak-started.json",
+      "sha256": "481bc2e87324c47b58959ac80502415acdc7aec05c833cd47b7f587e798cb997"
+    },
+    {
+      "file": ".tmp/refactor-tests/r6-player-visibility/sample-os.cjs",
+      "sha256": "4070049d50d2e1741054fbd0932d3afff2cc3c23ecfad5e29a422095f869e468"
+    },
+    {
+      "file": ".tmp/refactor-tests/r6-player-visibility/setup.json",
+      "sha256": "03494dd07f6604a2c2e816ef8e3cbc059acba56f6db6673f504e20ecd9d5ce76"
+    },
+    {
+      "file": ".tmp/refactor-tests/r6-player-visibility/source-2-process.log",
+      "sha256": "49b337e770a6db11d1fc5260b89fa7173f0265cfaae8d1a4ba04a68bba338aa7"
+    },
+    {
+      "file": ".tmp/refactor-tests/r6-player-visibility/source-2-progress.json",
+      "sha256": "916037f032eef5640e37bded7f059241737c79d86902018a9418366f7ee40afa"
+    },
+    {
+      "file": ".tmp/refactor-tests/r6-player-visibility/source-2-result.json",
+      "sha256": "6c7fb641f7749e5884fd967f889d13fd0bb144cb9e997f89f36524081986d52f"
+    },
+    {
+      "file": ".tmp/refactor-tests/r6-player-visibility/source-2-started.json",
+      "sha256": "8def9adb5a9555c815bcc53ca69808a6cf3c3c879ba92f3350e36cffa127e33b"
+    },
+    {
+      "file": ".tmp/refactor-tests/r6-player-visibility/source-3-process.log",
+      "sha256": "910fe890ef3afb2edc66e6cb084356fd8fc160df5df55e27d78c961fae1ef7bb"
+    },
+    {
+      "file": ".tmp/refactor-tests/r6-player-visibility/source-3-progress.json",
+      "sha256": "447d4fd86fa5b44906dc114c0c68e3fb218cb7cc6106aeba6becdbe12ca7d959"
+    },
+    {
+      "file": ".tmp/refactor-tests/r6-player-visibility/source-3-result.json",
+      "sha256": "a591978ae0d3bc0c0c14514a0dc3a0f6f1af7aeb362fb18c488e7731a814b5a1"
+    },
+    {
+      "file": ".tmp/refactor-tests/r6-player-visibility/source-3-started.json",
+      "sha256": "07205afe9839bf32c3bd319224cdb2a63a09a748d4f083f0cccbb62d3c945f33"
+    },
+    {
+      "file": ".tmp/refactor-tests/r6-player-visibility/source-4-process.log",
+      "sha256": "71146ae49dc8dfb3e2ff19f84839040b01452a2d6776406d8070a68f280b3fcb"
+    },
+    {
+      "file": ".tmp/refactor-tests/r6-player-visibility/source-4-progress.json",
+      "sha256": "5d3b299258a1b1332ae3b7533263c73e3281687d98c630b8372b13934d57bff5"
+    },
+    {
+      "file": ".tmp/refactor-tests/r6-player-visibility/source-4-result.json",
+      "sha256": "5880ba1a13bdf5956876596b803bbe73cd71fcf2ba0947f1e2d8a4d5a488fbcb"
+    },
+    {
+      "file": ".tmp/refactor-tests/r6-player-visibility/source-4-started.json",
+      "sha256": "adeaa5e5816f4cc5c0f8b339303001645963af5088fdb1cab28c9b8c369227d0"
+    },
+    {
+      "file": ".tmp/refactor-tests/r6-player-visibility/source-5-process.log",
+      "sha256": "f0ec7e6a4aa21009f004ab398f664b63557bf23f433768005558e8410a45fcda"
+    },
+    {
+      "file": ".tmp/refactor-tests/r6-player-visibility/source-5-progress.json",
+      "sha256": "8a728b8f7c477105786fc480dd072f344a59f16e10444f8524714e9a4987f466"
+    },
+    {
+      "file": ".tmp/refactor-tests/r6-player-visibility/source-5-result.json",
+      "sha256": "0081884f520a8f931ff7179fca0d19c8b7484038d1f6b10a3d821617ee82a700"
+    },
+    {
+      "file": ".tmp/refactor-tests/r6-player-visibility/source-5-started.json",
+      "sha256": "2b0274e151208bdaa0023eccfe83dfc12b8b8d78d4373685f58af1139fe5672e"
+    },
+    {
+      "file": ".tmp/refactor-tests/r6-player-visibility/source-inputs.json",
+      "sha256": "963e852db909ad6a21801b505380e12657c529b3c0f690c7582a0af3697a0157"
+    },
+    {
+      "file": ".tmp/refactor-tests/r6-player-visibility/source-process.log",
+      "sha256": "940e6c4697a3c0fecbd714f98748e9681112c1f67aafea7df2cc576e9cac2925"
+    },
+    {
+      "file": ".tmp/refactor-tests/r6-player-visibility/source-progress.json",
+      "sha256": "2b8bed51aecca43055aca19ffc81c608cce1738917eaebeb05ceba22f941b741"
+    },
+    {
+      "file": ".tmp/refactor-tests/r6-player-visibility/source-result.json",
+      "sha256": "41b2638396f3f77ef7a73fbe62fadf90573c61fb764e74b380222ae65545123c"
+    },
+    {
+      "file": ".tmp/refactor-tests/r6-player-visibility/source-started.json",
+      "sha256": "85f7ca7c3feb4ff00c5aded8b4369dd181823dafe7d3ce42298a0a21df1e2b41"
+    },
+    {
+      "file": ".tmp/refactor-tests/r6-player-visibility/summarize.cjs",
+      "sha256": "982a406f2448bd89f1986a2202738e103fd1846e0cd5ba47320df7fe5e90fdca"
+    },
+    {
+      "file": ".tmp/refactor-tests/r6-player-visibility/verify-build.cjs",
+      "sha256": "40fc209f885240205c9febc8a18c268e29342a7bac4576d4dfbbc80c4ca755ba"
+    }
+  ]
+}

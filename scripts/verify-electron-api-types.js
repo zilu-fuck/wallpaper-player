@@ -71,6 +71,7 @@ const PLUGIN_OWNED_CHANNELS = new Set([
   'video-analysis-vlm-local-list-files',
   'video-analysis-vlm-local-select-file',
   'video-analysis-vlm-download',
+  'video-analysis-vlm-download-cancel',
   'video-analysis-vlm-start',
   'video-analysis-vlm-stop',
   'video-analysis-event',

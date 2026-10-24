@@ -2,6 +2,7 @@ import { claimPairing, getInfo } from './api'
 import type { PairingPayload, StoredDevice } from '../types'
 import { getClientId } from '../persistence/devices'
 import { normalizeEndpoint, uniqueEndpoints } from '../utils/url'
+import { pairingPayloadSchema } from '../../../packages/contracts'
 
 const PAIRING_POLL_INTERVAL_MS = 1200
 const PAIRING_WAIT_TIMEOUT_MS = 5 * 60 * 1000
@@ -16,11 +17,11 @@ export function parsePairingCode(raw: string): PairingPayload | null {
       const params = new URLSearchParams(query)
       const data = params.get('data')
       if (!data) return null
-      return JSON.parse(decodeBase64Url(data)) as PairingPayload
+      return pairingPayloadSchema.parse(JSON.parse(decodeBase64Url(data)))
     }
 
     if (value.startsWith('{')) {
-      return JSON.parse(value) as PairingPayload
+      return pairingPayloadSchema.parse(JSON.parse(value))
     }
   } catch {
     return null
@@ -75,7 +76,7 @@ export async function createDeviceFromPairingPayload(
       await delay(PAIRING_POLL_INTERVAL_MS, signal)
       claimed = await claimPairing(endpoint, payload, client, signal)
     }
-    if (!claimed.token) {
+    if (!('token' in claimed) || !claimed.token) {
       throw new Error('电脑端尚未允许本次绑定')
     }
     const claimedEndpoint = claimed.endpoint ? normalizeEndpoint(claimed.endpoint) : endpoint

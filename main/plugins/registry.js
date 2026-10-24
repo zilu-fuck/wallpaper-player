@@ -1,9 +1,9 @@
 const crypto = require('crypto')
 const path = require('path')
-const { ipcMain } = require('electron')
+const { ipcMain: appIpcMain } = require('../security/ipc')
 const log = require('electron-log')
 const { EventEmitter } = require('events')
-const { loadSettings, saveSettings, sanitizeSettingsForSave, registerSettingsSection } = require('../settings')
+const { loadSettings, loadSettingsFields, saveSettings, commitSettingsPatch, updateSettingsAndFlush, getSettingsSnapshotVersion, sanitizeSettingsForSave, registerSettingsSection, registerSettingsSectionAsync } = require('../settings')
 const { sendJson, readBody } = require('../remote/http-utils')
 const { requireCoreModule } = require('./core-api')
 const { isOfficialPluginId } = require('./official')
@@ -79,12 +79,26 @@ function assertActionAllowed(plugin, action) {
   }
 }
 
-function createPluginRegistry() {
+function createPluginRegistry({ ipcMain = appIpcMain } = {}) {
   const plugins = new Map()
   const remoteRoutes = []
   const capabilities = new Map()
   const events = new EventEmitter()
   let setupComplete = false
+  let lifecycleTail = Promise.resolve(), lifecyclePending = 0, lifecycleClosing = false, disposalPromise = null
+
+  function assertLifecycleOpen() {
+    if (lifecycleClosing) throw Object.assign(new Error('插件服务正在关闭'), { code: 'plugin_service_stopping' })
+  }
+
+  function runLifecycle(operation) {
+    if (lifecycleClosing) return Promise.reject(Object.assign(new Error('插件服务正在关闭'), { code: 'plugin_service_stopping' }))
+    if (lifecyclePending >= 32) return Promise.reject(new Error('插件操作过多，请稍后重试'))
+    lifecyclePending++
+    const work = lifecycleTail.then(operation).finally(() => lifecyclePending--)
+    lifecycleTail = work.catch(() => {})
+    return work
+  }
 
   function createSetupErrorPlugin(plugin, error) {
     const seed = [
@@ -209,7 +223,7 @@ function createPluginRegistry() {
       },
       plugins: {
         getConfig() {
-          return loadSettings()?.plugins?.[plugin.id]?.config || {}
+          return loadSettingsFields(['plugins']).plugins?.[plugin.id]?.config || {}
         },
         saveConfig(config) {
           return saveSettings(sanitizeSettingsForSave({
@@ -254,7 +268,7 @@ function createPluginRegistry() {
   }
 
   function getPersistedEnabled(id, fallbackEnabled) {
-    const state = loadSettings()?.plugins?.[id]
+    const state = loadSettingsFields(['plugins']).plugins?.[id]
     if (state && Object.hasOwn(state, 'enabled')) return Boolean(state.enabled)
     return fallbackEnabled
   }
@@ -269,19 +283,18 @@ function createPluginRegistry() {
   }
 
   function getStoredPluginConfig(id) {
-    return loadSettings()?.plugins?.[id]?.config || {}
+    return loadSettingsFields(['plugins']).plugins?.[id]?.config || {}
   }
 
   function persistPluginState(plugin) {
-    saveSettings(sanitizeSettingsForSave({
+    return commitSettingsPatch({
       plugins: {
         [plugin.id]: {
           enabled: plugin.enabled,
-          config: getStoredPluginConfig(plugin.id),
           updatedAt: new Date().toISOString()
         }
       }
-    }))
+    }, { returnSettings: false })
   }
 
   function normalizePluginConfig(plugin, config) {
@@ -344,7 +357,7 @@ function createPluginRegistry() {
           const actionResult = route.action
             ? await executeRouteAction(plugin, route, req, routeContext)
             : null
-          sendJson(req, res, route.response?.status || 200, {
+          return sendJson(req, res, route.response?.status || 200, {
             plugin: {
               id: plugin.id,
               name: plugin.name,
@@ -426,6 +439,7 @@ function createPluginRegistry() {
   }
 
   async function register(plugin, options = {}) {
+    assertLifecycleOpen()
     const id = normalizePluginId(plugin?.id)
     if (!id) throw new Error('Plugin id is required')
     if (plugins.has(id)) throw new Error(`Plugin already registered: ${id}`)
@@ -474,22 +488,25 @@ function createPluginRegistry() {
     try {
       if (normalizedPlugin.settingsSections && typeof normalizedPlugin.settingsSections === 'object') {
         for (const [key, definition] of Object.entries(normalizedPlugin.settingsSections)) {
-          pluginState.registrationDisposers.push(registerSettingsSection(key, definition))
+          pluginState.registrationDisposers.push(await registerSettingsSectionAsync(key, definition))
         }
       }
+      assertLifecycleOpen()
       if (Object.keys(normalizedPlugin.settingsSchema || {}).length) {
-        const currentState = loadSettings()?.plugins?.[normalizedPlugin.id] || {}
-        const now = new Date().toISOString()
-        saveSettings(sanitizeSettingsForSave({
-          plugins: {
-            [normalizedPlugin.id]: {
-              config: normalizePluginConfig(normalizedPlugin, currentState.config),
-              ...(currentState.installedAt ? {} : { installedAt: now }),
-              ...(currentState.updatedAt ? {} : { updatedAt: now })
+        await updateSettingsAndFlush(current => {
+          const currentState = current.plugins?.[normalizedPlugin.id] || {}, now = new Date().toISOString()
+          return { patch: sanitizeSettingsForSave({
+            plugins: {
+              [normalizedPlugin.id]: {
+                config: normalizePluginConfig(normalizedPlugin, currentState.config),
+                ...(currentState.installedAt ? {} : { installedAt: now }),
+                ...(currentState.updatedAt ? {} : { updatedAt: now })
+              }
             }
-          }
-        }))
+          }) }
+        }, { fields: ['plugins'], returnSettings: false })
       }
+      assertLifecycleOpen()
     } catch (error) {
       for (const disposer of [...pluginState.registrationDisposers].reverse()) {
         try {
@@ -531,28 +548,37 @@ function createPluginRegistry() {
   }
 
   async function setup(pluginsToRegister = []) {
-    if (setupComplete) return listPlugins()
-    for (const plugin of pluginsToRegister) {
-      try {
-        await register(plugin)
-      } catch (error) {
+    if (disposalPromise) await disposalPromise
+    lifecycleClosing = false
+    return runLifecycle(async () => {
+      assertLifecycleOpen()
+      if (setupComplete) return listPlugins()
+      for (const plugin of pluginsToRegister) {
         try {
-          await register(createSetupErrorPlugin(plugin, error))
-        } catch (fallbackError) {
-          log.warn('[plugins] failed to register error placeholder:', fallbackError?.message || fallbackError)
+          assertLifecycleOpen()
+          await register(plugin)
+        } catch (error) {
+          assertLifecycleOpen()
+          try {
+            await register(createSetupErrorPlugin(plugin, error))
+          } catch (fallbackError) {
+            log.warn('[plugins] failed to register error placeholder:', fallbackError?.message || fallbackError)
+          }
         }
       }
-    }
-    setupComplete = true
-    return listPlugins()
+      setupComplete = true
+      return listPlugins()
+    })
   }
 
   function listPlugins() {
-    const settings = loadSettings()
+    const settings = loadSettingsFields(['plugins'])
     return [...plugins.values()].map(({ plugin }) => {
       const persisted = settings?.plugins?.[plugin.id] || {}
       return {
         id: plugin.id,
+        _settingsVersion: getSettingsSnapshotVersion(settings),
+        secretKeys: Array.isArray(plugin.secretKeys) ? plugin.secretKeys : [],
         name: plugin.name,
         version: plugin.version || '',
         enabled: plugin.enabled,
@@ -591,7 +617,9 @@ function createPluginRegistry() {
     return plugins.get(normalizePluginId(id))?.plugin || null
   }
 
-  async function setPluginEnabled(id, enabled) {
+  function setPluginEnabled(id, enabled) { return runLifecycle(() => setPluginEnabledNow(id, enabled)) }
+
+  async function setPluginEnabledNow(id, enabled) {
     const pluginState = plugins.get(normalizePluginId(id))
     if (!pluginState) {
       return { success: false, error: '插件不存在' }
@@ -604,7 +632,7 @@ function createPluginRegistry() {
     }
 
     if (plugin.enabled === nextEnabled && pluginState.active === nextEnabled) {
-      persistPluginState(plugin)
+      await persistPluginState(plugin)
       return { success: true, plugin: listPlugins().find(item => item.id === plugin.id) }
     }
 
@@ -631,7 +659,11 @@ function createPluginRegistry() {
       }
     }
 
-    persistPluginState(plugin)
+    try { await persistPluginState(plugin) }
+    catch (error) {
+      events.emit('plugin-state-changed', { id: plugin.id, enabled: plugin.enabled, status: plugin.status })
+      return { success: false, error: '插件状态未能保存，请重试：' + error.message, plugin: listPlugins().find(item => item.id === plugin.id) }
+    }
 
     events.emit('plugin-state-changed', { id: plugin.id, enabled: plugin.enabled, status: plugin.status })
     return { success: true, plugin: listPlugins().find(item => item.id === plugin.id) }
@@ -685,7 +717,8 @@ function createPluginRegistry() {
     }
   }
 
-  async function dispose() {
+  async function disposeNow() {
+    await lifecycleTail
     for (const pluginState of [...plugins.values()].reverse()) {
       await disposePlugin(pluginState)
       for (const disposer of [...pluginState.registrationDisposers].reverse()) {
@@ -704,6 +737,13 @@ function createPluginRegistry() {
     setupComplete = false
   }
 
+  function dispose() {
+    if (disposalPromise) return disposalPromise
+    lifecycleClosing = true
+    disposalPromise = disposeNow().finally(() => { disposalPromise = null })
+    return disposalPromise
+  }
+
   return {
     register,
     unregister,
@@ -711,6 +751,7 @@ function createPluginRegistry() {
     listPlugins,
     getPlugin,
     setPluginEnabled,
+    runLifecycle,
     getSettingsSchemas,
     matchRemoteRoute,
     getCapability,

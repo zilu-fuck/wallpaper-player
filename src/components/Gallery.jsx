@@ -1,6 +1,6 @@
 import { memo, useEffect, useMemo, useRef, useState } from 'react'
 import VideoCard from './VideoCard'
-import { useApp } from '../context/AppContext'
+import { useAppFields, useAppSelection } from '../context/AppContext'
 
 const PAGE_SIZE = 100
 
@@ -19,20 +19,18 @@ function Gallery({ videos }) {
     handleOpenBulkTagEditor,
     analysisSidebarOpen,
     setAnalysisSidebarOpen,
-    analysisTaskCounts,
     sortBy,
     hasCategoryFilter
-  } = useApp()
+  } = useAppFields([
+    'totalCount', 'trimmedSearchQuery', 'activeCategoryLabel', 'selectedVideoKeys',
+    'handleClearVideoSelection', 'handleOpenBulkTagEditor', 'analysisSidebarOpen', 'setAnalysisSidebarOpen',
+    'sortBy', 'hasCategoryFilter'
+  ])
+  const analysisTaskTotal = useAppSelection(state => ['running', 'queued', 'success', 'failed'].reduce((total, key) => total + Number(state.analysisTaskCounts?.[key] || 0), 0))
   const [viewMode, setViewMode] = useState('grid') // grid | list
   const [currentPage, setCurrentPage] = useState(1)
   const galleryRef = useRef(null)
   const pendingPageScrollRef = useRef(false)
-  const analysisTaskTotal = (
-    Number(analysisTaskCounts?.running || 0) +
-    Number(analysisTaskCounts?.queued || 0) +
-    Number(analysisTaskCounts?.success || 0) +
-    Number(analysisTaskCounts?.failed || 0)
-  )
   const pageCount = Math.max(1, Math.ceil(videos.length / PAGE_SIZE))
   const safeCurrentPage = clampPage(currentPage, pageCount)
   const pageStart = (safeCurrentPage - 1) * PAGE_SIZE
@@ -207,11 +205,13 @@ function Gallery({ videos }) {
           </svg>
           {analysisTaskTotal > 0 ? <span>{analysisTaskTotal > 99 ? '99+' : analysisTaskTotal}</span> : null}
         </button>
-        <div className="view-toggle">
+        <div className="view-toggle" role="group" aria-label="显示方式">
           <button
             className={`view-btn ${viewMode === 'grid' ? 'active' : ''}`}
             onClick={() => setViewMode('grid')}
             title="网格视图"
+              aria-label="网格视图"
+              aria-pressed={viewMode === 'grid'}
           >
             <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
               <rect x="3" y="3" width="7" height="7" rx="1" />
@@ -224,6 +224,8 @@ function Gallery({ videos }) {
             className={`view-btn ${viewMode === 'list' ? 'active' : ''}`}
             onClick={() => setViewMode('list')}
             title="列表视图"
+              aria-label="列表视图"
+              aria-pressed={viewMode === 'list'}
           >
             <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
               <rect x="3" y="4" width="18" height="3" rx="1" />

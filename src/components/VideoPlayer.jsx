@@ -1,15 +1,17 @@
-import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
-import { useApp } from '../context/AppContext'
+import { memo, useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
+import { useAppFields, useAppSelection } from '../context/AppContext'
 import VideoAnalysisPanel from './VideoAnalysisPanel'
 import PlayerAnalysisStatus from './player/PlayerAnalysisStatus'
 import PlayerProgressPreview from './player/PlayerProgressPreview'
 import PlayerToolbarMenu, { formatSpeed } from './player/PlayerToolbarMenu'
 import { formatTime } from './player/playerFormat'
+import { getPlaybackState, savePlaybackState } from '../api/media'
+import { MpvAdapter, Html5Adapter, WebpageAdapter } from '../api/player'
+import { useMpvHost, useProgressPreview } from '../hooks/usePlayerResources'
 
 const SEEK_STEP = 5
 const ARROW_HOLD_DELAY = 300
 const ARROW_HOLD_SPEED = 2
-const PROGRESS_PREVIEW_CACHE_LIMIT = 24
 
 function clamp(value, min, max) {
   return Math.min(max, Math.max(min, value))
@@ -44,11 +46,8 @@ function getQueueItemMeta(item, isNetworkList) {
   return dir || item?.group || '本地视频'
 }
 
-export default function VideoPlayer({ video }) {
+function VideoPlayer({ video }) {
   const {
-    settings,
-    plugins,
-    pluginsLoaded,
     mpvStatus,
     playerError,
     setPlayerError,
@@ -65,9 +64,59 @@ export default function VideoPlayer({ video }) {
     handleAdvanceFromEnd,
     handleAppendCustomTags,
     registerPlayerCommandTarget
-  } = useApp()
+  } = useAppFields([
+    'mpvStatus', 'playerError', 'setPlayerError', 'queueItems',
+    'queueIndex', 'queueLength', 'handlePlay', 'handleOpenFile',
+    'handleDropFiles', 'handleStopPlayback', 'handleNext', 'handlePrev',
+    'handleReplayCurrent', 'handleAdvanceFromEnd', 'handleAppendCustomTags', 'registerPlayerCommandTarget'
+  ])
+  const analysisEnabled = useAppSelection(state => Boolean(state.pluginsLoaded && state.settings?.videoAnalysis?.enabled && state.plugins?.some(plugin => plugin.id === 'video-analysis' && plugin.enabled)))
+
+  const playbackTarget = video?.url || video?.fullPath || ''
+  const playbackIntentKey = JSON.stringify([playbackTarget, video?.sourceType, video?.resourceKind,
+    video?.openMode, video?.playbackUrl, video?.httpHeaders, video?.playbackToken, video?.playOptions?.resume])
+  const [engineOverride, setEngineOverride] = useState(null)
+  const mode = engineOverride?.key === playbackIntentKey ? engineOverride.mode
+    : mpvStatus?.available === false ? 'html5' : 'mpv'
+  const setMode = useCallback(next => setEngineOverride({ key: playbackIntentKey, mode: next }), [playbackIntentKey])
+  const viewSessionKey = JSON.stringify([playbackIntentKey, mode])
+  const viewSessionKeyRef = useRef(viewSessionKey)
+  viewSessionKeyRef.current = viewSessionKey
+  const adapterRecordRef = useRef(null)
+  const videoDataRef = useRef(video)
+  videoDataRef.current = video
+  const advanceRef = useRef(handleAdvanceFromEnd)
+  advanceRef.current = handleAdvanceFromEnd
+  const ownedAdapter = useCallback(() => {
+    const record = adapterRecordRef.current
+    return record?.key === viewSessionKey && viewSessionKeyRef.current === viewSessionKey ? record.adapter : null
+  }, [viewSessionKey])
+  const readOwnedVideo = useCallback(event => {
+    if (!(ownedAdapter() instanceof Html5Adapter)) return null
+    const element = event?.currentTarget || videoRef.current
+    return element === videoRef.current ? element : null
+  }, [ownedAdapter])
+  const nativeCommand = useCallback(command => {
+    const adapter = ownedAdapter()
+    if (!(adapter instanceof MpvAdapter)) return Promise.resolve(undefined)
+    return adapter.command(command).catch(error => {
+      if (ownedAdapter() === adapter) setPlayerError(error.message)
+      return undefined
+    })
+  }, [ownedAdapter, setPlayerError])
+  const bindVideo = useCallback(element => {
+    videoRef.current = element
+    const adapter = ownedAdapter()
+    if (adapter instanceof Html5Adapter) adapter.attach(element)
+  }, [ownedAdapter])
+  const bindWebpage = useCallback(frame => {
+    webpageRef.current = frame
+    const adapter = ownedAdapter()
+    if (frame && adapter instanceof WebpageAdapter) adapter.load(frame, frame.src)
+  }, [ownedAdapter])
 
   const videoRef = useRef(null)
+  const webpageRef = useRef(null)
   const launchTokenRef = useRef(0)
   const html5ResumeRef = useRef(null)
   const html5SaveSnapshotRef = useRef(null)
@@ -76,31 +125,23 @@ export default function VideoPlayer({ video }) {
   const videoSurfaceRef = useRef(null)
   const shellRef = useRef(null)
   const toolbarRef = useRef(null)
-  const hostBoundsRef = useRef(null)
   const controlsTimerRef = useRef(null)
   const clickTimerRef = useRef(null)
-  const progressPreviewTimerRef = useRef(null)
-  const progressPreviewRequestRef = useRef(0)
-  const progressPreviewCacheRef = useRef(new Map())
-  const progressPreviewInFlightRef = useRef(false)
-  const progressPreviewPendingTimeRef = useRef(null)
-  const progressPreviewVisibleRef = useRef(false)
   const arrowHoldRef = useRef({})
   const arrowSpeedRestoreRef = useRef(null)
   const speedRef = useRef(1)
-  const pausedRef = useRef(true)
-  const canUseMpvRef = useRef(false)
-  const autoPausedRef = useRef(false)
-  const hostSyncFramesRef = useRef([])
-  const hostSyncTimersRef = useRef([])
-  const [mode, setMode] = useState(() => (mpvStatus?.available === false ? 'html5' : 'mpv'))
+  const autoPausedRef = useRef(null)
   const [launchState, setLaunchState] = useState('idle')
   const [activeMenu, setActiveMenu] = useState(null)
   const [controlsVisible, setControlsVisible] = useState(true)
   const [webFullscreen, setWebFullscreen] = useState(false)
   const [isFullscreen, setIsFullscreen] = useState(false)
-  const [html5Url, setHtml5Url] = useState('')
-  const [webviewUrl, setWebviewUrl] = useState('')
+  const [html5Source, setHtml5Source] = useState(null)
+  const html5Url = html5Source?.key === playbackIntentKey ? html5Source.url : ''
+  const setHtml5Url = useCallback(url => setHtml5Source({ key: playbackIntentKey, url }), [playbackIntentKey])
+  const [webpageSource, setWebpageSource] = useState(null)
+  const webviewUrl = webpageSource?.key === playbackIntentKey ? webpageSource.url : ''
+  const setWebviewUrl = useCallback(url => setWebpageSource({ key: playbackIntentKey, url }), [playbackIntentKey])
   const [activePlaybackUrl, setActivePlaybackUrl] = useState('')
   const [activeHttpHeaders, setActiveHttpHeaders] = useState(null)
   const [mpvState, setMpvState] = useState(null)
@@ -118,18 +159,12 @@ export default function VideoPlayer({ video }) {
   const [analysisOpen, setAnalysisOpen] = useState(false)
   const [analysisJob, setAnalysisJob] = useState(null)
   const [playlistOpen, setPlaylistOpen] = useState(false)
-  const [progressPreview, setProgressPreview] = useState({
-    visible: false,
-    time: 0,
-    x: 0,
-    imageUrl: '',
-    loading: false
-  })
   const playbackResumeEnabled = video?.playOptions?.resume !== false
   const isNetworkResource = video?.sourceType === 'network'
+  const { progressPreview, showProgressPreview, hideProgressPreview } = useProgressPreview(
+    playbackIntentKey, isNetworkResource ? '' : video?.fullPath || '')
   const isWebpageShell = Boolean(isNetworkResource && video?.resourceKind === 'webpage' && video?.openMode === 'webview' && !video?.playbackUrl)
   const isWebpageMode = Boolean(isWebpageShell || webviewUrl)
-  const playbackTarget = video?.url || video?.fullPath || ''
   const pageUrl = webviewUrl || playbackTarget
   const pageHost = (() => {
     try {
@@ -138,11 +173,12 @@ export default function VideoPlayer({ video }) {
       return '网页资源'
     }
   })()
-  const videoAnalysisPlugin = plugins?.find?.(plugin => plugin.id === 'video-analysis')
-  const videoAnalysisEnabled = Boolean(!isNetworkResource && pluginsLoaded && videoAnalysisPlugin?.enabled && settings?.videoAnalysis?.enabled)
+  const videoAnalysisEnabled = Boolean(!isNetworkResource && analysisEnabled)
 
   const mpvEngineAvailable = mpvStatus?.available !== false
   const canUseMpv = !isWebpageMode && mpvEngineAvailable && mode === 'mpv'
+  const { readMpvHostBounds, scheduleMpvHostBoundsSync } = useMpvHost(
+    viewSessionKey, Boolean(video && canUseMpv), stageRef, videoSurfaceRef, ownedAdapter)
   const isHtml5 = !canUseMpv
   const state = isHtml5 ? html5State : (mpvState || {})
   const rawPosition = Number(state.timePos ?? state.currentTime ?? 0)
@@ -196,30 +232,6 @@ export default function VideoPlayer({ video }) {
   }, [playlistAvailable])
 
   useEffect(() => {
-    pausedRef.current = paused
-  }, [paused])
-
-  useEffect(() => {
-    canUseMpvRef.current = canUseMpv
-  }, [canUseMpv])
-
-  useEffect(() => {
-    if (!video || !window.electronAPI?.onMpvState) return undefined
-    window.electronAPI?.mpvGetState?.()
-      ?.then(state => setMpvState(state || null))
-      .catch(() => {})
-    return window.electronAPI.onMpvState((state) => {
-      if (!state?.filePath || !playbackTarget) {
-        setMpvState(state || null)
-        return
-      }
-      if (String(state.filePath).replace(/\\/g, '/').toLowerCase() === String(playbackTarget).replace(/\\/g, '/').toLowerCase()) {
-        setMpvState(state)
-      }
-    })
-  }, [playbackTarget, video])
-
-  useEffect(() => {
     let canceled = false
     setAnalysisOpen(false)
 
@@ -251,20 +263,28 @@ export default function VideoPlayer({ video }) {
 
   useEffect(() => {
     if (!videoAnalysisEnabled || !video?.fullPath || !window.electronAPI?.onVideoAnalysisEvent) return undefined
-
+    let disposed = false, queriedJobId = ''
     const remove = window.electronAPI.onVideoAnalysisEvent((payload) => {
       if (!payload || payload.videoPath !== video.fullPath) return
+      if (['started', 'running'].includes(payload.status) && queriedJobId !== payload.jobId) {
+        queriedJobId = payload.jobId
+        window.electronAPI.getVideoAnalysisJob?.().then(job => {
+          if (!disposed && job?.jobId === payload.jobId && job.videoPath === video.fullPath) {
+            setAnalysisJob(current => current?.jobId === job.jobId ? { ...current, canCancel: Boolean(job.canCancel), interestId: job.interestId } : current)
+          }
+        }).catch(() => {})
+      }
 
       if (payload.status === 'started') {
         setAnalysisOpen(false)
-        setAnalysisJob({ jobId: payload.jobId, message: payload.message || '开始分析当前视频' })
+        setAnalysisJob({ jobId: payload.jobId, canCancel: false, message: payload.message || '开始分析当前视频' })
         setAnalysisState({ status: 'analyzing', data: null, error: '' })
         return
       }
 
       if (payload.status === 'running') {
         setAnalysisJob(prev => ({
-          ...(prev || {}),
+          ...(prev?.jobId === payload.jobId ? prev : { canCancel: false }),
           jobId: payload.jobId,
           message: payload.event?.message || payload.event?.stage || '正在分析',
           stage: payload.event?.stage,
@@ -293,14 +313,16 @@ export default function VideoPlayer({ video }) {
       }
     })
 
-    return () => remove?.()
+    return () => { disposed = true; remove?.() }
   }, [video?.fullPath, videoAnalysisEnabled])
 
   const handleClose = useCallback(() => {
-    videoRef.current?.pause?.()
+    const adapter = ownedAdapter()
+    if (!adapter) return
+    void adapter.stop().catch(() => {})
     setMpvState(null)
     handleStopPlayback?.()
-  }, [handleStopPlayback])
+  }, [handleStopPlayback, ownedAdapter])
 
   const handleSeekTo = useCallback((nextPosition) => {
     if (isWebpageMode) return
@@ -308,73 +330,17 @@ export default function VideoPlayer({ video }) {
     if (!Number.isFinite(value)) return
 
     if (canUseMpv) {
-      window.electronAPI?.mpvSeekTo?.(value)
+      ownedAdapter()?.seek(value)?.catch(() => {})
       return
     }
 
     const el = videoRef.current
-    if (!el) return
-    el.currentTime = clamp(value, 0, Number.isFinite(el.duration) ? el.duration : value)
-    setHtml5State(prev => ({ ...prev, currentTime: el.currentTime }))
-  }, [canUseMpv, isWebpageMode])
-
-  const requestProgressPreviewFrame = useCallback((previewTime) => {
-    if (isNetworkResource || !video?.fullPath || !window.electronAPI?.generatePreviewFrame || !window.electronAPI?.getThumbnailUrl) return
-
-    const seconds = Math.max(0, Math.round(Number(previewTime) || 0))
-    const cachedUrl = progressPreviewCacheRef.current.get(seconds)
-    if (cachedUrl) {
-      setProgressPreview(prev => ({ ...prev, imageUrl: cachedUrl, loading: false }))
-      return
-    }
-
-    if (progressPreviewInFlightRef.current) {
-      progressPreviewPendingTimeRef.current = previewTime
-      setProgressPreview(prev => ({ ...prev, loading: true }))
-      return
-    }
-
-    const requestId = progressPreviewRequestRef.current + 1
-    progressPreviewRequestRef.current = requestId
-    progressPreviewInFlightRef.current = true
-    progressPreviewPendingTimeRef.current = null
-    setProgressPreview(prev => ({ ...prev, loading: true }))
-
-    window.electronAPI.generatePreviewFrame(video.fullPath, seconds)
-      .then(async (result) => {
-        if (progressPreviewRequestRef.current !== requestId) return
-        if (!result?.framePath) {
-          setProgressPreview(prev => ({ ...prev, loading: false }))
-          return
-        }
-
-        const imageUrl = await window.electronAPI.getThumbnailUrl(result.framePath)
-        if (progressPreviewRequestRef.current !== requestId) return
-        progressPreviewCacheRef.current.set(seconds, imageUrl)
-        if (progressPreviewCacheRef.current.size > PROGRESS_PREVIEW_CACHE_LIMIT) {
-          const oldestKey = progressPreviewCacheRef.current.keys().next().value
-          progressPreviewCacheRef.current.delete(oldestKey)
-        }
-        setProgressPreview(prev => ({
-          ...prev,
-          imageUrl: Math.max(0, Math.round(Number(prev.time) || 0)) === seconds ? imageUrl : prev.imageUrl,
-          loading: false
-        }))
-      })
-      .catch(() => {
-        if (progressPreviewRequestRef.current === requestId) {
-          setProgressPreview(prev => ({ ...prev, loading: false }))
-        }
-      })
-      .finally(() => {
-        progressPreviewInFlightRef.current = false
-        const pendingTime = progressPreviewPendingTimeRef.current
-        progressPreviewPendingTimeRef.current = null
-        if (pendingTime != null && progressPreviewVisibleRef.current) {
-          requestProgressPreviewFrame(pendingTime)
-        }
-      })
-  }, [isNetworkResource, video?.fullPath])
+    const adapter = ownedAdapter()
+    if (!(adapter instanceof Html5Adapter)) return
+    const position = clamp(value, 0, Number.isFinite(el?.duration) ? el.duration : value)
+    void adapter.seek(position)
+    setHtml5State(prev => ({ ...prev, currentTime: position }))
+  }, [canUseMpv, isWebpageMode, nativeCommand, ownedAdapter, readOwnedVideo])
 
   const updateProgressPreview = useCallback((event) => {
     if (!duration || duration <= 0) return
@@ -383,71 +349,43 @@ export default function VideoPlayer({ video }) {
     const toolbarBounds = toolbarRef.current?.getBoundingClientRect()
     const ratio = clamp((event.clientX - bounds.left) / bounds.width, 0, 1)
     const previewTime = ratio * duration
-    const previewSeconds = Math.max(0, Math.round(previewTime))
     const previewEdge = 84
     const previewMax = toolbarBounds ? Math.max(previewEdge, toolbarBounds.width - previewEdge) : Math.max(previewEdge, bounds.width - previewEdge)
     const previewLeft = toolbarBounds
       ? clamp(event.clientX - toolbarBounds.left, previewEdge, previewMax)
       : clamp(event.clientX - bounds.left, Math.min(previewEdge, bounds.width / 2), previewMax)
-    const cachedUrl = progressPreviewCacheRef.current.get(previewSeconds)
-
     setActiveMenu(null)
-    progressPreviewVisibleRef.current = true
-    setProgressPreview(prev => ({
-      ...prev,
-      visible: true,
-      time: previewTime,
-      x: `${previewLeft}px`,
-      imageUrl: cachedUrl || '',
-      loading: !cachedUrl
-    }))
-
-    if (progressPreviewTimerRef.current) {
-      clearTimeout(progressPreviewTimerRef.current)
-    }
-    progressPreviewTimerRef.current = setTimeout(() => {
-      progressPreviewTimerRef.current = null
-      requestProgressPreviewFrame(previewTime)
-    }, 120)
-  }, [duration, requestProgressPreviewFrame])
-
-  const hideProgressPreview = useCallback(() => {
-    if (progressPreviewTimerRef.current) {
-      clearTimeout(progressPreviewTimerRef.current)
-      progressPreviewTimerRef.current = null
-    }
-    progressPreviewRequestRef.current += 1
-    progressPreviewPendingTimeRef.current = null
-    progressPreviewVisibleRef.current = false
-    setProgressPreview(prev => ({ ...prev, visible: false, loading: false }))
-  }, [])
+    showProgressPreview(previewTime, `${previewLeft}px`)
+  }, [duration, showProgressPreview])
 
   const handleSeek = useCallback((delta) => {
     if (isWebpageMode) return
     if (canUseMpv) {
-      window.electronAPI?.mpvSeekRelative?.(delta)
+      nativeCommand({ command: 'seekRelative', value: delta })
       return
     }
 
-    const el = videoRef.current
+    const el = readOwnedVideo()
     if (!el) return
-    el.currentTime = clamp(el.currentTime + delta, 0, Number.isFinite(el.duration) ? el.duration : el.currentTime + delta)
-    setHtml5State(prev => ({ ...prev, currentTime: el.currentTime }))
+    const position = clamp(el.currentTime + delta, 0, Number.isFinite(el.duration) ? el.duration : el.currentTime + delta)
+    void ownedAdapter()?.seek(position)
+    setHtml5State(prev => ({ ...prev, currentTime: position }))
   }, [canUseMpv, isWebpageMode])
 
   const handleTogglePause = useCallback(() => {
     if (isWebpageMode) return
+    autoPausedRef.current = null
     if (canUseMpv) {
-      window.electronAPI?.mpvCyclePause?.()
+      nativeCommand({ command: 'cyclePause' })
       return
     }
 
-    const el = videoRef.current
+    const el = readOwnedVideo()
     if (!el) return
     if (el.paused) {
-      el.play().catch(() => {})
+      ownedAdapter()?.play()?.catch(() => {})
     } else {
-      el.pause()
+      ownedAdapter()?.pause()?.catch(() => {})
     }
   }, [canUseMpv, isWebpageMode])
 
@@ -455,11 +393,11 @@ export default function VideoPlayer({ video }) {
     if (isWebpageMode) return
     const value = clamp(Number(nextVolume), 0, 100)
     if (canUseMpv) {
-      window.electronAPI?.mpvSetVolume?.(value)
+      nativeCommand({ command: 'setVolume', value })
       return
     }
 
-    const el = videoRef.current
+    const el = readOwnedVideo()
     if (!el) return
     el.volume = value / 100
     setHtml5State(prev => ({ ...prev, volume: value, muted: el.muted }))
@@ -468,11 +406,11 @@ export default function VideoPlayer({ video }) {
   const handleToggleMute = useCallback(() => {
     if (isWebpageMode) return
     if (canUseMpv) {
-      window.electronAPI?.mpvToggleMute?.()
+      nativeCommand({ command: 'toggleMute' })
       return
     }
 
-    const el = videoRef.current
+    const el = readOwnedVideo()
     if (!el) return
     el.muted = !el.muted
     setHtml5State(prev => ({ ...prev, muted: el.muted }))
@@ -482,11 +420,11 @@ export default function VideoPlayer({ video }) {
     if (isWebpageMode) return
     const value = clamp(Number(nextSpeed), 0.1, 4)
     if (canUseMpv) {
-      window.electronAPI?.mpvSetSpeed?.(value)
+      nativeCommand({ command: 'setSpeed', value })
       return
     }
 
-    const el = videoRef.current
+    const el = readOwnedVideo()
     if (!el) return
     el.playbackRate = value
     setHtml5State(prev => ({ ...prev, playbackRate: value }))
@@ -502,25 +440,25 @@ export default function VideoPlayer({ video }) {
       setActiveMenu(null)
       return
     }
-    window.electronAPI?.mpvSetSubtitleTrack?.(trackId)
-    if (trackId !== 'no') window.electronAPI?.mpvSetSubtitleVisible?.(true)
+    nativeCommand({ command: 'setSubtitleTrack', value: trackId })
+    if (trackId !== 'no') nativeCommand({ command: 'setSubtitleVisible', value: true })
     setActiveMenu(null)
   }, [canUseMpv])
 
   const handleSelectAudio = useCallback((trackId) => {
-    if (canUseMpv) window.electronAPI?.mpvSetAudioTrack?.(trackId)
+    if (canUseMpv) nativeCommand({ command: 'setAudioTrack', value: trackId })
     setActiveMenu(null)
   }, [canUseMpv])
 
   const handleToggleSubtitleVisible = useCallback(() => {
     if (canUseMpv) {
-      window.electronAPI?.mpvSetSubtitleVisible?.(!subtitleVisible)
+      nativeCommand({ command: 'setSubtitleVisible', value: !subtitleVisible })
     }
-  }, [canUseMpv, subtitleVisible])
+  }, [canUseMpv, subtitleVisible, nativeCommand])
 
   const handleSubtitleScaleChange = useCallback((nextScale) => {
     if (canUseMpv) {
-      window.electronAPI?.mpvSetSubtitleScale?.(nextScale)
+      nativeCommand({ command: 'setSubtitleScale', value: nextScale })
     }
     setActiveMenu(null)
   }, [canUseMpv])
@@ -555,16 +493,21 @@ export default function VideoPlayer({ video }) {
 
   const handleCancelAnalysis = useCallback(async () => {
     const jobId = analysisJob?.jobId
-    await window.electronAPI?.cancelVideoAnalysis?.(jobId)
-  }, [analysisJob?.jobId])
+    if (!jobId || analysisJob.canCancel === false) return
+    const owned = analysisJob.interestId ? analysisJob : await window.electronAPI?.getVideoAnalysisJob?.()
+    if (owned?.jobId !== jobId || !owned.canCancel || !owned.interestId) return
+    const result = await window.electronAPI?.cancelVideoAnalysis?.(jobId, owned.interestId)
+    if (result?.released) setAnalysisJob(current => current?.jobId === jobId ? { ...current, canCancel: false,
+      message: result.shared ? '已取消本次分析，其他设备或窗口仍在分析' : '正在取消分析' } : current)
+  }, [analysisJob])
 
   const handleScreenshot = useCallback(async () => {
     if (canUseMpv) {
-      await window.electronAPI?.mpvScreenshot?.()
+      await nativeCommand({ command: 'screenshot' })
       return
     }
 
-    const el = videoRef.current
+    const el = readOwnedVideo()
     if (!el) return
 
     const canvas = document.createElement('canvas')
@@ -582,10 +525,10 @@ export default function VideoPlayer({ video }) {
     } catch (err) {
       setPlayerError(err?.message || '截图失败')
     }
-  }, [canUseMpv, setPlayerError])
+  }, [canUseMpv, setPlayerError, nativeCommand, readOwnedVideo])
 
   const handlePlayerCommand = useCallback((action, value) => {
-    if (canUseMpv) return false
+    if (isWebpageMode) return ['play-pause', 'seek-backward', 'seek-forward', 'volume-up', 'volume-down', 'mute', 'screenshot'].includes(action)
 
     switch (action) {
       case 'play-pause':
@@ -613,7 +556,7 @@ export default function VideoPlayer({ video }) {
         return false
     }
   }, [
-    canUseMpv,
+    isWebpageMode,
     handleScreenshot,
     handleSeek,
     handleSetVolume,
@@ -684,8 +627,8 @@ export default function VideoPlayer({ video }) {
     handleToggleFullscreen()
   }, [handleToggleFullscreen])
 
-  const handleHtml5LoadedMetadata = useCallback(() => {
-    const el = videoRef.current
+  const handleHtml5LoadedMetadata = useCallback(event => {
+    const el = readOwnedVideo(event)
     if (!el) return
 
     const resume = html5ResumeRef.current
@@ -710,10 +653,10 @@ export default function VideoPlayer({ video }) {
       playbackRate: el.playbackRate || 1,
       loop: el.loop
     })
-  }, [])
+  }, [readOwnedVideo])
 
-  const handleHtml5TimeUpdate = useCallback(() => {
-    const el = videoRef.current
+  const handleHtml5TimeUpdate = useCallback((event) => {
+    const el = readOwnedVideo(event)
     if (!el) return
     setHtml5State(prev => ({
       ...prev,
@@ -725,29 +668,31 @@ export default function VideoPlayer({ video }) {
       playbackRate: el.playbackRate || 1,
       loop: el.loop
     }))
-  }, [])
+  }, [readOwnedVideo])
 
-  const handleHtml5VolumeChange = useCallback(() => {
-    const el = videoRef.current
+  const handleHtml5VolumeChange = useCallback((event) => {
+    const el = readOwnedVideo(event)
     if (!el) return
     setHtml5State(prev => ({
       ...prev,
       volume: Math.round((el.volume ?? 1) * 100),
       muted: el.muted
     }))
-  }, [])
+  }, [readOwnedVideo])
 
-  const handleHtml5RateChange = useCallback(() => {
-    const el = videoRef.current
+  const handleHtml5RateChange = useCallback((event) => {
+    const el = readOwnedVideo(event)
     if (!el) return
     setHtml5State(prev => ({ ...prev, playbackRate: el.playbackRate || 1 }))
-  }, [])
+  }, [readOwnedVideo])
 
   const saveHtml5PlaybackState = useCallback((immediate = false) => {
     if (canUseMpv || !playbackTarget || !window.electronAPI?.savePlaybackState) return
 
-    const el = videoRef.current
+    const el = readOwnedVideo()
     if (!el) return
+    const snapshot = ownedAdapter()?.getState()
+    if (snapshot?.phase === 'loading' && snapshot.explicitPosition === undefined) return
 
     const patch = {
       position: el.ended ? 0 : Math.max(0, Number(el.currentTime) || 0),
@@ -759,7 +704,7 @@ export default function VideoPlayer({ video }) {
 
     html5SaveSnapshotRef.current = patch
 
-    const save = () => window.electronAPI.savePlaybackState(playbackTarget, patch).catch(() => {})
+    const save = () => savePlaybackState(playbackTarget, patch).catch(() => {})
     if (immediate) {
       if (html5SaveTimerRef.current) {
         clearTimeout(html5SaveTimerRef.current)
@@ -774,21 +719,21 @@ export default function VideoPlayer({ video }) {
       html5SaveTimerRef.current = null
       const nextPatch = html5SaveSnapshotRef.current
       if (!nextPatch) return
-      window.electronAPI.savePlaybackState(playbackTarget, nextPatch).catch(() => {})
+      savePlaybackState(playbackTarget, nextPatch).catch(() => {})
     }, 1000)
-  }, [canUseMpv, playbackTarget])
+  }, [canUseMpv, playbackTarget, readOwnedVideo, ownedAdapter])
 
-  const handleHtml5PlaybackStateChange = useCallback(() => {
-    const el = videoRef.current
+  const handleHtml5PlaybackStateChange = useCallback((event) => {
+    const el = readOwnedVideo(event)
     if (!el) return
     setHtml5State(prev => ({ ...prev, paused: el.paused }))
     if (el.paused && Number(el.currentTime) > 0) {
       saveHtml5PlaybackState(true)
     }
-  }, [saveHtml5PlaybackState])
+  }, [readOwnedVideo, saveHtml5PlaybackState])
 
-  const handleHtml5Seeked = useCallback(() => {
-    const el = videoRef.current
+  const handleHtml5Seeked = useCallback((event) => {
+    const el = readOwnedVideo(event)
     if (!el) return
     setHtml5State(prev => ({
       ...prev,
@@ -796,127 +741,13 @@ export default function VideoPlayer({ video }) {
       paused: el.paused
     }))
     saveHtml5PlaybackState(true)
-  }, [saveHtml5PlaybackState])
+  }, [readOwnedVideo, saveHtml5PlaybackState])
 
   const handleHtml5Ended = useCallback(() => {
+    if (!readOwnedVideo()) return
     setHtml5State(prev => ({ ...prev, paused: true }))
     saveHtml5PlaybackState(true)
-    handleAdvanceFromEnd?.()
-  }, [handleAdvanceFromEnd, saveHtml5PlaybackState])
-
-  const clearHostSyncJobs = useCallback(() => {
-    hostSyncFramesRef.current.forEach(id => cancelAnimationFrame(id))
-    hostSyncFramesRef.current = []
-    hostSyncTimersRef.current.forEach(id => clearTimeout(id))
-    hostSyncTimersRef.current = []
-  }, [])
-
-  const readMpvHostBounds = useCallback(() => {
-    const hostEl = stageRef.current || videoSurfaceRef.current
-    if (!video || !canUseMpv || !hostEl) return null
-
-    const rect = hostEl.getBoundingClientRect()
-    const viewportWidth = window.innerWidth || document.documentElement.clientWidth || 0
-    const viewportHeight = window.innerHeight || document.documentElement.clientHeight || 0
-    if (
-      rect.width < 8 ||
-      rect.height < 8 ||
-      rect.right <= 0 ||
-      rect.bottom <= 0 ||
-      rect.left >= viewportWidth ||
-      rect.top >= viewportHeight
-    ) {
-      return null
-    }
-
-    return {
-      x: Math.round(rect.left),
-      y: Math.round(rect.top),
-      width: Math.max(1, Math.round(rect.width)),
-      height: Math.max(1, Math.round(rect.height))
-    }
-  }, [canUseMpv, video])
-
-  const syncMpvHostBounds = useCallback(() => {
-    const nextBounds = readMpvHostBounds()
-    if (!nextBounds) return false
-
-    const prev = hostBoundsRef.current
-    if (
-      prev &&
-      prev.x === nextBounds.x &&
-      prev.y === nextBounds.y &&
-      prev.width === nextBounds.width &&
-      prev.height === nextBounds.height
-    ) {
-      return false
-    }
-
-    hostBoundsRef.current = nextBounds
-    window.electronAPI?.mpvSetHostBounds?.(nextBounds)?.catch(() => {})
-    return true
-  }, [readMpvHostBounds])
-
-  const scheduleMpvHostBoundsSync = useCallback((bursts = false) => {
-    clearHostSyncJobs()
-
-    const run = () => {
-      syncMpvHostBounds()
-    }
-
-    const frameOffsets = bursts ? [0, 1, 2, 3, 4, 5, 8, 12] : [0]
-    const scheduleFrameChain = (remaining) => {
-      const id = requestAnimationFrame(() => {
-        hostSyncFramesRef.current = hostSyncFramesRef.current.filter(frameId => frameId !== id)
-        run()
-        if (remaining > 0) scheduleFrameChain(remaining - 1)
-      })
-      hostSyncFramesRef.current.push(id)
-    }
-    scheduleFrameChain(Math.max(...frameOffsets))
-
-    if (bursts) {
-      ;[80, 180, 360, 700].forEach(delay => {
-        const id = setTimeout(() => {
-          hostSyncTimersRef.current = hostSyncTimersRef.current.filter(timerId => timerId !== id)
-          run()
-        }, delay)
-        hostSyncTimersRef.current.push(id)
-      })
-    }
-  }, [clearHostSyncJobs, syncMpvHostBounds])
-
-  useLayoutEffect(() => {
-    if (!video || !canUseMpv) {
-      clearHostSyncJobs()
-      hostBoundsRef.current = null
-      window.electronAPI?.mpvSetHostBounds?.(null)?.catch(() => {})
-      return undefined
-    }
-
-    scheduleMpvHostBoundsSync(true)
-
-    const stageEl = stageRef.current
-    const observer = stageEl && typeof ResizeObserver !== 'undefined'
-      ? new ResizeObserver(() => scheduleMpvHostBoundsSync(true))
-      : null
-
-    if (observer && stageEl) {
-      observer.observe(stageEl)
-    }
-
-    window.addEventListener('resize', scheduleMpvHostBoundsSync)
-    window.addEventListener('scroll', scheduleMpvHostBoundsSync, true)
-
-    return () => {
-      clearHostSyncJobs()
-      window.removeEventListener('resize', scheduleMpvHostBoundsSync)
-      window.removeEventListener('scroll', scheduleMpvHostBoundsSync, true)
-      observer?.disconnect()
-      hostBoundsRef.current = null
-      window.electronAPI?.mpvSetHostBounds?.(null)?.catch(() => {})
-    }
-  }, [canUseMpv, clearHostSyncJobs, scheduleMpvHostBoundsSync, video])
+  }, [readOwnedVideo, saveHtml5PlaybackState])
 
   useLayoutEffect(() => {
     if (video && canUseMpv) scheduleMpvHostBoundsSync(true)
@@ -930,7 +761,7 @@ export default function VideoPlayer({ video }) {
     playlistAvailable,
     playlistOpen,
     scheduleMpvHostBoundsSync,
-    video
+    playbackIntentKey
   ])
 
   useEffect(() => {
@@ -946,177 +777,103 @@ export default function VideoPlayer({ video }) {
   }, [isWebpageShell, mode, mpvStatus?.available])
 
   useEffect(() => {
-    if (!video) return undefined
-
+    const item = videoDataRef.current
+    if (!item) return undefined
     const launchId = ++launchTokenRef.current
-    const shouldUseMpv = !isWebpageShell && mode === 'mpv' && mpvStatus?.available !== false
-
-    setLaunchState(isWebpageShell ? 'ready' : (shouldUseMpv ? 'launching' : 'loading'))
-    setHtml5Error('')
-    setHtml5Url('')
-    setWebviewUrl(isWebpageShell ? playbackTarget : '')
-    setActivePlaybackUrl('')
-    setActiveHttpHeaders(null)
-    setPlayerError('')
-    html5ResumeRef.current = null
-
+    const useWebpage = isWebpageShell || Boolean(webviewUrl)
+    const shouldUseMpv = !useWebpage && mode === 'mpv' && mpvStatus?.available !== false
+    const adapter = useWebpage ? new WebpageAdapter() : shouldUseMpv ? new MpvAdapter() : new Html5Adapter()
+    const record = { key: viewSessionKey, adapter, ended: false }
+    adapterRecordRef.current = record
     let cancelled = false
-    let resolvedNetworkUrl = ''
-    let resolvedNetworkHeaders = null
-
-    const resolveNetworkPlayback = async () => {
-      if (!isNetworkResource) return { url: playbackTarget, httpHeaders: null }
-      if (isWebpageShell) return { url: playbackTarget, httpHeaders: null, webview: true }
-      if (resolvedNetworkUrl) return { url: resolvedNetworkUrl, httpHeaders: resolvedNetworkHeaders }
-      if (video.resourceKind !== 'webpage') {
-        resolvedNetworkUrl = video.playbackUrl || playbackTarget
-        resolvedNetworkHeaders = video.httpHeaders || null
-        setActiveHttpHeaders(resolvedNetworkHeaders)
-        return { url: resolvedNetworkUrl, httpHeaders: resolvedNetworkHeaders }
+    const owns = () => !cancelled && adapterRecordRef.current === record && viewSessionKeyRef.current === viewSessionKey
+    setLaunchState(isWebpageShell ? 'ready' : shouldUseMpv ? 'launching' : 'loading')
+    setHtml5Error(''); setHtml5Url(''); setWebviewUrl(useWebpage ? webviewUrl || playbackTarget : '')
+    setActivePlaybackUrl(''); setActiveHttpHeaders(null); setPlayerError(''); setMpvState(null)
+    html5ResumeRef.current = null
+    const unsubscribe = adapter.subscribe(snapshot => {
+      if (!owns()) return
+      if (snapshot.native) setMpvState(snapshot.native)
+      if (adapter instanceof Html5Adapter) setHtml5State(previous => ({ ...previous,
+        currentTime: snapshot.position, duration: snapshot.duration, paused: snapshot.paused,
+        volume: snapshot.volume, muted: snapshot.muted, playbackRate: snapshot.speed }))
+      if (snapshot.phase === 'ended' && !record.ended) { record.ended = true; advanceRef.current?.() }
+      if (snapshot.phase === 'error') {
+        if (snapshot.errorCode === 'player_stop_timeout') { setPlayerError(snapshot.error); setLaunchState('error') }
+        else if (shouldUseMpv) setMode('html5')
+        else { setHtml5Error(snapshot.error || 'HTML5 播放器不支持当前格式'); setPlayerError(snapshot.error || '播放失败') }
       }
-      const result = await window.electronAPI?.resolveNetworkResource?.({
-        id: video.id,
-        url: playbackTarget,
-        title: video.name || video.fileName,
-        kind: video.resourceKind,
-        playbackUrl: video.playbackUrl,
-        httpHeaders: video.httpHeaders,
-        parser: video.parser,
-        page: video.page
-      })
-      if (!result?.success) {
-        throw new Error(result?.error || '网页资源解析失败')
-      }
-      if (!result.resource?.playbackUrl && result.resource?.page?.openMode === 'webview') {
-        resolvedNetworkUrl = result.resource?.url || playbackTarget
-        setActivePlaybackUrl(resolvedNetworkUrl)
-        setWebviewUrl(resolvedNetworkUrl)
-        setMode('html5')
-        return { url: resolvedNetworkUrl, httpHeaders: null, webview: true }
-      }
-      resolvedNetworkUrl = result.resource?.playbackUrl || playbackTarget
-      resolvedNetworkHeaders = result.resource?.httpHeaders || video.httpHeaders || null
-      setActiveHttpHeaders(resolvedNetworkHeaders)
-      return { url: resolvedNetworkUrl, httpHeaders: resolvedNetworkHeaders }
-    }
-
-    if (isWebpageShell) {
-      setActivePlaybackUrl(playbackTarget)
-      setWebviewUrl(playbackTarget)
-      setHtml5Url('')
-      setHtml5State(prev => ({
-        ...prev,
-        currentTime: 0,
-        duration: 0,
-        paused: true
-      }))
-      return () => {
-        cancelled = true
-      }
-    }
-
+    })
     const loadHtml5 = async () => {
-      try {
-        const networkPlayback = isNetworkResource ? await resolveNetworkPlayback() : null
-        if (networkPlayback?.webview) {
-          if (cancelled || launchTokenRef.current !== launchId) return
-          setLaunchState('ready')
-          return
+      let url = item.playbackUrl || playbackTarget, headers = item.httpHeaders || null
+      if (isNetworkResource && item.resourceKind === 'webpage') {
+        const result = await window.electronAPI.resolveNetworkResource(item)
+        if (!owns()) return
+        if (!result?.success) throw new Error(result?.error || '网页资源解析失败')
+        if (!result.resource?.playbackUrl && result.resource?.page?.openMode === 'webview') {
+          record.adapter = new WebpageAdapter()
+          await adapter.stop(); unsubscribe()
+          setWebviewUrl(result.resource.url || playbackTarget); setLaunchState('ready'); return
         }
-        const [url, playbackState] = await Promise.all([
-          isNetworkResource ? Promise.resolve(networkPlayback?.url || '') : window.electronAPI?.getFileUrl?.(video.fullPath),
-          window.electronAPI?.getPlaybackState?.(playbackTarget)
-        ])
-
-        if (cancelled || launchTokenRef.current !== launchId) return
-
-        html5ResumeRef.current = playbackResumeEnabled ? (playbackState || null) : null
-        setActivePlaybackUrl(url || '')
-        setHtml5Url(url || '')
-        setHtml5State(prev => ({
-          ...prev,
-          currentTime: playbackResumeEnabled ? Number(playbackState?.position ?? 0) : 0,
-          volume: playbackResumeEnabled && playbackState?.volume != null ? Number(playbackState.volume) : prev.volume,
-          muted: playbackResumeEnabled && playbackState?.muted != null ? Boolean(playbackState.muted) : prev.muted,
-          playbackRate: playbackResumeEnabled && playbackState?.speed != null ? Number(playbackState.speed) : prev.playbackRate,
-          loop: playbackResumeEnabled && playbackState?.loopMode === 'inf'
-        }))
-        setLaunchState('ready')
-      } catch (err) {
-        if (cancelled || launchTokenRef.current !== launchId) return
-        const message = err?.message || 'HTML5 播放失败'
-        setHtml5Error(message)
-        setPlayerError(message)
-        setLaunchState('error')
+        url = result.resource?.playbackUrl || playbackTarget; headers = result.resource?.httpHeaders || headers
       }
+      const [fileUrl, saved] = await Promise.all([
+        isNetworkResource ? Promise.resolve(url) : window.electronAPI.getFileUrl(item.fullPath),
+        getPlaybackState(playbackTarget)
+      ])
+      if (!owns()) return
+      const restore = { position: playbackResumeEnabled ? Number(saved?.position || 0) : 0,
+        volume: saved?.volume, speed: saved?.speed, muted: saved?.muted, loop: saved?.loopMode === 'inf' }
+      html5ResumeRef.current = null
+      adapter.load(fileUrl, restore)
+      adapter.attach(videoRef.current)
+      setActiveHttpHeaders(headers); setActivePlaybackUrl(fileUrl); setHtml5Url(fileUrl); setLaunchState('ready')
     }
-
-    if (shouldUseMpv) {
-      const currentHostBounds = readMpvHostBounds()
-      if (currentHostBounds) {
-        hostBoundsRef.current = currentHostBounds
-        window.electronAPI?.mpvSetHostBounds?.(currentHostBounds)?.catch(() => {})
-      }
-
-      const playPromise = isNetworkResource
-        ? resolveNetworkPlayback().then((networkPlayback) => {
-          const networkPlaybackUrl = networkPlayback?.url || ''
-          if (networkPlayback?.webview) {
-            return { success: true, webview: true }
-          }
-          setActivePlaybackUrl(networkPlaybackUrl)
-          return window.electronAPI?.mpvPlayUrl?.(playbackTarget, {
-            title: video.name || video.fileName,
-            kind: video.resourceKind,
-            playbackUrl: networkPlaybackUrl || video.playbackUrl,
-            httpHeaders: networkPlayback?.httpHeaders || video.httpHeaders,
-            parser: video.parser,
-            page: video.page,
-            resume: video.playOptions?.resume,
-            hostBounds: currentHostBounds || hostBoundsRef.current || undefined
-          })
-        })
-        : window.electronAPI?.mpvPlay?.(video.fullPath, {
-          resume: video.playOptions?.resume,
-          hostBounds: currentHostBounds || hostBoundsRef.current || undefined,
-          playlist: [video.fullPath],
-          playlistIndex: 0
-        })
-      if (!playPromise?.then) {
-        setMode('html5')
-        loadHtml5()
-      } else {
-        playPromise.then((result) => {
-          if (cancelled || launchTokenRef.current !== launchId) return
-          if (result?.success) {
-            setLaunchState('ready')
-            return
-          }
-
-          setMode('html5')
-          loadHtml5()
-        }).catch((err) => {
-          if (cancelled || launchTokenRef.current !== launchId) return
-          setMode('html5')
-          loadHtml5().catch(() => {})
-          if (err?.message) {
-            setPlayerError('')
-          }
-        })
-      }
+    if (useWebpage) {
+      setActivePlaybackUrl(webviewUrl || playbackTarget)
+      if (webpageRef.current) adapter.load(webpageRef.current, webviewUrl || playbackTarget)
+    }
+    else if (shouldUseMpv) {
+      adapter.load({ target: playbackTarget, source: isNetworkResource ? 'network' : 'local',
+        resume: playbackResumeEnabled, title: item.name || item.fileName, kind: item.resourceKind,
+        hostBounds: readMpvHostBounds() || undefined
+      }).then(result => {
+        if (!owns()) return
+        if (result?.webpageUrl) { setWebviewUrl(result.webpageUrl); setMode('html5') }
+        else setLaunchState('ready')
+      }).catch(error => {
+        if (!owns()) return
+        if (error.code === 'player_stop_timeout') { setPlayerError(error.message); setLaunchState('error') }
+        else setMode('html5')
+      })
     } else {
-      loadHtml5()
+      // Retain this engine for the current intent when availability changes in the background.
+      setMode('html5')
+      loadHtml5().catch(error => {
+        if (!owns()) return
+        setHtml5Error(error.message || 'HTML5 播放失败'); setPlayerError(error.message || '播放失败'); setLaunchState('error')
+      })
     }
-
     return () => {
       cancelled = true
-      if (shouldUseMpv) {
-        window.electronAPI?.mpvStop?.()
-      } else {
-        videoRef.current?.pause?.()
+      if (html5SaveTimerRef.current) { clearTimeout(html5SaveTimerRef.current); html5SaveTimerRef.current = null }
+      if (clickTimerRef.current) { clearTimeout(clickTimerRef.current); clickTimerRef.current = null }
+      if (controlsTimerRef.current) { clearTimeout(controlsTimerRef.current); controlsTimerRef.current = null }
+      unsubscribe()
+      if (adapterRecordRef.current === record) adapterRecordRef.current = null
+      if (record.adapter instanceof Html5Adapter) {
+        const snapshot = record.adapter.getState()
+        if (snapshot.phase !== 'idle' && snapshot.phase !== 'loading') {
+          void savePlaybackState(playbackTarget, { position: snapshot.phase === 'ended' ? 0 : snapshot.position,
+            volume: snapshot.volume, speed: snapshot.speed, muted: snapshot.muted, loopMode: snapshot.loop ? 'inf' : 'off' }).catch(() => {})
+        } else if (snapshot.explicitPosition !== undefined) {
+          void savePlaybackState(playbackTarget, { position: snapshot.explicitPosition }).catch(() => {})
+        }
       }
+      void record.adapter.stop().catch(() => {})
     }
-  }, [isNetworkResource, isWebpageShell, mode, mpvStatus?.available, playbackResumeEnabled, playbackTarget, readMpvHostBounds, setPlayerError, video])
+  }, [viewSessionKey, isNetworkResource, isWebpageShell, mode, playbackResumeEnabled, playbackTarget,
+    readMpvHostBounds, setHtml5Url, setMode, setPlayerError, setWebviewUrl])
 
   useEffect(() => {
     if (canUseMpv || !html5Url || !playbackTarget) return undefined
@@ -1132,18 +889,6 @@ export default function VideoPlayer({ video }) {
     saveHtml5PlaybackState,
     playbackTarget
   ])
-
-  useEffect(() => {
-    return () => {
-      if (html5SaveTimerRef.current) {
-        clearTimeout(html5SaveTimerRef.current)
-        html5SaveTimerRef.current = null
-      }
-      if (!canUseMpv && playbackTarget) {
-        saveHtml5PlaybackState(true)
-      }
-    }
-  }, [canUseMpv, playbackTarget, saveHtml5PlaybackState])
 
   useEffect(() => {
     if (!video) return undefined
@@ -1266,12 +1011,18 @@ export default function VideoPlayer({ video }) {
       window.removeEventListener('blur', clearArrowHolds)
       clearArrowHolds()
     }
-  }, [activeMenu, applySpeed, handleClose, handleOpenFile, handleSeek, handleTogglePause, video, webFullscreen])
+  }, [activeMenu, applySpeed, handleClose, handleOpenFile, handleSeek, handleTogglePause, playbackIntentKey, webFullscreen])
 
   useEffect(() => {
     if (mode !== 'html5' || !html5Url) return
-    videoRef.current?.play?.().catch(() => {})
-  }, [html5Url, mode, video])
+    const adapter = ownedAdapter()
+    if (document.hidden) {
+      autoPausedRef.current = adapter
+      adapter?.pause()?.catch(() => {})
+    } else {
+      adapter?.play()?.catch(() => {})
+    }
+  }, [html5Url, mode, playbackIntentKey, ownedAdapter])
 
   useEffect(() => {
     if (!video) return undefined
@@ -1279,29 +1030,26 @@ export default function VideoPlayer({ video }) {
     return () => {
       window.electronAPI?.setMediaPlaybackActive?.(false)?.catch(() => {})
     }
-  }, [video])
+  }, [viewSessionKey, ownedAdapter])
 
   useEffect(() => {
-    if (!video) return undefined
+    if (!video || isWebpageMode) return undefined
+    let active = true
 
     const pauseForBackground = () => {
-      if (pausedRef.current) return
-      autoPausedRef.current = true
-      if (canUseMpvRef.current) {
-        window.electronAPI?.mpvSetPaused?.(true)?.catch(() => {})
-        return
-      }
-      videoRef.current?.pause?.()
+      if (!active) return
+      const adapter = ownedAdapter(), snapshot = adapter?.getState()
+      if (!adapter || (snapshot.paused && snapshot.phase !== 'loading' && snapshot.phase !== 'idle')) return
+      autoPausedRef.current = adapter
+      adapter.pause()?.catch(() => {})
     }
 
     const restoreFromBackground = () => {
-      if (!autoPausedRef.current) return
-      autoPausedRef.current = false
-      if (canUseMpvRef.current) {
-        window.electronAPI?.mpvSetPaused?.(false)?.catch(() => {})
-        return
-      }
-      videoRef.current?.play?.().catch(() => {})
+      if (!active) return
+      const adapter = ownedAdapter()
+      if (!adapter || autoPausedRef.current !== adapter) return
+      autoPausedRef.current = null
+      adapter.play()?.catch(() => {})
     }
 
     const handleVisibilityChange = () => {
@@ -1317,11 +1065,12 @@ export default function VideoPlayer({ video }) {
     handleVisibilityChange()
 
     return () => {
+      active = false
       window.removeEventListener('pagehide', pauseForBackground)
       document.removeEventListener('visibilitychange', handleVisibilityChange)
-      autoPausedRef.current = false
+      autoPausedRef.current = null
     }
-  }, [video])
+  }, [viewSessionKey, ownedAdapter, isWebpageMode])
 
   useEffect(() => {
     showControls()
@@ -1344,32 +1093,11 @@ export default function VideoPlayer({ video }) {
   }, [])
 
   useEffect(() => {
-    progressPreviewCacheRef.current.clear()
-    progressPreviewRequestRef.current += 1
-    progressPreviewPendingTimeRef.current = null
-    progressPreviewVisibleRef.current = false
-    setProgressPreview({
-      visible: false,
-      time: 0,
-      x: 0,
-      imageUrl: '',
-      loading: false
-    })
-  }, [video?.fullPath])
-
-  useEffect(() => {
     return () => {
       if (clickTimerRef.current) {
         clearTimeout(clickTimerRef.current)
         clickTimerRef.current = null
       }
-      if (progressPreviewTimerRef.current) {
-        clearTimeout(progressPreviewTimerRef.current)
-        progressPreviewTimerRef.current = null
-      }
-      progressPreviewRequestRef.current += 1
-      progressPreviewPendingTimeRef.current = null
-      progressPreviewVisibleRef.current = false
     }
   }, [])
 
@@ -1400,7 +1128,7 @@ export default function VideoPlayer({ video }) {
       onSelectAudio={handleSelectAudio}
     />
   ) : null
-  const renderToolbarMenu = (menuName) => activeMenu === menuName ? activeToolbarMenu : null
+  const renderToolbarMenu = (menuName) => !canUseMpv && activeMenu === menuName ? activeToolbarMenu : null
   return (
     <div
       className={`player-overlay${webFullscreen ? ' player-overlay-web-fullscreen' : ''}`}
@@ -1524,6 +1252,8 @@ export default function VideoPlayer({ video }) {
               pageUrl ? (
                 <div className="player-webview-frame" onClick={event => event.stopPropagation()}>
                   <webview
+                    key={viewSessionKey}
+                    ref={bindWebpage}
                     className="player-webview"
                     src={pageUrl}
                     partition="persist:wallpaper-player-web"
@@ -1545,10 +1275,10 @@ export default function VideoPlayer({ video }) {
             ) : isHtml5 ? (
               html5Url ? (
                 <video
-                  ref={videoRef}
+                  key={viewSessionKey}
+                  ref={bindVideo}
                   className="player-video"
                   src={html5Url}
-                  autoPlay
                   onLoadedMetadata={handleHtml5LoadedMetadata}
                   onTimeUpdate={handleHtml5TimeUpdate}
                   onVolumeChange={handleHtml5VolumeChange}
@@ -1557,7 +1287,8 @@ export default function VideoPlayer({ video }) {
                   onPause={handleHtml5PlaybackStateChange}
                   onSeeked={handleHtml5Seeked}
                   onEnded={handleHtml5Ended}
-                  onError={() => {
+                  onError={event => {
+                    if (!readOwnedVideo(event)) return
                     const message = 'HTML5 播放器不支持当前格式'
                     setHtml5Error(message)
                     setPlayerError(message)
@@ -1623,6 +1354,12 @@ export default function VideoPlayer({ video }) {
             )}
 
           </div>
+
+          {canUseMpv && activeToolbarMenu ? (
+            <aside className="player-native-menu-panel" aria-label="播放选项" onClick={event => event.stopPropagation()}>
+              {activeToolbarMenu}
+            </aside>
+          ) : null}
 
           {playlistAvailable ? (
             <div className="player-playlist-rail" onClick={event => event.stopPropagation()}>
@@ -1852,3 +1589,5 @@ export default function VideoPlayer({ video }) {
     </div>
   )
 }
+
+export default memo(VideoPlayer)

@@ -1,226 +1,66 @@
-const fs = require('fs')
-const fsp = require('fs/promises')
-const path = require('path')
-const { execFileSync } = require('child_process')
+const fs = require('node:fs')
+const fsp = require('node:fs/promises')
+const path = require('node:path')
+const io = require('./build-io.cjs')
+const { publishOutput, readPointer } = require('./build-output.cjs')
+const { buildPluginSet, validatePluginOutput } = require('./package-plugins.js')
 
-const rootDir = path.join(__dirname, '..')
-const tempRoot = resolveAsciiBuildRoot()
-const pluginArtifactsDir = path.join(tempRoot, 'plugin-artifacts')
-const pluginStageRoot = path.join(tempRoot, 'plugin-stage')
-const packagedIntegrityPath = path.join(tempRoot, 'main', 'plugins', 'official-package-integrity.json')
-const sourceIntegrityPath = path.join(rootDir, 'main', 'plugins', 'official-package-integrity.json')
-const mirror = 'https://npmmirror.com/mirrors/electron-builder-binaries/'
-
-const copyItems = [
-  '.npmrc',
-  'build',
-  'dist',
-  'index.html',
-  'LICENSE',
-  'licenses',
-  'main',
-  'main.js',
-  'node_modules',
-  'package-lock.json',
-  'package.json',
-  'preload.js',
-  'scripts',
-  'sources',
-  'THIRD_PARTY_NOTICES.md',
-  'vendor',
-  'vite.config.js'
-]
-
-const videoComprehensionItems = [
-  '.env.example',
-  'docs',
-  'pyproject.toml',
-  'README.md',
-  'uv.lock',
-  'video_comprehension'
-]
-
-const officialPluginDirs = new Set(['video-analysis', 'ai-search', 'agent-bridge'])
-const copyFilters = new Map([
-  ['node_modules', (src) => path.basename(src) !== 'wallpaper-player']
-])
-
-const requiredVideoComprehensionFiles = [
-  'pyproject.toml',
-  path.join('video_comprehension', 'cli.py'),
-  path.join('video_comprehension', 'config.py'),
-  path.join('video_comprehension', 'pipeline.py')
-]
-
+const copyItems = ['.npmrc', 'build', 'dist', 'index.html', 'LICENSE', 'licenses', 'main', 'main.js', 'node_modules',
+  'package-lock.json', 'package.json', 'packages', 'preload.js', 'scripts', 'sources', 'THIRD_PARTY_NOTICES.md', 'vendor', 'vite.config.js']
+const copyOptions = {
+  node_modules: { excludeNames: ['wallpaper-player'] },
+  main: { excludePaths: ['plugins/video-analysis', 'plugins/ai-search', 'plugins/agent-bridge', 'video-comprehension-runtime'] },
+  vendor: { excludePaths: ['_downloads', 'llama.cpp', 'llama.cpp-cuda'], excludeFileExtensions: ['.pdb'] }
+}
 function resolveAsciiBuildRoot(env = process.env, options = {}) {
-  const platform = options.platform || process.platform
-  const execPath = options.execPath || process.execPath
-  const defaultBase = platform === 'win32'
-    ? path.join(path.parse(execPath).root, 'wp-build')
-    : path.join(path.parse(execPath).root, 'tmp', 'wp-build')
-  const configuredBase = String(env.WALLPAPER_PLAYER_BUILD_ROOT || '').trim()
-  const buildRoot = path.resolve(configuredBase || defaultBase, 'wallpaper-player-build')
-  if (/[^\x20-\x7e]/.test(buildRoot)) {
-    throw new Error('Windows 打包目录必须是纯 ASCII 路径；请将 WALLPAPER_PLAYER_BUILD_ROOT 设置为可写的 ASCII 目录')
-  }
+  const platform = options.platform || process.platform, execPath = options.execPath || process.execPath
+  const defaultBase = platform === 'win32' ? path.join(path.parse(execPath).root, 'wp-build') : path.join(path.parse(execPath).root, 'tmp', 'wp-build')
+  const buildRoot = path.resolve(String(env.WALLPAPER_PLAYER_BUILD_ROOT || '').trim() || defaultBase, 'wallpaper-player-build')
+  if (/[^\x20-\x7e]/.test(buildRoot)) throw new Error('Windows build directory must be ASCII; set WALLPAPER_PLAYER_BUILD_ROOT to a writable ASCII directory')
   return buildRoot
 }
-
-async function assertVideoComprehensionProject(projectDir) {
-  const missing = getMissingVideoComprehensionFiles(projectDir)
-
-  if (missing.length) {
-    throw new Error(`video comprehension project is incomplete:\n${missing.map(item => `- ${item}`).join('\n')}`)
-  }
+async function validateWindowsOutput(directory, { version, mode, sourceCommit, inspectVersion } = {}) {
+  const integrity = await validatePluginOutput(directory)
+  const asar = require('@electron/asar')
+  const archive = path.join(directory, 'win-unpacked', 'resources', 'app.asar')
+  const embedded = JSON.parse(asar.extractFile(archive, path.join('main', 'plugins', 'official-package-integrity.json')).toString('utf8'))
+  if (JSON.stringify(embedded) !== JSON.stringify(integrity)) throw new Error('packaged app integrity differs from companion plugins')
+  const manifest = JSON.parse(asar.extractFile(archive, 'package.json').toString('utf8'))
+  if (manifest.version !== version) throw new Error('packaged app version differs from build version')
+  const entries = asar.listPackage(archive).map(item => item.replace(/\\/g, '/'))
+  if (entries.some(item => /^\/main\/(?:plugins\/(?:video-analysis|ai-search|agent-bridge)(?:\/|$)|video-comprehension-runtime(?:\/|$))/.test(item))) throw new Error('official plugin payload leaked into core app')
+  if (mode === 'distribution') await require('./release-gate.cjs').collectWindows({ directory, version, sourceCommit, integrity, ...(inspectVersion ? { inspectVersion } : {}) })
+  return integrity
 }
-
-function getMissingVideoComprehensionFiles(projectDir) {
-  return requiredVideoComprehensionFiles
-    .map(item => path.join(projectDir, item))
-    .filter(itemPath => !fs.existsSync(itemPath))
-}
-
-function hasCompleteVideoComprehensionProject(projectDir) {
-  return getMissingVideoComprehensionFiles(projectDir).length === 0
-}
-
-function resolveVideoComprehensionSourceProject() {
-  const candidates = [
-    path.join(rootDir, 'video comprehension', 'video comprehension'),
-    path.join(rootDir, 'main', 'video-comprehension-runtime')
-  ]
-  const sourceProject = candidates.find(hasCompleteVideoComprehensionProject)
-  if (sourceProject) return sourceProject
-
-  const missing = candidates.flatMap(candidate => getMissingVideoComprehensionFiles(candidate))
-  throw new Error(`video comprehension project is incomplete:\n${missing.map(item => `- ${item}`).join('\n')}`)
-}
-
-async function patchVideoComprehensionRuntime(projectDir) {
-  const cliPath = path.join(projectDir, 'video_comprehension', 'cli.py')
-  let cliText = await fsp.readFile(cliPath, 'utf-8')
-  if (!cliText.includes('VIDEO_COMPREHENSION_ENV')) {
-    cliText = cliText.replace('import argparse\nfrom pathlib import Path', 'import argparse\nimport os\nfrom pathlib import Path')
-    cliText = cliText.replace(
-      '    result = run_pipeline(load_request_from_env(Path(args.video_path)))',
-      [
-        '    env_path = Path(os.environ.get("VIDEO_COMPREHENSION_ENV") or ".env")',
-        '    result = run_pipeline(load_request_from_env(Path(args.video_path), env_path=env_path))'
-      ].join('\n')
-    )
-    await fsp.writeFile(cliPath, cliText, 'utf-8')
-  }
-
-  const configPath = path.join(projectDir, 'video_comprehension', 'config.py')
-  let configText = await fsp.readFile(configPath, 'utf-8')
-  if (!configText.includes('VIDEO_COMPREHENSION_OUTPUT_DIR')) {
-    configText = configText.replace('from __future__ import annotations\n\nfrom dataclasses', 'from __future__ import annotations\n\nimport os\nfrom dataclasses')
-    configText = configText.replace(
-      '    yolo_model = resolve_model_path(model_storage_dir, DEFAULT_YOLO_MODEL)',
-      [
-        '    output_dir = resolve_config_path(os.environ.get("VIDEO_COMPREHENSION_OUTPUT_DIR") or str(DEFAULT_OUTPUT_DIR), env_path.parent)',
-        '    yolo_model = resolve_model_path(model_storage_dir, DEFAULT_YOLO_MODEL)'
-      ].join('\n')
-    )
-    configText = configText.replace('        output_dir=DEFAULT_OUTPUT_DIR,', '        output_dir=output_dir,')
-    await fsp.writeFile(configPath, configText, 'utf-8')
-  }
-}
-
-async function copyVideoComprehensionProject(sourceProject, targetProject) {
-  await fsp.rm(targetProject, { recursive: true, force: true })
-  await fsp.mkdir(targetProject, { recursive: true })
-  for (const item of videoComprehensionItems) {
-    const src = path.join(sourceProject, item)
-    if (!fs.existsSync(src)) continue
-    await fsp.cp(src, path.join(targetProject, item), { recursive: true })
-  }
-  await assertVideoComprehensionProject(targetProject)
-  await patchVideoComprehensionRuntime(targetProject)
-  await assertVideoComprehensionProject(targetProject)
-}
-
-async function copyProject() {
+async function packageWindows({ rootDir = path.resolve(__dirname, '..'), buildBase = resolveAsciiBuildRoot(), mode = 'distribution',
+  runCommand = io.run, buildPlugins = buildPluginSet, validate = validateWindowsOutput, beforePointer } = {}) {
+  if (!['directory', 'distribution'].includes(mode)) throw new Error('invalid Windows build mode')
+  if (process.env.ELECTRON_PUBLISH && process.env.ELECTRON_PUBLISH !== 'never') throw new Error('local packaging cannot publish; use the release workflow')
+  const manifest = JSON.parse(await fsp.readFile(path.join(rootDir, 'package.json'), 'utf8'))
+  if (manifest.build?.directories?.output !== 'release') throw new Error('Windows build output must be the isolated release directory')
+  await readPointer(rootDir, 'windows', { optional: true })
+  await io.noLinkedParents(path.join(rootDir, 'release'))
+  const { stage, owner } = await io.createStage(buildBase, rootDir)
+  console.log('Windows build stage: ' + stage)
   try {
-    await fsp.rm(tempRoot, { recursive: true, force: true })
-    await fsp.mkdir(tempRoot, { recursive: true })
-  } catch (error) {
-    throw new Error(`无法创建纯 ASCII 打包目录 ${tempRoot}；可通过 WALLPAPER_PLAYER_BUILD_ROOT 指定其他可写 ASCII 目录：${error.message}`)
-  }
-
-  for (const item of copyItems) {
-    const src = path.join(rootDir, item)
-    if (!fs.existsSync(src)) continue
-    await fsp.cp(src, path.join(tempRoot, item), {
-      recursive: true,
-      filter: copyFilters.get(item)
+    for (const item of copyItems) if (fs.existsSync(path.join(rootDir, item))) await io.copyItem(path.join(rootDir, item), path.join(stage, item), copyOptions[item])
+    const plugins = path.join(stage, 'plugin-artifacts'), integrityPath = path.join(stage, 'main/plugins/official-package-integrity.json')
+    await buildPlugins({ rootDir, stageRoot: path.join(stage, 'plugin-stage'), outputDir: plugins, integrityPath })
+    await runCommand(process.execPath, [path.join(stage, 'node_modules/electron-builder/cli.js'), mode === 'directory' ? '--dir' : '--win', '--x64', '--publish', 'never'], {
+      cwd: stage, env: { ...process.env, ELECTRON_BUILDER_BINARIES_MIRROR: process.env.ELECTRON_BUILDER_BINARIES_MIRROR || 'https://npmmirror.com/mirrors/electron-builder-binaries/' }
     })
-  }
-
-  await removeOfficialPluginPayloads(path.join(tempRoot, 'main', 'plugins'))
-  await fsp.rm(path.join(tempRoot, 'main', 'video-comprehension-runtime'), { recursive: true, force: true })
-  await fsp.rm(path.join(tempRoot, 'video comprehension'), { recursive: true, force: true })
+    const sourceCommit = process.env.GITHUB_SHA || null
+    const result = await publishOutput({ rootDir, kind: 'windows', version: manifest.version, mode, sourceCommit, beforePointer,
+      populate: async directory => {
+        for (const child of await fsp.readdir(path.join(stage, 'release'))) await io.copyItem(path.join(stage, 'release', child), path.join(directory, child))
+        await io.copyItem(plugins, path.join(directory, 'plugins'))
+        await io.copyItem(integrityPath, path.join(directory, 'official-package-integrity.json'))
+      },
+      validate: directory => validate(directory, { version: manifest.version, mode, sourceCommit }) })
+    console.log('Windows build output: ' + result.directory)
+    await io.removeStage(stage, owner).catch(error => console.warn('Retained successful build stage: ' + stage + '\n' + error.message))
+    return result
+  } catch (error) { error.message += '\nBuild stage retained: ' + stage; throw error }
 }
-
-async function removeOfficialPluginPayloads(pluginsDir) {
-  for (const pluginId of officialPluginDirs) {
-    await fsp.rm(path.join(pluginsDir, pluginId), { recursive: true, force: true })
-  }
-}
-
-async function copyReleaseBack() {
-  const sourceRelease = path.join(tempRoot, 'release')
-  const targetRelease = path.join(rootDir, 'release')
-
-  if (!fs.existsSync(sourceRelease)) {
-    throw new Error('electron-builder did not create a release directory')
-  }
-
-  await fsp.rm(targetRelease, { recursive: true, force: true })
-  await fsp.cp(sourceRelease, targetRelease, { recursive: true })
-  await fsp.cp(pluginArtifactsDir, path.join(targetRelease, 'plugins'), { recursive: true })
-}
-
-function packagePlugins() {
-  execFileSync(process.execPath, [path.join(rootDir, 'scripts', 'package-plugins.js')], {
-    cwd: rootDir,
-    stdio: 'inherit',
-    env: {
-      ...process.env,
-      WALLPAPER_PLUGIN_OUTPUT_DIR: pluginArtifactsDir,
-      WALLPAPER_PLUGIN_INTEGRITY_OUTPUT: packagedIntegrityPath,
-      WALLPAPER_PLUGIN_STAGE_ROOT: pluginStageRoot
-    }
-  })
-}
-
-async function main() {
-  await copyProject()
-  packagePlugins()
-  await fsp.copyFile(packagedIntegrityPath, sourceIntegrityPath)
-
-  const electronBuilderCli = path.join(tempRoot, 'node_modules', 'electron-builder', 'cli.js')
-  const publishMode = process.env.ELECTRON_PUBLISH || 'never'
-  // --dir 只产出 unpacked 目录（对应 pack:win）；默认产出完整安装包+便携版（对应 dist:win）
-  const targetFlag = process.argv.includes('--dir') ? '--dir' : '--win'
-
-  execFileSync(process.execPath, [electronBuilderCli, targetFlag, '--publish', publishMode], {
-    cwd: tempRoot,
-    stdio: 'inherit',
-    env: {
-      ...process.env,
-      ELECTRON_BUILDER_BINARIES_MIRROR: process.env.ELECTRON_BUILDER_BINARIES_MIRROR || mirror
-    }
-  })
-
-  await copyReleaseBack()
-}
-
-if (require.main === module) {
-  main().catch((err) => {
-    console.error(err)
-    process.exitCode = 1
-  })
-}
-
-module.exports = { resolveAsciiBuildRoot }
+if (require.main === module) packageWindows({ mode: process.argv.includes('--dir') ? 'directory' : 'distribution' }).catch(error => { console.error(error); process.exitCode = 1 })
+module.exports = { resolveAsciiBuildRoot, packageWindows, validateWindowsOutput }

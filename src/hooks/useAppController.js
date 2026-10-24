@@ -7,34 +7,31 @@ import { useVideoFilter } from './useVideoFilter'
 import { useTagEditor } from './useTagEditor'
 import { usePlayer } from './usePlayer'
 import { useVideoAnalysisTasks } from './useVideoAnalysisTasks'
+import { useAppInitialization } from './useAppInitialization'
+import { getPublicDirectories, isPrivateDirectory } from '../utils/directories'
 
-function getPublicDirectories(directories = [], privateDirectories = []) {
-  const privateSet = new Set(privateDirectories)
-  return directories.filter(dir => !privateSet.has(dir))
-}
 
 // 组合所有子 hook，编排 init 与跨 hook 操作
 export function useAppController() {
   const appState = useAppState()
   const {
     settings,
-    setSettings,
     setCurrentDir,
     setLoading,
     setShowSettings,
-    refreshPlugins,
     saveSettings,
     handleDirectoriesChange
   } = appState
 
   const scan = useScan({ setCurrentDir, setLoading })
+  const initialization = useAppInitialization(appState, scan)
 
-  const { favoriteKeys, handleToggleFavorite } = useFavorites({ settings, saveSettings })
+  const { favoriteKeys, handleToggleFavorite } = useFavorites({ settings, reconcileSettings: appState.reconcileSettings, setSettingsSaveError: appState.setSettingsSaveError })
   const customTags = settings?.customTags || {}
   const hiddenTags = settings?.hiddenTags || []
 
   const filter = useVideoFilter({ videos: scan.videos, customTags, favoriteKeys, hiddenTags })
-  const tagEditor = useTagEditor({ settings, saveSettings })
+  const tagEditor = useTagEditor({ settings, reconcileSettings: appState.reconcileSettings })
   const player = usePlayer({
     queueVideos: filter.filteredVideos,
     videoSource: filter.displayVideos,
@@ -47,46 +44,43 @@ export function useAppController() {
     pluginsLoaded: appState.pluginsLoaded
   })
   const { handlePlayPath, handlePlayNetworkResource } = player
+  const currentPlayerPathRef = useRef(null)
+  currentPlayerPathRef.current = player.playingVideo?.fullPath
+  const directoryPolicyRef = useRef(null)
+  const directoryPolicyKey = JSON.stringify([settings?.directories, settings?.privateDirectories])
+  useEffect(() => {
+    if (!settings) return
+    const changed = directoryPolicyRef.current !== null && directoryPolicyRef.current !== directoryPolicyKey
+    directoryPolicyRef.current = directoryPolicyKey
+    if (!changed) return
+    const filePath = player.playingVideo?.fullPath
+    if (filePath) {
+      window.electronAPI.getFileUrl(filePath).catch(() => {
+        if (currentPlayerPathRef.current === filePath) player.handleClosePlayer()
+      })
+    }
+    if (appState.currentDir) {
+      scan.resetGallery()
+      scan.scanAndLoad(appState.currentDir)
+    }
+  }, [directoryPolicyKey, settings, appState.currentDir, player, scan])
+
+  useEffect(() => window.electronAPI?.onPrivacyStateChanged?.(({ unlocked }) => {
+    if (unlocked) return
+    const privateDirectories = settings?.privateDirectories || []
+    if (isPrivateDirectory(player.playingVideo?.fullPath, privateDirectories)) {
+      player.handleClosePlayer()
+    }
+    if (isPrivateDirectory(appState.currentDir, privateDirectories)) {
+      const directory = getPublicDirectories(settings?.directories, privateDirectories)[0]
+      scan.cancelScan()
+      scan.resetGallery()
+      setCurrentDir(directory || null)
+      if (directory) scan.scanAndLoad(directory)
+    }
+  }), [appState.currentDir, player, scan, settings, setCurrentDir])
   // 优先使用排除隐藏标签后的可见计数；扫描未完成时回退到扫描数量
   const totalCount = filter.visibleCount ?? scan.videos.length
-
-  // 初始化：加载设置、扫描默认目录（用 ref 防止 StrictMode 重复调用）
-  const initRef = useRef(false)
-  useEffect(() => {
-    if (initRef.current) return
-    initRef.current = true
-    init()
-  }, [])
-
-  async function init() {
-    setLoading(true)
-    try {
-      const s = await window.electronAPI.getSettings()
-      setSettings({
-        theme: 'dark',
-        ...s
-      })
-      refreshPlugins()
-
-      const publicDirectories = getPublicDirectories(s.directories || [], s.privateDirectories || [])
-      const dir = s.defaultDirectory || publicDirectories[0]
-      if (dir) {
-        setCurrentDir(dir)
-        await scan.scanAndLoad(dir)
-      } else {
-        setLoading(false)
-      }
-
-      // 检查 ffmpeg（后台执行，不阻塞UI）
-      window.electronAPI.checkFfmpeg().then(ff => appState.setFfmpegStatus(ff))
-
-      // 检查 mpv
-      window.electronAPI.checkMpv().then(mpv => appState.setMpvStatus(mpv))
-    } catch (err) {
-      console.error('初始化失败:', err)
-      setLoading(false)
-    }
-  }
 
   const addDirectory = useCallback(async (options = {}) => {
     const selection = window.electronAPI.selectVideoDirectory
@@ -185,6 +179,7 @@ export function useAppController() {
 
   return {
     ...appState,
+    ...initialization,
     ...scan,
     ...filter,
     ...tagEditor,

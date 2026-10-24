@@ -1,0 +1,168 @@
+{
+  "date": "2026-10-23T13:59:49.068Z",
+  "status": "Negotiated settings request reads implemented and verified in background; overall R7/R6/R8 remain active",
+  "requestScope": "Continue the documented refactor while the user is gaming: no always-on-top windows or focus stealing",
+  "implementation": {
+    "requestReads": [
+      "GET_SETTINGS with encoding json-v1",
+      "GET_SETTINGS_FEED with encoding json-v1"
+    ],
+    "snapshot": "Capture immutable canonical JSON and committed version before awaiting. Reader uses one lazy worker, coalesces identical versions, caches one immutable encoded result and permits at most eight distinct pending versions.",
+    "privacy": "Shared sanitizer removes password salt/hash and tagMutationReceipts, ignores supplied _settingsVersion and attaches the owned committed version inside the worker.",
+    "publicApi": "Existing preload getSettings/getSettingsFeed still return objects; older object replies and option-free IPC reads remain compatible. Full JSON parsing for negotiated reads occurs in preload, not main.",
+    "ordering": "Register feed baseline before decoding; commits may advance the live feed during the read. A late response never resets the publisher version. Existing renderer version recovery remains in use.",
+    "lifecycle": {
+      "workerTimeoutMs": 30000,
+      "idleRetireMs": 60000,
+      "distinctPendingSnapshots": 8,
+      "shutdown": "Existing settings disposal drains reader and serializer together; forced close terminates the owned worker and rejects queued/active reads."
+    },
+    "dependenciesAdded": false
+  },
+  "verification": {
+    "node": [
+      "real worker redacts secrets/receipts, owns metadata, preserves extensions and caches one immutable result",
+      "same-version reads coalesce while distinct queued snapshots have a strict capacity",
+      "crash, invalid replies, wrong versions, timeout and worker startup failure settle requests and allow recovery",
+      "idle worker retires, cached reads need no worker and a new version starts a fresh worker",
+      "graceful close drains existing work, forced close rejects active/queued work and both reject new reads",
+      "actual 10000-tag repository returns equivalent public settings: legacy main full JSON.parse 1, encoded read 0; captured-version ownership preserved",
+      "real preload/IPC modules negotiate encoded reads but expose unchanged object contracts; old option-free replies and input validation remain",
+      "new preload tolerates older object replies and rejects encoded snapshots that expose private fields",
+      "commits during decode and out-of-order feed replies cannot rewind the publisher; retired frames and shutdown reject late baselines"
+    ],
+    "native": [
+      "initial encoded 10000-tag feed crosses real sandbox IPC with zero full main-thread JSON.parse",
+      "production sandbox preload and SettingsClient receive only narrow actual Electron events",
+      "legacy full subscriptions coexist and unsubscribe without changing current consumers",
+      "a lost native event produces one authoritative full resync",
+      "foreign navigation cannot read or receive settings and an authorized reload gets a fresh feed",
+      "production SettingsClient requests version-only durable save replies without an extra full read",
+      "a version acknowledgment repairs a lost final save event with one authoritative full read",
+      "production media adapters use small version replies, recover a lost last event and preserve tag replay, bulk and legacy reads"
+    ],
+    "nativeMainFullParses": 0,
+    "nativeShownWindows": 0,
+    "mainFullParseComparison": {
+      "legacy": 1,
+      "encoded": 0,
+      "tags": 10000
+    },
+    "asar": {
+      "passed": true,
+      "electron": "44.9.0",
+      "asar": true,
+      "tags": 10000,
+      "windowsCreated": 0,
+      "workerRetired": true,
+      "afterClose": {
+        "closed": true,
+        "active": false,
+        "queued": 0,
+        "worker": false,
+        "started": 2,
+        "completed": 2,
+        "cacheHits": 1
+      },
+      "scope": "Actual Electron worker module loaded from a dedicated minimal ASAR; no production installer, decoder, window or foreground activity"
+    },
+    "otherChecks": [
+      "14 JSON serialization lifecycle cases",
+      "11 settings feed/renderer cases",
+      "10 version-reply and transaction cases",
+      "19 storage/recovery cases",
+      "settings persistence",
+      "138 preload APIs and 127 IPC channels matched declarations; typecheck passed",
+      "shared contracts and generated declarations, old/new compatibility boundaries",
+      "API adapter typecheck",
+      "npm run build",
+      "CI YAML and new verification entry parsed; cloud CI not run",
+      "git diff --check"
+    ],
+    "conditions": "10000 generated tags. Actual Node workers and production repository; actual hidden Electron 44.9.0 sandbox preload, guarded IPC and freshly bundled SettingsClient; minimal ASAR worker tested separately. No decoder, foreground timing or game-performance benchmark."
+  },
+  "preservation": {
+    "originalDataFiles": 42,
+    "historicalPublicAssets": 8,
+    "packageLockUnchanged": true,
+    "latestFormalAsarUnchanged": true,
+    "latestFormalPackage": "E:\\wallpaper播放器\\release\\windows-1.5.1-14f3526e-d50d-47b3-8899-6f5e74d12c75",
+    "newDistributionBuilt": false,
+    "productionInstallationReplaced": false
+  },
+  "limits": [
+    "Cold startup file parsing/normalization remains synchronous.",
+    "Option-free legacy full reads, full snapshot fallback broadcasts and older mutation reply paths can still prepare full snapshots on main; this stage does not claim the project has zero main-thread JSON work.",
+    "Worker-to-preload transfer, full renderer JSON parsing/schema preparation, cold startup, sustained CPU/RSS and the concurrent event-loop p95 budget require separate measurements.",
+    "No fresh complete production Windows distribution is built in this stage. Existing local production bundle remains the prior splash version.",
+    "R6 foreground resource acceptance remains deferred per user gaming preference; physical Android, native iOS, signing/migration, production TLS/update delivery and historical theme drift remain open."
+  ],
+  "harnessCorrection": "Initial lifecycle assertion compared arrays created by different VM realms and incorrectly expected the shared object schema to reject stripped extra fields. Those assertions were corrected to compare plain values and the established schema semantics; no production behavior was relaxed.",
+  "sourceHashes": [
+    {
+      "file": "main/settings.js",
+      "sha256": "82e1970a7fe8e4fc094d106db2d1132e1b5cee7efff17266ed6eab8c43629ebd"
+    },
+    {
+      "file": "main/application/settings-broadcast.js",
+      "sha256": "0f9099721091f8efd96a4c1e434fd0e57c180ae1f00eb11fd9dd1f2dee245a5d"
+    },
+    {
+      "file": "main/ipc/settings.js",
+      "sha256": "e3f75bb5d2d0103db3cad1833adbdc419fd33c250fcf2e77c481618f684c1ed8"
+    },
+    {
+      "file": "preload.js",
+      "sha256": "82289ee291e6d472175cca44b9b4a7f0e97d53a497c87e97a807c9564e7ff88f"
+    },
+    {
+      "file": "main/application/settings-reader.js",
+      "sha256": "039b02fbedc727d1b1e7c870a538d1b8a0bda87c35b183479f10f6834b0ba0ec"
+    },
+    {
+      "file": "main/application/settings-read-worker.js",
+      "sha256": "a99932bc87743ad6b03461e773829acc482c7cb9ffeb67084ed317ac00a41fc1"
+    },
+    {
+      "file": "main/repositories/settings-renderer.js",
+      "sha256": "b76f7a95e4e2c3c98830bd373b1a3c8de2fbc8a65fdd2766015f763da68f8dbc"
+    },
+    {
+      "file": "packages/contracts/src/settings-feed.ts",
+      "sha256": "492874449a8039ea37fcd0f7ea8a39defa63dcaf8e61cddf88a087d1d84cc9d2"
+    },
+    {
+      "file": "packages/contracts/dist/settings-feed.js",
+      "sha256": "e6ac5399bbd57c9629d146371c8a02028b3ad16c55742dedcd7cc876952fba29"
+    },
+    {
+      "file": "packages/contracts/dist/settings-feed.d.ts",
+      "sha256": "abb4a234300af0a779a65ad86c450b463e59365e9a2bbb64598300c09ceabacf"
+    },
+    {
+      "file": "scripts/verify-settings-read-lifecycle.js",
+      "sha256": "083f5e823cc5af4ba37a7ddc40dbe88346a814aea8324a9f13f6d97f31cf558d"
+    },
+    {
+      "file": "scripts/verify-settings-read-asar.js",
+      "sha256": "9207ea4120f825a200c74dad6275f6a263769efc0c0ef7485bf3f1a8779482d2"
+    },
+    {
+      "file": "scripts/verify-settings-feed-electron.js",
+      "sha256": "e9b65b15fcae7026a5a214d8ef341219551397d452a1f74384b6f37b0984887b"
+    },
+    {
+      "file": "package.json",
+      "sha256": "3b739d4004a9c00b5016ff20af769e1f02aed85ac1fcf25b86dfbc1a6db0c6cf"
+    },
+    {
+      "file": ".github/workflows/ci.yml",
+      "sha256": "59180cf9eb48fd9010ddc51ccb7c6f656c82df328c3461a2859b2e2df072aeac"
+    }
+  ],
+  "raw": {
+    "node": ".tmp/refactor-tests/r7-settings-read/node-result.json",
+    "native": ".tmp/refactor-tests/r7-settings-read/native-feed.json",
+    "asar": ".tmp/refactor-tests/r7-settings-read/asar-result.json"
+  }
+}

@@ -1,15 +1,20 @@
 const { Tray, Menu, nativeImage, clipboard, app } = require('electron')
 const log = require('electron-log')
+const crypto = require('crypto')
 const { EVENT } = require('../ipc-channels')
-const { loadSettings, saveSettingsAndFlush, sanitizeSettingsForSave } = require('../settings')
+const { loadSettings, getRemoteAccessSettings, saveSettingsAndFlush, updateSettingsAndFlush, sanitizeSettingsForSave } = require('../settings')
 const { createWindow, getMainWindow } = require('../window')
 const {
   approvePairingRequest,
   createPairingCode,
   getIdentityCorruptedAt,
+  getIdentityReadError,
+  onAuthorizationChanged,
   listPairedDevices,
   listPendingPairingRequests,
   loadIdentity,
+  refreshIdentity,
+  flushIdentityWrites,
   rejectPairingRequest,
   revokePairedDevice,
   rotateAccessToken
@@ -34,6 +39,15 @@ let serverState = {
 }
 let tray = null
 let isQuitting = false
+let lifecycleQueue = Promise.resolve()
+const stateEpoch = crypto.randomUUID()
+let stateRevision = 0, stateFingerprint = ''
+
+function serializeLifecycle(operation) {
+  const result = lifecycleQueue.then(operation)
+  lifecycleQueue = result.catch(() => {})
+  return result
+}
 
 function normalizeRemoteSettings(settings) {
   const source = settings?.remoteAccess && typeof settings.remoteAccess === 'object'
@@ -56,24 +70,29 @@ function normalizeRemoteSettings(settings) {
 }
 
 function getRemoteSettings() {
-  return normalizeRemoteSettings(loadSettings())
+  return normalizeRemoteSettings(getRemoteAccessSettings())
 }
 
 function getRemoteState() {
   const settings = getRemoteSettings()
-  const identity = loadIdentity()
-  return {
+  let identity, identityError
+  try { identity = loadIdentity() }
+  catch { identityError = getIdentityReadError() || { message: '设备身份暂时不可用，请修复后刷新状态' } }
+  const state = {
     settings,
-    running: serverState.running,
-    error: serverState.error,
+    running: !identityError && serverState.running,
+    error: identityError?.message || serverState.error,
     port: settings.port,
-    endpoint: getPrimaryEndpoint(settings.port),
-    endpoints: getLanAddresses(settings.port),
-    accessToken: identity.accessToken,
+    endpoint: identityError ? '' : getPrimaryEndpoint(settings.port),
+    endpoints: identityError ? [] : getLanAddresses(settings.port),
+    accessToken: identity?.accessToken || '',
     identityCorruptedAt: getIdentityCorruptedAt(),
-    pairedDevices: listPairedDevices(),
-    pendingPairingRequests: listPendingPairingRequests()
+    pairedDevices: identityError ? [] : listPairedDevices(),
+    pendingPairingRequests: identityError ? [] : listPendingPairingRequests()
   }
+  const fingerprint = crypto.createHash('sha256').update(JSON.stringify(state)).digest('hex')
+  if (fingerprint !== stateFingerprint) { stateFingerprint = fingerprint; stateRevision++ }
+  return { ...state, _remoteVersion: { epoch: stateEpoch, revision: stateRevision } }
 }
 
 function sendRemoteState() {
@@ -130,7 +149,13 @@ function updateTrayMenu() {
     {
       label: '复制访问地址',
       enabled: Boolean(state.endpoint),
-      click: () => clipboard.writeText(state.endpoint)
+      click: async () => {
+        try {
+          await clipboard.writeText(state.endpoint)
+        } catch (error) {
+          log.error('[remote] 复制访问地址失败', error)
+        }
+      }
     },
     {
       label: state.running ? '暂停手机访问' : '启动手机访问',
@@ -158,11 +183,13 @@ function updateTrayMenu() {
   tray.setContextMenu(menu)
 }
 
-async function startRemoteAccess(options = {}) {
+async function startRemoteAccessNow(options = {}) {
+  if (isQuitting) throw Object.assign(new Error('应用正在退出'), { code: 'app_quitting' })
+  await refreshIdentity()
   const settings = getRemoteSettings()
   if (serverState.running && server && !options.forceRestart) return getRemoteState()
 
-  await stopRemoteAccess()
+  await stopRemoteAccessNow()
   const nextServer = createRemoteServer({
     port: settings.port,
     onPairingRequest: sendRemoteState
@@ -191,7 +218,19 @@ async function startRemoteAccess(options = {}) {
   return getRemoteState()
 }
 
-async function stopRemoteAccess() {
+async function closeRemoteServer(currentServer) {
+  const { closeActiveFileStreams, waitForFileStreams } = require('./streaming')
+  const { jsonResponses } = require('./json-responses')
+  currentServer.resourceClosing = true
+  const stopped = new Promise(resolve => currentServer.close(resolve))
+  closeActiveFileStreams(currentServer)
+  jsonResponses.close(currentServer)
+  currentServer.closeAllConnections?.()
+  await Promise.all([stopped, waitForFileStreams(currentServer), jsonResponses.wait(currentServer)])
+  await flushIdentityWrites()
+}
+
+async function stopRemoteAccessNow() {
   if (!server) {
     serverState = { ...serverState, running: false, error: '' }
     updateTrayMenu()
@@ -201,7 +240,7 @@ async function stopRemoteAccess() {
 
   const currentServer = server
   server = null
-  await new Promise((resolve) => currentServer.close(resolve))
+  await closeRemoteServer(currentServer)
   serverState = { ...serverState, running: false, error: '' }
   updateTrayMenu()
   sendRemoteState()
@@ -209,19 +248,25 @@ async function stopRemoteAccess() {
   return getRemoteState()
 }
 
-async function applyRemoteSettings(nextRemoteSettings) {
-  const currentSettings = loadSettings()
-  const currentRemoteAccess = normalizeRemoteSettings(currentSettings)
-  const remoteAccess = normalizeRemoteSettings(nextRemoteSettings)
-  await saveSettingsAndFlush(sanitizeSettingsForSave({ remoteAccess }))
+async function applyRemoteSettingsNow(nextRemoteSettings) {
+  if (isQuitting) throw Object.assign(new Error('应用正在退出'), { code: 'app_quitting' })
+  await refreshIdentity()
+  if (!nextRemoteSettings || typeof nextRemoteSettings !== 'object' || Array.isArray(nextRemoteSettings)) throw new Error('手机访问设置无效')
+  if (Object.hasOwn(nextRemoteSettings, 'port') && (!Number.isInteger(Number(nextRemoteSettings.port)) || Number(nextRemoteSettings.port) < 1 || Number(nextRemoteSettings.port) > 65535)) throw new Error('端口必须是 1 到 65535 的整数')
+  let currentRemoteAccess, remoteAccess
+  await updateSettingsAndFlush(currentSettings => {
+    currentRemoteAccess = normalizeRemoteSettings(currentSettings)
+    remoteAccess = normalizeRemoteSettings({ ...currentRemoteAccess, ...nextRemoteSettings })
+    return { patch: sanitizeSettingsForSave({ remoteAccess }) }
+  })
 
   try {
     if (remoteAccess.enabled) {
-      await startRemoteAccess({
+      await startRemoteAccessNow({
         forceRestart: serverState.running && currentRemoteAccess.port !== remoteAccess.port
       })
     } else {
-      await stopRemoteAccess()
+      await stopRemoteAccessNow()
     }
   } catch (err) {
     serverState = {
@@ -231,10 +276,9 @@ async function applyRemoteSettings(nextRemoteSettings) {
       endpoints: [],
       accessToken: loadIdentity().accessToken
     }
-    await saveSettingsAndFlush(sanitizeSettingsForSave({
-      ...currentSettings,
-      remoteAccess: { ...remoteAccess, enabled: false }
-    }))
+    await updateSettingsAndFlush(settings => ({ patch: sanitizeSettingsForSave({
+      remoteAccess: { ...normalizeRemoteSettings(settings), enabled: false }
+    }) }))
     updateTrayMenu()
     sendRemoteState()
   }
@@ -242,12 +286,17 @@ async function applyRemoteSettings(nextRemoteSettings) {
   return getRemoteState()
 }
 
-async function initRemoteAccess() {
-  loadIdentity()
+async function initRemoteAccessNow() {
+  if (isQuitting) return
+  try { await refreshIdentity() }
+  catch (error) {
+    if (!getIdentityReadError()) throw error
+    sendRemoteState(); return getRemoteState()
+  }
   const settings = getRemoteSettings()
   if (settings.enabled) {
     try {
-      await startRemoteAccess()
+      await startRemoteAccessNow()
     } catch (err) {
       serverState = { ...serverState, running: false, error: err.message }
       log.error('[remote] start failed:', err)
@@ -259,7 +308,7 @@ async function initRemoteAccess() {
 
 function shouldKeepRunningInTray() {
   const settings = getRemoteSettings()
-  return settings.enabled && settings.keepRunningInTray && !isQuitting
+  return settings.enabled && settings.keepRunningInTray && !isQuitting && !getIdentityReadError()
 }
 
 function setupRemoteIPC() {
@@ -267,14 +316,15 @@ function setupRemoteIPC() {
   // 保留此占位导出是为了避免破坏外部引用；下一版本可删除。
 }
 
-async function disposeRemoteAccess() {
-  isQuitting = true
+async function disposeRemoteAccessNow() {
+  removeIdentityListener()
   const currentServer = server
   server = null
   serverState = { ...serverState, running: false, error: '' }
   if (currentServer) {
-    await new Promise((resolve) => currentServer.close(resolve))
+    await closeRemoteServer(currentServer)
   }
+  await flushIdentityWrites()
   if (tray) {
     tray.destroy()
     tray = null
@@ -284,6 +334,21 @@ async function disposeRemoteAccess() {
 function markQuitting() {
   isQuitting = true
 }
+
+async function startRemoteAccess(options = {}) { return serializeLifecycle(() => startRemoteAccessNow(options)) }
+async function stopRemoteAccess() { return serializeLifecycle(stopRemoteAccessNow) }
+async function applyRemoteSettings(nextRemoteSettings) { return serializeLifecycle(() => applyRemoteSettingsNow(nextRemoteSettings)) }
+async function initRemoteAccess() { return serializeLifecycle(initRemoteAccessNow) }
+async function disposeRemoteAccess() { isQuitting = true; return serializeLifecycle(disposeRemoteAccessNow) }
+
+// An unreadable credential source invalidates all active work, rather than
+// keeping a listener/stream authorized by the last in-memory identity.
+const removeIdentityListener = onAuthorizationChanged(() => {
+  if (isQuitting || !getIdentityReadError()) return
+  void serializeLifecycle(async () => {
+    if (!isQuitting && getIdentityReadError()) await stopRemoteAccessNow()
+  }).catch(() => { log.error('[remote] 身份不可用，手机访问收尾失败') })
+})
 
 module.exports = {
   DEFAULT_REMOTE_SETTINGS,

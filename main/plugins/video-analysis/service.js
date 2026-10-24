@@ -7,7 +7,8 @@ const { spawn } = require('child_process')
 const { BrowserWindow } = require('electron')
 const { core } = require('./core')
 const { getResourcePath, isPathInside, pathKey } = core('paths')
-const { loadSettings, saveSettings } = core('settings')
+const { loadSettings, updateSettingsAndFlush } = core('settings')
+const { RuntimeConfigStore } = require('./runtime-config-store')
 const {
   getDefaultAnalysisModelDirectory,
   getDefaultAnalysisResultDirectory,
@@ -16,6 +17,9 @@ const {
 
 let activeJob = null
 let activeJobSeq = 0
+let analysisClosing = false
+const ANALYSIS_WAIT_MS = 2 * 60 * 60 * 1000
+const ANALYSIS_OUTPUT_LIMIT = 256 * 1024
 const recentAnalysisEvents = new Map()
 const RECENT_ANALYSIS_EVENT_LIMIT = 100
 const REQUIRED_VIDEO_COMPREHENSION_FILES = [
@@ -271,6 +275,7 @@ async function resolveVideoComprehensionRoot() {
   if (await hasCompleteVideoComprehensionProject(bundledRoot)) {
     const runtimeRoot = getRuntimeVideoComprehensionRoot()
     if (!(await hasCompleteVideoComprehensionProject(runtimeRoot))) {
+      if (!isPathInside(getDefaultAnalysisRuntimeDirectory(), runtimeRoot) || path.basename(runtimeRoot) !== 'project') throw new Error('分析运行目录无效')
       await fsp.rm(runtimeRoot, { recursive: true, force: true })
       await copyDirectoryFromPossiblyAsar(bundledRoot, runtimeRoot)
     }
@@ -307,7 +312,12 @@ function parseEnvText(text) {
     const separatorIndex = line.indexOf('=')
     if (separatorIndex < 0) continue
     const key = line.slice(0, separatorIndex).trim()
-    const value = line.slice(separatorIndex + 1).trim().replace(/^["']|["']$/g, '')
+    let value = line.slice(separatorIndex + 1).trim()
+    // Arguments contain their own path quotes; only unwrap a complete env value.
+    if (key === 'VLM_SERVER_ARGS' && value.startsWith('"')) {
+      try { const decoded = JSON.parse(value); if (typeof decoded === 'string') value = decoded }
+      catch { if (/^"[^"]*"$/.test(value)) value = value.slice(1, -1) }
+    } else if (/^"[^"]*"$/.test(value) || /^'[^']*'$/.test(value)) value = value.slice(1, -1)
     if (ANALYSIS_ENV_KEYS.includes(key)) {
       values[key] = value
     } else {
@@ -352,6 +362,9 @@ function envToRuntimeConfig(values, meta = {}) {
 }
 
 function validateRuntimeConfig(config) {
+  if (Object.values(config).some(value => typeof value === 'string' && /[\r\n\0]/.test(value))) {
+    throw new Error('分析配置字段不能包含换行或空字符')
+  }
   const mode = String(config?.mode || '').trim().toLowerCase()
   const llmProvider = String(config?.llmProvider || LOCAL_DEFAULT_ANALYSIS_ENV.LLM_PROVIDER).trim().toLowerCase()
   const vlmProvider = String(config?.vlmProvider || LOCAL_DEFAULT_ANALYSIS_ENV.VLM_PROVIDER).trim().toLowerCase()
@@ -427,96 +440,56 @@ function validateRuntimeConfig(config) {
 }
 
 function renderEnv(values) {
-  return `${ANALYSIS_ENV_KEYS.map(key => `${key}=${values[key]}`).join('\n')}\n`
+  return `${ANALYSIS_ENV_KEYS.map(key => `${key}=${key === 'VLM_SERVER_ARGS' ? JSON.stringify(values[key]) : values[key]}`).join('\n')}\n`
 }
 
-async function ensureRuntimeEnvPath() {
-  const envPath = getEnvPath()
-  await fsp.mkdir(path.dirname(envPath), { recursive: true })
-  try {
-    await fsp.access(envPath)
-    return envPath
-  } catch (err) {
-    if (err?.code !== 'ENOENT') throw err
-  }
+const runtimeConfigStore = new RuntimeConfigStore({ filename: getEnvPath, legacyFilename: getLegacyEnvPath })
 
-  const legacyEnvPath = getLegacyEnvPath()
-  try {
-    await fsp.copyFile(legacyEnvPath, envPath)
-  } catch (err) {
-    if (err?.code !== 'ENOENT') throw err
-  }
-  return envPath
+function decodeRuntimeConfig(text) {
+  const parsed = text === null ? { values: LOCAL_DEFAULT_ANALYSIS_ENV, unsupportedKeys: [] } : parseEnvText(text)
+  return envToRuntimeConfig(parsed.values, { usingDefaults: text === null, unsupportedKeys: parsed.unsupportedKeys })
 }
 
-async function getVideoAnalysisRuntimeConfig() {
-  const envPath = await ensureRuntimeEnvPath()
-  try {
-    const parsed = parseEnvText(await fsp.readFile(envPath, 'utf-8'))
-    const config = envToRuntimeConfig(parsed.values, {
-      usingDefaults: false,
-      unsupportedKeys: parsed.unsupportedKeys
-    })
-    persistLlmProfile(config)
-    return config
-  } catch (err) {
-    if (err?.code !== 'ENOENT') throw err
-    return envToRuntimeConfig(LOCAL_DEFAULT_ANALYSIS_ENV, {
-      usingDefaults: true,
-      unsupportedKeys: []
-    })
-  }
+function ensureRuntimeEnvPath() {
+  return runtimeConfigStore.materialize(() => renderEnv(validateRuntimeConfig(envToRuntimeConfig(LOCAL_DEFAULT_ANALYSIS_ENV))))
 }
 
-async function saveVideoAnalysisRuntimeConfig(config) {
-  let currentConfig = envToRuntimeConfig(LOCAL_DEFAULT_ANALYSIS_ENV)
-  const envPath = await ensureRuntimeEnvPath()
-  try {
-    const parsed = parseEnvText(await fsp.readFile(envPath, 'utf-8'))
-    currentConfig = envToRuntimeConfig(parsed.values)
-  } catch (err) {
-    if (err?.code !== 'ENOENT') throw err
-  }
-  const values = validateRuntimeConfig({
-    ...currentConfig,
-    ...config,
-    modelStorageDir: config?.modelStorageDir || getAnalysisModelDirectory()
-  })
-  await fsp.mkdir(path.dirname(envPath), { recursive: true })
-  await fsp.writeFile(envPath, renderEnv(values), 'utf-8')
-  const runtimeConfig = envToRuntimeConfig(values, {
-    usingDefaults: false,
-    unsupportedKeys: []
-  })
-  persistLlmProfile(runtimeConfig)
-  return runtimeConfig
-}
+function getVideoAnalysisRuntimeConfig() { return runtimeConfigStore.read(decodeRuntimeConfig) }
 
-function persistLlmProfile(config) {
-  const provider = ['local', 'api'].includes(String(config?.llmProvider || '').toLowerCase())
-    ? String(config.llmProvider).toLowerCase()
-    : 'local'
-  const settings = loadSettings()
-  saveSettings({
-    videoAnalysis: {
-      ...(settings.videoAnalysis || {}),
-      llmProfiles: {
-        ...(settings.videoAnalysis?.llmProfiles || {}),
-        [provider]: {
-          llmBaseUrl: config.llmBaseUrl || '',
-          llmName: config.llmName || '',
-          llmApiKey: config.llmApiKey || ''
-        }
-      }
+function updateVideoAnalysisRuntimeConfig(update, options = {}) {
+  return runtimeConfigStore.update(text => {
+    const current = decodeRuntimeConfig(text), patch = update({ ...current })
+    if (!patch || typeof patch !== 'object' || Array.isArray(patch) || typeof patch.then === 'function') throw new TypeError('分析配置修改无效')
+    const values = validateRuntimeConfig({ ...current, ...patch,
+      modelStorageDir: patch.modelStorageDir || current.modelStorageDir || getAnalysisModelDirectory() })
+    const config = envToRuntimeConfig(values, { usingDefaults: false, unsupportedKeys: [] })
+    return { text: renderEnv(values), value: config, previous: current }
+  }, mutation => updateSettingsAndFlush(settings => {
+    const desired = {}
+    for (const config of [mutation.previous, mutation.value]) {
+      const provider = config.llmProvider === 'api' ? 'api' : 'local'
+      desired[provider] = { llmBaseUrl: config.llmBaseUrl || '', llmName: config.llmName || '', llmApiKey: config.llmApiKey || '' }
     }
-  })
+    const section = settings.videoAnalysis || {}, profiles = {}
+    for (const [provider, profile] of Object.entries(desired)) {
+      if (Object.keys(profile).some(key => section.llmProfiles?.[provider]?.[key] !== profile[key])) profiles[provider] = profile
+    }
+    const patch = {}
+    if (Object.keys(profiles).length) patch.llmProfiles = profiles
+    if (options.modelDirectory && pathKey(section.modelDir || '') !== pathKey(options.modelDirectory)) patch.modelDir = options.modelDirectory
+    return { patch: Object.keys(patch).length ? { videoAnalysis: patch } : {} }
+  }))
 }
 
-async function resetVideoAnalysisRuntimeConfig() {
-  return saveVideoAnalysisRuntimeConfig({
-    ...envToRuntimeConfig(LOCAL_DEFAULT_ANALYSIS_ENV),
-    modelStorageDir: getDefaultAnalysisModelDirectory()
-  })
+function saveVideoAnalysisRuntimeConfig(config, options) {
+  if (!config || typeof config !== 'object' || Array.isArray(config) || typeof config.then === 'function') return Promise.reject(new TypeError('分析配置修改无效'))
+  const patch = { ...config }
+  return updateVideoAnalysisRuntimeConfig(() => patch, options)
+}
+
+function resetVideoAnalysisRuntimeConfig() {
+  const directory = getDefaultAnalysisModelDirectory()
+  return saveVideoAnalysisRuntimeConfig({ ...envToRuntimeConfig(LOCAL_DEFAULT_ANALYSIS_ENV), modelStorageDir: directory }, { modelDirectory: directory })
 }
 
 function getAnalysisResultDirectory() {
@@ -573,26 +546,45 @@ async function removeLegacyAnalysisResults(videoPath, keepPath, outputDir = getA
     const candidatePath = path.join(outputDir, entry.name)
     if (pathKey(candidatePath) === keepKey) return
     const payload = await readJson(candidatePath)
-    if (payload?.sourceVideoPath && pathKey(payload.sourceVideoPath) !== pathKey(videoPath)) return
+    if (!payload?.sourceVideoPath || pathKey(payload.sourceVideoPath) !== pathKey(videoPath)) return
     await fsp.unlink(candidatePath).catch(() => {})
   }))
 }
 
-async function saveAnalysisResult(videoPath, analysis) {
-  if (!analysis?.available) return null
-  const outputDir = getAnalysisResultDirectory()
-  await fsp.mkdir(outputDir, { recursive: true })
-  const savedAt = new Date()
-  const resultPath = getSavedAnalysisResultPath(videoPath, outputDir)
-  const payload = {
-    savedAt: savedAt.toISOString(),
-    sourceVideoPath: path.resolve(videoPath),
-    resultFileName: path.basename(resultPath),
-    analysis
+const analysisSaveQueues = new Map()
+function saveAnalysisResult(videoPath, analysis, options = {}) {
+  if (!analysis?.available) return Promise.resolve(null)
+  const outputDir = getAnalysisResultDirectory(), resultPath = getSavedAnalysisResultPath(videoPath, outputDir)
+  const check = async () => {
+    if (options.signal?.aborted) throw options.signal.reason
+    await options.authorize?.()
+    if (options.signal?.aborted) throw options.signal.reason
   }
-  await fsp.writeFile(resultPath, JSON.stringify(payload, null, 2), 'utf-8')
-  await removeLegacyAnalysisResults(videoPath, resultPath, outputDir)
-  return resultPath
+  const save = (analysisSaveQueues.get(resultPath) || Promise.resolve()).catch(() => {}).then(async () => {
+    await check(); await fsp.mkdir(outputDir, { recursive: true }); await check()
+    const temporary = resultPath + '.' + crypto.randomUUID() + '.tmp'
+    let previous = null, committed = false
+    try { previous = await fsp.readFile(resultPath) } catch (error) { if (error.code !== 'ENOENT') throw error }
+    try {
+      const payload = { savedAt: new Date().toISOString(), sourceVideoPath: path.resolve(videoPath), resultFileName: path.basename(resultPath), analysis }
+      await fsp.writeFile(temporary, JSON.stringify(payload, null, 2), 'utf8')
+      await check(); await fsp.rename(temporary, resultPath); committed = true
+      await check()
+      if (!options.signal) await removeLegacyAnalysisResults(videoPath, resultPath, outputDir)
+      await check()
+      return resultPath
+    } catch (error) {
+      if (committed) {
+        if (previous) { await fsp.writeFile(temporary, previous); await fsp.rename(temporary, resultPath) }
+        else await fsp.unlink(resultPath).catch(() => {})
+      }
+      throw error
+    } finally { await fsp.unlink(temporary).catch(() => {}) }
+  })
+  analysisSaveQueues.set(resultPath, save)
+  const release = () => { if (analysisSaveQueues.get(resultPath) === save) analysisSaveQueues.delete(resultPath) }
+  save.then(release, release)
+  return save
 }
 
 function getActiveAnalysisJob() {
@@ -628,6 +620,7 @@ function emitAnalysisEvent(sender, payload) {
   const sentWebContents = new Set()
   const sendTo = (target) => {
     if (!target || target.isDestroyed?.()) return
+    if (payload.videoPath && !core('media-access').canReadPath(payload.videoPath, target.id)) return
     target.send('video-analysis-event', payload)
     sentWebContents.add(target.id)
   }
@@ -672,6 +665,12 @@ function parsePipelineLine(line) {
 }
 
 function handleProcessOutput(job, sender, text) {
+  if (job.cancelled || job.abort.signal.aborted || activeJob !== job) return
+  if (Buffer.byteLength(job.outputBuffer, 'utf8') + Buffer.byteLength(text, 'utf8') > ANALYSIS_OUTPUT_LIMIT) {
+    job.failure = new Error('分析输出过大，已停止任务')
+    job.abort.abort(job.failure)
+    return
+  }
   job.outputBuffer += text
   const lines = job.outputBuffer.split(/\r?\n/)
   job.outputBuffer = lines.pop() || ''
@@ -790,157 +789,105 @@ async function checkLocalModelServices() {
   }
 }
 
-async function startVideoAnalysis(videoPath, sender) {
-  if (activeJob) {
-    return {
-      accepted: false,
-      reason: 'already_running',
-      job: getActiveAnalysisJob()
-    }
-  }
-
-  const project = await resolveVideoComprehensionRoot()
-  if (project.source === 'missing') {
-    return {
-      accepted: false,
-      reason: 'missing_project',
-      error: `未找到完整的视频理解项目。已检查：${project.checkedPaths.join('；')}。请重新安装包含视频理解运行文件的版本，或检查安装目录 resources\\video comprehension\\video comprehension 下是否存在 pyproject.toml 和 video_comprehension。`
-    }
-  }
-  const root = project.root
-
-  const serviceCheck = await checkLocalModelServices()
-  if (!serviceCheck.ok) {
-    return {
-      accepted: false,
-      reason: 'model_service_unavailable',
-      error: serviceCheck.error
-    }
-  }
-
-  const job = {
-    jobId: `analysis_${Date.now()}_${++activeJobSeq}`,
-    videoPath: path.resolve(videoPath),
-    startedAt: Date.now(),
-    lastEvent: null,
-    outputBuffer: '',
-    process: null
-  }
-
-  const modelDir = getAnalysisModelDirectory()
-  const envPath = getEnvPath()
-  const outputsDir = getOutputsDir()
-  await fsp.mkdir(path.dirname(envPath), { recursive: true })
-  await fsp.mkdir(outputsDir, { recursive: true })
-  const child = spawn('uv', ['run', 'video-comprehension', job.videoPath], {
-    cwd: root,
-    windowsHide: true,
-    shell: false,
-    env: {
-      ...process.env,
-      PYTHONUTF8: '1',
-      PYTHONIOENCODING: 'utf-8',
-      VIDEO_COMPREHENSION_ENV: envPath,
-      VIDEO_COMPREHENSION_OUTPUT_DIR: outputsDir,
-      HF_HOME: path.join(modelDir, 'huggingface'),
-      HUGGINGFACE_HUB_CACHE: path.join(modelDir, 'huggingface', 'hub')
-    }
-  })
-  job.process = child
+async function startVideoAnalysis(videoPath, sender, options = {}) {
+  if (analysisClosing) return { accepted: false, reason: 'stopping', error: '分析服务正在关闭' }
+  if (activeJob) return { accepted: false, reason: 'already_running', job: getActiveAnalysisJob() }
+  const scheduler = core('application/resource-scheduler').mediaScheduler
+  const lifecycle = core('process-lifecycle')
+  const scanner = core('scanner')
+  const job = { jobId: 'analysis_' + Date.now() + '_' + (++activeJobSeq), videoPath: path.resolve(videoPath),
+    startedAt: Date.now(), lastEvent: null, outputBuffer: '', process: null, abort: new AbortController(), cancelled: false }
   activeJob = job
-
-  emitAnalysisEvent(sender, {
-    jobId: job.jobId,
-    videoPath: job.videoPath,
-    status: 'started',
-    message: '开始分析当前视频'
-  })
-
-  child.stdout?.setEncoding('utf8')
-  child.stderr?.setEncoding('utf8')
-  child.stdout?.on('data', chunk => handleProcessOutput(job, sender, chunk))
-  child.stderr?.on('data', chunk => handleProcessOutput(job, sender, chunk))
-
-  child.on('error', (err) => {
-    if (activeJob?.jobId === job.jobId) activeJob = null
-    emitAnalysisEvent(sender, {
-      jobId: job.jobId,
-      videoPath: job.videoPath,
-      status: 'error',
-      error: err.message
-    })
-  })
-
-  child.on('close', async (code, signal) => {
-    if (job.outputBuffer.trim()) {
-      const event = parsePipelineLine(job.outputBuffer)
-      if (event) {
-        job.lastEvent = event
-        emitAnalysisEvent(sender, {
-          jobId: job.jobId,
-          videoPath: job.videoPath,
-          status: 'running',
-          event
-        })
-      }
+  const check = context => {
+    context.throwIfAborted()
+    if (analysisClosing || activeJob !== job || job.cancelled) throw new Error('分析任务已结束')
+  }
+  const authorize = options.authorize || (() => scanner.assertAllowedVideoPath(job.videoPath, { audience: sender ? 'desktop' : 'remote', senderId: sender?.id }))
+  const timeoutMs = Math.max(1, Math.min(ANALYSIS_WAIT_MS, Number(options.timeoutMs) || ANALYSIS_WAIT_MS))
+  job.completion = scheduler.enqueue({ key: 'analysis:' + job.jobId, type: 'analysis', groupLimit: 1,
+    priority: 50, timeoutMs, signal: job.abort.signal }, async context => {
+    job.context = context
+    let child, abortProcess, outputReceived, processError
+    try {
+      check(context); await authorize(); check(context)
+      const project = await resolveVideoComprehensionRoot()
+      check(context)
+      if (project.source === 'missing') throw new Error('未找到完整的视频理解项目，请检查安装目录或重新安装分析运行文件')
+      const serviceCheck = await checkLocalModelServices()
+      check(context)
+      if (!serviceCheck.ok) throw new Error(serviceCheck.error)
+      const modelDir = getAnalysisModelDirectory(), envPath = await ensureRuntimeEnvPath(), outputsDir = getOutputsDir()
+      await fsp.mkdir(path.dirname(envPath), { recursive: true }); await fsp.mkdir(outputsDir, { recursive: true })
+      check(context); await authorize(); check(context)
+      const spec = lifecycle.workerSpawnSpec('uv', ['run', 'video-comprehension', job.videoPath], {
+        cwd: project.root, windowsHide: true, detached: process.platform !== 'win32', shell: false,
+        env: { ...process.env, PYTHONUTF8: '1', PYTHONIOENCODING: 'utf-8', VIDEO_COMPREHENSION_ENV: envPath,
+          VIDEO_COMPREHENSION_OUTPUT_DIR: outputsDir, HF_HOME: path.join(modelDir, 'huggingface'),
+          HUGGINGFACE_HUB_CACHE: path.join(modelDir, 'huggingface', 'hub') }
+      })
+      child = spawn(spec.file, spec.args, spec.options); job.process = child
+      abortProcess = () => { void lifecycle.stopProcessTree(child, { processGroup: process.platform !== 'win32' }).catch(() => {}) }
+      context.signal.addEventListener('abort', abortProcess, { once: true })
+      child.stdout?.setEncoding('utf8'); child.stderr?.setEncoding('utf8')
+      outputReceived = chunk => handleProcessOutput(job, sender, chunk)
+      child.stdout?.on('data', outputReceived)
+      child.stderr?.on('data', outputReceived)
+      const closed = await new Promise(resolve => {
+        processError = error => { job.failure = error; job.abort.abort(error) }
+        child.on('error', processError)
+        child.once('close', (code, signal) => resolve({ code, signal }))
+      })
+      job.process = null
+      check(context)
+      if (job.failure) throw job.failure
+      if (job.outputBuffer.trim()) handleProcessOutput(job, sender, '\n')
+      if (closed.code !== 0) throw new Error(await readLatestJobError(job.videoPath) || '视频理解管线退出：' + closed.code)
+      const analysis = await findGeneratedAnalysisResult(job.videoPath)
+      check(context); await authorize(); check(context)
+      if (!analysis?.available) throw new Error('分析流程已结束，但没有找到可保存的分析结果')
+      let savedResultPath
+      try { savedResultPath = await saveAnalysisResult(job.videoPath, analysis, { signal: context.signal, authorize }) } catch (error) { analysis.saveError = error?.message || '保存分析结果失败' }
+      check(context)
+      emitAnalysisEvent(sender, { jobId: job.jobId, videoPath: job.videoPath, status: 'success', analysis, savedResultPath })
+    } catch (error) {
+      const cancelled = job.cancelled || analysisClosing
+      const message = cancelled ? '分析已取消' : context.signal.reason?.code === 'task_timeout' ? '分析超过最长等待时间，请缩短视频后重试' : job.failure?.message || error?.message || '分析失败'
+      emitAnalysisEvent(sender, { jobId: job.jobId, videoPath: job.videoPath, status: cancelled ? 'cancelled' : 'error', error: message })
+    } finally {
+      if (abortProcess) context.signal.removeEventListener('abort', abortProcess)
+      if (outputReceived) { child?.stdout?.off('data', outputReceived); child?.stderr?.off('data', outputReceived) }
+      if (processError) child?.off('error', processError)
+      if (activeJob === job) activeJob = null
       job.outputBuffer = ''
     }
-
-    if (activeJob?.jobId === job.jobId) activeJob = null
-    if (code === 0) {
-      const analysis = await findGeneratedAnalysisResult(job.videoPath)
-      if (!analysis?.available) {
-        emitAnalysisEvent(sender, {
-          jobId: job.jobId,
-          videoPath: job.videoPath,
-          status: 'error',
-          error: '分析流程已结束，但没有找到可保存的分析结果'
-        })
-        return
-      }
-      let savedResultPath = null
-      try {
-        savedResultPath = await saveAnalysisResult(job.videoPath, analysis)
-      } catch (err) {
-        analysis.saveError = err?.message || '保存分析结果失败'
-      }
-      emitAnalysisEvent(sender, {
-        jobId: job.jobId,
-        videoPath: job.videoPath,
-        status: 'success',
-        analysis,
-        savedResultPath
-      })
-      return
+  }).catch(error => {
+    // A queued job may be cancelled before its worker is entered; an active worker retains ownership until cleanup.
+    if (!job.context && activeJob === job) {
+      emitAnalysisEvent(sender, { jobId: job.jobId, videoPath: job.videoPath, status: job.cancelled || analysisClosing ? 'cancelled' : 'error', error: error?.message || '分析失败' })
+      activeJob = null
     }
-
-    const latestError = signal ? '分析已取消' : await readLatestJobError(job.videoPath)
-    emitAnalysisEvent(sender, {
-      jobId: job.jobId,
-      videoPath: job.videoPath,
-      status: signal ? 'cancelled' : 'error',
-      code,
-      signal,
-      error: latestError || `视频理解管线退出：${code}`
-    })
   })
-
-  return {
-    accepted: true,
-    job: getActiveAnalysisJob()
-  }
+  emitAnalysisEvent(sender, { jobId: job.jobId, videoPath: job.videoPath, status: 'started', message: '分析任务已排队' })
+  return { accepted: true, job: getActiveAnalysisJob() }
 }
 
 function cancelVideoAnalysis(jobId) {
   if (!activeJob) return { cancelled: false, reason: 'not_running' }
   if (jobId && activeJob.jobId !== jobId) return { cancelled: false, reason: 'job_mismatch' }
-
-  const job = activeJob
-  try {
-    job.process?.kill()
-  } catch {}
+  const job = activeJob; job.cancelled = true; job.abort.abort(new Error('分析已取消'))
   return { cancelled: true, jobId: job.jobId }
 }
+
+async function disposeVideoAnalysis() {
+  analysisClosing = true
+  await analysisTaskService.dispose()
+  const scheduler = core('application/resource-scheduler').mediaScheduler
+  cancelVideoAnalysis()
+  await activeJob?.completion
+  await scheduler.waitForIdle(['analysis'])
+}
+function disposeRuntimeConfiguration() { return runtimeConfigStore.close() }
+function resumeVideoAnalysis() { if (!activeJob) { analysisClosing = false; analysisTaskService.resume(); runtimeConfigStore.resume() } }
 
 async function readJson(filePath) {
   try {
@@ -1324,12 +1271,17 @@ async function findVideoAnalysis(videoPath) {
   }
 }
 
+const analysisTaskService = require('./task-interests').createAnalysisTaskService({ startVideoAnalysis, cancelVideoAnalysis, getActiveAnalysisJob })
 module.exports = {
+  analysisTaskService,
   findVideoAnalysis,
   listSavedAnalysisResultsForVideos,
   deleteSavedAnalysisResult,
   startVideoAnalysis,
   cancelVideoAnalysis,
+  disposeVideoAnalysis,
+  disposeRuntimeConfiguration,
+  resumeVideoAnalysis,
   getActiveAnalysisJob,
   getRecentAnalysisEvent,
   getOutputsDir,
@@ -1339,6 +1291,7 @@ module.exports = {
   saveAnalysisResult,
   getVideoAnalysisRuntimeConfig,
   saveVideoAnalysisRuntimeConfig,
+  updateVideoAnalysisRuntimeConfig,
   resetVideoAnalysisRuntimeConfig,
   getVideoComprehensionRoot
 }

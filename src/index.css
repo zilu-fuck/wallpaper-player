@@ -1,3 +1,4 @@
+@import './styles/window-chrome.css';
 @import './styles/base.css';
 @import './styles/sidebar.css';
 @import './styles/gallery.css';
@@ -5,3 +6,6 @@
 @import './styles/player.css';
 @import './styles/settings.css';
 @import './styles/dock-downloads-ai.css';
+@import './styles/responsive.css';
+@import './styles/player-v3.css';
+@import './styles/close-confirm.css';

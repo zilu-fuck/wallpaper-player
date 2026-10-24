@@ -1,384 +1,69 @@
-import { Plus, Tag, X } from 'lucide-react-native'
-import { useEffect, useMemo, useState } from 'react'
-import { PanResponder, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native'
-import { useSafeAreaInsets } from 'react-native-safe-area-context'
-import { colors } from '../../theme'
+import { Plus } from 'lucide-react-native'
+import { useMemo } from 'react'
+import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native'
+import { useTheme } from '../../theme-context'
+import type { ThemeColors } from '../../theme'
 import type { VideoItem } from '../../types'
+import type { TagEditorDraft } from '../../hooks/useTagEditorDraft'
 import { getVideoTitle, uniqueText } from '../../screens/player/playerUtils'
+import { PlayerSheetFrame } from './PlayerSheetFrame'
 
 type Props = {
-  visible: boolean
-  video: VideoItem
-  availableCustomTags: string[]
-  saving?: boolean
-  onClose: () => void
-  onSave: (tags: string[]) => void
+  visible: boolean; video: VideoItem; editor: TagEditorDraft; availableCustomTags: string[]
+  saving?: boolean; loading?: boolean; error?: string; editKey?: number; notice?: string
+  onReload?: () => void; onClose: () => void; onSave: (tags: string[]) => void
 }
-
-export function TagEditorSheet({
-  visible,
-  video,
-  availableCustomTags,
-  saving = false,
-  onClose,
-  onSave
-}: Props) {
-  const safeAreaInsets = useSafeAreaInsets()
-  const systemTags = useMemo(() => {
-    if (video.systemTags?.length) return uniqueText(video.systemTags)
-    const customTagSet = new Set(video.customTags || [])
-    return uniqueText(video.tags || []).filter(tag => !customTagSet.has(tag))
-  }, [video])
-  const initialCustomTags = useMemo(() => uniqueText(video.customTags || []), [video])
-  const [selectedTags, setSelectedTags] = useState<string[]>(initialCustomTags)
-  const [draft, setDraft] = useState('')
-
-  useEffect(() => {
-    if (!visible) return
-    setSelectedTags(initialCustomTags)
-    setDraft('')
-  }, [initialCustomTags, visible])
-
-  const allCustomOptions = useMemo(() => uniqueText([
-    ...selectedTags,
-    ...availableCustomTags
-  ]), [availableCustomTags, selectedTags])
-
-  const panResponder = useMemo(() => PanResponder.create({
-    onMoveShouldSetPanResponder: (_event, gesture) => gesture.dy > 16 && Math.abs(gesture.dy) > Math.abs(gesture.dx),
-    onPanResponderRelease: (_event, gesture) => {
-      if (gesture.dy > 48) onClose()
-    }
-  }), [onClose])
-
+export function TagEditorSheet({ visible, video, editor, availableCustomTags, saving = false, loading = false,
+  error = '', notice, onReload, onClose, onSave }: Props) {
+  const { colors } = useTheme(), styles = createStyles(colors)
+  const systemTags = useMemo(() => video.systemTags ? uniqueText(video.systemTags)
+    : uniqueText(video.tags || []).filter(tag => !(video.customTags || []).includes(tag)), [video])
+  const options = useMemo(() => uniqueText([...editor.tags, ...availableCustomTags]), [editor.tags, availableCustomTags])
   if (!visible) return null
-
-  const toggleTag = (tag: string) => {
-    setSelectedTags(current => current.includes(tag)
-      ? current.filter(item => item !== tag)
-      : [...current, tag])
-  }
-
-  const addDraftTag = () => {
-    const next = draft.trim()
-    if (!next) return
-    setSelectedTags(current => current.includes(next) ? current : [...current, next])
-    setDraft('')
-  }
-
+  const disabled = loading || saving
   return (
-    <View style={styles.backdrop}>
-      <Pressable style={styles.backdropPress} onPress={onClose} />
-      <View style={[styles.sheet, {
-        paddingBottom: safeAreaInsets.bottom,
-        paddingLeft: safeAreaInsets.left,
-        paddingRight: safeAreaInsets.right
-      }]} {...panResponder.panHandlers}>
-        <View style={styles.handleWrap}>
-          <View style={styles.handle} />
-        </View>
-
-        <View style={styles.topCard}>
-          <View style={styles.topIcon}>
-            <Tag color="#101114" size={20} />
-          </View>
-          <View style={styles.topText}>
-            <Text style={styles.topTitle}>管理视频标签</Text>
-            <Text style={styles.topSubtitle} numberOfLines={1}>{getVideoTitle(video)}</Text>
-          </View>
-          <Pressable style={styles.closeButton} onPress={onClose}>
-            <X color="#2d3036" size={20} />
-          </Pressable>
-        </View>
-
-        <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-          <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>原本标签</Text>
-            <Text style={styles.sectionMeta}>{systemTags.length || 0} 个</Text>
-          </View>
-          <View style={styles.chipWrap}>
-            {systemTags.length > 0 ? systemTags.map(tag => (
-              <View key={tag} style={[styles.chip, styles.systemChip]}>
-                <Text style={styles.systemChipText}>{tag}</Text>
-              </View>
-            )) : (
-              <Text style={styles.emptyText}>没有识别到原始标签</Text>
-            )}
-          </View>
-
-          <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>自定义标签</Text>
-            <Text style={styles.sectionMeta}>可多选</Text>
-          </View>
-
-          <View style={styles.inputRow}>
-            <TextInput
-              value={draft}
-              onChangeText={setDraft}
-              onSubmitEditing={addDraftTag}
-              placeholder="输入新标签"
-              placeholderTextColor="rgba(16,17,20,0.42)"
-              style={styles.input}
-              returnKeyType="done"
-            />
-            <Pressable style={styles.addButton} onPress={addDraftTag}>
-              <Plus color="#101114" size={20} />
-              <Text style={styles.addButtonText}>新建</Text>
-            </Pressable>
-          </View>
-
-          <View style={styles.optionList}>
-            {allCustomOptions.length > 0 ? allCustomOptions.map((tag, index) => {
-              const selected = selectedTags.includes(tag)
-              return (
-                <Pressable key={tag} style={styles.optionItem} onPress={() => toggleTag(tag)}>
-                  <View style={styles.optionTextBlock}>
-                    <Text style={styles.optionTitle}>{tag}</Text>
-                    <Text style={styles.optionSubtitle}>{selected ? '已添加到当前视频' : `自定义标签 ${index + 1}`}</Text>
-                  </View>
-                  <View style={[styles.radio, selected && styles.radioSelected]}>
-                    {selected ? <View style={styles.radioDot} /> : null}
-                  </View>
-                </Pressable>
-              )
-            }) : (
-              <Text style={styles.emptyText}>还没有自定义标签，输入后点新建</Text>
-            )}
-          </View>
-        </ScrollView>
-
-        <View style={styles.footer}>
-          <Pressable style={styles.doneButton} disabled={saving} onPress={() => onSave(selectedTags)}>
-            <Text style={styles.doneButtonText}>{saving ? '保存中...' : '完成'}</Text>
-          </Pressable>
-        </View>
+    <PlayerSheetFrame title="管理标签" onClose={onClose} notice={notice} footer={
+      <Pressable accessibilityRole="button" accessibilityLabel="保存视频标签" accessibilityState={{ disabled, busy: disabled }}
+        style={styles.done} disabled={disabled} onPress={() => onSave(editor.tags)}>
+        <Text style={styles.doneText}>{saving ? '保存中…' : loading ? '读取中…' : '完成'}</Text>
+      </Pressable>
+    }>
+      <Text style={styles.name}>{getVideoTitle(video)}</Text>
+      {error ? <Text accessibilityRole="alert" accessibilityLiveRegion="polite" style={styles.error}>{error}</Text> : null}
+      {error && onReload ? <Pressable accessibilityRole="button" accessibilityState={{ disabled }} style={styles.action}
+        disabled={disabled} onPress={onReload}><Text style={styles.text}>重新载入最新标签（替换草稿）</Text></Pressable> : null}
+      <Text accessibilityRole="header" style={styles.heading}>原本标签</Text>
+      <View style={styles.wrap}>{systemTags.length ? systemTags.map(tag => <View key={tag} style={styles.chip}><Text style={styles.text}>{tag}</Text></View>)
+        : <Text style={styles.muted}>没有识别到原始标签</Text>}</View>
+      <Text accessibilityRole="header" style={styles.heading}>自定义标签</Text>
+      <View style={styles.inputRow}>
+        <TextInput accessibilityLabel="新标签名称" value={editor.text} editable={!disabled} onChangeText={editor.setText}
+          onSubmitEditing={editor.add} placeholder="输入新标签" placeholderTextColor={colors.subtle} style={styles.input} returnKeyType="done" />
+        <Pressable accessibilityRole="button" accessibilityLabel="新建标签" accessibilityState={{ disabled }} style={styles.add}
+          disabled={disabled} onPress={editor.add}><Plus color={colors.text} size={20} /><Text style={styles.text}>新建</Text></Pressable>
       </View>
-    </View>
+      {options.length ? options.map(tag => {
+        const selected = editor.tags.includes(tag)
+        return <Pressable key={tag} accessibilityRole="checkbox" accessibilityLabel={'自定义标签：' + tag}
+          accessibilityState={{ checked: selected, disabled }} disabled={disabled} style={styles.option} onPress={() => editor.toggle(tag)}>
+          <View style={styles.optionText}><Text style={styles.text}>{tag}</Text><Text style={styles.muted}>{selected ? '已添加到当前视频' : '尚未添加'}</Text></View>
+          <Text importantForAccessibility="no" style={styles.mark}>{selected ? '✓' : '○'}</Text>
+        </Pressable>
+      }) : <Text style={styles.muted}>还没有自定义标签，输入后点新建</Text>}
+    </PlayerSheetFrame>
   )
 }
-
-const styles = StyleSheet.create({
-  backdrop: {
-    position: 'absolute',
-    top: 0,
-    right: 0,
-    bottom: 0,
-    left: 0,
-    backgroundColor: 'rgba(0,0,0,0.32)',
-    justifyContent: 'flex-end'
-  },
-  backdropPress: {
-    position: 'absolute',
-    top: 0,
-    right: 0,
-    bottom: 0,
-    left: 0
-  },
-  sheet: {
-    maxHeight: '78%',
-    borderTopLeftRadius: 18,
-    borderTopRightRadius: 18,
-    backgroundColor: '#f8f9fb',
-    overflow: 'hidden'
-  },
-  handleWrap: {
-    height: 20,
-    alignItems: 'center',
-    justifyContent: 'center'
-  },
-  handle: {
-    width: 38,
-    height: 4,
-    borderRadius: 2,
-    backgroundColor: 'rgba(16,17,20,0.12)'
-  },
-  topCard: {
-    marginHorizontal: 16,
-    marginBottom: 14,
-    minHeight: 72,
-    paddingHorizontal: 16,
-    borderRadius: 12,
-    backgroundColor: '#ffffff',
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-    shadowColor: '#000',
-    shadowOpacity: 0.05,
-    shadowRadius: 10,
-    shadowOffset: { width: 0, height: 4 },
-    elevation: 2
-  },
-  topIcon: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: '#f0f2f5',
-    alignItems: 'center',
-    justifyContent: 'center'
-  },
-  topText: {
-    flex: 1,
-    minWidth: 0
-  },
-  topTitle: {
-    color: '#101114',
-    fontSize: 16,
-    fontWeight: '800'
-  },
-  topSubtitle: {
-    marginTop: 4,
-    color: 'rgba(16,17,20,0.56)',
-    fontSize: 12
-  },
-  closeButton: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: '#f0f2f5',
-    alignItems: 'center',
-    justifyContent: 'center'
-  },
-  content: {
-    paddingHorizontal: 18,
-    paddingBottom: 10
-  },
-  sectionHeader: {
-    marginTop: 4,
-    marginBottom: 10,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between'
-  },
-  sectionTitle: {
-    color: '#101114',
-    fontSize: 16,
-    fontWeight: '900'
-  },
-  sectionMeta: {
-    color: 'rgba(16,17,20,0.5)',
-    fontSize: 13,
-    fontWeight: '700'
-  },
-  chipWrap: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 8,
-    marginBottom: 18
-  },
-  chip: {
-    minHeight: 34,
-    paddingHorizontal: 12,
-    borderRadius: 17,
-    alignItems: 'center',
-    justifyContent: 'center'
-  },
-  systemChip: {
-    backgroundColor: '#eceff3'
-  },
-  systemChipText: {
-    color: 'rgba(16,17,20,0.74)',
-    fontSize: 13,
-    fontWeight: '800'
-  },
-  emptyText: {
-    color: 'rgba(16,17,20,0.48)',
-    fontSize: 13,
-    lineHeight: 20
-  },
-  inputRow: {
-    marginBottom: 14,
-    flexDirection: 'row',
-    gap: 10
-  },
-  input: {
-    flex: 1,
-    minHeight: 44,
-    paddingHorizontal: 14,
-    borderRadius: 12,
-    backgroundColor: '#ffffff',
-    color: '#101114',
-    fontSize: 14,
-    fontWeight: '700'
-  },
-  addButton: {
-    minWidth: 88,
-    minHeight: 44,
-    paddingHorizontal: 12,
-    borderRadius: 12,
-    backgroundColor: '#ffffff',
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 4
-  },
-  addButtonText: {
-    color: '#101114',
-    fontSize: 14,
-    fontWeight: '800'
-  },
-  optionList: {
-    borderRadius: 14,
-    backgroundColor: '#ffffff',
-    overflow: 'hidden'
-  },
-  optionItem: {
-    minHeight: 70,
-    paddingHorizontal: 16,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: 'rgba(16,17,20,0.1)',
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12
-  },
-  optionTextBlock: {
-    flex: 1,
-    minWidth: 0
-  },
-  optionTitle: {
-    color: '#101114',
-    fontSize: 16,
-    fontWeight: '800'
-  },
-  optionSubtitle: {
-    marginTop: 6,
-    color: 'rgba(16,17,20,0.54)',
-    fontSize: 12,
-    fontWeight: '700'
-  },
-  radio: {
-    width: 34,
-    height: 34,
-    borderRadius: 17,
-    borderWidth: 2,
-    borderColor: 'rgba(16,17,20,0.22)',
-    alignItems: 'center',
-    justifyContent: 'center'
-  },
-  radioSelected: {
-    borderColor: colors.accent
-  },
-  radioDot: {
-    width: 18,
-    height: 18,
-    borderRadius: 9,
-    backgroundColor: colors.accent
-  },
-  footer: {
-    borderTopWidth: StyleSheet.hairlineWidth,
-    borderTopColor: 'rgba(16,17,20,0.12)',
-    backgroundColor: '#ffffff',
-    paddingHorizontal: 18,
-    paddingTop: 12
-  },
-  doneButton: {
-    minHeight: 46,
-    borderRadius: 12,
-    alignItems: 'center',
-    justifyContent: 'center'
-  },
-  doneButtonText: {
-    color: '#101114',
-    fontSize: 18,
-    fontWeight: '900'
-  }
+const createStyles = (colors: ThemeColors) => StyleSheet.create({
+  name: { color: colors.muted, fontSize: 14 }, heading: { color: colors.text, fontSize: 16, fontWeight: '800' },
+  text: { color: colors.text, fontSize: 14, flexShrink: 1 }, muted: { color: colors.muted, fontSize: 13 },
+  wrap: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 }, chip: { maxWidth: '100%', padding: 10, borderRadius: 12, backgroundColor: colors.surfaceElevated },
+  inputRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
+  input: { flexGrow: 1, flexBasis: 160, minWidth: 0, minHeight: 48, padding: 12, borderRadius: 8, color: colors.text, backgroundColor: colors.surfaceElevated, fontSize: 16 },
+  add: { minHeight: 48, padding: 12, flexDirection: 'row', gap: 6, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.surfaceElevated, borderRadius: 8 },
+  option: { minHeight: 48, padding: 12, flexDirection: 'row', alignItems: 'center', gap: 12, borderRadius: 8, backgroundColor: colors.surfaceElevated },
+  optionText: { flex: 1, minWidth: 0, gap: 6 }, mark: { color: colors.text, fontSize: 24 },
+  done: { minHeight: 48, padding: 12, alignItems: 'center', justifyContent: 'center', borderRadius: 8, backgroundColor: colors.accentStrong },
+  doneText: { color: colors.onAccent, fontSize: 18, fontWeight: '800' },
+  error: { color: colors.text, borderLeftWidth: 3, borderLeftColor: colors.danger, padding: 12, backgroundColor: colors.surfaceElevated, fontSize: 14 },
+  action: { minHeight: 48, padding: 12, borderRadius: 8, backgroundColor: colors.surfaceElevated }
 })

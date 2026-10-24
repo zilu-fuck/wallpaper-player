@@ -10,6 +10,7 @@ on:
       - main
       - master
   workflow_dispatch:
+  workflow_call:
 
 permissions:
   contents: read
@@ -32,8 +33,35 @@ jobs:
       - name: Install root dependencies
         run: npm ci
 
+      - name: Verify release candidate and failure gates
+        run: npm run verify:release-gate
+
+      - name: Verify Unicode packaging, retained releases and failed build recovery
+        run: npm run verify:packaging
+
+      - name: Prepare pinned Electron runtime
+        run: npm run electron:install
+
+      - name: Verify test data isolation before core checks
+        run: npm run verify:test-data-guard
+
+      - name: Verify desktop dependency consumers and security regressions
+        run: npm run verify:dependency-security
+
+      - name: Verify shared protocol contracts and compatibility
+        run: npm run verify:contracts
+
+      - name: Typecheck actual desktop API adapters
+        run: npm run verify:api-adapters
+
       - name: Build desktop frontend
         run: npm run build
+
+      - name: Verify pinned Electron full startup and asynchronous clipboard behavior
+        run: npm run verify:electron-runtime
+
+      - name: Verify Vite development contracts and React Fast Refresh
+        run: npm run verify:vite-dev
 
       - name: Verify remote identity
         run: npm run verify:remote-mobile
@@ -47,11 +75,26 @@ jobs:
       - name: Verify plugin registry
         run: npm run verify:plugins
 
+      - name: Verify literal-path plugin ZIP installation and lifecycle
+        run: npm run verify:plugin-external
+
+      - name: Verify mobile release manifest, platform selection and desktop-only fallback
+        run: npm run verify:mobile-updates
+
+      - name: Verify update server context, binding ownership and protocol bootstrap
+        run: npm run verify:update-context
+
+      - name: Mobile update entry and request ownership
+        run: npm run verify:mobile-update-ui
+
       - name: Verify AI search
         run: npm run verify:ai-search
 
       - name: Verify electronAPI bridge types
         run: npm run verify:electron-api
+
+      - name: Verify packaged shared contracts in Electron
+        run: npm run verify:packaged-contracts
 
       - name: Verify direct startup
         run: npm run verify:startup
@@ -59,13 +102,203 @@ jobs:
       - name: Verify settings persistence
         run: npm run verify:settings-persistence
 
+      - name: Verify settings backup, format version, crash recovery and startup gates
+        run: npm run verify:settings-recovery
+
+      - name: Verify asynchronous cold settings preparation and ASAR worker lifecycle
+        run: npm run verify:settings-startup
+
+      - name: Verify queued plugin section preparation and selected settings reads
+        run: npm run verify:plugin-settings
+
+      - name: Verify retained identity failures, credential invalidation and native repair flow
+        run: npm run verify:identity-read-safety
+
+      - name: Verify settings snapshot ordering and optimistic intent ownership
+        run: npm run verify:settings-snapshots
+
+      - name: Verify plugin and remote settings ownership and draft preservation
+        run: npm run verify:settings-panels
+
+      - name: Verify initialization failure recovery
+        run: npm run verify:app-initialization
+
+      - name: Verify asynchronous privacy passwords and attempt ownership
+        run: npm run verify:privacy-passwords
+
+      - name: Verify minimal current permission snapshots
+        run: npm run verify:media-policy-settings
+
+      - name: Verify updater startup loading and lifecycle
+        run: npm run verify:updater-startup
+
+      - name: Verify asynchronous JSON response resources and authorization fences
+        run: npm run verify:json-responses
+
+      - name: Verify asynchronous library paths and stale policy publication
+        run: npm run verify:library-paths
+
+      - name: Verify desktop responsive navigation, focus and reduced motion
+        run: npm run verify:responsive-layout
+
+      - name: Verify splash clocks and bounded visibility
+        run: npm run verify:splash-clock
+
+      - name: Verify mobile adaptive grids and accessible controls
+        run: npm run verify:mobile-accessibility
+
+      - name: Verify mobile input cancellation and accessible playback gestures
+        run: npm run verify:mobile-input-accessibility
+
+      - name: Verify mobile player modal ownership and drafts
+        run: npm run verify:mobile-player-panels
+
+      - name: Verify analysis configuration transactions and lifecycle
+        run: npm run verify:analysis-config
+
+      - name: Verify concurrent media mutations
+        run: npm run verify:media-mutations
+
+      - name: Verify scoped user-media repository and typed tag path preparation
+        run: npm run verify:media-fields
+
+      - name: Verify bounded media mutation paths and commit-time policy
+        run: npm run verify:media-mutation-paths
+
+      - name: Verify field-scoped settings commits and snapshot ownership
+        run: npm run verify:settings-commit
+
+      - name: Verify settings JSON worker ownership and incremental snapshots
+        run: npm run verify:settings-json
+
+      - name: Verify settings feeds, bounded full broadcasts and native frame ownership
+        run: npm run verify:settings-feed
+
+      - name: Verify asynchronous settings reads, privacy and ASAR worker lifecycle
+        run: npm run verify:settings-read
+
+      - name: Verify settings version acknowledgments, media replies and recovery
+        run: npm run verify:settings-replies
+
+      - name: Verify asynchronous identity IO, durable authorization and response ownership
+        run: npm run verify:identity-io
+
+      - name: Verify tag versions and editor conflicts
+        run: npm run verify:tag-conflicts
+
+      - name: Verify library settings invalidation
+        run: npm run verify:library-invalidation
+
+      - name: Verify indexed queries and mobile paging behavior
+        run: npm run verify:library-query
+
+      - name: Verify connection ownership and cancellation
+        run: npm run verify:connection-lifecycle
+
+      - name: Verify file stream ownership and media pressure
+        run: npm run verify:file-stream-lifecycle
+
+      - name: Verify network streaming, HLS and response ownership
+        run: npm run verify:network-stream-lifecycle
+
+      - name: Verify complete player, parser and path preparation ownership
+        run: npm run verify:preparation-lifecycle
+
+      - name: Verify selective player settings reads and late authority revalidation
+        run: npm run verify:player-settings-read
+
+      - name: Verify player task ownership and background cancellation
+        run: npm run verify:player-task-lifecycle
+
+      - name: Verify desktop playback adapters and native session ownership
+        run: npm run verify:desktop-player
+
+      - name: Verify IPC sender, entry URL and navigation boundaries in Electron
+        run: npm run verify:ipc-sender
+
+      - name: Verify mobile playback source ownership and readiness
+        run: npm run verify:mobile-playback-adapter
+
+      - name: Verify media job interests, budgets and card ownership
+        run: npm run verify:resource-scheduler
+
+      - name: Verify player gesture, rotation and resource cleanup
+        run: npm run verify:player-resources
+
+      - name: Verify mobile navigation and playlist ownership
+        run: npm run verify:mobile-navigation
+
+      - name: Verify analysis authorization after asynchronous reads
+        run: npm run verify:analysis-request-lifecycle
+
+      - name: Verify analysis task budget, cancellation and publication
+        run: npm run verify:analysis-job-lifecycle
+
+      - name: Verify analysis caller interests and actual UI ownership
+        run: npm run verify:analysis-interests
+
+      - name: Verify download budgets, cancellation and shutdown
+        run: npm run verify:download-lifecycle
+
+      - name: Verify owned mpv installation and bounded version reclamation
+        run: npm run verify:mpv-installer
+
+      - name: Verify download observations, preflight and external handoff
+        run: npm run verify:download-observation
+
+      - name: Verify durable download ownership and submission UI
+        run: node scripts/run-verify.cjs scripts/verify-download-tasks.js && node scripts/run-verify.cjs scripts/verify-download-submission.js
+
+      - name: Verify model startup and download cancellation in Electron UI
+        run: npm run verify:vlm-ui
+
+      - name: Verify settings drafts, request ownership and visible observations
+        run: npm run verify:analysis-settings
+
+      - name: Verify actual React state consumers, Profiler and subscription cleanup
+        run: npm run verify:app-state
+
+      - name: Verify remote start, stop and request body ownership
+        run: npm run verify:remote-server-lifecycle
+
+      - name: Verify transcode owners and cache budgets
+        run: npm run verify:transcode-interests
+
+      - name: Verify queued preparation and owned process tree cleanup
+        run: npm run verify:transcode-preparation
+
+      - name: Verify transcode source identities, configuration and atomic cache
+        run: npm run verify:transcode-cache
+
+      - name: Measure 5k and 10k library query budgets
+        run: npm run verify:library-performance
+
+      - name: Verify mobile query, device storage and playback behavior
+        run: npm run verify:mobile-correctness
+
+      - name: Verify final playback persistence on shutdown
+        run: npm run verify:shutdown-persistence
+
+      - name: Verify update metadata parsing
+        run: npm run verify:update-metadata
+
       - name: Install mobile dependencies
         working-directory: mobile
         run: npm ci
 
+      - name: Verify mobile dependency consumers and security regressions
+        run: npm run verify:dependency-security-mobile
+
+      - name: Verify Expo SDK dependency compatibility
+        working-directory: mobile
+        run: node ../scripts/run-verify.cjs node_modules/expo/bin/cli install --check
+
       - name: Mobile typecheck
         working-directory: mobile
         run: npm run typecheck
+
+      - name: Verify Android and iOS Hermes bundles
+        run: npm run verify:mobile-bundles
 
   verify-lan:
     name: LAN / mobile flow verification (needs vendor binaries)
@@ -88,8 +321,14 @@ jobs:
       - name: Prepare vendor (mpv / ffmpeg / aria2 / yt-dlp)
         run: node scripts/prepare-vendor.js --skip llama
 
+      - name: Verify actual bundled aria2 task lifecycles
+        run: node scripts/run-verify.cjs scripts/verify-native-download-tasks.js
+
       - name: Verify remote library flow
         run: npm run verify:remote-library
+
+      - name: Verify desktop and remote media privacy
+        run: npm run verify:media-access
 
       - name: Verify legacy path-key tag compatibility
         run: npm run verify:legacy-tags
@@ -108,6 +347,12 @@ jobs:
 
       - name: Verify mobile transcode concurrency
         run: npm run verify:mobile-transcode-concurrency
+
+      - name: Verify actual remux, reencode and process shutdown
+        run: npm run verify:transcode-operations
+
+      - name: Verify real media worker budgets and cancellation
+        run: npm run verify:media-job-lifecycle
 
       - name: Verify remote pressure
         run: npm run verify:remote-pressure

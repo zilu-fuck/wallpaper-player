@@ -1,0 +1,432 @@
+{
+  "version": 1,
+  "date": "2026-10-15T07:24:51.760Z",
+  "environment": {
+    "platform": "win32",
+    "node": "v24.14.0",
+    "cpu": "AMD Ryzen 7 5800X 8-Core Processor             ",
+    "memoryGiB": 31.92,
+    "electron": "35.7.5",
+    "react": "19.2.7",
+    "window": {
+      "width": 1440,
+      "height": 1000,
+      "visible": false
+    }
+  },
+  "workload": {
+    "library": 10000,
+    "renderedPage": 100,
+    "updatesPerScenario": 20,
+    "bridge": "controlled renderer fixture; actual App/controller/hooks/components and React profiling renderer",
+    "nativeDecoder": false
+  },
+  "interpretation": [
+    "Bodies count component render attempts, including attempts React does not commit. Profiler durations include descendants and are not additive across rows.",
+    "Compare the warmed analysisWithSettings scenario. The baseline first analysis scenario also includes seven late thumbnail state updates; the current fixture waits for thumbnail initialization before measuring.",
+    "Both runs used explicit --in-process-gpu --no-sandbox test flags. They do not establish production Chromium sandbox, GPU, decoder or phone performance."
+  ],
+  "before": {
+    "capturedAt": "2026-10-15T07:04:16.466Z",
+    "sourceSha256": "e4ee4798d0dca64ff6fe820a051c498f54ea8d8e98661b0c78a5230d348cb934",
+    "sourceFiles": [
+      "src/context/AppContext.js",
+      "src/components/AppProvider.jsx",
+      "src/hooks/useAppState.js",
+      "src/components/Gallery.jsx",
+      "src/components/VideoCard.jsx",
+      "src/components/Sidebar.jsx",
+      "src/components/Settings.jsx",
+      "src/components/VideoPlayer.jsx",
+      "src/components/TagEditor.jsx"
+    ],
+    "flags": [
+      "--in-process-gpu",
+      "--no-sandbox"
+    ],
+    "measurements": [
+      {
+        "name": "analysis",
+        "bodies": {
+          "AppInner": 20,
+          "Sidebar": 20,
+          "Gallery": 20,
+          "VideoCard": 2007,
+          "TagEditor": 20
+        },
+        "durations": {
+          "Sidebar": {
+            "commits": 20,
+            "totalMs": 0.8,
+            "maximumMs": 0.1
+          },
+          "VideoCard": {
+            "commits": 2007,
+            "totalMs": 20.2,
+            "maximumMs": 0.3
+          },
+          "Gallery": {
+            "commits": 22,
+            "totalMs": 37.4,
+            "maximumMs": 3.4
+          },
+          "TagEditor": {
+            "commits": 20,
+            "totalMs": 0,
+            "maximumMs": 0
+          },
+          "AppInner": {
+            "commits": 23,
+            "totalMs": 43.5,
+            "maximumMs": 4.4
+          }
+        }
+      },
+      {
+        "name": "analysisWithSettings",
+        "bodies": {
+          "AppInner": 20,
+          "Sidebar": 20,
+          "Gallery": 20,
+          "VideoCard": 2000,
+          "Settings": 20,
+          "TagEditor": 20
+        },
+        "durations": {
+          "Sidebar": {
+            "commits": 20,
+            "totalMs": 1,
+            "maximumMs": 0.1
+          },
+          "VideoCard": {
+            "commits": 2000,
+            "totalMs": 16,
+            "maximumMs": 0.2
+          },
+          "Gallery": {
+            "commits": 20,
+            "totalMs": 29.2,
+            "maximumMs": 2.2
+          },
+          "Settings": {
+            "commits": 20,
+            "totalMs": 0.8,
+            "maximumMs": 0.2
+          },
+          "TagEditor": {
+            "commits": 20,
+            "totalMs": 0,
+            "maximumMs": 0
+          },
+          "AppInner": {
+            "commits": 20,
+            "totalMs": 35.1,
+            "maximumMs": 2.7
+          }
+        }
+      },
+      {
+        "name": "settingsBroadcast",
+        "bodies": {
+          "AppInner": 20,
+          "Sidebar": 39,
+          "Gallery": 20,
+          "VideoCard": 2000,
+          "Settings": 20,
+          "TagEditor": 20
+        },
+        "durations": {
+          "Sidebar": {
+            "commits": 39,
+            "totalMs": 2.2,
+            "maximumMs": 0.2
+          },
+          "VideoCard": {
+            "commits": 2000,
+            "totalMs": 25.7,
+            "maximumMs": 0.1
+          },
+          "Gallery": {
+            "commits": 20,
+            "totalMs": 53.6,
+            "maximumMs": 11.3
+          },
+          "Settings": {
+            "commits": 20,
+            "totalMs": 1.3,
+            "maximumMs": 0.2
+          },
+          "TagEditor": {
+            "commits": 20,
+            "totalMs": 0,
+            "maximumMs": 0
+          },
+          "AppInner": {
+            "commits": 39,
+            "totalMs": 64.8,
+            "maximumMs": 12.3
+          }
+        }
+      },
+      {
+        "name": "playback",
+        "bodies": {
+          "VideoPlayer": 20
+        },
+        "durations": {
+          "VideoPlayer": {
+            "commits": 20,
+            "totalMs": 0.8,
+            "maximumMs": 0.1
+          },
+          "AppInner": {
+            "commits": 20,
+            "totalMs": 4.3,
+            "maximumMs": 0.4
+          }
+        }
+      },
+      {
+        "name": "favorite",
+        "bodies": {
+          "AppInner": 20,
+          "Sidebar": 40,
+          "Gallery": 20,
+          "VideoCard": 2000,
+          "TagEditor": 20
+        },
+        "durations": {
+          "Sidebar": {
+            "commits": 40,
+            "totalMs": 2.5,
+            "maximumMs": 0.2
+          },
+          "VideoCard": {
+            "commits": 2000,
+            "totalMs": 26.5,
+            "maximumMs": 0.2
+          },
+          "Gallery": {
+            "commits": 20,
+            "totalMs": 51.2,
+            "maximumMs": 3.6
+          },
+          "TagEditor": {
+            "commits": 20,
+            "totalMs": 0,
+            "maximumMs": 0
+          },
+          "AppInner": {
+            "commits": 40,
+            "totalMs": 59.8,
+            "maximumMs": 3.9
+          }
+        }
+      }
+    ]
+  },
+  "after": {
+    "capturedAt": "2026-10-15T07:22:42.368Z",
+    "sourceSha256": "e47f16474e6b7e876352224f5ab88d640df8b0b4e32390c04da8f73c2eb82600",
+    "sourceFiles": [
+      "src/App.jsx",
+      "src/context/AppContext.js",
+      "src/components/AppProvider.jsx",
+      "src/hooks/useAppState.js",
+      "src/services/controller-store.js",
+      "src/utils/share-json.js",
+      "src/components/Gallery.jsx",
+      "src/components/VideoCard.jsx",
+      "src/components/Sidebar.jsx",
+      "src/components/Settings.jsx",
+      "src/components/VideoPlayer.jsx",
+      "src/components/TagEditor.jsx"
+    ],
+    "flags": [
+      "--in-process-gpu",
+      "--no-sandbox"
+    ],
+    "measurements": [
+      {
+        "name": "analysis",
+        "bodies": {
+          "AppInner": 40
+        },
+        "durations": {
+          "AppInner": {
+            "commits": 20,
+            "totalMs": 4,
+            "maximumMs": 0.5
+          }
+        }
+      },
+      {
+        "name": "analysisWithSettings",
+        "bodies": {
+          "AppInner": 40
+        },
+        "durations": {
+          "AppInner": {
+            "commits": 21,
+            "totalMs": 2.6,
+            "maximumMs": 0.2
+          }
+        }
+      },
+      {
+        "name": "settingsBroadcast",
+        "bodies": {
+          "AppInner": 20,
+          "Settings": 20
+        },
+        "durations": {
+          "Settings": {
+            "commits": 20,
+            "totalMs": 1.5,
+            "maximumMs": 0.2
+          },
+          "AppInner": {
+            "commits": 20,
+            "totalMs": 4.5,
+            "maximumMs": 0.5
+          }
+        }
+      },
+      {
+        "name": "playback",
+        "bodies": {
+          "VideoPlayer": 20
+        },
+        "durations": {
+          "VideoPlayer": {
+            "commits": 20,
+            "totalMs": 1,
+            "maximumMs": 0.2
+          },
+          "AppInner": {
+            "commits": 20,
+            "totalMs": 4.3,
+            "maximumMs": 0.4
+          }
+        }
+      },
+      {
+        "name": "favorite",
+        "bodies": {
+          "AppInner": 20,
+          "Sidebar": 20,
+          "VideoCard": 20
+        },
+        "durations": {
+          "Sidebar": {
+            "commits": 20,
+            "totalMs": 1.7,
+            "maximumMs": 0.1
+          },
+          "VideoCard": {
+            "commits": 20,
+            "totalMs": 0.1,
+            "maximumMs": 0.1
+          },
+          "Gallery": {
+            "commits": 20,
+            "totalMs": 0.5,
+            "maximumMs": 0.1
+          },
+          "AppInner": {
+            "commits": 20,
+            "totalMs": 6.3,
+            "maximumMs": 0.6
+          }
+        }
+      }
+    ],
+    "behavior": {
+      "latestFavoriteAction": true,
+      "selectedCards": 2,
+      "searchAndTarget": true,
+      "reset": true,
+      "suspendedStateAndActions": true,
+      "favoritesFilterInvalidation": true,
+      "customTagAdditionAndRemoval": true
+    },
+    "listenersAfterUnmount": {
+      "ai": 0,
+      "settings": 0,
+      "player": 0,
+      "shortcut": 0,
+      "privacy": 0,
+      "remote": 0,
+      "analysis": 0,
+      "ended": 0,
+      "player-error": 0
+    }
+  },
+  "startupRegression": {
+    "date": "2026-10-15T07:23:43.883Z",
+    "flags": [
+      "--in-process-gpu",
+      "--no-sandbox"
+    ],
+    "fixture": "24-byte MP4 headers on local disk; real scanner/settings/HTTP; no decoder or native UI",
+    "samples": [
+      {
+        "desktopInteractiveMs": 1608.0267999999996,
+        "firstPageCards": 100,
+        "filteredCards": 1,
+        "searchHandled": true,
+        "progressiveScan": true,
+        "phases": {
+          "mainRequiredMs": 474.30349999999993,
+          "nativeReadyMs": 517.8578,
+          "windowCreatedMs": 645.5954999999999,
+          "documentLoadedMs": 827.8897,
+          "scanStartMs": 911.8619000000001,
+          "scanEndMs": 1057.5946000000001,
+          "scanCount": 131,
+          "firstCardsMs": 1169.0393000000001
+        }
+      },
+      {
+        "desktopInteractiveMs": 1654.1000000000058,
+        "firstPageCards": 100,
+        "filteredCards": 1,
+        "searchHandled": true,
+        "progressiveScan": true,
+        "phases": {
+          "mainRequiredMs": 486.586,
+          "nativeReadyMs": 532.4217,
+          "windowCreatedMs": 667.1139999999999,
+          "documentLoadedMs": 868.2667,
+          "scanStartMs": 953.0235999999999,
+          "scanEndMs": 1105.1702999999998,
+          "scanCount": 131,
+          "firstCardsMs": 1218.5277
+        }
+      },
+      {
+        "desktopInteractiveMs": 1578.6475000000064,
+        "firstPageCards": 100,
+        "filteredCards": 1,
+        "searchHandled": true,
+        "progressiveScan": true,
+        "phases": {
+          "mainRequiredMs": 460.8349,
+          "nativeReadyMs": 511.0097,
+          "windowCreatedMs": 633.0696,
+          "documentLoadedMs": 827.8079,
+          "scanStartMs": 907.8592000000001,
+          "scanEndMs": 1050.5625,
+          "scanCount": 131,
+          "firstCardsMs": 1162.9155
+        }
+      }
+    ],
+    "p95Ms": 1654.1000000000058,
+    "queryP95Ms": 24.05999999999767,
+    "searchP95Ms": 13.601800000000367,
+    "eventLoopP95Ms": 20.676607,
+    "firstQueryMs": 532.0890999999974,
+    "fullIndexColdLoadMs": 4290.4539
+  }
+}

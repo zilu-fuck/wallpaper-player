@@ -341,36 +341,7 @@ export function usePlayer({ queueVideos = [], videoSource = queueVideos, playbac
   }, [handleClosePlayer])
 
   const runPlayerCommand = useCallback((action, value) => {
-    const handled = playerCommandTargetRef.current?.(action, value)
-    if (handled) return
-
-    switch (action) {
-      case 'play-pause':
-        window.electronAPI?.mpvCyclePause?.()
-        break
-      case 'seek-backward':
-        window.electronAPI?.mpvSeekRelative?.(-(value ?? 5))
-        break
-      case 'seek-forward':
-        window.electronAPI?.mpvSeekRelative?.(value ?? 5)
-        break
-      case 'volume-up':
-        window.electronAPI?.mpvGetState?.()
-          ?.then(state => window.electronAPI?.mpvSetVolume?.(Math.min(100, (state?.volume ?? 100) + (value ?? 5))))
-        break
-      case 'volume-down':
-        window.electronAPI?.mpvGetState?.()
-          ?.then(state => window.electronAPI?.mpvSetVolume?.(Math.max(0, (state?.volume ?? 100) - (value ?? 5))))
-        break
-      case 'mute':
-        window.electronAPI?.mpvToggleMute?.()
-        break
-      case 'screenshot':
-        window.electronAPI?.mpvScreenshot?.()
-        break
-      default:
-        break
-    }
+    return playerCommandTargetRef.current?.(action, value)
   }, [])
 
   const handleNext = useCallback(() => {
@@ -417,20 +388,8 @@ export function usePlayer({ queueVideos = [], videoSource = queueVideos, playbac
 
   useEffect(() => {
     const removeState = window.electronAPI?.onMpvState?.((state) => {
-      const nextPath = state?.filePath || ''
+      const nextPath = state?.resourceTarget || state?.filePath || ''
       setCurrentPlaybackPath(current => current === nextPath ? current : nextPath)
-    })
-
-    const removeEnded = window.electronAPI?.onMpvEnded?.((data) => {
-      if (data?.reason === 'eof') {
-        handleAdvanceFromEnd()
-      } else if (data?.reason === 'quit') {
-        handleClosePlayer()
-      }
-    })
-
-    const removeError = window.electronAPI?.onMpvError?.((data) => {
-      setPlayerError(data?.message || 'mpv 播放出错')
     })
 
     const removeShortcut = window.electronAPI?.onPlayerShortcut?.((payload) => {
@@ -476,8 +435,6 @@ export function usePlayer({ queueVideos = [], videoSource = queueVideos, playbac
     return () => {
       removeShortcut?.()
       removeState?.()
-      removeEnded?.()
-      removeError?.()
     }
   }, [handleAdvanceFromEnd, handleClosePlayer, handleNext, handleOpenFile, handlePrev, handleStopPlayback, runPlayerCommand])
 

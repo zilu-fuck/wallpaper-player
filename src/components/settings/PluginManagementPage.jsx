@@ -1,4 +1,3 @@
-import { useEffect, useState } from 'react'
 import AiSearchPluginSettings from './AiSearchPluginSettings'
 
 function getStatusLabel(plugin) {
@@ -55,48 +54,6 @@ function getPermissionLabel(permission) {
   return labels[permission] || permission
 }
 
-function isPlainObject(value) {
-  return value && typeof value === 'object' && !Array.isArray(value)
-}
-
-function formatConfigDraft(field, value) {
-  if (field?.type === 'object') {
-    if (typeof value === 'string') return value
-    return JSON.stringify(isPlainObject(value) ? value : {}, null, 2)
-  }
-  if (value == null) return ''
-  return String(value)
-}
-
-function parseConfigDraft(field, value) {
-  if (field?.type === 'number') {
-    const number = Number(value)
-    return Number.isFinite(number) ? number : 0
-  }
-  if (field?.type === 'object') {
-    if (isPlainObject(value)) return value
-    const parsed = JSON.parse(value || '{}')
-    if (!isPlainObject(parsed)) throw new Error('JSON 必须是对象')
-    return parsed
-  }
-  return value
-}
-
-function buildConfigDrafts(plugin, schemaKeys, settingsSchema) {
-  return Object.fromEntries(
-    schemaKeys.map(key => [
-      key,
-      formatConfigDraft(settingsSchema[key], plugin?.config?.[key])
-    ])
-  )
-}
-
-function hasDraftChanges(plugin, schemaKeys, settingsSchema, drafts) {
-  return schemaKeys.some(key => (
-    formatConfigDraft(settingsSchema[key], plugin?.config?.[key]) !== formatConfigDraft(settingsSchema[key], drafts[key])
-  ))
-}
-
 function renderConfigInput({
   plugin,
   key,
@@ -104,7 +61,7 @@ function renderConfigInput({
   value,
   draftValue,
   error,
-  busy,
+  busy, editingDisabled,
   onDraftChange,
   onCommit
 }) {
@@ -135,14 +92,14 @@ function renderConfigInput({
     )
   }
 
-  if (field?.type === 'object') {
+  if (field?.type === 'object' || field?.type === 'array') {
     return (
       <label className="plugin-config-field plugin-config-field-wide" key={key}>
         <span>{field.title || key}</span>
         <textarea
           value={draftValue ?? '{}'}
           onChange={(event) => onDraftChange(key, event.target.value)}
-          disabled={disabled}
+          disabled={Boolean(editingDisabled)}
           spellCheck={false}
         />
         {error ? <small className="error">{error}</small> : null}
@@ -155,10 +112,10 @@ function renderConfigInput({
     <label className="plugin-config-field" key={key}>
       <span>{field?.title || key}</span>
       <input
-        type={field?.type === 'number' ? 'number' : 'text'}
+        type={field?.type === 'number' ? 'number' : plugin?.secretKeys?.includes(key) ? 'password' : 'text'}
         value={draftValue ?? ''}
         onChange={(event) => onDraftChange(key, event.target.value)}
-        disabled={disabled}
+        disabled={Boolean(editingDisabled)}
       />
       {error ? <small className="error">{error}</small> : null}
       {field?.description ? <small>{field.description}</small> : null}
@@ -175,7 +132,8 @@ export default function PluginManagementPage({
   onInstallPluginDirectory,
   onUninstallPlugin,
   onOpenPluginsDirectory,
-  onSavePluginConfig,
+  onDraftChange, onCommitConfig, onSaveDraftConfig, onPluginUiChange, pluginUi,
+  configDrafts, configErrors, draftChanged, configSaving, onRefreshPlugins, pluginLoading, pluginLoadError, messageError,
   busyPluginId,
   message,
   availableTags,
@@ -195,58 +153,12 @@ export default function PluginManagementPage({
   const installingDirectory = busyPluginId === 'install-directory'
   const installing = installingFile || installingDirectory
   const busy = busyPluginId === activePlugin?.id
-  const actionBusy = busy || installing
+  const actionBusy = Boolean(busyPluginId)
   const lifecycleAction = getLifecycleAction(activePlugin)
-  const [configDrafts, setConfigDrafts] = useState({})
-  const [configErrors, setConfigErrors] = useState({})
-  const draftChanged = activePlugin
-    ? hasDraftChanges(activePlugin, schemaKeys, settingsSchema, configDrafts)
-    : false
-
-  useEffect(() => {
-    setConfigDrafts(buildConfigDrafts(activePlugin, schemaKeys, settingsSchema))
-    setConfigErrors({})
-  }, [activePlugin?.id, activePlugin?.updatedAt])
-
-  const handleDraftChange = (key, value) => {
-    setConfigDrafts(prev => ({ ...prev, [key]: value }))
-    setConfigErrors(prev => ({ ...prev, [key]: '' }))
-  }
-
-  const handleCommitConfig = (key, immediateValue, hasImmediateValue = false) => {
-    if (!activePlugin) return
-    const field = settingsSchema[key]
-    try {
-      const nextValue = hasImmediateValue
-        ? immediateValue
-        : parseConfigDraft(field, configDrafts[key])
-      setConfigErrors(prev => ({ ...prev, [key]: '' }))
-      onSavePluginConfig(activePlugin.id, {
-        ...(activePlugin.config || {}),
-        [key]: nextValue
-      })
-    } catch (error) {
-      setConfigErrors(prev => ({ ...prev, [key]: error?.message || '配置格式无效' }))
-    }
-  }
-
-  const handleSaveDraftConfig = () => {
-    if (!activePlugin) return
-    const nextConfig = { ...(activePlugin.config || {}) }
-    const nextErrors = {}
-    for (const key of schemaKeys) {
-      const field = settingsSchema[key]
-      if (field?.type === 'boolean' || field?.type === 'enum') continue
-      try {
-        nextConfig[key] = parseConfigDraft(field, configDrafts[key])
-      } catch (error) {
-        nextErrors[key] = error?.message || '配置格式无效'
-      }
-    }
-    setConfigErrors(nextErrors)
-    if (Object.keys(nextErrors).length) return
-    onSavePluginConfig(activePlugin.id, nextConfig)
-  }
+  const handleDraftChange = (key, value) => onDraftChange(key, value, activePlugin.id)
+  const handleCommitConfig = (key, value) => onCommitConfig(key, value, activePlugin.id)
+  const handleSaveDraftConfig = () => onSaveDraftConfig(activePlugin.id)
+  const handleUiChange = patch => onPluginUiChange(patch, activePlugin.id)
 
   return (
     <div className="plugin-management">
@@ -256,16 +168,18 @@ export default function PluginManagementPage({
           <span>{plugins.length} 个插件</span>
         </div>
         <div className="plugin-list-actions">
-          <button className="btn btn-sm btn-primary" type="button" onClick={onInstallPluginFile} disabled={installing}>
+          <button className="btn btn-sm" type="button" onClick={onRefreshPlugins} disabled={actionBusy || pluginLoading}>{pluginLoading ? '读取中...' : '刷新列表'}</button>
+          <button className="btn btn-sm btn-primary" type="button" onClick={onInstallPluginFile} disabled={actionBusy}>
             {installingFile ? '安装中...' : '安装包'}
           </button>
-          <button className="btn btn-sm" type="button" onClick={onInstallPluginDirectory} disabled={installing}>
+          <button className="btn btn-sm" type="button" onClick={onInstallPluginDirectory} disabled={actionBusy}>
             {installingDirectory ? '安装中...' : '安装文件夹'}
           </button>
-          <button className="btn btn-sm plugin-list-open-dir" type="button" onClick={onOpenPluginsDirectory} disabled={installing}>
+          <button className="btn btn-sm plugin-list-open-dir" type="button" onClick={onOpenPluginsDirectory} disabled={actionBusy}>
             打开插件目录
           </button>
         </div>
+        {pluginLoadError ? <p className="hint error" role="alert">{pluginLoadError}</p> : null}
         {plugins.length ? plugins.map((plugin) => (
           <button
             className={`plugin-list-item${plugin.id === activePlugin?.id ? ' selected' : ''}`}
@@ -324,7 +238,7 @@ export default function PluginManagementPage({
             {activePlugin.lastError ? (
               <p className="hint error plugin-message">{activePlugin.lastError}</p>
             ) : null}
-            {message ? <p className="hint plugin-message">{message}</p> : null}
+            {message ? <p className={`hint plugin-message${messageError ? ' error' : ''}`} role={messageError ? 'alert' : 'status'}>{message}</p> : null}
 
             <div className="plugin-info-grid">
               <div className="plugin-info-box">
@@ -382,6 +296,9 @@ export default function PluginManagementPage({
                   configDrafts={configDrafts}
                   configErrors={configErrors}
                   busy={actionBusy}
+                  editingDisabled={actionBusy && !configSaving}
+                  uiState={pluginUi}
+                  onUiChange={handleUiChange}
                   onDraftChange={handleDraftChange}
                   onSaveDraftConfig={handleSaveDraftConfig}
                   onCommitConfig={handleCommitConfig}
@@ -406,10 +323,10 @@ export default function PluginManagementPage({
                       plugin: activePlugin,
                       key,
                       field: settingsSchema[key],
-                      value: activePlugin.config?.[key],
+                      value: configDrafts[key],
                       draftValue: configDrafts[key],
                       error: configErrors[key],
-                      busy: actionBusy,
+                      busy: actionBusy, editingDisabled: actionBusy && !configSaving,
                       onDraftChange: handleDraftChange,
                       onCommit: handleCommitConfig
                     }))}

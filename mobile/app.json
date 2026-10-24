@@ -3,14 +3,24 @@
     "name": "Wallpaper Player",
     "slug": "wallpaper-player-mobile",
     "version": "0.1.4",
+    "icon": "./assets/icon.png",
     "orientation": "default",
     "userInterfaceStyle": "dark",
+    "experiments": {
+      "onDemandFilesystem": false
+    },
     "assetBundlePatterns": [
       "**/*"
     ],
     "android": {
       "package": "com.wallpaperplayer.mobile",
       "versionCode": 5,
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-foreground.png",
+        "backgroundImage": "./assets/adaptive-background.png",
+        "backgroundColor": "#3ddcee",
+        "monochromeImage": "./assets/adaptive-monochrome.png"
+      },
       "blockedPermissions": [
         "android.permission.RECORD_AUDIO"
       ],
@@ -33,7 +43,8 @@
         }
       ],
       "expo-secure-store",
-      "./plugins/with-cleartext-traffic"
+      "./plugins/with-cleartext-traffic",
+      "./plugins/with-windows-cmake-paths"
     ],
     "scheme": "wallpaper-player"
   }

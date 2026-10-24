@@ -7,7 +7,12 @@ import Sidebar from './components/Sidebar'
 import TagEditor from './components/TagEditor'
 import UpdateNotice from './components/UpdateNotice'
 import RightDock from './components/RightDock'
-import { useApp } from './context/AppContext'
+import InitializationNotice from './components/InitializationNotice'
+import WindowChrome from './components/WindowChrome'
+import CloseConfirm from './components/CloseConfirm'
+import AppDialog from './components/AppDialog'
+import { useAppFields } from './context/AppContext'
+import { rememberThemeHint } from './services/splash'
 
 const Settings = lazy(() => import('./components/Settings'))
 const VideoAnalysisSidebar = lazy(() => import('./components/VideoAnalysisSidebar'))
@@ -77,7 +82,21 @@ function AppInner() {
     openAnalysisResultTask,
     closeAnalysisResultTask,
     queueVideoAnalysis
-  } = useApp()
+  } = useAppFields([
+    'loading', 'theme', 'videos', 'scanning',
+    'scanError', 'scanErrorDir', 'currentDir', 'searchQuery',
+    'setSearchQuery', 'sortBy', 'setSortBy', 'activeCategory',
+    'activeCategoryLabel', 'hasCategoryFilter', 'setActiveCategory', 'filteredVideos',
+    'trimmedSearchQuery', 'hasFilter', 'settings', 'setSettings',
+    'settingsSaveError', 'setSettingsSaveError', 'handleDirectoriesChange', 'handleSelectDirectory',
+    'handleOpenFile', 'handleDropFiles', 'handlePlayNetworkResource', 'runPlayerCommand',
+    'scanAndLoad', 'playingVideo', 'showSettings', 'setShowSettings',
+    'plugins', 'analysisTasks', 'analysisSidebarOpen', 'setAnalysisSidebarOpen',
+    'analysisTaskCounts', 'getAnalysisTaskStatusLabel', 'cancelRunningAnalysisTask', 'retryAnalysisTask',
+    'hideFinishedAnalysisTasks', 'deleteSavedAnalysisTask', 'deleteSavedAnalysisTasks', 'refreshSavedAnalysisResults',
+    'savedAnalysisResultsLoading', 'savedAnalysisResultsMessage', 'selectedAnalysisResultTask', 'openAnalysisResultTask',
+    'closeAnalysisResultTask', 'queueVideoAnalysis'
+  ])
 
   const aiSearchRef = useRef(null)
   const [rightDockTab, setRightDockTab] = useState('video-analysis')
@@ -325,6 +344,16 @@ function AppInner() {
 
   const activeDirName = currentDir ? currentDir.split(/[/\\]/).pop() : '未选择目录'
 
+  // 关闭询问：主进程发起，渲染层作答（保持与设计系统一致，不用系统原生弹窗）。
+  const [closePrompt, setClosePrompt] = useState(null)
+  useEffect(() => {
+    const remove = window.electronAPI?.onWindowClosePrompt?.(payload => setClosePrompt(payload))
+    return () => remove?.()
+  }, [])
+
+  // 把主题偏好写进 <html data-theme>，让下一次启动的首帧开屏直接用对配色。
+  useEffect(() => { rememberThemeHint(theme) }, [theme])
+
   const onSearchChange = useCallback((e) => setSearchQuery(e.target.value), [setSearchQuery])
   const onClearSearch = useCallback(() => setSearchQuery(''), [setSearchQuery])
   const onSortChange = useCallback((e) => setSortBy(e.target.value), [setSortBy])
@@ -389,15 +418,23 @@ function AppInner() {
 
   if (loading) {
     return (
-      <div className="app-loading">
+      <div className="app-loading" role="status" aria-live="polite">
         <div className="loading-spinner" />
-        <p>正在加载...</p>
+        <p>正在加载…</p>
       </div>
     )
   }
 
+  if (!settings) return <div className={`app-loading theme-${theme}`}><h2>无法载入应用设置</h2><InitializationNotice /></div>
+
   return (
     <div className={`app theme-${theme}`} onDragOver={onRootDragOver} onDrop={onRootDrop}>
+      {/* 自绘标题栏（原生标题栏已在主进程关闭） */}
+      <WindowChrome title="视频画廊" meta={activeDirName} />
+
+      <CloseConfirm payload={closePrompt} onDone={() => setClosePrompt(null)} />
+      <AppDialog />
+
       {/* 顶部导航栏 */}
       <header className="header">
         <div className="header-left">
@@ -430,12 +467,13 @@ function AppInner() {
               <input
                 type="text"
                 className="search-input"
+                aria-label="搜索名称或分组"
                 placeholder="搜索名称或分组..."
                 value={searchQuery}
                 onChange={onSearchChange}
               />
               {searchQuery && (
-                <button className="search-clear" onClick={onClearSearch} title="清空搜索">
+                <button className="search-clear" onClick={onClearSearch} title="清空搜索" aria-label="清空搜索">
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                     <path d="M18 6L6 18M6 6l12 12" />
                   </svg>
@@ -467,6 +505,7 @@ function AppInner() {
               </button>
               <select
                 className="sort-select"
+                aria-label="视频排序"
                 value={sortBy}
                 onChange={onSortChange}
               >
@@ -480,11 +519,11 @@ function AppInner() {
               </span>
               <button
                 className="btn btn-icon"
-                title="刷新"
+                title={scanning ? '正在扫描…' : '刷新'}
                 onClick={onRefresh}
                 disabled={scanning}
               >
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <svg className={scanning ? 'spin' : undefined} width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <polyline points="23 4 23 10 17 10" />
                   <path d="M20.49 15a9 9 0 11-2.12-9.36L23 10" />
                 </svg>
@@ -505,6 +544,7 @@ function AppInner() {
         <Sidebar />
 
         <div className="content-body">
+          <InitializationNotice />
           {/* 扫描进度提示 */}
           {scanning && (
             <div className="progress-bar scanning">
@@ -548,6 +588,11 @@ function AppInner() {
                   <button className="btn btn-primary" onClick={onSelectDirectory}>
                     选择目录
                   </button>
+                </div>
+              ) : filteredVideos.length === 0 && hasFilter && scanning ? (
+                <div className="empty-state compact" role="status">
+                  <h2>正在同步完整视频库</h2>
+                  <p>搜索结果会在同步过程中继续补齐。</p>
                 </div>
               ) : filteredVideos.length === 0 && hasFilter ? (
                 <div className="empty-state compact">

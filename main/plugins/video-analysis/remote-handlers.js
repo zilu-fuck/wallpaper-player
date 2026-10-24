@@ -3,10 +3,10 @@ const { loadSettings } = core('settings')
 const { pathKey } = core('paths')
 const {
   findVideoAnalysis,
-  getActiveAnalysisJob,
+  analysisTaskService,
   getRecentAnalysisEvent,
-  startVideoAnalysis
 } = require('./service')
+const { remoteAnalysisOwner } = require('./task-interests')
 const { sendJson } = core('remote/http-utils')
 
 function sanitizeRemoteAnalysis(analysis) {
@@ -74,7 +74,8 @@ function sanitizeRemoteAnalysisJob(job, videoPath) {
     return {
       running: true,
       currentVideo: false,
-      startedAt: job.startedAt || 0
+      startedAt: job.startedAt || 0,
+      interestId: job.interestId, canCancel: false, interestedClients: 0, interestCancelled: job.interestCancelled
     }
   }
 
@@ -82,6 +83,7 @@ function sanitizeRemoteAnalysisJob(job, videoPath) {
     running: true,
     currentVideo: true,
     jobId: job.jobId || '',
+    interestId: job.interestId, canCancel: job.canCancel, interestedClients: job.interestedClients, interestCancelled: job.interestCancelled,
     startedAt: job.startedAt || 0,
     lastEvent: sanitizeRemoteAnalysisEvent(job.lastEvent)
   }
@@ -100,17 +102,28 @@ function sanitizeRemoteRecentAnalysisEvent(recent, videoPath) {
   }
 }
 
-function createAnalysisHandlers({ resolveVideoPath }) {
-  async function getRemoteVideoAnalysisPayload(videoId) {
+function createAnalysisHandlers({ resolveVideoPath, authorizeRequest = () => true }) {
+  const requestedInterest = req => new URL(req.url, 'http://localhost').searchParams.get('interestId') || undefined
+  async function revalidate(req, res, videoId, videoPath) {
+    if (req.aborted || res.destroyed || res.writableEnded || !await authorizeRequest(req, res)) return false
+    const currentPath = await resolveVideoPath(videoId)
+    if (pathKey(currentPath) !== pathKey(videoPath)) {
+      throw Object.assign(new Error('视频不存在或索引尚未加载'), { status: 404, code: 'video_not_found' })
+    }
+    return !req.aborted && !res.destroyed && !res.writableEnded && await authorizeRequest(req, res)
+  }
+  async function getRemoteVideoAnalysisPayload(req, res, videoId) {
     const videoPath = await resolveVideoPath(videoId)
     const settings = loadSettings()
     const enabled = Boolean(settings.videoAnalysis?.enabled)
-    const job = getActiveAnalysisJob()
+    const { actor } = remoteAnalysisOwner(req)
+    const job = analysisTaskService.get(actor, requestedInterest(req))
     const sanitizedJob = sanitizeRemoteAnalysisJob(job, videoPath)
     const analysis = enabled && !sanitizedJob?.currentVideo
       ? await findVideoAnalysis(videoPath)
       : { available: false, reason: enabled ? 'running' : 'disabled' }
     const recent = sanitizeRemoteRecentAnalysisEvent(getRecentAnalysisEvent(videoPath), videoPath)
+    if (!await revalidate(req, res, videoId, videoPath)) return null
     return {
       enabled,
       analysis: sanitizeRemoteAnalysis(analysis),
@@ -121,33 +134,54 @@ function createAnalysisHandlers({ resolveVideoPath }) {
   }
 
   async function handleGetVideoAnalysis(req, res, videoId) {
-    sendJson(req, res, 200, await getRemoteVideoAnalysisPayload(videoId))
+    const payload = await getRemoteVideoAnalysisPayload(req, res, videoId)
+    if (payload) return sendJson(req, res, 200, payload)
   }
 
   async function handleStartVideoAnalysis(req, res, videoId) {
     const videoPath = await resolveVideoPath(videoId)
     const settings = loadSettings()
     if (!settings.videoAnalysis?.enabled) {
-      sendJson(req, res, 200, {
+      const payload = await getRemoteVideoAnalysisPayload(req, res, videoId)
+      if (!payload) return
+      return sendJson(req, res, 200, {
         accepted: false,
         reason: 'disabled',
         error: '请先在电脑端设置里开启视频理解',
-        ...(await getRemoteVideoAnalysisPayload(videoId))
+        ...payload
       })
-      return
     }
-
-    const result = await startVideoAnalysis(videoPath)
-    sendJson(req, res, result.accepted ? 202 : 200, {
+    if (!await revalidate(req, res, videoId, videoPath)) return
+    const { actor, tokenHash } = remoteAnalysisOwner(req)
+    const result = await analysisTaskService.start(videoPath, actor, requestedInterest(req), { authorize: async () => {
+      await core('remote/authorization').refresh?.()
+      if (!core('remote/authorization').isAuthorized(tokenHash)) throw Object.assign(new Error('设备未授权'), { status: 401 })
+      await core('scanner').assertAllowedVideoPath(videoPath, { audience: 'remote' })
+    } })
+    const payload = await getRemoteVideoAnalysisPayload(req, res, videoId)
+    if (!payload) return
+    return sendJson(req, res, result.accepted ? 202 : 200, {
       ...result,
       job: sanitizeRemoteAnalysisJob(result.job, videoPath),
-      ...(await getRemoteVideoAnalysisPayload(videoId))
+      ...payload
     })
+  }
+
+  async function handleCancelVideoAnalysis(req, res, videoId) {
+    const videoPath = await resolveVideoPath(videoId)
+    if (!await revalidate(req, res, videoId, videoPath)) return
+    const { actor } = remoteAnalysisOwner(req)
+    const jobId = new URL(req.url, 'http://localhost').searchParams.get('jobId') || undefined
+    const job = analysisTaskService.get(actor)
+    const differentVideo = job?.running && job.videoPath && pathKey(job.videoPath) !== pathKey(videoPath)
+    const result = await analysisTaskService.cancel(actor, differentVideo ? 'different-video' : jobId, requestedInterest(req))
+    if (await revalidate(req, res, videoId, videoPath)) return sendJson(req, res, 200, result)
   }
 
   return {
     handleGetVideoAnalysis,
-    handleStartVideoAnalysis
+    handleStartVideoAnalysis,
+    handleCancelVideoAnalysis
   }
 }
 

@@ -1,0 +1,1138 @@
+{
+  "date": "2026-10-18T15:46:48.865Z",
+  "stage": "R7 batch 14: asynchronous identity boundaries and atomic authorization writes",
+  "sourceDigests": {
+    "main/index.js": "b4471e5189b9c332ff4eeee170e792822b30166a05db4554f236b5dc8d47ccb8",
+    "main/ipc/remote.js": "2c5f7b6baeecc720655972f9d344b1af25661e7bd0991f9cdf7d2319007bf643",
+    "main/remote/index.js": "99b4e5117d47c0c6b8956f926125f7bbdbd9fe603cc146f28b39caffc659a3b9",
+    "main/remote/identity.js": "1807700ddbeb1cce5aacc0f17fdc96a45e25e6ff2c1f41f0e6c24e2497972115",
+    "main/remote/server.js": "331f052d3e9e8c27ef20ece86e7eb39b08650351223ced861d7db557d3e977f3",
+    "main/remote/json-responses.js": "3844076ab33e7cd3c6e30644ab9bb25baefc885c5e2d09f1570dca54d7ba4e16",
+    "main/remote/handlers/info.js": "ce9c15b04e78f972f354cad5732bf068f74c2dfdb1746da25e1633fa5ee888f1",
+    "main/remote/handlers/media.js": "e0d80f996809972cb4fb66db1622e053c30adc274eab78e3334d0edfae97c52b",
+    "main/remote/handlers/transcode.js": "afb5f616ef8e7b2d24dfef22f66fb352dee1732c4b16b901a521a750a42054fc",
+    "main/remote/handlers/network-resources.js": "6def64b5048635019b6d0c54c1b39ec65726bd1798952e3566811a1312b1ba6c",
+    "main/plugins/core-api.js": "9f69f407f28049c7f7ea224568e12fe3838e0b7b607a91f4d3c714fe575b0739",
+    "main/plugins/video-analysis/remote.js": "c49a61897104b55f393622e571a9cf99b07b5c75b3a673f84a5719a40524685e",
+    "main/plugins/video-analysis/remote-handlers.js": "dd98f9cb0cfb7cec3fca38f64fc4d5c3c6fc89e1d5de1c387e74eb4dcf9e3c2b",
+    "scripts/verify-identity-io.js": "9aae37fafd4e5bc184ba40996cfc4f8dca1ff8d5eaa5b836dc69eaa1e5e74439",
+    "scripts/verify-identity-lifecycle.js": "bb73798d5b10354499718efc6a1fb6990ef38ab99d0111e0e7754a2b8dad8235",
+    "scripts/verify-packaged-contracts.js": "74733a47705c60fcf6a7827df66159fd02967426682c7546dd802654b72b62e8",
+    "scripts/verify-json-responses.js": "a657c513cdd454eb2c0ff3cf4a116584d6d6b93fa51504b7bea59a8488340bda",
+    "scripts/verify-remote-mobile.js": "0860853988cfd2648ad31de298aa24cf54630ad116437700dfbb9ae8666cd714",
+    "scripts/verify-analysis-interests.js": "87f57250772566030fabbd0accc048dd498aa2a20493723c8a91410784e02073",
+    "scripts/verify-network-stream-lifecycle.js": "b701b1f62470ede38eef830f6b2c8e6851971917946006ef2c5d3ab81c617627",
+    "scripts/verify-plugin-remote-route.js": "38e1ee8a60273c9df146871c01304122aa9277a753cec1195a3f7e86fb6eecf4",
+    "scripts/verify-remote-server-lifecycle.js": "9d1c980037d6e7095e17d45f62cc22f1cef35c2fdbe1fe4e2ef359feeef9783a",
+    "scripts/verify-shutdown-persistence.js": "d05959e0d03ff7d137ee64a08a66bf86dcd2c55b471a37d376feef58af0d79b1",
+    "package.json": "0e825bc9817339a951189867bbd424a0a786188dd015c8fc63fb3054c02d0485",
+    ".github/workflows/ci.yml": "c7eb0a8725cb01d7c016083e2b015fac8d35a81705ed985d181a457e5e722eaf",
+    "docs/refactor-progress.md": "e93c88858dcda56d03bd3b1290cde153023734c5570d916f3eb9c2a06cf7e21d",
+    "docs/desktop-mobile-review-and-refactor-plan.md": "5d19ea8d12c27911808174e0d8599adcafc43d4495f70139cb6b49921e7fb0af",
+    "docs/protocol-contracts.md": "71a94962981a4fdbe216d060968825ffc3b0c07412d5b3d7b29c90132dd2178d"
+  },
+  "inputArtifacts": {
+    "initialBaseline": {
+      "file": ".tmp/refactor-tests/identity-io-baseline.json",
+      "sha256": "997028eaa82a23b16243eacd04e7cb23aea08f6b3cc32888368e8e5ade357baa"
+    },
+    "finalSeries": {
+      "file": ".tmp/refactor-tests/identity-io-series-final.json",
+      "sha256": "c145fee88505cfff83e745b98f396703c7dfe28fa057dcc8baae4ed8ed0eab7a"
+    },
+    "concurrentEarlierCheckpoint": {
+      "file": ".tmp/refactor-tests/identity-io-under-parallel-checks.json",
+      "sha256": "6e56cf64418f7d80ad004a4ca073ebf1294b562997fb3f608b9efb01ea04e119"
+    },
+    "earlierSeriesBeforeCompatibilityBridge": {
+      "file": ".tmp/refactor-tests/identity-io-series-before-compatibility-bridge.json",
+      "sha256": "4f69014f0940a482c595b6ba5bc75eb6d2405d02df1bc40a1335063f153c314e"
+    },
+    "finalNpmCommandObservation": {
+      "file": ".tmp/refactor-tests/identity-io-after.json",
+      "sha256": "1d25af63cf4ce88847d9aa7da2352f945d4c1bee701951c03f9d350e745ccf6d"
+    },
+    "lifecycle": {
+      "file": ".tmp/refactor-tests/identity-lifecycle.json",
+      "sha256": "fbffb0317e0e6dfada6b81e4fcfa6e01d2f78fea319dc963caaaf998a24c4424"
+    }
+  },
+  "capturedBaseline": {
+    "main/remote/identity.js": {
+      "captured": ".tmp\\refactor-tests\\identity-io-DPOWFw\\identity.js.at-start.cjs",
+      "sha256": "e370641785bdea5182858a8da5df61a3a7e69427d169982130b3513d710e2feb"
+    },
+    "main/remote/server.js": {
+      "captured": ".tmp\\refactor-tests\\identity-io-DPOWFw\\server.js.at-start.cjs",
+      "sha256": "45efac2ccbc3dc78affb122f5b4f612f37395155ed18ef8491214c6dd0f2a1af"
+    },
+    "main/remote/json-responses.js": {
+      "captured": ".tmp\\refactor-tests\\identity-io-DPOWFw\\json-responses.js.at-start.cjs",
+      "sha256": "ddc2bf73dad214f119a66389d200198fe10945634424e04d4a3d416e42ffc06f"
+    }
+  },
+  "productionSourceReplaced": false,
+  "summary": {
+    "baseline": [
+      {
+        "name": "twenty sequential authenticated HTTP requests",
+        "elapsedMedianMs": 53.36540000000002,
+        "elapsedRangeMs": [
+          52.14250000000001,
+          57.0856
+        ],
+        "largestObservedHeartbeatGapMs": 2.8903999999999996,
+        "synchronousIdentityIO": [
+          {
+            "readFileSync": 60,
+            "existsSync": 60,
+            "writeFileSync": 0,
+            "renameSync": 0,
+            "statSync": 0
+          },
+          {
+            "readFileSync": 60,
+            "existsSync": 60,
+            "writeFileSync": 0,
+            "renameSync": 0,
+            "statSync": 0
+          },
+          {
+            "readFileSync": 60,
+            "existsSync": 60,
+            "writeFileSync": 0,
+            "renameSync": 0,
+            "statSync": 0
+          }
+        ]
+      },
+      {
+        "name": "sixteen concurrent authenticated HTTP requests",
+        "elapsedMedianMs": 35.0993,
+        "elapsedRangeMs": [
+          34.3819,
+          40.63390000000001
+        ],
+        "largestObservedHeartbeatGapMs": 30.25,
+        "synchronousIdentityIO": [
+          {
+            "readFileSync": 48,
+            "existsSync": 48,
+            "writeFileSync": 0,
+            "renameSync": 0,
+            "statSync": 0
+          },
+          {
+            "readFileSync": 48,
+            "existsSync": 48,
+            "writeFileSync": 0,
+            "renameSync": 0,
+            "statSync": 0
+          },
+          {
+            "readFileSync": 48,
+            "existsSync": 48,
+            "writeFileSync": 0,
+            "renameSync": 0,
+            "statSync": 0
+          }
+        ]
+      },
+      {
+        "name": "one thousand bound token checks",
+        "elapsedMedianMs": 766.4782,
+        "elapsedRangeMs": [
+          706.0998,
+          772.8408000000001
+        ],
+        "largestObservedHeartbeatGapMs": 772.7325,
+        "synchronousIdentityIO": [
+          {
+            "readFileSync": 2000,
+            "existsSync": 2000,
+            "writeFileSync": 0,
+            "renameSync": 0,
+            "statSync": 0
+          },
+          {
+            "readFileSync": 2000,
+            "existsSync": 2000,
+            "writeFileSync": 0,
+            "renameSync": 0,
+            "statSync": 0
+          },
+          {
+            "readFileSync": 2000,
+            "existsSync": 2000,
+            "writeFileSync": 0,
+            "renameSync": 0,
+            "statSync": 0
+          }
+        ]
+      }
+    ],
+    "current": [
+      {
+        "name": "twenty sequential authenticated HTTP requests",
+        "elapsedMedianMs": 55.02859999999998,
+        "elapsedRangeMs": [
+          51.59709999999998,
+          57.5907
+        ],
+        "largestObservedHeartbeatGapMs": 1.7993999999999915,
+        "synchronousIdentityIO": [
+          {
+            "readFileSync": 0,
+            "existsSync": 0,
+            "writeFileSync": 0,
+            "renameSync": 0,
+            "statSync": 0
+          },
+          {
+            "readFileSync": 0,
+            "existsSync": 0,
+            "writeFileSync": 0,
+            "renameSync": 0,
+            "statSync": 0
+          },
+          {
+            "readFileSync": 0,
+            "existsSync": 0,
+            "writeFileSync": 0,
+            "renameSync": 0,
+            "statSync": 0
+          }
+        ]
+      },
+      {
+        "name": "sixteen concurrent authenticated HTTP requests",
+        "elapsedMedianMs": 15.835399999999993,
+        "elapsedRangeMs": [
+          15.758999999999986,
+          17.18519999999998
+        ],
+        "largestObservedHeartbeatGapMs": 4.334299999999985,
+        "synchronousIdentityIO": [
+          {
+            "readFileSync": 0,
+            "existsSync": 0,
+            "writeFileSync": 0,
+            "renameSync": 0,
+            "statSync": 0
+          },
+          {
+            "readFileSync": 0,
+            "existsSync": 0,
+            "writeFileSync": 0,
+            "renameSync": 0,
+            "statSync": 0
+          },
+          {
+            "readFileSync": 0,
+            "existsSync": 0,
+            "writeFileSync": 0,
+            "renameSync": 0,
+            "statSync": 0
+          }
+        ]
+      },
+      {
+        "name": "one thousand bound token checks",
+        "elapsedMedianMs": 19.4983,
+        "elapsedRangeMs": [
+          18.462199999999996,
+          19.742500000000007
+        ],
+        "largestObservedHeartbeatGapMs": 19.708699999999993,
+        "synchronousIdentityIO": [
+          {
+            "readFileSync": 0,
+            "existsSync": 0,
+            "writeFileSync": 0,
+            "renameSync": 0,
+            "statSync": 0
+          },
+          {
+            "readFileSync": 0,
+            "existsSync": 0,
+            "writeFileSync": 0,
+            "renameSync": 0,
+            "statSync": 0
+          },
+          {
+            "readFileSync": 0,
+            "existsSync": 0,
+            "writeFileSync": 0,
+            "renameSync": 0,
+            "statSync": 0
+          }
+        ]
+      }
+    ]
+  },
+  "observations": {
+    "initialBaseline": {
+      "date": "2026-10-18T15:27:37.096Z",
+      "fixture": ".tmp\\refactor-tests\\identity-io-DPOWFw",
+      "baseline": true,
+      "sourceDigests": {
+        "main/remote/identity.js": "e370641785bdea5182858a8da5df61a3a7e69427d169982130b3513d710e2feb",
+        "main/remote/server.js": "45efac2ccbc3dc78affb122f5b4f612f37395155ed18ef8491214c6dd0f2a1af",
+        "main/remote/json-responses.js": "ddc2bf73dad214f119a66389d200198fe10945634424e04d4a3d416e42ffc06f"
+      },
+      "pairedDevices": 100,
+      "results": [
+        {
+          "name": "twenty sequential authenticated HTTP requests",
+          "milliseconds": 53.784700000000015,
+          "maxHeartbeatGapMs": 2.4380999999999915,
+          "synchronousIdentityIO": {
+            "readFileSync": 60,
+            "existsSync": 60,
+            "writeFileSync": 0,
+            "renameSync": 0,
+            "statSync": 0
+          }
+        },
+        {
+          "name": "sixteen concurrent authenticated HTTP requests",
+          "milliseconds": 36.08330000000001,
+          "maxHeartbeatGapMs": 25.5171,
+          "synchronousIdentityIO": {
+            "readFileSync": 48,
+            "existsSync": 48,
+            "writeFileSync": 0,
+            "renameSync": 0,
+            "statSync": 0
+          }
+        },
+        {
+          "name": "one thousand bound token checks",
+          "milliseconds": 763.6074,
+          "maxHeartbeatGapMs": 763.3644,
+          "synchronousIdentityIO": {
+            "readFileSync": 2000,
+            "existsSync": 2000,
+            "writeFileSync": 0,
+            "renameSync": 0,
+            "statSync": 0
+          }
+        }
+      ],
+      "conditions": "Actual production HTTP server and identity repository, 100 generated paired identities, warmed local profile, loopback requests. Counts include identity/temp-file sync IO only. Single process observations, not P95 or phone/native acceptance."
+    },
+    "finalSeries": {
+      "date": "2026-10-18T15:44:09.416Z",
+      "conditions": "Three alternating SHA-verified captured-baseline/current processes on final runtime source, including legacy plugin compatibility bridge. No other verification deliberately ran concurrently. All samples retained; medians and maxima are observations, not population P95.",
+      "samples": [
+        {
+          "date": "2026-10-18T15:44:04.022Z",
+          "fixture": ".tmp\\refactor-tests\\identity-io-kBbRcj",
+          "baseline": true,
+          "sourceDigests": {
+            "main/remote/identity.js": "e370641785bdea5182858a8da5df61a3a7e69427d169982130b3513d710e2feb",
+            "main/remote/server.js": "45efac2ccbc3dc78affb122f5b4f612f37395155ed18ef8491214c6dd0f2a1af",
+            "main/remote/json-responses.js": "ddc2bf73dad214f119a66389d200198fe10945634424e04d4a3d416e42ffc06f"
+          },
+          "pairedDevices": 100,
+          "results": [
+            {
+              "name": "twenty sequential authenticated HTTP requests",
+              "milliseconds": 57.0856,
+              "maxHeartbeatGapMs": 2.8903999999999996,
+              "synchronousIdentityIO": {
+                "readFileSync": 60,
+                "existsSync": 60,
+                "writeFileSync": 0,
+                "renameSync": 0,
+                "statSync": 0
+              }
+            },
+            {
+              "name": "sixteen concurrent authenticated HTTP requests",
+              "milliseconds": 40.63390000000001,
+              "maxHeartbeatGapMs": 30.25,
+              "synchronousIdentityIO": {
+                "readFileSync": 48,
+                "existsSync": 48,
+                "writeFileSync": 0,
+                "renameSync": 0,
+                "statSync": 0
+              }
+            },
+            {
+              "name": "one thousand bound token checks",
+              "milliseconds": 772.8408000000001,
+              "maxHeartbeatGapMs": 772.7325,
+              "synchronousIdentityIO": {
+                "readFileSync": 2000,
+                "existsSync": 2000,
+                "writeFileSync": 0,
+                "renameSync": 0,
+                "statSync": 0
+              }
+            }
+          ],
+          "baselineMode": "SHA-verified captured identity/server/JSON transport modules; current dependencies; production sources not replaced.",
+          "conditions": "Actual production HTTP server and identity repository, 100 generated paired identities, warmed local profile, loopback requests. Counts include identity/temp-file sync IO only. Single process observations, not P95 or phone/native acceptance."
+        },
+        {
+          "date": "2026-10-18T15:44:04.775Z",
+          "fixture": ".tmp\\refactor-tests\\identity-io-2SBr6q",
+          "baseline": false,
+          "sourceDigests": {
+            "main/remote/identity.js": "1807700ddbeb1cce5aacc0f17fdc96a45e25e6ff2c1f41f0e6c24e2497972115",
+            "main/remote/server.js": "331f052d3e9e8c27ef20ece86e7eb39b08650351223ced861d7db557d3e977f3",
+            "main/remote/json-responses.js": "3844076ab33e7cd3c6e30644ab9bb25baefc885c5e2d09f1570dca54d7ba4e16"
+          },
+          "pairedDevices": 100,
+          "results": [
+            {
+              "name": "twenty sequential authenticated HTTP requests",
+              "milliseconds": 51.59709999999998,
+              "maxHeartbeatGapMs": 1.7993999999999915,
+              "synchronousIdentityIO": {
+                "readFileSync": 0,
+                "existsSync": 0,
+                "writeFileSync": 0,
+                "renameSync": 0,
+                "statSync": 0
+              }
+            },
+            {
+              "name": "sixteen concurrent authenticated HTTP requests",
+              "milliseconds": 15.835399999999993,
+              "maxHeartbeatGapMs": 4.08189999999999,
+              "synchronousIdentityIO": {
+                "readFileSync": 0,
+                "existsSync": 0,
+                "writeFileSync": 0,
+                "renameSync": 0,
+                "statSync": 0
+              }
+            },
+            {
+              "name": "one thousand bound token checks",
+              "milliseconds": 19.4983,
+              "maxHeartbeatGapMs": 19.33960000000002,
+              "synchronousIdentityIO": {
+                "readFileSync": 0,
+                "existsSync": 0,
+                "writeFileSync": 0,
+                "renameSync": 0,
+                "statSync": 0
+              }
+            }
+          ],
+          "conditions": "Actual production HTTP server and identity repository, 100 generated paired identities, warmed local profile, loopback requests. Counts include identity/temp-file sync IO only. Single process observations, not P95 or phone/native acceptance."
+        },
+        {
+          "date": "2026-10-18T15:44:06.215Z",
+          "fixture": ".tmp\\refactor-tests\\identity-io-5pX1FQ",
+          "baseline": true,
+          "sourceDigests": {
+            "main/remote/identity.js": "e370641785bdea5182858a8da5df61a3a7e69427d169982130b3513d710e2feb",
+            "main/remote/server.js": "45efac2ccbc3dc78affb122f5b4f612f37395155ed18ef8491214c6dd0f2a1af",
+            "main/remote/json-responses.js": "ddc2bf73dad214f119a66389d200198fe10945634424e04d4a3d416e42ffc06f"
+          },
+          "pairedDevices": 100,
+          "results": [
+            {
+              "name": "twenty sequential authenticated HTTP requests",
+              "milliseconds": 52.14250000000001,
+              "maxHeartbeatGapMs": 2.741500000000002,
+              "synchronousIdentityIO": {
+                "readFileSync": 60,
+                "existsSync": 60,
+                "writeFileSync": 0,
+                "renameSync": 0,
+                "statSync": 0
+              }
+            },
+            {
+              "name": "sixteen concurrent authenticated HTTP requests",
+              "milliseconds": 34.3819,
+              "maxHeartbeatGapMs": 25.75479999999999,
+              "synchronousIdentityIO": {
+                "readFileSync": 48,
+                "existsSync": 48,
+                "writeFileSync": 0,
+                "renameSync": 0,
+                "statSync": 0
+              }
+            },
+            {
+              "name": "one thousand bound token checks",
+              "milliseconds": 706.0998,
+              "maxHeartbeatGapMs": 705.9896,
+              "synchronousIdentityIO": {
+                "readFileSync": 2000,
+                "existsSync": 2000,
+                "writeFileSync": 0,
+                "renameSync": 0,
+                "statSync": 0
+              }
+            }
+          ],
+          "baselineMode": "SHA-verified captured identity/server/JSON transport modules; current dependencies; production sources not replaced.",
+          "conditions": "Actual production HTTP server and identity repository, 100 generated paired identities, warmed local profile, loopback requests. Counts include identity/temp-file sync IO only. Single process observations, not P95 or phone/native acceptance."
+        },
+        {
+          "date": "2026-10-18T15:44:06.991Z",
+          "fixture": ".tmp\\refactor-tests\\identity-io-1NsexE",
+          "baseline": false,
+          "sourceDigests": {
+            "main/remote/identity.js": "1807700ddbeb1cce5aacc0f17fdc96a45e25e6ff2c1f41f0e6c24e2497972115",
+            "main/remote/server.js": "331f052d3e9e8c27ef20ece86e7eb39b08650351223ced861d7db557d3e977f3",
+            "main/remote/json-responses.js": "3844076ab33e7cd3c6e30644ab9bb25baefc885c5e2d09f1570dca54d7ba4e16"
+          },
+          "pairedDevices": 100,
+          "results": [
+            {
+              "name": "twenty sequential authenticated HTTP requests",
+              "milliseconds": 57.5907,
+              "maxHeartbeatGapMs": 1.5444999999999993,
+              "synchronousIdentityIO": {
+                "readFileSync": 0,
+                "existsSync": 0,
+                "writeFileSync": 0,
+                "renameSync": 0,
+                "statSync": 0
+              }
+            },
+            {
+              "name": "sixteen concurrent authenticated HTTP requests",
+              "milliseconds": 17.18519999999998,
+              "maxHeartbeatGapMs": 3.930999999999983,
+              "synchronousIdentityIO": {
+                "readFileSync": 0,
+                "existsSync": 0,
+                "writeFileSync": 0,
+                "renameSync": 0,
+                "statSync": 0
+              }
+            },
+            {
+              "name": "one thousand bound token checks",
+              "milliseconds": 18.462199999999996,
+              "maxHeartbeatGapMs": 18.4315,
+              "synchronousIdentityIO": {
+                "readFileSync": 0,
+                "existsSync": 0,
+                "writeFileSync": 0,
+                "renameSync": 0,
+                "statSync": 0
+              }
+            }
+          ],
+          "conditions": "Actual production HTTP server and identity repository, 100 generated paired identities, warmed local profile, loopback requests. Counts include identity/temp-file sync IO only. Single process observations, not P95 or phone/native acceptance."
+        },
+        {
+          "date": "2026-10-18T15:44:08.521Z",
+          "fixture": ".tmp\\refactor-tests\\identity-io-nU7oAV",
+          "baseline": true,
+          "sourceDigests": {
+            "main/remote/identity.js": "e370641785bdea5182858a8da5df61a3a7e69427d169982130b3513d710e2feb",
+            "main/remote/server.js": "45efac2ccbc3dc78affb122f5b4f612f37395155ed18ef8491214c6dd0f2a1af",
+            "main/remote/json-responses.js": "ddc2bf73dad214f119a66389d200198fe10945634424e04d4a3d416e42ffc06f"
+          },
+          "pairedDevices": 100,
+          "results": [
+            {
+              "name": "twenty sequential authenticated HTTP requests",
+              "milliseconds": 53.36540000000002,
+              "maxHeartbeatGapMs": 2.5226000000000113,
+              "synchronousIdentityIO": {
+                "readFileSync": 60,
+                "existsSync": 60,
+                "writeFileSync": 0,
+                "renameSync": 0,
+                "statSync": 0
+              }
+            },
+            {
+              "name": "sixteen concurrent authenticated HTTP requests",
+              "milliseconds": 35.0993,
+              "maxHeartbeatGapMs": 24.77449999999999,
+              "synchronousIdentityIO": {
+                "readFileSync": 48,
+                "existsSync": 48,
+                "writeFileSync": 0,
+                "renameSync": 0,
+                "statSync": 0
+              }
+            },
+            {
+              "name": "one thousand bound token checks",
+              "milliseconds": 766.4782,
+              "maxHeartbeatGapMs": 766.366,
+              "synchronousIdentityIO": {
+                "readFileSync": 2000,
+                "existsSync": 2000,
+                "writeFileSync": 0,
+                "renameSync": 0,
+                "statSync": 0
+              }
+            }
+          ],
+          "baselineMode": "SHA-verified captured identity/server/JSON transport modules; current dependencies; production sources not replaced.",
+          "conditions": "Actual production HTTP server and identity repository, 100 generated paired identities, warmed local profile, loopback requests. Counts include identity/temp-file sync IO only. Single process observations, not P95 or phone/native acceptance."
+        },
+        {
+          "date": "2026-10-18T15:44:09.319Z",
+          "fixture": ".tmp\\refactor-tests\\identity-io-BVoOwz",
+          "baseline": false,
+          "sourceDigests": {
+            "main/remote/identity.js": "1807700ddbeb1cce5aacc0f17fdc96a45e25e6ff2c1f41f0e6c24e2497972115",
+            "main/remote/server.js": "331f052d3e9e8c27ef20ece86e7eb39b08650351223ced861d7db557d3e977f3",
+            "main/remote/json-responses.js": "3844076ab33e7cd3c6e30644ab9bb25baefc885c5e2d09f1570dca54d7ba4e16"
+          },
+          "pairedDevices": 100,
+          "results": [
+            {
+              "name": "twenty sequential authenticated HTTP requests",
+              "milliseconds": 55.02859999999998,
+              "maxHeartbeatGapMs": 1.5555000000000234,
+              "synchronousIdentityIO": {
+                "readFileSync": 0,
+                "existsSync": 0,
+                "writeFileSync": 0,
+                "renameSync": 0,
+                "statSync": 0
+              }
+            },
+            {
+              "name": "sixteen concurrent authenticated HTTP requests",
+              "milliseconds": 15.758999999999986,
+              "maxHeartbeatGapMs": 4.334299999999985,
+              "synchronousIdentityIO": {
+                "readFileSync": 0,
+                "existsSync": 0,
+                "writeFileSync": 0,
+                "renameSync": 0,
+                "statSync": 0
+              }
+            },
+            {
+              "name": "one thousand bound token checks",
+              "milliseconds": 19.742500000000007,
+              "maxHeartbeatGapMs": 19.708699999999993,
+              "synchronousIdentityIO": {
+                "readFileSync": 0,
+                "existsSync": 0,
+                "writeFileSync": 0,
+                "renameSync": 0,
+                "statSync": 0
+              }
+            }
+          ],
+          "conditions": "Actual production HTTP server and identity repository, 100 generated paired identities, warmed local profile, loopback requests. Counts include identity/temp-file sync IO only. Single process observations, not P95 or phone/native acceptance."
+        }
+      ]
+    },
+    "concurrentEarlierCheckpoint": {
+      "date": "2026-10-18T15:38:39.163Z",
+      "fixture": ".tmp\\refactor-tests\\identity-io-zbQp5f",
+      "baseline": false,
+      "sourceDigests": {
+        "main/remote/identity.js": "73261c4812938b1526700ae59c5054262e56500aea12fc289d3bc60a3888ddd9",
+        "main/remote/server.js": "b095bd8860806956685ba6129d353692b1deb214a4d37d3d5c3edf75fc86635a",
+        "main/remote/json-responses.js": "3844076ab33e7cd3c6e30644ab9bb25baefc885c5e2d09f1570dca54d7ba4e16"
+      },
+      "pairedDevices": 100,
+      "results": [
+        {
+          "name": "twenty sequential authenticated HTTP requests",
+          "milliseconds": 59.756399999999985,
+          "maxHeartbeatGapMs": 1.822499999999991,
+          "synchronousIdentityIO": {
+            "readFileSync": 0,
+            "existsSync": 0,
+            "writeFileSync": 0,
+            "renameSync": 0,
+            "statSync": 0
+          }
+        },
+        {
+          "name": "sixteen concurrent authenticated HTTP requests",
+          "milliseconds": 18.60050000000001,
+          "maxHeartbeatGapMs": 5.476799999999997,
+          "synchronousIdentityIO": {
+            "readFileSync": 0,
+            "existsSync": 0,
+            "writeFileSync": 0,
+            "renameSync": 0,
+            "statSync": 0
+          }
+        },
+        {
+          "name": "one thousand bound token checks",
+          "milliseconds": 22.27680000000001,
+          "maxHeartbeatGapMs": 22.247199999999992,
+          "synchronousIdentityIO": {
+            "readFileSync": 0,
+            "existsSync": 0,
+            "writeFileSync": 0,
+            "renameSync": 0,
+            "statSync": 0
+          }
+        }
+      ],
+      "conditions": "Actual production HTTP server and identity repository, 100 generated paired identities, warmed local profile, loopback requests. Counts include identity/temp-file sync IO only. Single process observations, not P95 or phone/native acceptance."
+    },
+    "earlierSeriesBeforeCompatibilityBridge": {
+      "date": "2026-10-18T15:40:23.137Z",
+      "conditions": "Three alternating captured-baseline/current processes on final source. No other verification deliberately ran concurrently. All samples retained; medians and maxima are observations, not population P95.",
+      "samples": [
+        {
+          "date": "2026-10-18T15:40:17.829Z",
+          "fixture": ".tmp\\refactor-tests\\identity-io-7I2QGJ",
+          "baseline": true,
+          "sourceDigests": {
+            "main/remote/identity.js": "e370641785bdea5182858a8da5df61a3a7e69427d169982130b3513d710e2feb",
+            "main/remote/server.js": "45efac2ccbc3dc78affb122f5b4f612f37395155ed18ef8491214c6dd0f2a1af",
+            "main/remote/json-responses.js": "ddc2bf73dad214f119a66389d200198fe10945634424e04d4a3d416e42ffc06f"
+          },
+          "pairedDevices": 100,
+          "results": [
+            {
+              "name": "twenty sequential authenticated HTTP requests",
+              "milliseconds": 57.0274,
+              "maxHeartbeatGapMs": 2.8737000000000137,
+              "synchronousIdentityIO": {
+                "readFileSync": 60,
+                "existsSync": 60,
+                "writeFileSync": 0,
+                "renameSync": 0,
+                "statSync": 0
+              }
+            },
+            {
+              "name": "sixteen concurrent authenticated HTTP requests",
+              "milliseconds": 36.89190000000002,
+              "maxHeartbeatGapMs": 26.204199999999986,
+              "synchronousIdentityIO": {
+                "readFileSync": 48,
+                "existsSync": 48,
+                "writeFileSync": 0,
+                "renameSync": 0,
+                "statSync": 0
+              }
+            },
+            {
+              "name": "one thousand bound token checks",
+              "milliseconds": 750.8549,
+              "maxHeartbeatGapMs": 750.8027,
+              "synchronousIdentityIO": {
+                "readFileSync": 2000,
+                "existsSync": 2000,
+                "writeFileSync": 0,
+                "renameSync": 0,
+                "statSync": 0
+              }
+            }
+          ],
+          "baselineMode": "SHA-verified captured identity/server/JSON transport modules; current dependencies; production sources not replaced.",
+          "conditions": "Actual production HTTP server and identity repository, 100 generated paired identities, warmed local profile, loopback requests. Counts include identity/temp-file sync IO only. Single process observations, not P95 or phone/native acceptance."
+        },
+        {
+          "date": "2026-10-18T15:40:18.580Z",
+          "fixture": ".tmp\\refactor-tests\\identity-io-n4VOmy",
+          "baseline": false,
+          "sourceDigests": {
+            "main/remote/identity.js": "73261c4812938b1526700ae59c5054262e56500aea12fc289d3bc60a3888ddd9",
+            "main/remote/server.js": "b095bd8860806956685ba6129d353692b1deb214a4d37d3d5c3edf75fc86635a",
+            "main/remote/json-responses.js": "3844076ab33e7cd3c6e30644ab9bb25baefc885c5e2d09f1570dca54d7ba4e16"
+          },
+          "pairedDevices": 100,
+          "results": [
+            {
+              "name": "twenty sequential authenticated HTTP requests",
+              "milliseconds": 53.981899999999996,
+              "maxHeartbeatGapMs": 1.6935000000000002,
+              "synchronousIdentityIO": {
+                "readFileSync": 0,
+                "existsSync": 0,
+                "writeFileSync": 0,
+                "renameSync": 0,
+                "statSync": 0
+              }
+            },
+            {
+              "name": "sixteen concurrent authenticated HTTP requests",
+              "milliseconds": 16.38069999999999,
+              "maxHeartbeatGapMs": 4.055499999999995,
+              "synchronousIdentityIO": {
+                "readFileSync": 0,
+                "existsSync": 0,
+                "writeFileSync": 0,
+                "renameSync": 0,
+                "statSync": 0
+              }
+            },
+            {
+              "name": "one thousand bound token checks",
+              "milliseconds": 18.7568,
+              "maxHeartbeatGapMs": 18.513499999999993,
+              "synchronousIdentityIO": {
+                "readFileSync": 0,
+                "existsSync": 0,
+                "writeFileSync": 0,
+                "renameSync": 0,
+                "statSync": 0
+              }
+            }
+          ],
+          "conditions": "Actual production HTTP server and identity repository, 100 generated paired identities, warmed local profile, loopback requests. Counts include identity/temp-file sync IO only. Single process observations, not P95 or phone/native acceptance."
+        },
+        {
+          "date": "2026-10-18T15:40:20.026Z",
+          "fixture": ".tmp\\refactor-tests\\identity-io-qTAip6",
+          "baseline": true,
+          "sourceDigests": {
+            "main/remote/identity.js": "e370641785bdea5182858a8da5df61a3a7e69427d169982130b3513d710e2feb",
+            "main/remote/server.js": "45efac2ccbc3dc78affb122f5b4f612f37395155ed18ef8491214c6dd0f2a1af",
+            "main/remote/json-responses.js": "ddc2bf73dad214f119a66389d200198fe10945634424e04d4a3d416e42ffc06f"
+          },
+          "pairedDevices": 100,
+          "results": [
+            {
+              "name": "twenty sequential authenticated HTTP requests",
+              "milliseconds": 54.49950000000001,
+              "maxHeartbeatGapMs": 3.0074000000000183,
+              "synchronousIdentityIO": {
+                "readFileSync": 60,
+                "existsSync": 60,
+                "writeFileSync": 0,
+                "renameSync": 0,
+                "statSync": 0
+              }
+            },
+            {
+              "name": "sixteen concurrent authenticated HTTP requests",
+              "milliseconds": 36.061200000000014,
+              "maxHeartbeatGapMs": 25.316000000000003,
+              "synchronousIdentityIO": {
+                "readFileSync": 48,
+                "existsSync": 48,
+                "writeFileSync": 0,
+                "renameSync": 0,
+                "statSync": 0
+              }
+            },
+            {
+              "name": "one thousand bound token checks",
+              "milliseconds": 702.7668,
+              "maxHeartbeatGapMs": 702.6572,
+              "synchronousIdentityIO": {
+                "readFileSync": 2000,
+                "existsSync": 2000,
+                "writeFileSync": 0,
+                "renameSync": 0,
+                "statSync": 0
+              }
+            }
+          ],
+          "baselineMode": "SHA-verified captured identity/server/JSON transport modules; current dependencies; production sources not replaced.",
+          "conditions": "Actual production HTTP server and identity repository, 100 generated paired identities, warmed local profile, loopback requests. Counts include identity/temp-file sync IO only. Single process observations, not P95 or phone/native acceptance."
+        },
+        {
+          "date": "2026-10-18T15:40:20.779Z",
+          "fixture": ".tmp\\refactor-tests\\identity-io-VUahh4",
+          "baseline": false,
+          "sourceDigests": {
+            "main/remote/identity.js": "73261c4812938b1526700ae59c5054262e56500aea12fc289d3bc60a3888ddd9",
+            "main/remote/server.js": "b095bd8860806956685ba6129d353692b1deb214a4d37d3d5c3edf75fc86635a",
+            "main/remote/json-responses.js": "3844076ab33e7cd3c6e30644ab9bb25baefc885c5e2d09f1570dca54d7ba4e16"
+          },
+          "pairedDevices": 100,
+          "results": [
+            {
+              "name": "twenty sequential authenticated HTTP requests",
+              "milliseconds": 56.4939,
+              "maxHeartbeatGapMs": 1.9161000000000001,
+              "synchronousIdentityIO": {
+                "readFileSync": 0,
+                "existsSync": 0,
+                "writeFileSync": 0,
+                "renameSync": 0,
+                "statSync": 0
+              }
+            },
+            {
+              "name": "sixteen concurrent authenticated HTTP requests",
+              "milliseconds": 15.355699999999985,
+              "maxHeartbeatGapMs": 4.085799999999978,
+              "synchronousIdentityIO": {
+                "readFileSync": 0,
+                "existsSync": 0,
+                "writeFileSync": 0,
+                "renameSync": 0,
+                "statSync": 0
+              }
+            },
+            {
+              "name": "one thousand bound token checks",
+              "milliseconds": 18.24260000000001,
+              "maxHeartbeatGapMs": 18.213300000000004,
+              "synchronousIdentityIO": {
+                "readFileSync": 0,
+                "existsSync": 0,
+                "writeFileSync": 0,
+                "renameSync": 0,
+                "statSync": 0
+              }
+            }
+          ],
+          "conditions": "Actual production HTTP server and identity repository, 100 generated paired identities, warmed local profile, loopback requests. Counts include identity/temp-file sync IO only. Single process observations, not P95 or phone/native acceptance."
+        },
+        {
+          "date": "2026-10-18T15:40:22.288Z",
+          "fixture": ".tmp\\refactor-tests\\identity-io-kG9WXD",
+          "baseline": true,
+          "sourceDigests": {
+            "main/remote/identity.js": "e370641785bdea5182858a8da5df61a3a7e69427d169982130b3513d710e2feb",
+            "main/remote/server.js": "45efac2ccbc3dc78affb122f5b4f612f37395155ed18ef8491214c6dd0f2a1af",
+            "main/remote/json-responses.js": "ddc2bf73dad214f119a66389d200198fe10945634424e04d4a3d416e42ffc06f"
+          },
+          "pairedDevices": 100,
+          "results": [
+            {
+              "name": "twenty sequential authenticated HTTP requests",
+              "milliseconds": 54.0822,
+              "maxHeartbeatGapMs": 2.901999999999987,
+              "synchronousIdentityIO": {
+                "readFileSync": 60,
+                "existsSync": 60,
+                "writeFileSync": 0,
+                "renameSync": 0,
+                "statSync": 0
+              }
+            },
+            {
+              "name": "sixteen concurrent authenticated HTTP requests",
+              "milliseconds": 40.79650000000001,
+              "maxHeartbeatGapMs": 30.989000000000004,
+              "synchronousIdentityIO": {
+                "readFileSync": 48,
+                "existsSync": 48,
+                "writeFileSync": 0,
+                "renameSync": 0,
+                "statSync": 0
+              }
+            },
+            {
+              "name": "one thousand bound token checks",
+              "milliseconds": 735.2955000000001,
+              "maxHeartbeatGapMs": 735.1750000000001,
+              "synchronousIdentityIO": {
+                "readFileSync": 2000,
+                "existsSync": 2000,
+                "writeFileSync": 0,
+                "renameSync": 0,
+                "statSync": 0
+              }
+            }
+          ],
+          "baselineMode": "SHA-verified captured identity/server/JSON transport modules; current dependencies; production sources not replaced.",
+          "conditions": "Actual production HTTP server and identity repository, 100 generated paired identities, warmed local profile, loopback requests. Counts include identity/temp-file sync IO only. Single process observations, not P95 or phone/native acceptance."
+        },
+        {
+          "date": "2026-10-18T15:40:23.036Z",
+          "fixture": ".tmp\\refactor-tests\\identity-io-O8OMtd",
+          "baseline": false,
+          "sourceDigests": {
+            "main/remote/identity.js": "73261c4812938b1526700ae59c5054262e56500aea12fc289d3bc60a3888ddd9",
+            "main/remote/server.js": "b095bd8860806956685ba6129d353692b1deb214a4d37d3d5c3edf75fc86635a",
+            "main/remote/json-responses.js": "3844076ab33e7cd3c6e30644ab9bb25baefc885c5e2d09f1570dca54d7ba4e16"
+          },
+          "pairedDevices": 100,
+          "results": [
+            {
+              "name": "twenty sequential authenticated HTTP requests",
+              "milliseconds": 55.34739999999999,
+              "maxHeartbeatGapMs": 2.0230999999999995,
+              "synchronousIdentityIO": {
+                "readFileSync": 0,
+                "existsSync": 0,
+                "writeFileSync": 0,
+                "renameSync": 0,
+                "statSync": 0
+              }
+            },
+            {
+              "name": "sixteen concurrent authenticated HTTP requests",
+              "milliseconds": 17.235799999999983,
+              "maxHeartbeatGapMs": 4.416499999999985,
+              "synchronousIdentityIO": {
+                "readFileSync": 0,
+                "existsSync": 0,
+                "writeFileSync": 0,
+                "renameSync": 0,
+                "statSync": 0
+              }
+            },
+            {
+              "name": "one thousand bound token checks",
+              "milliseconds": 19.626499999999993,
+              "maxHeartbeatGapMs": 19.320400000000006,
+              "synchronousIdentityIO": {
+                "readFileSync": 0,
+                "existsSync": 0,
+                "writeFileSync": 0,
+                "renameSync": 0,
+                "statSync": 0
+              }
+            }
+          ],
+          "conditions": "Actual production HTTP server and identity repository, 100 generated paired identities, warmed local profile, loopback requests. Counts include identity/temp-file sync IO only. Single process observations, not P95 or phone/native acceptance."
+        }
+      ]
+    },
+    "finalNpmCommandObservation": {
+      "date": "2026-10-18T15:45:55.342Z",
+      "fixture": ".tmp\\refactor-tests\\identity-io-T5BuCZ",
+      "baseline": false,
+      "sourceDigests": {
+        "main/remote/identity.js": "1807700ddbeb1cce5aacc0f17fdc96a45e25e6ff2c1f41f0e6c24e2497972115",
+        "main/remote/server.js": "331f052d3e9e8c27ef20ece86e7eb39b08650351223ced861d7db557d3e977f3",
+        "main/remote/json-responses.js": "3844076ab33e7cd3c6e30644ab9bb25baefc885c5e2d09f1570dca54d7ba4e16"
+      },
+      "pairedDevices": 100,
+      "results": [
+        {
+          "name": "twenty sequential authenticated HTTP requests",
+          "milliseconds": 68.6483,
+          "maxHeartbeatGapMs": 1.8384000000000071,
+          "synchronousIdentityIO": {
+            "readFileSync": 0,
+            "existsSync": 0,
+            "writeFileSync": 0,
+            "renameSync": 0,
+            "statSync": 0
+          }
+        },
+        {
+          "name": "sixteen concurrent authenticated HTTP requests",
+          "milliseconds": 18.8647,
+          "maxHeartbeatGapMs": 4.508500000000026,
+          "synchronousIdentityIO": {
+            "readFileSync": 0,
+            "existsSync": 0,
+            "writeFileSync": 0,
+            "renameSync": 0,
+            "statSync": 0
+          }
+        },
+        {
+          "name": "one thousand bound token checks",
+          "milliseconds": 21.865699999999975,
+          "maxHeartbeatGapMs": 21.835799999999978,
+          "synchronousIdentityIO": {
+            "readFileSync": 0,
+            "existsSync": 0,
+            "writeFileSync": 0,
+            "renameSync": 0,
+            "statSync": 0
+          }
+        }
+      ],
+      "conditions": "Actual production HTTP server and identity repository, 100 generated paired identities, warmed local profile, loopback requests. Counts include identity/temp-file sync IO only. Single process observations, not P95 or phone/native acceptance."
+    },
+    "lifecycle": {
+      "date": "2026-10-18T15:45:55.596Z",
+      "fixture": ".tmp\\refactor-tests\\identity-lifecycle-0XlT36",
+      "passed": [
+        "asynchronous cold initialization and detached snapshots",
+        "concurrent approved claims preserve both durable pairings",
+        "legacy synchronous bridge fails busy while queued identity IO owns the file",
+        "one durable token for duplicate claims and no publication before rename",
+        "atomic write failure preserves cache/disk/approval and permits retry",
+        "durable revocation invalidates bearer and signed resources immediately after commit",
+        "late last-seen update cannot overwrite a rebound device",
+        "last-seen writes coalesce and flush owns actual completion",
+        "failed last-seen write is nonfatal and retries without publishing failed state",
+        "only unstarted refreshes coalesce; later external revocation is reread",
+        "unreadable identity fails closed without replacing a committed identity",
+        "durable legacy rotation invalidates its resources and preserves paired devices",
+        "corrupt identity rebuild is atomic and invalidates old credentials and pending pairing",
+        "profile ownership prevents credentials crossing user-data paths",
+        "response teardown retains its lease until asynchronous authorization settles"
+      ],
+      "sourceDigests": {
+        "main/remote/identity.js": "1807700ddbeb1cce5aacc0f17fdc96a45e25e6ff2c1f41f0e6c24e2497972115",
+        "main/remote/json-responses.js": "3844076ab33e7cd3c6e30644ab9bb25baefc885c5e2d09f1570dca54d7ba4e16"
+      },
+      "conditions": "Production identity repository, real atomic files, controlled async read/rename failure/delay, production JSON response ownership. No device, media decoding or crash recovery acceptance claim."
+    }
+  },
+  "checksOnFinalRuntime": [
+    {
+      "command": "npm run verify:identity-io",
+      "status": "passed",
+      "scope": "Actual production HTTP sync-IO counters and 15 lifecycle cases. Its last observation ran alongside syntax/YAML checks, remains separate from the final alternating series and includes 68.6483 ms sequential-request total."
+    },
+    {
+      "command": "npm run verify:json-responses",
+      "status": "passed",
+      "scope": "Controlled transport, actual slow socket and actual HTTP 10k legacy response, external credential-file edit while gzip waits, app revocation/rebinding, privacy and self-unpair acknowledgment."
+    },
+    {
+      "command": "node scripts/verify-plugin-remote-route.js",
+      "status": "passed",
+      "scope": "Actual route, existing synchronous boolean helper and new awaited async helper."
+    },
+    {
+      "command": "npm run verify:packaged-contracts -- --in-process-gpu --no-sandbox",
+      "status": "passed",
+      "scope": "Actual Electron/ASAR identity init/pair/sign/revoke and disk state; local test flags only."
+    },
+    {
+      "command": "Three alternating node scripts/verify-identity-io.js --baseline / without --baseline",
+      "status": "passed",
+      "scope": "Six final raw samples, SHA-verified captured modules and current dependencies; no other verification deliberately concurrent."
+    },
+    {
+      "command": "CI YAML/new script command and node --check",
+      "status": "passed",
+      "scope": "Parsed workflow step and package command; 18 changed runtime/verifier files syntax checked."
+    }
+  ],
+  "additionalBatchChecks": {
+    "qualification": "Passed during this batch; most preceded the final compatibility-only synchronous bridge extraction. The current analysis request/interests and plugin helper checks ran after that extraction. They do not imply physical-mobile/native acceptance.",
+    "checks": [
+      "remote/mobile pairing",
+      "remote API",
+      "network stream lifecycle",
+      "analysis interests",
+      "analysis request lifecycle",
+      "mobile correctness and actual two-phone HTTP identities",
+      "remote settings",
+      "media access",
+      "contracts",
+      "remote server lifecycle including delayed identity-write ownership",
+      "settings panels and actual Electron UI",
+      "IPC sender in actual Electron",
+      "startup",
+      "app initialization and actual Electron UI",
+      "shutdown persistence with actual identity prewarm and a live timeout watchdog",
+      "remote library"
+    ]
+  },
+  "compatibility": {
+    "installedPluginHelper": "authorizeMedia stays synchronous/boolean and refreshes the credential file synchronously; 503 identity_busy on queued work prevents write races.",
+    "currentPluginHelper": "authorizeMediaAsync is awaited; current analysis plugin falls back to authorizeMedia on older cores.",
+    "snapshot": "loadIdentity returns an owned copy; warm callers needing external-file freshness await refreshIdentity first. Cold local callers retain a synchronous compatibility fallback.",
+    "protocol": "No mobile HTTP payload, shared schema, desktop product launch flag, dependency or native-source change."
+  },
+  "limitations": [
+    "Local warmed loopback observations with generated 100-device JSON; three medians/maxima are not P95, cold-start, physical phone, throughput or sustained responsiveness acceptance.",
+    "Sequential HTTP totals did not improve materially (53.3654 to 55.0286 ms medians). The 1000-check tight loop is synthetic and still synchronous CPU/crypto work.",
+    "Other observations are retained separately, including a 68.6483 ms sequential HTTP total during the final npm/syntax check run and earlier checkpoint data. Earlier source digests are intentionally historical.",
+    "Only requests that have not started reading may share a refresh. Application commits serialize with reads; external file edits are observed on subsequent refresh boundaries, not continuously watched.",
+    "JSON authorization waits retain owner/byte leases until the actual asynchronous refresh settles. This is not a claim that filesystem operations can always be immediately cancelled.",
+    "Identity JSON parsing, normalization, hashing and settings copies remain on the main process. Explicit settings paths, the legacy plugin synchronous bridge and cold local fallback remain migration work.",
+    "Atomic replacement/failed-write tests do not prove fsync/power-loss durability, cross-file crash recovery, signing/update delivery or TLS.",
+    "R6 physical decoding/contention/rotation/PSS, other R7 responsiveness/feature/type/UI work and R8 delivery remain incomplete."
+  ]
+}

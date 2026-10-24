@@ -1,0 +1,1670 @@
+{
+  "date": "2026-10-19T07:56:34.688Z",
+  "stage": "R7 batch 17: version-only desktop configuration/media acknowledgments and selected-field save sanitation",
+  "environment": {
+    "node": "24.14.0",
+    "v8": "13.6.233.17-node.41",
+    "platform": "win32",
+    "arch": "x64",
+    "osRelease": "10.0.26300",
+    "cpu": "AMD Ryzen 7 5800X 8-Core Processor             ",
+    "electron": "35.7.5"
+  },
+  "sourceDigests": {
+    "main/settings.js": "277c5e9597bddf8583608a588daea3210f4cb9f49dff6b8e89bc41d977feeb45",
+    "main/ipc/settings.js": "de7fca92a59b29f8149f869bec5799bbbe8998a611844b28d027fae84e7035ad",
+    "main/ipc/media-data.js": "23dc622bb90bdbed724c5bdb86aecaa095a4ee4a1a4312b3387728d179b91300",
+    "main/application/media-mutations.js": "d818e77b93c16cc1b5ca7113dd910f9ff14009011598edbf3bade6a3c500a49c",
+    "main/remote/media-mutations.js": "76ea043d52a84d980b1b0ff683553cd304da1aa21c806c7d165b54beda11b2aa",
+    "main/application/settings-json.js": "b051646df7c453b943e1c51f0e58a23caaea1c06b8d4fe243c476e86bfeb60ba",
+    "main/application/settings-json-worker.js": "13bb2ffad8358b1a0f57f819d7a3b2bfc9cf6d942cb82d9be4408db424a481ec",
+    "main/application/settings-broadcast.js": "f7137590c14a6e3c4fa4217fe318f90d5072942b1d206c2d5d50e4a97e38281e",
+    "preload.js": "b4a725252f0b0a6ecd2afec36084678984a975b795c363ee2cd09f6fbdff22c6",
+    "src/electronAPI.d.ts": "e65d79c8fa1eb6aabebcba897a89add74074ce0c81953e64f34c41235b33fa20",
+    "src/api/media.ts": "c63e9606db06783225a634a278624ea3ba0a4fb9541624cffb105e1c0ff44e73",
+    "src/services/settings-client.js": "36c2fe66bd85f54bb4e89445fadf8f1c704a0bc271d79fe5f0b6eadd5f1ffdb1",
+    "src/hooks/useAppState.js": "26bd3629c0ebfeeed7a394ff90f0b4a1bdace96a1f110ee097cae405ed420a05",
+    "src/hooks/useAppController.js": "8708aac4dff9f3815db09d96f40e09f44f9bcffbd4ad26b136cfcd6cbd6562c3",
+    "src/hooks/useFavorites.js": "8ab483bb36c39a82c53d3b86f06932df28e7b0b67279a33d489bded6b8d9f2e4",
+    "src/hooks/useTagEditor.js": "1779628a8d9755d29a18f63e714a5b23dc1ba18c5b18c90d3a1459ec0510128d",
+    "packages/contracts/src/index.ts": "23ecb23d50d0b6cba74eed99238c20205c70d56a62ca5a7c0350db088a0e7af1",
+    "packages/contracts/src/settings-feed.ts": "8266d590aa5b9b2ac6bfa2a72fb4f9a269cd9e29de0de4cdf76832f7805342f6",
+    "packages/contracts/dist/index.js": "6fd89ec15d078d06f85781f98d2c8e9dd4815586539ec255cd40662f23c99ef3",
+    "packages/contracts/dist/index.d.ts": "70fe20ec736e996b75a46ee355b125669da5cee2ad0388f6b6f156d4a3017e4d",
+    "packages/contracts/dist/settings-feed.js": "d3de55971030b50e35ee4f8e70ebdd1c65a3353553f211aea31e6bf58e98424c",
+    "packages/contracts/dist/settings-feed.d.ts": "d111c15b37ea6f1d0967eeb799a423a4a09adbe3ebc0339f3977acb18363ee28",
+    "scripts/verify-settings-replies.js": "bcd3bd1c09408f928a6657cb1703ffc51f8ea3d44f5e056e29440cae22798f48",
+    "scripts/verify-settings-replies-cost.js": "5a48df927b98830cc667529dbc2558b13cae99704c4f6447791849210fde3303",
+    "scripts/verify-settings-feed-ui.js": "bda50f78695063155a139d68b94c44abfb3f8ec45cc0dbcf4f0d55d342f6cca2",
+    "scripts/verify-settings-feed-electron.js": "e2b4df5ea51aba3afbf7cf4931bd71158c1546972d06720845d9e3fa7991a35e",
+    "scripts/verify-settings-snapshots-electron.js": "24156174324f495d9659e7dc5be5fd234cdd7563e468fa8e6cb2a9fce8ba62e9",
+    "scripts/verify-mobile-bundles.js": "019ed797b1afd0b69494e55744e1f68fa43d96bfa735bca2cd24148cd122d098",
+    "package.json": "ae2c2f64468326aadf3f66a9e321bb3c295b728ae0c5e7a23c3969ab67136c49",
+    ".github/workflows/ci.yml": "8177e3b5d42e41d58f7a861195ae17c96013f3e5dd384c4f869494c2e925b34f",
+    "docs/refactor-progress.md": "bc67f6a6329a3d94f7c45dfd2e00b6b95d45d3a9c670d22611d7e24bbc42c8a3",
+    "docs/desktop-mobile-review-and-refactor-plan.md": "c5776f77cfaa864e92deec2df10ae2b9d34c5bcda9853c8daa3418aea2623283",
+    "docs/protocol-contracts.md": "02e9b32d20304bb21cbee361f963ea5c8d3b592dcfd39ccf27a2947d1ebb5708"
+  },
+  "inputArtifacts": {
+    "before": {
+      "file": ".tmp/refactor-tests/settings-replies-before.json",
+      "sha256": "52d73ea14804567abde56d8f02aa3bda1d36a39d2db48800fe8174a3726444a1"
+    },
+    "series": {
+      "file": ".tmp/refactor-tests/settings-replies-series-final.json",
+      "sha256": "5b664e63fb3de09e4eed705761ac0c609e197d60943871c0a074f3356b4244a4"
+    },
+    "lifecycle": {
+      "file": ".tmp/refactor-tests/settings-replies-lifecycle.json",
+      "sha256": "6e82b58ee17baf804b4b2cccd60d705065ea14e2668f26fa7aa2f36d9c4ed133"
+    },
+    "feedLifecycle": {
+      "file": ".tmp/refactor-tests/settings-feed-lifecycle.json",
+      "sha256": "956f17d7488acf13caa68c97ce35975c72467884f342dd9428073d812e1c99e7"
+    },
+    "native": {
+      "file": ".tmp/refactor-tests/settings-feed-electron.json",
+      "sha256": "97a5ea7ebf8b04a09e6fc4e51d3d341d056f98c53b8535073ffd249c1c49d900"
+    },
+    "appUI": {
+      "file": ".tmp/refactor-tests/settings-replies-app-ui.json",
+      "sha256": "4e3653316f3ecad5a200e09f56c27d8321e950c5079692f4697210166a940629"
+    },
+    "worker": {
+      "file": ".tmp/refactor-tests/settings-json-lifecycle.json",
+      "sha256": "9a51d8fbb049bcc26a01930a8a857be53a1362a111ba772eddffc04cd94c6816"
+    },
+    "patches": {
+      "file": ".tmp/refactor-tests/settings-patch-lifecycle.json",
+      "sha256": "43e253c34d41ab3eb56ea6a58f6a3d6bfbf32407aba938258df68777133b0015"
+    },
+    "mobile": {
+      "file": ".tmp/refactor-tests/contracts-bundles-evidence.json",
+      "sha256": "89dc43c91c13ce93a6100c505928a1334898d937876527b49fad7f74e40c7748"
+    },
+    "initialBefore": {
+      "file": ".tmp/refactor-tests/settings-replies-cost-1gNTlP/result.json",
+      "sha256": "67dec9e83dac6e4e9ffd2c13a50bbc52ca5ddc07ec71b01a2e63772678a74094"
+    },
+    "preliminaryParallelAfter": {
+      "file": ".tmp/refactor-tests/settings-replies-cost-0wXXPX/result.json",
+      "sha256": "74501a239c92b6eb5e7ae1667a25c8c2075b244fb395f9a3752681293680a34d"
+    }
+  },
+  "capturedBefore": {
+    "date": "2026-10-19T07:43:54.425Z",
+    "fixture": ".tmp\\refactor-tests\\settings-replies-before-ExPTE3",
+    "sourceDigests": {
+      "main/settings.js": "f63c39a704827255c83d248bbebcf9dd5f0a664e66b918781de7cb85f5515a80",
+      "main/ipc/settings.js": "0795511bfc94bd813d99012f8373bcfb12dfa520204d3ae24dc82524d7f8eecc",
+      "main/ipc/media-data.js": "fbcf14db2be08e8b3e9b5b7fe67ac5ea8b4f2d59d0e8c5050a3241ab05b890a9",
+      "main/application/media-mutations.js": "8457b641457e7f18c131a6560361aa48ad643571b1fe5b64b5c6216ba07af447",
+      "preload.js": "b9f1d33fd75e94cc9a80a9d85d9f30c552a59847bef812b975e89c13b920c271",
+      "src/api/media.ts": "c845c478047db840cc09853ac5de00a3fe0e6e35bed9d8a92ade6454c68dc4e0",
+      "src/services/settings-client.js": "cafd005db99d35d5387bc7ce06947b6674d4b4d1c76313ef0d9672442ad704ca"
+    }
+  },
+  "replayScope": "Hash-verified captured settings, media service and IPC modules compiled at their production filenames and installed only in the isolated test process require cache before dependent main modules load. Other compatible dependencies and generated contracts current. Captured preload/renderer sources identify the checkpoint but are not executed in the Node timing model. Production files were not swapped.",
+  "buildArtifacts": {
+    "dist/index.html": "a8ce3a4905de0541cf29d78fa875e705bb2cd0e3dac7c649f03cbc4767fde28c",
+    "dist/assets/index-BhcHHf6w.js": "4d7477025f4dae76812095e8b22790fa7329f4da2c3f70b4c32db9e55408a60e"
+  },
+  "implementation": [
+    "Optional settingsReply version-v1 on existing settings/favorite/tag read/tag replace/bulk IPC; no option retains legacy complete settings.",
+    "Separate returnSettings and opt-in returnVersion transaction options. Commit and read/no-op baselines return detached versions; default internal/HTTP shapes unchanged.",
+    "App settings, favorite and tag consumers reconcile acknowledgments against confirmed versions; last-event loss triggers a coalesced full read, not a resend.",
+    "Save sanitation copies current requested fields and path policy dependencies, preserving detached extension input and a complete compatibility path above 500 fields."
+  ],
+  "metrics": [
+    {
+      "operation": "theme IPC reply",
+      "before": {
+        "millisecondsMedian": 25.209699999999998,
+        "millisecondsMax": 29.108000000000004,
+        "maxHeartbeatGapMs": 12.446399999999983,
+        "responseJsonBytes": [
+          498508,
+          498509
+        ],
+        "fullStateParses": [
+          2
+        ]
+      },
+      "after": {
+        "millisecondsMedian": 12.997100000000046,
+        "millisecondsMax": 14.63620000000003,
+        "maxHeartbeatGapMs": 12.422000000000025,
+        "responseJsonBytes": [
+          96,
+          96
+        ],
+        "fullStateParses": [
+          0
+        ]
+      }
+    },
+    {
+      "operation": "favorite IPC reply",
+      "before": {
+        "millisecondsMedian": 38.2663,
+        "millisecondsMax": 42.83190000000002,
+        "maxHeartbeatGapMs": 22.408600000000092,
+        "responseJsonBytes": [
+          498667,
+          498793
+        ],
+        "fullStateParses": [
+          3
+        ]
+      },
+      "after": {
+        "millisecondsMedian": 20.799300000000017,
+        "millisecondsMax": 26.544799999999896,
+        "maxHeartbeatGapMs": 11.797699999999963,
+        "responseJsonBytes": [
+          253,
+          255
+        ],
+        "fullStateParses": [
+          2
+        ]
+      }
+    },
+    {
+      "operation": "tag read IPC reply",
+      "before": {
+        "millisecondsMedian": 243.3246999999999,
+        "millisecondsMax": 259.674,
+        "maxHeartbeatGapMs": 27.503099999999904,
+        "responseJsonBytes": [
+          498759,
+          498759
+        ],
+        "fullStateParses": [
+          3
+        ]
+      },
+      "after": {
+        "millisecondsMedian": 223.82330000000002,
+        "millisecondsMax": 229.1386,
+        "maxHeartbeatGapMs": 6.826999999999998,
+        "responseJsonBytes": [
+          220,
+          220
+        ],
+        "fullStateParses": [
+          2
+        ]
+      }
+    },
+    {
+      "operation": "tag write IPC reply",
+      "before": {
+        "millisecondsMedian": 295.11529999999993,
+        "millisecondsMax": 313.00679999999966,
+        "maxHeartbeatGapMs": 31.01700000000028,
+        "responseJsonBytes": [
+          499075,
+          499075
+        ],
+        "fullStateParses": [
+          3
+        ]
+      },
+      "after": {
+        "millisecondsMedian": 274.4855,
+        "millisecondsMax": 286.2180000000001,
+        "maxHeartbeatGapMs": 21.392100000000028,
+        "responseJsonBytes": [
+          327,
+          327
+        ],
+        "fullStateParses": [
+          2
+        ]
+      }
+    }
+  ],
+  "costSeries": {
+    "date": "2026-10-19T07:53:30.511Z",
+    "conditions": "Three alternating captured-before/current process pairs after targeted verification completed. Five observations per operation in each process. Controlled production IPC with Node cloned replies; no other verification launched during these measurements.",
+    "runs": [
+      {
+        "date": "2026-10-19T07:53:11.466Z",
+        "fixture": ".tmp\\refactor-tests\\settings-replies-cost-CElscc",
+        "before": true,
+        "sourceDigests": {
+          "main/settings.js": "f63c39a704827255c83d248bbebcf9dd5f0a664e66b918781de7cb85f5515a80",
+          "main/application/media-mutations.js": "8457b641457e7f18c131a6560361aa48ad643571b1fe5b64b5c6216ba07af447",
+          "main/ipc/settings.js": "0795511bfc94bd813d99012f8373bcfb12dfa520204d3ae24dc82524d7f8eecc",
+          "main/ipc/media-data.js": "fbcf14db2be08e8b3e9b5b7fe67ac5ea8b4f2d59d0e8c5050a3241ab05b890a9"
+        },
+        "tagEntries": 10000,
+        "results": [
+          {
+            "name": "theme IPC reply",
+            "observations": [
+              {
+                "milliseconds": 27.691399999999987,
+                "maxHeartbeatGapMs": 11.2029,
+                "responseJsonBytes": 498509,
+                "fullStateParses": 2
+              },
+              {
+                "milliseconds": 24.39100000000002,
+                "maxHeartbeatGapMs": 9.082899999999995,
+                "responseJsonBytes": 498508,
+                "fullStateParses": 2
+              },
+              {
+                "milliseconds": 22.99860000000001,
+                "maxHeartbeatGapMs": 10.408999999999992,
+                "responseJsonBytes": 498509,
+                "fullStateParses": 2
+              },
+              {
+                "milliseconds": 25.209699999999998,
+                "maxHeartbeatGapMs": 10.524700000000053,
+                "responseJsonBytes": 498508,
+                "fullStateParses": 2
+              },
+              {
+                "milliseconds": 23.867099999999937,
+                "maxHeartbeatGapMs": 9.801699999999983,
+                "responseJsonBytes": 498509,
+                "fullStateParses": 2
+              }
+            ]
+          },
+          {
+            "name": "favorite IPC reply",
+            "observations": [
+              {
+                "milliseconds": 39.47630000000004,
+                "maxHeartbeatGapMs": 19.667100000000005,
+                "responseJsonBytes": 498792,
+                "fullStateParses": 3
+              },
+              {
+                "milliseconds": 36.2170000000001,
+                "maxHeartbeatGapMs": 14.399200000000064,
+                "responseJsonBytes": 498667,
+                "fullStateParses": 3
+              },
+              {
+                "milliseconds": 37.59949999999992,
+                "maxHeartbeatGapMs": 18.1638999999999,
+                "responseJsonBytes": 498793,
+                "fullStateParses": 3
+              },
+              {
+                "milliseconds": 38.86430000000007,
+                "maxHeartbeatGapMs": 15.431300000000078,
+                "responseJsonBytes": 498668,
+                "fullStateParses": 3
+              },
+              {
+                "milliseconds": 42.83190000000002,
+                "maxHeartbeatGapMs": 22.408600000000092,
+                "responseJsonBytes": 498793,
+                "fullStateParses": 3
+              }
+            ]
+          },
+          {
+            "name": "tag read IPC reply",
+            "observations": [
+              {
+                "milliseconds": 253.0226,
+                "maxHeartbeatGapMs": 27.503099999999904,
+                "responseJsonBytes": 498759,
+                "fullStateParses": 3
+              },
+              {
+                "milliseconds": 259.0727999999999,
+                "maxHeartbeatGapMs": 22.56549999999993,
+                "responseJsonBytes": 498759,
+                "fullStateParses": 3
+              },
+              {
+                "milliseconds": 240.29909999999995,
+                "maxHeartbeatGapMs": 22.253099999999904,
+                "responseJsonBytes": 498759,
+                "fullStateParses": 3
+              },
+              {
+                "milliseconds": 241.37079999999992,
+                "maxHeartbeatGapMs": 22.9846,
+                "responseJsonBytes": 498759,
+                "fullStateParses": 3
+              },
+              {
+                "milliseconds": 236.0277000000001,
+                "maxHeartbeatGapMs": 22.90650000000005,
+                "responseJsonBytes": 498759,
+                "fullStateParses": 3
+              }
+            ]
+          },
+          {
+            "name": "tag write IPC reply",
+            "observations": [
+              {
+                "milliseconds": 313.00679999999966,
+                "maxHeartbeatGapMs": 24.047699999999622,
+                "responseJsonBytes": 499075,
+                "fullStateParses": 3
+              },
+              {
+                "milliseconds": 292.7230999999997,
+                "maxHeartbeatGapMs": 28.196500000000015,
+                "responseJsonBytes": 499075,
+                "fullStateParses": 3
+              },
+              {
+                "milliseconds": 281.9441999999999,
+                "maxHeartbeatGapMs": 23.740099999999984,
+                "responseJsonBytes": 499075,
+                "fullStateParses": 3
+              },
+              {
+                "milliseconds": 298.72739999999976,
+                "maxHeartbeatGapMs": 24.6266999999998,
+                "responseJsonBytes": 499075,
+                "fullStateParses": 3
+              },
+              {
+                "milliseconds": 293.9848999999999,
+                "maxHeartbeatGapMs": 22.853000000000065,
+                "responseJsonBytes": 499075,
+                "fullStateParses": 3
+              }
+            ]
+          }
+        ],
+        "conditions": "Controlled IPC registration with actual settings/media service, worker, atomic writes, generated network tag keys and one real file header. Negotiated publisher uses a no-op send; replies use Node structuredClone. Five observations per operation. Captured-before modules replayed in this isolated process require cache, compatible dependencies current. Not Electron transport, decoder, cold start or P95."
+      },
+      {
+        "date": "2026-10-19T07:53:15.098Z",
+        "fixture": ".tmp\\refactor-tests\\settings-replies-cost-26cIiX",
+        "before": false,
+        "sourceDigests": {
+          "main/settings.js": "277c5e9597bddf8583608a588daea3210f4cb9f49dff6b8e89bc41d977feeb45",
+          "main/application/media-mutations.js": "d818e77b93c16cc1b5ca7113dd910f9ff14009011598edbf3bade6a3c500a49c",
+          "main/ipc/settings.js": "de7fca92a59b29f8149f869bec5799bbbe8998a611844b28d027fae84e7035ad",
+          "main/ipc/media-data.js": "23dc622bb90bdbed724c5bdb86aecaa095a4ee4a1a4312b3387728d179b91300"
+        },
+        "tagEntries": 10000,
+        "results": [
+          {
+            "name": "theme IPC reply",
+            "observations": [
+              {
+                "milliseconds": 13.77389999999997,
+                "maxHeartbeatGapMs": 11.907600000000002,
+                "responseJsonBytes": 96,
+                "fullStateParses": 0
+              },
+              {
+                "milliseconds": 12.538700000000006,
+                "maxHeartbeatGapMs": 11.274000000000001,
+                "responseJsonBytes": 96,
+                "fullStateParses": 0
+              },
+              {
+                "milliseconds": 12.560799999999972,
+                "maxHeartbeatGapMs": 7.9839999999999804,
+                "responseJsonBytes": 96,
+                "fullStateParses": 0
+              },
+              {
+                "milliseconds": 13.167900000000031,
+                "maxHeartbeatGapMs": 6.356100000000026,
+                "responseJsonBytes": 96,
+                "fullStateParses": 0
+              },
+              {
+                "milliseconds": 13.104600000000005,
+                "maxHeartbeatGapMs": 8.436699999999973,
+                "responseJsonBytes": 96,
+                "fullStateParses": 0
+              }
+            ]
+          },
+          {
+            "name": "favorite IPC reply",
+            "observations": [
+              {
+                "milliseconds": 20.43610000000001,
+                "maxHeartbeatGapMs": 7.5750000000000455,
+                "responseJsonBytes": 253,
+                "fullStateParses": 2
+              },
+              {
+                "milliseconds": 21.396299999999997,
+                "maxHeartbeatGapMs": 11.797699999999963,
+                "responseJsonBytes": 254,
+                "fullStateParses": 2
+              },
+              {
+                "milliseconds": 26.544799999999896,
+                "maxHeartbeatGapMs": 7.8297000000000025,
+                "responseJsonBytes": 254,
+                "fullStateParses": 2
+              },
+              {
+                "milliseconds": 19.158300000000054,
+                "maxHeartbeatGapMs": 10.380899999999997,
+                "responseJsonBytes": 255,
+                "fullStateParses": 2
+              },
+              {
+                "milliseconds": 21.03150000000005,
+                "maxHeartbeatGapMs": 10.517900000000054,
+                "responseJsonBytes": 254,
+                "fullStateParses": 2
+              }
+            ]
+          },
+          {
+            "name": "tag read IPC reply",
+            "observations": [
+              {
+                "milliseconds": 224,
+                "maxHeartbeatGapMs": 5.529099999999971,
+                "responseJsonBytes": 220,
+                "fullStateParses": 2
+              },
+              {
+                "milliseconds": 223.82330000000002,
+                "maxHeartbeatGapMs": 5.296299999999974,
+                "responseJsonBytes": 220,
+                "fullStateParses": 2
+              },
+              {
+                "milliseconds": 229.1386,
+                "maxHeartbeatGapMs": 5.472600000000057,
+                "responseJsonBytes": 220,
+                "fullStateParses": 2
+              },
+              {
+                "milliseconds": 212.14179999999988,
+                "maxHeartbeatGapMs": 6.605000000000018,
+                "responseJsonBytes": 220,
+                "fullStateParses": 2
+              },
+              {
+                "milliseconds": 218.01289999999995,
+                "maxHeartbeatGapMs": 5.654299999999921,
+                "responseJsonBytes": 220,
+                "fullStateParses": 2
+              }
+            ]
+          },
+          {
+            "name": "tag write IPC reply",
+            "observations": [
+              {
+                "milliseconds": 286.2180000000001,
+                "maxHeartbeatGapMs": 18.39359999999988,
+                "responseJsonBytes": 327,
+                "fullStateParses": 2
+              },
+              {
+                "milliseconds": 285.9051000000002,
+                "maxHeartbeatGapMs": 19.184899999999743,
+                "responseJsonBytes": 327,
+                "fullStateParses": 2
+              },
+              {
+                "milliseconds": 281.2049000000002,
+                "maxHeartbeatGapMs": 21.392100000000028,
+                "responseJsonBytes": 327,
+                "fullStateParses": 2
+              },
+              {
+                "milliseconds": 272.39429999999993,
+                "maxHeartbeatGapMs": 16.075000000000273,
+                "responseJsonBytes": 327,
+                "fullStateParses": 2
+              },
+              {
+                "milliseconds": 262.94669999999996,
+                "maxHeartbeatGapMs": 18.264200000000073,
+                "responseJsonBytes": 327,
+                "fullStateParses": 2
+              }
+            ]
+          }
+        ],
+        "conditions": "Controlled IPC registration with actual settings/media service, worker, atomic writes, generated network tag keys and one real file header. Negotiated publisher uses a no-op send; replies use Node structuredClone. Five observations per operation. Captured-before modules replayed in this isolated process require cache, compatible dependencies current. Not Electron transport, decoder, cold start or P95."
+      },
+      {
+        "date": "2026-10-19T07:53:19.116Z",
+        "fixture": ".tmp\\refactor-tests\\settings-replies-cost-EqQapA",
+        "before": true,
+        "sourceDigests": {
+          "main/settings.js": "f63c39a704827255c83d248bbebcf9dd5f0a664e66b918781de7cb85f5515a80",
+          "main/application/media-mutations.js": "8457b641457e7f18c131a6560361aa48ad643571b1fe5b64b5c6216ba07af447",
+          "main/ipc/settings.js": "0795511bfc94bd813d99012f8373bcfb12dfa520204d3ae24dc82524d7f8eecc",
+          "main/ipc/media-data.js": "fbcf14db2be08e8b3e9b5b7fe67ac5ea8b4f2d59d0e8c5050a3241ab05b890a9"
+        },
+        "tagEntries": 10000,
+        "results": [
+          {
+            "name": "theme IPC reply",
+            "observations": [
+              {
+                "milliseconds": 29.108000000000004,
+                "maxHeartbeatGapMs": 12.446399999999983,
+                "responseJsonBytes": 498509,
+                "fullStateParses": 2
+              },
+              {
+                "milliseconds": 23.962200000000053,
+                "maxHeartbeatGapMs": 10.76120000000003,
+                "responseJsonBytes": 498508,
+                "fullStateParses": 2
+              },
+              {
+                "milliseconds": 23.576099999999997,
+                "maxHeartbeatGapMs": 8.860199999999963,
+                "responseJsonBytes": 498509,
+                "fullStateParses": 2
+              },
+              {
+                "milliseconds": 25.63409999999999,
+                "maxHeartbeatGapMs": 9.124499999999898,
+                "responseJsonBytes": 498508,
+                "fullStateParses": 2
+              },
+              {
+                "milliseconds": 24.8125,
+                "maxHeartbeatGapMs": 10.66960000000006,
+                "responseJsonBytes": 498509,
+                "fullStateParses": 2
+              }
+            ]
+          },
+          {
+            "name": "favorite IPC reply",
+            "observations": [
+              {
+                "milliseconds": 39.50739999999996,
+                "maxHeartbeatGapMs": 18.80989999999997,
+                "responseJsonBytes": 498792,
+                "fullStateParses": 3
+              },
+              {
+                "milliseconds": 39.98079999999993,
+                "maxHeartbeatGapMs": 15.171899999999937,
+                "responseJsonBytes": 498667,
+                "fullStateParses": 3
+              },
+              {
+                "milliseconds": 36.39309999999989,
+                "maxHeartbeatGapMs": 16.01769999999999,
+                "responseJsonBytes": 498793,
+                "fullStateParses": 3
+              },
+              {
+                "milliseconds": 38.45330000000001,
+                "maxHeartbeatGapMs": 19.044200000000046,
+                "responseJsonBytes": 498668,
+                "fullStateParses": 3
+              },
+              {
+                "milliseconds": 36.10439999999994,
+                "maxHeartbeatGapMs": 15.621700000000033,
+                "responseJsonBytes": 498793,
+                "fullStateParses": 3
+              }
+            ]
+          },
+          {
+            "name": "tag read IPC reply",
+            "observations": [
+              {
+                "milliseconds": 247.74560000000008,
+                "maxHeartbeatGapMs": 25.600800000000163,
+                "responseJsonBytes": 498759,
+                "fullStateParses": 3
+              },
+              {
+                "milliseconds": 253.3297,
+                "maxHeartbeatGapMs": 22.0788,
+                "responseJsonBytes": 498759,
+                "fullStateParses": 3
+              },
+              {
+                "milliseconds": 235.27530000000002,
+                "maxHeartbeatGapMs": 22.282899999999927,
+                "responseJsonBytes": 498759,
+                "fullStateParses": 3
+              },
+              {
+                "milliseconds": 235.85030000000006,
+                "maxHeartbeatGapMs": 22.512899999999945,
+                "responseJsonBytes": 498759,
+                "fullStateParses": 3
+              },
+              {
+                "milliseconds": 243.3246999999999,
+                "maxHeartbeatGapMs": 22.17939999999976,
+                "responseJsonBytes": 498759,
+                "fullStateParses": 3
+              }
+            ]
+          },
+          {
+            "name": "tag write IPC reply",
+            "observations": [
+              {
+                "milliseconds": 302.221,
+                "maxHeartbeatGapMs": 28.58289999999988,
+                "responseJsonBytes": 499075,
+                "fullStateParses": 3
+              },
+              {
+                "milliseconds": 295.11529999999993,
+                "maxHeartbeatGapMs": 24.010299999999916,
+                "responseJsonBytes": 499075,
+                "fullStateParses": 3
+              },
+              {
+                "milliseconds": 285.3875000000003,
+                "maxHeartbeatGapMs": 23.46270000000004,
+                "responseJsonBytes": 499075,
+                "fullStateParses": 3
+              },
+              {
+                "milliseconds": 296.8924000000002,
+                "maxHeartbeatGapMs": 31.01700000000028,
+                "responseJsonBytes": 499075,
+                "fullStateParses": 3
+              },
+              {
+                "milliseconds": 289.0897,
+                "maxHeartbeatGapMs": 22.4041000000002,
+                "responseJsonBytes": 499075,
+                "fullStateParses": 3
+              }
+            ]
+          }
+        ],
+        "conditions": "Controlled IPC registration with actual settings/media service, worker, atomic writes, generated network tag keys and one real file header. Negotiated publisher uses a no-op send; replies use Node structuredClone. Five observations per operation. Captured-before modules replayed in this isolated process require cache, compatible dependencies current. Not Electron transport, decoder, cold start or P95."
+      },
+      {
+        "date": "2026-10-19T07:53:22.710Z",
+        "fixture": ".tmp\\refactor-tests\\settings-replies-cost-62t90l",
+        "before": false,
+        "sourceDigests": {
+          "main/settings.js": "277c5e9597bddf8583608a588daea3210f4cb9f49dff6b8e89bc41d977feeb45",
+          "main/application/media-mutations.js": "d818e77b93c16cc1b5ca7113dd910f9ff14009011598edbf3bade6a3c500a49c",
+          "main/ipc/settings.js": "de7fca92a59b29f8149f869bec5799bbbe8998a611844b28d027fae84e7035ad",
+          "main/ipc/media-data.js": "23dc622bb90bdbed724c5bdb86aecaa095a4ee4a1a4312b3387728d179b91300"
+        },
+        "tagEntries": 10000,
+        "results": [
+          {
+            "name": "theme IPC reply",
+            "observations": [
+              {
+                "milliseconds": 14.417699999999968,
+                "maxHeartbeatGapMs": 7.478200000000015,
+                "responseJsonBytes": 96,
+                "fullStateParses": 0
+              },
+              {
+                "milliseconds": 12.54989999999998,
+                "maxHeartbeatGapMs": 6.855599999999981,
+                "responseJsonBytes": 96,
+                "fullStateParses": 0
+              },
+              {
+                "milliseconds": 12.433899999999994,
+                "maxHeartbeatGapMs": 10.15039999999999,
+                "responseJsonBytes": 96,
+                "fullStateParses": 0
+              },
+              {
+                "milliseconds": 12.997100000000046,
+                "maxHeartbeatGapMs": 11.634200000000021,
+                "responseJsonBytes": 96,
+                "fullStateParses": 0
+              },
+              {
+                "milliseconds": 12.017500000000041,
+                "maxHeartbeatGapMs": 10.605999999999995,
+                "responseJsonBytes": 96,
+                "fullStateParses": 0
+              }
+            ]
+          },
+          {
+            "name": "favorite IPC reply",
+            "observations": [
+              {
+                "milliseconds": 20.082200000000057,
+                "maxHeartbeatGapMs": 10.589500000000044,
+                "responseJsonBytes": 253,
+                "fullStateParses": 2
+              },
+              {
+                "milliseconds": 24.29219999999998,
+                "maxHeartbeatGapMs": 8.389800000000037,
+                "responseJsonBytes": 254,
+                "fullStateParses": 2
+              },
+              {
+                "milliseconds": 19.97860000000003,
+                "maxHeartbeatGapMs": 10.66560000000004,
+                "responseJsonBytes": 254,
+                "fullStateParses": 2
+              },
+              {
+                "milliseconds": 19.627700000000004,
+                "maxHeartbeatGapMs": 9.05989999999997,
+                "responseJsonBytes": 255,
+                "fullStateParses": 2
+              },
+              {
+                "milliseconds": 20.799300000000017,
+                "maxHeartbeatGapMs": 6.099699999999984,
+                "responseJsonBytes": 254,
+                "fullStateParses": 2
+              }
+            ]
+          },
+          {
+            "name": "tag read IPC reply",
+            "observations": [
+              {
+                "milliseconds": 228.43919999999991,
+                "maxHeartbeatGapMs": 6.097699999999918,
+                "responseJsonBytes": 220,
+                "fullStateParses": 2
+              },
+              {
+                "milliseconds": 224.92870000000005,
+                "maxHeartbeatGapMs": 6.133000000000038,
+                "responseJsonBytes": 220,
+                "fullStateParses": 2
+              },
+              {
+                "milliseconds": 227.9505999999999,
+                "maxHeartbeatGapMs": 5.830400000000054,
+                "responseJsonBytes": 220,
+                "fullStateParses": 2
+              },
+              {
+                "milliseconds": 213.86879999999996,
+                "maxHeartbeatGapMs": 5.8146999999999025,
+                "responseJsonBytes": 220,
+                "fullStateParses": 2
+              },
+              {
+                "milliseconds": 216.02949999999987,
+                "maxHeartbeatGapMs": 5.730599999999868,
+                "responseJsonBytes": 220,
+                "fullStateParses": 2
+              }
+            ]
+          },
+          {
+            "name": "tag write IPC reply",
+            "observations": [
+              {
+                "milliseconds": 278.6626000000001,
+                "maxHeartbeatGapMs": 17.322200000000066,
+                "responseJsonBytes": 327,
+                "fullStateParses": 2
+              },
+              {
+                "milliseconds": 275.82040000000006,
+                "maxHeartbeatGapMs": 18.802700000000186,
+                "responseJsonBytes": 327,
+                "fullStateParses": 2
+              },
+              {
+                "milliseconds": 273.0382000000004,
+                "maxHeartbeatGapMs": 16.069099999999708,
+                "responseJsonBytes": 327,
+                "fullStateParses": 2
+              },
+              {
+                "milliseconds": 277.33320000000003,
+                "maxHeartbeatGapMs": 20.269100000000435,
+                "responseJsonBytes": 327,
+                "fullStateParses": 2
+              },
+              {
+                "milliseconds": 267.5511999999999,
+                "maxHeartbeatGapMs": 20.661599999999908,
+                "responseJsonBytes": 327,
+                "fullStateParses": 2
+              }
+            ]
+          }
+        ],
+        "conditions": "Controlled IPC registration with actual settings/media service, worker, atomic writes, generated network tag keys and one real file header. Negotiated publisher uses a no-op send; replies use Node structuredClone. Five observations per operation. Captured-before modules replayed in this isolated process require cache, compatible dependencies current. Not Electron transport, decoder, cold start or P95."
+      },
+      {
+        "date": "2026-10-19T07:53:26.772Z",
+        "fixture": ".tmp\\refactor-tests\\settings-replies-cost-ZdJVcz",
+        "before": true,
+        "sourceDigests": {
+          "main/settings.js": "f63c39a704827255c83d248bbebcf9dd5f0a664e66b918781de7cb85f5515a80",
+          "main/application/media-mutations.js": "8457b641457e7f18c131a6560361aa48ad643571b1fe5b64b5c6216ba07af447",
+          "main/ipc/settings.js": "0795511bfc94bd813d99012f8373bcfb12dfa520204d3ae24dc82524d7f8eecc",
+          "main/ipc/media-data.js": "fbcf14db2be08e8b3e9b5b7fe67ac5ea8b4f2d59d0e8c5050a3241ab05b890a9"
+        },
+        "tagEntries": 10000,
+        "results": [
+          {
+            "name": "theme IPC reply",
+            "observations": [
+              {
+                "milliseconds": 28.912599999999998,
+                "maxHeartbeatGapMs": 11.273599999999988,
+                "responseJsonBytes": 498509,
+                "fullStateParses": 2
+              },
+              {
+                "milliseconds": 25.484899999999982,
+                "maxHeartbeatGapMs": 9.442099999999982,
+                "responseJsonBytes": 498508,
+                "fullStateParses": 2
+              },
+              {
+                "milliseconds": 26.117500000000064,
+                "maxHeartbeatGapMs": 11.813599999999951,
+                "responseJsonBytes": 498509,
+                "fullStateParses": 2
+              },
+              {
+                "milliseconds": 26.095699999999965,
+                "maxHeartbeatGapMs": 12.096599999999967,
+                "responseJsonBytes": 498508,
+                "fullStateParses": 2
+              },
+              {
+                "milliseconds": 24.2269,
+                "maxHeartbeatGapMs": 9.849299999999971,
+                "responseJsonBytes": 498509,
+                "fullStateParses": 2
+              }
+            ]
+          },
+          {
+            "name": "favorite IPC reply",
+            "observations": [
+              {
+                "milliseconds": 37.983799999999974,
+                "maxHeartbeatGapMs": 18.495499999999993,
+                "responseJsonBytes": 498792,
+                "fullStateParses": 3
+              },
+              {
+                "milliseconds": 38.2663,
+                "maxHeartbeatGapMs": 15.165700000000015,
+                "responseJsonBytes": 498667,
+                "fullStateParses": 3
+              },
+              {
+                "milliseconds": 36.165899999999965,
+                "maxHeartbeatGapMs": 16.252099999999928,
+                "responseJsonBytes": 498793,
+                "fullStateParses": 3
+              },
+              {
+                "milliseconds": 38.352499999999964,
+                "maxHeartbeatGapMs": 19.133499999999913,
+                "responseJsonBytes": 498668,
+                "fullStateParses": 3
+              },
+              {
+                "milliseconds": 36.42750000000001,
+                "maxHeartbeatGapMs": 16.050000000000068,
+                "responseJsonBytes": 498793,
+                "fullStateParses": 3
+              }
+            ]
+          },
+          {
+            "name": "tag read IPC reply",
+            "observations": [
+              {
+                "milliseconds": 254.01890000000003,
+                "maxHeartbeatGapMs": 27.30320000000006,
+                "responseJsonBytes": 498759,
+                "fullStateParses": 3
+              },
+              {
+                "milliseconds": 259.674,
+                "maxHeartbeatGapMs": 24.20049999999992,
+                "responseJsonBytes": 498759,
+                "fullStateParses": 3
+              },
+              {
+                "milliseconds": 245.6485,
+                "maxHeartbeatGapMs": 22.53370000000018,
+                "responseJsonBytes": 498759,
+                "fullStateParses": 3
+              },
+              {
+                "milliseconds": 238.8839999999998,
+                "maxHeartbeatGapMs": 21.89519999999993,
+                "responseJsonBytes": 498759,
+                "fullStateParses": 3
+              },
+              {
+                "milliseconds": 239.89700000000016,
+                "maxHeartbeatGapMs": 22.125100000000202,
+                "responseJsonBytes": 498759,
+                "fullStateParses": 3
+              }
+            ]
+          },
+          {
+            "name": "tag write IPC reply",
+            "observations": [
+              {
+                "milliseconds": 305.47469999999976,
+                "maxHeartbeatGapMs": 25.465899999999692,
+                "responseJsonBytes": 499075,
+                "fullStateParses": 3
+              },
+              {
+                "milliseconds": 296.8188,
+                "maxHeartbeatGapMs": 23.44399999999996,
+                "responseJsonBytes": 499075,
+                "fullStateParses": 3
+              },
+              {
+                "milliseconds": 289.8443000000002,
+                "maxHeartbeatGapMs": 25.684299999999894,
+                "responseJsonBytes": 499075,
+                "fullStateParses": 3
+              },
+              {
+                "milliseconds": 298.9210000000003,
+                "maxHeartbeatGapMs": 26.241700000000037,
+                "responseJsonBytes": 499075,
+                "fullStateParses": 3
+              },
+              {
+                "milliseconds": 292.8666000000003,
+                "maxHeartbeatGapMs": 22.593000000000302,
+                "responseJsonBytes": 499075,
+                "fullStateParses": 3
+              }
+            ]
+          }
+        ],
+        "conditions": "Controlled IPC registration with actual settings/media service, worker, atomic writes, generated network tag keys and one real file header. Negotiated publisher uses a no-op send; replies use Node structuredClone. Five observations per operation. Captured-before modules replayed in this isolated process require cache, compatible dependencies current. Not Electron transport, decoder, cold start or P95."
+      },
+      {
+        "date": "2026-10-19T07:53:30.395Z",
+        "fixture": ".tmp\\refactor-tests\\settings-replies-cost-WSehPl",
+        "before": false,
+        "sourceDigests": {
+          "main/settings.js": "277c5e9597bddf8583608a588daea3210f4cb9f49dff6b8e89bc41d977feeb45",
+          "main/application/media-mutations.js": "d818e77b93c16cc1b5ca7113dd910f9ff14009011598edbf3bade6a3c500a49c",
+          "main/ipc/settings.js": "de7fca92a59b29f8149f869bec5799bbbe8998a611844b28d027fae84e7035ad",
+          "main/ipc/media-data.js": "23dc622bb90bdbed724c5bdb86aecaa095a4ee4a1a4312b3387728d179b91300"
+        },
+        "tagEntries": 10000,
+        "results": [
+          {
+            "name": "theme IPC reply",
+            "observations": [
+              {
+                "milliseconds": 14.303899999999999,
+                "maxHeartbeatGapMs": 12.422000000000025,
+                "responseJsonBytes": 96,
+                "fullStateParses": 0
+              },
+              {
+                "milliseconds": 13.326700000000017,
+                "maxHeartbeatGapMs": 9.06170000000003,
+                "responseJsonBytes": 96,
+                "fullStateParses": 0
+              },
+              {
+                "milliseconds": 12.859800000000007,
+                "maxHeartbeatGapMs": 6.39670000000001,
+                "responseJsonBytes": 96,
+                "fullStateParses": 0
+              },
+              {
+                "milliseconds": 14.63620000000003,
+                "maxHeartbeatGapMs": 8.558400000000006,
+                "responseJsonBytes": 96,
+                "fullStateParses": 0
+              },
+              {
+                "milliseconds": 12.546600000000012,
+                "maxHeartbeatGapMs": 9.777699999999982,
+                "responseJsonBytes": 96,
+                "fullStateParses": 0
+              }
+            ]
+          },
+          {
+            "name": "favorite IPC reply",
+            "observations": [
+              {
+                "milliseconds": 20.987899999999968,
+                "maxHeartbeatGapMs": 7.433599999999956,
+                "responseJsonBytes": 253,
+                "fullStateParses": 2
+              },
+              {
+                "milliseconds": 25.447099999999978,
+                "maxHeartbeatGapMs": 8.877700000000004,
+                "responseJsonBytes": 254,
+                "fullStateParses": 2
+              },
+              {
+                "milliseconds": 20.83630000000005,
+                "maxHeartbeatGapMs": 6.845199999999977,
+                "responseJsonBytes": 254,
+                "fullStateParses": 2
+              },
+              {
+                "milliseconds": 19.75980000000004,
+                "maxHeartbeatGapMs": 10.809399999999982,
+                "responseJsonBytes": 255,
+                "fullStateParses": 2
+              },
+              {
+                "milliseconds": 20.37309999999991,
+                "maxHeartbeatGapMs": 11.45760000000007,
+                "responseJsonBytes": 254,
+                "fullStateParses": 2
+              }
+            ]
+          },
+          {
+            "name": "tag read IPC reply",
+            "observations": [
+              {
+                "milliseconds": 227.86710000000005,
+                "maxHeartbeatGapMs": 6.826999999999998,
+                "responseJsonBytes": 220,
+                "fullStateParses": 2
+              },
+              {
+                "milliseconds": 220.5937,
+                "maxHeartbeatGapMs": 5.509500000000116,
+                "responseJsonBytes": 220,
+                "fullStateParses": 2
+              },
+              {
+                "milliseconds": 228.69869999999992,
+                "maxHeartbeatGapMs": 6.15119999999979,
+                "responseJsonBytes": 220,
+                "fullStateParses": 2
+              },
+              {
+                "milliseconds": 213.37000000000012,
+                "maxHeartbeatGapMs": 5.555399999999963,
+                "responseJsonBytes": 220,
+                "fullStateParses": 2
+              },
+              {
+                "milliseconds": 219.4050000000002,
+                "maxHeartbeatGapMs": 5.787800000000061,
+                "responseJsonBytes": 220,
+                "fullStateParses": 2
+              }
+            ]
+          },
+          {
+            "name": "tag write IPC reply",
+            "observations": [
+              {
+                "milliseconds": 274.4855,
+                "maxHeartbeatGapMs": 16.77690000000007,
+                "responseJsonBytes": 327,
+                "fullStateParses": 2
+              },
+              {
+                "milliseconds": 270.7419,
+                "maxHeartbeatGapMs": 17.674199999999928,
+                "responseJsonBytes": 327,
+                "fullStateParses": 2
+              },
+              {
+                "milliseconds": 271.86770000000024,
+                "maxHeartbeatGapMs": 15.58560000000034,
+                "responseJsonBytes": 327,
+                "fullStateParses": 2
+              },
+              {
+                "milliseconds": 284.8265000000001,
+                "maxHeartbeatGapMs": 21.32930000000033,
+                "responseJsonBytes": 327,
+                "fullStateParses": 2
+              },
+              {
+                "milliseconds": 273.42819999999983,
+                "maxHeartbeatGapMs": 15.577499999999873,
+                "responseJsonBytes": 327,
+                "fullStateParses": 2
+              }
+            ]
+          }
+        ],
+        "conditions": "Controlled IPC registration with actual settings/media service, worker, atomic writes, generated network tag keys and one real file header. Negotiated publisher uses a no-op send; replies use Node structuredClone. Five observations per operation. Captured-before modules replayed in this isolated process require cache, compatible dependencies current. Not Electron transport, decoder, cold start or P95."
+      }
+    ]
+  },
+  "interpretation": {
+    "sample": "Three alternating before/current independent processes; five observations of each operation in each process, pooled 15 per version/operation.",
+    "workload": "10000 generated URL tag keys plus one synthetic file header. Production IPC handlers/worker/filesystem/media preparation, no-op broadcaster, Node structuredClone replies. JSON byte counting outside the timed operation.",
+    "observed": "Theme/favorite call median and reply size fell. Tags improve modestly but remain over 200 ms in this fixture. Theme whole-state parses 2 to 0, media 3 to 2. Theme maximum heartbeat did not improve materially.",
+    "excluded": "Initial standalone before and early after under parallel verification retained by fixture path, excluded from final series.",
+    "notEstablished": "Electron transport wire bytes or P95, renderer interaction latency, cold startup, physical decode/contention, peak/PSS/long-run memory."
+  },
+  "lifecycle": {
+    "date": "2026-10-19T07:52:36.567Z",
+    "fixture": ".tmp\\refactor-tests\\settings-replies-8qpt0C",
+    "passed": [
+      "normal version acknowledgment uses the already observed feed without a full read",
+      "missing final broadcast recovers from the acknowledgment with one authoritative read",
+      "concurrent media acknowledgments share a recovery read and old acknowledgments preserve new state",
+      "malformed or unreachable acknowledgment cannot spin, silently succeed or mutate confirmed state",
+      "failed persistence rolls back intent and retired save acknowledgments cannot publish",
+      "legacy save API retains complete snapshot behavior without the reply option",
+      "production IPC opt-in returns detached commit versions including no-op and rejects invalid options before writes",
+      "media IPC preserves tag CAS/replay, bulk partial failure and legacy replies while version replies omit full settings",
+      "save sanitation reads selected fields, preserves directory policy and isolates custom sanitizer inputs",
+      "failed disk replacement cannot return a success version or publish a new snapshot"
+    ],
+    "sourceDigests": {
+      "main/settings.js": "277c5e9597bddf8583608a588daea3210f4cb9f49dff6b8e89bc41d977feeb45",
+      "main/ipc/settings.js": "de7fca92a59b29f8149f869bec5799bbbe8998a611844b28d027fae84e7035ad",
+      "main/ipc/media-data.js": "23dc622bb90bdbed724c5bdb86aecaa095a4ee4a1a4312b3387728d179b91300",
+      "main/application/media-mutations.js": "d818e77b93c16cc1b5ca7113dd910f9ff14009011598edbf3bade6a3c500a49c",
+      "preload.js": "b4a725252f0b0a6ecd2afec36084678984a975b795c363ee2cd09f6fbdff22c6",
+      "src/services/settings-client.js": "36c2fe66bd85f54bb4e89445fadf8f1c704a0bc271d79fe5f0b6eadd5f1ffdb1",
+      "src/api/media.ts": "c63e9606db06783225a634a278624ea3ba0a4fb9541624cffb105e1c0ff44e73",
+      "src/hooks/useAppState.js": "26bd3629c0ebfeeed7a394ff90f0b4a1bdace96a1f110ee097cae405ed420a05",
+      "src/hooks/useAppController.js": "8708aac4dff9f3815db09d96f40e09f44f9bcffbd4ad26b136cfcd6cbd6562c3",
+      "src/hooks/useFavorites.js": "8ab483bb36c39a82c53d3b86f06932df28e7b0b67279a33d489bded6b8d9f2e4",
+      "src/hooks/useTagEditor.js": "1779628a8d9755d29a18f63e714a5b23dc1ba18c5b18c90d3a1459ec0510128d",
+      "packages/contracts/src/settings-feed.ts": "8266d590aa5b9b2ac6bfa2a72fb4f9a269cd9e29de0de4cdf76832f7805342f6"
+    },
+    "conditions": "Actual production settings, JSON worker and IPC handlers under controlled registration; production SettingsClient through module harness. Native frame/preload/App checks are separate."
+  },
+  "feedLifecycle": {
+    "date": "2026-10-19T07:56:33.494Z",
+    "fixture": ".tmp\\refactor-tests\\settings-feed-LQJxly",
+    "passed": [
+      "shared schema protects metadata, special keys and map ordering",
+      "initial feed reads coalesce and a pre-reply event triggers one fresh baseline",
+      "entity changes preserve unchanged references and optimistic intent rejects stale full acknowledgments",
+      "lost/out-of-order messages coalesce recovery and fresh baselines bound invalid-clock retries",
+      "private fields and malformed map order cannot partially mutate confirmed settings",
+      "retired reads do not publish after disposal and current recovery failures stay visible",
+      "negotiated broadcasts carry one entity and keep a stable feed for multiple readers",
+      "field and playback reads avoid full snapshots while keeping detached values",
+      "legacy listeners coexist and stale unsubscribe messages cannot disable newer listeners",
+      "unannounced version changes recover with a full snapshot and privacy changes stay redacted",
+      "failed commits and retired frame scopes cannot emit state"
+    ],
+    "sourceDigests": {
+      "main/settings.js": "277c5e9597bddf8583608a588daea3210f4cb9f49dff6b8e89bc41d977feeb45",
+      "main/application/settings-broadcast.js": "f7137590c14a6e3c4fa4217fe318f90d5072942b1d206c2d5d50e4a97e38281e",
+      "main/application/settings-json.js": "b051646df7c453b943e1c51f0e58a23caaea1c06b8d4fe243c476e86bfeb60ba",
+      "main/application/settings-json-worker.js": "13bb2ffad8358b1a0f57f819d7a3b2bfc9cf6d942cb82d9be4408db424a481ec",
+      "src/services/settings-client.js": "36c2fe66bd85f54bb4e89445fadf8f1c704a0bc271d79fe5f0b6eadd5f1ffdb1",
+      "src/hooks/useAppState.js": "26bd3629c0ebfeeed7a394ff90f0b4a1bdace96a1f110ee097cae405ed420a05",
+      "src/utils/share-json.js": "91392d99af0dbc903522f41b35b1f7a4beb2bd8947251fb95f9c7873523b52a4",
+      "preload.js": "b4a725252f0b0a6ecd2afec36084678984a975b795c363ee2cd09f6fbdff22c6",
+      "packages/contracts/src/settings-feed.ts": "8266d590aa5b9b2ac6bfa2a72fb4f9a269cd9e29de0de4cdf76832f7805342f6"
+    },
+    "conditions": "Actual production settings, worker, publisher and renderer SettingsClient. Renderer hooks loaded through controlled harness and main-frame scope injected here; actual Electron frame/preload verification is separate."
+  },
+  "nativeFeedAndReplies": {
+    "date": "2026-10-19T07:50:11.852Z",
+    "fixture": ".tmp\\refactor-tests\\settings-feed-ui-R3lzkZ",
+    "passed": [
+      "production sandbox preload and SettingsClient receive only narrow actual Electron events",
+      "legacy full subscriptions coexist and unsubscribe without changing current consumers",
+      "a lost native event produces one authoritative full resync",
+      "foreign navigation cannot read or receive settings and an authorized reload gets a fresh feed",
+      "production SettingsClient requests version-only durable save replies without an extra full read",
+      "a version acknowledgment repairs a lost final save event with one authoritative full read",
+      "production media adapters use small version replies, recover a lost last event and preserve tag replay, bulk and legacy reads"
+    ],
+    "ordinary": [
+      {
+        "channel": "settings-patched",
+        "kind": "settings-patch-v1",
+        "bytes": 271,
+        "feedId": "06996106-5e8a-4b31-a82a-4bdc93bbda8c",
+        "mapKeys": {}
+      },
+      {
+        "channel": "settings-patched",
+        "kind": "settings-patch-v1",
+        "bytes": 525,
+        "feedId": "06996106-5e8a-4b31-a82a-4bdc93bbda8c",
+        "mapKeys": {
+          "playbackStates": [
+            "fixture-video"
+          ]
+        }
+      },
+      {
+        "channel": "settings-patched",
+        "kind": "settings-patch-v1",
+        "bytes": 312,
+        "feedId": "06996106-5e8a-4b31-a82a-4bdc93bbda8c",
+        "mapKeys": {
+          "customTags": [
+            "file-7"
+          ]
+        }
+      }
+    ],
+    "replies": [
+      {
+        "channel": "save-settings",
+        "bytes": 97,
+        "hasSettings": false,
+        "version": {
+          "epoch": "4842244f-6ad0-4764-9cf7-dee548171870",
+          "revision": 12
+        }
+      },
+      {
+        "channel": "save-settings",
+        "bytes": 97,
+        "hasSettings": false,
+        "version": {
+          "epoch": "4842244f-6ad0-4764-9cf7-dee548171870",
+          "revision": 13
+        }
+      },
+      {
+        "channel": "media-set-favorite",
+        "bytes": 247,
+        "hasSettings": false,
+        "version": {
+          "epoch": "4842244f-6ad0-4764-9cf7-dee548171870",
+          "revision": 14
+        }
+      },
+      {
+        "channel": "media-set-favorite",
+        "bytes": 248,
+        "hasSettings": false,
+        "version": {
+          "epoch": "4842244f-6ad0-4764-9cf7-dee548171870",
+          "revision": 15
+        }
+      },
+      {
+        "channel": "media-get-tags",
+        "bytes": 220,
+        "hasSettings": false,
+        "version": {
+          "epoch": "4842244f-6ad0-4764-9cf7-dee548171870",
+          "revision": 15
+        }
+      },
+      {
+        "channel": "media-set-tags",
+        "bytes": 321,
+        "hasSettings": false,
+        "version": {
+          "epoch": "4842244f-6ad0-4764-9cf7-dee548171870",
+          "revision": 16
+        }
+      },
+      {
+        "channel": "media-set-tags",
+        "bytes": 320,
+        "hasSettings": false,
+        "version": {
+          "epoch": "4842244f-6ad0-4764-9cf7-dee548171870",
+          "revision": 16
+        }
+      },
+      {
+        "channel": "media-append-tags",
+        "bytes": 358,
+        "hasSettings": false,
+        "version": {
+          "epoch": "4842244f-6ad0-4764-9cf7-dee548171870",
+          "revision": 17
+        }
+      }
+    ],
+    "sourceDigests": {
+      "main/settings.js": "277c5e9597bddf8583608a588daea3210f4cb9f49dff6b8e89bc41d977feeb45",
+      "main/application/settings-broadcast.js": "f7137590c14a6e3c4fa4217fe318f90d5072942b1d206c2d5d50e4a97e38281e",
+      "main/ipc/settings.js": "de7fca92a59b29f8149f869bec5799bbbe8998a611844b28d027fae84e7035ad",
+      "main/ipc/media-data.js": "23dc622bb90bdbed724c5bdb86aecaa095a4ee4a1a4312b3387728d179b91300",
+      "main/application/media-mutations.js": "d818e77b93c16cc1b5ca7113dd910f9ff14009011598edbf3bade6a3c500a49c",
+      "main/security/ipc-sender.js": "da80398dd786f6a7b6c737fbd2e3f0de9b581584fb5c3f81a16b44a12e570b1a",
+      "preload.js": "b4a725252f0b0a6ecd2afec36084678984a975b795c363ee2cd09f6fbdff22c6",
+      "src/api/media.ts": "c63e9606db06783225a634a278624ea3ba0a4fb9541624cffb105e1c0ff44e73",
+      "src/services/settings-client.js": "36c2fe66bd85f54bb4e89445fadf8f1c704a0bc271d79fe5f0b6eadd5f1ffdb1",
+      "src/utils/share-json.js": "91392d99af0dbc903522f41b35b1f7a4beb2bd8947251fb95f9c7873523b52a4",
+      "packages/contracts/dist/settings-feed.js": "d3de55971030b50e35ee4f8e70ebdd1c65a3353553f211aea31e6bf58e98424c"
+    },
+    "conditions": "Actual hidden Electron, production sandbox preload, guarded IPC and freshly bundled SettingsClient. 10000 generated tags, no decoder. JSON payload size is not IPC wire size or native latency/P95."
+  },
+  "rebuiltAppUI": {
+    "date": "2026-10-19T07:52:39.262Z",
+    "passed": [
+      "rebuilt production App uses version acknowledgments with queued intent and old reply isolation",
+      "actual settings disk failure shows a visible error and retry succeeds",
+      "actual favorite hook recovers a lost last event with one feed read",
+      "actual tag editor recovers a lost last event with one feed read and closes after reconciliation"
+    ],
+    "mediaReplies": [
+      {
+        "channel": "media-set-favorite",
+        "version": {
+          "epoch": "220ccf4b-f56e-473c-a2c5-8958613349bf",
+          "revision": 8
+        },
+        "bytes": 218,
+        "hasSettings": false
+      },
+      {
+        "channel": "media-get-tags",
+        "version": {
+          "epoch": "220ccf4b-f56e-473c-a2c5-8958613349bf",
+          "revision": 8
+        },
+        "bytes": 219,
+        "hasSettings": false
+      },
+      {
+        "channel": "media-set-tags",
+        "version": {
+          "epoch": "220ccf4b-f56e-473c-a2c5-8958613349bf",
+          "revision": 9
+        },
+        "bytes": 297,
+        "hasSettings": false
+      }
+    ],
+    "sourceDigests": {
+      "main/settings.js": "277c5e9597bddf8583608a588daea3210f4cb9f49dff6b8e89bc41d977feeb45",
+      "main/ipc/settings.js": "de7fca92a59b29f8149f869bec5799bbbe8998a611844b28d027fae84e7035ad",
+      "main/ipc/media-data.js": "23dc622bb90bdbed724c5bdb86aecaa095a4ee4a1a4312b3387728d179b91300",
+      "preload.js": "b4a725252f0b0a6ecd2afec36084678984a975b795c363ee2cd09f6fbdff22c6",
+      "src/services/settings-client.js": "36c2fe66bd85f54bb4e89445fadf8f1c704a0bc271d79fe5f0b6eadd5f1ffdb1",
+      "src/hooks/useAppState.js": "26bd3629c0ebfeeed7a394ff90f0b4a1bdace96a1f110ee097cae405ed420a05",
+      "src/hooks/useAppController.js": "8708aac4dff9f3815db09d96f40e09f44f9bcffbd4ad26b136cfcd6cbd6562c3",
+      "src/hooks/useFavorites.js": "8ab483bb36c39a82c53d3b86f06932df28e7b0b67279a33d489bded6b8d9f2e4",
+      "src/hooks/useTagEditor.js": "1779628a8d9755d29a18f63e714a5b23dc1ba18c5b18c90d3a1459ec0510128d",
+      "src/api/media.ts": "c63e9606db06783225a634a278624ea3ba0a4fb9541624cffb105e1c0ff44e73"
+    },
+    "conditions": "Actual rebuilt production App, guarded IPC and preload in hidden Electron with synthetic video headers. UI clicks via executeJavaScript, no decode or physical device."
+  },
+  "regressions": {
+    "worker": {
+      "date": "2026-10-19T07:46:54.098Z",
+      "fixture": ".tmp\\refactor-tests\\settings-json-lifecycle-PD2QJl",
+      "passed": [
+        "worker snapshot and returned fields have separate ownership",
+        "seed mismatch, JSON canonical semantics and serialization error recovery",
+        "configured byte budget rejects before publication and recovers",
+        "single active job and graceful close wait for actual worker completion",
+        "forced close terminates only the owned thread before releasing the job",
+        "unexpected thread exit and malformed response recover after thread exit",
+        "deadline terminates a live blocked worker and later requests recover",
+        "idle worker does not keep an otherwise completed Node process alive",
+        "idle retirement releases the owned thread and later reseeds from current state",
+        "ordinary production patch sends changed fields and preserves input/result/cache ownership",
+        "value-only result and worker failure never publish or replace the durable file",
+        "synchronous changes during worker preparation rebase and flush together",
+        "custom property-key JSON, special keys and directory callback ownership stay compatible",
+        "path rebase compares the encoded durable snapshot before scheduling a follow-up write"
+      ],
+      "sourceDigests": {
+        "main/settings.js": "277c5e9597bddf8583608a588daea3210f4cb9f49dff6b8e89bc41d977feeb45",
+        "main/application/settings-json.js": "b051646df7c453b943e1c51f0e58a23caaea1c06b8d4fe243c476e86bfeb60ba",
+        "main/application/settings-json-worker.js": "13bb2ffad8358b1a0f57f819d7a3b2bfc9cf6d942cb82d9be4408db424a481ec",
+        "main/application/media-mutations.js": "d818e77b93c16cc1b5ca7113dd910f9ff14009011598edbf3bade6a3c500a49c",
+        "main/remote/media-mutations.js": "76ea043d52a84d980b1b0ff683553cd304da1aa21c806c7d165b54beda11b2aa",
+        "main/index.js": "81a0f85e42439421d6d976012f4b5ff01ccb21aa8155487541cf9bd35e0701dc"
+      }
+    },
+    "patches": {
+      "date": "2026-10-19T07:46:54.299Z",
+      "fixture": ".tmp\\refactor-tests\\settings-patch-lifecycle-0Ir2ID",
+      "passed": [
+        "detached initial/provider defaults",
+        "patch-only intent",
+        "cache unchanged before rename",
+        "sync field/plugin rebase",
+        "observer/result/callback/input isolation after commit",
+        "in-flight input cannot change durable intent",
+        "queued input captured at call",
+        "snapshot stamps",
+        "failed custom merge does not mutate cache or notify",
+        "explicit undefined reset",
+        "unrelated patch preserves path config",
+        "actual policy re-resolves retargeted root",
+        "explicit path patch normalizes current root"
+      ],
+      "conditions": "Production settings and media policy, actual atomic file writes and real directory junction/symlink. Rename delay/failure controlled; no renderer/native performance claim."
+    },
+    "developmentCorrection": "The unchanged existing worker lifecycle rejected an extra settingsVersion on value-only results in the initial implementation. Version metadata was made opt-in instead; original result-shape assertions pass. Controlled realm object assertion and missing custom-section fixture value were corrected in the new verifier."
+  },
+  "mobileBundles": {
+    "results": [
+      {
+        "platform": "android",
+        "bytes": 3104440,
+        "modules": 2514,
+        "reactVersion": "19.2.3",
+        "sharedContracts": true
+      },
+      {
+        "platform": "ios",
+        "bytes": 3100836,
+        "modules": 2518,
+        "reactVersion": "19.2.3",
+        "sharedContracts": true
+      }
+    ],
+    "conditions": "Fresh Android/iOS production Hermes exports verified current shared runtime source and a single pinned mobile React; no physical device or native decoding claim.",
+    "artifacts": {
+      "android": {
+        "metadata": {
+          "file": ".tmp/refactor-tests/contracts-android-bundle/metadata.json",
+          "sha256": "ec658347288e2216df8f7ba1d32157f36552bad2a103f698006b755d05303945"
+        },
+        "bundle": {
+          "file": ".tmp/refactor-tests/contracts-android-bundle/_expo/static/js/android/AppEntry-9192b9d69a39b92c9456aabd350dd61b.hbc",
+          "sha256": "701c55d2b013a970e98eb49fcfbedd7ac541b6635c2ed7fa8b75919441feb847"
+        },
+        "sourceMap": {
+          "file": ".tmp/refactor-tests/contracts-android-bundle/_expo/static/js/android/AppEntry-9192b9d69a39b92c9456aabd350dd61b.hbc.map",
+          "sha256": "e756e6557ca6a0fc25f952a5fcdc69a91ba24f7dd2caf2d0a8d12440e1e07df0"
+        }
+      },
+      "ios": {
+        "metadata": {
+          "file": ".tmp/refactor-tests/contracts-ios-bundle/metadata.json",
+          "sha256": "0ebc8a6e560991a48fee42d58c5f2c423ee5065c6d3c5402c0f79357e3a59494"
+        },
+        "bundle": {
+          "file": ".tmp/refactor-tests/contracts-ios-bundle/_expo/static/js/ios/AppEntry-4f2ea6ada75746cdce842ffd55a310af.hbc",
+          "sha256": "c7a9959f6d751a85ba9c695796958295018a331c2e61199ee68d621f73c7efbb"
+        },
+        "sourceMap": {
+          "file": ".tmp/refactor-tests/contracts-ios-bundle/_expo/static/js/ios/AppEntry-4f2ea6ada75746cdce842ffd55a310af.hbc.map",
+          "sha256": "ff9fd0024ddf79f2f4d853582f61d429f1b64c40f1de3c2d70d89b039c03914a"
+        }
+      }
+    }
+  },
+  "verification": [
+    {
+      "command": "npm run build",
+      "exitCode": 0,
+      "scope": "Targeted local verification; not complete release/native acceptance."
+    },
+    {
+      "command": "npm run build:contracts",
+      "exitCode": 0,
+      "scope": "Targeted local verification; not complete release/native acceptance."
+    },
+    {
+      "command": "npm run verify:api-adapters",
+      "exitCode": 0,
+      "scope": "Targeted local verification; not complete release/native acceptance."
+    },
+    {
+      "command": "npm run verify:electron-api",
+      "exitCode": 0,
+      "scope": "Targeted local verification; not complete release/native acceptance."
+    },
+    {
+      "command": "npm run verify:contracts",
+      "exitCode": 0,
+      "scope": "Targeted local verification; not complete release/native acceptance."
+    },
+    {
+      "command": "npm run verify:settings-replies",
+      "exitCode": 0,
+      "scope": "Targeted local verification; not complete release/native acceptance."
+    },
+    {
+      "command": "node scripts/verify-settings-feed.js",
+      "exitCode": 0,
+      "scope": "Targeted local verification; not complete release/native acceptance."
+    },
+    {
+      "command": "node scripts/verify-settings-feed-ui.js",
+      "exitCode": 0,
+      "scope": "Targeted local verification; not complete release/native acceptance."
+    },
+    {
+      "command": "npm run verify:settings-snapshots",
+      "exitCode": 0,
+      "scope": "Targeted local verification; not complete release/native acceptance."
+    },
+    {
+      "command": "node scripts/verify-settings-snapshots-ui.js",
+      "exitCode": 0,
+      "scope": "Targeted local verification; not complete release/native acceptance."
+    },
+    {
+      "command": "node scripts/verify-settings-json-lifecycle.js",
+      "exitCode": 0,
+      "scope": "Targeted local verification; not complete release/native acceptance."
+    },
+    {
+      "command": "node scripts/verify-settings-patch-lifecycle.js",
+      "exitCode": 0,
+      "scope": "Targeted local verification; not complete release/native acceptance."
+    },
+    {
+      "command": "npm run verify:settings-panels",
+      "exitCode": 0,
+      "scope": "Targeted local verification; not complete release/native acceptance."
+    },
+    {
+      "command": "npm run verify:app-initialization",
+      "exitCode": 0,
+      "scope": "Targeted local verification; not complete release/native acceptance."
+    },
+    {
+      "command": "npm run verify:analysis-settings",
+      "exitCode": 0,
+      "scope": "Targeted local verification; not complete release/native acceptance."
+    },
+    {
+      "command": "npm run verify:app-state",
+      "exitCode": 0,
+      "scope": "Targeted local verification; not complete release/native acceptance."
+    },
+    {
+      "command": "npm run verify:media-policy-settings",
+      "exitCode": 0,
+      "scope": "Targeted local verification; not complete release/native acceptance."
+    },
+    {
+      "command": "npm run verify:privacy-passwords",
+      "exitCode": 0,
+      "scope": "Targeted local verification; not complete release/native acceptance."
+    },
+    {
+      "command": "npm run verify:media-mutations",
+      "exitCode": 0,
+      "scope": "Targeted local verification; not complete release/native acceptance."
+    },
+    {
+      "command": "npm run verify:tag-conflicts",
+      "exitCode": 0,
+      "scope": "Targeted local verification; not complete release/native acceptance."
+    },
+    {
+      "command": "npm run verify:mobile-correctness",
+      "exitCode": 0,
+      "scope": "Targeted local verification; not complete release/native acceptance."
+    },
+    {
+      "command": "npm run verify:remote-settings",
+      "exitCode": 0,
+      "scope": "Targeted local verification; not complete release/native acceptance."
+    },
+    {
+      "command": "npm run verify:settings-persistence",
+      "exitCode": 0,
+      "scope": "Targeted local verification; not complete release/native acceptance."
+    },
+    {
+      "command": "npm run verify:shutdown-persistence",
+      "exitCode": 0,
+      "scope": "Targeted local verification; not complete release/native acceptance."
+    },
+    {
+      "command": "npm run verify:packaged-contracts -- --in-process-gpu --no-sandbox",
+      "exitCode": 0,
+      "scope": "Targeted local verification; not complete release/native acceptance."
+    },
+    {
+      "command": "npm run verify:mobile-bundles",
+      "exitCode": 0,
+      "scope": "Targeted local verification; not complete release/native acceptance."
+    },
+    {
+      "command": "CI YAML/settings-replies gate",
+      "exitCode": 0,
+      "scope": "Targeted local verification; not complete release/native acceptance."
+    },
+    {
+      "command": "git diff --check with CRLF whitespace handling",
+      "exitCode": 0,
+      "scope": "Targeted local verification; not complete release/native acceptance."
+    }
+  ],
+  "isolation": {
+    "file": ".tmp-wallpaper-player/settings.json",
+    "observedSha256": "d50a7b59c1c5a3b8424e24202d4dc001c783d1a4cb70507f21add47ace61e59a",
+    "status": "Previous batch incident file retained at the same observed hash. This batch did not restore, delete or rewrite it. All new Node tests assert fixture user data before importing settings; cost/lifecycle/native wrapper check project fallback hash.",
+    "priorIncident": ".tmp/refactor-tests/settings-feed-isolation-incident.json"
+  },
+  "limits": [
+    "Complete initial/recovery/legacy snapshots and network/download/other unconverted IPC responses remain.",
+    "Media preparation and update callbacks still clone full settings twice; tag preparation/normalization/worker encoding are not eliminated.",
+    "Large business results (bulk tags, one huge entity) can still be large. Response JSON bytes are not actual IPC wire byte counts.",
+    "A successful durable mutation may be followed by a visible synchronization failure; the client does not roll back or automatically resend it.",
+    "Synchronous compatibility rebases retain existing follow-up-write semantics; no additional cross-file or power-loss transaction guarantee.",
+    "R6 physical-device decode/contention/rotation/PSS, R7 remaining full reads/logical repositories/feature-type splits/cold stability, and R8 dependency/migration/recovery/signing/update/TLS remain open."
+  ]
+}

@@ -18,11 +18,11 @@ import {
   X
 } from 'lucide-react-native'
 import type { ReactNode } from 'react'
+import type { LayoutChangeEvent } from 'react-native'
 import { useCallback, useEffect, useMemo, useRef, useState, startTransition } from 'react'
 import {
   ActivityIndicator,
   FlatList,
-  InteractionManager,
   KeyboardAvoidingView,
   Platform,
   Pressable,
@@ -30,7 +30,6 @@ import {
   StyleSheet,
   Text,
   TextInput,
-  useWindowDimensions,
   View
 } from 'react-native'
 import type { NavigationContext } from '../../App'
@@ -38,19 +37,25 @@ import mobilePackage from '../../package.json'
 import { ConnectionStatus } from '../components/ConnectionStatus'
 import { MobileUpdateCard } from '../components/MobileUpdateCard'
 import { PrimaryButton } from '../components/PrimaryButton'
+import { AccessibleModal } from '../components/AccessibleModal'
 import { VideoCard } from '../components/VideoCard'
-import { addTagsToVideos, ApiError, getLibrary, restoreHiddenTags, toggleFavorite } from '../services/api'
+import { addTagsToVideos, ApiError, restoreHiddenTags, toggleFavorite } from '../services/api'
 import { testConnection } from '../services/connection-manager'
 import { subscribeToVideoLibraryUpdates } from '../services/library-events'
-import { loadCachedLibrary, saveLibraryResponse } from '../persistence/library'
+import { LibraryRepository } from '../services/library-repository'
+import { usePageActivity } from '../hooks/usePageActivity'
+import { useAdaptiveVideoGrid } from '../hooks/useAdaptiveVideoGrid'
+import type { LibraryQuery } from '../../../packages/contracts'
 import { useTheme } from '../theme-context'
 import type { ThemeMode } from '../theme'
 import type { CategorySummary, DirectorySummary, LibraryResponse, StoredDevice, VideoItem } from '../types'
-import { safeSearchText, uniqueTags } from '../utils/url'
+import { uniqueTags } from '../utils/url'
+import { getTagKey, type TagFilter } from '../services/library-query'
 
 type Props = {
   navigation: NavigationContext
   device: StoredDevice
+  focused?: boolean
 }
 
 type LibraryMode = 'all' | 'favorites' | 'directory' | 'custom' | 'system' | 'settings'
@@ -69,73 +74,12 @@ type Selection = {
   label: string
 }
 
-type TagFilter = {
-  key: string
-  type: 'custom' | 'system'
-  name: string
-  state: 'include' | 'exclude'
-}
-
-type VideoSearchIndexEntry = {
-  searchText: string
-  customTagKeys: Set<string>
-  systemTagKeys: Set<string>
-}
-
-const GRID_COLUMNS = 2
 const GRID_GAP = 10
 const EMPTY_GROUPS = { custom: [], system: [] }
 const APP_VERSION = mobilePackage.version
 const RECONNECT_BASE_DELAY_MS = 2000
 const RECONNECT_MAX_DELAY_MS = 30000
 const zhCollator = new Intl.Collator('zh-Hans-CN', { numeric: true, sensitivity: 'base' })
-
-function getSortTitle(video: VideoItem) {
-  return String(video.name || video.fileName || '').trim()
-}
-
-function getSortFileName(video: VideoItem) {
-  return String(video.fileName || '').trim()
-}
-
-function getSortPath(video: VideoItem) {
-  return String(video.id || video.streamUrl || video.thumbnailUrl || '').trim()
-}
-
-function compareByTitle(a: VideoItem, b: VideoItem) {
-  return zhCollator.compare(getSortTitle(a), getSortTitle(b)) ||
-    zhCollator.compare(getSortFileName(a), getSortFileName(b)) ||
-    zhCollator.compare(getSortPath(a), getSortPath(b))
-}
-
-function getVideoSearchText(video: VideoItem) {
-  return safeSearchText(
-    video.name,
-    video.fileName,
-    video.group,
-    video.tags,
-    video.systemTags,
-    video.customTags,
-    video.directoryName,
-    video.extension
-  )
-}
-
-function sortVideos(videos: VideoItem[], sortBy: SortKey) {
-  return [...videos].sort((a, b) => {
-    switch (sortBy) {
-      case 'date':
-        return (b.modified || 0) - (a.modified || 0) || compareByTitle(a, b)
-      case 'size':
-        return (b.size || 0) - (a.size || 0) || compareByTitle(a, b)
-      case 'type':
-        return zhCollator.compare(a.extension || '', b.extension || '') || compareByTitle(a, b)
-      case 'name':
-      default:
-        return compareByTitle(a, b)
-    }
-  })
-}
 
 function inferDirectories(items: VideoItem[]): DirectorySummary[] {
   const counts = new Map<string, DirectorySummary>()
@@ -159,7 +103,7 @@ function inferCategoryGroups(items: VideoItem[]): LibraryResponse['categoryGroup
     for (const tag of item.customTags || []) {
       customCounts.set(tag, (customCounts.get(tag) || 0) + 1)
     }
-    const systemTags = item.systemTags?.length ? item.systemTags : item.tags || []
+    const systemTags = item.systemTags ?? item.tags ?? []
     for (const tag of systemTags) {
       tag && systemCounts.set(tag, (systemCounts.get(tag) || 0) + 1)
     }
@@ -179,44 +123,17 @@ function favoriteCount(items: VideoItem[]) {
   return items.filter(item => item.favorite).length
 }
 
-function getTagKey(value: string) {
-  return value.trim().toLocaleLowerCase()
-}
-
 function normalizeTagText(value: string) {
   return uniqueTags(value.split(/[,，\s]+/))
 }
 
-function videoMatchesTagFilter(video: VideoItem, filter: TagFilter) {
-  if (filter.type === 'custom') return Boolean(video.customTags?.includes(filter.name))
-  const systemTags = video.systemTags?.length ? video.systemTags : video.tags || []
-  return systemTags.includes(filter.name)
-}
-
-function createVideoSearchIndex(items: VideoItem[]) {
-  const index = new Map<string, VideoSearchIndexEntry>()
-  for (const item of items) {
-    const systemTags = item.systemTags?.length ? item.systemTags : item.tags || []
-    index.set(item.id, {
-      searchText: getVideoSearchText(item),
-      customTagKeys: new Set((item.customTags || []).map(getTagKey)),
-      systemTagKeys: new Set(systemTags.map(getTagKey))
-    })
-  }
-  return index
-}
-
-function videoMatchesIndexedTagFilter(video: VideoItem, filter: TagFilter, entry?: VideoSearchIndexEntry) {
-  if (!entry) return videoMatchesTagFilter(video, filter)
-  const key = getTagKey(filter.name)
-  return filter.type === 'custom'
-    ? entry.customTagKeys.has(key)
-    : entry.systemTagKeys.has(key)
-}
-
-export function LibraryScreen({ navigation, device }: Props) {
+export function LibraryScreen({ navigation, device, focused = true }: Props) {
+  const pageActive = usePageActivity(focused)
+  const pageActiveRef = useRef(pageActive)
+  pageActiveRef.current = pageActive
+  const connectionControllerRef = useRef<AbortController | null>(null)
+  const connectionCheckedRef = useRef(false)
   const { colors, themeMode, setThemeMode } = useTheme()
-  const styles = useMemo(() => createStyles(colors), [colors])
   const [activeDevice, setActiveDevice] = useState(device)
   const activeDeviceRef = useRef(device)
   const readyRef = useRef(false)
@@ -225,7 +142,7 @@ export function LibraryScreen({ navigation, device }: Props) {
   const libraryRequestRef = useRef(0)
   const reconnectAttemptRef = useRef(0)
   const loadRef = useRef<((useCache?: boolean) => Promise<void>) | null>(null)
-  const pendingSortTaskRef = useRef<{ cancel?: () => void } | null>(null)
+  const pendingSortTaskRef = useRef<number | null>(null)
   const [library, setLibrary] = useState<LibraryResponse>({
     items: [],
     count: 0,
@@ -244,6 +161,7 @@ export function LibraryScreen({ navigation, device }: Props) {
   const [error, setError] = useState('')
   const [reconnectHint, setReconnectHint] = useState('')
   const [online, setOnline] = useState(false)
+  const [connectionChecked, setConnectionChecked] = useState(false)
   const [drawerOpen, setDrawerOpen] = useState(false)
   const [searchOpen, setSearchOpen] = useState(false)
   const [query, setQuery] = useState('')
@@ -252,6 +170,7 @@ export function LibraryScreen({ navigation, device }: Props) {
   const [selection, setSelection] = useState<Selection>({ mode: 'all', label: device.name })
   const [tagFilters, setTagFilters] = useState<TagFilter[]>([])
   const [selectedVideoIds, setSelectedVideoIds] = useState<string[]>([])
+  const [selectionBarHeight, setSelectionBarHeight] = useState(0)
   const [bulkTagOpen, setBulkTagOpen] = useState(false)
   const [bulkTagText, setBulkTagText] = useState('')
   const [bulkTagQuery, setBulkTagQuery] = useState('')
@@ -261,7 +180,18 @@ export function LibraryScreen({ navigation, device }: Props) {
   const [restorePassword, setRestorePassword] = useState('')
   const [restoreSubmitting, setRestoreSubmitting] = useState(false)
   const [restoreError, setRestoreError] = useState('')
-  const { width } = useWindowDimensions()
+  const repository = useMemo(() => new LibraryRepository(device), [device.id, device.bindingId, device.token])
+  const [loadingMore, setLoadingMore] = useState(false)
+  const [categoryLoading, setCategoryLoading] = useState<'custom' | 'system' | null>(null)
+  const libraryQuery = useMemo<LibraryQuery>(() => ({
+    directoryId: selection.mode === 'directory' ? selection.id : undefined,
+    favorite: selection.mode === 'favorites' ? true : undefined,
+    includeTags: tagFilters.filter(tag => tag.state === 'include').map(({ type, name }) => ({ type, name })),
+    excludeTags: tagFilters.filter(tag => tag.state === 'exclude').map(({ type, name }) => ({ type, name })),
+    query, sort: sortBy
+  }), [selection.mode, selection.id, tagFilters, query, sortBy])
+  const libraryQueryRef = useRef(libraryQuery)
+  libraryQueryRef.current = libraryQuery
 
   useEffect(() => {
     activeDeviceRef.current = activeDevice
@@ -296,6 +226,7 @@ export function LibraryScreen({ navigation, device }: Props) {
   }, [])
 
   const scheduleReconnect = useCallback((message: string) => {
+    if (!pageActiveRef.current) return
     if (reconnectTimerRef.current) return
     const attempt = reconnectAttemptRef.current
     const delay = Math.min(RECONNECT_MAX_DELAY_MS, RECONNECT_BASE_DELAY_MS * (2 ** attempt))
@@ -309,7 +240,33 @@ export function LibraryScreen({ navigation, device }: Props) {
     }, delay)
   }, [])
 
+  useEffect(() => repository.subscribe(state => {
+    applyLibrary(state.library)
+    setLoading(state.loading)
+    setLoadingMore(state.loadingMore)
+    setCategoryLoading(state.categoryLoading)
+    setError(state.error)
+    if (state.error) {
+      setOnline(false)
+      if (state.retryable && readyRef.current) scheduleReconnect(state.error)
+      else clearReconnectTimer()
+    } else if (!state.loading && !state.offline && (state.library.revision || state.library.items.length)) {
+      setOnline(true); clearReconnectTimer()
+    }
+    if (state.library.revision || state.library.items.length) { setReady(true); readyRef.current = true }
+  }), [applyLibrary, repository, clearReconnectTimer, scheduleReconnect])
+
+  useEffect(() => () => { libraryRequestRef.current++; repository.dispose() }, [repository])
+
+  useEffect(() => {
+    if (pageActive && ready && connectionChecked) void repository.select(libraryQuery)
+  }, [libraryQuery, ready, connectionChecked, repository, pageActive])
+
   const load = useCallback(async (useCache = true) => {
+    if (!pageActiveRef.current) return
+    connectionControllerRef.current?.abort()
+    const controller = new AbortController()
+    connectionControllerRef.current = controller
     const isInitialLoad = !readyRef.current
     let usingCachedLibrary = false
     const requestId = libraryRequestRef.current + 1
@@ -328,20 +285,22 @@ export function LibraryScreen({ navigation, device }: Props) {
     }
 
     if (useCache) {
-      const cached = await loadCachedLibrary(activeDeviceRef.current.id).catch(() => null)
+      usingCachedLibrary = await repository.hydrate(libraryQueryRef.current).catch(() => false)
       if (requestId !== libraryRequestRef.current) return
-      if (cached) {
-        applyLibrary(cached)
-        setReady(true)
-        setLoading(false)
-        usingCachedLibrary = true
-      }
+      if (usingCachedLibrary) { setReady(true); readyRef.current = true }
     }
 
     const showConnectionGate = isInitialLoad && !usingCachedLibrary
 
     try {
-      const connectedDevice = await testConnection(activeDeviceRef.current, showConnectionGate ? setConnectionGate : undefined)
+      const connectedDevice = await testConnection(activeDeviceRef.current, showConnectionGate ? progress => {
+        if (pageActiveRef.current && requestId === libraryRequestRef.current) setConnectionGate(progress)
+      } : undefined, controller.signal)
+      if (requestId !== libraryRequestRef.current || controller.signal.aborted || !pageActiveRef.current) return
+      activeDeviceRef.current = connectedDevice
+      repository.updateDevice(connectedDevice)
+      setConnectionChecked(true)
+      connectionCheckedRef.current = true
       setActiveDevice(connectedDevice)
       setOnline(true)
       if (showConnectionGate) {
@@ -351,7 +310,10 @@ export function LibraryScreen({ navigation, device }: Props) {
           detail: '正在读取电脑端目录和分类...'
         })
       }
-      const response = await getLibrary(connectedDevice)
+      if (!useCache && readyRef.current) await repository.refresh()
+      else await repository.select(libraryQueryRef.current, true)
+      if (repository.state.error) throw new ApiError(repository.state.error, 0, 'library_load_failed', repository.state.retryable)
+      const response = repository.state.library
       if (requestId !== libraryRequestRef.current) return
       if (showConnectionGate) {
         setConnectionGate({
@@ -361,8 +323,7 @@ export function LibraryScreen({ navigation, device }: Props) {
         })
       }
       applyLibrary(response)
-      await saveLibraryResponse(connectedDevice.id, response)
-      if (response.refreshing) {
+      if (response.refreshing && !repository.paginated) {
         libraryRefreshTimerRef.current = setTimeout(() => {
           libraryRefreshTimerRef.current = null
           loadRef.current?.(false)
@@ -378,11 +339,12 @@ export function LibraryScreen({ navigation, device }: Props) {
         setReady(true)
       }
     } catch (err) {
-      if (requestId !== libraryRequestRef.current) return
+      if (requestId !== libraryRequestRef.current || controller.signal.aborted || !pageActiveRef.current) return
       setOnline(false)
       const message = err instanceof Error ? err.message : '无法连接电脑'
       setError(message)
       const shouldReconnect = !(err instanceof ApiError && (
+        !err.retryable ||
         err.status === 401 ||
         err.status === 403 ||
         err.code === 'unauthorized' ||
@@ -402,19 +364,27 @@ export function LibraryScreen({ navigation, device }: Props) {
       }
     } finally {
       if (requestId === libraryRequestRef.current) {
+        setConnectionChecked(true)
+        connectionCheckedRef.current = true
         setLoading(false)
         setRefreshing(false)
       }
     }
-  }, [applyLibrary, clearLibraryRefreshTimer, clearReconnectTimer, scheduleReconnect])
+  }, [applyLibrary, clearLibraryRefreshTimer, clearReconnectTimer, scheduleReconnect, repository])
 
   useEffect(() => {
     loadRef.current = load
   }, [load])
 
   useEffect(() => {
-    load()
-  }, [load])
+    repository.setActive(pageActive)
+    if (!pageActive) {
+      libraryRequestRef.current++; connectionControllerRef.current?.abort()
+      clearReconnectTimer(); clearLibraryRefreshTimer(); setRefreshing(false)
+    } else if (!connectionCheckedRef.current) void loadRef.current?.(true)
+    else void repository.refresh()
+    return () => { connectionControllerRef.current?.abort(); repository.setActive(false) }
+  }, [pageActive, repository, clearReconnectTimer, clearLibraryRefreshTimer])
 
   useEffect(() => () => {
     clearReconnectTimer()
@@ -422,7 +392,7 @@ export function LibraryScreen({ navigation, device }: Props) {
   }, [clearLibraryRefreshTimer, clearReconnectTimer])
 
   useEffect(() => subscribeToVideoLibraryUpdates((update) => {
-    if (update.deviceId !== activeDevice.id) return
+    if (update.deviceId !== activeDevice.id || update.bindingId !== activeDevice.bindingId) return
     setLibrary(current => {
       let changed = false
       const items = current.items.map(item => {
@@ -434,47 +404,31 @@ export function LibraryScreen({ navigation, device }: Props) {
       return {
         ...current,
         items,
-        favoriteCount: favoriteCount(items),
-        categoryGroups: inferCategoryGroups(items)
+        favoriteCount: repository.paginated ? current.favoriteCount : favoriteCount(items),
+        categoryGroups: repository.paginated ? current.categoryGroups : inferCategoryGroups(items)
       }
     })
-  }), [activeDevice.id])
+    void repository.refresh()
+  }), [activeDevice.id, activeDevice.bindingId, repository])
 
   const videos = library.items
   const directories = library.directories || []
   const categoryGroups = library.categoryGroups || EMPTY_GROUPS
   const totalCount = library.count || videos.length
   const currentFavoriteCount = library.favoriteCount ?? favoriteCount(videos)
-  const videoSearchIndex = useMemo(() => createVideoSearchIndex(videos), [videos])
-
-  const filteredVideos = useMemo(() => {
-    const keyword = query.trim().toLowerCase()
-    const includeFilters = tagFilters.filter(f => f.state === 'include')
-    const excludeFilters = tagFilters.filter(f => f.state === 'exclude')
-    const scoped = videos.filter(video => {
-      if (selection.mode === 'favorites') return Boolean(video.favorite)
-      if (selection.mode === 'directory') return video.directoryId === selection.id
-      // 包含：AND 交集；排除：并集排除（命中任一即隐藏）
-      return includeFilters.every(filter => videoMatchesIndexedTagFilter(video, filter, videoSearchIndex.get(video.id))) &&
-        excludeFilters.every(filter => !videoMatchesIndexedTagFilter(video, filter, videoSearchIndex.get(video.id)))
-    })
-
-    const searched = keyword
-      ? scoped.filter(video => (videoSearchIndex.get(video.id)?.searchText || getVideoSearchText(video)).includes(keyword))
-      : scoped
-
-    return sortVideos(searched, sortBy)
-  }, [query, selection, sortBy, tagFilters, videoSearchIndex, videos])
+  const filteredVideos = videos
 
   const subtitle = useMemo(() => {
     if (loading) return '正在读取视频库'
     if (selection.mode === 'settings') return '手机访问与远程播放'
-    if (filteredVideos.length === 0) return query.trim() ? '没有匹配的视频' : '没有可显示的视频'
-    return `${filteredVideos.length} / ${totalCount} 个视频`
-  }, [filteredVideos.length, loading, query, selection.mode, totalCount])
+    if (!filteredVideos.length && library.scanState === 'refreshing') return '电脑正在同步视频库，结果将继续补齐'
+    if (filteredVideos.length === 0) return repository.state.offline ? '此查询没有离线缓存，请连接电脑' : query.trim() ? '没有匹配的视频' : '没有可显示的视频'
+    const matched = library.matchedCount ?? filteredVideos.length
+    return repository.paginated ? `已加载 ${filteredVideos.length} / ${matched} 个视频` : `${filteredVideos.length} / ${totalCount} 个视频`
+  }, [filteredVideos.length, library.matchedCount, library.scanState, loading, query, selection.mode, totalCount, repository, error])
 
-  const gridPadding = 10
-  const cardWidth = Math.max(144, Math.floor((width - gridPadding * 2 - GRID_GAP) / GRID_COLUMNS))
+  const grid = useAdaptiveVideoGrid(filteredVideos, JSON.stringify(libraryQuery), pageActive)
+  const styles = useMemo(() => createStyles(colors, grid.fontScale), [colors, grid.fontScale])
   const title = useMemo(() => {
     if (tagFilters.length === 0) {
       return selection.mode === 'all' ? activeDevice.name : selection.label
@@ -521,9 +475,6 @@ export function LibraryScreen({ navigation, device }: Props) {
 
   const select = useCallback((next: Selection) => {
     setSelection(next)
-    if (next.mode !== 'custom' && next.mode !== 'system') {
-      setTagFilters([])
-    }
     setDrawerOpen(false)
   }, [])
 
@@ -563,7 +514,7 @@ export function LibraryScreen({ navigation, device }: Props) {
         // exclude → 移除
         next = current.filter(item => item.key !== filter.key)
       }
-      setSelection(next.length
+      setSelection(current => current.mode === 'favorites' || current.mode === 'directory' ? current : next.length
         ? { mode: filter.type, id: filter.key, label: filter.name }
         : { mode: 'all', label: activeDevice.name })
       return next
@@ -600,13 +551,13 @@ export function LibraryScreen({ navigation, device }: Props) {
 
   const handleSortSelect = useCallback((key: SortKey) => {
     setVisibleSortBy(key)
-    pendingSortTaskRef.current?.cancel?.()
-    pendingSortTaskRef.current = InteractionManager.runAfterInteractions(() => {
+    if (pendingSortTaskRef.current !== null) cancelIdleCallback(pendingSortTaskRef.current)
+    pendingSortTaskRef.current = requestIdleCallback(() => {
+      pendingSortTaskRef.current = null
       startTransition(() => {
         setSortBy(key)
       })
-      pendingSortTaskRef.current = null
-    })
+    }, { timeout: 250 })
   }, [])
 
   const clearVideoSelection = useCallback(() => {
@@ -668,30 +619,40 @@ export function LibraryScreen({ navigation, device }: Props) {
     if (!selectedVideoIds.length || !tags.length) return
     setBulkSaving(true)
     try {
-      await addTagsToVideos(activeDevice, selectedVideoIds, tags)
+      const result = await addTagsToVideos(activeDevice, selectedVideoIds, tags)
+      const updatedIds = new Set(result.updated?.map(item => item.id) || selectedVideoIds)
+      const savedTags = new Map(result.updated?.map(item => [item.id, item.customTags]) || [])
+      const savedRevisions = new Map(result.updated?.map(item => [item.id, item.customTagsRevision]) || [])
       setLibrary(current => {
         const items = current.items.map(item => {
-          if (!selectedVideoIds.includes(item.id)) return item
-          const customTags = [...new Set([...(item.customTags || []), ...tags])]
-          const allTags = [...new Set([...(item.tags || []), ...tags])]
-          return { ...item, customTags, tags: allTags }
+          if (!updatedIds.has(item.id)) return item
+          const customTags = savedTags.get(item.id) || [...new Set([...(item.customTags || []), ...tags])]
+          const allTags = [...new Set([...(item.systemTags || []), ...customTags])]
+          return { ...item, customTags, customTagsRevision: savedRevisions.get(item.id) ?? item.customTagsRevision, tags: allTags }
         })
         return {
           ...current,
           items,
-          categoryGroups: inferCategoryGroups(items)
+          categoryGroups: repository.paginated ? current.categoryGroups : inferCategoryGroups(items)
         }
       })
-      clearVideoSelection()
+      void repository.refresh()
+      if (result.failed?.length) {
+        setSelectedVideoIds(result.failed.map(item => item.id))
+        setError('已更新 ' + result.updatedCount + ' 项，' + result.failed.length + ' 项失败，请检查后重试')
+      } else {
+        clearVideoSelection()
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : '批量添加标签失败')
     } finally {
       setBulkSaving(false)
     }
-  }, [activeDevice, pendingBulkTags, selectedVideoIds, clearVideoSelection])
+  }, [activeDevice, pendingBulkTags, selectedVideoIds, clearVideoSelection, repository])
 
   useEffect(() => () => {
-    pendingSortTaskRef.current?.cancel?.()
+    if (pendingSortTaskRef.current !== null) cancelIdleCallback(pendingSortTaskRef.current)
+    pendingSortTaskRef.current = null
   }, [])
 
   const handleThemeSelect = useCallback((mode: ThemeMode) => {
@@ -705,32 +666,36 @@ export function LibraryScreen({ navigation, device }: Props) {
       return {
         ...current,
         items,
-        favoriteCount: favoriteCount(items)
+        favoriteCount: repository.paginated ? (current.favoriteCount || 0) + items.reduce((delta, item, index) =>
+          delta + Number(Boolean(item.favorite)) - Number(Boolean(current.items[index].favorite)), 0) : favoriteCount(items)
       }
     })
 
     try {
-      const result = await toggleFavorite(activeDevice, video.id)
+      const result = await toggleFavorite(activeDevice, video.id, !Boolean(video.favorite))
       setLibrary(current => {
         const items = current.items.map(item => item.id === video.id ? { ...item, favorite: result.favorite } : item)
         return {
           ...current,
           items,
-          favoriteCount: favoriteCount(items)
+          favoriteCount: repository.paginated ? (current.favoriteCount || 0) + items.reduce((delta, item, index) =>
+            delta + Number(Boolean(item.favorite)) - Number(Boolean(current.items[index].favorite)), 0) : favoriteCount(items)
         }
       })
+      void repository.refresh()
     } catch (err) {
       setLibrary(current => {
         const items = current.items.map(item => item.id === video.id ? { ...item, favorite: video.favorite } : item)
         return {
           ...current,
           items,
-          favoriteCount: favoriteCount(items)
+          favoriteCount: repository.paginated ? (current.favoriteCount || 0) + items.reduce((delta, item, index) =>
+            delta + Number(Boolean(item.favorite)) - Number(Boolean(current.items[index].favorite)), 0) : favoriteCount(items)
         }
       })
       setError(err instanceof Error ? err.message : '收藏同步失败')
     }
-  }, [activeDevice])
+  }, [activeDevice, repository])
 
   const handleVideoPress = useCallback((video: VideoItem) => {
     if (selectionModeActive) {
@@ -758,7 +723,7 @@ export function LibraryScreen({ navigation, device }: Props) {
   if (!ready) {
     return (
       <View style={styles.shell}>
-        <View style={styles.gate}>
+        <ScrollView contentContainerStyle={styles.gate}>
           <View style={styles.gateIcon}>
             <Monitor color={colors.accent} size={34} />
           </View>
@@ -781,21 +746,22 @@ export function LibraryScreen({ navigation, device }: Props) {
                 icon={<Monitor color={colors.text} size={20} />}
                 onPress={navigation.refreshDevices}
               />
+              <MobileUpdateCard focused={pageActive} />
             </View>
           ) : (
             <ActivityIndicator color={colors.accent} />
           )}
-        </View>
+        </ScrollView>
       </View>
     )
   }
 
   return (
-    <View style={styles.shell}>
+    <View style={styles.shell} onLayout={grid.onLayout}>
       <View style={styles.header}>
         {searchOpen ? (
           <View style={styles.searchHeader}>
-            <Pressable style={styles.iconButton} onPress={closeSearch}>
+            <Pressable style={styles.iconButton} onPress={closeSearch} accessibilityRole="button" accessibilityLabel="关闭搜索">
               <ArrowLeft color={colors.text} size={22} />
             </Pressable>
             <View style={styles.searchBox}>
@@ -809,9 +775,10 @@ export function LibraryScreen({ navigation, device }: Props) {
                 autoCapitalize="none"
                 autoCorrect={false}
                 style={styles.searchInput}
+                accessibilityLabel="搜索视频、目录、分类和标签"
               />
               {query ? (
-                <Pressable style={styles.clearButton} onPress={() => setQuery('')}>
+                <Pressable style={styles.clearButton} onPress={() => setQuery('')} accessibilityRole="button" accessibilityLabel="清空搜索">
                   <X color={colors.muted} size={18} />
                 </Pressable>
               ) : null}
@@ -819,14 +786,14 @@ export function LibraryScreen({ navigation, device }: Props) {
           </View>
         ) : (
           <View style={styles.titleRow}>
-            <Pressable style={styles.iconButton} onPress={() => setDrawerOpen(true)}>
+            <Pressable style={styles.iconButton} onPress={() => setDrawerOpen(true)} accessibilityRole="button" accessibilityLabel="打开导航" accessibilityState={{ expanded: drawerOpen }}>
               <Menu color={colors.text} size={22} />
             </Pressable>
             <View style={styles.titleBlock}>
-              <Text style={styles.title} numberOfLines={1}>{title}</Text>
-              <Text style={styles.subtitle} numberOfLines={1}>{subtitle}</Text>
+              <Text style={styles.title} numberOfLines={grid.fontScale > 1.3 ? 2 : 1} accessibilityRole="header" accessibilityLabel={title}>{title}</Text>
+              <Text style={styles.subtitle} numberOfLines={2} accessibilityLiveRegion="polite">{subtitle}</Text>
             </View>
-            <Pressable style={styles.iconButton} onPress={openSearch}>
+            <Pressable style={styles.iconButton} onPress={openSearch} accessibilityRole="button" accessibilityLabel="搜索视频">
               <Search color={colors.text} size={22} />
             </Pressable>
           </View>
@@ -839,7 +806,7 @@ export function LibraryScreen({ navigation, device }: Props) {
               : reconnectHint || activeDevice.endpoint}
           />
         ) : null}
-        {!searchOpen && error ? <Text style={styles.error}>{error}</Text> : null}
+        {error ? <Text style={styles.error}>{error}</Text> : null}
       </View>
 
       {selection.mode === 'settings' ? (
@@ -853,6 +820,9 @@ export function LibraryScreen({ navigation, device }: Props) {
                   key={mode}
                   style={[styles.themeOption, themeMode === mode && styles.themeOptionActive]}
                   onPress={() => handleThemeSelect(mode)}
+                  accessibilityRole="button"
+                  accessibilityLabel={mode === 'dark' ? '深色主题' : '亮色主题'}
+                  accessibilityState={{ selected: themeMode === mode }}
                 >
                   <Text style={[styles.themeOptionText, themeMode === mode && styles.themeOptionTextActive]}>
                     {mode === 'dark' ? '深色' : '亮色'}
@@ -864,7 +834,7 @@ export function LibraryScreen({ navigation, device }: Props) {
           <Text style={styles.settingsText}>{activeDevice.endpoint}</Text>
           <View style={styles.settingGroup}>
             <Text style={styles.settingLabel}>检查更新</Text>
-            <MobileUpdateCard />
+            <MobileUpdateCard focused={pageActive && !drawerOpen} />
           </View>
           <Text style={styles.settingsText}>目录 {directories.length} 个 · 视频 {totalCount} 个 · 我喜欢 {currentFavoriteCount} 个</Text>
           <PrimaryButton
@@ -889,12 +859,23 @@ export function LibraryScreen({ navigation, device }: Props) {
             onClearTagFilters={clearTagFilters}
           />
           <FlatList
-            key="library-grid"
+            key={`library-grid-${grid.columns}`}
+            ref={grid.listRef}
             data={filteredVideos}
             keyExtractor={item => item.id}
-            numColumns={GRID_COLUMNS}
-            columnWrapperStyle={styles.gridRow}
-            contentContainerStyle={styles.list}
+            onEndReached={() => { void repository.loadMore() }}
+            onEndReachedThreshold={0.6}
+            ListFooterComponent={loadingMore ? <ActivityIndicator color={colors.accent} /> : library.nextCursor ? (
+              <PrimaryButton label={error ? '重试加载下一页' : '加载下一页'} onPress={() => { void repository.loadMore() }} />
+            ) : undefined}
+            numColumns={grid.columns}
+            columnWrapperStyle={grid.columns > 1 ? styles.gridRow : undefined}
+            onViewableItemsChanged={grid.onViewableItemsChanged}
+            viewabilityConfig={grid.viewabilityConfig}
+            onScrollToIndexFailed={grid.onScrollToIndexFailed}
+            onContentSizeChange={grid.onContentSizeChange}
+            onScrollBeginDrag={grid.onScrollBeginDrag}
+            contentContainerStyle={[styles.list, selectionModeActive && { paddingBottom: selectionBarHeight + 24 }]}
             refreshing={refreshing}
             onRefresh={() => {
               setRefreshing(true)
@@ -902,7 +883,7 @@ export function LibraryScreen({ navigation, device }: Props) {
             }}
             renderItem={({ item }) => (
               <VideoCard
-                width={cardWidth}
+                width={grid.cardWidth}
                 device={activeDevice}
                 video={item}
                 selected={selectedVideoIdSet.has(item.id)}
@@ -914,7 +895,7 @@ export function LibraryScreen({ navigation, device }: Props) {
             )}
             ListEmptyComponent={(
               <View style={styles.center}>
-                <Text style={styles.centerText}>还没有视频</Text>
+                <Text style={styles.centerText}>{error ? '此查询暂时无法读取，请重试' : library.scanState === 'refreshing' ? '电脑正在同步视频库，结果将继续补齐' : query.trim() ? '没有匹配的视频' : '还没有视频'}</Text>
                 <PrimaryButton
                   label="重新加载"
                   icon={<RefreshCw color={colors.onAccent} size={20} />}
@@ -933,20 +914,24 @@ export function LibraryScreen({ navigation, device }: Props) {
           selectedCount={selectedVideoIds.length}
           onOpenBulkTagSheet={openBulkTagSheet}
           onClearVideoSelection={clearVideoSelection}
+          onLayout={event => setSelectionBarHeight(event.nativeEvent.layout.height)}
         />
       ) : null}
 
+      {focused && (bulkTagOpen || restoreHiddenOpen || drawerOpen) ? (
+        <AccessibleModal label={restoreHiddenOpen ? '还原隐藏标签' : bulkTagOpen ? '批量添加标签' : '视频库导航'}
+          onClose={restoreHiddenOpen ? () => setRestoreHiddenOpen(false) : bulkTagOpen ? closeBulkTagSheet : closeDrawer}>
       {bulkTagOpen ? (
         <KeyboardAvoidingView
           style={styles.bulkSheetAvoider}
           behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
           pointerEvents="box-none"
         >
-          <Pressable style={styles.bulkSheetScrim} onPress={closeBulkTagSheet} />
+          <Pressable style={styles.bulkSheetScrim} onPress={closeBulkTagSheet} accessible={false} importantForAccessibility="no" />
           <View style={styles.bulkSheet}>
             <View style={styles.bulkSheetHeader}>
               <Text style={styles.bulkSheetTitle}>批量添加标签</Text>
-              <Pressable style={styles.drawerClose} onPress={closeBulkTagSheet}>
+              <Pressable style={styles.drawerClose} onPress={closeBulkTagSheet} accessibilityRole="button" accessibilityLabel="关闭批量标签编辑">
                 <X color={colors.text} size={20} />
               </Pressable>
             </View>
@@ -966,11 +951,12 @@ export function LibraryScreen({ navigation, device }: Props) {
                 style={styles.bulkInput}
                 returnKeyType="done"
                 onSubmitEditing={saveBulkTags}
+                accessibilityLabel="要添加的标签"
               />
               {pendingBulkTags.length ? (
                 <View style={styles.bulkPendingTags}>
                   {pendingBulkTags.map(tag => (
-                    <Pressable key={tag} style={styles.bulkPendingTag} onPress={() => removePendingBulkTag(tag)}>
+                    <Pressable key={tag} style={styles.bulkPendingTag} onPress={() => removePendingBulkTag(tag)} accessibilityRole="button" accessibilityLabel={`移除待添加标签 ${tag}`}>
                       <Text style={styles.bulkPendingTagText} numberOfLines={1}>{tag}</Text>
                       <X color={colors.onAccent} size={13} />
                     </Pressable>
@@ -991,9 +977,10 @@ export function LibraryScreen({ navigation, device }: Props) {
                   placeholderTextColor={colors.subtle}
                   style={styles.bulkSearchInput}
                   returnKeyType="search"
+                  accessibilityLabel="搜索已有标签"
                 />
                 {bulkTagQuery ? (
-                  <Pressable style={styles.bulkSearchClear} onPress={() => setBulkTagQuery('')}>
+                  <Pressable style={styles.bulkSearchClear} onPress={() => setBulkTagQuery('')} accessibilityRole="button" accessibilityLabel="清空标签搜索">
                     <X color={colors.muted} size={15} />
                   </Pressable>
                 ) : null}
@@ -1006,6 +993,9 @@ export function LibraryScreen({ navigation, device }: Props) {
                       key={tag}
                       style={[styles.bulkTagOption, selected && styles.bulkTagOptionSelected]}
                       onPress={() => toggleBulkTagOption(tag)}
+                      accessibilityRole="checkbox"
+                      accessibilityLabel={tag}
+                      accessibilityState={{ checked: selected }}
                     >
                       <Text
                         style={[styles.bulkTagOptionText, selected && styles.bulkTagOptionTextSelected]}
@@ -1026,6 +1016,8 @@ export function LibraryScreen({ navigation, device }: Props) {
               style={[styles.bulkSaveButton, (!pendingBulkTags.length || bulkSaving) && styles.updateButtonDisabled]}
               onPress={saveBulkTags}
               disabled={!pendingBulkTags.length || bulkSaving}
+              accessibilityRole="button"
+              accessibilityState={{ disabled: !pendingBulkTags.length || bulkSaving, busy: bulkSaving }}
             >
               {bulkSaving ? <ActivityIndicator color={colors.onAccent} size="small" /> : null}
               <Text style={styles.bulkSaveButtonText}>{bulkSaving ? '保存中...' : '添加到已选视频'}</Text>
@@ -1047,13 +1039,13 @@ export function LibraryScreen({ navigation, device }: Props) {
         />
       ) : null}
 
-      {drawerOpen ? (
+      {drawerOpen && !restoreHiddenOpen && !bulkTagOpen ? (
         <View style={StyleSheet.absoluteFill} pointerEvents="box-none">
-          <Pressable style={styles.drawerScrim} onPress={closeDrawer} />
+          <Pressable style={styles.drawerScrim} onPress={closeDrawer} accessible={false} importantForAccessibility="no" />
           <View style={styles.drawer}>
             <View style={styles.drawerHeader}>
               <Text style={styles.drawerTitle} numberOfLines={1}>{activeDevice.name}</Text>
-              <Pressable style={styles.drawerClose} onPress={closeDrawer}>
+              <Pressable style={styles.drawerClose} onPress={closeDrawer} accessibilityRole="button" accessibilityLabel="关闭导航">
                 <X color={colors.text} size={20} />
               </Pressable>
             </View>
@@ -1093,8 +1085,10 @@ export function LibraryScreen({ navigation, device }: Props) {
                 title="自定义分类"
                 headerAction={library.hiddenTagCount && library.hiddenTagCount > 0 ? (
                   <Pressable
-                    hitSlop={8}
+                    style={styles.drawerClose}
+                    accessibilityRole="button"
                     onPress={() => {
+                      setDrawerOpen(false)
                       setRestoreError('')
                       setRestorePassword('')
                       setRestoreHiddenOpen(true)
@@ -1122,6 +1116,10 @@ export function LibraryScreen({ navigation, device }: Props) {
                 }) : (
                   <Text style={styles.drawerEmpty}>暂无自定义分类</Text>
                 )}
+                {library.categoryPagination?.customNextCursor ? (
+                  <DrawerItem label={categoryLoading === 'custom' ? '正在加载分类…' : '更多分类'}
+                    icon={<Tags color={colors.muted} size={20} />} onPress={() => { void repository.loadCategories('custom') }} />
+                ) : null}
               </DrawerSection>
 
               <DrawerSection title="系统分类">
@@ -1142,6 +1140,10 @@ export function LibraryScreen({ navigation, device }: Props) {
                 }) : (
                   <Text style={styles.drawerEmpty}>暂无系统分类</Text>
                 )}
+                {library.categoryPagination?.systemNextCursor ? (
+                  <DrawerItem label={categoryLoading === 'system' ? '正在加载分类…' : '更多分类'}
+                    icon={<Tags color={colors.muted} size={20} />} onPress={() => { void repository.loadCategories('system') }} />
+                ) : null}
               </DrawerSection>
             </ScrollView>
 
@@ -1161,6 +1163,8 @@ export function LibraryScreen({ navigation, device }: Props) {
             </View>
           </View>
         </View>
+      ) : null}
+        </AccessibleModal>
       ) : null}
     </View>
   )
@@ -1184,6 +1188,7 @@ type SortFilterBarProps = {
 }
 
 type BulkSelectionBarProps = {
+  onLayout: (event: LayoutChangeEvent) => void
   styles: ReturnType<typeof createStyles>
   colors: ReturnType<typeof useTheme>['colors']
   selectedCount: number
@@ -1227,6 +1232,9 @@ function SortFilterBar({
             key={option.key}
             style={[styles.sortChip, visibleSortBy === option.key && styles.sortChipActive]}
             onPress={() => onSortSelect(option.key)}
+            accessibilityRole="button"
+            accessibilityLabel={`按${option.label}排序`}
+            accessibilityState={{ selected: visibleSortBy === option.key }}
           >
             {option.icon}
             <Text style={[styles.sortChipText, visibleSortBy === option.key && styles.sortChipTextActive]}>
@@ -1237,8 +1245,8 @@ function SortFilterBar({
       </View>
       {tagFilters.length ? (
         <View style={styles.filterBar}>
-          <Text style={styles.filterBarText} numberOfLines={1}>{getTagFilterSummary(tagFilters)}</Text>
-          <Pressable style={styles.filterClearButton} onPress={onClearTagFilters}>
+          <Text style={styles.filterBarText}>{getTagFilterSummary(tagFilters)}</Text>
+          <Pressable style={styles.filterClearButton} onPress={onClearTagFilters} accessibilityRole="button" accessibilityLabel="清空标签筛选">
             <Text style={styles.filterClearText}>清空</Text>
           </Pressable>
         </View>
@@ -1252,16 +1260,17 @@ function BulkSelectionBar({
   colors,
   selectedCount,
   onOpenBulkTagSheet,
-  onClearVideoSelection
+  onClearVideoSelection,
+  onLayout
 }: BulkSelectionBarProps) {
   return (
-    <View style={styles.bulkBar}>
+    <View style={styles.bulkBar} onLayout={onLayout}>
       <Text style={styles.bulkText}>已选择 {selectedCount} 个视频</Text>
-      <Pressable style={styles.bulkButton} onPress={onOpenBulkTagSheet}>
+      <Pressable style={styles.bulkButton} onPress={onOpenBulkTagSheet} accessibilityRole="button" accessibilityLabel="为已选视频添加标签">
         <Tag color={colors.onAccent} size={17} />
         <Text style={styles.bulkButtonText}>添加标签</Text>
       </Pressable>
-      <Pressable style={[styles.bulkButton, styles.bulkButtonSecondary]} onPress={onClearVideoSelection}>
+      <Pressable style={[styles.bulkButton, styles.bulkButtonSecondary]} onPress={onClearVideoSelection} accessibilityRole="button" accessibilityLabel="取消视频选择">
         <Text style={[styles.bulkButtonText, styles.bulkButtonSecondaryText]}>取消</Text>
       </Pressable>
     </View>
@@ -1284,15 +1293,15 @@ function RestoreHiddenSheet({
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       pointerEvents="box-none"
     >
-      <Pressable style={styles.bulkSheetScrim} onPress={onClose} />
+      <Pressable style={styles.bulkSheetScrim} onPress={onClose} accessible={false} importantForAccessibility="no" />
       <View style={styles.bulkSheet}>
         <View style={styles.bulkSheetHeader}>
           <Text style={styles.bulkSheetTitle}>还原隐藏标签</Text>
-          <Pressable style={styles.drawerClose} onPress={onClose}>
+          <Pressable style={styles.drawerClose} onPress={onClose} accessibilityRole="button" accessibilityLabel="关闭还原隐藏标签">
             <X color={colors.text} size={20} />
           </Pressable>
         </View>
-        <View style={styles.bulkSheetScrollContent}>
+        <ScrollView style={styles.bulkSheetScroll} contentContainerStyle={styles.bulkSheetScrollContent} keyboardShouldPersistTaps="handled">
           <Text style={styles.bulkSheetHint}>
             验证隐私密码后，将还原电脑端所有被隐藏的标签。
           </Text>
@@ -1305,13 +1314,16 @@ function RestoreHiddenSheet({
             secureTextEntry
             returnKeyType="done"
             onSubmitEditing={onSubmit}
+            accessibilityLabel="隐私密码"
           />
           {error ? <Text style={styles.restoreErrorText}>{error}</Text> : null}
-        </View>
+        </ScrollView>
         <Pressable
           style={[styles.bulkSaveButton, (!password || submitting) && styles.updateButtonDisabled]}
           onPress={onSubmit}
           disabled={!password || submitting}
+          accessibilityRole="button"
+          accessibilityState={{ disabled: !password || submitting, busy: submitting }}
         >
           {submitting ? <ActivityIndicator color={colors.onAccent} size="small" /> : null}
           <Text style={styles.bulkSaveButtonText}>{submitting ? '还原中...' : '还原隐藏标签'}</Text>
@@ -1350,15 +1362,16 @@ function DrawerItem({ label, count, active, excluded, icon, onPress }: DrawerIte
   const styles = createStyles(colors)
 
   return (
-    <Pressable style={[styles.drawerItem, active && styles.drawerItemActive, excluded && styles.drawerItemExcluded]} onPress={onPress}>
+    <Pressable style={[styles.drawerItem, active && styles.drawerItemActive, excluded && styles.drawerItemExcluded]} onPress={onPress}
+      accessibilityRole="button" accessibilityLabel={`${label}${typeof count === 'number' ? `，${count} 项` : ''}${excluded ? '，已排除' : ''}`} accessibilityState={{ selected: active || excluded }}>
       {icon}
-      <Text style={[styles.drawerItemText, active && styles.drawerItemTextActive, excluded && styles.drawerItemTextExcluded]} numberOfLines={1}>{label}</Text>
+      <Text style={[styles.drawerItemText, active && styles.drawerItemTextActive, excluded && styles.drawerItemTextExcluded]}>{label}</Text>
       {typeof count === 'number' ? <Text style={[styles.drawerItemCount, excluded && styles.drawerItemCountExcluded]}>{count}</Text> : null}
     </Pressable>
   )
 }
 
-const createStyles = (colors: ReturnType<typeof useTheme>['colors']) => StyleSheet.create({
+const createStyles = (colors: ReturnType<typeof useTheme>['colors'], fontScale = 1) => StyleSheet.create({
   shell: {
     flex: 1,
     backgroundColor: colors.background
@@ -1392,9 +1405,9 @@ const createStyles = (colors: ReturnType<typeof useTheme>['colors']) => StyleShe
     marginTop: 2
   },
   iconButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 8,
+    width: 48,
+    height: 48,
+    borderRadius: 14,
     backgroundColor: colors.surface,
     borderWidth: 1,
     borderColor: colors.border,
@@ -1409,8 +1422,8 @@ const createStyles = (colors: ReturnType<typeof useTheme>['colors']) => StyleShe
   },
   searchBox: {
     flex: 1,
-    height: 40,
-    borderRadius: 8,
+    minHeight: 48,
+    borderRadius: 14,
     backgroundColor: colors.surface,
     borderWidth: 1,
     borderColor: colors.border,
@@ -1421,13 +1434,14 @@ const createStyles = (colors: ReturnType<typeof useTheme>['colors']) => StyleShe
   },
   searchInput: {
     flex: 1,
+    minWidth: 0,
     color: colors.text,
     fontSize: 16,
-    paddingVertical: 0
+    paddingVertical: 8
   },
   clearButton: {
-    width: 28,
-    height: 28,
+    width: 48,
+    height: 48,
     alignItems: 'center',
     justifyContent: 'center'
   },
@@ -1440,14 +1454,18 @@ const createStyles = (colors: ReturnType<typeof useTheme>['colors']) => StyleShe
     paddingHorizontal: 10,
     paddingVertical: 7,
     flexDirection: 'row',
+    flexWrap: 'wrap',
     gap: 8,
     borderBottomWidth: 1,
     borderBottomColor: colors.border
   },
   sortChip: {
     flex: 1,
-    minHeight: 30,
-    borderRadius: 8,
+    flexBasis: fontScale > 1.3 ? '40%' : '20%',
+    minHeight: 48,
+    paddingVertical: 8,
+    paddingHorizontal: 6,
+    borderRadius: 12,
     borderWidth: 1,
     borderColor: colors.border,
     backgroundColor: colors.surface,
@@ -1486,8 +1504,9 @@ const createStyles = (colors: ReturnType<typeof useTheme>['colors']) => StyleShe
     fontWeight: '800'
   },
   filterClearButton: {
-    minHeight: 28,
-    borderRadius: 8,
+    minHeight: 48,
+    minWidth: 48,
+    borderRadius: 12,
     paddingHorizontal: 10,
     backgroundColor: colors.surfaceElevated,
     alignItems: 'center',
@@ -1519,7 +1538,7 @@ const createStyles = (colors: ReturnType<typeof useTheme>['colors']) => StyleShe
     textAlign: 'center'
   },
   gate: {
-    flex: 1,
+    flexGrow: 1,
     padding: 28,
     alignItems: 'center',
     justifyContent: 'center',
@@ -1528,7 +1547,7 @@ const createStyles = (colors: ReturnType<typeof useTheme>['colors']) => StyleShe
   gateIcon: {
     width: 72,
     height: 72,
-    borderRadius: 16,
+    borderRadius: 20,
     backgroundColor: colors.surface,
     borderWidth: 1,
     borderColor: colors.border,
@@ -1551,8 +1570,8 @@ const createStyles = (colors: ReturnType<typeof useTheme>['colors']) => StyleShe
   progressTrack: {
     width: '100%',
     maxWidth: 320,
-    height: 8,
-    borderRadius: 8,
+    height: 6,
+    borderRadius: 999,
     overflow: 'hidden',
     backgroundColor: colors.surface,
     borderWidth: 1,
@@ -1561,7 +1580,7 @@ const createStyles = (colors: ReturnType<typeof useTheme>['colors']) => StyleShe
   },
   progressFill: {
     height: '100%',
-    borderRadius: 8,
+    borderRadius: 999,
     backgroundColor: colors.accent
   },
   progressText: {
@@ -1581,7 +1600,7 @@ const createStyles = (colors: ReturnType<typeof useTheme>['colors']) => StyleShe
     right: 0,
     bottom: 0,
     left: 0,
-    backgroundColor: 'rgba(0,0,0,0.42)'
+    backgroundColor: colors.scrim
   },
   drawer: {
     position: 'absolute',
@@ -1589,6 +1608,7 @@ const createStyles = (colors: ReturnType<typeof useTheme>['colors']) => StyleShe
     bottom: 0,
     left: 0,
     width: 304,
+    maxWidth: '100%',
     backgroundColor: colors.background,
     borderRightWidth: 1,
     borderRightColor: colors.border,
@@ -1609,9 +1629,9 @@ const createStyles = (colors: ReturnType<typeof useTheme>['colors']) => StyleShe
     fontWeight: '800'
   },
   drawerClose: {
-    width: 38,
-    height: 38,
-    borderRadius: 8,
+    width: 48,
+    height: 48,
+    borderRadius: 14,
     backgroundColor: colors.surface,
     alignItems: 'center',
     justifyContent: 'center'
@@ -1621,8 +1641,9 @@ const createStyles = (colors: ReturnType<typeof useTheme>['colors']) => StyleShe
     paddingBottom: 8
   },
   drawerItem: {
-    minHeight: 44,
-    borderRadius: 8,
+    minHeight: 48,
+    paddingVertical: 8,
+    borderRadius: 12,
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: 10,
@@ -1645,7 +1666,7 @@ const createStyles = (colors: ReturnType<typeof useTheme>['colors']) => StyleShe
     fontSize: 12
   },
   drawerItemExcluded: {
-    backgroundColor: 'rgba(255, 99, 99, 0.12)'
+    backgroundColor: 'rgba(255, 107, 107, 0.12)'
   },
   restoreErrorText: {
     color: colors.danger,
@@ -1710,7 +1731,7 @@ const createStyles = (colors: ReturnType<typeof useTheme>['colors']) => StyleShe
   },
   themeToggle: {
     flexDirection: 'row',
-    borderRadius: 8,
+    borderRadius: 14,
     borderWidth: 1,
     borderColor: colors.border,
     backgroundColor: colors.surface,
@@ -1719,8 +1740,8 @@ const createStyles = (colors: ReturnType<typeof useTheme>['colors']) => StyleShe
   },
   themeOption: {
     flex: 1,
-    minHeight: 38,
-    borderRadius: 6,
+    minHeight: 48,
+    borderRadius: 10,
     alignItems: 'center',
     justifyContent: 'center'
   },
@@ -1754,23 +1775,26 @@ const createStyles = (colors: ReturnType<typeof useTheme>['colors']) => StyleShe
     right: 10,
     bottom: 12,
     minHeight: 54,
-    borderRadius: 12,
+    borderRadius: 18,
     borderWidth: 1,
     borderColor: colors.border,
     backgroundColor: colors.surfaceElevated,
     flexDirection: 'row',
+    flexWrap: 'wrap',
     alignItems: 'center',
     gap: 8,
-    paddingHorizontal: 10
+    paddingHorizontal: 10,
+    paddingVertical: 8
   },
   bulkText: {
     flex: 1,
+    minWidth: '40%',
     color: colors.text,
     fontSize: 14,
     fontWeight: '800'
   },
   bulkButton: {
-    minHeight: 38,
+    minHeight: 48,
     borderRadius: 8,
     paddingHorizontal: 11,
     backgroundColor: colors.accentStrong,
@@ -1811,7 +1835,7 @@ const createStyles = (colors: ReturnType<typeof useTheme>['colors']) => StyleShe
   bulkSheet: {
     marginHorizontal: 10,
     marginBottom: 10,
-    maxHeight: '74%',
+    maxHeight: '92%',
     borderTopLeftRadius: 16,
     borderTopRightRadius: 16,
     borderBottomLeftRadius: 16,
@@ -1852,7 +1876,8 @@ const createStyles = (colors: ReturnType<typeof useTheme>['colors']) => StyleShe
     fontWeight: '900'
   },
   bulkInput: {
-    minHeight: 46,
+    minHeight: 48,
+    paddingVertical: 8,
     borderRadius: 8,
     borderWidth: 1,
     borderColor: colors.border,
@@ -1868,7 +1893,8 @@ const createStyles = (colors: ReturnType<typeof useTheme>['colors']) => StyleShe
   },
   bulkPendingTag: {
     maxWidth: '100%',
-    minHeight: 32,
+    minHeight: 48,
+    paddingVertical: 8,
     borderRadius: 999,
     paddingLeft: 11,
     paddingRight: 9,
@@ -1895,7 +1921,7 @@ const createStyles = (colors: ReturnType<typeof useTheme>['colors']) => StyleShe
     fontWeight: '700'
   },
   bulkSearchBox: {
-    minHeight: 42,
+    minHeight: 48,
     borderRadius: 8,
     borderWidth: 1,
     borderColor: colors.border,
@@ -1911,11 +1937,11 @@ const createStyles = (colors: ReturnType<typeof useTheme>['colors']) => StyleShe
     minHeight: 40,
     color: colors.text,
     fontSize: 14,
-    paddingVertical: 0
+    paddingVertical: 8
   },
   bulkSearchClear: {
-    width: 32,
-    height: 32,
+    width: 48,
+    height: 48,
     borderRadius: 16,
     alignItems: 'center',
     justifyContent: 'center'
@@ -1928,7 +1954,8 @@ const createStyles = (colors: ReturnType<typeof useTheme>['colors']) => StyleShe
   },
   bulkTagOption: {
     maxWidth: '100%',
-    minHeight: 32,
+    minHeight: 48,
+    paddingVertical: 8,
     borderRadius: 999,
     borderWidth: 1,
     borderColor: colors.border,
@@ -1956,7 +1983,8 @@ const createStyles = (colors: ReturnType<typeof useTheme>['colors']) => StyleShe
     lineHeight: 20
   },
   bulkSaveButton: {
-    minHeight: 46,
+    minHeight: 48,
+    paddingVertical: 8,
     borderRadius: 8,
     backgroundColor: colors.accentStrong,
     flexDirection: 'row',
