@@ -1,0 +1,399 @@
+{
+  "date": "2026-10-24T07:22:38.173Z",
+  "localDate": "2026-10-24",
+  "status": "Windows 1.5.3 published and public binaries checked; the overall desktop/mobile refactor remains active",
+  "release": {
+    "tag": "v1.5.3",
+    "url": "https://github.com/zilu-fuck/wallpaper-player/releases/tag/v1.5.3",
+    "sourceCommit": "8da66540f427b80030fcaab59d2ed552a8974d95",
+    "draft": false,
+    "prerelease": false,
+    "assets": [
+      {
+        "file": "Wallpaper-Player-Setup-1.5.3.exe",
+        "role": "installer",
+        "bytes": 232441723,
+        "sha256": "972d2b0869407af8b86cd283c4f8593a8d1ff30c21253271376b747d0db5190e",
+        "sha512": "JED7xF7VlfkXfvhicbXg2r2i6k2rLJ5qR+Rc1gsmW6cDkMaK+Ct8ir/h9LdL/5vJbb6iYgcqnXUxMd/fQYfv6Q==",
+        "bootstrapArch": "ia32",
+        "productVersion": "1.5.3",
+        "signing": {
+          "status": "NotSigned",
+          "certificateSha256": null
+        },
+        "platform": "windows",
+        "url": "https://github.com/zilu-fuck/wallpaper-player/releases/download/v1.5.3/Wallpaper-Player-Setup-1.5.3.exe"
+      },
+      {
+        "file": "Wallpaper-Player-1.5.3.exe",
+        "role": "portable",
+        "bytes": 231997338,
+        "sha256": "19a9fcf8c667c28ff71f23eab52ed3f4ba680f705b6f53e1b79ccff6b9a6cc6c",
+        "sha512": "ncS57X6vwmtBwLuzQKAyCPHZ7Yx1mD9PoqdjSUlji03t1TjYBtbd/QJZI6wx/OUm2zLRxzucYNK/EDa/KMg2KQ==",
+        "bootstrapArch": "ia32",
+        "productVersion": "1.5.3",
+        "signing": {
+          "status": "NotSigned",
+          "certificateSha256": null
+        },
+        "platform": "windows",
+        "url": "https://github.com/zilu-fuck/wallpaper-player/releases/download/v1.5.3/Wallpaper-Player-1.5.3.exe"
+      },
+      {
+        "file": "Wallpaper-Player-Setup-1.5.3.exe.blockmap",
+        "role": "blockmap",
+        "bytes": 242854,
+        "sha256": "a779cd22a339eb806be7ba94e2fa7e9e352a382a4786f6372a879d7f5abc5773",
+        "sha512": "fth9uOFvaZok8tjgXbKyypjpymxC9ihhxO7BbmITzKI37tblJr+TA9BxmLpiSq2UI0W2bn5uSd0ifPNtjI44oQ==",
+        "platform": "windows",
+        "url": "https://github.com/zilu-fuck/wallpaper-player/releases/download/v1.5.3/Wallpaper-Player-Setup-1.5.3.exe.blockmap"
+      },
+      {
+        "file": "latest.yml",
+        "role": "desktop-update-metadata",
+        "bytes": 361,
+        "sha256": "4850bbfea7ac60e3f8c11f44d58a8dcf8a7a760ae19f390aec7600c7b1f71d39",
+        "sha512": "ozNZV3vIg8ymtn7la+UQ5KTxKxrxDB8QlD4zfAwP2vnVSuUlwtEfNFLUsy/kqev5bXoSzbwyz4Rv3yvQqgGssw==",
+        "platform": "windows",
+        "url": "https://github.com/zilu-fuck/wallpaper-player/releases/download/v1.5.3/latest.yml"
+      },
+      {
+        "file": "Wallpaper-Player-Plugin-video-analysis-1.0.0.zip",
+        "role": "plugin",
+        "bytes": 569698557,
+        "sha256": "cda17c0da1906d92683c05e57c50d1f3fe4aca70a6654752cbed2781d80756a4",
+        "sha512": "TpRPdZzmqFAxM6y3rV+ha5XEAIt2IPvt8aCHoYlLIctOhBAkDIllTojf66EIRoc5jqg1lWAeXpB824ltQoShuA==",
+        "pluginId": "video-analysis",
+        "version": "1.0.0",
+        "platform": "windows",
+        "url": "https://github.com/zilu-fuck/wallpaper-player/releases/download/v1.5.3/Wallpaper-Player-Plugin-video-analysis-1.0.0.zip"
+      },
+      {
+        "file": "Wallpaper-Player-Plugin-ai-search-0.1.0.zip",
+        "role": "plugin",
+        "bytes": 2955069,
+        "sha256": "640e29b1d03a2e2959948125ee63da17856b961e3815ad491209cf95633dc6f3",
+        "sha512": "8dChO1Vrp4OrLlA0JBUrAJzwgISFwny2TfZNr5P8REvqelR/NxYfkEN2iYn7rYjJvYm7iBmfvks3N60iveZz2Q==",
+        "pluginId": "ai-search",
+        "version": "0.1.0",
+        "platform": "windows",
+        "url": "https://github.com/zilu-fuck/wallpaper-player/releases/download/v1.5.3/Wallpaper-Player-Plugin-ai-search-0.1.0.zip"
+      },
+      {
+        "file": "Wallpaper-Player-Plugin-agent-bridge-0.1.0.zip",
+        "role": "plugin",
+        "bytes": 1093,
+        "sha256": "0c6aca0d4084125b8350da6d42bd2f7716c72a8211c544a97b4a324f496e3d1a",
+        "sha512": "LgbdJA1tHJvwghxu4z3WOyQ/y6D0VsErgbNKKwN9svIyc8cZp0jzQiVZAoaFRYhBhkR0ouF+2+j+Hfw7YPNz8Q==",
+        "pluginId": "agent-bridge",
+        "version": "0.1.0",
+        "platform": "windows",
+        "url": "https://github.com/zilu-fuck/wallpaper-player/releases/download/v1.5.3/Wallpaper-Player-Plugin-agent-bridge-0.1.0.zip"
+      }
+    ],
+    "manifestSha256": "590e2059e9f4b9428c68378885c4ee4c9c7a1bb38586b4b2b02be123b5bdd24b",
+    "ci": "https://github.com/zilu-fuck/wallpaper-player/actions/runs/40069858065",
+    "pipeline": "https://github.com/zilu-fuck/wallpaper-player/actions/runs/40070704832",
+    "jobs": [
+      {
+        "name": "Release preflight",
+        "conclusion": "success"
+      },
+      {
+        "name": "Full core and LAN verification / Core verification (build + node scripts + typecheck)",
+        "conclusion": "success"
+      },
+      {
+        "name": "Full core and LAN verification / LAN / mobile flow verification (needs vendor binaries)",
+        "conclusion": "success"
+      },
+      {
+        "name": "Build verified Windows artifacts",
+        "conclusion": "success"
+      },
+      {
+        "name": "Build verified signed Android artifact",
+        "conclusion": "skipped"
+      },
+      {
+        "name": "Publish only the complete verified candidate",
+        "conclusion": "success"
+      }
+    ]
+  },
+  "downloadVerification": {
+    "method": "Actual public release inventory/server digests and local installer/portable/metadata downloads; actual NSIS ASAR extraction and critical code comparison against the immutable tag. Publisher separately downloads and checks every uploaded asset.",
+    "directory": "E:\\wallpaper播放器\\.tmp\\refactor-tests\\release-1.5.3\\public-download-017e16e2",
+    "archive": {
+      "file": "E:\\wallpaper播放器\\.tmp\\refactor-tests\\release-1.5.3\\public-download-017e16e2\\installer-asar\\app.asar",
+      "bytes": 16564223,
+      "sha256": "d69c60c2a8833286339e218f037d892acafe17d321e5326d698c82aff49feab3",
+      "sha512": "DiLrwbg7ateOZSFTSDfr1hLIZsY6wjIy3s/1RJeak2d1kvx5MNlVL24rwUsab7fRBFQFbzCAS0hRyqZ0u7IUoA=="
+    },
+    "normalizedSourceFilesChecked": [
+      "main.js",
+      "preload.js",
+      "main/index.js",
+      "main/remote/identity.js",
+      "main/repositories/device-activity.js",
+      "main/repositories/identity-document.js",
+      "main/remote/index.js",
+      "main/ipc/remote.js",
+      "main/application/settings-json-worker.js",
+      "main/application/settings-reader.js",
+      "main/repositories/settings-normalize.js"
+    ],
+    "visibleLocalCopies": [
+      {
+        "file": "E:\\wallpaper播放器\\release\\downloaded-v1.5.3-35dfe715\\Wallpaper-Player-Setup-1.5.3.exe",
+        "bytes": 232441723,
+        "sha256": "972d2b0869407af8b86cd283c4f8593a8d1ff30c21253271376b747d0db5190e",
+        "sha512": "JED7xF7VlfkXfvhicbXg2r2i6k2rLJ5qR+Rc1gsmW6cDkMaK+Ct8ir/h9LdL/5vJbb6iYgcqnXUxMd/fQYfv6Q=="
+      },
+      {
+        "file": "E:\\wallpaper播放器\\release\\downloaded-v1.5.3-35dfe715\\Wallpaper-Player-1.5.3.exe",
+        "bytes": 231997338,
+        "sha256": "19a9fcf8c667c28ff71f23eab52ed3f4ba680f705b6f53e1b79ccff6b9a6cc6c",
+        "sha512": "ncS57X6vwmtBwLuzQKAyCPHZ7Yx1mD9PoqdjSUlji03t1TjYBtbd/QJZI6wx/OUm2zLRxzucYNK/EDa/KMg2KQ=="
+      },
+      {
+        "file": "E:\\wallpaper播放器\\release\\downloaded-v1.5.3-35dfe715\\release-manifest.json",
+        "bytes": 4065,
+        "sha256": "590e2059e9f4b9428c68378885c4ee4c9c7a1bb38586b4b2b02be123b5bdd24b",
+        "sha512": "d2w+l5exbPKFp7+XoGENdqM2ebM/l5a3CDdM+QgG7KkS1j49KOUA52l0msCtVPaxZ/eoauwjNnFnuHc5tvW9OQ=="
+      },
+      {
+        "file": "E:\\wallpaper播放器\\release\\downloaded-v1.5.3-35dfe715\\latest.yml",
+        "bytes": 361,
+        "sha256": "4850bbfea7ac60e3f8c11f44d58a8dcf8a7a760ae19f390aec7600c7b1f71d39",
+        "sha512": "ozNZV3vIg8ymtn7la+UQ5KTxKxrxDB8QlD4zfAwP2vnVSuUlwtEfNFLUsy/kqev5bXoSzbwyz4Rv3yvQqgGssw=="
+      }
+    ],
+    "failedAttempts": "Initial gh full-binary transfer and a curl full-binary transfer timed out locally; those partial directories remain. The successful download used four bounded workers and 4MiB HTTP ranges, checked every range and the final SHA256/SHA512/size against the public manifest."
+  },
+  "runtime": {
+    "evidence": ".tmp/refactor-tests/release-1.5.3/portable-result.json",
+    "profile": "E:\\wp-public-qa-35f39470\\Data",
+    "identity": {
+      "pid": 2228,
+      "profile": "E:\\wp-public-qa-35f39470\\Data",
+      "archive": "C:\\Users\\s1897\\AppData\\Local\\Temp\\3L88vyJCcuY87oPCDL8722p0wO3\\resources\\app.asar",
+      "version": "1.5.3",
+      "arch": "x64",
+      "electron": "44.9.0"
+    },
+    "samples": [
+      {
+        "theme": "dark",
+        "width": 1100,
+        "height": 760,
+        "background": "rgb(14, 21, 34)",
+        "backdrop": "none",
+        "overlay": "rgba(3, 5, 10, 0.72)",
+        "replayHidden": true,
+        "fits": true,
+        "screenshot": "E:\\wallpaper播放器\\.tmp\\refactor-tests\\release-1.5.3\\packaged-dark-1100.png",
+        "alwaysOnTop": false,
+        "bounds": {
+          "x": 240,
+          "y": 66,
+          "width": 1100,
+          "height": 760
+        }
+      },
+      {
+        "theme": "light",
+        "width": 1100,
+        "height": 760,
+        "background": "rgb(255, 255, 255)",
+        "backdrop": "none",
+        "overlay": "rgba(15, 23, 42, 0.42)",
+        "replayHidden": true,
+        "fits": true,
+        "screenshot": "E:\\wallpaper播放器\\.tmp\\refactor-tests\\release-1.5.3\\packaged-light-1100.png",
+        "alwaysOnTop": false,
+        "bounds": {
+          "x": 240,
+          "y": 66,
+          "width": 1100,
+          "height": 760
+        }
+      },
+      {
+        "theme": "dark",
+        "width": 900,
+        "height": 760,
+        "background": "rgb(14, 21, 34)",
+        "backdrop": "none",
+        "overlay": "rgba(3, 5, 10, 0.72)",
+        "replayHidden": true,
+        "fits": true,
+        "screenshot": "E:\\wallpaper播放器\\.tmp\\refactor-tests\\release-1.5.3\\packaged-dark-900.png",
+        "alwaysOnTop": false,
+        "bounds": {
+          "x": 240,
+          "y": 66,
+          "width": 900,
+          "height": 760
+        }
+      },
+      {
+        "theme": "light",
+        "width": 900,
+        "height": 760,
+        "background": "rgb(255, 255, 255)",
+        "backdrop": "none",
+        "overlay": "rgba(15, 23, 42, 0.42)",
+        "replayHidden": true,
+        "fits": true,
+        "screenshot": "E:\\wallpaper播放器\\.tmp\\refactor-tests\\release-1.5.3\\packaged-light-900.png",
+        "alwaysOnTop": false,
+        "bounds": {
+          "x": 240,
+          "y": 66,
+          "width": 900,
+          "height": 760
+        }
+      }
+    ],
+    "replayRestoredAfterClose": true,
+    "activityIsolation": {
+      "credentialsUnchanged": true,
+      "activityPersisted": true,
+      "addressRestored": true
+    },
+    "exitCode": 0,
+    "alwaysOnTop": false,
+    "closure": {
+      "date": "2026-10-24T07:22:23.7621278Z",
+      "count": 0,
+      "processes": []
+    },
+    "screenshots": [
+      "release-1.5.3/packaged-dark-1100.png",
+      "release-1.5.3/packaged-light-900.png"
+    ]
+  },
+  "preservation": {
+    "passed": true,
+    "date": "2026-10-24T07:22:30.037Z",
+    "originalFiles": 42,
+    "historicalPublicFiles": 8,
+    "filesChecked": 90,
+    "checked": [
+      "E:\\wallpaper播放器\\.tmp-wallpaper-player\\analysis-results\\G086 Bronya分析结果2026-06-22_20-00-44.json",
+      "E:\\wallpaper播放器\\.tmp-wallpaper-player\\downloads\\aria2.session",
+      "E:\\wallpaper播放器\\.tmp-wallpaper-player\\llama-server-err.log",
+      "E:\\wallpaper播放器\\.tmp-wallpaper-player\\llama-server-out.log",
+      "E:\\wallpaper播放器\\.tmp-wallpaper-player\\remote-identity.json",
+      "E:\\wallpaper播放器\\.tmp-wallpaper-player\\scan-index\\029fa92465c3409cba74ce3db6b927dfec0d4f581b12122975041a32ab324e8a.json",
+      "E:\\wallpaper播放器\\.tmp-wallpaper-player\\scan-index\\06cf5926d93db3cc7b30882ee7dbecb69d51ce4e00de7901de3d48b866f9afc3.json",
+      "E:\\wallpaper播放器\\.tmp-wallpaper-player\\scan-index\\0e65747e6e0fc76a1e0c86e951c35d6c7392c184ba6cb43724d7d58856ff212a.json",
+      "E:\\wallpaper播放器\\.tmp-wallpaper-player\\scan-index\\114890f3437dd45b34313ba38d9d3c36a09701d5d672bf8abd7af8c922db61af.json",
+      "E:\\wallpaper播放器\\.tmp-wallpaper-player\\scan-index\\1465f8e823323fe9c4383abb5a38c9e17fc550dd44cd2f14fd7f7242bc309e12.json",
+      "E:\\wallpaper播放器\\.tmp-wallpaper-player\\scan-index\\153bae098b5d3524553fcf4d8cbb1eacef2471314948819d043b26cebe199e14.json",
+      "E:\\wallpaper播放器\\.tmp-wallpaper-player\\scan-index\\165f4a9a9309a7ac323647e9acefd754a66c6295cab7db6bdb50830914bf0d68.json",
+      "E:\\wallpaper播放器\\.tmp-wallpaper-player\\scan-index\\1db67e5d68a60a19388b0338ed1ee18c2a2bcd0025ab168a1d69920c929bd647.json",
+      "E:\\wallpaper播放器\\.tmp-wallpaper-player\\scan-index\\3032598f9f4655037a67986db404cfbf60011a2ca84a1e6edcec794c7deab956.json",
+      "E:\\wallpaper播放器\\.tmp-wallpaper-player\\scan-index\\358da0698a4692a8052707f22ba2b9c94b5c4e73080d12c721e622b66a80614c.json",
+      "E:\\wallpaper播放器\\.tmp-wallpaper-player\\scan-index\\5eb5da5dcf86cb8c66f674df75935c030f8e12d86b6373ebcdaa3d7aba7eb672.json",
+      "E:\\wallpaper播放器\\.tmp-wallpaper-player\\scan-index\\5f59f687750abe3eb7d55cdb1aa86cb802bf22f3b00e3bb369f77a7ef2584d06.json",
+      "E:\\wallpaper播放器\\.tmp-wallpaper-player\\scan-index\\602ae02092dd5e362dec6b88bd5afb39f14c218b3e0f0fbd52e5a8d09eddeb0d.json",
+      "E:\\wallpaper播放器\\.tmp-wallpaper-player\\scan-index\\664a4a47b45908fdfdf2d6bb5ec7024e41699d7dd2af4110f2889d4eac6dd2d7.json",
+      "E:\\wallpaper播放器\\.tmp-wallpaper-player\\scan-index\\6a4b7a95d1ae5d67f63cc87a4f3486c0a22c35af457355ae63f4303d7bdbcaa1.json",
+      "E:\\wallpaper播放器\\.tmp-wallpaper-player\\scan-index\\6c2bfaa6b9f2b41ef00e065bab2a6d71c599e2ce76cc3f5939228ecc7b8be650.json",
+      "E:\\wallpaper播放器\\.tmp-wallpaper-player\\scan-index\\703cb3b91afdc3a4a39fb95f9d0c0289fe6dcdab34f10425d71858a05164ce3b.json",
+      "E:\\wallpaper播放器\\.tmp-wallpaper-player\\scan-index\\85bd705cb26d94f80943f15877c1c71cc9f9a665c0bf24f8ab568b0b6bacf550.json",
+      "E:\\wallpaper播放器\\.tmp-wallpaper-player\\scan-index\\87720e2b63644af82253d5ec9ace977d27e42c03a6033c6811af6c6094928e09.json",
+      "E:\\wallpaper播放器\\.tmp-wallpaper-player\\scan-index\\959e88efa835995e2afff87fc4257966a41b7f45da19d44dc3369ba0d88599c9.json",
+      "E:\\wallpaper播放器\\.tmp-wallpaper-player\\scan-index\\9d7bcef01cadb37f1a59d31b708084c192007deea8564d134dcc473b0605201c.json",
+      "E:\\wallpaper播放器\\.tmp-wallpaper-player\\scan-index\\a02253e6f623d27dfaa6674be31d9b43fc3d9b2c6bcda125418f1c3dd2a25709.json",
+      "E:\\wallpaper播放器\\.tmp-wallpaper-player\\scan-index\\a17738a5c4b4bc1ce4358ecff69b8e44a1e1a33a7511d9a11eddecd94b9e58cd.json",
+      "E:\\wallpaper播放器\\.tmp-wallpaper-player\\scan-index\\c53e2ac468d9387f39255a1ee9893eba1abe325ab086dea0025a18d1ef67e75f.json",
+      "E:\\wallpaper播放器\\.tmp-wallpaper-player\\scan-index\\cb702390842effe5e6e22e77acbda7b2bbea77ed51a5c07e66c3c5d8d0bc15bf.json",
+      "E:\\wallpaper播放器\\.tmp-wallpaper-player\\scan-index\\cbf568b1144651ce061c2dc94a347128724334dd45ac2dd4ebf6890d74c66251.json",
+      "E:\\wallpaper播放器\\.tmp-wallpaper-player\\scan-index\\d6cd75e4bc356e88ed2b4c2272c32263e568d67a07b4017d73b22e09c23e8306.json",
+      "E:\\wallpaper播放器\\.tmp-wallpaper-player\\scan-index\\db34a207b303445fed1e9654c8e68883c93c5123070913181f89844225e4636a.json",
+      "E:\\wallpaper播放器\\.tmp-wallpaper-player\\scan-index\\de13066bd94cc789543a5fa9e6100f3297df42c5dd715cccf10b11383b6f1d68.json",
+      "E:\\wallpaper播放器\\.tmp-wallpaper-player\\scan-index\\eba7ad116c30f43341d30f06e5f9efe510565b2a31a16c0eccab8fc4c303e6bc.json",
+      "E:\\wallpaper播放器\\.tmp-wallpaper-player\\scan-index\\f16070f230607bf79853b98a8c462b8e7b854deeb16fe246ba6c9d783c9b2832.json",
+      "E:\\wallpaper播放器\\.tmp-wallpaper-player\\scan-index\\f408135604349a60c1b7caa1d60757de692af100c4518e5588f38b619995f186.json",
+      "E:\\wallpaper播放器\\.tmp-wallpaper-player\\scan-index\\f7b0c1004febecbe36453be10ef2ddc2523e5b92f4af5f318ce1049990e93053.json",
+      "E:\\wallpaper播放器\\.tmp-wallpaper-player\\scan-index\\f892c389d585d65dff3d06f6c86d3355dc90100c808a4f80da22b2f7e81865ba.json",
+      "E:\\wallpaper播放器\\.tmp-wallpaper-player\\scan-index\\fc41c7e68e94b6f115983997d8498353a4f8f41b61fc91662dd84affe70fc9fb.json",
+      "E:\\wallpaper播放器\\.tmp-wallpaper-player\\settings.json",
+      "E:\\wallpaper播放器\\.tmp-wallpaper-player\\video-metadata-cache.json",
+      "E:\\wallpaper播放器\\release\\Wallpaper-Player-Setup-1.4.0.exe",
+      "E:\\wallpaper播放器\\release\\Wallpaper-Player-1.4.0.exe",
+      "E:\\wallpaper播放器\\release\\Wallpaper-Player-Setup-1.4.0.exe.blockmap",
+      "E:\\wallpaper播放器\\release\\latest.yml",
+      "E:\\wallpaper播放器\\release\\plugins\\Wallpaper-Player-Plugin-video-analysis-1.0.0.zip",
+      "E:\\wallpaper播放器\\release\\plugins\\Wallpaper-Player-Plugin-ai-search-0.1.0.zip",
+      "E:\\wallpaper播放器\\release\\plugins\\Wallpaper-Player-Plugin-agent-bridge-0.1.0.zip",
+      "E:\\wallpaper播放器\\mobile\\dist\\wallpaper-player-mobile-0.1.4-arm64-release.apk",
+      "E:\\wallpaper播放器\\.tmp\\refactor-tests\\r8-windows-delivery\\中文交付 QA' & $workspace\\release\\windows-9.9.0-61373658-ea43-4520-8bed-87db7f536e2d\\win-unpacked\\resources\\app.asar",
+      "E:\\wallpaper播放器\\.tmp\\refactor-tests\\r8-windows-delivery\\中文交付 QA' & $workspace\\release\\windows-9.9.0-61373658-ea43-4520-8bed-87db7f536e2d\\Wallpaper-Player-Setup-9.9.0.exe",
+      "E:\\wallpaper播放器\\.tmp\\refactor-tests\\r8-windows-delivery\\中文交付 QA' & $workspace\\release\\windows-9.9.0-61373658-ea43-4520-8bed-87db7f536e2d\\Wallpaper-Player-9.9.0.exe",
+      "E:\\wallpaper播放器\\.tmp\\refactor-tests\\r8-windows-delivery\\中文交付 QA' & $workspace\\release\\windows-9.9.0-61373658-ea43-4520-8bed-87db7f536e2d\\Wallpaper-Player-Setup-9.9.0.exe.blockmap",
+      "E:\\wallpaper播放器\\.tmp\\refactor-tests\\r8-windows-delivery\\中文交付 QA' & $workspace\\release\\windows-9.9.0-61373658-ea43-4520-8bed-87db7f536e2d\\latest.yml",
+      "E:\\wallpaper播放器\\.tmp\\refactor-tests\\r8-windows-delivery\\中文交付 QA' & $workspace\\release\\windows-9.9.0-61373658-ea43-4520-8bed-87db7f536e2d\\plugins\\Wallpaper-Player-Plugin-video-analysis-1.0.0.zip",
+      "E:\\wallpaper播放器\\.tmp\\refactor-tests\\r8-windows-delivery\\中文交付 QA' & $workspace\\release\\windows-9.9.0-61373658-ea43-4520-8bed-87db7f536e2d\\plugins\\Wallpaper-Player-Plugin-ai-search-0.1.0.zip",
+      "E:\\wallpaper播放器\\.tmp\\refactor-tests\\r8-windows-delivery\\中文交付 QA' & $workspace\\release\\windows-9.9.0-61373658-ea43-4520-8bed-87db7f536e2d\\plugins\\Wallpaper-Player-Plugin-agent-bridge-0.1.0.zip",
+      "E:\\wallpaper播放器\\.tmp\\refactor-tests\\r8-windows-delivery\\中文交付 QA' & $workspace\\release\\windows-9.9.1-10620f4d-1401-4182-aa75-0de284854712\\win-unpacked\\resources\\app.asar",
+      "E:\\wallpaper播放器\\.tmp\\refactor-tests\\r8-windows-delivery\\中文交付 QA' & $workspace\\release\\windows-9.9.1-10620f4d-1401-4182-aa75-0de284854712\\Wallpaper-Player-Setup-9.9.1.exe",
+      "E:\\wallpaper播放器\\.tmp\\refactor-tests\\r8-windows-delivery\\中文交付 QA' & $workspace\\release\\windows-9.9.1-10620f4d-1401-4182-aa75-0de284854712\\Wallpaper-Player-9.9.1.exe",
+      "E:\\wallpaper播放器\\.tmp\\refactor-tests\\r8-windows-delivery\\中文交付 QA' & $workspace\\release\\windows-9.9.1-10620f4d-1401-4182-aa75-0de284854712\\Wallpaper-Player-Setup-9.9.1.exe.blockmap",
+      "E:\\wallpaper播放器\\.tmp\\refactor-tests\\r8-windows-delivery\\中文交付 QA' & $workspace\\release\\windows-9.9.1-10620f4d-1401-4182-aa75-0de284854712\\latest.yml",
+      "E:\\wallpaper播放器\\.tmp\\refactor-tests\\r8-windows-delivery\\中文交付 QA' & $workspace\\release\\windows-9.9.1-10620f4d-1401-4182-aa75-0de284854712\\plugins\\Wallpaper-Player-Plugin-video-analysis-1.0.0.zip",
+      "E:\\wallpaper播放器\\.tmp\\refactor-tests\\r8-windows-delivery\\中文交付 QA' & $workspace\\release\\windows-9.9.1-10620f4d-1401-4182-aa75-0de284854712\\plugins\\Wallpaper-Player-Plugin-ai-search-0.1.0.zip",
+      "E:\\wallpaper播放器\\.tmp\\refactor-tests\\r8-windows-delivery\\中文交付 QA' & $workspace\\release\\windows-9.9.1-10620f4d-1401-4182-aa75-0de284854712\\plugins\\Wallpaper-Player-Plugin-agent-bridge-0.1.0.zip",
+      "E:\\wallpaper播放器\\.tmp\\refactor-tests\\r8-windows-frontend\\完整前端 QA' & $source\\release\\windows-9.9.2-4e546600-f339-433e-9da2-4d9d00fe7ae0\\win-unpacked\\resources\\app.asar",
+      "E:\\wallpaper播放器\\.tmp\\refactor-tests\\r8-windows-frontend\\完整前端 QA' & $source\\release\\windows-9.9.2-4e546600-f339-433e-9da2-4d9d00fe7ae0\\Wallpaper-Player-Setup-9.9.2.exe",
+      "E:\\wallpaper播放器\\.tmp\\refactor-tests\\r8-windows-frontend\\完整前端 QA' & $source\\release\\windows-9.9.2-4e546600-f339-433e-9da2-4d9d00fe7ae0\\Wallpaper-Player-9.9.2.exe",
+      "E:\\wallpaper播放器\\.tmp\\refactor-tests\\r8-windows-frontend\\完整前端 QA' & $source\\release\\windows-9.9.2-4e546600-f339-433e-9da2-4d9d00fe7ae0\\Wallpaper-Player-Setup-9.9.2.exe.blockmap",
+      "E:\\wallpaper播放器\\.tmp\\refactor-tests\\r8-windows-frontend\\完整前端 QA' & $source\\release\\windows-9.9.2-4e546600-f339-433e-9da2-4d9d00fe7ae0\\latest.yml",
+      "E:\\wallpaper播放器\\.tmp\\refactor-tests\\r8-windows-frontend\\完整前端 QA' & $source\\release\\windows-9.9.2-4e546600-f339-433e-9da2-4d9d00fe7ae0\\plugins\\Wallpaper-Player-Plugin-video-analysis-1.0.0.zip",
+      "E:\\wallpaper播放器\\.tmp\\refactor-tests\\r8-windows-frontend\\完整前端 QA' & $source\\release\\windows-9.9.2-4e546600-f339-433e-9da2-4d9d00fe7ae0\\plugins\\Wallpaper-Player-Plugin-ai-search-0.1.0.zip",
+      "E:\\wallpaper播放器\\.tmp\\refactor-tests\\r8-windows-frontend\\完整前端 QA' & $source\\release\\windows-9.9.2-4e546600-f339-433e-9da2-4d9d00fe7ae0\\plugins\\Wallpaper-Player-Plugin-agent-bridge-0.1.0.zip",
+      "E:\\wallpaper播放器\\release\\windows-1.5.1-e1dfa8de-fc21-4143-bb95-02234b158364\\win-unpacked\\resources\\app.asar",
+      "E:\\wallpaper播放器\\release\\windows-1.5.1-e1dfa8de-fc21-4143-bb95-02234b158364\\Wallpaper-Player-Setup-1.5.1.exe",
+      "E:\\wallpaper播放器\\release\\windows-1.5.1-e1dfa8de-fc21-4143-bb95-02234b158364\\Wallpaper-Player-1.5.1.exe",
+      "E:\\wallpaper播放器\\release\\windows-1.5.1-e1dfa8de-fc21-4143-bb95-02234b158364\\Wallpaper-Player-Setup-1.5.1.exe.blockmap",
+      "E:\\wallpaper播放器\\release\\windows-1.5.1-e1dfa8de-fc21-4143-bb95-02234b158364\\latest.yml",
+      "E:\\wallpaper播放器\\release\\windows-1.5.1-e1dfa8de-fc21-4143-bb95-02234b158364\\plugins\\Wallpaper-Player-Plugin-video-analysis-1.0.0.zip",
+      "E:\\wallpaper播放器\\release\\windows-1.5.1-e1dfa8de-fc21-4143-bb95-02234b158364\\plugins\\Wallpaper-Player-Plugin-ai-search-0.1.0.zip",
+      "E:\\wallpaper播放器\\release\\windows-1.5.1-e1dfa8de-fc21-4143-bb95-02234b158364\\plugins\\Wallpaper-Player-Plugin-agent-bridge-0.1.0.zip",
+      "E:\\wallpaper播放器\\release\\windows-1.5.1-886566c7-b3f3-49f0-a779-cc9767b20f2e\\win-unpacked\\resources\\app.asar",
+      "E:\\wallpaper播放器\\release\\windows-1.5.1-886566c7-b3f3-49f0-a779-cc9767b20f2e\\Wallpaper-Player-Setup-1.5.1.exe",
+      "E:\\wallpaper播放器\\release\\windows-1.5.1-886566c7-b3f3-49f0-a779-cc9767b20f2e\\Wallpaper-Player-1.5.1.exe",
+      "E:\\wallpaper播放器\\release\\windows-1.5.1-886566c7-b3f3-49f0-a779-cc9767b20f2e\\Wallpaper-Player-Setup-1.5.1.exe.blockmap",
+      "E:\\wallpaper播放器\\release\\windows-1.5.1-886566c7-b3f3-49f0-a779-cc9767b20f2e\\latest.yml",
+      "E:\\wallpaper播放器\\release\\windows-1.5.1-886566c7-b3f3-49f0-a779-cc9767b20f2e\\plugins\\Wallpaper-Player-Plugin-video-analysis-1.0.0.zip",
+      "E:\\wallpaper播放器\\release\\windows-1.5.1-886566c7-b3f3-49f0-a779-cc9767b20f2e\\plugins\\Wallpaper-Player-Plugin-ai-search-0.1.0.zip",
+      "E:\\wallpaper播放器\\release\\windows-1.5.1-886566c7-b3f3-49f0-a779-cc9767b20f2e\\plugins\\Wallpaper-Player-Plugin-agent-bridge-0.1.0.zip"
+    ],
+    "scope": "Read-only hashes of original user-data snapshot, historical public/QA artifacts and frozen prior local distributions. Current source changes and new publication artifacts are separate."
+  },
+  "previousCandidate": {
+    "tag": "v1.5.2",
+    "sourceCommit": "c7d150fe254204636ff750e2a32dc4ca37a46d2d",
+    "pipeline": "https://github.com/zilu-fuck/wallpaper-player/actions/runs/40069107544",
+    "published": false,
+    "tagMoved": false
+  },
+  "scope": {
+    "installerExecuted": false,
+    "productionInstallationModified": false,
+    "phoneSourcePushed": true,
+    "newApkPublished": false,
+    "physicalPhoneAcceptanceAdded": false,
+    "iosNativeAcceptanceAdded": false,
+    "newTwentyMinuteSoak": false,
+    "remaining": [
+      "Android signing and identity/data upgrade migration",
+      "physical-phone PSS/FPS/LAN and iOS native matrix",
+      "broader Windows installation/upgrade, multi-monitor and long-run gates",
+      "remaining R7 component/settings consumers and R8 backup/journal/TLS work"
+    ]
+  }
+}

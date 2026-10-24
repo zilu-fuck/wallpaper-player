@@ -151,3 +151,9 @@ Join-Path (Get-Location) $build.output
 ## 设置可读性与身份保护集成包（2026-10-24）
 
 最新本地产物为[安装包](../release/windows-1.5.1-886566c7-b3f3-49f0-a779-cc9767b20f2e/Wallpaper-Player-Setup-1.5.1.exe)和[便携版](../release/windows-1.5.1-886566c7-b3f3-49f0-a779-cc9767b20f2e/Wallpaper-Player-1.5.1.exe)，匹配插件在同目录 plugins；当前索引选择此目录。深浅设置面板均为不透明底色并加强遮罩，设置期间隐藏重播按钮；身份读取失败保留原件、停止远程授权，支持修复后刷新。116 项 ASAR、24 项 vendor 与 7 项资产一致，实际便携程序四项深浅/窄窗检查和正常退出通过。历史包保留，仍未签名、未执行安装或公开发布；未对该 ASAR 新增长时/手机原生验收。原始记录、摘要和适用范围见[本轮证据](evidence/r8-identity-read-safety.json)。
+
+## 当前远端正式版本：Windows 1.5.3（2026-10-24）
+
+[公开发布页](https://github.com/zilu-fuck/wallpaper-player/releases/tag/v1.5.3) 已提供八项完整资产，源码标签 v1.5.3 固定在 8da66540f427b80030fcaab59d2ed552a8974d95。完整 CI 与发布流水线均成功，资产经过发布器上传后回下载核验；本机另验证实际公开安装器/便携版及关键 ASAR 代码，并使用独立便携 Data 完成深浅设置与访问记录隔离检查，未执行安装或覆盖生产配置。既有官方插件请安装本次发布附带的匹配 ZIP。
+
+v1.5.2 候选未发布，失败标签原位保留；本地构建索引仍只表示本机成功构建，不改指向下载缓存。Windows 签名状态见公开清单；Android 签名迁移仍开放，手机源码推送不代表新 APK/iOS 发布。完整摘要、运行范围、原数据保留和剩余验收见[发布证据](evidence/r8-publication-1.5.3.json)。
