@@ -91,13 +91,26 @@ async function native() {
             await run(`document.getElementById('app-splash-replay').click(); true`)
             assert.equal((await state()).inert,true)
             await run(`new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)))`)
-            await run(`new Promise(resolve => setTimeout(resolve,1350))`)
+            const timeline = await run(`(async () => {
+              const animations = document.getElementById('app-splash').getAnimations({ subtree: true });
+              const outline = animations.find(animation => animation.animationName === 'splash-outline');
+              if (!outline) throw Error('Missing outline animation');
+              const timing = outline.effect.getTiming();
+              // Sample the CSS timeline itself; compositor scheduling on a busy
+              // runner must not turn a 1350ms wall timer into a partial frame.
+              for (const animation of animations) { animation.pause(); animation.currentTime = 1350; }
+              await Promise.all(animations.map(animation => animation.ready));
+              return { sampleMs: outline.currentTime, outlineDuration: timing.duration,
+                outlineEasing: getComputedStyle(document.querySelector('.splash-trace')).animationTimingFunction };
+            })()`)
+            assert.equal(timeline.sampleMs,1350); assert.equal(timeline.outlineDuration,1200)
+            assert.equal(timeline.outlineEasing,'cubic-bezier(0.35, 0, 0.25, 1)')
             const visual = await run(`({ image: document.querySelector('.splash-mark img').complete && document.querySelector('.splash-mark img').naturalWidth, trace: getComputedStyle(document.querySelector('.splash-trace')).strokeDashoffset, spacing: parseFloat(getComputedStyle(document.querySelector('.splash-title')).letterSpacing), scene: getComputedStyle(document.querySelector('.splash-scene')).transform, count: document.querySelectorAll('#app-splash').length })`)
             assert.equal(visual.image,1024); assert.equal(visual.trace,'0px'); assert.equal(visual.count,1); assert.ok(visual.spacing>=8 && visual.spacing<24)
             fs.writeFileSync(path.join(fixture,`project-splash-${size.join('x')}.png`),(await window.webContents.capturePage()).toPNG())
             const ready = await waitForReady(); assert.ok(ready.scrollWidth<=ready.width)
             if(size[0]===1100) fs.writeFileSync(path.join(fixture,'project-main-1100x760.png'),(await window.webContents.capturePage()).toPNG())
-            results.push({scenario:'project-replay-responsive',size,visual,ready})
+            results.push({scenario:'project-replay-responsive',size,timeline,visual,ready})
           }
           await run(`document.getElementById('app-splash-replay').click(); document.getElementById('app-splash-replay').click(); true`)
           assert.equal(await run(`document.querySelectorAll('#app-splash').length`),1)

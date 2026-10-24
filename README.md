@@ -12,7 +12,7 @@ Windows 发布包内置 mpv、FFmpeg、aria2 和 yt-dlp，普通用户不需要�
 | Android 手机端 | 源码版本见 [mobile/app.json](mobile/app.json)；现有 APK 是历史构建，正式签名迁移仍待完成 | 历史文件 `mobile/dist/wallpaper-player-mobile-0.1.4-arm64-release.apk` 不代表当前源码已重新打包 |
 | 插件包 | 版本及摘要以对应桌面构建的 `official-package-integrity.json` 为准 | 对应构建目录的 `plugins/`；独立构建见下方说明 |
 
-本批更新说明见 [release-notes/v1.5.2.md](release-notes/v1.5.2.md)，重构进度与验收范围见 [docs/refactor-progress.md](docs/refactor-progress.md)。
+本批更新说明见 [release-notes/v1.5.3.md](release-notes/v1.5.3.md)，重构进度与验收范围见 [docs/refactor-progress.md](docs/refactor-progress.md)。
 
 ## 主要功能
 
