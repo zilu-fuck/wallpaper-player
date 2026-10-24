@@ -3,6 +3,7 @@ const fs = require('node:fs/promises')
 const path = require('node:path')
 const crypto = require('node:crypto')
 const asar = require('@electron/asar')
+const { finished } = require('node:stream/promises')
 const io = require('./build-io.cjs')
 const output = require('./build-output.cjs')
 const plugins = require('./package-plugins.js')
@@ -14,6 +15,12 @@ async function write(file, value) { await fs.mkdir(path.dirname(file), { recursi
 async function json(file) { return JSON.parse(await fs.readFile(file, 'utf8')) }
 async function absent(file) { await assert.rejects(fs.lstat(file), { code: 'ENOENT' }) }
 async function check(name, action) { await action(); results.push(name) }
+async function createArchive(source, target) {
+  // asar 3 returns its WriteStream before the final buffered bytes are flushed.
+  // Copying or corrupting the fixture must wait for that stream to finish.
+  const stream = await asar.createPackage(source, target)
+  if (stream && typeof stream.on === 'function') await finished(stream)
+}
 const deferred = () => { let resolve; const promise = new Promise(done => { resolve = done }); return { promise, resolve } }
 
 async function main() {
@@ -134,7 +141,7 @@ async function main() {
     await write(path.join(content, 'main/plugins/official-package-integrity.json'), JSON.stringify(built.integrity))
     const archive = path.join(cwd, 'release/win-unpacked/resources/app.asar')
     await fs.mkdir(path.dirname(archive), { recursive: true })
-    await asar.createPackage(content, archive)
+    await createArchive(content, archive)
   }
   const options = { rootDir: project, buildBase, mode: 'directory', buildPlugins: preparedPlugins, runCommand: fakeBuilder }
   let success
@@ -167,7 +174,7 @@ async function main() {
     const wrongAsar = path.join(fixture, 'wrong-asar')
     await write(path.join(wrongAsar, 'package.json'), JSON.stringify(manifest))
     await write(path.join(wrongAsar, 'main/plugins/official-package-integrity.json'), '{}')
-    await asar.createPackage(wrongAsar, path.join(mismatched, 'win-unpacked/resources/app.asar'))
+    await createArchive(wrongAsar, path.join(mismatched, 'win-unpacked/resources/app.asar'))
     asar.uncache(path.join(mismatched, 'win-unpacked/resources/app.asar'))
     await assert.rejects(validateWindowsOutput(mismatched, { version: '9.9.0', mode: 'directory' }), /app integrity differs/)
     assert.deepEqual(await fs.readFile(output.pointerPath(project, 'windows')), pointer)

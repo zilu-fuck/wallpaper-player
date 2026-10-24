@@ -40,6 +40,7 @@ async function desktop() {
   const results = [], failures = [], behavior = {}, label = observe ? 'before' : 'after'
   try {
     await window.loadFile(entry); await until(() => run("document.querySelectorAll('.video-card').length > 0"))
+    await until(() => run("!document.getElementById('app-splash') && !document.getElementById('root').inert"))
     await run("window.__layoutErrors = []; window.addEventListener('error', event => window.__layoutErrors.push(String(event.error || event.message)))")
     const forcedMotion = await window.webContents.insertCSS('*, *::before, *::after { animation: none !important; transition: none !important; }')
     for (const theme of ['dark', 'light']) {
