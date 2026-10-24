@@ -139,7 +139,7 @@ matches(api, /options\.signal\?\.addEventListener\('abort'/, 'API requests shoul
 matches(libraryEvents, /listeners\.forEach\(listener => listener\(update\)\)/, 'library update events should notify retained library listeners')
 
 matches(server, /\/v1\/pairing\/claim/, 'server should expose pairing claim route')
-matches(read('main/remote/index.js'), /pendingPairingRequests: listPendingPairingRequests\(\)/, 'desktop state should expose pending pairing requests for confirmation')
+matches(read('main/remote/index.js'), /pendingPairingRequests: identityError \? \[\] : listPendingPairingRequests\(\)/, 'desktop state should expose pending pairing requests only while its identity is available')
 matches(read('src/components/settings/RemoteAccessSection.jsx'), /handleApprovePairingRequest/, 'desktop settings should allow approving pairing requests')
 matches(read('src/components/settings/RemoteAccessSection.jsx'), /待确认绑定/, 'desktop settings should render pending pairing requests')
 matches(server, /\/v1\/devices\/current/, 'server should expose current-device unpair route')
